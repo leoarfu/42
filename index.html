@@ -1,0 +1,381 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>LEOAF | LEO Architecture Fundamentals</title>
+    
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=VT323&family=Press+Start+2P&display=swap" rel="stylesheet">
+
+    <style>
+        :root {
+            --neon-blue: #0ff;
+            --neon-pink: #f0f;
+            --grid-color: rgba(14, 236, 245, 0.2);
+            --bg-color: #0d0221;
+            --terminal-bg: rgba(0, 20, 0, 0.85);
+            --text-glow: 0 0 5px var(--neon-blue), 0 0 10px var(--neon-blue);
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            background-color: var(--bg-color);
+            color: var(--neon-blue);
+            font-family: 'VT323', monospace;
+            font-size: 1.5rem;
+            overflow-x: hidden;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* --- BACKGROUND 3D GRID EFFECT --- */
+        .retro-grid {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: 
+                linear-gradient(transparent 0%, var(--bg-color) 100%), 
+                linear-gradient(0deg, transparent 75%, var(--grid-color) 76%), 
+                linear-gradient(90deg, transparent 75%, var(--grid-color) 76%);
+            background-size: 100% 100%, 50px 50px, 50px 50px;
+            transform: perspective(500px) rotateX(60deg) translateY(0) scale(2);
+            animation: moveGrid 5s linear infinite;
+            z-index: -1;
+            opacity: 0.4;
+        }
+
+        @keyframes moveGrid {
+            0% { background-position: 0 0, 0 0, 0 0; }
+            100% { background-position: 0 0, 0 50px, 0 50px; }
+        }
+
+        /* --- CRT SCANLINE OVERLAY --- */
+        .scanlines {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            background: linear-gradient(
+                to bottom,
+                rgba(255,255,255,0),
+                rgba(255,255,255,0) 50%,
+                rgba(0,0,0,0.2) 50%,
+                rgba(0,0,0,0.2)
+            );
+            background-size: 100% 4px;
+            pointer-events: none;
+            z-index: 100;
+        }
+
+        /* --- LAYOUT --- */
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+            width: 100%;
+            position: relative;
+            z-index: 1;
+        }
+
+        header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 2px solid var(--neon-blue);
+            padding-bottom: 20px;
+            margin-bottom: 40px;
+        }
+
+        .logo-container {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .logo-img {
+            height: 80px; 
+            width: auto;
+            filter: drop-shadow(0 0 5px var(--neon-blue));
+        }
+
+        h1 {
+            font-family: 'Press Start 2P', cursive;
+            font-size: 1.5rem;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            text-shadow: 4px 4px var(--neon-pink);
+        }
+
+        /* --- NAVIGATION --- */
+        nav ul {
+            display: flex;
+            gap: 20px;
+            list-style: none;
+        }
+
+        nav a {
+            color: white;
+            text-decoration: none;
+            font-size: 1.2rem;
+            border: 1px solid transparent;
+            padding: 5px 10px;
+            transition: 0.3s;
+        }
+
+        nav a:hover {
+            background-color: var(--neon-blue);
+            color: black;
+            box-shadow: 0 0 15px var(--neon-blue);
+            cursor: pointer;
+        }
+
+        /* --- SEARCH BAR (Command Prompt) --- */
+        .search-terminal {
+            background: black;
+            border: 2px solid var(--neon-pink);
+            padding: 15px;
+            margin-bottom: 40px;
+            display: flex;
+            align-items: center;
+            box-shadow: 5px 5px 0px var(--neon-blue);
+        }
+
+        .prompt-symbol {
+            color: var(--neon-pink);
+            margin-right: 10px;
+            font-weight: bold;
+        }
+
+        .search-input {
+            background: transparent;
+            border: none;
+            color: white;
+            font-family: 'VT323', monospace;
+            font-size: 1.5rem;
+            width: 100%;
+            outline: none;
+        }
+
+        /* --- MAIN GRID MENU --- */
+        .module-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 30px;
+        }
+
+        .card {
+            background: rgba(0, 0, 0, 0.7);
+            border: 1px solid var(--neon-blue);
+            padding: 20px;
+            transition: 0.3s;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 0 20px rgba(0, 255, 255, 0.4);
+            border-color: white;
+        }
+
+        .card h3 {
+            color: var(--neon-pink);
+            border-bottom: 1px dashed var(--neon-pink);
+            padding-bottom: 10px;
+            margin-bottom: 15px;
+            font-size: 1.8rem;
+        }
+
+        .card ul {
+            list-style: none;
+            padding-left: 10px;
+        }
+
+        .card li::before {
+            content: "> ";
+            color: var(--neon-blue);
+        }
+
+        .card li {
+            margin-bottom: 8px;
+            cursor: pointer;
+        }
+
+        .card li:hover {
+            text-decoration: underline;
+            color: white;
+        }
+
+        /* --- AI PORTFOLIO SECTION --- */
+        .ai-section {
+            margin-top: 50px;
+            border: 2px solid #0f0; /* Retro Green */
+            background: black;
+            padding: 20px;
+            position: relative;
+        }
+        
+        .ai-header {
+            position: absolute;
+            top: -15px;
+            left: 20px;
+            background: black;
+            padding: 0 10px;
+            color: #0f0;
+            font-weight: bold;
+        }
+
+        .ai-status {
+            color: #0f0;
+            animation: blink 1s infinite;
+        }
+
+        @keyframes blink {
+            50% { opacity: 0; }
+        }
+
+        /* --- RESPONSIVE --- */
+        @media (max-width: 768px) {
+            header {
+                flex-direction: column;
+                text-align: center;
+                gap: 20px;
+            }
+            nav ul {
+                flex-wrap: wrap;
+                justify-content: center;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="retro-grid"></div>
+    <div class="scanlines"></div>
+
+    <div class="container">
+        <header>
+            <div class="logo-container">
+                <img src="image.png" alt="LEOAF Logo" class="logo-img">
+                <div>
+                    <h1>LEOAF</h1>
+                    <small>LEO Architecture Fundamentals</small>
+                </div>
+            </div>
+            <nav>
+                <ul>
+                    <li><a href="#">[HOME]</a></li>
+                    <li><a href="#">[DATABASE]</a></li>
+                    <li><a href="#">[SIMULATOR]</a></li>
+                    <li><a href="#">[LOGIN]</a></li>
+                </ul>
+            </nav>
+        </header>
+
+        <section class="search-terminal">
+            <span class="prompt-symbol">USER@LEOAF:~$</span>
+            <input type="text" class="search-input" id="cmdInput" placeholder="Enter query (e.g. 'Starlink Latency' or 'Launch Costs')..." autofocus>
+        </section>
+
+        <div id="typing-effect" style="margin-bottom: 20px; min-height: 30px;">
+            </div>
+
+        <div class="module-grid">
+            
+            <div class="card">
+                <h3>01_PHYSICS</h3>
+                <ul>
+                    <li>Orbital Mechanics 101</li>
+                    <li>The Latency Equation</li>
+                    <li>Doppler Shift Issues</li>
+                    <li>Van Allen Belts</li>
+                </ul>
+            </div>
+
+            <div class="card">
+                <h3>02_HARDWARE</h3>
+                <ul>
+                    <li>Phased Array Antennas</li>
+                    <li>Laser Links (OISL)</li>
+                    <li>Hall Thrusters</li>
+                    <li>Solar Arrays</li>
+                </ul>
+            </div>
+
+            <div class="card">
+                <h3>03_CONSTELLATIONS</h3>
+                <ul>
+                    <li>SpaceX Starlink</li>
+                    <li>Amazon Kuiper</li>
+                    <li>Eutelsat OneWeb</li>
+                    <li>Telesat Lightspeed</li>
+                </ul>
+            </div>
+
+            <div class="card">
+                <h3>04_ECONOMICS</h3>
+                <ul>
+                    <li>Cost Per Gbps</li>
+                    <li>Launch Economics ($/kg)</li>
+                    <li>Terminal Subsidy (CAC)</li>
+                    <li>Market Cap Analysis</li>
+                </ul>
+            </div>
+        </div>
+
+        <div class="ai-section">
+            <div class="ai-header">AI_ASSISTANT_V1.0</div>
+            <p>SYSTEM STATUS: <span class="ai-status">ONLINE</span></p>
+            <br>
+            <p>> Awaiting input...</p>
+            <p>> I can calculate link budgets and compare constellation coverage maps.</p>
+            <p>> <a href="#" style="color:#0f0; text-decoration: underline;">[INITIATE NEURAL LINK]</a></p>
+        </div>
+        
+        <footer style="margin-top: 50px; text-align: center; opacity: 0.7; font-size: 1rem;">
+            &copy; 2025 LEO ARCHITECTURE FUNDAMENTALS. ESTABLISHED IN THE FUTURE.
+        </footer>
+
+    </div>
+
+    <script>
+        // TYPEWRITER EFFECT FOR INTRO
+        const text = "INITIALIZING KNOWLEDGE BASE... ACCESSING ORBITAL DATA... READY.";
+        const container = document.getElementById("typing-effect");
+        let i = 0;
+
+        function typeWriter() {
+            if (i < text.length) {
+                container.innerHTML += text.charAt(i);
+                i++;
+                setTimeout(typeWriter, 50); // Speed of typing
+            }
+        }
+
+        // Run on load
+        window.onload = typeWriter;
+
+        // COMMAND LINE INTERACTION
+        const input = document.getElementById('cmdInput');
+        input.addEventListener("keypress", function(event) {
+            if (event.key === "Enter") {
+                event.preventDefault();
+                alert("SEARCH FUNCTIONALITY WILL BE LINKED TO DOCUSAURUS ENGINE: Searching for " + input.value);
+                input.value = "";
+            }
+        });
+    </script>
+
+</body>
+</html>
