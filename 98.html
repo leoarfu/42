@@ -1,0 +1,400 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>LEOAF • LEO Architecture Fundamentals</title>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=VT323&family=Press+Start+2P&display=swap" rel="stylesheet">
+
+  <style>
+    :root {
+      --neon-blue: #0ff;
+      --neon-pink: #f0f;
+      --bg-color: #0d0221;
+      --terminal-bg: rgba(0, 20, 0, 0.85);
+      --grid-color: rgba(14, 236, 245, 0.15);
+    }
+
+    * { box-sizing: border-box; margin:0; padding:0; }
+    body {
+      background: var(--bg-color);
+      color: var(--neon-blue);
+      font-family: 'VT323', monospace;
+      font-size: 1.5rem;
+      min-height: 100vh;
+      overflow-x: hidden;
+      position: relative;
+    }
+
+    /* === BACKGROUND GRID & SCANLINES === */
+    .retro-grid {
+      position: fixed;
+      inset: 0;
+      background:
+        linear-gradient(transparent 0%, var(--bg-color) 100%),
+        linear-gradient(0deg, transparent 75%, var(--grid-color) 76%),
+        linear-gradient(90deg, transparent 75%, var(--grid-color) 76%);
+      background-size: 100% 100%, 50px 50px, 50px 50px;
+      transform: perspective(600px) rotateX(65deg) translateY(-100px) scale(1.8);
+      animation: gridMove 12s linear infinite;
+      opacity: 0.45;
+      pointer-events: none;
+      z-index: -2;
+    }
+    @keyframes gridMove {
+      0%   { background-position: 0 0, 0 0, 0 0; }
+      100% { background-position: 0 0, 0 100px, 100px 0; }
+    }
+
+    .scanlines {
+      position: fixed;
+      inset: 0;
+      background: repeating-linear-gradient(
+        to bottom,
+        transparent 0px,
+        transparent 2px,
+        rgba(0,0,0,0.25) 2px,
+        rgba(0,0,0,0.25) 4px
+      );
+      pointer-events: none;
+      z-index: 9999;
+      opacity: 0.35;
+    }
+
+    .container {
+      max-width: 1400px;
+      margin: 0 auto;
+      padding: 1.5rem;
+      position: relative;
+      z-index: 1;
+    }
+
+    header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding-bottom: 1.5rem;
+      border-bottom: 2px solid var(--neon-blue);
+      margin-bottom: 2rem;
+    }
+
+    .logo-container {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+    }
+    .logo-img { height: 80px; filter: drop-shadow(0 0 8px var(--neon-blue)); }
+
+    h1 {
+      font-family: 'Press Start 2P', cursive;
+      font-size: 2.2rem;
+      letter-spacing: 4px;
+      text-shadow: 4px 4px var(--neon-pink), 0 0 15px var(--neon-pink);
+    }
+
+    nav ul {
+      display: flex;
+      gap: 1.5rem;
+      list-style: none;
+    }
+    nav a {
+      color: var(--neon-blue);
+      text-decoration: none;
+      padding: 0.4rem 0.8rem;
+      border: 1px solid transparent;
+      transition: 0.25s;
+    }
+    nav a:hover {
+      background: var(--neon-blue);
+      color: black;
+      box-shadow: 0 0 12px var(--neon-blue);
+    }
+
+    /* Top bar utilities */
+    .top-utilities {
+      display: flex;
+      gap: 1.5rem;
+      align-items: center;
+    }
+    .search-box, .bot-box {
+      background: rgba(0,0,0,0.7);
+      border: 1px solid var(--neon-blue);
+      padding: 0.5rem 1rem;
+      border-radius: 4px;
+      color: var(--neon-blue);
+      font-family: inherit;
+      font-size: 1.3rem;
+    }
+    .search-box input, .bot-box input {
+      background: transparent;
+      border: none;
+      color: inherit;
+      font: inherit;
+      outline: none;
+      width: 180px;
+    }
+    .search-box::before { content: "🔍 "; }
+    .bot-box::before { content: "🤖 "; }
+
+    /* Typing area */
+    #typing-effect {
+      min-height: 2rem;
+      margin: 1rem 0 2rem;
+      color: var(--neon-blue);
+      text-shadow: 0 0 8px var(--neon-blue);
+    }
+
+    /* Cards grid */
+    .module-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+      gap: 1.8rem;
+      margin: 2rem 0;
+    }
+    .card {
+      background: var(--terminal-bg);
+      border: 1px solid var(--neon-blue);
+      padding: 1.4rem;
+      transition: all 0.3s;
+      position: relative;
+    }
+    .card:hover {
+      transform: translateY(-6px);
+      box-shadow: 0 0 25px rgba(0,255,255,0.35);
+      border-color: white;
+    }
+    .card h3 {
+      color: var(--neon-pink);
+      margin-bottom: 0.8rem;
+      text-shadow: 0 0 8px var(--neon-pink);
+    }
+    .card ul {
+      list-style: none;
+      padding-left: 0;
+    }
+    .card li {
+      margin: 0.5rem 0;
+    }
+    .card a {
+      color: var(--neon-blue);
+      text-decoration: none;
+    }
+    .card a:hover { text-decoration: underline; color: white; }
+
+    /* AI box */
+    .ai-section {
+      margin: 3rem 0;
+      border: 2px solid #0f0;
+      background: black;
+      padding: 1.5rem;
+      position: relative;
+    }
+    .ai-header {
+      position: absolute;
+      top: -14px;
+      left: 20px;
+      background: black;
+      padding: 0 12px;
+      color: #0f0;
+      font-weight: bold;
+    }
+    .ai-status {
+      color: #0f0;
+      animation: blink 1.2s infinite;
+    }
+    @keyframes blink { 50% { opacity: 0; } }
+
+    /* Collapsible sections (for phases) */
+    details {
+      margin: 1.5rem 0;
+      background: rgba(0,0,0,0.6);
+      border: 1px solid var(--neon-blue);
+      padding: 0.8rem 1.2rem;
+      border-radius: 4px;
+    }
+    summary {
+      color: var(--neon-pink);
+      cursor: pointer;
+      font-size: 1.6rem;
+      text-shadow: 0 0 6px var(--neon-pink);
+      outline: none;
+    }
+    .phase-content {
+      margin-top: 1rem;
+      padding: 1rem;
+      background: rgba(0,40,40,0.4);
+      border-left: 4px solid var(--neon-blue);
+    }
+
+    footer {
+      text-align: center;
+      padding: 3rem 0 2rem;
+      color: rgba(0,255,255,0.6);
+      font-size: 1.1rem;
+      border-top: 1px solid rgba(0,255,255,0.3);
+    }
+  </style>
+</head>
+<body>
+
+<div class="retro-grid"></div>
+<div class="scanlines"></div>
+
+<div class="container">
+
+  <!-- Top bar -->
+  <header>
+    <div class="logo-container">
+      <img src="https://via.placeholder.com/80x80/0f0/000?text=LEO" alt="LEOAF Logo" class="logo-img"> <!-- replace with your gif -->
+      <div>
+        <h1>LEOAF</h1>
+        <small>Low Earth Orbit Architecture Fundamentals</small>
+      </div>
+    </div>
+
+    <div class="top-utilities">
+      <div class="search-box">
+        <input type="text" id="siteSearch" placeholder="search site..." autocomplete="off"/>
+      </div>
+      <div class="bot-box">
+        <input type="text" id="botInput" placeholder="ask the bot..." autocomplete="off"/>
+      </div>
+    </div>
+  </header>
+
+  <!-- Typing intro -->
+  <div id="typing-effect"></div>
+
+  <!-- Navigation cards -->
+  <div class="module-grid">
+    <div class="card">
+      <h3>PHASE 0</h3>
+      <p>Connectivity needs & challenges on Earth</p>
+    </div>
+    <div class="card">
+      <h3>PHASE 1</h3>
+      <p>Orbits • Legacy systems • Latency math</p>
+    </div>
+    <div class="card">
+      <h3>PHASE 2</h3>
+      <p>History • Failures • What changed</p>
+    </div>
+    <div class="card">
+      <h3>PHASE 3</h3>
+      <p>RF • Link budgets • Constellation design</p>
+    </div>
+    <div class="card">
+      <h3>PHASE 4</h3>
+      <p>Major LEO players (Starlink, Kuiper, OneWeb, Lightspeed)</p>
+    </div>
+    <div class="card">
+      <h3>PHASE 5</h3>
+      <p>Economics • Revenue models • Break-even</p>
+    </div>
+    <div class="card">
+      <h3>PHASE 6</h3>
+      <p>Regulatory • Debris • Geopolitics • Future</p>
+    </div>
+    <div class="card">
+      <h3>CAPSTONE</h3>
+      <p>Design your own constellation project</p>
+    </div>
+  </div>
+
+  <!-- Collapsible phase sections (add your notes here later) -->
+  <details id="phase0">
+    <summary>PHASE 0 — Connectivity Needs & Environments</summary>
+    <div class="phase-content">
+      <p>Content coming soon...</p>
+      <!-- Paste your phase 0 notes here -->
+    </div>
+  </details>
+
+  <details id="phase4">
+    <summary>PHASE 4 — Major LEO Constellations</summary>
+    <div class="phase-content">
+      <p>Starlink • Kuiper • OneWeb • Lightspeed comparison coming soon...</p>
+      <!-- Paste table or detailed text here -->
+    </div>
+  </details>
+
+  <!-- Add more <details> for other phases as you write them -->
+
+  <!-- AI / Bot output area -->
+  <div class="ai-section">
+    <div class="ai-header">LEOAF BOT v0.1</div>
+    <p id="botOutput" style="margin:1rem 0; min-height:6rem; white-space:pre-wrap;">
+      SYSTEM ONLINE. Type a question above...
+    </p>
+  </div>
+
+  <footer>
+    © 2026 LEO ARCHITECTURE FUNDAMENTALS • ESTABLISHED IN THE FUTURE
+  </footer>
+
+</div>
+
+<script>
+// Typewriter
+const text = "INITIALIZING LEO KNOWLEDGE BASE... ORBITAL DATA LOADED... READY.";
+const container = document.getElementById("typing-effect");
+let i = 0;
+function typeWriter() {
+  if (i < text.length) {
+    container.innerHTML += text.charAt(i);
+    i++;
+    setTimeout(typeWriter, 40);
+  }
+}
+typeWriter();
+
+// Simple page search
+document.getElementById("siteSearch").addEventListener("input", e => {
+  const term = e.target.value.toLowerCase().trim();
+  if (!term) {
+    document.querySelectorAll("details").forEach(d => d.removeAttribute("open"));
+    return;
+  }
+  document.querySelectorAll("details").forEach(d => {
+    const text = d.textContent.toLowerCase();
+    d.open = text.includes(term);
+  });
+});
+
+// Very simple bot (keyword matching on page content)
+const botInput = document.getElementById("botInput");
+const botOutput = document.getElementById("botOutput");
+
+botInput.addEventListener("keypress", e => {
+  if (e.key === "Enter") {
+    const q = e.target.value.trim().toLowerCase();
+    if (!q) return;
+
+    let answer = "I don't have enough information yet. Try asking about constellations, latency, economics or a specific phase.";
+
+    // Very basic keyword matching – improve later
+    if (q.includes("starlink") || q.includes("spacex")) {
+      answer = "Starlink (SpaceX) is the largest operational LEO constellation (~9,000+ satellites in 2026). It uses regenerative routing + laser ISLs, targets consumer, aviation, maritime and military. Latency ~20–40 ms.";
+    } else if (q.includes("kuiper") || q.includes("amazon")) {
+      answer = "Project Kuiper (Amazon) plans 3,236 satellites. Strong AWS integration, enterprise focus, partnerships with airlines. Deployment ramping up in 2026.";
+    } else if (q.includes("oneweb") || q.includes("eutelsat")) {
+      answer = "Eutelsat OneWeb (~648 satellites) focuses on B2B, enterprise, government, polar coverage. Bent-pipe architecture, replenishment ongoing.";
+    } else if (q.includes("lightspeed") || q.includes("telesat")) {
+      answer = "Telesat Lightspeed (~198 satellites) targets carrier-grade SLAs, aviation, government. Regenerative processing, launches starting late 2026.";
+    } else if (q.includes("latency")) {
+      answer = "LEO propagation delay ~20–40 ms round-trip vs GEO ~600 ms. Handover & processing add a few ms. Still faster than long-haul fiber for some routes.";
+    } else if (q.includes("phase")) {
+      answer = "Use the collapsible sections above or the cards to jump to a specific phase.";
+    }
+
+    botOutput.textContent = `> ${q}\n  ${answer}`;
+    e.target.value = "";
+  }
+});
+</script>
+
+</body>
+</html>
