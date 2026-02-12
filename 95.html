@@ -1,0 +1,343 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>LEOAF | LEO Architecture Fundamentals</title>
+    
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=VT323&family=Press+Start+2P&display=swap" rel="stylesheet">
+    
+    <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+
+    <style>
+        :root {
+            --neon-blue: #0ff;
+            --neon-pink: #f0f;
+            --neon-green: #0f0;
+            --neon-amber: #ffb000;
+            --grid-color: rgba(14, 236, 245, 0.2);
+            --bg-color: #0d0221;
+            --terminal-bg: rgba(0, 10, 0, 0.9);
+            --text-glow: 0 0 5px var(--neon-blue);
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+
+        body {
+            background-color: var(--bg-color);
+            color: var(--neon-blue);
+            font-family: 'VT323', monospace;
+            font-size: 1.3rem;
+            overflow-x: hidden;
+            min-height: 100svh;
+            display: flex;
+            flex-direction: column;
+            line-height: 1.4;
+        }
+
+        /* --- BACKGROUND EFFECTS --- */
+        .retro-grid {
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: 
+                linear-gradient(transparent 0%, var(--bg-color) 100%), 
+                linear-gradient(0deg, transparent 75%, var(--grid-color) 76%), 
+                linear-gradient(90deg, transparent 75%, var(--grid-color) 76%);
+            background-size: 100% 100%, 50px 50px, 50px 50px;
+            transform: perspective(500px) rotateX(60deg) translateY(0) scale(2);
+            animation: moveGrid 5s linear infinite;
+            z-index: -1;
+            opacity: 0.4;
+        }
+
+        @keyframes moveGrid {
+            0% { background-position: 0 0, 0 0, 0 0; }
+            100% { background-position: 0 0, 0 50px, 0 50px; }
+        }
+
+        .scanlines {
+            position: fixed;
+            top: 0; left: 0; width: 100vw; height: 100vh;
+            background: linear-gradient(to bottom, rgba(255,255,255,0), rgba(255,255,255,0) 50%, rgba(0,0,0,0.2) 50%, rgba(0,0,0,0.2));
+            background-size: 100% 4px;
+            pointer-events: none;
+            z-index: 100;
+        }
+
+        /* --- LAYOUT --- */
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+            width: 100%;
+            position: relative;
+            z-index: 1;
+        }
+
+        header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 2px solid var(--neon-blue);
+            padding-bottom: 20px;
+            margin-bottom: 30px;
+        }
+
+        .logo-container h1 {
+            font-family: 'Press Start 2P', cursive;
+            font-size: 1.5rem;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            text-shadow: 3px 3px var(--neon-pink);
+            margin-bottom: 5px;
+        }
+
+        nav ul { display: flex; gap: 15px; list-style: none; }
+        nav a {
+            color: white; text-decoration: none; font-size: 1.2rem;
+            padding: 5px 10px; border: 1px solid transparent; transition: 0.3s;
+        }
+        nav a:hover {
+            background-color: var(--neon-blue); color: black; box-shadow: 0 0 10px var(--neon-blue);
+        }
+
+        /* --- TERMINAL SEARCH --- */
+        .search-terminal {
+            background: black;
+            border: 1px solid var(--neon-green);
+            padding: 15px;
+            margin-bottom: 30px;
+            display: flex;
+            align-items: center;
+            box-shadow: 4px 4px 0px rgba(0, 255, 0, 0.3);
+        }
+
+        .prompt-symbol { color: var(--neon-green); margin-right: 10px; font-weight: bold; }
+        .search-input {
+            background: transparent; border: none; color: white;
+            font-family: 'VT323', monospace; font-size: 1.4rem; width: 100%; outline: none;
+        }
+
+        /* --- SECTION HEADERS --- */
+        .phase-header {
+            color: var(--neon-pink);
+            font-family: 'Press Start 2P';
+            font-size: 1rem;
+            margin: 40px 0 20px 0;
+            text-transform: uppercase;
+            border-left: 5px solid var(--neon-pink);
+            padding-left: 15px;
+        }
+
+        /* --- MODULE GRID & CARDS --- */
+        .module-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+            gap: 25px;
+        }
+
+        .card {
+            background: var(--terminal-bg);
+            border: 1px solid var(--neon-blue);
+            padding: 20px;
+            transition: 0.3s;
+            position: relative;
+        }
+
+        .card:hover { border-color: white; box-shadow: 0 0 15px rgba(0, 255, 255, 0.3); }
+
+        .card h3 {
+            color: var(--neon-blue); border-bottom: 1px dashed var(--neon-blue);
+            padding-bottom: 10px; margin-bottom: 15px; font-size: 1.6rem; text-transform: uppercase;
+        }
+
+        /* --- ROADMAP NODE (The Clickable Part) --- */
+        .roadmap-node {
+            background: rgba(0, 255, 255, 0.1);
+            border: 1px solid var(--neon-blue);
+            padding: 10px;
+            margin: 10px 0;
+            cursor: pointer;
+            transition: 0.3s;
+        }
+        .roadmap-node:hover { background: var(--neon-blue); color: black; }
+        .roadmap-node h4 { margin-bottom: 5px; text-transform: uppercase; }
+
+        /* --- ACCORDIONS --- */
+        details { margin-bottom: 10px; padding: 5px; }
+        summary { cursor: pointer; list-style: none; font-weight: bold; color: white; }
+        summary::before { content: "[+] "; color: var(--neon-green); }
+        details[open] summary::before { content: "[-] "; color: var(--neon-pink); }
+        .details-content { padding: 10px 0 10px 25px; color: #ddd; font-size: 1.1rem; }
+        .highlight { color: var(--neon-amber); }
+
+        /* --- MODAL SYSTEM --- */
+        .modal {
+            display: none; position: fixed; z-index: 2000; left: 0; top: 0;
+            width: 100%; height: 100%; background-color: rgba(0,0,0,0.9); backdrop-filter: blur(5px);
+        }
+        .modal-content {
+            background-color: #0d0d0d; margin: 5% auto; padding: 30px;
+            border: 1px solid var(--neon-green); width: 85%; max-width: 800px;
+            box-shadow: 0 0 30px var(--neon-green); color: #e0e0e0; font-family: 'Courier New', monospace;
+        }
+        .close { color: var(--neon-pink); float: right; font-size: 32px; cursor: pointer; font-weight: bold; }
+        .data-table { width: 100%; border-collapse: collapse; margin: 20px 0; }
+        .data-table th, .data-table td { border: 1px solid #333; padding: 12px; text-align: left; }
+        .formula-box { background: #1a1a1a; padding: 20px; border-left: 5px solid var(--neon-pink); margin-top: 20px; text-align: center; }
+
+        /* --- FOOTER & MISC --- */
+        .capstone-box {
+            margin-top: 50px; border: 2px solid var(--neon-pink);
+            background: rgba(255, 0, 255, 0.05); padding: 30px; text-align: center;
+            animation: pulseBorder 3s infinite;
+        }
+        @keyframes pulseBorder {
+            0%, 100% { box-shadow: 0 0 5px var(--neon-pink); }
+            50% { box-shadow: 0 0 20px var(--neon-pink); }
+        }
+        footer { margin-top: 50px; text-align: center; opacity: 0.7; padding-bottom: 20px; }
+
+        @media (max-width: 768px) {
+            header { flex-direction: column; text-align: center; gap: 20px; }
+            .module-grid { grid-template-columns: 1fr; }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="retro-grid"></div>
+    <div class="scanlines"></div>
+
+    <div class="container">
+        <header>
+            <div class="logo-container">
+                <h1>LEOAF</h1>
+                <small>>> LEO ARCHITECTURE FUNDAMENTALS >></small>
+            </div>
+            <nav>
+                <ul>
+                    <li><a href="#">[ROADMAP]</a></li>
+                    <li><a href="#">[DATABASE]</a></li>
+                    <li><a href="#">[SIMULATOR]</a></li>
+                </ul>
+            </nav>
+        </header>
+
+        <section class="search-terminal">
+            <span class="prompt-symbol">USER@LEOAF:~$</span>
+            <input type="text" class="search-input" id="cmdInput" placeholder="Load module... (e.g., 'physics')">
+        </section>
+
+        <div id="typing-effect" style="margin-bottom: 30px; min-height: 30px; color: var(--neon-green);"></div>
+
+        <div class="phase-header">PHASE 1: THE UPLINK</div>
+        <div class="module-grid">
+            <div class="card">
+                <h3>01_PHYSICS_ENGINE</h3>
+                <details>
+                    <summary>Foundations</summary>
+                    <div class="details-content">
+                        <div class="roadmap-node" onclick="openKeplerModal()">
+                            <h4>> Open: Kepler's Laws Data</h4>
+                            <p><small>Click to view orbital mechanics core.</small></p>
+                        </div>
+                        <ul>
+                            <li><span class="highlight">Latency:</span> LEO (30ms) vs GEO (600ms)</li>
+                            <li>Doppler Shift at 7.5km/s</li>
+                        </ul>
+                    </div>
+                </details>
+            </div>
+
+            <div class="card">
+                <h3>02_CONTEXT_LAYER</h3>
+                <details>
+                    <summary>The Graveyard (History)</summary>
+                    <div class="details-content">
+                        <p>Iridium, Teledesic, and the 90s LEO boom.</p>
+                    </div>
+                </details>
+            </div>
+        </div>
+
+        <div class="capstone-box">
+            <h2 style="font-family:'Press Start 2P'; color:var(--neon-pink)">/// FINAL BOSS ///</h2>
+            <p>Design your own LEO Constellation.</p>
+        </div>
+
+        <footer>
+            &copy; 2026 LEO ARCHITECTURE FUNDAMENTALS.
+        </footer>
+    </div>
+
+    <div id="keplerModal" class="modal">
+        <div class="modal-content">
+            <span class="close" onclick="closeKeplerModal()">&times;</span>
+            <h2 style="color:var(--neon-pink)">> CORE_PHYSICS: KEPLER & GRAVITY</h2>
+            <hr style="border: 1px solid #333; margin: 15px 0;">
+            
+            <section>
+                <h3>1. The Law of Orbits</h3>
+                <p>Satellites move in <strong>elliptical</strong> paths. LEO orbits are nearly circular ($$e \approx 0$$).</p>
+            </section>
+
+            <section style="margin-top:20px;">
+                <h3>2. Orbital Velocity Data</h3>
+                <table class="data-table">
+                    <tr><th>Satellite</th><th>Altitude ($$h$$)</th><th>Velocity ($$v$$)</th></tr>
+                    <tr><td>ISS</td><td>420 km</td><td>7.66 km/s</td></tr>
+                    <tr><td>Starlink</td><td>550 km</td><td>7.59 km/s</td></tr>
+                </table>
+            </section>
+
+            <div class="formula-box">
+                <h4>[ORBITAL_VELOCITY_EQUATION]</h4>
+                <p>$$v = \sqrt{\frac{GM}{r}}$$</p>
+                <p><small>G = Gravitational Constant | M = Earth Mass | r = Radius from Center</small></p>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // --- TERMINAL LOGIC ---
+        const terminalOutput = document.getElementById("typing-effect");
+        const input = document.getElementById('cmdInput');
+        const PROMPT = "USER@LEOAF:~$ ";
+        const knowledgeBase = {
+            "help": "COMMANDS: help, list, clear, physics, starlink",
+            "physics": "PHYSICS ENGINE: Kepler's Laws, FSPL, and Doppler effects.",
+            "starlink": "STARLINK: 550km altitude, 7.59 km/s orbital speed.",
+            "list": "TOPICS: physics, orbits, economics, starlink"
+        };
+
+        function typeText(element, text) {
+            const line = document.createElement("div");
+            line.innerHTML = `<span style="color:var(--neon-green);">${PROMPT}</span>${text}`;
+            element.appendChild(line);
+            window.scrollTo(0, document.body.scrollHeight);
+        }
+
+        input.addEventListener("keypress", (e) => {
+            if (e.key === "Enter") {
+                const query = input.value.toLowerCase().trim();
+                input.value = "";
+                if (query === "clear") { terminalOutput.innerHTML = ""; return; }
+                const response = knowledgeBase[query] || "ERROR: UNKNOWN_CMD";
+                typeText(terminalOutput, response);
+            }
+        });
+
+        // --- MODAL LOGIC ---
+        function openKeplerModal() { document.getElementById("keplerModal").style.display = "block"; }
+        function closeKeplerModal() { document.getElementById("keplerModal").style.display = "none"; }
+        window.onclick = function(event) {
+            let modal = document.getElementById("keplerModal");
+            if (event.target == modal) { modal.style.display = "none"; }
+        }
+    </script>
+</body>
+</html>
