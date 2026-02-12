@@ -1,0 +1,605 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>LEOAF | LEO Architecture Fundamentals</title>
+    
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=VT323&family=Press+Start+2P&display=swap" rel="stylesheet">
+
+    <style>
+        :root {
+            --neon-blue: #0ff;
+            --neon-pink: #f0f;
+            --neon-green: #0f0;
+            --neon-amber: #ffb000;
+            --grid-color: rgba(14, 236, 245, 0.2);
+            --bg-color: #0d0221;
+            --terminal-bg: rgba(0, 10, 0, 0.9);
+            --text-glow: 0 0 5px var(--neon-blue);
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            background-color: var(--bg-color);
+            color: var(--neon-blue);
+            font-family: 'VT323', monospace;
+            font-size: 1.3rem;
+            overflow-x: hidden;
+            min-height: 100svh;
+            display: flex;
+            flex-direction: column;
+            line-height: 1.4;
+        }
+
+        /* --- BACKGROUND EFFECTS --- */
+        .retro-grid {
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: 
+                linear-gradient(transparent 0%, var(--bg-color) 100%), 
+                linear-gradient(0deg, transparent 75%, var(--grid-color) 76%), 
+                linear-gradient(90deg, transparent 75%, var(--grid-color) 76%);
+            background-size: 100% 100%, 50px 50px, 50px 50px;
+            transform: perspective(500px) rotateX(60deg) translateY(0) scale(2);
+            animation: moveGrid 5s linear infinite;
+            z-index: -1;
+            opacity: 0.4;
+        }
+
+        @keyframes moveGrid {
+            0% { background-position: 0 0, 0 0, 0 0; }
+            100% { background-position: 0 0, 0 50px, 0 50px; }
+        }
+
+        .scanlines {
+            position: fixed;
+            top: 0; left: 0; width: 100vw; height: 100vh;
+            background: linear-gradient(to bottom, rgba(255,255,255,0), rgba(255,255,255,0) 50%, rgba(0,0,0,0.2) 50%, rgba(0,0,0,0.2));
+            background-size: 100% 4px;
+            pointer-events: none;
+            z-index: 100;
+        }
+
+        /* --- LAYOUT --- */
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+            width: 100%;
+            position: relative;
+            z-index: 1;
+        }
+
+        header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 2px solid var(--neon-blue);
+            padding-bottom: 20px;
+            margin-bottom: 30px;
+        }
+
+        .logo-container h1 {
+            font-family: 'Press Start 2P', cursive;
+            font-size: 1.5rem;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            text-shadow: 3px 3px var(--neon-pink);
+            margin-bottom: 5px;
+        }
+
+        /* --- NAVIGATION --- */
+        nav ul {
+            display: flex;
+            gap: 15px;
+            list-style: none;
+        }
+
+        nav a {
+            color: white;
+            text-decoration: none;
+            font-size: 1.2rem;
+            padding: 5px 10px;
+            border: 1px solid transparent;
+            transition: 0.3s;
+        }
+
+        nav a:hover {
+            background-color: var(--neon-blue);
+            color: black;
+            box-shadow: 0 0 10px var(--neon-blue);
+        }
+
+        /* --- TERMINAL SEARCH --- */
+        .search-terminal {
+            background: black;
+            border: 1px solid var(--neon-green);
+            padding: 15px;
+            margin-bottom: 30px;
+            display: flex;
+            align-items: center;
+            box-shadow: 4px 4px 0px rgba(0, 255, 0, 0.3);
+        }
+
+        .prompt-symbol { color: var(--neon-green); margin-right: 10px; font-weight: bold; }
+        .search-input {
+            background: transparent; border: none; color: white;
+            font-family: 'VT323', monospace; font-size: 1.4rem; width: 100%; outline: none;
+        }
+
+        /* --- SECTION HEADERS --- */
+        .phase-header {
+            color: var(--neon-pink);
+            font-family: 'Press Start 2P';
+            font-size: 1rem;
+            margin: 40px 0 20px 0;
+            text-transform: uppercase;
+            border-left: 5px solid var(--neon-pink);
+            padding-left: 15px;
+        }
+
+        /* --- MODULE GRID & CARDS --- */
+        .module-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+            gap: 25px;
+        }
+
+        .card {
+            background: var(--terminal-bg);
+            border: 1px solid var(--neon-blue);
+            padding: 20px;
+            transition: 0.3s;
+            position: relative;
+        }
+
+        .card:hover {
+            box-shadow: 0 0 15px rgba(0, 255, 255, 0.3);
+            border-color: white;
+        }
+
+        .card h3 {
+            color: var(--neon-blue);
+            border-bottom: 1px dashed var(--neon-blue);
+            padding-bottom: 10px;
+            margin-bottom: 15px;
+            font-size: 1.6rem;
+            text-transform: uppercase;
+        }
+
+        /* --- ACCORDION DETAILS (THE LEARNING ITEMS) --- */
+        details {
+            margin-bottom: 10px;
+            padding: 5px;
+            border: 1px solid transparent;
+        }
+
+        details:hover { border-left: 2px solid var(--neon-pink); }
+
+        summary {
+            cursor: pointer;
+            list-style: none;
+            font-weight: bold;
+            color: white;
+        }
+        
+        summary::before { content: "[+] "; color: var(--neon-green); }
+        details[open] summary::before { content: "[-] "; color: var(--neon-pink); }
+
+        .details-content {
+            padding: 10px 0 10px 25px;
+            color: #ddd;
+            font-size: 1.1rem;
+        }
+
+        .details-content ul { list-style: square; margin-left: 20px; }
+        .details-content li { margin-bottom: 5px; }
+
+        .highlight { color: var(--neon-amber); }
+
+        /* --- SPECIALIZATION TRACKS --- */
+        .track-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            margin-top: 20px;
+        }
+        
+        .track-card {
+            border: 1px solid var(--neon-green);
+            background: #001100;
+            padding: 15px;
+            text-align: center;
+        }
+        
+        .track-card h4 { color: var(--neon-green); margin-bottom: 10px; text-transform: uppercase; }
+
+        /* --- CAPSTONE BOX --- */
+        .capstone-box {
+            margin-top: 50px;
+            border: 2px solid var(--neon-pink);
+            background: rgba(255, 0, 255, 0.05);
+            padding: 30px;
+            text-align: center;
+            animation: pulseBorder 3s infinite;
+        }
+
+        @keyframes pulseBorder {
+            0% { box-shadow: 0 0 5px var(--neon-pink); }
+            50% { box-shadow: 0 0 20px var(--neon-pink); }
+            100% { box-shadow: 0 0 5px var(--neon-pink); }
+        }
+
+        .capstone-title {
+            font-family: 'Press Start 2P';
+            color: var(--neon-pink);
+            margin-bottom: 20px;
+        }
+
+        /* --- FOOTER --- */
+        footer {
+            margin-top: 50px; text-align: center; opacity: 0.7; font-size: 1rem; padding-bottom: 20px;
+        }
+
+        @media (max-width: 768px) {
+            header { flex-direction: column; text-align: center; gap: 20px; }
+            nav ul { flex-wrap: wrap; justify-content: center; }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="retro-grid"></div>
+    <div class="scanlines"></div>
+
+    <div class="container">
+        <header>
+            <div class="logo-container">
+                <h1>LEOAF</h1>
+                <small>>> LEO ARCHITECTURE FUNDAMENTALS >></small>
+            </div>
+            <nav>
+                <ul>
+                    <li><a href="#">[ROADMAP]</a></li>
+                    <li><a href="#">[DATABASE]</a></li>
+                    <li><a href="#">[SIMULATOR]</a></li>
+                    <li><a href="#">[LOGIN]</a></li>
+                </ul>
+            </nav>
+        </header>
+
+        <section class="search-terminal">
+            <span class="prompt-symbol">USER@LEOAF:~$</span>
+            <input type="text" class="search-input" id="cmdInput" 
+                   placeholder="Load module... (e.g., 'Link Budget' or 'Starlink')">
+        </section>
+
+        <div id="typing-effect" style="margin-bottom: 30px; min-height: 30px; color: var(--neon-green);"></div>
+
+        <div class="phase-header">PHASE 1: THE UPLINK (Foundations)</div>
+        <div class="module-grid">
+            <div class="card">
+                <h3>01_PHYSICS_ENGINE</h3>
+                <details>
+                    <summary>Orbital Mechanics 101</summary>
+                    <div class="details-content">
+                        <ul>
+                            <li>Kepler’s Laws & Gravity</li>
+                            <li><span class="highlight">The Latency Math:</span> Why LEO (30ms) vs GEO (600ms)?</li>
+                            <li>Inclination & Coverage Footprints</li>
+                            <li>Doppler Shift at 7.5km/s</li>
+                        </ul>
+                    </div>
+                </details>
+                <details>
+                    <summary>Telecom Basics</summary>
+                    <div class="details-content">
+                        <ul>
+                            <li>Bandwidth vs. Throughput</li>
+                            <li>Modulation (QPSK, QAM)</li>
+                            <li>Link Budgets & Noise (Eb/N0)</li>
+                            <li><strong>Book:</strong> Maral & Bousquet</li>
+                        </ul>
+                    </div>
+                </details>
+            </div>
+
+            <div class="card">
+                <h3>02_CONTEXT_LAYER</h3>
+                <details>
+                    <summary>Terrestrial vs. Space</summary>
+                    <div class="details-content">
+                        <p>Why land networks fail in oceans, deserts, and air.</p>
+                        <ul>
+                            <li>Fiber Backbone limitations</li>
+                            <li>Rural connectivity economics</li>
+                        </ul>
+                    </div>
+                </details>
+                <details>
+                    <summary>The Graveyard (History)</summary>
+                    <div class="details-content">
+                        <p>Analyze failures to understand success.</p>
+                        <ul>
+                            <li><strong>Iridium:</strong> Bankrupt -> Revived</li>
+                            <li><strong>Teledesic:</strong> The 90s dream that died</li>
+                            <li><strong>Lesson:</strong> LEO wasn't new, it was early.</li>
+                        </ul>
+                    </div>
+                </details>
+            </div>
+        </div>
+
+        <div class="phase-header">PHASE 2: THE MACHINE (Engineering)</div>
+        <div class="module-grid">
+            <div class="card">
+                <h3>03_RF_SYSTEMS</h3>
+                <details>
+                    <summary>Antenna Tech</summary>
+                    <div class="details-content">
+                        <ul>
+                            <li><span class="highlight">Phased Arrays:</span> Steering beams without moving parts.</li>
+                            <li>Ka vs Ku Band</li>
+                            <li>Rain Fade & Interference</li>
+                        </ul>
+                    </div>
+                </details>
+                <details>
+                    <summary>Link Budget Calc</summary>
+                    <div class="details-content">
+                        <p>The Holy Grail calculation.</p>
+                        <ul>
+                            <li>Free-space path loss</li>
+                            <li>Antenna Gain / EIRP</li>
+                            <li>Required SNR</li>
+                        </ul>
+                    </div>
+                </details>
+            </div>
+
+            <div class="card">
+                <h3>04_NET_ARCH</h3>
+                <details>
+                    <summary>Constellation Design</summary>
+                    <div class="details-content">
+                        <ul>
+                            <li>Walker Delta Patterns</li>
+                            <li>Planes vs. Satellites per plane</li>
+                            <li>Coverage probability</li>
+                            <li><strong>Tools:</strong> STK, GMAT, Python (poliastro)</li>
+                        </ul>
+                    </div>
+                </details>
+                <details>
+                    <summary>Routing in Space</summary>
+                    <div class="details-content">
+                        <ul>
+                            <li><strong>OISL:</strong> Optical Inter-Satellite Links (Lasers).</li>
+                            <li>Space-based Mesh Networks.</li>
+                            <li>Bent-pipe vs. On-board Processing.</li>
+                        </ul>
+                    </div>
+                </details>
+            </div>
+        </div>
+
+        <div class="phase-header">PHASE 3: THE MARKET (Business Logic)</div>
+        <div class="module-grid">
+            <div class="card">
+                <h3>05_ECONOMICS</h3>
+                <details>
+                    <summary>Cost Structures</summary>
+                    <div class="details-content">
+                        <ul>
+                            <li><strong>CAPEX:</strong> Launch costs ($/kg), Sat Manufacturing.</li>
+                            <li><strong>OPEX:</strong> Ground stations, Maintenance.</li>
+                            <li>User Terminal Cost (The biggest hurdle).</li>
+                        </ul>
+                    </div>
+                </details>
+                <details>
+                    <summary>Revenue Models</summary>
+                    <div class="details-content">
+                        <ul>
+                            <li>ARPU (Avg Revenue Per User).</li>
+                            <li>Aviation & Maritime (High Margin).</li>
+                            <li>Military Contracts.</li>
+                            <li>Break-even analysis: Starlink's 10yr horizon.</li>
+                        </ul>
+                    </div>
+                </details>
+            </div>
+
+            <div class="card">
+                <h3>06_STRATEGY</h3>
+                <details>
+                    <summary>Competitive Landscape</summary>
+                    <div class="details-content">
+                        <ul>
+                            <li>Starlink (First mover)</li>
+                            <li>Kuiper (Amazon Integration)</li>
+                            <li>OneWeb (Eutelsat / B2B focus)</li>
+                            <li>Telesat Lightspeed</li>
+                        </ul>
+                    </div>
+                </details>
+                <details>
+                    <summary>Regulatory</summary>
+                    <div class="details-content">
+                        <ul>
+                            <li>ITU Spectrum battles.</li>
+                            <li>Orbital Debris (Kessler Syndrome).</li>
+                            <li>Landing rights per country.</li>
+                        </ul>
+                    </div>
+                </details>
+            </div>
+        </div>
+
+        <div class="phase-header">PHASE 4: CHOOSE YOUR CLASS</div>
+        <div class="track-grid">
+            <div class="track-card">
+                <h4>RF Engineer</h4>
+                <p>Master Link Budgets, Phased Arrays, Modulation, and Interference Mitigation.</p>
+            </div>
+            <div class="track-card">
+                <h4>Network Architect</h4>
+                <p>Master Routing, TCP/IP at scale, OISL, and Latency Optimization.</p>
+            </div>
+            <div class="track-card">
+                <h4>Constellation Strategist</h4>
+                <p>Master Orbital Mechanics, Coverage Analysis, STK Simulation, and CAPEX modeling.</p>
+            </div>
+        </div>
+
+        <div class="capstone-box">
+            <h2 class="capstone-title">/// FINAL BOSS: THE CAPSTONE ///</h2>
+            <p style="margin-bottom: 15px; color: white;">Design your own LEO Constellation.</p>
+            <div style="text-align: left; display: inline-block; color: #ddd;">
+                <p>1. Choose Altitude (e.g., 900km) & Inclination.</p>
+                <p>2. Define Number of Satellites & Planes.</p>
+                <p>3. Compute Link Budget & Latency.</p>
+                <p>4. Build the Revenue Model.</p>
+                <p style="margin-top:10px; color: var(--neon-pink);"><strong>DELIVERABLE:</strong> "Is this profitable?" Presentation.</p>
+            </div>
+        </div>
+        
+        <footer>
+            &copy; 2026 LEO ARCHITECTURE FUNDAMENTALS.<br>
+            "If you can't calculate the path loss, you can't build the business."
+        </footer>
+
+    </div>
+
+    <script>
+    // --- 1. CONFIGURATION ---
+    const terminalOutput = document.getElementById("typing-effect");
+    const input = document.getElementById('cmdInput');
+    const PROMPT = "USER@LEOAF:~$ ";
+    
+    // Sound effect (optional, valid data URI for a tiny beep)
+    // const beep = new Audio("data:audio/wav;base64,UklGRl9vT19XQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YU..."); 
+
+    // --- 2. KNOWLEDGE BASE (The Brain) ---
+    // This simple object acts as your "Database"
+    const knowledgeBase = {
+        "help": "AVAILABLE COMMANDS: <br> - help <br> - clear <br> - list (shows all topics) <br> - [keyword] (e.g., 'latency', 'starlink', 'physics')",
+        "list": "TOPICS: <br> physics, latency, doppler, orbit, rf, phased array, starlink, kuiper, cost, elon",
+        "latency": "LATENCY DATA: <br> GEO: ~600ms (High) <br> LEO: ~30-50ms (Low) <br> CAUSE: Speed of light distance to 35,000km vs 550km.",
+        "starlink": "IDENTITY: Starlink <br> OWNER: SpaceX <br> ALTITUDE: ~550km <br> SATELLITES: 4,000+ <br> TECH: Laser Links, Phased Array.",
+        "physics": "PHYSICS MODULE: <br> Critical concepts include Keplerian elements, Free-space path loss (FSPL), and Doppler shift compensation.",
+        "orbit": "ORBITAL TYPES: <br> LEO: Low Earth Orbit (500-2000km). Low latency, high speed. <br> GEO: Geostationary (35,786km). Fixed position, high latency.",
+        "cost": "ECONOMICS: <br> The main battle is reducing User Terminal cost (currently ~$500) and Launch cost ($/kg). Starlink aims for <$1000/terminal.",
+        "hello": "GREETINGS. I am the LEOAF System. Ask me about Satellite Architecture.",
+        "contact": "CONTACT: Admin is currently in Low Earth Orbit. Please leave a message after the beep."
+    };
+
+    // --- 3. TYPEWRITER EFFECT FUNCTION ---
+    function typeText(element, text, speed = 20) {
+        // Clear previous if needed or append? Let's append for terminal feel.
+        // But for the 'intro' we might want to clear.
+        // For replies, we append a new line.
+        
+        const line = document.createElement("div");
+        line.style.marginBottom = "10px";
+        element.appendChild(line);
+
+        let i = 0;
+        
+        // Handle HTML tags slightly effectively by just setting innerHTML at the end
+        // But for typing effect, we usually type plain text. 
+        // A simple trick: Type it all at once if it has HTML, or simple char by char if plain.
+        
+        if (text.includes("<br>")) {
+             line.innerHTML = `<span style="color:var(--neon-green);">${PROMPT}</span>Response loaded: <br>` + text;
+             // Auto scroll to bottom
+             window.scrollTo(0, document.body.scrollHeight);
+        } else {
+            // Char by char effect for plain text
+            line.innerHTML = `<span style="color:var(--neon-green);">${PROMPT}</span>`;
+            
+            function typeChar() {
+                if (i < text.length) {
+                    line.innerHTML += text.charAt(i);
+                    i++;
+                    setTimeout(typeChar, speed);
+                } else {
+                     window.scrollTo(0, document.body.scrollHeight);
+                }
+            }
+            typeChar();
+        }
+    }
+
+    // --- 4. INITIALIZATION ---
+    window.onload = function() {
+        const introText = "INITIALIZING LEOAF KNOWLEDGE CORE... V1.0 READY. TYPE 'HELP' FOR COMMANDS.";
+        const introLine = document.createElement("div");
+        introLine.style.color = "var(--neon-green)";
+        terminalOutput.appendChild(introLine);
+        
+        let i = 0;
+        function typeIntro() {
+            if (i < introText.length) {
+                introLine.innerHTML += introText.charAt(i);
+                i++;
+                setTimeout(typeIntro, 30);
+            }
+        }
+        typeIntro();
+    };
+
+    // --- 5. INPUT LISTENER ---
+    input.addEventListener("keypress", function(event) {
+        if (event.key === "Enter") {
+            event.preventDefault();
+            
+            const query = input.value.toLowerCase().trim();
+            input.value = ""; // Clear input
+
+            // 1. Echo the user's command to the screen
+            const commandLine = document.createElement("div");
+            commandLine.innerHTML = `<span style="color:var(--neon-pink);">${PROMPT}</span>${query}`;
+            terminalOutput.appendChild(commandLine);
+
+            // 2. Process Command
+            if (query === "clear") {
+                terminalOutput.innerHTML = "";
+                return;
+            }
+
+            // 3. Find Answer
+            let response = "ERROR: COMMAND_UNKNOWN. TYPE 'HELP' OR 'LIST'.";
+            
+            // Exact match check
+            if (knowledgeBase[query]) {
+                response = knowledgeBase[query];
+            } else {
+                // Fuzzy check (check if any key is inside the query)
+                const keys = Object.keys(knowledgeBase);
+                for (let key of keys) {
+                    if (query.includes(key)) {
+                        response = knowledgeBase[key];
+                        break;
+                    }
+                }
+            }
+
+            // 4. Output Answer
+            setTimeout(() => {
+                typeText(terminalOutput, response, 15);
+            }, 300); // Slight artificial delay for "processing" feel
+        }
+    });
+</script>
+
+</body>
+</html>
