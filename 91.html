@@ -4,10 +4,13 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>LEOAF | LEO Architecture Fundamentals</title>
+
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=VT323&family=Press+Start+2P&display=swap" rel="stylesheet">
+
 <style>
+/* ========== ROOT COLORS ========== */
 :root {
     --neon-blue: #0ff;
     --neon-pink: #f0f;
@@ -17,80 +20,95 @@
     --grid-color: rgba(14, 236, 245, 0.2);
     --bg-color: #0d0221;
     --terminal-bg: rgba(0, 10, 0, 0.9);
-    --text-glow: 0 0 5px var(--neon-blue);
 }
-* { box-sizing: border-box; margin:0; padding:0; }
+
+/* ========== BASE STYLES ========== */
+* { box-sizing: border-box; margin: 0; padding: 0; }
 body {
     background-color: var(--bg-color);
     color: var(--neon-blue);
     font-family: 'VT323', monospace;
     font-size: 1.3rem;
+    line-height: 1.4;
     min-height: 100svh;
     display: flex; flex-direction: column;
-    line-height: 1.4;
-    overflow-x: hidden;
 }
-.retro-grid {
-    position: fixed; top:0; left:0; width:100%; height:100%;
-    background: linear-gradient(transparent 0%, var(--bg-color) 100%), linear-gradient(0deg, transparent 75%, var(--grid-color) 76%), linear-gradient(90deg, transparent 75%, var(--grid-color) 76%);
+.container { max-width: 1200px; margin: 0 auto; padding: 20px; }
+
+/* ========== GRID & SCANLINES ========== */
+.retro-grid { 
+    position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+    background: linear-gradient(transparent 0%, var(--bg-color) 100%), 
+                linear-gradient(0deg, transparent 75%, var(--grid-color) 76%), 
+                linear-gradient(90deg, transparent 75%, var(--grid-color) 76%);
     background-size: 100% 100%, 50px 50px, 50px 50px;
-    transform: perspective(500px) rotateX(60deg) translateY(0) scale(2);
-    animation: moveGrid 5s linear infinite; z-index: -1; opacity:0.4;
+    transform: perspective(500px) rotateX(60deg) scale(2);
+    animation: moveGrid 5s linear infinite; z-index: -1; opacity: 0.4;
 }
-@keyframes moveGrid {
-    0% { background-position:0 0, 0 0, 0 0; }
-    100% { background-position:0 0, 0 50px, 0 50px; }
-}
+@keyframes moveGrid { 0% { background-position:0 0,0 0,0 0; } 100% { background-position:0 0,0 50px,0 50px; } }
+
 .scanlines {
     position: fixed; top:0; left:0; width:100vw; height:100vh;
     background: linear-gradient(to bottom, rgba(255,255,255,0), rgba(255,255,255,0) 50%, rgba(0,0,0,0.2) 50%, rgba(0,0,0,0.2));
     background-size: 100% 4px; pointer-events: none; z-index: 100;
 }
-.container { max-width:1200px; margin:0 auto; padding:20px; width:100%; position:relative; z-index:1; }
+
+/* ========== HEADER ========== */
 header { display:flex; justify-content:space-between; align-items:center; border-bottom:2px solid var(--neon-blue); padding-bottom:20px; margin-bottom:30px; }
-.logo-container h1 { font-family:'Press Start 2P', cursive; font-size:1.5rem; text-transform:uppercase; letter-spacing:2px; text-shadow: 3px 3px var(--neon-pink); margin-bottom:5px; }
+.logo-container h1 { font-family:'Press Start 2P',cursive; font-size:1.5rem; text-transform:uppercase; letter-spacing:2px; text-shadow:3px 3px var(--neon-pink); margin-bottom:5px; }
 nav ul { display:flex; gap:15px; list-style:none; }
 nav a { color:white; text-decoration:none; font-size:1.2rem; padding:5px 10px; border:1px solid transparent; transition:0.3s; }
 nav a:hover { background-color: var(--neon-blue); color:black; box-shadow:0 0 10px var(--neon-blue); }
-.search-terminal { background:black; border:1px solid var(--neon-green); padding:15px; margin-bottom:30px; display:flex; align-items:center; box-shadow:4px 4px 0px rgba(0,255,0,0.3);}
-.prompt-symbol { color:var(--neon-green); margin-right:10px; font-weight:bold; }
-.search-input { background:transparent; border:none; color:white; font-family:'VT323', monospace; font-size:1.4rem; width:100%; outline:none; }
-.phase-header { color:var(--neon-pink); font-family:'Press Start 2P'; font-size:1rem; margin:40px 0 20px 0; text-transform:uppercase; border-left:5px solid var(--neon-pink); padding-left:15px; }
-.module-grid { display:grid; grid-template-columns:repeat(auto-fit, minmax(350px, 1fr)); gap:25px; }
+
+/* ========== SEARCH TERMINAL ========== */
+.search-terminal {
+    background:black; border:1px solid var(--neon-green); padding:15px; margin-bottom:30px; display:flex; align-items:center; box-shadow:4px 4px 0px rgba(0,255,0,0.3);
+}
+.prompt-symbol { color: var(--neon-green); margin-right:10px; font-weight:bold; }
+.search-input { background:transparent; border:none; color:white; font-family:'VT323',monospace; font-size:1.4rem; width:100%; outline:none; }
+
+/* ========== PHASE HEADER ========== */
+.phase-header {
+    color: var(--neon-pink); font-family:'Press Start 2P'; font-size:1rem; margin:40px 0 20px 0; text-transform:uppercase; border-left:5px solid var(--neon-pink); padding-left:15px;
+}
+
+/* ========== MODULE CARDS ========== */
+.module-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(350px,1fr)); gap:25px; }
 .card { background:var(--terminal-bg); border:1px solid var(--neon-blue); padding:20px; transition:0.3s; position:relative; }
 .card:hover { box-shadow:0 0 15px rgba(0,255,255,0.3); border-color:white; }
-.card h3 { color:var(--neon-blue); border-bottom:1px dashed var(--neon-blue); padding-bottom:10px; margin-bottom:15px; font-size:1.6rem; text-transform:uppercase; }
-.difficulty-badge { display:inline-block; padding:2px 8px; font-size:0.9rem; border-radius:3px; margin-left:10px; font-family:'Press Start 2P'; }
-.badge-easy { background:var(--neon-green); color:black; }
-.badge-medium { background:var(--neon-amber); color:black; }
-.badge-hard { background:var(--neon-pink); color:black; }
-.badge-expert { background:var(--neon-red); color:white; }
-details { margin-bottom:10px; padding:5px; border:1px solid transparent; }
-details:hover { border-left:2px solid var(--neon-pink); }
-summary { cursor:pointer; list-style:none; font-weight:bold; color:white; }
-summary::before { content:"[+] "; color:var(--neon-green); }
-details[open] summary::before { content:"[-] "; color:var(--neon-pink); }
+.card h3 { color: var(--neon-blue); border-bottom:1px dashed var(--neon-blue); padding-bottom:10px; margin-bottom:15px; font-size:1.6rem; text-transform:uppercase; }
 .details-content { padding:10px 0 10px 25px; color:#ddd; font-size:1.1rem; }
 .details-content ul { list-style:square; margin-left:20px; }
 .details-content li { margin-bottom:5px; }
-.highlight { color:var(--neon-amber); }
-.track-grid { display:grid; grid-template-columns:repeat(auto-fit, minmax(230px,1fr)); gap:20px; margin-top:20px; }
+
+/* ========== DIFFICULTY BADGES ========== */
+.difficulty-badge { display:inline-block; padding:2px 8px; font-size:0.9rem; border-radius:3px; margin-left:10px; font-family:'Press Start 2P'; }
+.badge-easy { background: var(--neon-green); color:black; }
+.badge-medium { background: var(--neon-amber); color:black; }
+.badge-hard { background: var(--neon-pink); color:black; }
+.badge-expert { background: var(--neon-red); color:white; }
+
+/* ========== TRACKS ========== */
+.track-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(230px,1fr)); gap:20px; margin-top:20px; }
 .track-card { border:1px solid var(--neon-green); background:#001100; padding:15px; text-align:center; transition:0.3s; }
-.track-card:hover { box-shadow:0 0 15px var(--neon-green); transform:translateY(-5px);}
-.track-card h4 { color:var(--neon-green); margin-bottom:10px; text-transform:uppercase; font-size:0.9rem;}
+.track-card:hover { box-shadow:0 0 15px var(--neon-green); transform:translateY(-5px); }
+.track-card h4 { color:var(--neon-green); margin-bottom:10px; text-transform:uppercase; font-size:0.9rem; }
+
+/* ========== CAPSTONE ========== */
 .capstone-box { margin-top:50px; border:2px solid var(--neon-pink); background:rgba(255,0,255,0.05); padding:30px; text-align:center; animation:pulseBorder 3s infinite; }
-@keyframes pulseBorder { 0% { box-shadow:0 0 5px var(--neon-pink);} 50% { box-shadow:0 0 20px var(--neon-pink);} 100% { box-shadow:0 0 5px var(--neon-pink);} }
-.capstone-title { font-family:'Press Start 2P'; color:var(--neon-pink); margin-bottom:20px;}
-.modal { display:none; position:fixed; z-index:1000; left:0; top:0; width:100%; height:100%; background-color:rgba(0,0,0,0.9); backdrop-filter:blur(5px);}
-.modal-content { background-color:#0d0d0d; margin:5% auto; padding:20px; border:1px solid var(--neon-green); width:80%; max-width:700px; box-shadow:0 0 20px var(--neon-green); color:#e0e0e0; font-family:'Courier New', monospace;}
-.close { color:var(--neon-pink); float:right; font-size:28px; cursor:pointer; }
-.data-table { width:100%; border-collapse:collapse; margin:20px 0;}
-.data-table th, .data-table td { border:1px solid #333; padding:10px; text-align:left;}
-.formula-box { background:#1a1a1a; padding:15px; border-left:5px solid var(--neon-pink); margin-top:20px; }
+@keyframes pulseBorder { 0% { box-shadow:0 0 5px var(--neon-pink); } 50% { box-shadow:0 0 20px var(--neon-pink); } 100% { box-shadow:0 0 5px var(--neon-pink); } }
+.capstone-title { font-family:'Press Start 2P'; color: var(--neon-pink); margin-bottom:20px; }
+
+/* ========== MODAL LOGIN ========== */
+.modal { display:none; position:fixed; z-index:1000; left:0; top:0; width:100%; height:100%; background-color:rgba(0,0,0,0.9); backdrop-filter:blur(5px); }
+.modal-content { background-color:#0d0d0d; margin:5% auto; padding:20px; border:1px solid var(--neon-green); width:80%; max-width:700px; box-shadow:0 0 20px var(--neon-green); color:#e0e0e0; font-family:'Courier New', monospace; }
+.close { color: var(--neon-pink); float:right; font-size:28px; cursor:pointer; }
+
+/* ========== FOOTER ========== */
 footer { margin-top:50px; text-align:center; opacity:0.7; font-size:1rem; padding-bottom:20px; }
-.info-box { background: rgba(0,255,255,0.1); border-left:4px solid var(--neon-blue); padding:15px; margin:15px 0;}
-.warning-box { background: rgba(255,176,0,0.1); border-left:4px solid var(--neon-amber); padding:15px; margin:15px 0;}
-@media(max-width:768px){header{flex-direction:column;text-align:center;gap:20px;} nav ul{flex-wrap:wrap;justify-content:center;} .module-grid{grid-template-columns:1fr;} .track-grid{grid-template-columns:1fr;}}
+
+/* ========== MEDIA ========== */
+@media (max-width:768px) { header{flex-direction:column;text-align:center;gap:20px;} nav ul{flex-wrap:wrap;justify-content:center;} .module-grid{grid-template-columns:1fr;} .track-grid{grid-template-columns:1fr;} }
 </style>
 </head>
 <body>
@@ -100,152 +118,291 @@ footer { margin-top:50px; text-align:center; opacity:0.7; font-size:1rem; paddin
 
 <div class="container">
 <header>
-<div class="logo-container">
-<h1>LEOAF</h1>
-<small>>> LEO ARCHITECTURE FUNDAMENTALS >></small>
-</div>
-<nav>
-<ul>
-<li><a href="#">[ROADMAP]</a></li>
-<li><a href="#">[DATABASE]</a></li>
-<li><a href="#">[SIMULATOR]</a></li>
-<li><a href="#" id="loginBtn">[LOGIN]</a></li>
-</ul>
-</nav>
+    <div class="logo-container">
+        <h1>LEOAF</h1>
+        <small>>> LEO ARCHITECTURE FUNDAMENTALS >></small>
+    </div>
+    <nav>
+        <ul>
+            <li><a href="#">[ROADMAP]</a></li>
+            <li><a href="#">[DATABASE]</a></li>
+            <li><a href="#">[SIMULATOR]</a></li>
+            <li><a href="#" id="loginBtn">[LOGIN]</a></li>
+        </ul>
+    </nav>
 </header>
 
 <section class="search-terminal">
-<span class="prompt-symbol">USER@LEOAF:~$</span>
-<input type="text" class="search-input" id="cmdInput" placeholder="Keyword search... e.g., 'latency', 'starlink', 'physics'">
+    <span class="prompt-symbol">USER@LEOAF:~$</span>
+    <input type="text" class="search-input" id="cmdInput" placeholder="Search keyword...">
 </section>
+<div id="typing-effect" style="margin-bottom: 30px; min-height: 30px; color: var(--neon-green);"></div>
 
-<div id="typing-effect" style="margin-bottom:30px; min-height:30px; color:var(--neon-green);"></div>
+<!-- ========== PHASES + MODULES ========== -->
 
-<!-- ================== PHASES & MODULES ================== -->
-<!-- PHASE 0: MISSION BRIEFING -->
+<!-- PHASE 0: Mission Briefing -->
 <div class="phase-header">PHASE 0: MISSION BRIEFING (Start Here)</div>
 <div class="module-grid">
-<!-- Example card 00_WHY_LEO -->
-<div class="card">
-<h3>00_WHY_LEO <span class="difficulty-badge badge-easy">EASY</span></h3>
-<details><summary>The Problem Statement</summary>
-<div class="details-content">
-<p><span class="highlight">50% of humanity has no internet.</span> Fiber can't reach oceans, deserts, or remote regions economically.</p>
-<ul>
-<li><strong>Maritime:</strong> Ships pay $10-50/MB via GEO satellites.</li>
-<li><strong>Aviation:</strong> In-flight WiFi is slow and expensive.</li>
-<li><strong>Rural:</strong> Last-mile fiber costs $10,000+ per home.</li>
-<li><strong>IoT:</strong> Smart agriculture, tracking need global coverage.</li>
-</ul>
-<div class="info-box">💡 <strong>The Insight:</strong> LEO constellations provide global coverage at low latency.</div>
-</div></details>
-<details><summary>Use Cases & Users</summary>
-<div class="details-content">
-<ul>
-<li><strong>Consumer Broadband:</strong> Rural homes, RVs, disaster relief.</li>
-<li><strong>Maritime:</strong> Commercial shipping, cruise ships.</li>
-<li><strong>Aviation:</strong> Commercial and private jets.</li>
-<li><strong>Government/Military:</strong> Secure comms, remote operations.</li>
-<li><strong>IoT/M2M:</strong> Asset tracking, smart sensors.</li>
-<li><strong>Enterprise:</strong> Remote mining, oil rigs, construction.</li>
-</ul>
-</div></details>
+    <div class="card">
+        <h3>00_WHY_LEO <span class="difficulty-badge badge-easy">EASY</span></h3>
+        <details>
+            <summary>The Problem Statement</summary>
+            <div class="details-content">
+                <p><span style="color:var(--neon-amber)">50% of humanity has no internet.</span> Fiber can't reach oceans, deserts, or remote regions economically.</p>
+            </div>
+        </details>
+        <details>
+            <summary>Use Cases & Users</summary>
+            <div class="details-content">
+                <ul>
+                    <li>Consumer Broadband</li>
+                    <li>Maritime</li>
+                    <li>Aviation</li>
+                    <li>Government / Military</li>
+                    <li>IoT / M2M</li>
+                    <li>Enterprise</li>
+                </ul>
+            </div>
+        </details>
+    </div>
+
+    <div class="card">
+        <h3>00_THE_PLAYERS <span class="difficulty-badge badge-easy">EASY</span></h3>
+        <details>
+            <summary>Current Constellation Operators</summary>
+            <div class="details-content">
+                <ul>
+                    <li>Starlink</li>
+                    <li>Kuiper</li>
+                    <li>OneWeb</li>
+                    <li>Telesat Lightspeed</li>
+                    <li>China SatNet</li>
+                </ul>
+            </div>
+        </details>
+    </div>
+
+    <div class="card">
+        <h3>00_THE_AHA_MOMENT <span class="difficulty-badge badge-easy">EASY</span></h3>
+        <details>
+            <summary>Latency Comparison</summary>
+            <div class="details-content">
+                <ul>
+                    <li>Fiber: ~80ms</li>
+                    <li>LEO: ~30-50ms</li>
+                    <li>GEO: ~600ms</li>
+                </ul>
+            </div>
+        </details>
+    </div>
 </div>
 
-<!-- Additional cards/modules go here (PHASE 0 → PHASE 4 + Capstone) -->
-<!-- For brevity, we’ll generate all cards similarly in final build -->
+<!-- PHASE 1: Foundations -->
+<div class="phase-header">PHASE 1: FOUNDATIONS (Learn the Language)</div>
+<div class="module-grid">
+    <div class="card">
+        <h3>01_PHYSICS_ENGINE <span class="difficulty-badge badge-medium">MEDIUM</span></h3>
+        <details>
+            <summary>Orbital Mechanics 101</summary>
+            <div class="details-content">
+                <ul>
+                    <li>Kepler's Laws</li>
+                    <li>Latency Math</li>
+                    <li>Inclination & Coverage</li>
+                    <li>Doppler Shift</li>
+                </ul>
+            </div>
+        </details>
+    </div>
 
-<!-- ================== CAPSTONE PROJECT ================== -->
+    <div class="card">
+        <h3>02_TELECOM_BASICS <span class="difficulty-badge badge-medium">MEDIUM</span></h3>
+        <details>
+            <summary>Frequency Bands</summary>
+            <div class="details-content">
+                <ul>
+                    <li>L-band</li>
+                    <li>Ku-band</li>
+                    <li>Ka-band</li>
+                    <li>V-band</li>
+                </ul>
+            </div>
+        </details>
+    </div>
+
+    <div class="card">
+        <h3>03_HISTORICAL_CONTEXT <span class="difficulty-badge badge-easy">EASY</span></h3>
+        <details>
+            <summary>Previous Constellation Failures</summary>
+            <div class="details-content">
+                <ul>
+                    <li>Iridium</li>
+                    <li>Teledesic</li>
+                    <li>Globalstar</li>
+                </ul>
+            </div>
+        </details>
+    </div>
+</div>
+
+<!-- PHASE 2: Engineering -->
+<div class="phase-header">PHASE 2: ENGINEERING (Build the System)</div>
+<div class="module-grid">
+    <div class="card">
+        <h3>04_CONSTELLATION_DESIGN <span class="difficulty-badge badge-hard">HARD</span></h3>
+        <details>
+            <summary>Walker Delta Patterns</summary>
+            <div class="details-content">
+                <ul>
+                    <li>Inclination, Planes, Satellites, Phase</li>
+                </ul>
+            </div>
+        </details>
+    </div>
+    <div class="card">
+        <h3>05_RF_SYSTEMS <span class="difficulty-badge badge-hard">HARD</span></h3>
+        <details>
+            <summary>Link Budget</summary>
+            <div class="details-content">
+                <ul>
+                    <li>EIRP, FSPL, Gains, Losses</li>
+                </ul>
+            </div>
+        </details>
+    </div>
+    <div class="card">
+        <h3>06_SPACECRAFT_SUBSYSTEMS <span class="difficulty-badge badge-medium">MEDIUM</span></h3>
+        <details>
+            <summary>Power, Thermal, ADCS</summary>
+            <div class="details-content">
+                <ul>
+                    <li>Solar Panels, Batteries</li>
+                    <li>MLI, Radiators, Heaters</li>
+                    <li>Reaction Wheels, Thrusters</li>
+                </ul>
+            </div>
+        </details>
+    </div>
+</div>
+
+<!-- PHASE 2.5: Simulation Lab -->
+<div class="phase-header">PHASE 2.5: SIMULATION LAB (Get Your Hands Dirty)</div>
+<div class="module-grid">
+    <div class="card">
+        <h3>09_STK_WALKTHROUGH <span class="difficulty-badge badge-medium">MEDIUM</span></h3>
+        <details>
+            <summary>Getting Started with STK</summary>
+            <div class="details-content">
+                <ul>
+                    <li>Installation, First Project, Coverage Analysis</li>
+                </ul>
+            </div>
+        </details>
+    </div>
+</div>
+
+<!-- PHASE 3: Business & Strategy -->
+<div class="phase-header">PHASE 3: BUSINESS & STRATEGY (Follow the Money)</div>
+<div class="module-grid">
+    <div class="card">
+        <h3>12_ECONOMICS <span class="difficulty-badge badge-medium">MEDIUM</span></h3>
+        <details>
+            <summary>CAPEX & OPEX</summary>
+            <div class="details-content">
+                <ul>
+                    <li>Launch Costs</li>
+                    <li>Manufacturing</li>
+                    <li>Ground Infrastructure</li>
+                </ul>
+            </div>
+        </details>
+    </div>
+</div>
+
+<!-- PHASE 4: Specialization Tracks -->
+<div class="phase-header">PHASE 4: CHOOSE YOUR CLASS (Specialize)</div>
+<div class="track-grid">
+    <div class="track-card">
+        <h4>🛰️ Systems Engineer</h4>
+        <p>End-to-end satellite design: RF + Power + Thermal + ADCS</p>
+    </div>
+    <div class="track-card">
+        <h4>📡 RF/Link Budget Specialist</h4>
+        <p>Antenna design, link budgets, propagation models</p>
+    </div>
+    <div class="track-card">
+        <h4>🌐 Network Architect</h4>
+        <p>Routing, OISL, TCP/IP optimization, latency engineering</p>
+    </div>
+</div>
+
+<!-- CAPSTONE PROJECT -->
 <div class="capstone-box">
 <h2 class="capstone-title">/// FINAL BOSS: THE CAPSTONE ///</h2>
-<p style="margin-bottom:15px; color:white; font-size:1.2rem;">Design Your Own LEO Constellation</p>
-<!-- Capstone details here (requirements, technical design, business case) -->
+<p>Design Your Own LEO Constellation</p>
+</div>
+
+<!-- LOGIN MODAL -->
+<div id="loginModal" class="modal">
+    <div class="modal-content">
+        <span class="close" id="closeModal">&times;</span>
+        <h2>Login / Signup</h>
+        <form id="loginForm">
+            <label for="email">Email:</label><br>
+            <input type="email" id="email" name="email" required style="width:100%; padding:8px; margin:10px 0; background:#000; color:#0f0; border:1px solid var(--neon-green);"><br>
+            <label for="password">Password:</label><br>
+            <input type="password" id="password" name="password" required style="width:100%; padding:8px; margin:10px 0; background:#000; color:#0f0; border:1px solid var(--neon-green);"><br>
+            <button type="submit" style="padding:10px 20px; background:var(--neon-green); color:black; border:none; cursor:pointer; font-family:'Press Start 2P';">Login / Signup</button>
+        </form>
+    </div>
 </div>
 
 <footer>
-&copy; 2026 LEO ARCHITECTURE FUNDAMENTALS.<br>
-"If you can't calculate the path loss, you can't build the business."<br>
-<small style="margin-top:10px; display:block;">[Glossary] [Resources] [Contributors] [Feedback]</small>
+    &copy; 2026 LEOAF | LEO Architecture Fundamentals. All Rights Reserved.
 </footer>
-</div>
 
-<!-- ================== LOGIN MODAL ================== -->
-<div id="loginModal" class="modal">
-<div class="modal-content">
-<span class="close">&times;</span>
-<h3>Login / Signup</h3>
-<p>Email:</p>
-<input type="email" id="emailInput" placeholder="you@example.com" style="width:100%; padding:8px; margin-bottom:10px;">
-<p>Password:</p>
-<input type="password" id="passwordInput" placeholder="********" style="width:100%; padding:8px; margin-bottom:10px;">
-<button id="loginSubmit" style="padding:10px 20px; background:var(--neon-green); border:none; cursor:pointer;">Login / Signup</button>
-<div id="loginStatus" style="margin-top:10px; color:var(--neon-amber);"></div>
-</div>
-</div>
-
-<!-- ================== SCRIPTS ================== -->
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js"></script>
 <script>
-// Supabase client placeholder
-const SUPABASE_URL = "YOUR_SUPABASE_URL";
-const SUPABASE_KEY = "YOUR_SUPABASE_ANON_KEY";
-const supabase = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+// ========== LOGIN MODAL ==========
+const loginBtn = document.getElementById('loginBtn');
+const modal = document.getElementById('loginModal');
+const closeModal = document.getElementById('closeModal');
 
-// Login modal
-const modal = document.getElementById("loginModal");
-const loginBtn = document.getElementById("loginBtn");
-const closeBtn = modal.querySelector(".close");
 loginBtn.onclick = () => { modal.style.display = "block"; }
-closeBtn.onclick = () => { modal.style.display = "none"; }
-window.onclick = (e) => { if(e.target == modal) modal.style.display = "none"; }
+closeModal.onclick = () => { modal.style.display = "none"; }
+window.onclick = (event) => { if(event.target == modal){ modal.style.display = "none"; } }
 
-document.getElementById("loginSubmit").onclick = async () => {
-    const email = document.getElementById("emailInput").value;
-    const password = document.getElementById("passwordInput").value;
-    if(!email || !password) { document.getElementById("loginStatus").innerText="Enter email & password"; return; }
-    // Example: signUp/signIn
-    const { data, error } = await supabase.auth.signInWithPassword({ email, password });
-    if(error) document.getElementById("loginStatus").innerText = error.message;
-    else document.getElementById("loginStatus").innerText = "Login successful!";
-    modal.style.display = "none";
-};
+// ========== KEYWORD SEARCH ==========
+const cmdInput = document.getElementById('cmdInput');
+const typingEffect = document.getElementById('typing-effect');
 
-// Terminal search (placeholder knowledge base)
-const terminalOutput = document.getElementById("typing-effect");
-const input = document.getElementById('cmdInput');
-const PROMPT = "USER@LEOAF:~$ ";
-const knowledgeBase = {
-    "help": "AVAILABLE COMMANDS: help, list, [keyword]",
-    "list": "TOPICS: physics, latency, orbit, rf, starlink, kuiper, oneweb, cost, capex, opex, spectrum, debris, security, oisl",
-    "latency": "LEO latency ~30-50ms, GEO ~600ms, Fiber ~80ms.",
-    "starlink": "Starlink: SpaceX, ~550km, 4,000+ sats, laser links.",
-    "physics": "Orbital mechanics, Kepler's laws, free-space path loss, Doppler shift."
-};
-function typeText(element, text, speed=20){
-    const line = document.createElement("div"); line.style.marginBottom="10px"; element.appendChild(line);
-    line.innerHTML = '<span style="color:var(--neon-green);">'+PROMPT+'</span>'+text;
-    window.scrollTo(0,document.body.scrollHeight);
-}
-input.addEventListener("keypress", function(event){
-    if(event.key==="Enter"){
-        event.preventDefault();
-        const query = input.value.toLowerCase().trim(); input.value="";
-        const commandLine = document.createElement("div");
-        commandLine.innerHTML = '<span style="color:var(--neon-pink);">'+PROMPT+'</span>'+query;
-        terminalOutput.appendChild(commandLine);
-        let response = knowledgeBase[query] || "ERROR: COMMAND_UNKNOWN. Type 'help' or 'list'.";
-        setTimeout(()=>{ typeText(terminalOutput,response,15); },300);
+cmdInput.addEventListener('keydown', function(e){
+    if(e.key === "Enter"){
+        e.preventDefault();
+        const query = cmdInput.value.toLowerCase().trim();
+        cmdInput.value = "";
+        // Very simple keyword routing for now (expand later)
+        let response = "";
+        if(query.includes("rf")) response = "Go to PHASE 2: ENGINEERING → 05_RF_SYSTEMS";
+        else if(query.includes("orbit")) response = "Go to PHASE 1: FOUNDATIONS → 01_PHYSICS_ENGINE";
+        else if(query.includes("business")) response = "Go to PHASE 3: BUSINESS & STRATEGY → 12_ECONOMICS";
+        else if(query.includes("capstone")) response = "Scroll down to FINAL BOSS: THE CAPSTONE";
+        else response = "Keyword not found. Try another term.";
+
+        typingEffect.textContent = "> " + response;
     }
 });
 
-// Intro typing effect
-window.onload = function(){
-    const introText="INITIALIZING LEOAF KNOWLEDGE CORE... V2.0 READY. TYPE 'HELP' FOR COMMANDS.";
-    const introLine=document.createElement("div"); introLine.style.color="var(--neon-green)"; terminalOutput.appendChild(introLine);
-    let i=0; function typeIntro(){ if(i<introText.length){ introLine.innerHTML+=introText.charAt(i); i++; setTimeout(typeIntro,30);} }
-    typeIntro();
-  };
+// ========== LOGIN FORM HANDLER (placeholder) ==========
+const loginForm = document.getElementById('loginForm');
+loginForm.addEventListener('submit', function(e){
+    e.preventDefault();
+    const email = document.getElementById('email').value;
+    const password = document.getElementById('password').value;
+    // Placeholder: Connect to Supabase or other backend later
+    alert(`Logged in as: ${email}`);
+    modal.style.display = "none";
+});
 </script>
-
 </body>
 </html>
+    
