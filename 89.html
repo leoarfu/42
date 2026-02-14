@@ -1,0 +1,427 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>LEOAF v1.0 – LEO ARCHITECTURE FUNDAMENTALS TERMINAL</title>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=VT323&family=Press+Start+2P&display=swap" rel="stylesheet">
+
+    <style>
+        :root {
+            --phosphor-amber: #ffb000;
+            --phosphor-green: #a0ff00;
+            --dark-bg: #0a0a00;
+            --crt-glow: rgba(255, 180, 0, 0.7);
+            --scanline: rgba(0,0,0,0.35);
+            --vignette: radial-gradient(circle at center, transparent 60%, #000000 100%);
+        }
+
+        * { box-sizing: border-box; margin:0; padding:0; }
+        body {
+            background: var(--dark-bg);
+            color: var(--phosphor-amber);
+            font-family: 'VT323', monospace;
+            font-size: 1.4rem;
+            line-height: 1.45;
+            min-height: 100vh;
+            overflow-x: hidden;
+            image-rendering: pixelated;
+            text-shadow: 
+                0 0 4px var(--crt-glow),
+                0 0 8px var(--crt-glow),
+                0 0 12px var(--crt-glow);
+        }
+
+        /* CRT CONTAINER + CURVATURE + VIGNETTE */
+        .crt-screen {
+            position: relative;
+            max-width: 1280px;
+            margin: 2vh auto;
+            padding: 4vmin;
+            background: #000;
+            border: 12px solid #111;
+            border-radius: 18% / 12%;
+            box-shadow: 
+                inset 0 0 80px rgba(0,0,0,0.9),
+                0 0 60px rgba(180,120,0,0.4);
+            overflow: hidden;
+        }
+
+        .crt-screen::before {
+            content: "";
+            position: absolute;
+            inset: 0;
+            background: var(--vignette);
+            pointer-events: none;
+            z-index: 2;
+        }
+
+        /* STRONGER SCANLINES + FLICKER */
+        .scanlines {
+            position: fixed;
+            inset: 0;
+            background: repeating-linear-gradient(
+                to bottom,
+                transparent 0,
+                transparent 2px,
+                var(--scanline) 2px,
+                var(--scanline) 4px
+            );
+            background-size: 100% 4px;
+            pointer-events: none;
+            z-index: 999;
+            opacity: 0.6;
+            animation: flicker 8s infinite steps(1);
+        }
+
+        @keyframes flicker {
+            0%,19.9%,22%,62.9%,64%,64.9%,70%,99.9%,100% { opacity: 0.6; }
+            20%,21.9%,63%,63.9%,65%,69.9% { opacity: 0.4; }
+        }
+
+        /* GRID BACKGROUND (subtle) */
+        .retro-grid {
+            position: fixed;
+            inset: 0;
+            background: 
+                linear-gradient(transparent 0%, var(--dark-bg) 100%),
+                repeating-linear-gradient(0deg, transparent, transparent 48px, rgba(180,180,0,0.08) 49px),
+                repeating-linear-gradient(90deg, transparent, transparent 48px, rgba(180,180,0,0.08) 49px);
+            background-size: 100% 100%, 50px 50px, 50px 50px;
+            animation: gridmove 60s linear infinite;
+            opacity: 0.25;
+            z-index: -1;
+        }
+        @keyframes gridmove { to { background-position: 0 50px, 0 50px; } }
+
+        .container { position: relative; z-index: 10; }
+
+        header {
+            text-align: center;
+            padding: 1rem 0 2rem;
+            border-bottom: 3px double var(--phosphor-green);
+        }
+        h1 {
+            font-family: 'Press Start 2P', cursive;
+            font-size: 2.4rem;
+            letter-spacing: 6px;
+            margin-bottom: 0.4rem;
+            color: var(--phosphor-green);
+            text-shadow: 0 0 10px var(--crt-glow), 0 0 20px var(--crt-glow);
+        }
+        .subtitle { font-size: 1.1rem; opacity: 0.8; }
+
+        /* COMMAND PROMPT */
+        .terminal-prompt {
+            background: rgba(0,20,0,0.85);
+            border: 2px solid var(--phosphor-green);
+            padding: 1rem;
+            margin: 1.5rem 0;
+            box-shadow: inset 0 0 20px rgba(0,255,0,0.15);
+        }
+        .prompt { color: var(--phosphor-green); font-weight: bold; }
+        #cmdInput {
+            background: transparent;
+            border: none;
+            color: var(--phosphor-amber);
+            font-family: inherit;
+            font-size: 1.4rem;
+            width: 90%;
+            outline: none;
+        }
+
+        .output { 
+            min-height: 2rem; 
+            color: var(--phosphor-green); 
+            margin-top: 0.8rem; 
+            white-space: pre-wrap;
+        }
+
+        /* PHASE HEADERS – DOS-like */
+        .phase-header {
+            font-family: 'Press Start 2P', cursive;
+            font-size: 1.1rem;
+            color: var(--phosphor-green);
+            margin: 3rem 0 1rem;
+            padding-left: 1rem;
+            border-left: 6px solid var(--phosphor-amber);
+            text-transform: uppercase;
+            letter-spacing: 2px;
+        }
+
+        /* CARDS – more blocky / terminal feel */
+        .module-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(340px, 1fr));
+            gap: 1.5rem;
+        }
+        .card {
+            background: rgba(0,10,0,0.92);
+            border: 2px solid var(--phosphor-amber);
+            padding: 1.2rem;
+            transition: all 0.15s;
+        }
+        .card:hover {
+            border-color: var(--phosphor-green);
+            box-shadow: 0 0 20px rgba(160,255,0,0.4);
+        }
+        .card h3 {
+            color: var(--phosphor-green);
+            font-size: 1.5rem;
+            margin-bottom: 0.8rem;
+            border-bottom: 1px dashed var(--phosphor-amber);
+            padding-bottom: 0.4rem;
+        }
+        details summary {
+            cursor: pointer;
+            color: #ffdd88;
+            user-select: none;
+        }
+        .details-content {
+            margin-top: 0.8rem;
+            color: #ccdd99;
+            font-size: 1.15rem;
+        }
+        .details-content ul { list-style: square inside; margin: 0.5rem 0; }
+
+        /* BADGES */
+        .difficulty-badge {
+            font-family: 'Press Start 2P';
+            font-size: 0.8rem;
+            padding: 0.2rem 0.5rem;
+            margin-left: 0.6rem;
+            border-radius: 2px;
+        }
+        .badge-easy    { background:#228822; color:#000; }
+        .badge-medium  { background:#aa8800; color:#000; }
+        .badge-hard    { background:#aa4400; color:#fff; }
+        .badge-expert  { background:#880000; color:#fff; }
+
+        /* TRACKS */
+        .track-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            gap: 1.2rem;
+            margin: 2rem 0;
+        }
+        .track-card {
+            border: 2px solid var(--phosphor-green);
+            background: rgba(0,40,0,0.6);
+            padding: 1.2rem;
+            text-align: center;
+            transition: 0.2s;
+        }
+        .track-card:hover { transform: scale(1.04); box-shadow: 0 0 25px var(--crt-glow); }
+
+        /* CAPSTONE */
+        .capstone {
+            margin: 4rem 0;
+            padding: 2rem;
+            border: 4px double var(--phosphor-green);
+            text-align: center;
+            background: rgba(40,60,0,0.3);
+            animation: pulse 6s infinite;
+        }
+        @keyframes pulse { 0%,100% { opacity:0.9; } 50% { opacity:0.6; } }
+
+        footer {
+            text-align: center;
+            padding: 3rem 1rem;
+            opacity: 0.6;
+            font-size: 1.1rem;
+        }
+
+        @media (max-width: 800px) {
+            .module-grid, .track-grid { grid-template-columns: 1fr; }
+            h1 { font-size: 1.9rem; }
+        }
+    </style>
+</head>
+<body>
+
+<div class="retro-grid"></div>
+<div class="scanlines"></div>
+
+<div class="crt-screen">
+    <div class="container">
+
+        <header>
+            <h1>LEOAF TERMINAL v1.0</h1>
+            <div class="subtitle">>> LEO ARCHITECTURE FUNDAMENTALS – 1986 EDITION >></div>
+        </header>
+
+        <div class="terminal-prompt">
+            <span class="prompt">C:\LEOAF&gt;</span>
+            <input type="text" id="cmdInput" placeholder="ENTER KEYWORD (rf, orbit, capstone...)">
+            <div id="output" class="output"></div>
+        </div>
+
+        <!-- PHASE 0 -->
+        <div class="phase-header">PHASE 0: MISSION BRIEFING – BOOT SEQUENCE</div>
+        <div class="module-grid">
+            <div class="card">
+                <h3>00_WHY_LEO <span class="difficulty-badge badge-easy">EASY</span></h3>
+                <details><summary>Access Briefing</summary><div class="details-content">
+                    <p>50%+ of world lacks broadband. LEO = global low-latency access.</p>
+                    <p>Motivation: connectivity = education, economy, disaster response.</p>
+                </div></details>
+            </div>
+            <div class="card">
+                <h3>00_THE_PLAYERS <span class="difficulty-badge badge-easy">EASY</span></h3>
+                <details><summary>List Operators</summary><div class="details-content">
+                    <ul>
+                        <li>SpaceX Starlink</li>
+                        <li>Amazon Kuiper</li>
+                        <li>OneWeb / Eutelsat</li>
+                        <li>Telesat Lightspeed</li>
+                        <li>China SatNet / GuoWang</li>
+                        <li>Governments (SDA, etc.)</li>
+                    </ul>
+                </div></details>
+            </div>
+            <div class="card">
+                <h3>00_THE_AHA_MOMENT <span class="difficulty-badge badge-easy">EASY</span></h3>
+                <details><summary>Latency Reality</summary><div class="details-content">
+                    <ul>
+                        <li>GEO: 600+ ms</li>
+                        <li>LEO: 25–55 ms</li>
+                        <li>Fiber urban: ~10–40 ms</li>
+                    </ul>
+                    <p>Launch cost collapse (Falcon 9/Reusability) → boom now.</p>
+                </div></details>
+            </div>
+            <div class="card">
+                <h3>00_ROADMAP_OVERVIEW <span class="difficulty-badge badge-easy">EASY</span></h3>
+                <details><summary>Full Path</summary><div class="details-content">
+                    <p>0 → Foundations → Engineering → Simulation → Business → Specialization → CAPSTONE</p>
+                </div></details>
+            </div>
+        </div>
+
+        <!-- PHASE 1 -->
+        <div class="phase-header">PHASE 1: FOUNDATIONS – CORE OS LOADED</div>
+        <div class="module-grid">
+            <div class="card"><h3>01_ORBITAL_MECHANICS <span class="difficulty-badge badge-medium">MEDIUM</span></h3>
+                <details><summary>Kepler & Basics</summary><div class="details-content">
+                    <ul><li>LEO 300–1200 km</li><li>Inclination</li><li>Walker patterns</li><li>Ground track</li></ul>
+                </div></details>
+            </div>
+            <div class="card"><h3>02_PHYSICS_GRAVITATION <span class="difficulty-badge badge-medium">MEDIUM</span></h3>...</div>
+            <div class="card"><h3>03_TELECOM_RF_BASICS <span class="difficulty-badge badge-medium">MEDIUM</span></h3>...</div>
+            <div class="card"><h3>04_NETWORKING_PROTOCOLS <span class="difficulty-badge badge-medium">MEDIUM</span></h3>...</div>
+            <div class="card"><h3>05_HISTORICAL_CONTEXT <span class="difficulty-badge badge-easy">EASY</span></h3>...</div>
+            <div class="card"><h3>06_GLOSSARY <span class="difficulty-badge badge-easy">EASY</span></h3>
+                <details><summary>Quick Ref</summary><div class="details-content">
+                    <ul>
+                        <li>FSPL – Free Space Path Loss</li>
+                        <li>OISL – Optical Inter-Satellite Link</li>
+                        <li>EIRP – Effective Isotropic Radiated Power</li>
+                    </ul>
+                </div></details>
+            </div>
+        </div>
+
+        <!-- PHASE 2 -->
+        <div class="phase-header">PHASE 2: ENGINEERING – HARDWARE LAYER</div>
+        <div class="module-grid">
+            <div class="card"><h3>07_CONSTELLATION_DESIGN <span class="difficulty-badge badge-hard">HARD</span></h3>...</div>
+            <div class="card"><h3>08_RF_SYSTEMS_LINK_BUDGET <span class="difficulty-badge badge-hard">HARD</span></h3>...</div>
+            <div class="card"><h3>09_SPACECRAFT_SUBSYSTEMS <span class="difficulty-badge badge-medium">MEDIUM</span></h3>...</div>
+            <div class="card"><h3>10_NETWORK_ARCH_MESH <span class="difficulty-badge badge-hard">HARD</span></h3>...</div>
+            <div class="card"><h3>11_GROUND_SEGMENT <span class="difficulty-badge badge-medium">MEDIUM</span></h3>...</div>
+            <div class="card"><h3>12_COLLISION_DEBRIS_KESSLER <span class="difficulty-badge badge-hard">HARD</span></h3>...</div>
+            <div class="card"><h3>13_CYBERSECURITY_SATNET <span class="difficulty-badge badge-hard">HARD</span></h3>...</div>
+        </div>
+
+        <!-- PHASE 2.5 -->
+        <div class="phase-header">PHASE 2.5: SIMULATION LAB – VIRTUAL MACHINE</div>
+        <div class="module-grid">
+            <div class="card"><h3>14_STK_GMAT_WALKTHROUGH <span class="difficulty-badge badge-medium">MEDIUM</span></h3>...</div>
+            <div class="card"><h3>15_LINK_BUDGET_CALC <span class="difficulty-badge badge-medium">MEDIUM</span></h3>...</div>
+            <div class="card"><h3>16_COVERAGE_HEATMAPS <span class="difficulty-badge badge-medium">MEDIUM</span></h3>...</div>
+        </div>
+
+        <!-- PHASE 3 -->
+        <div class="phase-header">PHASE 3: BUSINESS & STRATEGY – CAPITAL ACCESS</div>
+        <div class="module-grid">
+            <div class="card"><h3>17_ECONOMICS_CAPEX_OPEX <span class="difficulty-badge badge-medium">MEDIUM</span></h3>...</div>
+            <div class="card"><h3>18_COMPETITIVE_LANDSCAPE <span class="difficulty-badge badge-medium">MEDIUM</span></h3>...</div>
+            <div class="card"><h3>19_REGULATORY_ITU_FCC <span class="difficulty-badge badge-hard">HARD</span></h3>...</div>
+            <div class="card"><h3>20_GEOPOLITICS_SPECTRUM <span class="difficulty-badge badge-hard">HARD</span></h3>...</div>
+        </div>
+
+        <!-- PHASE 4 -->
+        <div class="phase-header">PHASE 4: SPECIALIZATION TRACKS – SELECT ROLE</div>
+        <div class="track-grid">
+            <div class="track-card"><h4>SYSTEMS ENGINEER</h4><p>Full satellite integration</p></div>
+            <div class="track-card"><h4>RF SPECIALIST</h4><p>Link / antenna focus</p></div>
+            <div class="track-card"><h4>NETWORK ARCHITECT</h4><p>Routing / OISL</p></div>
+            <div class="track-card"><h4>BUSINESS STRATEGIST</h4><p>Economics & regulation</p></div>
+            <div class="track-card"><h4>ORBITAL ANALYST</h4><p>Constellation planning</p></div>
+        </div>
+
+        <!-- PHASE 5 -->
+        <div class="phase-header">PHASE 5: AI-ADAPTIVE PATH – INTELLIGENT SHELL</div>
+        <div class="module-grid">
+            <div class="card">
+                <h3>AI-ADAPTIVE FEATURES <span class="difficulty-badge badge-expert">EXPERT</span></h3>
+                <details><summary>Capabilities</summary><div class="details-content">
+                    <ul>
+                        <li>Progress tracking</li>
+                        <li>Mastery detection</li>
+                        <li>Adaptive reordering</li>
+                        <li>Difficulty scaling</li>
+                        <li>Keyword prompt answers</li>
+                    </ul>
+                </div></details>
+            </div>
+        </div>
+
+        <!-- CAPSTONE -->
+        <div class="capstone">
+            <h2>*** CAPSTONE MISSION – DESIGN YOUR CONSTELLATION ***</h2>
+            <p>Objectives:</p>
+            <ul style="list-style:none; text-align:left; max-width:600px; margin:1rem auto;">
+                <li>• Orbital shell (planes, incl., altitude)</li>
+                <li>• Sample link budget</li>
+                <li>• Coverage simulation</li>
+                <li>• Rough business case (CAPEX/OPEX/ROI)</li>
+                <li>• Debris & collision strategy</li>
+            </ul>
+            <p>>> Submit design via secure uplink (future feature) <<</p>
+        </div>
+
+        <footer>
+            SYSTEM  LEOAF.EXE  © 1986–2026  ALL RIGHTS RESERVED<br>
+            RETRO CRT MODE – PHOSPHOR PERSISTENCE ENABLED
+        </footer>
+
+    </div>
+</div>
+
+<script>
+    const input = document.getElementById('cmdInput');
+    const output = document.getElementById('output');
+
+    input.addEventListener('keydown', e => {
+        if (e.key === 'Enter') {
+            const q = input.value.trim().toLowerCase();
+            input.value = '';
+            let msg = '> COMMAND RECEIVED... ';
+
+            if (q.includes('rf') || q.includes('link')) msg += 'JUMP TO PHASE 2 → 08_RF_SYSTEMS_LINK_BUDGET';
+            else if (q.includes('orbit') || q.includes('walker')) msg += 'JUMP TO PHASE 1 → 01_ORBITAL_MECHANICS';
+            else if (q.includes('business') || q.includes('econ')) msg += 'JUMP TO PHASE 3 → 17_ECONOMICS';
+            else if (q.includes('capstone') || q.includes('final')) msg += 'FINAL BOSS LOCATED – SCROLL DOWN';
+            else if (q.includes('help') || q.includes('?')) msg += 'AVAILABLE: rf, orbit, business, capstone, sim, debris';
+            else msg += 'SYNTAX ERROR – TRY KNOWN KEYWORDS';
+
+            output.textContent = msg;
+        }
+    });
+</script>
+</body>
+</html>
