@@ -1,427 +1,405 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>LEOAF v1.0 – LEO ARCHITECTURE FUNDAMENTALS TERMINAL</title>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>LEOAF V3 | Knowledge Engine – 1980s CRT Edition</title>
 
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=VT323&family=Press+Start+2P&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=VT323&family=Press+Start+2P&display=swap" rel="stylesheet">
 
-    <style>
-        :root {
-            --phosphor-amber: #ffb000;
-            --phosphor-green: #a0ff00;
-            --dark-bg: #0a0a00;
-            --crt-glow: rgba(255, 180, 0, 0.7);
-            --scanline: rgba(0,0,0,0.35);
-            --vignette: radial-gradient(circle at center, transparent 60%, #000000 100%);
-        }
+<style>
+:root {
+  --bg: #0a0a00;
+  --neon-blue: #00ffff;
+  --neon-green: #00ff00;
+  --neon-pink: #ff00ff;
+  --neon-amber: #ffb000;
+  --crt-glow: rgba(0, 255, 0, 0.65);
+  --scanline: rgba(0,0,0,0.4);
+  --vignette: radial-gradient(circle at center, transparent 65%, #000 100%);
+}
 
-        * { box-sizing: border-box; margin:0; padding:0; }
-        body {
-            background: var(--dark-bg);
-            color: var(--phosphor-amber);
-            font-family: 'VT323', monospace;
-            font-size: 1.4rem;
-            line-height: 1.45;
-            min-height: 100vh;
-            overflow-x: hidden;
-            image-rendering: pixelated;
-            text-shadow: 
-                0 0 4px var(--crt-glow),
-                0 0 8px var(--crt-glow),
-                0 0 12px var(--crt-glow);
-        }
+* { box-sizing: border-box; }
 
-        /* CRT CONTAINER + CURVATURE + VIGNETTE */
-        .crt-screen {
-            position: relative;
-            max-width: 1280px;
-            margin: 2vh auto;
-            padding: 4vmin;
-            background: #000;
-            border: 12px solid #111;
-            border-radius: 18% / 12%;
-            box-shadow: 
-                inset 0 0 80px rgba(0,0,0,0.9),
-                0 0 60px rgba(180,120,0,0.4);
-            overflow: hidden;
-        }
+body {
+  background: var(--bg);
+  color: var(--neon-green);
+  font-family: 'VT323', monospace;
+  margin: 0;
+  padding: 0;
+  min-height: 100vh;
+  text-shadow: 
+    0 0 4px var(--crt-glow),
+    0 0 8px var(--crt-glow),
+    0 0 14px var(--crt-glow);
+  image-rendering: pixelated;
+}
 
-        .crt-screen::before {
-            content: "";
-            position: absolute;
-            inset: 0;
-            background: var(--vignette);
-            pointer-events: none;
-            z-index: 2;
-        }
+/* CRT CONTAINER */
+.crt-screen {
+  position: relative;
+  max-width: 1180px;
+  margin: 2vh auto;
+  padding: 3vmin 4vmin;
+  background: #000;
+  border: 14px solid #111;
+  border-radius: 18%/12%;
+  box-shadow: 
+    inset 0 0 90px rgba(0,0,0,0.95),
+    0 0 50px rgba(0,180,0,0.35);
+  overflow: hidden;
+}
 
-        /* STRONGER SCANLINES + FLICKER */
-        .scanlines {
-            position: fixed;
-            inset: 0;
-            background: repeating-linear-gradient(
-                to bottom,
-                transparent 0,
-                transparent 2px,
-                var(--scanline) 2px,
-                var(--scanline) 4px
-            );
-            background-size: 100% 4px;
-            pointer-events: none;
-            z-index: 999;
-            opacity: 0.6;
-            animation: flicker 8s infinite steps(1);
-        }
+.crt-screen::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: var(--vignette);
+  pointer-events: none;
+  z-index: 5;
+}
 
-        @keyframes flicker {
-            0%,19.9%,22%,62.9%,64%,64.9%,70%,99.9%,100% { opacity: 0.6; }
-            20%,21.9%,63%,63.9%,65%,69.9% { opacity: 0.4; }
-        }
+/* SCANLINES */
+.scanlines {
+  position: absolute;
+  inset: 0;
+  background: repeating-linear-gradient(
+    to bottom,
+    transparent 0,
+    transparent 2px,
+    var(--scanline) 2px,
+    var(--scanline) 4px
+  );
+  background-size: 100% 4px;
+  pointer-events: none;
+  z-index: 6;
+  opacity: 0.55;
+  animation: flicker 7s infinite steps(2);
+}
 
-        /* GRID BACKGROUND (subtle) */
-        .retro-grid {
-            position: fixed;
-            inset: 0;
-            background: 
-                linear-gradient(transparent 0%, var(--dark-bg) 100%),
-                repeating-linear-gradient(0deg, transparent, transparent 48px, rgba(180,180,0,0.08) 49px),
-                repeating-linear-gradient(90deg, transparent, transparent 48px, rgba(180,180,0,0.08) 49px);
-            background-size: 100% 100%, 50px 50px, 50px 50px;
-            animation: gridmove 60s linear infinite;
-            opacity: 0.25;
-            z-index: -1;
-        }
-        @keyframes gridmove { to { background-position: 0 50px, 0 50px; } }
+@keyframes flicker {
+  0%, 18%, 22%, 60%, 63%, 65%, 69%, 98%, 100% { opacity: 0.55; }
+  20%, 21%, 61%, 62%, 66%, 68% { opacity: 0.35; }
+}
 
-        .container { position: relative; z-index: 10; }
+/* HEADER */
+header {
+  padding: 20px;
+  border-bottom: 3px double var(--neon-blue);
+  position: relative;
+  z-index: 10;
+}
 
-        header {
-            text-align: center;
-            padding: 1rem 0 2rem;
-            border-bottom: 3px double var(--phosphor-green);
-        }
-        h1 {
-            font-family: 'Press Start 2P', cursive;
-            font-size: 2.4rem;
-            letter-spacing: 6px;
-            margin-bottom: 0.4rem;
-            color: var(--phosphor-green);
-            text-shadow: 0 0 10px var(--crt-glow), 0 0 20px var(--crt-glow);
-        }
-        .subtitle { font-size: 1.1rem; opacity: 0.8; }
+h1 {
+  font-family: 'Press Start 2P';
+  font-size: 1.6rem;
+  color: var(--neon-green);
+  text-shadow: 4px 4px var(--neon-pink);
+  margin: 0 0 12px 0;
+  letter-spacing: 2px;
+}
 
-        /* COMMAND PROMPT */
-        .terminal-prompt {
-            background: rgba(0,20,0,0.85);
-            border: 2px solid var(--phosphor-green);
-            padding: 1rem;
-            margin: 1.5rem 0;
-            box-shadow: inset 0 0 20px rgba(0,255,0,0.15);
-        }
-        .prompt { color: var(--phosphor-green); font-weight: bold; }
-        #cmdInput {
-            background: transparent;
-            border: none;
-            color: var(--phosphor-amber);
-            font-family: inherit;
-            font-size: 1.4rem;
-            width: 90%;
-            outline: none;
-        }
+.controls {
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+  margin-top: 12px;
+}
 
-        .output { 
-            min-height: 2rem; 
-            color: var(--phosphor-green); 
-            margin-top: 0.8rem; 
-            white-space: pre-wrap;
-        }
+button, select {
+  background: #000;
+  border: 2px solid var(--neon-green);
+  color: var(--neon-green);
+  padding: 6px 12px;
+  font-family: 'VT323';
+  font-size: 1.2rem;
+  cursor: pointer;
+  transition: 0.15s;
+}
 
-        /* PHASE HEADERS – DOS-like */
-        .phase-header {
-            font-family: 'Press Start 2P', cursive;
-            font-size: 1.1rem;
-            color: var(--phosphor-green);
-            margin: 3rem 0 1rem;
-            padding-left: 1rem;
-            border-left: 6px solid var(--phosphor-amber);
-            text-transform: uppercase;
-            letter-spacing: 2px;
-        }
+button:hover, select:hover {
+  background: var(--neon-green);
+  color: #000;
+  box-shadow: 0 0 12px var(--crt-glow);
+}
 
-        /* CARDS – more blocky / terminal feel */
-        .module-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(340px, 1fr));
-            gap: 1.5rem;
-        }
-        .card {
-            background: rgba(0,10,0,0.92);
-            border: 2px solid var(--phosphor-amber);
-            padding: 1.2rem;
-            transition: all 0.15s;
-        }
-        .card:hover {
-            border-color: var(--phosphor-green);
-            box-shadow: 0 0 20px rgba(160,255,0,0.4);
-        }
-        .card h3 {
-            color: var(--phosphor-green);
-            font-size: 1.5rem;
-            margin-bottom: 0.8rem;
-            border-bottom: 1px dashed var(--phosphor-amber);
-            padding-bottom: 0.4rem;
-        }
-        details summary {
-            cursor: pointer;
-            color: #ffdd88;
-            user-select: none;
-        }
-        .details-content {
-            margin-top: 0.8rem;
-            color: #ccdd99;
-            font-size: 1.15rem;
-        }
-        .details-content ul { list-style: square inside; margin: 0.5rem 0; }
+.progress-bar {
+  margin-top: 18px;
+  height: 22px;
+  background: #111;
+  border: 2px solid var(--neon-blue);
+  overflow: hidden;
+}
 
-        /* BADGES */
-        .difficulty-badge {
-            font-family: 'Press Start 2P';
-            font-size: 0.8rem;
-            padding: 0.2rem 0.5rem;
-            margin-left: 0.6rem;
-            border-radius: 2px;
-        }
-        .badge-easy    { background:#228822; color:#000; }
-        .badge-medium  { background:#aa8800; color:#000; }
-        .badge-hard    { background:#aa4400; color:#fff; }
-        .badge-expert  { background:#880000; color:#fff; }
+.progress-fill {
+  height: 100%;
+  width: 0%;
+  background: linear-gradient(90deg, var(--neon-green), #88ff88);
+  transition: width 0.6s ease-out;
+}
 
-        /* TRACKS */
-        .track-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-            gap: 1.2rem;
-            margin: 2rem 0;
-        }
-        .track-card {
-            border: 2px solid var(--phosphor-green);
-            background: rgba(0,40,0,0.6);
-            padding: 1.2rem;
-            text-align: center;
-            transition: 0.2s;
-        }
-        .track-card:hover { transform: scale(1.04); box-shadow: 0 0 25px var(--crt-glow); }
+/* PHASES & MODULES */
+.phase {
+  margin: 50px 0;
+}
 
-        /* CAPSTONE */
-        .capstone {
-            margin: 4rem 0;
-            padding: 2rem;
-            border: 4px double var(--phosphor-green);
-            text-align: center;
-            background: rgba(40,60,0,0.3);
-            animation: pulse 6s infinite;
-        }
-        @keyframes pulse { 0%,100% { opacity:0.9; } 50% { opacity:0.6; } }
+.phase h2 {
+  font-family: 'Press Start 2P';
+  color: var(--neon-pink);
+  font-size: 1.1rem;
+  margin-bottom: 20px;
+  border-left: 8px solid var(--neon-amber);
+  padding-left: 12px;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
 
-        footer {
-            text-align: center;
-            padding: 3rem 1rem;
-            opacity: 0.6;
-            font-size: 1.1rem;
-        }
+.module {
+  border: 2px solid var(--neon-blue);
+  padding: 18px;
+  margin: 18px 0;
+  background: rgba(0, 16, 16, 0.92);
+  transition: all 0.2s;
+}
 
-        @media (max-width: 800px) {
-            .module-grid, .track-grid { grid-template-columns: 1fr; }
-            h1 { font-size: 1.9rem; }
-        }
-    </style>
+.module:hover {
+  border-color: var(--neon-green);
+  box-shadow: 0 0 20px rgba(0,255,0,0.3);
+}
+
+.module.completed {
+  opacity: 0.45;
+  filter: grayscale(40%);
+}
+
+.module h3 {
+  margin: 0 0 12px 0;
+  text-transform: uppercase;
+  color: var(--neon-green);
+  font-size: 1.45rem;
+}
+
+.badge {
+  font-size: 0.85rem;
+  padding: 3px 8px;
+  margin-left: 12px;
+  border-radius: 2px;
+  font-family: 'Press Start 2P';
+}
+
+.easy { background: var(--neon-green); color: #000; }
+.medium { background: var(--neon-amber); color: #000; }
+.hard { background: var(--neon-pink); color: #fff; }
+
+.tag {
+  font-size: 0.9rem;
+  margin-right: 10px;
+  color: #88ff88;
+  opacity: 0.9;
+}
+
+.notes {
+  margin-top: 14px;
+  border-top: 1px dashed var(--neon-blue);
+  padding-top: 10px;
+}
+
+textarea {
+  width: 100%;
+  background: #000;
+  color: var(--neon-green);
+  border: 1px solid var(--neon-green);
+  font-family: 'VT323';
+  font-size: 1.2rem;
+  padding: 8px;
+  resize: vertical;
+  min-height: 80px;
+}
+
+button.mark-complete {
+  margin-top: 10px;
+  background: #001100;
+  border-color: var(--neon-amber);
+  color: var(--neon-amber);
+}
+
+button.mark-complete:hover {
+  background: var(--neon-amber);
+  color: #000;
+}
+
+.hidden { display: none; }
+
+footer {
+  text-align: center;
+  margin: 60px 20px 40px;
+  opacity: 0.65;
+  font-size: 1.1rem;
+  color: #88ff88;
+}
+
+/* RESPONSIVE */
+@media (max-width: 640px) {
+  .controls { justify-content: center; }
+  h1 { font-size: 1.4rem; }
+  .crt-screen { border-radius: 8%/6%; border-width: 10px; padding: 4vmin 3vmin; }
+}
+</style>
 </head>
 <body>
 
-<div class="retro-grid"></div>
-<div class="scanlines"></div>
-
 <div class="crt-screen">
-    <div class="container">
+  <div class="scanlines"></div>
 
-        <header>
-            <h1>LEOAF TERMINAL v1.0</h1>
-            <div class="subtitle">>> LEO ARCHITECTURE FUNDAMENTALS – 1986 EDITION >></div>
-        </header>
+  <header>
+    <h1>LEOAF V3 – KNOWLEDGE ENGINE</h1>
 
-        <div class="terminal-prompt">
-            <span class="prompt">C:\LEOAF&gt;</span>
-            <input type="text" id="cmdInput" placeholder="ENTER KEYWORD (rf, orbit, capstone...)">
-            <div id="output" class="output"></div>
-        </div>
+    <div class="controls">
+      <select id="difficultyFilter">
+        <option value="all">ALL DIFFICULTIES</option>
+        <option value="easy">EASY +</option>
+        <option value="medium">MEDIUM +</option>
+        <option value="hard">HARD ONLY</option>
+      </select>
 
-        <!-- PHASE 0 -->
-        <div class="phase-header">PHASE 0: MISSION BRIEFING – BOOT SEQUENCE</div>
-        <div class="module-grid">
-            <div class="card">
-                <h3>00_WHY_LEO <span class="difficulty-badge badge-easy">EASY</span></h3>
-                <details><summary>Access Briefing</summary><div class="details-content">
-                    <p>50%+ of world lacks broadband. LEO = global low-latency access.</p>
-                    <p>Motivation: connectivity = education, economy, disaster response.</p>
-                </div></details>
-            </div>
-            <div class="card">
-                <h3>00_THE_PLAYERS <span class="difficulty-badge badge-easy">EASY</span></h3>
-                <details><summary>List Operators</summary><div class="details-content">
-                    <ul>
-                        <li>SpaceX Starlink</li>
-                        <li>Amazon Kuiper</li>
-                        <li>OneWeb / Eutelsat</li>
-                        <li>Telesat Lightspeed</li>
-                        <li>China SatNet / GuoWang</li>
-                        <li>Governments (SDA, etc.)</li>
-                    </ul>
-                </div></details>
-            </div>
-            <div class="card">
-                <h3>00_THE_AHA_MOMENT <span class="difficulty-badge badge-easy">EASY</span></h3>
-                <details><summary>Latency Reality</summary><div class="details-content">
-                    <ul>
-                        <li>GEO: 600+ ms</li>
-                        <li>LEO: 25–55 ms</li>
-                        <li>Fiber urban: ~10–40 ms</li>
-                    </ul>
-                    <p>Launch cost collapse (Falcon 9/Reusability) → boom now.</p>
-                </div></details>
-            </div>
-            <div class="card">
-                <h3>00_ROADMAP_OVERVIEW <span class="difficulty-badge badge-easy">EASY</span></h3>
-                <details><summary>Full Path</summary><div class="details-content">
-                    <p>0 → Foundations → Engineering → Simulation → Business → Specialization → CAPSTONE</p>
-                </div></details>
-            </div>
-        </div>
-
-        <!-- PHASE 1 -->
-        <div class="phase-header">PHASE 1: FOUNDATIONS – CORE OS LOADED</div>
-        <div class="module-grid">
-            <div class="card"><h3>01_ORBITAL_MECHANICS <span class="difficulty-badge badge-medium">MEDIUM</span></h3>
-                <details><summary>Kepler & Basics</summary><div class="details-content">
-                    <ul><li>LEO 300–1200 km</li><li>Inclination</li><li>Walker patterns</li><li>Ground track</li></ul>
-                </div></details>
-            </div>
-            <div class="card"><h3>02_PHYSICS_GRAVITATION <span class="difficulty-badge badge-medium">MEDIUM</span></h3>...</div>
-            <div class="card"><h3>03_TELECOM_RF_BASICS <span class="difficulty-badge badge-medium">MEDIUM</span></h3>...</div>
-            <div class="card"><h3>04_NETWORKING_PROTOCOLS <span class="difficulty-badge badge-medium">MEDIUM</span></h3>...</div>
-            <div class="card"><h3>05_HISTORICAL_CONTEXT <span class="difficulty-badge badge-easy">EASY</span></h3>...</div>
-            <div class="card"><h3>06_GLOSSARY <span class="difficulty-badge badge-easy">EASY</span></h3>
-                <details><summary>Quick Ref</summary><div class="details-content">
-                    <ul>
-                        <li>FSPL – Free Space Path Loss</li>
-                        <li>OISL – Optical Inter-Satellite Link</li>
-                        <li>EIRP – Effective Isotropic Radiated Power</li>
-                    </ul>
-                </div></details>
-            </div>
-        </div>
-
-        <!-- PHASE 2 -->
-        <div class="phase-header">PHASE 2: ENGINEERING – HARDWARE LAYER</div>
-        <div class="module-grid">
-            <div class="card"><h3>07_CONSTELLATION_DESIGN <span class="difficulty-badge badge-hard">HARD</span></h3>...</div>
-            <div class="card"><h3>08_RF_SYSTEMS_LINK_BUDGET <span class="difficulty-badge badge-hard">HARD</span></h3>...</div>
-            <div class="card"><h3>09_SPACECRAFT_SUBSYSTEMS <span class="difficulty-badge badge-medium">MEDIUM</span></h3>...</div>
-            <div class="card"><h3>10_NETWORK_ARCH_MESH <span class="difficulty-badge badge-hard">HARD</span></h3>...</div>
-            <div class="card"><h3>11_GROUND_SEGMENT <span class="difficulty-badge badge-medium">MEDIUM</span></h3>...</div>
-            <div class="card"><h3>12_COLLISION_DEBRIS_KESSLER <span class="difficulty-badge badge-hard">HARD</span></h3>...</div>
-            <div class="card"><h3>13_CYBERSECURITY_SATNET <span class="difficulty-badge badge-hard">HARD</span></h3>...</div>
-        </div>
-
-        <!-- PHASE 2.5 -->
-        <div class="phase-header">PHASE 2.5: SIMULATION LAB – VIRTUAL MACHINE</div>
-        <div class="module-grid">
-            <div class="card"><h3>14_STK_GMAT_WALKTHROUGH <span class="difficulty-badge badge-medium">MEDIUM</span></h3>...</div>
-            <div class="card"><h3>15_LINK_BUDGET_CALC <span class="difficulty-badge badge-medium">MEDIUM</span></h3>...</div>
-            <div class="card"><h3>16_COVERAGE_HEATMAPS <span class="difficulty-badge badge-medium">MEDIUM</span></h3>...</div>
-        </div>
-
-        <!-- PHASE 3 -->
-        <div class="phase-header">PHASE 3: BUSINESS & STRATEGY – CAPITAL ACCESS</div>
-        <div class="module-grid">
-            <div class="card"><h3>17_ECONOMICS_CAPEX_OPEX <span class="difficulty-badge badge-medium">MEDIUM</span></h3>...</div>
-            <div class="card"><h3>18_COMPETITIVE_LANDSCAPE <span class="difficulty-badge badge-medium">MEDIUM</span></h3>...</div>
-            <div class="card"><h3>19_REGULATORY_ITU_FCC <span class="difficulty-badge badge-hard">HARD</span></h3>...</div>
-            <div class="card"><h3>20_GEOPOLITICS_SPECTRUM <span class="difficulty-badge badge-hard">HARD</span></h3>...</div>
-        </div>
-
-        <!-- PHASE 4 -->
-        <div class="phase-header">PHASE 4: SPECIALIZATION TRACKS – SELECT ROLE</div>
-        <div class="track-grid">
-            <div class="track-card"><h4>SYSTEMS ENGINEER</h4><p>Full satellite integration</p></div>
-            <div class="track-card"><h4>RF SPECIALIST</h4><p>Link / antenna focus</p></div>
-            <div class="track-card"><h4>NETWORK ARCHITECT</h4><p>Routing / OISL</p></div>
-            <div class="track-card"><h4>BUSINESS STRATEGIST</h4><p>Economics & regulation</p></div>
-            <div class="track-card"><h4>ORBITAL ANALYST</h4><p>Constellation planning</p></div>
-        </div>
-
-        <!-- PHASE 5 -->
-        <div class="phase-header">PHASE 5: AI-ADAPTIVE PATH – INTELLIGENT SHELL</div>
-        <div class="module-grid">
-            <div class="card">
-                <h3>AI-ADAPTIVE FEATURES <span class="difficulty-badge badge-expert">EXPERT</span></h3>
-                <details><summary>Capabilities</summary><div class="details-content">
-                    <ul>
-                        <li>Progress tracking</li>
-                        <li>Mastery detection</li>
-                        <li>Adaptive reordering</li>
-                        <li>Difficulty scaling</li>
-                        <li>Keyword prompt answers</li>
-                    </ul>
-                </div></details>
-            </div>
-        </div>
-
-        <!-- CAPSTONE -->
-        <div class="capstone">
-            <h2>*** CAPSTONE MISSION – DESIGN YOUR CONSTELLATION ***</h2>
-            <p>Objectives:</p>
-            <ul style="list-style:none; text-align:left; max-width:600px; margin:1rem auto;">
-                <li>• Orbital shell (planes, incl., altitude)</li>
-                <li>• Sample link budget</li>
-                <li>• Coverage simulation</li>
-                <li>• Rough business case (CAPEX/OPEX/ROI)</li>
-                <li>• Debris & collision strategy</li>
-            </ul>
-            <p>>> Submit design via secure uplink (future feature) <<</p>
-        </div>
-
-        <footer>
-            SYSTEM  LEOAF.EXE  © 1986–2026  ALL RIGHTS RESERVED<br>
-            RETRO CRT MODE – PHOSPHOR PERSISTENCE ENABLED
-        </footer>
-
+      <button onclick="toggleHideCompleted()">TOGGLE HIDE COMPLETED</button>
+      <button onclick="toggleMode()">SWITCH MODE</button>
     </div>
+
+    <div class="progress-bar">
+      <div class="progress-fill" id="progressFill"></div>
+    </div>
+  </header>
+
+  <div id="content"></div>
+
+  <footer>
+    LEOAF V3 | LOCAL 1980s-STYLE KNOWLEDGE TERMINAL | PROGRESS SAVED IN BROWSER
+  </footer>
 </div>
 
 <script>
-    const input = document.getElementById('cmdInput');
-    const output = document.getElementById('output');
+// ── MODULES ──
+// Expand this array later to match full LEOAF checklist (Phase 0 briefing → Capstone → AI path)
+const modules = [
+  { id:"why", title:"WHY LEO", difficulty:"easy", phase:"Phase 0: Mission Briefing", tags:["context","motivation"]},
+  { id:"players", title:"THE PLAYERS", difficulty:"easy", phase:"Phase 0: Mission Briefing", tags:["operators","competition"]},
+  { id:"aha", title:"THE AHA MOMENT", difficulty:"easy", phase:"Phase 0: Mission Briefing", tags:["latency","now"]},
+  { id:"graveyard", title:"The Graveyard – Past Failures", difficulty:"easy", phase:"Phase 0.5: History", tags:["history","iridium","teledesic"]},
+  { id:"physics", title:"Physics Engine – Orbital Mechanics", difficulty:"medium", phase:"Phase 1: Foundations", tags:["physics","kepler","inclination"]},
+  { id:"telecom", title:"Telecom & RF Basics", difficulty:"medium", phase:"Phase 1: Foundations", tags:["rf","bands","latency"]},
+  { id:"constellation", title:"Constellation Design", difficulty:"hard", phase:"Phase 2: Engineering", tags:["orbit","walker","coverage"]},
+  { id:"launch", title:"Launch & Deployment", difficulty:"hard", phase:"Phase 2: Engineering", tags:["launch","deployment"]},
+  { id:"fleet", title:"Fleet Operations & Subsystems", difficulty:"medium", phase:"Phase 2: Engineering", tags:["operations","power","thermal"]},
+  { id:"capacity", title:"Capacity Modeling & Link Budget", difficulty:"hard", phase:"Phase 2.5: Simulation Lab", tags:["capacity","budget","simulation"]},
+  { id:"economics", title:"Economics – CAPEX / OPEX / ROI", difficulty:"medium", phase:"Phase 3: Business & Strategy", tags:["business","finance"]},
+  { id:"risk", title:"Risk Modeling – Debris & Kessler", difficulty:"hard", phase:"Phase 3: Business & Strategy", tags:["risk","debris","geopolitics"]},
+  { id:"future", title:"Phase 5: The Long Game – 2040+", difficulty:"medium", phase:"Phase 5: Adaptive / Future", tags:["future","ai","sustainability"]},
+  // Add more here: e.g. Ground Segment, Cybersecurity, Specialization Tracks, Capstone Project, etc.
+];
 
-    input.addEventListener('keydown', e => {
-        if (e.key === 'Enter') {
-            const q = input.value.trim().toLowerCase();
-            input.value = '';
-            let msg = '> COMMAND RECEIVED... ';
+let hideCompleted = false;
+let mode = "campaign";
 
-            if (q.includes('rf') || q.includes('link')) msg += 'JUMP TO PHASE 2 → 08_RF_SYSTEMS_LINK_BUDGET';
-            else if (q.includes('orbit') || q.includes('walker')) msg += 'JUMP TO PHASE 1 → 01_ORBITAL_MECHANICS';
-            else if (q.includes('business') || q.includes('econ')) msg += 'JUMP TO PHASE 3 → 17_ECONOMICS';
-            else if (q.includes('capstone') || q.includes('final')) msg += 'FINAL BOSS LOCATED – SCROLL DOWN';
-            else if (q.includes('help') || q.includes('?')) msg += 'AVAILABLE: rf, orbit, business, capstone, sim, debris';
-            else msg += 'SYNTAX ERROR – TRY KNOWN KEYWORDS';
+function render() {
+  const container = document.getElementById("content");
+  container.innerHTML = "";
+  const diffFilter = document.getElementById("difficultyFilter").value;
 
-            output.textContent = msg;
-        }
-    });
+  const phases = [...new Set(modules.map(m => m.phase))];
+
+  phases.forEach(phase => {
+    const phaseDiv = document.createElement("div");
+    phaseDiv.className = "phase";
+    phaseDiv.innerHTML = `<h2>${phase.toUpperCase()}</h2>`;
+
+    modules
+      .filter(m => m.phase === phase)
+      .filter(m => passesDifficulty(m, diffFilter))
+      .filter(m => !(hideCompleted && isCompleted(m.id)))
+      .forEach(m => {
+        const mod = document.createElement("div");
+        mod.className = "module";
+        if (isCompleted(m.id)) mod.classList.add("completed");
+
+        mod.innerHTML = `
+          <h3>${m.title} <span class="badge ${m.difficulty}">${m.difficulty.toUpperCase()}</span></h3>
+          <div>${m.tags.map(t => `<span class="tag">#${t}</span>`).join("")}</div>
+          <button class="mark-complete" onclick="toggleComplete('${m.id}')">
+            ${isCompleted(m.id) ? "UNMARK" : "MARK COMPLETE"}
+          </button>
+          <div class="notes">
+            <details>
+              <summary>YOUR NOTES</summary>
+              <textarea rows="5" onchange="saveNote('${m.id}', this.value)">${loadNote(m.id)}</textarea>
+            </details>
+          </div>
+        `;
+        phaseDiv.appendChild(mod);
+      });
+
+    if (phaseDiv.querySelector(".module")) {
+      container.appendChild(phaseDiv);
+    }
+  });
+
+  updateProgress();
+}
+
+function passesDifficulty(module, filter) {
+  const levels = { easy: 1, medium: 2, hard: 3 };
+  if (filter === "all") return true;
+  if (filter === "easy")   return levels[module.difficulty] >= 1;
+  if (filter === "medium") return levels[module.difficulty] >= 2;
+  if (filter === "hard")   return levels[module.difficulty] >= 3;
+  return true;
+}
+
+function toggleComplete(id) {
+  if (localStorage.getItem(id) === "done") {
+    localStorage.removeItem(id);
+  } else {
+    localStorage.setItem(id, "done");
+  }
+  render();
+}
+
+function isCompleted(id) {
+  return localStorage.getItem(id) === "done";
+}
+
+function toggleHideCompleted() {
+  hideCompleted = !hideCompleted;
+  document.querySelector('button[onclick="toggleHideCompleted()"]').textContent = 
+    hideCompleted ? "SHOW COMPLETED" : "HIDE COMPLETED";
+  render();
+}
+
+function toggleMode() {
+  mode = mode === "campaign" ? "database" : "campaign";
+  alert("MODE SWITCHED TO " + mode.toUpperCase() + " (placeholder – expand later)");
+}
+
+function saveNote(id, value) {
+  localStorage.setItem(id + "_note", value);
+}
+
+function loadNote(id) {
+  return localStorage.getItem(id + "_note") || "";
+}
+
+function updateProgress() {
+  const total = modules.length;
+  const completed = modules.filter(m => isCompleted(m.id)).length;
+  const percent = total > 0 ? (completed / total) * 100 : 0;
+  document.getElementById("progressFill").style.width = percent + "%";
+}
+
+document.getElementById("difficultyFilter").addEventListener("change", render);
+
+// Initial render
+render();
 </script>
+
 </body>
 </html>
