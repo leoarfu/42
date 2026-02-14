@@ -1,0 +1,251 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>LEOAF V3 | Knowledge Engine</title>
+
+<link href="https://fonts.googleapis.com/css2?family=VT323&family=Press+Start+2P&display=swap" rel="stylesheet">
+
+<style>
+:root{
+  --bg:#0d0221;
+  --neon-blue:#0ff;
+  --neon-green:#0f0;
+  --neon-pink:#f0f;
+  --neon-amber:#ffb000;
+}
+body{
+  background:var(--bg);
+  color:var(--neon-blue);
+  font-family:'VT323',monospace;
+  margin:0;
+  padding:0;
+}
+header{
+  padding:20px;
+  border-bottom:2px solid var(--neon-blue);
+}
+h1{
+  font-family:'Press Start 2P';
+  font-size:1.4rem;
+  color:white;
+  text-shadow:3px 3px var(--neon-pink);
+}
+.controls{
+  display:flex;
+  gap:15px;
+  flex-wrap:wrap;
+  margin-top:15px;
+}
+button, select{
+  background:black;
+  border:1px solid var(--neon-green);
+  color:var(--neon-green);
+  padding:5px 10px;
+  font-family:'VT323';
+  cursor:pointer;
+}
+button:hover{
+  background:var(--neon-green);
+  color:black;
+}
+.progress-bar{
+  margin-top:15px;
+  height:20px;
+  background:#111;
+  border:1px solid var(--neon-blue);
+}
+.progress-fill{
+  height:100%;
+  width:0%;
+  background:var(--neon-green);
+}
+.phase{
+  margin:40px 20px;
+}
+.phase h2{
+  font-family:'Press Start 2P';
+  color:var(--neon-pink);
+  font-size:0.9rem;
+}
+.module{
+  border:1px solid var(--neon-blue);
+  padding:15px;
+  margin:15px 0;
+  background:#001010;
+}
+.module.completed{
+  opacity:0.4;
+}
+.module h3{
+  margin:0 0 10px 0;
+  text-transform:uppercase;
+}
+.badge{
+  font-size:0.8rem;
+  padding:2px 6px;
+  margin-left:10px;
+}
+.easy{background:var(--neon-green);color:black;}
+.medium{background:var(--neon-amber);color:black;}
+.hard{background:var(--neon-pink);color:black;}
+.tag{
+  font-size:0.8rem;
+  margin-right:8px;
+  color:#aaa;
+}
+.notes{
+  margin-top:10px;
+}
+textarea{
+  width:100%;
+  background:black;
+  color:var(--neon-green);
+  border:1px solid var(--neon-green);
+  font-family:'VT323';
+}
+footer{
+  text-align:center;
+  margin:50px 0;
+  opacity:0.6;
+}
+.hidden{display:none;}
+</style>
+</head>
+<body>
+
+<header>
+  <h1>LEOAF V3 – Knowledge Engine</h1>
+
+  <div class="controls">
+    <select id="difficultyFilter">
+      <option value="all">All Difficulties</option>
+      <option value="easy">Easy+</option>
+      <option value="medium">Medium+</option>
+      <option value="hard">Hard Only</option>
+    </select>
+
+    <button onclick="toggleHideCompleted()">Toggle Hide Completed</button>
+    <button onclick="toggleMode()">Switch Mode</button>
+  </div>
+
+  <div class="progress-bar">
+    <div class="progress-fill" id="progressFill"></div>
+  </div>
+</header>
+
+<div id="content"></div>
+
+<footer>
+LEOAF V3 | Local Knowledge System | Progress Saved in Browser
+</footer>
+
+<script>
+const modules = [
+{ id:"why", title:"WHY LEO", difficulty:"easy", phase:"Phase 0: Mission", tags:["context"]},
+{ id:"graveyard", title:"The Graveyard", difficulty:"easy", phase:"Phase 0.5: History", tags:["history"]},
+{ id:"physics", title:"Physics Engine", difficulty:"medium", phase:"Phase 1: Foundations", tags:["physics"]},
+{ id:"telecom", title:"Telecom Basics", difficulty:"medium", phase:"Phase 1: Foundations", tags:["rf"]},
+{ id:"constellation", title:"Constellation Design", difficulty:"hard", phase:"Phase 2: Engineering", tags:["orbit"]},
+{ id:"launch", title:"Launch & Deployment", difficulty:"hard", phase:"Phase 2: Engineering", tags:["launch"]},
+{ id:"fleet", title:"Fleet Operations", difficulty:"medium", phase:"Phase 2: Engineering", tags:["operations"]},
+{ id:"capacity", title:"Capacity Modeling", difficulty:"hard", phase:"Phase 2.5: Simulation", tags:["capacity"]},
+{ id:"economics", title:"Economics", difficulty:"medium", phase:"Phase 3: Strategy", tags:["business"]},
+{ id:"risk", title:"Risk Modeling", difficulty:"hard", phase:"Phase 3: Strategy", tags:["risk"]},
+{ id:"future", title:"Phase 5: The Long Game", difficulty:"medium", phase:"Phase 5: 2040+", tags:["future"]}
+];
+
+let hideCompleted=false;
+let mode="campaign";
+
+function render(){
+  const container=document.getElementById("content");
+  container.innerHTML="";
+  const diffFilter=document.getElementById("difficultyFilter").value;
+
+  const phases=[...new Set(modules.map(m=>m.phase))];
+
+  phases.forEach(phase=>{
+    const phaseDiv=document.createElement("div");
+    phaseDiv.className="phase";
+    phaseDiv.innerHTML=`<h2>${phase}</h2>`;
+
+    modules.filter(m=>m.phase===phase).forEach(m=>{
+      if(!passesDifficulty(m,diffFilter)) return;
+      if(hideCompleted && isCompleted(m.id)) return;
+
+      const mod=document.createElement("div");
+      mod.className="module";
+      if(isCompleted(m.id)) mod.classList.add("completed");
+
+      mod.innerHTML=`
+        <h3>${m.title} <span class="badge ${m.difficulty}">${m.difficulty.toUpperCase()}</span></h3>
+        <div>${m.tags.map(t=>`<span class="tag">#${t}</span>`).join("")}</div>
+        <button onclick="toggleComplete('${m.id}')">Mark Complete</button>
+        <div class="notes">
+          <details>
+            <summary>Your Notes</summary>
+            <textarea rows="4" onchange="saveNote('${m.id}',this.value)">${loadNote(m.id)}</textarea>
+          </details>
+        </div>
+      `;
+      phaseDiv.appendChild(mod);
+    });
+    container.appendChild(phaseDiv);
+  });
+
+  updateProgress();
+}
+
+function passesDifficulty(module,filter){
+  const levels={easy:1,medium:2,hard:3};
+  if(filter==="all") return true;
+  return levels[module.difficulty]>=levels[filter];
+}
+
+function toggleComplete(id){
+  if(localStorage.getItem(id)==="done"){
+    localStorage.removeItem(id);
+  }else{
+    localStorage.setItem(id,"done");
+  }
+  render();
+}
+
+function isCompleted(id){
+  return localStorage.getItem(id)==="done";
+}
+
+function toggleHideCompleted(){
+  hideCompleted=!hideCompleted;
+  render();
+}
+
+function toggleMode(){
+  mode=mode==="campaign"?"database":"campaign";
+  alert("Mode switched to "+mode.toUpperCase());
+}
+
+function saveNote(id,value){
+  localStorage.setItem(id+"_note",value);
+}
+
+function loadNote(id){
+  return localStorage.getItem(id+"_note")||"";
+}
+
+function updateProgress(){
+  const total=modules.length;
+  const completed=modules.filter(m=>isCompleted(m.id)).length;
+  const percent=(completed/total)*100;
+  document.getElementById("progressFill").style.width=percent+"%";
+}
+
+document.getElementById("difficultyFilter").addEventListener("change",render);
+
+render();
+</script>
+
+</body>
+</html>
