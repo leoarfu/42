@@ -1,0 +1,1086 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>LEOAF | LEO Architecture Fundamentals</title>
+    
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=VT323&family=Press+Start+2P&display=swap" rel="stylesheet">
+
+    <style>
+        :root {
+            --neon-blue: #0ff;
+            --neon-pink: #f0f;
+            --neon-green: #0f0;
+            --neon-amber: #ffb000;
+            --neon-red: #ff0040;
+            --grid-color: rgba(14, 236, 245, 0.2);
+            --bg-color: #0d0221;
+            --terminal-bg: rgba(0, 10, 0, 0.9);
+            --text-glow: 0 0 5px var(--neon-blue);
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            background-color: var(--bg-color);
+            color: var(--neon-blue);
+            font-family: 'VT323', monospace;
+            font-size: 1.3rem;
+            overflow-x: hidden;
+            min-height: 100svh;
+            display: flex;
+            flex-direction: column;
+            line-height: 1.4;
+        }
+
+        .retro-grid {
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: 
+                linear-gradient(transparent 0%, var(--bg-color) 100%), 
+                linear-gradient(0deg, transparent 75%, var(--grid-color) 76%), 
+                linear-gradient(90deg, transparent 75%, var(--grid-color) 76%);
+            background-size: 100% 100%, 50px 50px, 50px 50px;
+            transform: perspective(500px) rotateX(60deg) translateY(0) scale(2);
+            animation: moveGrid 5s linear infinite;
+            z-index: -1;
+            opacity: 0.4;
+        }
+
+        @keyframes moveGrid {
+            0% { background-position: 0 0, 0 0, 0 0; }
+            100% { background-position: 0 0, 0 50px, 0 50px; }
+        }
+
+        .scanlines {
+            position: fixed;
+            top: 0; left: 0; width: 100vw; height: 100vh;
+            background: linear-gradient(to bottom, rgba(255,255,255,0), rgba(255,255,255,0) 50%, rgba(0,0,0,0.2) 50%, rgba(0,0,0,0.2));
+            background-size: 100% 4px;
+            pointer-events: none;
+            z-index: 100;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+            width: 100%;
+            position: relative;
+            z-index: 1;
+        }
+
+        header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 2px solid var(--neon-blue);
+            padding-bottom: 20px;
+            margin-bottom: 30px;
+        }
+
+        .logo-container h1 {
+            font-family: 'Press Start 2P', cursive;
+            font-size: 1.5rem;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            text-shadow: 3px 3px var(--neon-pink);
+            margin-bottom: 5px;
+        }
+
+        nav ul {
+            display: flex;
+            gap: 15px;
+            list-style: none;
+        }
+
+        nav a {
+            color: white;
+            text-decoration: none;
+            font-size: 1.2rem;
+            padding: 5px 10px;
+            border: 1px solid transparent;
+            transition: 0.3s;
+        }
+
+        nav a:hover {
+            background-color: var(--neon-blue);
+            color: black;
+            box-shadow: 0 0 10px var(--neon-blue);
+        }
+
+        .search-terminal {
+            background: black;
+            border: 1px solid var(--neon-green);
+            padding: 15px;
+            margin-bottom: 30px;
+            display: flex;
+            align-items: center;
+            box-shadow: 4px 4px 0px rgba(0, 255, 0, 0.3);
+        }
+
+        .prompt-symbol { color: var(--neon-green); margin-right: 10px; font-weight: bold; }
+        .search-input {
+            background: transparent; border: none; color: white;
+            font-family: 'VT323', monospace; font-size: 1.4rem; width: 100%; outline: none;
+        }
+
+        .phase-header {
+            color: var(--neon-pink);
+            font-family: 'Press Start 2P';
+            font-size: 1rem;
+            margin: 40px 0 20px 0;
+            text-transform: uppercase;
+            border-left: 5px solid var(--neon-pink);
+            padding-left: 15px;
+        }
+
+        .module-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+            gap: 25px;
+        }
+
+        .card {
+            background: var(--terminal-bg);
+            border: 1px solid var(--neon-blue);
+            padding: 20px;
+            transition: 0.3s;
+            position: relative;
+        }
+
+        .card:hover {
+            box-shadow: 0 0 15px rgba(0, 255, 255, 0.3);
+            border-color: white;
+        }
+
+        .card h3 {
+            color: var(--neon-blue);
+            border-bottom: 1px dashed var(--neon-blue);
+            padding-bottom: 10px;
+            margin-bottom: 15px;
+            font-size: 1.6rem;
+            text-transform: uppercase;
+        }
+
+        .difficulty-badge {
+            display: inline-block;
+            padding: 2px 8px;
+            font-size: 0.9rem;
+            border-radius: 3px;
+            margin-left: 10px;
+            font-family: 'Press Start 2P';
+        }
+
+        .badge-easy { background: var(--neon-green); color: black; }
+        .badge-medium { background: var(--neon-amber); color: black; }
+        .badge-hard { background: var(--neon-pink); color: black; }
+        .badge-expert { background: var(--neon-red); color: white; }
+
+        details {
+            margin-bottom: 10px;
+            padding: 5px;
+            border: 1px solid transparent;
+        }
+
+        details:hover { border-left: 2px solid var(--neon-pink); }
+
+        summary {
+            cursor: pointer;
+            list-style: none;
+            font-weight: bold;
+            color: white;
+        }
+        
+        summary::before { content: "[+] "; color: var(--neon-green); }
+        details[open] summary::before { content: "[-] "; color: var(--neon-pink); }
+
+        .details-content {
+            padding: 10px 0 10px 25px;
+            color: #ddd;
+            font-size: 1.1rem;
+        }
+
+        .details-content ul { list-style: square; margin-left: 20px; }
+        .details-content li { margin-bottom: 5px; }
+
+        .highlight { color: var(--neon-amber); }
+
+        .track-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(230px, 1fr));
+            gap: 20px;
+            margin-top: 20px;
+        }
+        
+        .track-card {
+            border: 1px solid var(--neon-green);
+            background: #001100;
+            padding: 15px;
+            text-align: center;
+            transition: 0.3s;
+        }
+
+        .track-card:hover {
+            box-shadow: 0 0 15px var(--neon-green);
+            transform: translateY(-5px);
+        }
+        
+        .track-card h4 { 
+            color: var(--neon-green); 
+            margin-bottom: 10px; 
+            text-transform: uppercase;
+            font-size: 0.9rem;
+        }
+
+        .capstone-box {
+            margin-top: 50px;
+            border: 2px solid var(--neon-pink);
+            background: rgba(255, 0, 255, 0.05);
+            padding: 30px;
+            text-align: center;
+            animation: pulseBorder 3s infinite;
+        }
+
+        @keyframes pulseBorder {
+            0% { box-shadow: 0 0 5px var(--neon-pink); }
+            50% { box-shadow: 0 0 20px var(--neon-pink); }
+            100% { box-shadow: 0 0 5px var(--neon-pink); }
+        }
+
+        .capstone-title {
+            font-family: 'Press Start 2P';
+            color: var(--neon-pink);
+            margin-bottom: 20px;
+        }
+
+        .modal {
+            display: none; 
+            position: fixed; 
+            z-index: 1000; 
+            left: 0; top: 0;
+            width: 100%; height: 100%;
+            background-color: rgba(0,0,0,0.9);
+            backdrop-filter: blur(5px);
+        }
+
+        .modal-content {
+            background-color: #0d0d0d;
+            margin: 5% auto;
+            padding: 20px;
+            border: 1px solid var(--neon-green);
+            width: 80%;
+            max-width: 700px;
+            box-shadow: 0 0 20px var(--neon-green);
+            color: #e0e0e0;
+            font-family: 'Courier New', monospace;
+        }
+
+        .close {
+            color: var(--neon-pink);
+            float: right;
+            font-size: 28px;
+            cursor: pointer;
+        }
+
+        .data-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 20px 0;
+        }
+
+        .data-table th, .data-table td {
+            border: 1px solid #333;
+            padding: 10px;
+            text-align: left;
+        }
+
+        .formula-box {
+            background: #1a1a1a;
+            padding: 15px;
+            border-left: 5px solid var(--neon-pink);
+            margin-top: 20px;
+        }
+
+        footer {
+            margin-top: 50px; 
+            text-align: center; 
+            opacity: 0.7; 
+            font-size: 1rem; 
+            padding-bottom: 20px;
+        }
+
+        .info-box {
+            background: rgba(0, 255, 255, 0.1);
+            border-left: 4px solid var(--neon-blue);
+            padding: 15px;
+            margin: 15px 0;
+        }
+
+        .warning-box {
+            background: rgba(255, 176, 0, 0.1);
+            border-left: 4px solid var(--neon-amber);
+            padding: 15px;
+            margin: 15px 0;
+        }
+
+        @media (max-width: 768px) {
+            header { flex-direction: column; text-align: center; gap: 20px; }
+            nav ul { flex-wrap: wrap; justify-content: center; }
+            .module-grid { grid-template-columns: 1fr; }
+            .track-grid { grid-template-columns: 1fr; }
+        }
+        
+    </style>
+</head>
+<body>
+
+    <div class="retro-grid"></div>
+    <div class="scanlines"></div>
+
+    <div class="container">
+        <header>
+            <div class="logo-container">
+                <h1>LEOAF</h1>
+                <small>>> LEO ARCHITECTURE FUNDAMENTALS >></small>
+            </div>
+            <nav>
+                <ul>
+                    <li><a href="#">[ROADMAP]</a></li>
+                    <li><a href="#">[DATABASE]</a></li>
+                    <li><a href="#">[SIMULATOR]</a></li>
+                    <li><a href="#">[LOGIN]</a></li>
+                </ul>
+            </nav>
+        </header>
+
+        <section class="search-terminal">
+            <span class="prompt-symbol">USER@LEOAF:~$</span>
+            <input type="text" class="search-input" id="cmdInput" 
+                   placeholder="Load module... (e.g., 'help', 'starlink', 'latency')">
+        </section>
+
+        <div id="typing-effect" style="margin-bottom: 30px; min-height: 30px; color: var(--neon-green);"></div>
+        <!-- ========== PHASE 0: MISSION BRIEFING ========== -->
+        <div class="phase-header">PHASE 0: MISSION BRIEFING (Start Here)</div>
+        <div class="module-grid">
+            <div class="card">
+                <h3>00_WHY_LEO <span class="difficulty-badge badge-easy">EASY</span></h3>
+                <details>
+                    <summary>The Problem Statement</summary>
+                    <div class="details-content">
+                        <p><span class="highlight">50% of humanity has no internet.</span> Fiber can't reach oceans, deserts, or remote regions economically.</p>
+                        <ul>
+                            <li><strong>Maritime:</strong> Ships pay $10-50/MB via GEO satellites.</li>
+                            <li><strong>Aviation:</strong> In-flight WiFi is slow and expensive.</li>
+                            <li><strong>Rural:</strong> Last-mile fiber costs $10,000+ per home.</li>
+                            <li><strong>IoT:</strong> Smart agriculture, tracking need global coverage.</li>
+                        </ul>
+                        <div class="info-box">
+                            💡 <strong>The Insight:</strong> LEO constellations can provide global coverage with low latency at scale.
+                        </div>
+                    </div>
+                </details>
+                <details>
+                    <summary>Use Cases & Users</summary>
+                    <div class="details-content">
+                        <ul>
+                            <li><strong>Consumer Broadband:</strong> Rural homes, RVs, disaster relief.</li>
+                            <li><strong>Maritime:</strong> Commercial shipping, cruise ships.</li>
+                            <li><strong>Aviation:</strong> Commercial and private jets.</li>
+                            <li><strong>Government/Military:</strong> Secure comms, remote operations.</li>
+                            <li><strong>IoT/M2M:</strong> Asset tracking, smart sensors.</li>
+                            <li><strong>Enterprise:</strong> Remote mining, oil rigs, construction.</li>
+                        </ul>
+                    </div>
+                </details>
+            </div>
+
+            <div class="card">
+                <h3>00_THE_PLAYERS <span class="difficulty-badge badge-easy">EASY</span></h3>
+                <details>
+                    <summary>Current Constellation Operators</summary>
+                    <div class="details-content">
+                        <ul>
+                            <li><strong>Starlink (SpaceX):</strong> 4,000+ satellites, ~550km, first-mover advantage.</li>
+                            <li><strong>Kuiper (Amazon):</strong> 3,236 planned, leverages AWS/Prime integration.</li>
+                            <li><strong>OneWeb (Eutelsat):</strong> 600+ satellites, B2B focus, higher altitude (~1,200km).</li>
+                            <li><strong>Telesat Lightspeed:</strong> ~300 satellites, premium enterprise market.</li>
+                            <li><strong>China's SatNet:</strong> 13,000 planned, geopolitical competitor.</li>
+                        </ul>
+                    </div>
+                </details>
+                <details>
+                    <summary>Market Size & Timeline</summary>
+                    <div class="details-content">
+                        <p><strong>Total Addressable Market:</strong> $1 trillion+ by 2030 (satellite broadband + IoT).</p>
+                        <ul>
+                            <li><strong>2015-2020:</strong> Starlink prototype launches.</li>
+                            <li><strong>2021-2023:</strong> Commercial service begins, OneWeb recovers from bankruptcy.</li>
+                            <li><strong>2024-2025:</strong> Kuiper launches, competition intensifies.</li>
+                            <li><strong>2026+:</strong> Consolidation, profitability targets.</li>
+                        </ul>
+                    </div>
+                </details>
+            </div>
+
+            <div class="card">
+                <h3>00_THE_AHA_MOMENT <span class="difficulty-badge badge-easy">EASY</span></h3>
+                <details>
+                    <summary>LEO vs GEO vs Fiber: The Latency Showdown</summary>
+                    <div class="details-content">
+                        <div class="info-box">
+                            <strong>Scenario:</strong> Video call from San Francisco to London
+                            <ul style="margin-top: 10px;">
+                                <li><strong>Fiber:</strong> ~80ms (if available) - BEST</li>
+                                <li><strong>LEO Satellite:</strong> ~30-50ms - GOOD</li>
+                                <li><strong>GEO Satellite:</strong> ~600ms - UNUSABLE</li>
+                            </ul>
+                        </div>
+                        <p><span class="highlight">Why the difference?</span> Speed of light is constant. Distance matters.</p>
+                        <ul>
+                            <li>GEO: 35,786km altitude = 71,572km round trip</li>
+                            <li>LEO: 550km altitude = 1,100km round trip</li>
+                            <li>That's a <strong>65x distance reduction!</strong></li>
+                        </ul>
+                    </div>
+                </details>
+                <details>
+                    <summary>Interactive Visualization (Future)</summary>
+                    <div class="details-content">
+                        <p>🚀 <em>Coming soon: Interactive globe showing satellite coverage in real-time.</em></p>
+                    </div>
+                </details>
+            </div>
+        </div>
+
+        <!-- ========== PHASE 1: FOUNDATIONS ========== -->
+        <div class="phase-header">PHASE 1: FOUNDATIONS (Learn the Language)</div>
+        <div class="module-grid">
+            <div class="card">
+                <h3>01_PHYSICS_ENGINE <span class="difficulty-badge badge-medium">MEDIUM</span></h3>
+                <details>
+                    <summary>Orbital Mechanics 101</summary>
+                    <div class="details-content">
+                        <ul>
+                            <li><strong>Kepler's Laws:</strong> Elliptical orbits, equal areas, T² ∝ a³</li>
+                            <li><span class="highlight">The Latency Math:</span> Why LEO (30ms) vs GEO (600ms)?</li>
+                            <li><strong>Inclination & Coverage:</strong> Polar vs Equatorial orbits</li>
+                            <li><strong>Doppler Shift:</strong> Frequency changes at 7.5km/s</li>
+                            <li><strong>Eclipse Periods:</strong> Power management during Earth's shadow</li>
+                        </ul>
+                        <div class="warning-box">
+                            ⚠️ <strong>Prerequisite:</strong> Basic physics (velocity, acceleration, circular motion)
+                        </div>
+                    </div>
+                </details>
+                <details>
+                    <summary>Orbital Parameters Cheat Sheet</summary>
+                    <div class="details-content">
+                        <ul>
+                            <li><strong>Semi-major axis (a):</strong> Average orbital radius</li>
+                            <li><strong>Eccentricity (e):</strong> 0 = circle, 0.5 = ellipse</li>
+                            <li><strong>Inclination (i):</strong> Angle from equator</li>
+                            <li><strong>RAAN:</strong> Right Ascension of Ascending Node</li>
+                            <li><strong>Argument of Perigee (ω):</strong> Orientation of ellipse</li>
+                        </ul>
+                    </div>
+                </details>
+            </div>
+
+            <div class="card">
+                <h3>02_TELECOM_BASICS <span class="difficulty-badge badge-medium">MEDIUM</span></h3>
+                <details>
+                    <summary>Fundamentals</summary>
+                    <div class="details-content">
+                        <ul>
+                            <li><strong>Bandwidth vs Throughput:</strong> MHz vs Mbps</li>
+                            <li><strong>Modulation:</strong> QPSK, 8-PSK, 16-QAM, 64-QAM</li>
+                            <li><strong>Link Budgets:</strong> Power, distance, noise</li>
+                            <li><strong>SNR & Eb/N0:</strong> Signal quality metrics</li>
+                            <li><strong>Shannon's Theorem:</strong> Theoretical max data rate</li>
+                        </ul>
+                    </div>
+                </details>
+                <details>
+                    <summary>Frequency Bands</summary>
+                    <div class="details-content">
+                        <ul>
+                            <li><strong>L-band (1-2 GHz):</strong> Mobile, IoT</li>
+                            <li><strong>Ku-band (12-18 GHz):</strong> Traditional satellite</li>
+                            <li><strong>Ka-band (26-40 GHz):</strong> High throughput (Starlink)</li>
+                            <li><strong>V-band (40-75 GHz):</strong> Future ultra-high bandwidth</li>
+                        </ul>
+                        <div class="info-box">
+                            💡 Higher frequency = More bandwidth BUT more rain fade
+                        </div>
+                    </div>
+                </details>
+                <details>
+                    <summary>Recommended Resources</summary>
+                    <div class="details-content">
+                        <ul>
+                            <li><strong>Book:</strong> "Satellite Communications Systems" - Maral & Bousquet</li>
+                            <li><strong>Course:</strong> MIT OpenCourseWare - Communication Systems</li>
+                            <li><strong>Tool:</strong> RF Calculator (online)</li>
+                        </ul>
+                    </div>
+                </details>
+            </div>
+
+            <div class="card">
+                <h3>03_HISTORICAL_CONTEXT <span class="difficulty-badge badge-easy">EASY</span></h3>
+                <details>
+                    <summary>The Graveyard: Learning from Failures</summary>
+                    <div class="details-content">
+                        <p>LEO constellations aren't new. They failed before. Here's why:</p>
+                        <ul>
+                            <li><strong>Iridium (1998):</strong> Launched 66 sats, bankrupt in 1999. Too expensive ($3-8/min). <em>Lesson: User terminal cost kills adoption.</em></li>
+                            <li><strong>Teledesic (1990s):</strong> Bill Gates backed, never launched. Tech wasn't ready. <em>Lesson: Timing matters.</em></li>
+                            <li><strong>Globalstar:</strong> Survived but struggled. Limited coverage. <em>Lesson: Full global coverage is table stakes.</em></li>
+                        </ul>
+                        <div class="warning-box">
+                            ⚠️ <strong>What Changed?</strong> SpaceX's reusable rockets slashed launch costs from $10,000/kg to $1,000/kg.
+                        </div>
+                    </div>
+                </details>
+                <details>
+                    <summary>Why Now? The Perfect Storm</summary>
+                    <div class="details-content">
+                        <ul>
+                            <li><strong>Launch Costs:</strong> Falcon 9 reusability revolution</li>
+                            <li><strong>Electronics:</strong> Moore's Law made satellites smaller/cheaper</li>
+                            <li><strong>Phased Arrays:</strong> Electronically steerable antennas</li>
+                            <li><strong>Demand:</strong> Remote work, streaming, IoT explosion</li>
+                        </ul>
+                    </div>
+                </details>
+            </div>
+        </div>
+
+        <!-- ========== PHASE 2: ENGINEERING ========== -->
+        <div class="phase-header">PHASE 2: ENGINEERING (Build the System)</div>
+        <div class="module-grid">
+            <div class="card">
+                <h3>04_CONSTELLATION_DESIGN <span class="difficulty-badge badge-hard">HARD</span></h3>
+                <details>
+                    <summary>Walker Delta Patterns</summary>
+                    <div class="details-content">
+                        <p><strong>Walker-Delta Notation:</strong> i:T/P/F</p>
+                        <ul>
+                            <li><strong>i:</strong> Inclination angle</li>
+                            <li><strong>T:</strong> Total satellites</li>
+                            <li><strong>P:</strong> Number of orbital planes</li>
+                            <li><strong>F:</strong> Phase factor (spacing between planes)</li>
+                        </ul>
+                        <p><span class="highlight">Example:</span> Starlink Gen1 ≈ 53°:1,584/72/1</p>
+                    </div>
+                </details>
+                <details>
+                    <summary>Coverage Probability Math</summary>
+                    <div class="details-content">
+                        <ul>
+                            <li><strong>Elevation Angle:</strong> Minimum angle to see satellite (typically 25°-40°)</li>
+                            <li><strong>Footprint Radius:</strong> Ground area covered by one satellite</li>
+                            <li><strong>Revisit Time:</strong> How often a location sees a satellite</li>
+                            <li><strong>Continuous Coverage:</strong> Requires multiple satellites visible simultaneously</li>
+                        </ul>
+                    </div>
+                </details>
+            </div>
+        </div>
+            <div class="card">
+                <h3>05_RF_SYSTEMS <span class="difficulty-badge badge-hard">HARD</span></h3>
+                <details>
+                    <summary>Antenna Technologies</summary>
+                    <div class="details-content">
+                        <ul>
+                            <li><span class="highlight">Phased Arrays:</span> Electronically steer beams without moving parts. Starlink's pizza box uses this.</li>
+                            <li><strong>Parabolic Dish:</strong> Traditional, mechanically steered. Cheaper but bulkier.</li>
+                            <li><strong>Horn Antennas:</strong> For gateway/ground stations.</li>
+                            <li><strong>Helical Antennas:</strong> Compact, circular polarization.</li>
+                        </ul>
+                    </div>
+                </details>
+                <details>
+                    <summary>Link Budget Calculation</summary>
+                    <div class="details-content">
+                        <p><strong>The Holy Grail Equation:</strong></p>
+                        <div class="formula-box">
+                            <strong>Received Power (dBm) = EIRP - FSPL + Gain_RX - Losses</strong>
+                            <ul style="margin-top: 10px;">
+                                <li><strong>EIRP:</strong> Effective Isotropic Radiated Power</li>
+                                <li><strong>FSPL:</strong> Free-Space Path Loss = 20log₁₀(d) + 20log₁₀(f) + 92.45</li>
+                                <li><strong>Gain_RX:</strong> Receiving antenna gain</li>
+                                <li><strong>Losses:</strong> Atmospheric, rain fade, pointing errors</li>
+                            </ul>
+                        </div>
+                        <p><strong>Target:</strong> Received power must exceed noise floor + required SNR</p>
+                    </div>
+                </details>
+            </div>
+
+            <div class="card">
+                <h3>06_SPACECRAFT_SUBSYSTEMS <span class="difficulty-badge badge-medium">MEDIUM</span></h3>
+                <details>
+                    <summary>Power Systems</summary>
+                    <div class="details-content">
+                        <ul>
+                            <li><strong>Solar Panels:</strong> Typical LEO sat: 500W-2kW</li>
+                            <li><strong>Batteries:</strong> Lithium-ion for eclipse periods (~30 min per orbit)</li>
+                            <li><strong>Power Budget:</strong> Payload vs housekeeping allocation</li>
+                            <li><strong>Degradation:</strong> ~2-3% per year due to radiation</li>
+                        </ul>
+                    </div>
+                </details>
+                <details>
+                    <summary>Thermal Management</summary>
+                    <div class="details-content">
+                        <p><strong>Challenge:</strong> Satellites face -270°C (shadow) to +150°C (direct sun)</p>
+                        <ul>
+                            <li><strong>Passive:</strong> Multi-layer insulation (MLI), radiators</li>
+                            <li><strong>Active:</strong> Heaters, louvers, heat pipes</li>
+                            <li><strong>Electronics:</strong> Must operate -40°C to +85°C</li>
+                        </ul>
+                    </div>
+                </details>
+                <details>
+                    <summary>Attitude Control (ADCS)</summary>
+                    <div class="details-content">
+                        <ul>
+                            <li><strong>Reaction Wheels:</strong> Spin to change orientation</li>
+                            <li><strong>Magnetorquers:</strong> Interact with Earth's magnetic field</li>
+                            <li><strong>Thrusters:</strong> Chemical or electric propulsion</li>
+                            <li><strong>Star Trackers:</strong> Determine orientation using star patterns</li>
+                            <li><strong>Requirement:</strong> Point antennas at Earth within 0.1° accuracy</li>
+                        </ul>
+                    </div>
+                </details>
+            </div>
+
+            <div class="card">
+                <h3>07_NETWORK_ARCHITECTURE <span class="difficulty-badge badge-hard">HARD</span></h3>
+                <details>
+                    <summary>Bent-pipe vs On-board Processing</summary>
+                    <div class="details-content">
+                        <div class="info-box">
+                            <strong>Bent-pipe (Traditional):</strong>
+                            <ul>
+                                <li>Satellite is "dumb relay"</li>
+                                <li>All data goes: User → Sat → Gateway → Internet</li>
+                                <li>✅ Simple, reliable</li>
+                                <li>❌ Requires ground stations everywhere</li>
+                            </ul>
+                        </div>
+                        <div class="info-box">
+                            <strong>On-board Processing (Modern):</strong>
+                            <ul>
+                                <li>Satellite routes traffic intelligently</li>
+                                <li>Can connect: User → Sat → Sat → Sat → Gateway</li>
+                                <li>✅ Fewer ground stations needed</li>
+                                <li>❌ Complex, more expensive</li>
+                            </ul>
+                        </div>
+                    </div>
+                </details>
+                <details>
+                    <summary>OISL: Optical Inter-Satellite Links</summary>
+                    <div class="details-content">
+                        <p><span class="highlight">Game Changer:</span> Satellites communicate via LASERS at 100+ Gbps</p>
+                        <ul>
+                            <li><strong>Advantage:</strong> No spectrum licensing, massive bandwidth</li>
+                            <li><strong>Range:</strong> Up to 5,000km between satellites</li>
+                            <li><strong>Challenge:</strong> Pointing accuracy (microradians), tracking fast-moving targets</li>
+                            <li><strong>Status:</strong> Starlink Gen2 has OISL, Kuiper planning it</li>
+                        </ul>
+                    </div>
+                </details>
+            </div>
+
+            <div class="card">
+                <h3>08_GROUND_INFRASTRUCTURE <span class="difficulty-badge badge-medium">MEDIUM</span></h3>
+                <details>
+                    <summary>Gateway Stations</summary>
+                    <div class="details-content">
+                        <ul>
+                            <li><strong>Purpose:</strong> Connect satellite network to terrestrial internet</li>
+                            <li><strong>Requirements:</strong> Large parabolic antennas (3-13m), high-bandwidth fiber</li>
+                            <li><strong>Locations:</strong> Must be geographically distributed for redundancy</li>
+                            <li><strong>Starlink:</strong> 100+ gateway sites globally</li>
+                        </ul>
+                    </div>
+                </details>
+                <details>
+                    <summary>User Terminals</summary>
+                    <div class="details-content">
+                        <p><strong>The Make-or-Break Component:</strong></p>
+                        <ul>
+                            <li><strong>Target Cost:</strong> $200-500 (currently ~$500-600 for Starlink)</li>
+                            <li><strong>Technology:</strong> Phased array with 1,000+ antenna elements</li>
+                            <li><strong>Power:</strong> 50-100W typical</li>
+                            <li><strong>Challenge:</strong> Must manufacture millions at low cost</li>
+                        </ul>
+                    </div>
+                </details>
+            </div>
+        </div>
+
+        <!-- ========== PHASE 2.5: SIMULATION LAB ========== -->
+        <div class="phase-header">PHASE 2.5: SIMULATION LAB (Get Your Hands Dirty)</div>
+        <div class="module-grid">
+            <div class="card">
+                <h3>09_STK_WALKTHROUGH <span class="difficulty-badge badge-medium">MEDIUM</span></h3>
+                <details>
+                    <summary>Getting Started with STK</summary>
+                    <div class="details-content">
+                        <ul>
+                            <li><strong>Installation:</strong> Free educational license available</li>
+                            <li><strong>First Project:</strong> Create a single LEO satellite at 550km</li>
+                            <li><strong>Visualization:</strong> 3D globe, ground track, coverage area</li>
+                            <li><strong>Analysis:</strong> Access times, elevation angles, Doppler</li>
+                        </ul>
+                    </div>
+                </details>
+            </div>
+
+            <div class="card">
+                <h3>10_LINK_BUDGET_TOOL <span class="difficulty-badge badge-medium">MEDIUM</span></h3>
+                <details>
+                    <summary>Build Your Own Calculator</summary>
+                    <div class="details-content">
+                        <p><strong>Project:</strong> Create a Python/Excel link budget tool</p>
+                        <ul>
+                            <li><strong>Inputs:</strong> Frequency, distance, antenna gains, power</li>
+                            <li><strong>Calculations:</strong> FSPL, received power, SNR, data rate</li>
+                            <li><strong>Output:</strong> Link margin (dB above threshold)</li>
+                        </ul>
+                    </div>
+                </details>
+            </div>
+
+            <div class="card">
+                <h3>11_COVERAGE_HEATMAPS <span class="difficulty-badge badge-hard">HARD</span></h3>
+                <details>
+                    <summary>Visualization Project</summary>
+                    <div class="details-content">
+                        <p><strong>Goal:</strong> Create global coverage maps showing satellite visibility</p>
+                        <ul>
+                            <li><strong>Tools:</strong> Python (Matplotlib, Basemap, Plotly)</li>
+                            <li><strong>Data:</strong> TLE files from space-track.org</li>
+                            <li><strong>Metrics:</strong> Number of visible satellites, coverage probability</li>
+                        </ul>
+                    </div>
+                </details>
+            </div>
+        </div>
+
+        <!-- ========== PHASE 3: BUSINESS & STRATEGY ========== -->
+        <div class="phase-header">PHASE 3: BUSINESS & STRATEGY (Follow the Money)</div>
+        <div class="module-grid">
+            <div class="card">
+                <h3>12_ECONOMICS <span class="difficulty-badge badge-medium">MEDIUM</span></h3>
+                <details>
+                    <summary>CAPEX: Capital Expenditure</summary>
+                    <div class="details-content">
+                        <ul>
+                            <li><strong>Launch Costs:</strong> $1,000-5,000 per kg to orbit</li>
+                            <li><strong>Satellite Manufacturing:</strong> $250k-1M per satellite (at scale)</li>
+                            <li><strong>Ground Infrastructure:</strong> $5-10M per gateway station</li>
+                            <li><strong>R&D:</strong> Billions in development before first revenue</li>
+                        </ul>
+                    </div>
+                </details>
+                <details>
+                    <summary>Revenue Models</summary>
+                    <div class="details-content">
+                        <ul>
+                            <li><strong>Consumer Broadband:</strong> $50-150/month, ARPU = $80</li>
+                            <li><strong>Maritime:</strong> $5,000-50,000/month per vessel (high margin)</li>
+                            <li><strong>Aviation:</strong> $10,000-100,000/month per aircraft</li>
+                            <li><strong>Government/Military:</strong> Long-term contracts, $100M+</li>
+                        </ul>
+                    </div>
+                </details>
+            </div>
+
+            <div class="card">
+                <h3>13_COMPETITIVE_LANDSCAPE <span class="difficulty-badge badge-medium">MEDIUM</span></h3>
+                <details>
+                    <summary>Head-to-Head Comparison</summary>
+                    <div class="details-content">
+                        <table class="data-table" style="font-size: 0.9rem;">
+                            <tr>
+                                <th>Operator</th>
+                                <th>Satellites</th>
+                                <th>Altitude</th>
+                                <th>Strategy</th>
+                            </tr>
+                            <tr>
+                                <td>Starlink</td>
+                                <td>4,000+</td>
+                                <td>550 km</td>
+                                <td>Consumer mass market</td>
+                            </tr>
+                            <tr>
+                                <td>Kuiper</td>
+                                <td>0 (planned 3,236)</td>
+                                <td>590-630 km</td>
+                                <td>AWS integration</td>
+                            </tr>
+                            <tr>
+                                <td>OneWeb</td>
+                                <td>600+</td>
+                                <td>1,200 km</td>
+                                <td>B2B, enterprise</td>
+                            </tr>
+                        </table>
+                    </div>
+                </details>
+            </div>
+
+            <div class="card">
+                <h3>14_REGULATORY_SYSTEMS <span class="difficulty-badge badge-hard">HARD</span></h3>
+                <details>
+                    <summary>Spectrum Allocation Wars</summary>
+                    <div class="details-content">
+                        <ul>
+                            <li><strong>ITU:</strong> Allocates global spectrum</li>
+                            <li><strong>FCC (USA):</strong> US market access</li>
+                            <li><strong>"Use it or Lose it":</strong> Must launch 50% within 6 years</li>
+                        </ul>
+                    </div>
+                </details>
+                <details>
+                    <summary>Orbital Debris & Kessler Syndrome</summary>
+                    <div class="details-content">
+                        <p><span class="highlight">The Nightmare Scenario:</span> Collision cascade makes LEO unusable</p>
+                        <ul>
+                            <li><strong>Current Rules:</strong> Satellites must deorbit within 5 years</li>
+                            <li><strong>Challenges:</strong> 10,000+ satellites planned by 2030</li>
+                        </ul>
+                    </div>
+                </details>
+            </div>
+
+            <div class="card">
+                <h3>15_SECURITY & SUSTAINABILITY <span class="difficulty-badge badge-medium">MEDIUM</span></h3>
+                <details>
+                    <summary>Cybersecurity & Encryption</summary>
+                    <div class="details-content">
+                        <ul>
+                            <li><strong>User Link Encryption:</strong> AES-256 or better</li>
+                            <li><strong>Jamming Resistance:</strong> Frequency hopping, adaptive beamforming</li>
+                            <li><strong>Quantum Key Distribution:</strong> Future-proofing</li>
+                        </ul>
+                    </div>
+                </details>
+                <details>
+                    <summary>Collision Avoidance</summary>
+                    <div class="details-content">
+                        <ul>
+                            <li><strong>Space Surveillance Network:</strong> Tracks 27,000+ objects</li>
+                            <li><strong>Automated Maneuvers:</strong> Starlink performs ~25,000 avoidance maneuvers/year</li>
+                        </ul>
+                    </div>
+                </details>
+            </div>
+        </div>
+        <!-- ========== PHASE 4: SPECIALIZATION ========== -->
+        <div class="phase-header">PHASE 4: CHOOSE YOUR CLASS (Specialize)</div>
+        <div class="track-grid">
+            <div class="track-card">
+                <h4>🛰️ Systems Engineer</h4>
+                <p>Master end-to-end satellite design: RF + Power + Thermal + ADCS + Software integration.</p>
+                <small style="display: block; margin-top: 10px; color: #aaa;">
+                    <strong>Deep Dive:</strong> Subsystem trade studies, reliability analysis, mission design
+                </small>
+            </div>
+            
+            <div class="track-card">
+                <h4>📡 RF/Link Budget Specialist</h4>
+                <p>Master antenna design, propagation models, link budgets, modulation, and interference mitigation.</p>
+                <small style="display: block; margin-top: 10px; color: #aaa;">
+                    <strong>Deep Dive:</strong> Phased arrays, MIMO, adaptive coding, spectrum efficiency
+                </small>
+            </div>
+            
+            <div class="track-card">
+                <h4>🌐 Network Architect</h4>
+                <p>Master routing protocols, OISL, TCP/IP optimization, QoS, latency engineering.</p>
+                <small style="display: block; margin-top: 10px; color: #aaa;">
+                    <strong>Deep Dive:</strong> Space-based mesh, DTN, multipath routing, traffic engineering
+                </small>
+            </div>
+            
+            <div class="track-card">
+                <h4>📊 Business Strategist</h4>
+                <p>Master CAPEX/OPEX modeling, market analysis, regulatory strategy, competitive intelligence.</p>
+                <small style="display: block; margin-top: 10px; color: #aaa;">
+                    <strong>Deep Dive:</strong> Unit economics, TAM/SAM/SOM analysis, partnership strategies
+                </small>
+            </div>
+            
+            <div class="track-card">
+                <h4>🔬 Orbital Analyst</h4>
+                <p>Master constellation optimization, coverage modeling, STK simulation, mission planning.</p>
+                <small style="display: block; margin-top: 10px; color: #aaa;">
+                    <strong>Deep Dive:</strong> Walker patterns, genetic algorithms, multi-objective optimization
+                </small>
+            </div>
+        </div>
+
+        <!-- ========== CAPSTONE PROJECT ========== -->
+        <div class="capstone-box">
+            <h2 class="capstone-title">/// FINAL BOSS: THE CAPSTONE ///</h2>
+            <p style="margin-bottom: 15px; color: white; font-size: 1.2rem;">Design Your Own LEO Constellation</p>
+            <div style="text-align: left; display: inline-block; color: #ddd;">
+                <p><strong>PHASE 1: REQUIREMENTS</strong></p>
+                <ul style="margin-left: 20px; margin-bottom: 15px;">
+                    <li>Target Market: Rural broadband? Maritime? Aviation? Military?</li>
+                    <li>Coverage: Global? Regional? Polar?</li>
+                    <li>Performance: Latency? Throughput? Availability?</li>
+                </ul>
+                
+                <p><strong>PHASE 2: TECHNICAL DESIGN</strong></p>
+                <ul style="margin-left: 20px; margin-bottom: 15px;">
+                    <li>Choose Altitude (e.g., 900km) & Inclination</li>
+                    <li>Define Walker Pattern (Satellites/Planes)</li>
+                    <li>Design RF System (Frequency, Link Budget)</li>
+                    <li>Calculate Coverage & Latency</li>
+                </ul>
+                
+                <p><strong>PHASE 3: BUSINESS CASE</strong></p>
+                <ul style="margin-left: 20px; margin-bottom: 15px;">
+                    <li>Estimate CAPEX (Launch + Manufacturing)</li>
+                    <li>Estimate OPEX (Ground + Maintenance)</li>
+                    <li>Revenue Model (Price × Subscribers)</li>
+                    <li>Break-even Timeline</li>
+                </ul>
+                
+                <p style="margin-top:15px; color: var(--neon-pink);"><strong>DELIVERABLE:</strong> 
+                "Is this profitable?" Presentation (20 slides, 15 min pitch)</p>
+                
+                <div class="warning-box" style="margin-top: 20px;">
+                    ⚠️ <strong>Reality Check Questions:</strong><br>
+                    - Can you beat Starlink on cost?<br>
+                    - What's your unique advantage?<br>
+                    - How do you survive the 5-year cash burn?
+                </div>
+            </div>
+        </div>
+        
+        <footer>
+            &copy; 2026 LEO ARCHITECTURE FUNDAMENTALS.<br>
+            "If you can't calculate the path loss, you can't build the business."<br>
+            <small style="margin-top: 10px; display: block;">
+                [Glossary] [Resources] [Contributors] [Feedback]
+            </small>
+        </footer>
+
+    </div>
+
+    <!-- ========== JAVASCRIPT ========== -->
+    <script>
+    const terminalOutput = document.getElementById("typing-effect");
+    const input = document.getElementById('cmdInput');
+    const PROMPT = "USER@LEOAF:~$ ";
+
+    const knowledgeBase = {
+        "help": "AVAILABLE COMMANDS: <br> - help <br> - clear <br> - list <br> - [keyword] (e.g., 'latency', 'starlink', 'physics')",
+        "list": "TOPICS: <br> physics, latency, orbit, rf, starlink, kuiper, oneweb, cost, capex, opex, spectrum, debris, security, oisl",
+        "latency": "LATENCY DATA: <br> GEO: ~600ms <br> LEO: ~30-50ms <br> Fiber: ~80ms <br> CAUSE: Distance - GEO at 35,786km vs LEO at 550km.",
+        "starlink": "IDENTITY: Starlink <br> OWNER: SpaceX <br> ALTITUDE: ~550km <br> SATELLITES: 4,000+ <br> TECH: Laser Links, Phased Arrays",
+        "kuiper": "IDENTITY: Project Kuiper <br> OWNER: Amazon <br> ALTITUDE: 590-630km <br> SATELLITES: 3,236 planned",
+        "physics": "PHYSICS MODULE: <br> Kepler's Laws, Orbital Mechanics, Free-space path loss, Doppler shift",
+        "orbit": "ORBITAL TYPES: <br> LEO: 500-2000km (Low latency) <br> MEO: 2,000-35,786km (GPS) <br> GEO: 35,786km (High latency)",
+        "cost": "ECONOMICS: <br> CAPEX: $10-30B <br> OPEX: Ground stations, maintenance <br> KEY: User Terminal cost",
+        "hello": "GREETINGS. I am LEOAF. Ask me about Satellite Architecture. Type 'list' for topics."
+    };
+
+    function typeText(element, text, speed = 20) {
+        const line = document.createElement("div");
+        line.style.marginBottom = "10px";
+        element.appendChild(line);
+
+        if (text.includes("<br>")) {
+            line.innerHTML = '<span style="color:var(--neon-green);">' + PROMPT + '</span>' + text;
+            window.scrollTo(0, document.body.scrollHeight);
+        } else {
+            line.innerHTML = '<span style="color:var(--neon-green);">' + PROMPT + '</span>';
+            let i = 0;
+            function typeChar() {
+                if (i < text.length) {
+                    line.innerHTML += text.charAt(i);
+                    i++;
+                    setTimeout(typeChar, speed);
+                } else {
+                    window.scrollTo(0, document.body.scrollHeight);
+                }
+            }
+            typeChar();
+        }
+    }
+
+    window.onload = function() {
+        const introText = "INITIALIZING LEOAF KNOWLEDGE CORE... V2.0 READY. TYPE 'HELP' FOR COMMANDS.";
+        const introLine = document.createElement("div");
+        introLine.style.color = "var(--neon-green)";
+        terminalOutput.appendChild(introLine);
+        
+        let i = 0;
+        function typeIntro() {
+            if (i < introText.length) {
+                introLine.innerHTML += introText.charAt(i);
+                i++;
+                setTimeout(typeIntro, 30);
+            }
+        }
+        typeIntro();
+    };
+
+    input.addEventListener("keypress", function(event) {
+        if (event.key === "Enter") {
+            event.preventDefault();
+            
+            const query = input.value.toLowerCase().trim();
+            input.value = "";
+
+            const commandLine = document.createElement("div");
+            commandLine.innerHTML = '<span style="color:var(--neon-pink);">' + PROMPT + '</span>' + query;
+            terminalOutput.appendChild(commandLine);
+
+            if (query === "clear") {
+                terminalOutput.innerHTML = "";
+                return;
+            }
+
+            let response = "ERROR: COMMAND_UNKNOWN. TYPE 'HELP' OR 'LIST'.";
+            
+            if (knowledgeBase[query]) {
+                response = knowledgeBase[query];
+            } else {
+                const keys = Object.keys(knowledgeBase);
+                for (let key of keys) {
+                    if (query.includes(key)) {
+                        response = knowledgeBase[key];
+                        break;
+                    }
+                }
+            }
+
+            setTimeout(() => {
+                typeText(terminalOutput, response, 15);
+            }, 300);
+        }
+    });
+    </script>
+
+</body>
+</html>
