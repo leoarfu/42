@@ -20,7 +20,8 @@ body {
     color: white;
     overflow-x: hidden;
     position: relative;
-    min-height: 100vh;
+    /*min-height: 100vh;*/
+    min-height: calc(var(--vh, 1vh) * 100);
 }
 
 /* Canvas Background */
@@ -309,6 +310,17 @@ footer {
 </div>
     
 <script>
+    
+    // ---- FIX MOBILE VIEWPORT HEIGHT ----
+function setViewportHeight() {
+    const vh = window.innerHeight * 0.01;
+    document.documentElement.style.setProperty('--vh', `${vh}px`);
+}
+
+setViewportHeight();
+window.addEventListener('resize', setViewportHeight);
+window.addEventListener('orientationchange', setViewportHeight);
+    
 // --------------------
 // Starfield Canvas
 // --------------------
@@ -332,14 +344,13 @@ function initStars() {
 }
 
 function resizeCanvas() {
-    canvas.width = window.innerWidth;
-    canvas.height = window.innerHeight;
-    initStars(); // reinitialize stars properly
+    canvas.width = document.documentElement.clientWidth;
+    canvas.height = document.documentElement.clientHeight;
+    initStars();
 }
 
 window.addEventListener('resize', resizeCanvas);
-window.addEventListener('orientationchange', resizeCanvas);
-
+    
 resizeCanvas();
     
 function animateStars(){
