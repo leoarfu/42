@@ -1,0 +1,198 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>LEOAF | LEO Architecture Fundamentals</title>
+<style>
+  /* ---------- VARIABLES ---------- */
+  :root {
+    --bg-color: #0b0c1b;
+    --text-color: #0ff;
+    --title-color: #ff004f;
+    --invader-color: #00ff9f;
+    --lightning-color: #ffea00;
+    --star-colors: #ff004f, #00d9ff, #fff, #ffb000, #0f0;
+  }
+
+  body {
+    margin: 0;
+    font-family: 'VT323', monospace;
+    background: var(--bg-color);
+    color: var(--text-color);
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: flex-start;
+    min-height: 100vh;
+    padding: 20px;
+  }
+
+  /* ---------- STARFIELD ---------- */
+  #starfield {
+    position: fixed;
+    top: 0; left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: -2;
+    overflow: hidden;
+  }
+
+  .star {
+    position: absolute;
+    border-radius: 50%;
+    opacity: 0.8;
+  }
+
+  /* ---------- TITLE ---------- */
+  header {
+    text-align: center;
+    margin-top: 20px;
+    margin-bottom: 20px;
+  }
+
+  header h1 {
+    font-family: 'Press Start 2P', cursive;
+    font-size: 2.2rem;
+    color: var(--title-color);
+    margin-bottom: 10px;
+  }
+
+  header p {
+    font-size: 1.2rem;
+    max-width: 700px;
+    margin: 0 auto;
+    line-height: 1.4;
+  }
+
+  /* ---------- LIGHTNING BOLT ---------- */
+  .lightning {
+    width: 20px;
+    height: 80px;
+    background: linear-gradient(to bottom, transparent 20%, var(--lightning-color) 20%, var(--lightning-color) 80%, transparent 80%);
+    clip-path: polygon(
+      50% 0%, 60% 20%, 40% 20%, 50% 40%, 30% 40%, 40% 60%, 20% 60%, 30% 80%, 50% 80%, 50% 100%
+    );
+    margin: 20px 0;
+    animation: flash 1.5s infinite;
+  }
+
+  @keyframes flash {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.6; }
+  }
+
+  /* ---------- SPACE INVADER ---------- */
+  .invader {
+    font-size: 4rem;
+    position: absolute;
+    top: 40%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    cursor: pointer;
+    z-index: 1;
+    transition: transform 0.5s ease, text-shadow 0.3s ease;
+    color: var(--invader-color);
+  }
+
+  /* ---------- PHASE BOX ---------- */
+  .phase-box {
+    background: rgba(0,0,0,0.7);
+    border: 2px solid var(--title-color);
+    padding: 20px;
+    border-radius: 8px;
+    max-width: 800px;
+    text-align: center;
+    z-index: 1;
+  }
+
+  .phase-box h2 {
+    font-family: 'Press Start 2P', cursive;
+    font-size: 1.4rem;
+    margin-bottom: 10px;
+  }
+
+  .phase-box p {
+    font-size: 1rem;
+    line-height: 1.4;
+  }
+
+  /* ---------- RESPONSIVENESS ---------- */
+  @media (max-width: 768px) {
+    header h1 { font-size: 1.8rem; }
+    .invader { font-size: 3rem; }
+    .phase-box { padding: 15px; }
+  }
+</style>
+</head>
+<body>
+
+<!-- ---------- STARFIELD ---------- -->
+<div id="starfield"></div>
+
+<!-- ---------- HEADER ---------- -->
+<header>
+  <h1>LEO Architecture Fundamentals</h1>
+  <p>Learn everything about Low Earth Orbit satellites in a fun way. Click the space invader to start a surprise!</p>
+</header>
+
+<!-- ---------- LIGHTNING BOLT ---------- -->
+<div class="lightning"></div>
+
+<!-- ---------- SPACE INVADER ---------- -->
+<div class="invader">👾</div>
+
+<!-- ---------- PHASE BOX ---------- -->
+<div class="phase-box">
+  <h2>Build Your Cosmic Empire</h2>
+  <p>Sign in to unlock all modules, track your progress, and start your journey to becoming a LEOAF master. Mark modules as completed and watch your empire grow!</p>
+</div>
+
+<script>
+/* ---------- STARFIELD SCRIPT ---------- */
+const starfield = document.getElementById('starfield');
+const colors = ['#ff004f','#00d9ff','#ffffff','#ffb000','#0f0'];
+
+for(let i=0;i<200;i++){
+    let star = document.createElement('div');
+    star.classList.add('star');
+    star.style.width = star.style.height = Math.random()*2 + 1 + 'px';
+    star.style.background = colors[Math.floor(Math.random()*colors.length)];
+    star.style.top = Math.random()*window.innerHeight+'px';
+    star.style.left = Math.random()*window.innerWidth+'px';
+    starfield.appendChild(star);
+}
+
+// Animate stars slowly drifting
+setInterval(() => {
+    document.querySelectorAll('.star').forEach(star=>{
+        let top = parseFloat(star.style.top);
+        let left = parseFloat(star.style.left);
+        top += Math.random()*0.2-0.1;  // vertical drift
+        left += Math.random()*0.2-0.1; // horizontal drift
+        if(top<0) top=window.innerHeight;
+        if(top>window.innerHeight) top=0;
+        if(left<0) left=window.innerWidth;
+        if(left>window.innerWidth) left=0;
+        star.style.top = top+'px';
+        star.style.left = left+'px';
+    });
+}, 50);
+
+/* ---------- SPACE INVADER CLICK ---------- */
+const invader = document.querySelector('.invader');
+invader.addEventListener('click', () => {
+    const maxX = window.innerWidth - invader.offsetWidth;
+    const maxY = window.innerHeight - invader.offsetHeight;
+    const randX = Math.random() * maxX;
+    const randY = Math.random() * maxY;
+    invader.style.transform = `translate(${randX}px, ${randY}px) rotate(${Math.random()*360}deg)`;
+    invader.style.textShadow = '0 0 20px #ff004f, 0 0 40px #00d9ff';
+    setTimeout(() => { invader.style.textShadow = ''; }, 300);
+    alert("You’ve joined the Cosmic Empire! 🌌");
+});
+</script>
+
+</body>
+</html>
