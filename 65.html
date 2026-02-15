@@ -3,178 +3,319 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>LEOAF | LEO Architecture Fundamentals</title>
+<title>LEO Architecture Fundamentals — LEOAF</title>
+
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;600;800&display=swap" rel="stylesheet">
+
 <style>
-  body {
-    margin: 0;
-    font-family: 'VT323', monospace;
-    background: #0b0c1b;
-    color: #0ff;
-    overflow: hidden;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: flex-start;
+* { box-sizing: border-box; margin:0; padding:0; }
+
+body {
+    font-family: 'Orbitron', sans-serif;
+    background: #000;
+    color: white;
+    overflow-x: hidden;
+    position: relative;
     min-height: 100vh;
-    padding: 20px;
-  }
+}
 
-  /* ---------- STARFIELD ---------- */
-  #starfield {
+/* Canvas Background */
+#starsCanvas {
     position: fixed;
-    top: 0; left: 0;
-    width: 100%;
-    height: 100%;
-    z-index: -2;
-    overflow: hidden;
-  }
-  .star {
-    position: absolute;
-    border-radius: 50%;
-    opacity: 0.8;
-  }
+    top:0;
+    left:0;
+    width:100%;
+    height:100%;
+    z-index:-1;
+}
 
-  /* ---------- HEADER ---------- */
-  header {
-    text-align: center;
-    margin-top: 20px;
-    margin-bottom: 10px;
-  }
-  header h1 {
-    font-family: 'Press Start 2P', cursive;
-    font-size: 2.2rem;
+/* ---------- HEADER ---------- */
+header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 18px clamp(20px, 5vw, 60px);
+}
+
+.logo {
+    font-weight: 800;
+    font-size: clamp(18px, 2vw, 24px);
+    letter-spacing: 3px;
+}
+
+.logo span:first-child { color: white; }
+.logo span:last-child { color: #ff004f; }
+
+header button {
+    background: transparent;
+    border: 1px solid #ff004f;
     color: #ff004f;
-    margin-bottom: 10px;
-  }
-  header p {
-    font-size: 1.2rem;
-    max-width: 700px;
-    margin: 0 auto;
-    line-height: 1.4;
-  }
-
-  /* ---------- LIGHTNING BOLT ---------- */
-  .lightning {
-    width: 20px;
-    height: 80px;
-    background: linear-gradient(to bottom, transparent 20%, #ffea00 20%, #ffea00 80%, transparent 80%);
-    clip-path: polygon(
-      50% 0%, 60% 20%, 40% 20%, 50% 40%, 30% 40%, 40% 60%, 20% 60%, 30% 80%, 50% 80%, 50% 100%
-    );
-    margin: 10px 0;
-    animation: flash 1.5s infinite;
-  }
-  @keyframes flash {
-    0%,100% { opacity: 1; }
-    50% { opacity: 0.6; }
-  }
-
-  /* ---------- SPACE INVADER ---------- */
-  .invader {
-    font-size: 4rem;
-    position: absolute;
-    top: 40%;
-    left: 50%;
-    transform: translate(-50%, -50%);
+    padding: 6px 14px;
+    margin-left: 8px;
     cursor: pointer;
-    z-index: 1;
-    transition: transform 0.5s ease, text-shadow 0.3s ease;
-    color: #00ff9f;
-  }
+    transition: 0.3s ease;
+    font-size: 12px;
+}
 
-  /* ---------- PHASE BOX ---------- */
-  .phase-box {
-    background: rgba(0,0,0,0.7);
-    border: 2px solid #ff004f;
-    padding: 20px;
-    border-radius: 8px;
-    max-width: 800px;
+header button:hover {
+    background: #ff004f;
+    color: black;
+}
+
+/* ---------- HERO ---------- */
+.hero {
     text-align: center;
+    padding: clamp(40px, 6vw, 70px) 20px 40px;
+    position: relative;
     z-index: 1;
-  }
-  .phase-box h2 {
-    font-family: 'Press Start 2P', cursive;
-    font-size: 1.4rem;
-    margin-bottom: 10px;
-  }
-  .phase-box p {
-    font-size: 1rem;
-    line-height: 1.4;
-  }
+}
 
-  /* ---------- RESPONSIVENESS ---------- */
-  @media (max-width: 768px) {
-    header h1 { font-size: 1.8rem; }
-    .invader { font-size: 3rem; }
-    .phase-box { padding: 15px; }
-  }
+.hero h1 {
+    font-size: clamp(26px, 5vw, 44px);
+    margin-bottom: 20px;
+    font-weight: 800;
+}
+
+.hero p {
+    max-width: 650px;
+    margin: auto;
+    font-size: 15px;
+    opacity: 0.85;
+    line-height: 1.5;
+}
+
+.lightning {
+    width: clamp(60px, 6vw, 110px);
+    margin: 0 auto 18px;
+    display: block;
+    animation: boltGlow 3s ease-in-out infinite;
+}
+
+@keyframes boltGlow {
+    0% { filter: drop-shadow(0 0 8px #ff004f); }
+    50% { filter: drop-shadow(0 0 20px #00d9ff); }
+    100% { filter: drop-shadow(0 0 8px #ff004f); }
+}
+
+.invader {
+    position: absolute;
+    font-size: clamp(26px, 3vw, 40px);
+    top: 40%;
+    left: -50px;
+    animation: orbitDrift 25s linear infinite;
+}
+
+@keyframes orbitDrift {
+    0%   { transform: translate(0, -20px); }
+    25%  { transform: translate(30vw, -60px); }
+    50%  { transform: translate(65vw, 10px); }
+    75%  { transform: translate(40vw, 60px); }
+    100% { transform: translate(110vw, -10px); }
+}
+
+/* ---------- CURRICULUM ---------- */
+.curriculum {
+    max-width: 1000px;
+    margin: 30px auto;
+    padding: 0 20px;
+    position: relative;
+    z-index: 1;
+}
+
+.phase-card {
+    background: rgba(255,255,255,0.05);
+    padding: 18px;
+    margin-bottom: 12px;
+    border-left: 3px solid #ff004f;
+    transition: 0.3s ease;
+}
+
+.phase-card:hover {
+    background: rgba(0,217,255,0.1);
+    transform: translateX(4px);
+}
+
+.phase-card h3 {
+    margin: 0 0 6px;
+    font-size: 16px;
+    color: #00d9ff;
+}
+
+.phase-card p {
+    margin: 0;
+    font-size: 13px;
+    opacity: 0.75;
+}
+
+/* ---------- CTA ---------- */
+.cta {
+    text-align: center;
+    margin: 40px 20px 60px;
+    position: relative;
+    z-index: 1;
+}
+
+.cta button {
+    padding: 12px 28px;
+    font-size: 14px;
+    background: linear-gradient(45deg, #ff004f, #00d9ff);
+    border: none;
+    color: black;
+    cursor: pointer;
+    transition: 0.3s ease;
+}
+
+.cta button:hover {
+    transform: scale(1.05);
+}
+
+/* ---------- FOOTER ---------- */
+footer {
+    text-align: center;
+    padding: 30px;
+    opacity: 0.4;
+    font-size: 12px;
+    position: relative;
+    z-index: 1;
+}
 </style>
 </head>
 <body>
 
-<!-- ---------- STARFIELD ---------- -->
-<div id="starfield"></div>
+<canvas id="starsCanvas"></canvas>
 
-<!-- ---------- HEADER ---------- -->
 <header>
-  <h1>LEO Architecture Fundamentals</h1>
-  <p>Learn everything about Low Earth Orbit satellites in a fun way. Click the space invader to start a surprise!</p>
+    <div class="logo"><span>LEO</span><span>AF</span></div>
+    <div>
+        <button>Login</button>
+        <button>Register</button>
+    </div>
 </header>
 
-<!-- ---------- LIGHTNING BOLT ---------- -->
-<div class="lightning"></div>
+<section class="hero">
+    <h1>LEO Architecture Fundamentals</h1>
 
-<!-- ---------- SPACE INVADER ---------- -->
-<div class="invader">👾</div>
+    <svg class="lightning" viewBox="0 0 120 220">
+        <polygon points="70,0 30,110 65,110 40,220 100,95 60,95"
+                 fill="url(#grad)" />
+        <defs>
+            <linearGradient id="grad" x1="0%" y1="0%" x2="0%" y2="100%">
+                <stop offset="0%" style="stop-color:#ff004f"/>
+                <stop offset="50%" style="stop-color:#ff004f"/>
+                <stop offset="50%" style="stop-color:#00d9ff"/>
+                <stop offset="100%" style="stop-color:#00d9ff"/>
+            </linearGradient>
+        </defs>
+    </svg>
 
-<!-- ---------- PHASE BOX ---------- -->
-<div class="phase-box">
-  <h2>Build Your Cosmic Empire</h2>
-  <p>Sign in to unlock all modules, track your progress, and start your journey to becoming a LEOAF master. Mark modules as completed and watch your empire grow!</p>
-</div>
+    <div class="invader">👾</div>
+
+    <p>
+        A structured learning system for mastering modern low-Earth-orbit satellite architecture —
+        engineering, spectrum strategy, geopolitics, and full constellation design.
+    </p>
+</section>
+
+<section class="curriculum">
+    <div class="phase-card">
+        <h3>Phase 0 — Why Space Is Having Its Rockstar Era</h3>
+        <p>The shift. The players. The stakes.</p>
+    </div>
+    <div class="phase-card">
+        <h3>Phase 1 — Learn the Physics (Before You Bend It)</h3>
+        <p>Orbits, RF fundamentals, networking basics.</p>
+    </div>
+    <div class="phase-card">
+        <h3>Phase 2 — Engineer the Constellation</h3>
+        <p>Link budgets, spacecraft systems, architecture tradeoffs.</p>
+    </div>
+    <div class="phase-card">
+        <h3>Phase 3 — Money, Power & Spectrum Battles</h3>
+        <p>Regulation, sustainability, geopolitics.</p>
+    </div>
+    <div class="phase-card">
+        <h3>Phase 4 — Choose Your Mission</h3>
+        <p>Engineer. Strategist. Analyst. Architect.</p>
+    </div>
+    <div class="phase-card">
+        <h3>Build Your Cosmic Empire — Design Your Own Constellation</h3>
+        <p>From requirements to pitch deck.</p>
+    </div>
+</section>
+
+<section class="cta">
+    <button>Enter the Orbit</button>
+</section>
+
+<footer>
+© 2026 LEOAF
+</footer>
 
 <script>
-/* ---------- STARFIELD ---------- */
-const starfield = document.getElementById('starfield');
-const colors = ['#ff004f','#00d9ff','#ffffff','#ffb000','#0f0'];
-for(let i=0;i<200;i++){
-    let star = document.createElement('div');
-    star.classList.add('star');
-    star.style.width = star.style.height = Math.random()*2 + 1 + 'px';
-    star.style.background = colors[Math.floor(Math.random()*colors.length)];
-    star.style.top = Math.random()*window.innerHeight+'px';
-    star.style.left = Math.random()*window.innerWidth+'px';
-    starfield.appendChild(star);
-}
-// Animate stars slowly drifting
-setInterval(() => {
-    document.querySelectorAll('.star').forEach(star=>{
-        let top = parseFloat(star.style.top);
-        let left = parseFloat(star.style.left);
-        top += Math.random()*0.2-0.1;
-        left += Math.random()*0.2-0.1;
-        if(top<0) top=window.innerHeight;
-        if(top>window.innerHeight) top=0;
-        if(left<0) left=window.innerWidth;
-        if(left>window.innerWidth) left=0;
-        star.style.top = top+'px';
-        star.style.left = left+'px';
-    });
-}, 50);
+// --------------------
+// Starfield Canvas
+// --------------------
+const canvas = document.getElementById('starsCanvas');
+const ctx = canvas.getContext('2d');
 
-/* ---------- SPACE INVADER CLICK: MOVE ERRATICALLY ---------- */
-const invader = document.querySelector('.invader');
-invader.addEventListener('click', () => {
-    const maxX = window.innerWidth - invader.offsetWidth;
-    const maxY = window.innerHeight - invader.offsetHeight;
-    const randX = Math.random() * maxX;
-    const randY = Math.random() * maxY;
-    const randRot = Math.random() * 360;
-    invader.style.transform = `translate(${randX}px, ${randY}px) rotate(${randRot}deg)`;
-    invader.style.textShadow = '0 0 20px #ff004f, 0 0 40px #00d9ff';
-    setTimeout(() => { invader.style.textShadow = ''; }, 300);
-});
+let stars = [];
+const STAR_COUNT = 200;
+
+function resizeCanvas(){
+    canvas.width = window.innerWidth;
+    canvas.height = window.innerHeight;
+}
+window.addEventListener('resize', resizeCanvas);
+resizeCanvas();
+
+// Initialize stars (random colors variation)
+for(let i = 0; i < STAR_COUNT; i++){
+    stars.push({
+        x: Math.random() * canvas.width,
+        y: Math.random() * canvas.height,
+        size: Math.random()*1.5+0.5,
+        speed: Math.random()*0.2+0.05,
+        hue: Math.random() * 360
+    });
+}
+
+function animateStars(){
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    stars.forEach(star => {
+        star.y -= star.speed;
+        if(star.y < 0) star.y = canvas.height;
+        
+        ctx.beginPath();
+        ctx.fillStyle = `hsl(${star.hue}, 80%, 80%)`; // colored star
+        ctx.arc(star.x, star.y, star.size, 0, Math.PI*2);
+        ctx.fill();
+    });
+    requestAnimationFrame(animateStars);
+}
+animateStars();
 </script>
 
+<script>
+// ---------- SPACE INVADER CLICK: FAST SPIN ----------
+const invader = document.querySelector('.invader');
+
+invader.addEventListener('click', () => {
+    // Spin fast for 2 seconds
+    invader.style.transition = 'transform 0.1s linear';
+    let spinDegrees = 0;
+    const spinInterval = setInterval(() => {
+        spinDegrees += 60; // rotate 60deg per tick
+        invader.style.transform = `rotate(${spinDegrees}deg)`;
+    }, 50); // 50ms per tick = 20 spins/sec
+
+    setTimeout(() => {
+        clearInterval(spinInterval);
+        // Return to normal orbit position (reset transform)
+        invader.style.transition = 'transform 0.5s ease';
+        invader.style.transform = 'translate(0, 0)'; // keeps it at orbitDrift initial position
+    }, 2000);
+});
+</script>
+  
 </body>
 </html>
