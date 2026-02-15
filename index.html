@@ -439,7 +439,8 @@ invaderInner.parentElement.addEventListener('click', () => {
 <script>
 const supabaseUrl = 'https://kpkpptqtuuhnbdntuluc.supabase.co';
 const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imtwa3BwdHF0dXVobmJkbnR1bHVjIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzExNTE2MjAsImV4cCI6MjA4NjcyNzYyMH0.qUgRlbvjhi_cB7PTmSJLm62YFf3nJyYtJsnqbP97FrM';
-const supabase = supabase.createClient(supabaseUrl, supabaseKey);
+const { createClient } = supabase;
+const client = createClient(supabaseUrl, supabaseKey);
 </script>
 
 <script>
@@ -468,21 +469,46 @@ const registerBtn = document.getElementById('registerBtn');
 
 // Register
 registerBtn.addEventListener('click', async () => {
-    const email = emailInput.value;
-    const password = passwordInput.value;
-    const { data, error } = await supabase.auth.signUp({ email, password });
-    if(error) authMessage.innerText = error.message;
-    else authMessage.innerText = 'Check your email to confirm registration!';
+    const email = emailInput.value.trim();
+    const password = passwordInput.value.trim();
+
+    if (!email || !password) {
+        authMessage.innerText = "Enter email and password.";
+        return;
+    }
+
+    authMessage.innerText = "Creating account...";
+
+    const { data, error } = await client.auth.signUp({
+        email,
+        password
+    });
+
+    if (error) {
+        authMessage.innerText = error.message;
+    } else {
+        authMessage.innerText = "Success! Check your email to confirm.";
+        emailInput.value = "";
+        passwordInput.value = "";
+    }
 });
 
 // Login
 loginBtn.addEventListener('click', async () => {
-    const email = emailInput.value;
-    const password = passwordInput.value;
-    const { data, error } = await supabase.auth.signInWithPassword({ email, password });
-    if(error) authMessage.innerText = error.message;
-    else {
-        authMessage.innerText = 'Login successful!';
+    const email = emailInput.value.trim();
+    const password = passwordInput.value.trim();
+
+    authMessage.innerText = "Logging in...";
+
+    const { data, error } = await client.auth.signInWithPassword({
+        email,
+        password
+    });
+
+    if (error) {
+        authMessage.innerText = error.message;
+    } else {
+        authMessage.innerText = "Welcome back 🚀";
         authModal.style.display = 'none';
         showDashboard();
     }
@@ -490,7 +516,7 @@ loginBtn.addEventListener('click', async () => {
 
 // Show logged-in view
 async function showDashboard(){
-    const user = supabase.auth.getUser();
+    const { data: { user } } = await client.auth.getUser();
     // Here we can show the after-login page
     console.log(user);
     alert("Welcome! We'll now load your personal dashboard.");
