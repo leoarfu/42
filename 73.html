@@ -1,0 +1,295 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>LEOAF | LEO Architecture Fundamentals</title>
+
+<style>
+body {
+    font-family: Arial, sans-serif;
+    margin: 0;
+    background: #f4f6f9;
+    color: #222;
+}
+
+header {
+    background: #111;
+    color: white;
+    padding: 15px 30px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+nav button {
+    margin-left: 10px;
+    padding: 8px 14px;
+    cursor: pointer;
+}
+
+.container {
+    max-width: 1100px;
+    margin: 40px auto;
+    padding: 0 20px;
+}
+
+.section-title {
+    margin-top: 40px;
+    font-size: 24px;
+}
+
+.phase-card {
+    background: white;
+    padding: 20px;
+    margin-bottom: 15px;
+    border-radius: 6px;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.08);
+}
+
+.hidden {
+    display: none;
+}
+
+.dashboard-card {
+    background: white;
+    padding: 20px;
+    margin-bottom: 20px;
+    border-radius: 6px;
+}
+
+.module-list li {
+    margin-bottom: 8px;
+}
+
+.progress-bar {
+    background: #ddd;
+    height: 12px;
+    border-radius: 6px;
+    overflow: hidden;
+}
+
+.progress-fill {
+    height: 100%;
+    width: 0%;
+    background: #4caf50;
+}
+
+input[type="text"] {
+    padding: 10px;
+    width: 100%;
+    margin-bottom: 15px;
+}
+
+footer {
+    text-align: center;
+    padding: 30px;
+    margin-top: 50px;
+    background: #111;
+    color: white;
+}
+</style>
+</head>
+
+<body>
+
+<header>
+    <h2>LEO Architecture Fundamentals</h2>
+    <nav>
+        <button onclick="showPublic()">Home</button>
+        <button onclick="showAuthModal()">Login</button>
+        <button onclick="showAuthModal()">Register</button>
+        <button id="logoutBtn" class="hidden" onclick="logout()">Logout</button>
+    </nav>
+</header>
+
+<!-- ========================= -->
+<!-- PUBLIC HOME (Before Login) -->
+<!-- ========================= -->
+
+<div id="publicView" class="container">
+
+    <h1>Master LEO Satellite Architecture</h1>
+    <p>
+        A structured learning platform covering engineering, business, geopolitics,
+        simulations, and constellation design.
+    </p>
+
+    <div class="section-title">Curriculum Overview</div>
+
+    <div class="phase-card">
+        <h3>Phase 0 – Mission Briefing</h3>
+        <p>Why LEO, key players, global impact.</p>
+    </div>
+
+    <div class="phase-card">
+        <h3>Phase 1 – Foundations</h3>
+        <p>Orbital mechanics, telecom basics, networking fundamentals.</p>
+    </div>
+
+    <div class="phase-card">
+        <h3>Phase 2 – Engineering</h3>
+        <p>Constellation design, RF systems, spacecraft subsystems.</p>
+    </div>
+
+    <div class="phase-card">
+        <h3>Phase 2.5 – Simulation Lab</h3>
+        <p>Coverage maps, link budgets, orbital modeling.</p>
+    </div>
+
+    <div class="phase-card">
+        <h3>Phase 3 – Business & Geopolitics</h3>
+        <p>Economics, regulatory systems, spectrum wars, sustainability.</p>
+    </div>
+
+    <div class="phase-card">
+        <h3>Phase 4 – Specialization Tracks</h3>
+        <p>Engineering, RF, Network Architecture, Strategy.</p>
+    </div>
+
+    <div class="phase-card">
+        <h3>Phase 5 – Adaptive Learning Engine</h3>
+        <p>Personalized recommendations based on mastery.</p>
+    </div>
+
+    <div class="phase-card">
+        <h3>Final Capstone</h3>
+        <p>Design your own LEO constellation.</p>
+    </div>
+
+    <p><strong>Login to unlock full modules, progress tracking, and simulations.</strong></p>
+
+</div>
+
+<!-- ========================= -->
+<!-- AUTHENTICATED APP -->
+<!-- ========================= -->
+
+<div id="appView" class="container hidden">
+
+    <!-- DASHBOARD -->
+    <div id="dashboardSection">
+
+        <h2>Dashboard</h2>
+
+        <div class="dashboard-card">
+            <h4>Overall Progress</h4>
+            <div class="progress-bar">
+                <div class="progress-fill" id="overallProgress"></div>
+            </div>
+            <p id="progressText">0% completed</p>
+        </div>
+
+        <div class="dashboard-card">
+            <h4>Recommended Next Module</h4>
+            <p id="recommendedModule">Phase 1 – Orbital Mechanics Basics</p>
+            <button>Start Learning</button>
+        </div>
+
+    </div>
+
+    <!-- ROADMAP -->
+    <div id="roadmapSection" class="hidden">
+        <h2>Learning Roadmap</h2>
+
+        <ul class="module-list">
+            <li>Phase 0 – Mission Briefing</li>
+            <li>Phase 1 – Foundations</li>
+            <li>Phase 2 – Engineering</li>
+            <li>Phase 2.5 – Simulation Lab</li>
+            <li>Phase 3 – Business & Geopolitics</li>
+            <li>Phase 4 – Specialization</li>
+            <li>Phase 5 – Adaptive Engine</li>
+        </ul>
+    </div>
+
+    <!-- MODULE VIEW -->
+    <div id="moduleSection" class="hidden">
+        <h2>Module Title</h2>
+        <p>Learning objectives...</p>
+        <p>Main content area...</p>
+        <button>Mark as Completed</button>
+        <button>Mark as Mastered</button>
+    </div>
+
+    <!-- PROGRESS PAGE -->
+    <div id="progressSection" class="hidden">
+        <h2>Your Progress</h2>
+        <p>Heatmap, mastery, weak topics (to be connected to database).</p>
+    </div>
+
+    <!-- SEARCH -->
+    <div id="searchSection" class="hidden">
+        <h2>Quick Search</h2>
+        <input type="text" placeholder="Ask a keyword..." />
+        <p>Short answer preview + link to module (to be connected later).</p>
+    </div>
+
+    <!-- CAPSTONE -->
+    <div id="capstoneSection" class="hidden">
+        <h2>Capstone Project</h2>
+        <p>Design your own LEO constellation.</p>
+        <button>Start Capstone</button>
+    </div>
+
+</div>
+
+<!-- ========================= -->
+<!-- AUTH MODAL (Supabase Ready) -->
+<!-- ========================= -->
+
+<div id="authModal" class="hidden">
+    <div class="container">
+        <h2>Login / Register</h2>
+        <input type="text" placeholder="Email" />
+        <input type="text" placeholder="Password" />
+        <button onclick="fakeLogin()">Submit</button>
+    </div>
+</div>
+
+<footer>
+© 2026 LEO Architecture Fundamentals
+</footer>
+
+<script>
+
+/* ===============================
+   TEMP AUTH STATE (Replace Later)
+================================ */
+
+let isLoggedIn = false;
+
+function showPublic() {
+    document.getElementById("publicView").classList.remove("hidden");
+    document.getElementById("appView").classList.add("hidden");
+}
+
+function showAuthModal() {
+    document.getElementById("authModal").classList.remove("hidden");
+}
+
+function fakeLogin() {
+    isLoggedIn = true;
+    document.getElementById("authModal").classList.add("hidden");
+    document.getElementById("publicView").classList.add("hidden");
+    document.getElementById("appView").classList.remove("hidden");
+    document.getElementById("logoutBtn").classList.remove("hidden");
+    updateProgress(35); // sample progress
+}
+
+function logout() {
+    isLoggedIn = false;
+    document.getElementById("publicView").classList.remove("hidden");
+    document.getElementById("appView").classList.add("hidden");
+    document.getElementById("logoutBtn").classList.add("hidden");
+}
+
+function updateProgress(percent) {
+    document.getElementById("overallProgress").style.width = percent + "%";
+    document.getElementById("progressText").innerText = percent + "% completed";
+}
+
+</script>
+
+</body>
+</html>
