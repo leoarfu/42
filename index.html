@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>LEO Architecture Fundamentals — LEOAF</title>
 
 <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;600;800&display=swap" rel="stylesheet">
@@ -10,13 +10,17 @@
 <style>
 * { box-sizing: border-box; margin:0; padding:0; }
 
+html, body {
+    height: 100%;
+}
+    
 body {
     font-family: 'Orbitron', sans-serif;
     background: #000;
     color: white;
     overflow-x: hidden;
     position: relative;
-    min-height: 100vh;
+    min-height: 100vdh;
 }
 
 /* Canvas Background */
@@ -331,24 +335,30 @@ const ctx = canvas.getContext('2d');
 let stars = [];
 const STAR_COUNT = 200;
 
-function resizeCanvas(){
+function initStars() {
+    stars = [];
+    for (let i = 0; i < STAR_COUNT; i++) {
+        stars.push({
+            x: Math.random() * canvas.width,
+            y: Math.random() * canvas.height,
+            size: Math.random() * 1.5 + 0.5,
+            speed: Math.random() * 0.2 + 0.05,
+            hue: Math.random() * 360
+        });
+    }
+}
+
+function resizeCanvas() {
     canvas.width = window.innerWidth;
     canvas.height = window.innerHeight;
+    initStars(); // reinitialize stars properly
 }
+
 window.addEventListener('resize', resizeCanvas);
+window.addEventListener('orientationchange', resizeCanvas);
+
 resizeCanvas();
-
-// Initialize stars (random colors variation)
-for(let i = 0; i < STAR_COUNT; i++){
-    stars.push({
-        x: Math.random() * canvas.width,
-        y: Math.random() * canvas.height,
-        size: Math.random()*1.5+0.5,
-        speed: Math.random()*0.2+0.05,
-        hue: Math.random() * 360
-    });
-}
-
+    
 function animateStars(){
     ctx.clearRect(0, 0, canvas.width, canvas.height);
     stars.forEach(star => {
@@ -384,6 +394,14 @@ invaderInner.parentElement.addEventListener('click', () => {
         invaderInner.style.transform = 'rotate(0deg)';
     }, 2000);
 });
+
+    window.addEventListener('resize', () => {
+    const invader = document.querySelector('.invader');
+    invader.style.animation = 'none';
+    void invader.offsetWidth;
+    invader.style.animation = '';
+});
+    
 </script>
 
 <!-- Supabase JS SDK -->
