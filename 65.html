@@ -178,6 +178,9 @@ footer {
     position: relative;
     z-index: 1;
 }
+.invader-inner {
+    display: inline-block;
+    transform-origin: center;
 </style>
 </head>
 <body>
@@ -192,6 +195,7 @@ footer {
     </div>
 </header>
 
+<!-- HERO SECTION -->
 <section class="hero">
     <h1>LEO Architecture Fundamentals</h1>
 
@@ -208,7 +212,8 @@ footer {
         </defs>
     </svg>
 
-    <div class="invader">👾</div>
+    <!-- Space Invader with inner wrapper for spinning -->
+    <div class="invader"><span class="invader-inner">👾</span></div>
 
     <p>
         A structured learning system for mastering modern low-Earth-orbit satellite architecture —
@@ -297,22 +302,21 @@ animateStars();
 
 <script>
 // ---------- SPACE INVADER CLICK: FAST SPIN ----------
-const invader = document.querySelector('.invader');
+const invaderInner = document.querySelector('.invader-inner');
 
-invader.addEventListener('click', () => {
-    // Spin fast for 2 seconds
-    invader.style.transition = 'transform 0.1s linear';
+invaderInner.parentElement.addEventListener('click', () => {
+    invaderInner.style.transition = 'transform 0.1s linear';
     let spinDegrees = 0;
     const spinInterval = setInterval(() => {
         spinDegrees += 60; // rotate 60deg per tick
-        invader.style.transform = `rotate(${spinDegrees}deg)`;
-    }, 50); // 50ms per tick = 20 spins/sec
+        invaderInner.style.transform = `rotate(${spinDegrees}deg)`;
+    }, 50); // 20 spins/sec
 
     setTimeout(() => {
         clearInterval(spinInterval);
-        // Return to normal orbit position (reset transform)
-        invader.style.transition = 'transform 0.5s ease';
-        invader.style.transform = 'translate(0, 0)'; // keeps it at orbitDrift initial position
+        // Smoothly return to normal
+        invaderInner.style.transition = 'transform 0.5s ease';
+        invaderInner.style.transform = 'rotate(0deg)';
     }, 2000);
 });
 </script>
