@@ -8,39 +8,30 @@
 <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;600;800&display=swap" rel="stylesheet">
 
 <style>
-/* ---------- RESET & BASE ---------- */
-* { box-sizing: border-box; margin: 0; padding: 0; }
+* { box-sizing: border-box; margin:0; padding:0; }
 
 html {
-    /* FIX: Prevents iOS from auto-zooming text in landscape mode */
-    -webkit-text-size-adjust: 100%;
-    text-size-adjust: 100%;
-    height: 100%;
-    overflow-x: hidden;
+    height: -webkit-fill-available;   /* legacy WebKit fix */
+    height: 100dvh;                   /* dynamic viewport height – best current solution */
 }
-
+    
 body {
     font-family: 'Orbitron', sans-serif;
     background: #000;
     color: white;
-    position: relative;
-    width: 100%;
-    /* FIX: Use custom variable for mobile browser height, fallback to 100vh */
-    min-height: 100vh;
-    min-height: calc(var(--vh, 1vh) * 100);
     overflow-x: hidden;
-    -webkit-font-smoothing: antialiased;
+    position: relative;
+    min-height: 100vh;
 }
 
 /* Canvas Background */
 #starsCanvas {
     position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    z-index: -1;
-    pointer-events: none; /* Let clicks pass through */
+    top:0;
+    left:0;
+    width:100%;
+    height:100%;
+    z-index:-1;
 }
 
 /* ---------- HEADER ---------- */
@@ -49,36 +40,31 @@ header {
     justify-content: space-between;
     align-items: center;
     padding: 18px clamp(20px, 5vw, 60px);
-    position: relative;
-    z-index: 10;
 }
 
 .logo {
     font-weight: 800;
     font-size: clamp(18px, 2vw, 24px);
     letter-spacing: 3px;
-    user-select: none;
 }
+
 .logo span:first-child { color: white; }
 .logo span:last-child { color: #ff004f; }
 
-.nav-btn {
+header button {
     background: transparent;
     border: 1px solid #ff004f;
     color: #ff004f;
     padding: 6px 14px;
     margin-left: 8px;
     cursor: pointer;
-    transition: all 0.3s ease;
+    transition: 0.3s ease;
     font-size: 12px;
-    font-family: inherit;
-    text-transform: uppercase;
 }
 
-.nav-btn:hover {
+header button:hover {
     background: #ff004f;
     color: black;
-    box-shadow: 0 0 10px rgba(255, 0, 79, 0.5);
 }
 
 /* ---------- HERO ---------- */
@@ -91,22 +77,20 @@ header {
     display: flex;
     flex-direction: column;
     justify-content: center;
-    align-items: center;
 }
 
 .hero h1 {
     font-size: clamp(26px, 5vw, 44px);
     margin-bottom: 20px;
     font-weight: 800;
-    line-height: 1.2;
-    text-transform: uppercase;
 }
 
 .hero p {
     max-width: 650px;
+    margin: auto;
     font-size: 15px;
     opacity: 0.85;
-    line-height: 1.6;
+    line-height: 1.5;
 }
 
 .lightning {
@@ -117,26 +101,17 @@ header {
 }
 
 @keyframes boltGlow {
-    0%, 100% { filter: drop-shadow(0 0 8px #ff004f); }
+    0% { filter: drop-shadow(0 0 8px #ff004f); }
     50% { filter: drop-shadow(0 0 20px #00d9ff); }
+    100% { filter: drop-shadow(0 0 8px #ff004f); }
 }
 
-/* Invader Animation */
 .invader {
     position: fixed;
     font-size: clamp(26px, 3vw, 40px);
     top: 40%;
-    left: -60px; /* Start slightly further off-screen */
-    /* Use will-change for smoother mobile animation */
-    will-change: transform;
+    left: -50px;
     animation: orbitDrift 25s linear infinite;
-    z-index: 2;
-    cursor: pointer;
-}
-
-.invader-inner {
-    display: inline-block;
-    transform-origin: center;
 }
 
 @keyframes orbitDrift {
@@ -144,7 +119,7 @@ header {
     25%  { transform: translate(30vw, -60px); }
     50%  { transform: translate(65vw, 10px); }
     75%  { transform: translate(40vw, 60px); }
-    100% { transform: translate(110vw, -10px); } /* Ends off-screen right */
+    100% { transform: translate(110vw, -10px); }
 }
 
 /* ---------- CURRICULUM ---------- */
@@ -161,7 +136,7 @@ header {
     padding: 18px;
     margin-bottom: 12px;
     border-left: 3px solid #ff004f;
-    transition: transform 0.3s ease, background 0.3s ease;
+    transition: 0.3s ease;
 }
 
 .phase-card:hover {
@@ -173,7 +148,6 @@ header {
     margin: 0 0 6px;
     font-size: 16px;
     color: #00d9ff;
-    text-transform: uppercase;
 }
 
 .phase-card p {
@@ -182,95 +156,54 @@ header {
     opacity: 0.75;
 }
 
+/* ---------- CTA ---------- */
+.cta {
+    text-align: center;
+    margin: 40px 20px 60px;
+    position: relative;
+    z-index: 1;
+}
+
+.cta button {
+    padding: 12px 28px;
+    font-size: 14px;
+    background: linear-gradient(45deg, #ff004f, #00d9ff);
+    border: none;
+    color: black;
+    cursor: pointer;
+    transition: 0.3s ease;
+}
+
+.cta button:hover {
+    transform: scale(1.05);
+}
+
 /* ---------- FOOTER ---------- */
 footer {
     text-align: center;
-    padding: 40px 20px;
+    padding: 30px;
     opacity: 0.4;
     font-size: 12px;
     position: relative;
     z-index: 1;
-    letter-spacing: 1px;
+}
+.invader-inner {
+    display: inline-block;
+    transform-origin: center;
 }
 
-/* ---------- AUTH MODAL ---------- */
-/* Using a class instead of inline styles for cleaner toggle logic */
-.modal-overlay {
-    display: none; /* Hidden by default */
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background: rgba(0,0,0,0.9);
-    justify-content: center;
-    align-items: center;
-    z-index: 100;
-    backdrop-filter: blur(4px);
-    /* FIX: Allow scrolling if modal content is taller than landscape screen */
-    overflow-y: auto; 
-    padding: 20px; 
-}
-
-.modal-overlay.active {
-    display: flex;
-}
-
-.modal-content {
-    background: #080808;
-    padding: 30px;
-    border: 1px solid #ff004f;
-    box-shadow: 0 0 20px rgba(255, 0, 79, 0.2);
-    max-width: 360px;
-    width: 100%;
-    text-align: center;
-    position: relative;
-    /* Animation for appearing */
-    animation: modalPop 0.3s ease-out;
-}
-
-@keyframes modalPop {
-    from { transform: scale(0.9); opacity: 0; }
-    to { transform: scale(1); opacity: 1; }
-}
-
-.modal-content h2 {
-    color: #ff004f;
-    margin-bottom: 20px;
-    text-transform: uppercase;
-    font-size: 20px;
-}
-
-.modal-input {
-    width: 100%;
-    margin: 8px 0;
-    padding: 12px;
-    background: rgba(255,255,255,0.05);
-    border: 1px solid #333;
-    color: white;
-    font-family: 'Orbitron', sans-serif;
-    font-size: 14px;
-    outline: none;
-    transition: border 0.3s;
-}
-
-.modal-input:focus {
-    border-color: #00d9ff;
-}
+/* ---------- AUTH MODAL BUTTONS (Clean Bowie Style) ---------- */
 
 .auth-btn {
     background: transparent;
     border: 1px solid #ff004f;
     color: #ff004f;
-    padding: 10px 20px;
+    padding: 8px 18px;
     font-size: 12px;
-    margin: 15px 5px 5px;
+    margin: 8px 6px;
     cursor: pointer;
     transition: 0.3s ease;
     letter-spacing: 1px;
-    text-transform: uppercase;
-    font-family: inherit;
-    width: 45%;
 }
 
 .auth-btn:hover {
@@ -278,29 +211,24 @@ footer {
     color: black;
 }
 
+/* Close button */
 .close-btn {
     position: absolute;
-    top: 10px;
-    right: 15px;
+    top: 8px;
+    right: 12px;
     background: transparent;
     border: none;
-    color: #666;
-    font-size: 24px;
+    color: #ff004f;
+    font-size: 18px;
     cursor: pointer;
     transition: 0.2s ease;
-    line-height: 1;
 }
 
 .close-btn:hover {
+    transform: scale(1.2);
     color: #00d9ff;
 }
-
-.auth-message {
-    color: #00d9ff;
-    font-size: 12px;
-    margin-top: 15px;
-    min-height: 18px; /* Prevents jumping */
-}
+    
 </style>
 </head>
 <body>
@@ -310,16 +238,18 @@ footer {
 <header>
     <div class="logo"><span>LEO</span><span>AF</span></div>
     <div>
-        <button class="nav-btn" onclick="openModal('login')">Login</button>
-        <button class="nav-btn" onclick="openModal('register')">Register</button>
+        <button>Login</button>
+        <button>Register</button>
     </div>
 </header>
 
+<!-- HERO SECTION -->
 <section class="hero">
     <h1>LEO Architecture Fundamentals</h1>
 
     <svg class="lightning" viewBox="0 0 120 220">
-        <polygon points="70,0 30,110 65,110 40,220 100,95 60,95" fill="url(#grad)" />
+        <polygon points="70,0 30,110 65,110 40,220 100,95 60,95"
+                 fill="url(#grad)" />
         <defs>
             <linearGradient id="grad" x1="0%" y1="0%" x2="0%" y2="100%">
                 <stop offset="0%" style="stop-color:#ff004f"/>
@@ -330,6 +260,7 @@ footer {
         </defs>
     </svg>
 
+    <!-- Space Invader with inner wrapper for spinning -->
     <div class="invader"><span class="invader-inner">👾</span></div>
 
     <p>
@@ -359,59 +290,46 @@ footer {
         <h3>Phase 4 — Choose Your Mission</h3>
         <p>Engineer. Strategist. Analyst. Architect.</p>
     </div>
-    <div class="phase-card" style="border-color: #00d9ff;">
-        <h3>Build Your Cosmic Empire</h3>
-        <p>Design your own constellation. From requirements to pitch deck.</p>
+    <div class="phase-card">
+        <h3>Build Your Cosmic Empire — Design Your Own Constellation</h3>
+        <p>From requirements to pitch deck.</p>
     </div>
 </section>
 
 <footer>
-    © 2026 LEOAF<br>ESTABLISHED IN THE FUTURE
+© 2026 LEOAF<br>ESTABLISHED IN THE FUTURE
 </footer>
 
-<div id="authModal" class="modal-overlay">
-    <div class="modal-content">
+<!-- Modal -->
+<div id="authModal" style="display:none;position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.9);justify-content:center;align-items:center;z-index:10;">
+    <div style="background:#111;padding:30px;border:2px solid #ff004f;max-width:360px;width:90%;text-align:center;position:relative;">
+        <h2 style="color:#ff004f;">Welcome</h2>
+        <input id="emailInput" type="email" placeholder="Email" style="width:80%;margin:8px 0;padding:8px;"><br>
+        <input id="passwordInput" type="password" placeholder="Password" style="width:80%;margin:8px 0;padding:8px;"><br>
+        <button id="loginBtn" class="auth-btn login">Login</button>
+        <button id="registerBtn" class="auth-btn register">Register</button>
         <button id="closeModal" class="close-btn">×</button>
-        <h2>Welcome</h2>
-        <input id="emailInput" class="modal-input" type="email" placeholder="Email Address">
-        <input id="passwordInput" class="modal-input" type="password" placeholder="Password">
-        
-        <div style="display:flex; justify-content:space-between;">
-            <button id="loginBtn" class="auth-btn">Login</button>
-            <button id="registerBtn" class="auth-btn">Register</button>
-        </div>
-        
-        <p id="authMessage" class="auth-message"></p>
+        <p id="authMessage" style="color:white;font-size:13px;margin-top:6px;"></p>
     </div>
 </div>
-
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/supabase.min.js"></script>
-
+    
 <script>
-/* ----------------------------------------------------
-   1. VIEWPORT & CANVAS LOGIC (Robust Mobile Fix)
-   ---------------------------------------------------- */
+    
+// --------------------
+// Starfield Canvas
+// --------------------
 const canvas = document.getElementById('starsCanvas');
 const ctx = canvas.getContext('2d');
+
 let stars = [];
 const STAR_COUNT = 200;
 
-// Fix for mobile 100vh issue (address bar resizing)
-function setViewportHeight() {
-    const vh = window.innerHeight * 0.01;
-    document.documentElement.style.setProperty('--vh', `${vh}px`);
-}
-
 function initStars() {
     stars = [];
-    // Ensure we fill the current window dimensions
-    const w = window.innerWidth;
-    const h = window.innerHeight;
-    
     for (let i = 0; i < STAR_COUNT; i++) {
         stars.push({
-            x: Math.random() * w,
-            y: Math.random() * h,
+            x: Math.random() * canvas.width,
+            y: Math.random() * canvas.height,
             size: Math.random() * 1.5 + 0.5,
             speed: Math.random() * 0.2 + 0.05,
             hue: Math.random() * 360
@@ -420,110 +338,80 @@ function initStars() {
 }
 
 function resizeCanvas() {
-    // Only resize if dimensions actually changed significantly
-    // This prevents glitches when the mobile address bar scrolls away
-    if (Math.abs(canvas.width - window.innerWidth) > 50 || 
-        Math.abs(canvas.height - window.innerHeight) > 50) {
-        
-        canvas.width = window.innerWidth;
-        canvas.height = window.innerHeight;
-        // Optional: Re-init stars if you want a fresh field on rotate
-        // initStars(); 
-    }
+    canvas.width = window.innerWidth;
+    canvas.height = window.innerHeight;
+    initStars();           // recreate stars to avoid stretching artifacts
 }
 
-function animateStars() {
+window.addEventListener('resize', resizeCanvas);
+window.addEventListener('orientationchange', resizeCanvas);
+    
+resizeCanvas();
+    
+function animateStars(){
     ctx.clearRect(0, 0, canvas.width, canvas.height);
     stars.forEach(star => {
         star.y -= star.speed;
-        
-        // Wrap around top to bottom
-        if(star.y < 0) {
-            star.y = canvas.height;
-            star.x = Math.random() * canvas.width;
-        }
+        if(star.y < 0) star.y = canvas.height;
         
         ctx.beginPath();
-        ctx.fillStyle = `hsl(${star.hue}, 80%, 80%)`;
+        ctx.fillStyle = `hsl(${star.hue}, 80%, 80%)`; // colored star
         ctx.arc(star.x, star.y, star.size, 0, Math.PI*2);
         ctx.fill();
     });
     requestAnimationFrame(animateStars);
 }
-
-// Master Resize Handler (Debounced)
-let resizeTimer;
-window.addEventListener('resize', () => {
-    clearTimeout(resizeTimer);
-    resizeTimer = setTimeout(() => {
-        setViewportHeight();
-        resizeCanvas();
-    }, 100);
-});
-
-// Initialization
-setViewportHeight();
-canvas.width = window.innerWidth;
-canvas.height = window.innerHeight;
-initStars();
 animateStars();
+</script>
 
-
-/* ----------------------------------------------------
-   2. UI INTERACTIONS (Invader & Modal)
-   ---------------------------------------------------- */
-
-// Invader Spin
-const invaderEl = document.querySelector('.invader');
+<script>
+// ---------- SPACE INVADER CLICK: FAST SPIN ----------
 const invaderInner = document.querySelector('.invader-inner');
 
-if(invaderEl && invaderInner) {
-    invaderEl.addEventListener('click', () => {
-        invaderInner.style.transition = 'transform 0.1s linear';
-        let spinDegrees = 0;
-        const spinInterval = setInterval(() => {
-            spinDegrees += 60;
-            invaderInner.style.transform = `rotate(${spinDegrees}deg)`;
-        }, 50);
+invaderInner.parentElement.addEventListener('click', () => {
+    invaderInner.style.transition = 'transform 0.1s linear';
+    let spinDegrees = 0;
+    const spinInterval = setInterval(() => {
+        spinDegrees += 60; // rotate 60deg per tick
+        invaderInner.style.transform = `rotate(${spinDegrees}deg)`;
+    }, 50); // 20 spins/sec
 
-        setTimeout(() => {
-            clearInterval(spinInterval);
-            invaderInner.style.transition = 'transform 0.5s ease';
-            invaderInner.style.transform = 'rotate(0deg)';
-        }, 2000);
-    });
-}
-
-// Modal Logic
-const authModal = document.getElementById('authModal');
-const authMessage = document.getElementById('authMessage');
-
-function openModal(type) {
-    authModal.classList.add('active');
-    authMessage.innerText = ''; // Clear previous messages
-    // Optional: Focus the email input automatically
-    document.getElementById('emailInput').focus();
-}
-
-document.getElementById('closeModal').addEventListener('click', () => {
-    authModal.classList.remove('active');
+    setTimeout(() => {
+        clearInterval(spinInterval);
+        // Smoothly return to normal
+        invaderInner.style.transition = 'transform 0.5s ease';
+        invaderInner.style.transform = 'rotate(0deg)';
+    }, 2000);
 });
+</script>
 
-// Close modal if clicking outside the content box
-authModal.addEventListener('click', (e) => {
-    if (e.target === authModal) {
-        authModal.classList.remove('active');
-    }
-});
-
-
-/* ----------------------------------------------------
-   3. SUPABASE AUTHENTICATION
-   ---------------------------------------------------- */
+<!-- Supabase JS SDK -->
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/supabase.min.js"></script>
+<script>
 const supabaseUrl = 'https://kpkpptqtuuhnbdntuluc.supabase.co';
 const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imtwa3BwdHF0dXVobmJkbnR1bHVjIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzExNTE2MjAsImV4cCI6MjA4NjcyNzYyMH0.qUgRlbvjhi_cB7PTmSJLm62YFf3nJyYtJsnqbP97FrM';
 const supabase = supabase.createClient(supabaseUrl, supabaseKey);
+</script>
 
+<script>
+const authModal = document.getElementById('authModal');
+const loginButton = document.querySelector('header button:nth-child(1)');
+const registerButton = document.querySelector('header button:nth-child(2)');
+const closeModal = document.getElementById('closeModal');
+const authMessage = document.getElementById('authMessage');
+
+loginButton.addEventListener('click', () => {
+    authModal.style.display = 'flex';
+    authMessage.innerText = '';
+});
+registerButton.addEventListener('click', () => {
+    authModal.style.display = 'flex';
+    authMessage.innerText = '';
+});
+closeModal.addEventListener('click', () => authModal.style.display = 'none');
+</script>
+
+<script>
 const emailInput = document.getElementById('emailInput');
 const passwordInput = document.getElementById('passwordInput');
 const loginBtn = document.getElementById('loginBtn');
@@ -533,53 +421,32 @@ const registerBtn = document.getElementById('registerBtn');
 registerBtn.addEventListener('click', async () => {
     const email = emailInput.value;
     const password = passwordInput.value;
-    if(!email || !password) {
-        authMessage.innerText = "Please enter both email and password.";
-        return;
-    }
-    
-    authMessage.innerText = "Processing...";
     const { data, error } = await supabase.auth.signUp({ email, password });
-    
-    if(error) {
-        authMessage.innerText = error.message;
-        authMessage.style.color = '#ff004f';
-    } else {
-        authMessage.innerText = 'Check your email to confirm registration!';
-        authMessage.style.color = '#00d9ff';
-    }
+    if(error) authMessage.innerText = error.message;
+    else authMessage.innerText = 'Check your email to confirm registration!';
 });
 
 // Login
 loginBtn.addEventListener('click', async () => {
     const email = emailInput.value;
     const password = passwordInput.value;
-    if(!email || !password) {
-        authMessage.innerText = "Please enter both email and password.";
-        return;
-    }
-
-    authMessage.innerText = "Logging in...";
     const { data, error } = await supabase.auth.signInWithPassword({ email, password });
-    
-    if(error) {
-        authMessage.innerText = error.message;
-        authMessage.style.color = '#ff004f';
-    } else {
+    if(error) authMessage.innerText = error.message;
+    else {
         authMessage.innerText = 'Login successful!';
-        authMessage.style.color = '#00d9ff';
-        setTimeout(() => {
-            authModal.classList.remove('active');
-            showDashboard(data.user);
-        }, 1000);
+        authModal.style.display = 'none';
+        showDashboard();
     }
 });
 
-function showDashboard(user) {
-    console.log("Logged in user:", user);
-    alert("Welcome back, Commander. Initializing dashboard...");
+// Show logged-in view
+async function showDashboard(){
+    const user = supabase.auth.getUser();
+    // Here we can show the after-login page
+    console.log(user);
+    alert("Welcome! We'll now load your personal dashboard.");
 }
 </script>
-
+    
 </body>
 </html>
