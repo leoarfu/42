@@ -73,6 +73,10 @@ header button:hover {
     padding: clamp(40px, 6vw, 70px) 20px 40px;
     position: relative;
     z-index: 1;
+    min-height: 60vh;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
 }
 
 .hero h1 {
@@ -103,7 +107,7 @@ header button:hover {
 }
 
 .invader {
-    position: absolute;
+    position: fixed;
     font-size: clamp(26px, 3vw, 40px);
     top: 40%;
     left: -50px;
@@ -319,7 +323,6 @@ function setViewportHeight() {
 
 setViewportHeight();
 window.addEventListener('resize', setViewportHeight);
-window.addEventListener('orientationchange', setViewportHeight);
     
 // --------------------
 // Starfield Canvas
@@ -344,8 +347,8 @@ function initStars() {
 }
 
 function resizeCanvas() {
-    canvas.width = document.documentElement.clientWidth;
-    canvas.height = document.documentElement.clientHeight;
+    canvas.width = window.innerWidth;
+    canvas.height = window.innerHeight;
     initStars();
 }
 
