@@ -21,37 +21,70 @@ body {
 
 /* -------- STARFIELD -------- */
 
-body::before, body::after {
+body::before,
+body::after,
+body .stars {
     content: "";
     position: fixed;
+    top: 0;
+    left: 0;
     width: 200%;
     height: 200%;
-    top: -50%;
-    left: -50%;
-    background-image:
-        radial-gradient(2px 2px at 20% 30%, white, transparent),
-        radial-gradient(1px 1px at 70% 80%, white, transparent),
-        radial-gradient(1.5px 1.5px at 40% 60%, white, transparent),
-        radial-gradient(1px 1px at 90% 20%, white, transparent),
-        radial-gradient(1.2px 1.2px at 10% 75%, white, transparent),
-        radial-gradient(1px 1px at 55% 15%, white, transparent),
-        radial-gradient(1px 1px at 85% 55%, white, transparent);
-    background-repeat: repeat;
-    animation: drift 120s linear infinite;
-    opacity: 0.4;
+    pointer-events: none;
     z-index: -1;
 }
 
+/* Layer 1 - small stars */
+body::before {
+    background-image:
+        radial-gradient(1px 1px at 20% 30%, white, transparent),
+        radial-gradient(1px 1px at 80% 70%, white, transparent),
+        radial-gradient(1px 1px at 50% 50%, white, transparent),
+        radial-gradient(1px 1px at 10% 80%, white, transparent),
+        radial-gradient(1px 1px at 90% 20%, white, transparent),
+        radial-gradient(1px 1px at 60% 10%, white, transparent),
+        radial-gradient(1px 1px at 30% 60%, white, transparent),
+        radial-gradient(1px 1px at 75% 40%, white, transparent);
+    animation: driftSlow 120s linear infinite;
+    opacity: 0.6;
+}
+
+/* Layer 2 - medium stars */
 body::after {
-    animation-duration: 200s;
-    opacity: 0.2;
+    background-image:
+        radial-gradient(2px 2px at 25% 40%, white, transparent),
+        radial-gradient(2px 2px at 70% 90%, white, transparent),
+        radial-gradient(2px 2px at 40% 15%, white, transparent),
+        radial-gradient(2px 2px at 85% 60%, white, transparent);
+    animation: driftMedium 80s linear infinite;
+    opacity: 0.5;
 }
 
-@keyframes drift {
-    from { transform: translate(0, 0); }
-    to { transform: translate(-200px, -300px); }
+/* Layer 3 - faint distant stars */
+.stars {
+    background-image:
+        radial-gradient(1px 1px at 15% 25%, white, transparent),
+        radial-gradient(1px 1px at 45% 75%, white, transparent),
+        radial-gradient(1px 1px at 65% 35%, white, transparent),
+        radial-gradient(1px 1px at 95% 55%, white, transparent);
+    animation: driftFast 60s linear infinite;
+    opacity: 0.3;
 }
 
+@keyframes driftSlow {
+    from { transform: translate(0,0); }
+    to   { transform: translate(-200px, -300px); }
+}
+
+@keyframes driftMedium {
+    from { transform: translate(0,0); }
+    to   { transform: translate(-300px, -150px); }
+}
+
+@keyframes driftFast {
+    from { transform: translate(0,0); }
+    to   { transform: translate(-400px, -250px); }
+}
 /* ---------- HEADER ---------- */
 
 header {
@@ -209,7 +242,7 @@ footer {
 </head>
 
 <body>
-
+<div class="stars"></div>
 <header>
     <div class="logo">
         <span>LEO</span><span>AF</span>
