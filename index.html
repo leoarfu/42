@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, shrink-to-fit=no">
 <title>LEO Architecture Fundamentals — LEOAF</title>
 
 <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;600;800&display=swap" rel="stylesheet">
@@ -101,14 +101,16 @@ header button:hover {
 @media (max-height: 500px) and (orientation: landscape) {
     .hero {
         padding-top: 20px;
-        min-height: auto; /* Let content dictate height */
+        min-height: auto;
     }
-    .lightning {
-        width: 50px; /* Make the bolt smaller in landscape */
-        margin-bottom: 10px;
-    }
+    /* FIX: Prevent text from blowing up in landscape */
     .hero h1 {
-        margin-bottom: 10px;
+        font-size: 28px; 
+    }
+    /* FIX: Hide the invader or make it smaller so it doesn't block the view */
+    .invader {
+        font-size: 20px;
+        top: 80%; /* Move it out of the way of text */
     }
 }
   
@@ -387,7 +389,7 @@ function resizeCanvas() {
 
 // Initial load
 resizeCanvas();
-initStars(); // Ensure stars exist on load
+//initStars(); // Ensure stars exist on load
 
 window.addEventListener('resize', resizeCanvas);
 
