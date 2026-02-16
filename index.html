@@ -370,22 +370,18 @@ function initStars() {
 }
 
 function resizeCanvas() {
-    // Only re-initialize stars if the WIDTH changes (rotation), 
-    // otherwise just update canvas height to avoid "flashing" on scroll.
     const newWidth = window.innerWidth;
     const newHeight = window.innerHeight;
 
     // Update canvas drawing buffer
     canvas.width = newWidth;
     canvas.height = newHeight;
-
-    // If width changed significantly (rotation), re-scatter stars.
-    // If only height changed (mobile URL bar), just let them loop naturally.
-    if (Math.abs(newWidth - lastWidth) > 50) {
-        initStars(); 
-        lastWidth = newWidth;
-    }
+    
+    // We update the width variable, but we DO NOT call initStars().
+    // This keeps the current stars flowing, even if the screen size changes.
+    lastWidth = newWidth;
 }
+
 
 // Initial load
 resizeCanvas();
