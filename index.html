@@ -249,6 +249,16 @@ footer {
     transform: scale(1.2);
     color: #00d9ff;
 }
+
+.password-wrapper {
+    position: relative;
+    display: flex;
+}
+
+#togglePassword {
+    margin-left: 8px;
+    cursor: pointer;
+}
     
 </style>
 </head>
@@ -332,6 +342,10 @@ footer {
         <button id="closeModal" class="close-btn">×</button>
         <p id="authMessage" style="color:white;font-size:13px;margin-top:6px;"></p>
     </div>
+    <div class="password-wrapper">
+    <input type="password" id="password" placeholder="Password" />
+    <button type="button" id="togglePassword">Show</button>
+</div>
 </div>
     
 <script>
@@ -518,6 +532,43 @@ async function showDashboard(){
     console.log(user);
     alert("Welcome " + user.email + " 🚀");
 }
+    const passwordInput = document.getElementById('password');
+const togglePassword = document.getElementById('togglePassword');
+
+togglePassword.addEventListener('click', () => {
+    const type = passwordInput.getAttribute('type');
+
+    if (type === 'password') {
+        passwordInput.setAttribute('type', 'text');
+        togglePassword.textContent = 'Hide';
+    } else {
+        passwordInput.setAttribute('type', 'password');
+        togglePassword.textContent = 'Show';
+    }
+});
+registerBtn.addEventListener('click', async () => {
+    const email = emailInput.value.trim();
+    const password = passwordInput.value.trim();
+
+    authMessage.innerText = "Creating account...";
+
+    const { error } = await client.auth.signUp({
+        email,
+        password
+    });
+
+    if (error) {
+        if (error.message.toLowerCase().includes("already")) {
+            authMessage.innerText = "⚠️ An account with this email already exists. Try logging in.";
+        } else {
+            authMessage.innerText = error.message;
+        }
+        return;
+    }
+
+    authMessage.innerText = "📩 Check your email to confirm your account.";
+});
+
 </script>
     
 </body>
