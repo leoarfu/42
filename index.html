@@ -474,113 +474,101 @@ const supabaseUrl = 'https://kpkpptqtuuhnbdntuluc.supabase.co';
 const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imtwa3BwdHF0dXVobmJkbnR1bHVjIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzExNTE2MjAsImV4cCI6MjA4NjcyNzYyMH0.qUgRlbvjhi_cB7PTmSJLm62YFf3nJyYtJsnqbP97FrM';
 const client = supabase.createClient(supabaseUrl, supabaseKey);
 </script>
+<script>
+document.addEventListener('DOMContentLoaded', () => {
 
-/* ===============================
-   AUTH LOGIC (CLEAN VERSION)
-================================= */
+  const authModal = document.getElementById('authModal');
+  const loginButton = document.getElementById('openLogin');
+  const registerButton = document.getElementById('openRegister');
+  const closeModal = document.getElementById('closeModal');
 
-const authModal = document.getElementById('authModal');
-const loginButton = document.getElementById('openLogin');
-const registerButton = document.getElementById('openRegister');
-const closeModal = document.getElementById('closeModal');
+  const emailInput = document.getElementById('emailInput');
+  const passwordInput = document.getElementById('passwordInput');
+  const loginBtn = document.getElementById('loginBtn');
+  const registerBtn = document.getElementById('registerBtn');
+  const authMessage = document.getElementById('authMessage');
+  const togglePassword = document.getElementById('togglePassword');
 
-const emailInput = document.getElementById('emailInput');
-const passwordInput = document.getElementById('passwordInput');
-const loginBtn = document.getElementById('loginBtn');
-const registerBtn = document.getElementById('registerBtn');
-const authMessage = document.getElementById('authMessage');
-const togglePassword = document.getElementById('togglePassword');
+  // OPEN MODAL
+  loginButton.addEventListener('click', () => {
+      authModal.style.display = 'flex';
+      authMessage.innerText = '';
+  });
 
-/* ---------- OPEN / CLOSE MODAL ---------- */
+  registerButton.addEventListener('click', () => {
+      authModal.style.display = 'flex';
+      authMessage.innerText = '';
+  });
 
-loginButton.addEventListener('click', () => {
-    authModal.style.display = 'flex';
-    authMessage.innerText = '';
-});
+  closeModal.addEventListener('click', () => {
+      authModal.style.display = 'none';
+  });
 
-registerButton.addEventListener('click', () => {
-    authModal.style.display = 'flex';
-    authMessage.innerText = '';
-});
+  // SHOW / HIDE PASSWORD
+  togglePassword.addEventListener('click', () => {
+      const type = passwordInput.getAttribute('type');
+      if(type === 'password'){
+          passwordInput.setAttribute('type','text');
+          togglePassword.textContent = 'HIDE';
+      } else {
+          passwordInput.setAttribute('type','password');
+          togglePassword.textContent = 'SHOW';
+      }
+  });
 
-closeModal.addEventListener('click', () => {
-    authModal.style.display = 'none';
-});
+  // REGISTER
+  registerBtn.addEventListener('click', async () => {
+      const email = emailInput.value.trim();
+      const password = passwordInput.value.trim();
 
-/* ---------- SHOW / HIDE PASSWORD ---------- */
+      if(!email || !password){
+          authMessage.innerText = "Enter email and password.";
+          return;
+      }
 
-togglePassword.addEventListener('click', () => {
-    const type = passwordInput.getAttribute('type');
+      authMessage.innerText = "Creating account...";
 
-    if (type === 'password') {
-        passwordInput.setAttribute('type', 'text');
-        togglePassword.textContent = 'Hide';
-    } else {
-        passwordInput.setAttribute('type', 'password');
-        togglePassword.textContent = 'Show';
-    }
-});
+      const { error } = await client.auth.signUp({ email, password });
 
-/* ---------- REGISTER ---------- */
+      if(error){
+          if(error.message.toLowerCase().includes("already")){
+              authMessage.innerText = "⚠️ Account already exists. Try logging in.";
+          } else {
+              authMessage.innerText = error.message;
+          }
+          return;
+      }
 
-registerBtn.addEventListener('click', async () => {
-    const email = emailInput.value.trim();
-    const password = passwordInput.value.trim();
+      authMessage.innerText = "📩 Check your email to confirm.";
+  });
 
-    if (!email || !password) {
-        authMessage.innerText = "Enter email and password.";
-        return;
-    }
+  // LOGIN
+  loginBtn.addEventListener('click', async () => {
+      const email = emailInput.value.trim();
+      const password = passwordInput.value.trim();
 
-    authMessage.innerText = "Creating account...";
+      if(!email || !password){
+          authMessage.innerText = "Enter email and password.";
+          return;
+      }
 
-    const { error } = await client.auth.signUp({
-        email,
-        password
-    });
+      authMessage.innerText = "Logging in...";
 
-    if (error) {
-        if (error.message.toLowerCase().includes("already")) {
-            authMessage.innerText = "⚠️ Account already exists. Try logging in.";
-        } else {
-            authMessage.innerText = error.message;
-        }
-        return;
-    }
+      const { error } = await client.auth.signInWithPassword({ email, password });
 
-    authMessage.innerText = "📩 Check your email to confirm.";
-});
+      if(error){
+          authMessage.innerText = error.message;
+          return;
+      }
 
-/* ---------- LOGIN ---------- */
+      authMessage.innerText = "Welcome 🚀";
+      authModal.style.display = 'none';
+      window.location.href = "dashboard.html"; // or show dashboard content
+  });
 
-loginBtn.addEventListener('click', async () => {
-    const email = emailInput.value.trim();
-    const password = passwordInput.value.trim();
-
-    if (!email || !password) {
-        authMessage.innerText = "Enter email and password.";
-        return;
-    }
-
-    authMessage.innerText = "Logging in...";
-
-    const { error } = await client.auth.signInWithPassword({
-        email,
-        password
-    });
-
-    if (error) {
-        authMessage.innerText = error.message;
-        return;
-    }
-
-    authMessage.innerText = "Welcome 🚀";
-    authModal.style.display = 'none';
-
-    // Redirect to dashboard
-    window.location.href = "dashboard.html";
 });
 </script>
+
 
     
 </body>
