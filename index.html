@@ -336,16 +336,15 @@ footer {
     <div style="background:#111;padding:30px;border:2px solid #ff004f;max-width:360px;width:90%;text-align:center;position:relative;">
         <h2 style="color:#ff004f;">Welcome</h2>
         <input id="emailInput" type="email" placeholder="Email" style="width:80%;margin:8px 0;padding:8px;"><br>
-        <input id="passwordInput" type="password" placeholder="Password" style="width:80%;margin:8px 0;padding:8px;"><br>
+<div class="password-wrapper" style="width:80%;margin:8px auto;">
+    <input id="passwordInput" type="password" placeholder="Password" style="flex:1;padding:8px;">
+    <button type="button" id="togglePassword">Show</button>
+</div>
         <button id="loginBtn" class="auth-btn login">Login</button>
         <button id="registerBtn" class="auth-btn register">Register</button>
         <button id="closeModal" class="close-btn">×</button>
         <p id="authMessage" style="color:white;font-size:13px;margin-top:6px;"></p>
     </div>
-    <div class="password-wrapper">
-    <input type="password" id="password" placeholder="Password" />
-    <button type="button" id="togglePassword">Show</button>
-</div>
 </div>
     
 <script>
@@ -473,67 +472,39 @@ closeModal.addEventListener('click', () => authModal.style.display = 'none');
 </script>
 
 <script>
+/* ===============================
+   AUTH LOGIC (CLEAN VERSION)
+================================= */
+
+const authModal = document.getElementById('authModal');
+const loginButton = document.querySelector('header button:nth-child(1)');
+const registerButton = document.querySelector('header button:nth-child(2)');
+const closeModal = document.getElementById('closeModal');
+
 const emailInput = document.getElementById('emailInput');
 const passwordInput = document.getElementById('passwordInput');
 const loginBtn = document.getElementById('loginBtn');
 const registerBtn = document.getElementById('registerBtn');
-
-// Register
-registerBtn.addEventListener('click', async () => {
-    const email = emailInput.value.trim();
-    const password = passwordInput.value.trim();
-
-    if (!email || !password) {
-        authMessage.innerText = "Enter email and password.";
-        return;
-    }
-
-    authMessage.innerText = "Creating account...";
-
-    const { data, error } = await client.auth.signUp({
-        email,
-        password
-    });
-
-    if (error) {
-        authMessage.innerText = error.message;
-    } else {
-        authMessage.innerText = "Success! Check your email to confirm.";
-        emailInput.value = "";
-        passwordInput.value = "";
-    }
-});
-
-// Login
-loginBtn.addEventListener('click', async () => {
-    const email = emailInput.value.trim();
-    const password = passwordInput.value.trim();
-
-    authMessage.innerText = "Logging in...";
-
-    const { data, error } = await client.auth.signInWithPassword({
-        email,
-        password
-    });
-
-    if (error) {
-        authMessage.innerText = error.message;
-    } else {
-        authMessage.innerText = "Welcome back 🚀";
-        authModal.style.display = 'none';
-        showDashboard();
-    }
-});
-
-// Show logged-in view
-async function showDashboard(){
-    const { data: { user } } = await client.auth.getUser();
-    // Here we can show the after-login page
-    console.log(user);
-    alert("Welcome " + user.email + " 🚀");
-}
-    const passwordInput = document.getElementById('password');
+const authMessage = document.getElementById('authMessage');
 const togglePassword = document.getElementById('togglePassword');
+
+/* ---------- OPEN / CLOSE MODAL ---------- */
+
+loginButton.addEventListener('click', () => {
+    authModal.style.display = 'flex';
+    authMessage.innerText = '';
+});
+
+registerButton.addEventListener('click', () => {
+    authModal.style.display = 'flex';
+    authMessage.innerText = '';
+});
+
+closeModal.addEventListener('click', () => {
+    authModal.style.display = 'none';
+});
+
+/* ---------- SHOW / HIDE PASSWORD ---------- */
 
 togglePassword.addEventListener('click', () => {
     const type = passwordInput.getAttribute('type');
@@ -546,9 +517,17 @@ togglePassword.addEventListener('click', () => {
         togglePassword.textContent = 'Show';
     }
 });
+
+/* ---------- REGISTER ---------- */
+
 registerBtn.addEventListener('click', async () => {
     const email = emailInput.value.trim();
     const password = passwordInput.value.trim();
+
+    if (!email || !password) {
+        authMessage.innerText = "Enter email and password.";
+        return;
+    }
 
     authMessage.innerText = "Creating account...";
 
@@ -559,17 +538,47 @@ registerBtn.addEventListener('click', async () => {
 
     if (error) {
         if (error.message.toLowerCase().includes("already")) {
-            authMessage.innerText = "⚠️ An account with this email already exists. Try logging in.";
+            authMessage.innerText = "⚠️ Account already exists. Try logging in.";
         } else {
             authMessage.innerText = error.message;
         }
         return;
     }
 
-    authMessage.innerText = "📩 Check your email to confirm your account.";
+    authMessage.innerText = "📩 Check your email to confirm.";
 });
 
+/* ---------- LOGIN ---------- */
+
+loginBtn.addEventListener('click', async () => {
+    const email = emailInput.value.trim();
+    const password = passwordInput.value.trim();
+
+    if (!email || !password) {
+        authMessage.innerText = "Enter email and password.";
+        return;
+    }
+
+    authMessage.innerText = "Logging in...";
+
+    const { error } = await client.auth.signInWithPassword({
+        email,
+        password
+    });
+
+    if (error) {
+        authMessage.innerText = error.message;
+        return;
+    }
+
+    authMessage.innerText = "Welcome 🚀";
+    authModal.style.display = 'none';
+
+    // Redirect to dashboard
+    window.location.href = "dashboard.html";
+});
 </script>
+
     
 </body>
 </html>
