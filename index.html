@@ -251,13 +251,35 @@ footer {
 }
 
 .password-wrapper {
+    width: 80%;
+    margin: 8px auto;
     position: relative;
-    display: flex;
+}
+
+.password-wrapper input {
+    width: 100%;
+    padding: 8px 60px 8px 8px;
+    background: #000;
+    border: 1px solid #ff004f;
+    color: white;
 }
 
 #togglePassword {
-    margin-left: 8px;
+    position: absolute;
+    right: 10px;
+    top: 50%;
+    transform: translateY(-50%);
+    font-size: 11px;
+    color: #00d9ff;
     cursor: pointer;
+    letter-spacing: 1px;
+    opacity: 0.8;
+    transition: 0.2s ease;
+}
+
+#togglePassword:hover {
+    opacity: 1;
+    color: #ff004f;
 }
     
 </style>
@@ -269,8 +291,8 @@ footer {
 <header>
     <div class="logo"><span>LEO</span><span>AF</span></div>
     <div>
-        <button>Login</button>
-        <button>Register</button>
+        <button id="openLogin">Login</button>
+        <button id="openRegister">Register</button>
     </div>
 </header>
 
@@ -336,9 +358,9 @@ footer {
     <div style="background:#111;padding:30px;border:2px solid #ff004f;max-width:360px;width:90%;text-align:center;position:relative;">
         <h2 style="color:#ff004f;">Welcome</h2>
         <input id="emailInput" type="email" placeholder="Email" style="width:80%;margin:8px 0;padding:8px;"><br>
-<div class="password-wrapper" style="width:80%;margin:8px auto;">
-    <input id="passwordInput" type="password" placeholder="Password" style="flex:1;padding:8px;">
-    <button type="button" id="togglePassword">Show</button>
+<div class="password-wrapper">
+    <input id="passwordInput" type="password" placeholder="Password">
+    <span id="togglePassword">SHOW</span>
 </div>
         <button id="loginBtn" class="auth-btn login">Login</button>
         <button id="registerBtn" class="auth-btn register">Register</button>
@@ -458,8 +480,8 @@ const client = supabase.createClient(supabaseUrl, supabaseKey);
 ================================= */
 
 const authModal = document.getElementById('authModal');
-const loginButton = document.querySelector('header button:nth-child(1)');
-const registerButton = document.querySelector('header button:nth-child(2)');
+const loginButton = document.getElementById('openLogin');
+const registerButton = document.getElementById('openRegister');
 const closeModal = document.getElementById('closeModal');
 
 const emailInput = document.getElementById('emailInput');
