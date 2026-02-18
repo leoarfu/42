@@ -540,19 +540,36 @@ godspeedBtn.addEventListener('click', async () => {
 
     authMessage.innerText = "Launching...";
 
-    const { data, error } = await client.auth.signInWithPassword({
-        email,
-        password
-    });
+    // 1️⃣ Try login
+    const { data: loginData, error: loginError } =
+        await client.auth.signInWithPassword({
+            email,
+            password
+        });
 
-    if (!error && data.user) {
+    if (!loginError && loginData.user) {
         window.location.href = "dashboard.html";
         return;
     }
 
-    // ❌ Login failed
-    authMessage.innerText = "Invalid login credentials or no account.";
+    // 2️⃣ If login fails, try signup
+    const { data: signUpData, error: signUpError } =
+        await client.auth.signUp({
+            email,
+            password
+        });
+
+    if (!signUpError && signUpData.user) {
+        authMessage.innerText =
+            "Account created. Check your email to confirm before launch.";
+        return;
+    }
+
+    // 3️⃣ If signup failed → account exists → wrong password
+    authMessage.innerText =
+        "Invalid login credentials.";
 });
+    
     const togglePassword = document.getElementById("togglePassword");
     togglePassword.addEventListener("click", () => {
     const type = passwordInput.getAttribute("type");
