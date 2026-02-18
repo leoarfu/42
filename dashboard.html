@@ -1,0 +1,185 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>LEOAF Command Center</title>
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&display=swap" rel="stylesheet">
+
+<style>
+body {
+    margin:0;
+    font-family:'Orbitron', sans-serif;
+    background:#000;
+    color:white;
+    padding:20px;
+}
+
+header {
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    margin-bottom:20px;
+}
+
+button {
+    background:#ff004f;
+    border:none;
+    padding:8px 16px;
+    font-family:'Orbitron', sans-serif;
+    cursor:pointer;
+    transition:0.2s;
+}
+
+button:hover {
+    background:#00d9ff;
+    color:black;
+}
+
+.section {
+    border:1px solid #ff004f;
+    padding:15px;
+    margin-bottom:15px;
+}
+
+.section h3 {
+    margin-top:0;
+}
+
+.progress-container {
+    background:#111;
+    height:20px;
+    margin:20px 0;
+}
+
+.progress-bar {
+    background:#00d9ff;
+    height:100%;
+    width:0%;
+    transition:0.3s ease;
+}
+.small-btn {
+    padding:4px 10px;
+    font-size:12px;
+    margin-right:6px;
+}
+</style>
+</head>
+<body>
+
+<header>
+    <div>
+        <h2>LEO Architecture Fundamentals</h2>
+        <p id="userEmail"></p>
+    </div>
+    <button id="logoutBtn">Log Out</button>
+</header>
+
+<div class="progress-container">
+    <div class="progress-bar" id="progressBar"></div>
+</div>
+
+<div id="sections"></div>
+
+<button onclick="resetAll()">Reset Entire Course</button>
+
+<!-- Supabase -->
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/supabase.min.js"></script>
+<script>
+const supabaseUrl = 'YOUR_URL';
+const supabaseKey = 'YOUR_KEY';
+const { createClient } = supabase;
+const client = createClient(supabaseUrl, supabaseKey);
+
+const sectionList = [
+    "Foundations",
+    "System Design",
+    "Scalability",
+    "Databases",
+    "Security",
+    "Architecture Patterns",
+    "Performance",
+    "Deployment"
+];
+
+let progressData = JSON.parse(localStorage.getItem("leoafProgress")) || {};
+
+document.addEventListener('DOMContentLoaded', async () => {
+
+    const { data: { user } } = await client.auth.getUser();
+    if(!user){
+        window.location.href = "index.html";
+        return;
+    }
+
+    document.getElementById("userEmail").innerText = user.email;
+
+    renderSections();
+    updateProgress();
+
+    document.getElementById("logoutBtn").addEventListener("click", async () => {
+        await client.auth.signOut();
+        window.location.href = "index.html";
+    });
+
+});
+
+function renderSections(){
+    const container = document.getElementById("sections");
+    container.innerHTML = "";
+
+    sectionList.forEach(section => {
+        const mastered = progressData[section];
+
+        const div = document.createElement("div");
+        div.className = "section";
+
+        div.innerHTML = `
+            <h3>${section}</h3>
+            <p>Status: ${mastered ? "✅ Mastered" : "In Progress"}</p>
+            <button class="small-btn" onclick="toggleMaster('${section}')">
+                ${mastered ? "Undo" : "Mark Mastered"}
+            </button>
+            <button class="small-btn" onclick="resetSection('${section}')">
+                Reset Section
+            </button>
+        `;
+
+        container.appendChild(div);
+    });
+}
+
+function toggleMaster(section){
+    progressData[section] = !progressData[section];
+    localStorage.setItem("leoafProgress", JSON.stringify(progressData));
+    renderSections();
+    updateProgress();
+}
+
+function resetSection(section){
+    if(confirm("Reset this section?")){
+        delete progressData[section];
+        localStorage.setItem("leoafProgress", JSON.stringify(progressData));
+        renderSections();
+        updateProgress();
+    }
+}
+
+function resetAll(){
+    if(confirm("⚠️ This will reset ALL progress. Continue?")){
+        progressData = {};
+        localStorage.removeItem("leoafProgress");
+        renderSections();
+        updateProgress();
+    }
+}
+
+function updateProgress(){
+    const completed = Object.values(progressData).filter(v => v).length;
+    const percent = (completed / sectionList.length) * 100;
+    document.getElementById("progressBar").style.width = percent + "%";
+}
+</script>
+
+</body>
+</html>
