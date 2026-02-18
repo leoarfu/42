@@ -398,13 +398,6 @@ footer {
 </div>
     
 <script>
-
-document.addEventListener('DOMContentLoaded', async () => {
-    const { data: { user } } = await client.auth.getUser();
-    if (user) {
-        window.location.href = "dashboard.html";
-    }
-});
     
     // ---- FIX MOBILE VIEWPORT HEIGHT ----
 function setViewportHeight() {
@@ -506,7 +499,7 @@ invaderInner.parentElement.addEventListener('click', () => {
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script>
 const supabaseUrl = 'https://kpkpptqtuuhnbdntuluc.supabase.co';
-const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imtwa3BwdHF0dXVobmJkbnR1bHVjIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzExNTE2MjAsImV4cCI6MjA4NjcyNzYyMH0.qUgRlbvjhi_cB7PTmSJLm62YFf3nJyYtJsnqbP97FrM';
+const supabaseKey = 'YOUR_KEY';
 const { createClient } = supabase;
 const client = createClient(supabaseUrl, supabaseKey);
 
@@ -517,6 +510,14 @@ const emailInput = document.getElementById('emailInput');
 const passwordInput = document.getElementById('passwordInput');
 const godspeedBtn = document.getElementById('godspeedBtn');
 const authMessage = document.getElementById('authMessage');
+
+// ✅ Auto-redirect if already logged in
+document.addEventListener('DOMContentLoaded', async () => {
+    const { data: { user } } = await client.auth.getUser();
+    if (user) {
+        window.location.href = "dashboard.html";
+    }
+});
 
 launchBtn.addEventListener('click', () => {
     authModal.style.display = "flex";
@@ -549,11 +550,21 @@ godspeedBtn.addEventListener('click', async () => {
         return;
     }
 
-    authMessage.innerText =
-        "Invalid Password or No Account.";
+    authMessage.innerText = "Invalid login credentials or no account.";
+
+    const togglePassword = document.getElementById("togglePassword");
+
+togglePassword.addEventListener("click", () => {
+    const type = passwordInput.getAttribute("type");
+    passwordInput.setAttribute(
+        "type",
+        type === "password" ? "text" : "password"
+    );
+
+    togglePassword.innerText =
+        type === "password" ? "HIDE" : "SHOW";
+});
 });
 </script>
-
-    
 </body>
 </html>
