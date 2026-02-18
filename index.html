@@ -539,30 +539,18 @@ godspeedBtn.addEventListener('click', async () => {
 
     authMessage.innerText = "Launching...";
 
-    // 1️⃣ Try login first
-    const { error: loginError } = await client.auth.signInWithPassword({
+    const { data, error } = await client.auth.signInWithPassword({
         email,
         password
     });
 
-    if (!loginError) {
-        authMessage.innerText = "Welcome back 🚀";
+    if (!error && data.user) {
         window.location.href = "dashboard.html";
         return;
     }
 
-    // 2️⃣ If login failed → try signup
-    const { error: signUpError } = await client.auth.signUp({
-        email,
-        password
-    });
-
-    if (signUpError) {
-        authMessage.innerText = signUpError.message;
-        return;
-    }
-
-    authMessage.innerText = "Account created. Check your email to confirm.";
+    authMessage.innerText =
+        "Invalid Password or No Account.";
 });
 </script>
 
