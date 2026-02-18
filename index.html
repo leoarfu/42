@@ -315,8 +315,9 @@ footer {
 <header>
     <div class="logo"><span>LEO</span><span>AF</span></div>
     <div>
-        <button id="openLogin">Login</button>
-        <button id="openRegister">Register</button>
+        <button id="launchBtn">Launch</button>
+       <!-- <button id="openLogin">Login</button>
+        <button id="openRegister">Register</button> -->
     </div>
 </header>
 
@@ -388,14 +389,22 @@ footer {
     <input id="passwordInput" type="password" placeholder="Password">
     <span id="togglePassword">SHOW</span>
 </div>
-        <button id="loginBtn" class="auth-btn login">Login</button>
-        <button id="registerBtn" class="auth-btn register">Register</button>
+        <button id="godspeedBtn">Godspeed</button>
+       <--! <button id="loginBtn" class="auth-btn login">Login</button>
+        <button id="registerBtn" class="auth-btn register">Register</button> -->
         <button id="closeModal" class="close-btn">×</button>
         <p id="authMessage" style="color:white;font-size:13px;margin-top:6px;"></p>
     </div>
 </div>
     
 <script>
+
+document.addEventListener('DOMContentLoaded', async () => {
+    const { data: { user } } = await client.auth.getUser();
+    if (user) {
+        window.location.href = "dashboard.html";
+    }
+});
     
     // ---- FIX MOBILE VIEWPORT HEIGHT ----
 function setViewportHeight() {
@@ -498,52 +507,27 @@ invaderInner.parentElement.addEventListener('click', () => {
 <script>
 const supabaseUrl = 'https://kpkpptqtuuhnbdntuluc.supabase.co';
 const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imtwa3BwdHF0dXVobmJkbnR1bHVjIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzExNTE2MjAsImV4cCI6MjA4NjcyNzYyMH0.qUgRlbvjhi_cB7PTmSJLm62YFf3nJyYtJsnqbP97FrM';
-const client = supabase.createClient(supabaseUrl, supabaseKey);
-</script>
-<script>
-document.addEventListener('DOMContentLoaded', () => {
+const { createClient } = supabase;
+const client = createClient(supabaseUrl, supabaseKey);
 
-  const authModal = document.getElementById('authModal');
-  const loginButton = document.getElementById('openLogin');
-  const registerButton = document.getElementById('openRegister');
-  const closeModal = document.getElementById('closeModal');
+const authModal = document.getElementById('authModal');
+const launchBtn = document.getElementById('launchBtn');
+const closeModal = document.getElementById('closeModal');
+const emailInput = document.getElementById('emailInput');
+const passwordInput = document.getElementById('passwordInput');
+const godspeedBtn = document.getElementById('godspeedBtn');
+const authMessage = document.getElementById('authMessage');
 
-  const emailInput = document.getElementById('emailInput');
-  const passwordInput = document.getElementById('passwordInput');
-  const loginBtn = document.getElementById('loginBtn');
-  const registerBtn = document.getElementById('registerBtn');
-  const authMessage = document.getElementById('authMessage');
-  const togglePassword = document.getElementById('togglePassword');
+launchBtn.addEventListener('click', () => {
+    authModal.style.display = "flex";
+    authMessage.innerText = "";
+});
 
-  // OPEN MODAL
-  loginButton.addEventListener('click', () => {
-      authModal.style.display = 'flex';
-      authMessage.innerText = '';
-  });
+closeModal.addEventListener('click', () => {
+    authModal.style.display = "none";
+});
 
-  registerButton.addEventListener('click', () => {
-      authModal.style.display = 'flex';
-      authMessage.innerText = '';
-  });
-
-  closeModal.addEventListener('click', () => {
-      authModal.style.display = 'none';
-  });
-
-  // SHOW / HIDE PASSWORD
-  togglePassword.addEventListener('click', () => {
-      const type = passwordInput.getAttribute('type');
-      if(type === 'password'){
-          passwordInput.setAttribute('type','text');
-          togglePassword.textContent = 'HIDE';
-      } else {
-          passwordInput.setAttribute('type','password');
-          togglePassword.textContent = 'SHOW';
-      }
-  });
-
-  // REGISTER
-  registerBtn.addEventListener('click', async () => {
+godspeedBtn.addEventListener('click', async () => {
 
     const email = emailInput.value.trim();
     const password = passwordInput.value.trim();
@@ -553,8 +537,21 @@ document.addEventListener('DOMContentLoaded', () => {
         return;
     }
 
-    authMessage.innerText = "Creating account...";
+    authMessage.innerText = "Launching...";
 
+    // 1️⃣ Try login first
+    const { error: loginError } = await client.auth.signInWithPassword({
+        email,
+        password
+    });
+
+    if (!loginError) {
+        authMessage.innerText = "Welcome back 🚀";
+        window.location.href = "dashboard.html";
+        return;
+    }
+
+    // 2️⃣ If login failed → try signup
     const { error: signUpError } = await client.auth.signUp({
         email,
         password
@@ -565,48 +562,9 @@ document.addEventListener('DOMContentLoaded', () => {
         return;
     }
 
-    // Try to log in immediately
-    const { error: loginError } = await client.auth.signInWithPassword({
-        email,
-        password
-    });
-
-    if (!loginError) {
-        authMessage.innerText = "⚠️ Account already exists. You are now logged in.";
-        authModal.style.display = 'none';
-        window.location.href = "dashboard.html";
-    } else {
-        authMessage.innerText = "📩 Check your email to confirm your account.";
-    }
-
-});
-  // LOGIN
-  loginBtn.addEventListener('click', async () => {
-      const email = emailInput.value.trim();
-      const password = passwordInput.value.trim();
-
-      if(!email || !password){
-          authMessage.innerText = "Enter email and password.";
-          return;
-      }
-
-      authMessage.innerText = "Logging in...";
-
-      const { error } = await client.auth.signInWithPassword({ email, password });
-
-      if(error){
-          authMessage.innerText = error.message;
-          return;
-      }
-
-      authMessage.innerText = "Welcome 🚀";
-      authModal.style.display = 'none';
-      window.location.href = "dashboard.html"; // or show dashboard content
-  });
-
+    authMessage.innerText = "Account created. Check your email to confirm.";
 });
 </script>
-
 
     
 </body>
