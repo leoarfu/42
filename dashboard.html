@@ -5,61 +5,62 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>LEOAF Command Center</title>
 
-<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
 
 <style>
+
 body {
     margin:0;
-    font-family:'Orbitron', sans-serif;
-    background:black;
-    color:white;
-    overflow-x:hidden;
+    font-family:'Inter', sans-serif;
+    background: radial-gradient(circle at top, #111827 0%, #05060a 70%);
+    color:#e6edf3;
 }
 
-/* Subtle starfield */
+/* Subtle star drift */
 body::before {
     content:"";
     position:fixed;
     width:200%;
     height:200%;
-    background-image:
-        radial-gradient(white 1px, transparent 1px),
-        radial-gradient(#00d9ff 1px, transparent 1px),
-        radial-gradient(#ff004f 1px, transparent 1px);
-    background-size:120px 120px, 160px 160px, 200px 200px;
-    animation: drift 60s linear infinite;
-    opacity:0.15;
+    background-image: radial-gradient(white 1px, transparent 1px);
+    background-size:180px 180px;
+    opacity:0.05;
+    animation: drift 120s linear infinite;
 }
 
 @keyframes drift {
     from { transform: translate(0,0); }
-    to { transform: translate(-300px,-300px); }
+    to { transform: translate(-400px,-400px); }
 }
 
 header {
     display:flex;
     justify-content:space-between;
     align-items:center;
-    padding:20px 30px;
-    border-bottom:1px solid #ff004f;
+    padding:24px 40px;
+    border-bottom:1px solid rgba(255,255,255,0.08);
 }
 
-.glass {
-    background: rgba(20,20,20,0.6);
-    backdrop-filter: blur(8px);
-    border:1px solid #ff004f;
-    padding:20px;
-    margin:20px;
+header h2 {
+    font-family:'Orbitron';
+    letter-spacing:2px;
+    font-size:20px;
+    margin:0;
+}
+
+.email {
+    font-size:13px;
+    opacity:0.6;
 }
 
 button {
-    background:black;
+    background:transparent;
     border:1px solid #ff004f;
     color:#ff004f;
-    padding:8px 16px;
-    cursor:pointer;
+    padding:6px 14px;
     font-family:'Orbitron';
-    transition:0.2s;
+    cursor:pointer;
+    transition:0.2s ease;
 }
 
 button:hover {
@@ -67,34 +68,55 @@ button:hover {
     color:black;
 }
 
-.energy-container {
-    height:22px;
-    background:#111;
-    margin-top:10px;
+.container {
+    max-width:900px;
+    margin:40px auto;
+    padding:0 20px;
 }
 
-.energy-bar {
+/* Progress */
+.progress-wrapper {
+    margin-bottom:40px;
+}
+
+.progress-bar {
+    height:10px;
+    background:#111;
+    border-radius:10px;
+    overflow:hidden;
+}
+
+.progress-fill {
     height:100%;
     width:0%;
     background:linear-gradient(90deg,#ff004f,#00d9ff);
     transition:0.4s ease;
 }
 
-.module {
-    margin-bottom:15px;
-    padding:15px;
-    border:1px solid #00d9ff;
-    transition:0.2s;
+/* Sections */
+.section {
+    border:1px solid rgba(255,255,255,0.08);
+    padding:20px;
+    margin-bottom:18px;
+    background:rgba(255,255,255,0.02);
 }
 
-.module:hover {
-    box-shadow:0 0 15px #00d9ff;
+.section h3 {
+    margin:0 0 10px 0;
+    font-size:18px;
 }
 
-.small {
-    padding:4px 8px;
+.section p {
+    font-size:14px;
+    opacity:0.7;
+}
+
+.small-btn {
     font-size:12px;
+    margin-right:8px;
+    padding:4px 10px;
 }
+
 .danger {
     border-color:red;
     color:red;
@@ -103,6 +125,7 @@ button:hover {
     background:red;
     color:black;
 }
+
 </style>
 </head>
 <body>
@@ -110,41 +133,43 @@ button:hover {
 <header>
     <div>
         <h2>LEOAF Command Center</h2>
-        <div id="userEmail"></div>
+        <div class="email" id="userEmail"></div>
     </div>
     <button id="logoutBtn">Exit Command</button>
 </header>
 
-<div class="glass">
-    <h3>Energy Core</h3>
-    <div class="energy-container">
-        <div class="energy-bar" id="energyBar"></div>
+<div class="container">
+
+    <div class="progress-wrapper">
+        <h3>Learning Progress</h3>
+        <div class="progress-bar">
+            <div class="progress-fill" id="progressFill"></div>
+        </div>
     </div>
-</div>
 
-<div class="glass" id="modules"></div>
+    <div id="sections"></div>
 
-<div class="glass">
-    <h3>System Controls</h3>
-    <button class="danger" onclick="resetAll()">Reset Entire System</button>
+    <button class="danger" onclick="resetAll()">Reset Entire Course</button>
+
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/supabase.min.js"></script>
 <script>
+
 const supabaseUrl = 'YOUR_URL';
 const supabaseKey = 'YOUR_KEY';
 const { createClient } = supabase;
 const client = createClient(supabaseUrl, supabaseKey);
 
-const modulesList = [
-    "Foundations",
-    "System Design",
-    "Scalability",
-    "Databases",
-    "Security",
+const sectionsList = [
+    "Foundations of Architecture",
+    "System Design Principles",
+    "Scalability & Distributed Systems",
+    "Database Design",
+    "Security & Reliability",
     "Architecture Patterns",
-    "Performance",
-    "Deployment"
+    "Performance Optimization",
+    "Deployment & DevOps"
 ];
 
 let progress = JSON.parse(localStorage.getItem("leoafProgress")) || {};
@@ -159,33 +184,34 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     document.getElementById("userEmail").innerText = user.email;
 
-    renderModules();
-    updateEnergy();
+    renderSections();
+    updateProgress();
 
     document.getElementById("logoutBtn").addEventListener("click", async () => {
         await client.auth.signOut();
         window.location.href = "index.html";
     });
+
 });
 
-function renderModules(){
-    const container = document.getElementById("modules");
-    container.innerHTML = "<h3>Mission Modules</h3>";
+function renderSections(){
+    const container = document.getElementById("sections");
+    container.innerHTML = "";
 
-    modulesList.forEach(module => {
-        const mastered = progress[module];
+    sectionsList.forEach(section => {
+        const mastered = progress[section];
 
         const div = document.createElement("div");
-        div.className = "module";
+        div.className = "section";
 
         div.innerHTML = `
-            <strong>${module}</strong><br>
-            Status: ${mastered ? "MASTERED" : "IN PROGRESS"}<br><br>
-            <button class="small" onclick="toggle('${module}')">
+            <h3>${section}</h3>
+            <p>${mastered ? "Section mastered." : "Ready to begin."}</p>
+            <button class="small-btn" onclick="toggle('${section}')">
                 ${mastered ? "Undo Mastery" : "Mark Mastered"}
             </button>
-            <button class="small" onclick="resetModule('${module}')">
-                Reset Module
+            <button class="small-btn" onclick="resetSection('${section}')">
+                Reset
             </button>
         `;
 
@@ -193,37 +219,37 @@ function renderModules(){
     });
 }
 
-function toggle(module){
-    progress[module] = !progress[module];
+function toggle(section){
+    progress[section] = !progress[section];
     localStorage.setItem("leoafProgress", JSON.stringify(progress));
-    renderModules();
-    updateEnergy();
+    renderSections();
+    updateProgress();
 }
 
-function resetModule(module){
-    if(confirm("Reset this module?")){
-        delete progress[module];
+function resetSection(section){
+    if(confirm("Reset this section?")){
+        delete progress[section];
         localStorage.setItem("leoafProgress", JSON.stringify(progress));
-        renderModules();
-        updateEnergy();
+        renderSections();
+        updateProgress();
     }
 }
 
 function resetAll(){
-    if(confirm("⚠️ This will wipe all progress. Continue?")){
+    if(confirm("This will erase all progress. Continue?")){
         progress = {};
         localStorage.removeItem("leoafProgress");
-        renderModules();
-        updateEnergy();
+        renderSections();
+        updateProgress();
     }
 }
 
-function updateEnergy(){
+function updateProgress(){
     const completed = Object.values(progress).filter(v => v).length;
-    const percent = (completed / modulesList.length) * 100;
-    document.getElementById("energyBar").style.width = percent + "%";
+    const percent = (completed / sectionsList.length) * 100;
+    document.getElementById("progressFill").style.width = percent + "%";
 }
-</script>
 
+</script>
 </body>
 </html>
