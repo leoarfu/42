@@ -544,30 +544,42 @@ document.addEventListener('DOMContentLoaded', () => {
 
   // REGISTER
   registerBtn.addEventListener('click', async () => {
-      const email = emailInput.value.trim();
-      const password = passwordInput.value.trim();
 
-      if(!email || !password){
-          authMessage.innerText = "Enter email and password.";
-          return;
-      }
+    const email = emailInput.value.trim();
+    const password = passwordInput.value.trim();
 
-      authMessage.innerText = "Creating account...";
+    if (!email || !password) {
+        authMessage.innerText = "Enter email and password.";
+        return;
+    }
 
-      const { error } = await client.auth.signUp({ email, password });
+    authMessage.innerText = "Creating account...";
 
-      if(error){
-          if(error.message.toLowerCase().includes("already")){
-              authMessage.innerText = "⚠️ Account already exists. Try logging in.";
-          } else {
-              authMessage.innerText = error.message;
-          }
-          return;
-      }
+    const { error: signUpError } = await client.auth.signUp({
+        email,
+        password
+    });
 
-      authMessage.innerText = "📩 Check your email to confirm.";
-  });
+    if (signUpError) {
+        authMessage.innerText = signUpError.message;
+        return;
+    }
 
+    // Try to log in immediately
+    const { error: loginError } = await client.auth.signInWithPassword({
+        email,
+        password
+    });
+
+    if (!loginError) {
+        authMessage.innerText = "⚠️ Account already exists. You are now logged in.";
+        authModal.style.display = 'none';
+        window.location.href = "dashboard.html";
+    } else {
+        authMessage.innerText = "📩 Check your email to confirm your account.";
+    }
+
+});
   // LOGIN
   loginBtn.addEventListener('click', async () => {
       const email = emailInput.value.trim();
