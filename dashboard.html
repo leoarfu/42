@@ -1,67 +1,107 @@
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>LEOAF Command Center</title>
+
 <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&display=swap" rel="stylesheet">
 
 <style>
 body {
     margin:0;
     font-family:'Orbitron', sans-serif;
-    background:#000;
+    background:black;
     color:white;
-    padding:20px;
+    overflow-x:hidden;
+}
+
+/* Subtle starfield */
+body::before {
+    content:"";
+    position:fixed;
+    width:200%;
+    height:200%;
+    background-image:
+        radial-gradient(white 1px, transparent 1px),
+        radial-gradient(#00d9ff 1px, transparent 1px),
+        radial-gradient(#ff004f 1px, transparent 1px);
+    background-size:120px 120px, 160px 160px, 200px 200px;
+    animation: drift 60s linear infinite;
+    opacity:0.15;
+}
+
+@keyframes drift {
+    from { transform: translate(0,0); }
+    to { transform: translate(-300px,-300px); }
 }
 
 header {
     display:flex;
     justify-content:space-between;
     align-items:center;
-    margin-bottom:20px;
+    padding:20px 30px;
+    border-bottom:1px solid #ff004f;
+}
+
+.glass {
+    background: rgba(20,20,20,0.6);
+    backdrop-filter: blur(8px);
+    border:1px solid #ff004f;
+    padding:20px;
+    margin:20px;
 }
 
 button {
-    background:#ff004f;
-    border:none;
+    background:black;
+    border:1px solid #ff004f;
+    color:#ff004f;
     padding:8px 16px;
-    font-family:'Orbitron', sans-serif;
     cursor:pointer;
+    font-family:'Orbitron';
     transition:0.2s;
 }
 
 button:hover {
-    background:#00d9ff;
+    background:#ff004f;
     color:black;
 }
 
-.section {
-    border:1px solid #ff004f;
-    padding:15px;
-    margin-bottom:15px;
-}
-
-.section h3 {
-    margin-top:0;
-}
-
-.progress-container {
+.energy-container {
+    height:22px;
     background:#111;
-    height:20px;
-    margin:20px 0;
+    margin-top:10px;
 }
 
-.progress-bar {
-    background:#00d9ff;
+.energy-bar {
     height:100%;
     width:0%;
-    transition:0.3s ease;
+    background:linear-gradient(90deg,#ff004f,#00d9ff);
+    transition:0.4s ease;
 }
-.small-btn {
-    padding:4px 10px;
+
+.module {
+    margin-bottom:15px;
+    padding:15px;
+    border:1px solid #00d9ff;
+    transition:0.2s;
+}
+
+.module:hover {
+    box-shadow:0 0 15px #00d9ff;
+}
+
+.small {
+    padding:4px 8px;
     font-size:12px;
-    margin-right:6px;
+}
+.danger {
+    border-color:red;
+    color:red;
+}
+.danger:hover {
+    background:red;
+    color:black;
 }
 </style>
 </head>
@@ -69,21 +109,26 @@ button:hover {
 
 <header>
     <div>
-        <h2>LEO Architecture Fundamentals</h2>
-        <p id="userEmail"></p>
+        <h2>LEOAF Command Center</h2>
+        <div id="userEmail"></div>
     </div>
-    <button id="logoutBtn">Log Out</button>
+    <button id="logoutBtn">Exit Command</button>
 </header>
 
-<div class="progress-container">
-    <div class="progress-bar" id="progressBar"></div>
+<div class="glass">
+    <h3>Energy Core</h3>
+    <div class="energy-container">
+        <div class="energy-bar" id="energyBar"></div>
+    </div>
 </div>
 
-<div id="sections"></div>
+<div class="glass" id="modules"></div>
 
-<button onclick="resetAll()">Reset Entire Course</button>
+<div class="glass">
+    <h3>System Controls</h3>
+    <button class="danger" onclick="resetAll()">Reset Entire System</button>
+</div>
 
-<!-- Supabase -->
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/supabase.min.js"></script>
 <script>
 const supabaseUrl = 'YOUR_URL';
@@ -91,7 +136,7 @@ const supabaseKey = 'YOUR_KEY';
 const { createClient } = supabase;
 const client = createClient(supabaseUrl, supabaseKey);
 
-const sectionList = [
+const modulesList = [
     "Foundations",
     "System Design",
     "Scalability",
@@ -102,7 +147,7 @@ const sectionList = [
     "Deployment"
 ];
 
-let progressData = JSON.parse(localStorage.getItem("leoafProgress")) || {};
+let progress = JSON.parse(localStorage.getItem("leoafProgress")) || {};
 
 document.addEventListener('DOMContentLoaded', async () => {
 
@@ -114,34 +159,33 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     document.getElementById("userEmail").innerText = user.email;
 
-    renderSections();
-    updateProgress();
+    renderModules();
+    updateEnergy();
 
     document.getElementById("logoutBtn").addEventListener("click", async () => {
         await client.auth.signOut();
         window.location.href = "index.html";
     });
-
 });
 
-function renderSections(){
-    const container = document.getElementById("sections");
-    container.innerHTML = "";
+function renderModules(){
+    const container = document.getElementById("modules");
+    container.innerHTML = "<h3>Mission Modules</h3>";
 
-    sectionList.forEach(section => {
-        const mastered = progressData[section];
+    modulesList.forEach(module => {
+        const mastered = progress[module];
 
         const div = document.createElement("div");
-        div.className = "section";
+        div.className = "module";
 
         div.innerHTML = `
-            <h3>${section}</h3>
-            <p>Status: ${mastered ? "✅ Mastered" : "In Progress"}</p>
-            <button class="small-btn" onclick="toggleMaster('${section}')">
-                ${mastered ? "Undo" : "Mark Mastered"}
+            <strong>${module}</strong><br>
+            Status: ${mastered ? "MASTERED" : "IN PROGRESS"}<br><br>
+            <button class="small" onclick="toggle('${module}')">
+                ${mastered ? "Undo Mastery" : "Mark Mastered"}
             </button>
-            <button class="small-btn" onclick="resetSection('${section}')">
-                Reset Section
+            <button class="small" onclick="resetModule('${module}')">
+                Reset Module
             </button>
         `;
 
@@ -149,35 +193,35 @@ function renderSections(){
     });
 }
 
-function toggleMaster(section){
-    progressData[section] = !progressData[section];
-    localStorage.setItem("leoafProgress", JSON.stringify(progressData));
-    renderSections();
-    updateProgress();
+function toggle(module){
+    progress[module] = !progress[module];
+    localStorage.setItem("leoafProgress", JSON.stringify(progress));
+    renderModules();
+    updateEnergy();
 }
 
-function resetSection(section){
-    if(confirm("Reset this section?")){
-        delete progressData[section];
-        localStorage.setItem("leoafProgress", JSON.stringify(progressData));
-        renderSections();
-        updateProgress();
+function resetModule(module){
+    if(confirm("Reset this module?")){
+        delete progress[module];
+        localStorage.setItem("leoafProgress", JSON.stringify(progress));
+        renderModules();
+        updateEnergy();
     }
 }
 
 function resetAll(){
-    if(confirm("⚠️ This will reset ALL progress. Continue?")){
-        progressData = {};
+    if(confirm("⚠️ This will wipe all progress. Continue?")){
+        progress = {};
         localStorage.removeItem("leoafProgress");
-        renderSections();
-        updateProgress();
+        renderModules();
+        updateEnergy();
     }
 }
 
-function updateProgress(){
-    const completed = Object.values(progressData).filter(v => v).length;
-    const percent = (completed / sectionList.length) * 100;
-    document.getElementById("progressBar").style.width = percent + "%";
+function updateEnergy(){
+    const completed = Object.values(progress).filter(v => v).length;
+    const percent = (completed / modulesList.length) * 100;
+    document.getElementById("energyBar").style.width = percent + "%";
 }
 </script>
 
