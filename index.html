@@ -540,41 +540,19 @@ godspeedBtn.addEventListener('click', async () => {
 
     authMessage.innerText = "Launching...";
 
-    // 1️⃣ Try login
-    const { data: loginData, error: loginError } =
-        await client.auth.signInWithPassword({
-            email,
-            password
-        });
-
-    if (!loginError && loginData.user) {
-        window.location.href = "dashboard.html";
-        return;
-    }
-
-    // 2️⃣ If login failed, try signup
-    const { data: signUpData, error: signUpError } =
-        await client.auth.signUp({
-            email,
-            password
-        });
-
-    if (!signUpError && signUpData.user) {
-        authMessage.innerText =
-            "New account created. Confirm your email before launch.";
-        return;
-    }
-
-    // 3️⃣ If signup failed → account exists → wrong password
-    authMessage.innerText =
-        "Wrong password or if new account confirm your email.";
-});
+    const { data, error } = await client.auth.signInWithPassword({
+        email,
+        password
+    });
 
     if (!error && data.user) {
         window.location.href = "dashboard.html";
         return;
     }
 
+    // ❌ Login failed
+    authMessage.innerText = "Invalid login credentials or no account.";
+});
     const togglePassword = document.getElementById("togglePassword");
     togglePassword.addEventListener("click", () => {
     const type = passwordInput.getAttribute("type");
@@ -585,7 +563,6 @@ godspeedBtn.addEventListener('click', async () => {
 
     togglePassword.innerText =
         type === "password" ? "HIDE" : "SHOW";
-});
 });
 </script>
 </body>
