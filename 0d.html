@@ -1,258 +1,336 @@
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>LEOAF Command Center – The Waiting Room</title>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>LEOAF Black Lodge Command Center</title>
 
-  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;500;700&family=Cinzel+Decorative:wght@700&family=Special+Elite&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
 
-  <style>
-:root {
-  --red-room: #7a1212;
-  --red-room-dark: #4a0a0a;
-  --gold-trim: #d4af37;
-  --cream-text: #f5e8c7;
-  --floor-dark: #2c1a0f;      /* dark brown-black from the actual floor */
-  --floor-light: #c19a6b;     /* lighter brownish-beige */
-}
+<style>
+
+/* ============================= */
+/* BLACK LODGE ENVIRONMENT */
+/* ============================= */
 
 body {
-  margin: 0;
-  min-height: 100vh;
-  font-family: 'Special Elite', serif;
-  background: var(--red-room-dark);
-  color: var(--cream-text);
-  
-  /* curtain-like background layer */
-  background-image:
-    linear-gradient(transparent 40%, rgba(0,0,0,0.5) 100%),
-    repeating-linear-gradient(
-      45deg,
-      var(--red-room) 0,
-      var(--red-room) 100px,
-      #5c0c0c 100px,
-      #5c0c0c 200px
-    );
-  background-size: 100% 100%, 600px 600px;
-  animation: pulse 22s ease-in-out infinite;
-  position: relative;
-  overflow: hidden;
+    margin:0;
+    font-family:'Inter', sans-serif;
+    color:#f5f5f5;
+    overflow-x:hidden;
+    background:#000;
 }
 
-@keyframes pulse {
-  0%,100% { filter: brightness(1) contrast(1.08); }
-  50%     { filter: brightness(0.9) contrast(1.15); }
-}
-
-/* === ANIMATED ZIGZAG FLOOR – moving away / receding downward === */
+/* RED CURTAINS */
 body::before {
-  content: "";
-  position: fixed;
-  inset: 0;
-  background: repeating-linear-gradient(
-    45deg,
-    var(--floor-dark) 0px,
-    var(--floor-dark) 40px,
-    var(--floor-light) 40px,
-    var(--floor-light) 80px
-  );
-  background-size: 120px 120px;          /* controls zigzag width/height */
-  opacity: 0.45;                         /* was lower before – now more visible */
-  z-index: -2;
-  pointer-events: none;
-  
-  /* The movement: slow drift downward (away from viewer) */
-  animation: 
-    floorDrift 80s linear infinite,
-    floorBreathe 18s ease-in-out infinite;
+    content:"";
+    position:fixed;
+    inset:0;
+    background:
+        repeating-linear-gradient(
+            90deg,
+            #3a0000 0px,
+            #5c0000 40px,
+            #3a0000 80px
+        );
+    background-size:200% 100%;
+    animation: curtainMove 20s linear infinite;
+    z-index:-3;
 }
 
-@keyframes floorDrift {
-  from {
-    background-position: 0 0;
-  }
-  to {
-    background-position: 0 240px;        /* moves exactly 3× tile height = seamless loop */
-  }
+@keyframes curtainMove {
+    0% { background-position:0 0; }
+    100% { background-position:400px 0; }
 }
 
-@keyframes floorBreathe {
-  0%, 100% {
-    transform: scale(1.02) translateY(0);
-    filter: brightness(1);
-  }
-  50% {
-    transform: scale(1.00) translateY(8px);
-    filter: brightness(0.92);
-  }
+/* ZIGZAG FLOOR */
+.floor {
+    position:fixed;
+    bottom:0;
+    left:0;
+    width:100%;
+    height:55vh;
+    background:
+        repeating-linear-gradient(
+            135deg,
+            black 0px,
+            black 40px,
+            white 40px,
+            white 80px
+        ),
+        repeating-linear-gradient(
+            -135deg,
+            black 0px,
+            black 40px,
+            white 40px,
+            white 80px
+        );
+    background-size:160px 160px;
+    animation: floorMove 6s linear infinite;
+    transform: perspective(600px) rotateX(65deg);
+    transform-origin:bottom;
+    z-index:-2;
 }
 
-/* Optional subtle vignette / depth overlay to enhance "tunnel" feeling */
-body::after {
-  content: "";
-  position: fixed;
-  inset: 0;
-  background: radial-gradient(
-    circle at 50% 30%,
-    transparent 30%,
-    rgba(0,0,0,0.7) 70%,
-    black 100%
-  );
-  opacity: 0.6;
-  pointer-events: none;
-  z-index: -1;
+@keyframes floorMove {
+    0% { background-position:0 0, 0 0; }
+    100% { background-position:160px 160px, -160px 160px; }
 }
 
-/* Rest of your styles (header, container, sections, buttons etc.) remain the same */
-  </style>
+/* DARK ATMOSPHERE OVERLAY */
+.overlay {
+    position:fixed;
+    inset:0;
+    background:radial-gradient(circle at center, rgba(0,0,0,0.3), rgba(0,0,0,0.8));
+    z-index:-1;
+}
+
+/* ============================= */
+/* UI STYLING */
+/* ============================= */
+
+header {
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    padding:24px 40px;
+    border-bottom:1px solid rgba(255,255,255,0.1);
+    backdrop-filter: blur(4px);
+}
+
+header h2 {
+    font-family:'Orbitron';
+    letter-spacing:3px;
+    font-size:20px;
+    margin:0;
+    text-transform:uppercase;
+}
+
+.email {
+    font-size:13px;
+    opacity:0.7;
+}
+
+button {
+    background:transparent;
+    border:1px solid #ff1a1a;
+    color:#ff1a1a;
+    padding:6px 14px;
+    font-family:'Orbitron';
+    cursor:pointer;
+    transition:0.3s ease;
+}
+
+button:hover {
+    background:#ff1a1a;
+    color:black;
+    box-shadow:0 0 15px red;
+}
+
+.container {
+    max-width:900px;
+    margin:40px auto;
+    padding:0 20px;
+}
+
+/* Progress */
+.progress-wrapper {
+    margin-bottom:40px;
+}
+
+.progress-bar {
+    height:10px;
+    background:#111;
+    border-radius:10px;
+    overflow:hidden;
+}
+
+.progress-fill {
+    height:100%;
+    width:0%;
+    background:linear-gradient(90deg,#ff0000,#ffffff);
+    transition:0.4s ease;
+}
+
+/* Sections */
+.section {
+    border:1px solid rgba(255,255,255,0.1);
+    padding:20px;
+    margin-bottom:18px;
+    background:rgba(0,0,0,0.6);
+    backdrop-filter:blur(6px);
+    transition:0.3s ease;
+}
+
+.section:hover {
+    box-shadow:0 0 25px rgba(255,0,0,0.4);
+}
+
+.section h3 {
+    margin:0 0 10px 0;
+    font-size:18px;
+}
+
+.section p {
+    font-size:14px;
+    opacity:0.8;
+}
+
+.small-btn {
+    font-size:12px;
+    margin-right:8px;
+    padding:4px 10px;
+}
+
+.danger {
+    border-color:#ff0000;
+    color:#ff0000;
+}
+.danger:hover {
+    background:#ff0000;
+    color:black;
+}
+
+</style>
 </head>
+
 <body>
 
+<div class="floor"></div>
+<div class="overlay"></div>
+
 <header>
-  <div>
-    <h2>THE WAITING ROOM</h2>
-    <div class="email" id="userEmail"></div>
-  </div>
-  <button id="logoutBtn">Leave this place</button>
+    <div>
+        <h2>Black Lodge Command Center</h2>
+        <div class="email" id="userEmail"></div>
+    </div>
+    <button id="logoutBtn">Exit Lodge</button>
 </header>
 
 <div class="container">
 
-  <div class="progress-wrapper">
-    <h3>Progress Through the Lodge</h3>
+<div class="progress-wrapper">
+    <h3>Learning Progress</h3>
     <div class="progress-bar">
-      <div class="progress-fill" id="progressFill"></div>
+        <div class="progress-fill" id="progressFill"></div>
     </div>
-  </div>
+</div>
 
-  <div id="sections"></div>
+<div id="sections"></div>
 
-  <button class="danger" onclick="resetAll()">Erase All Knowledge</button>
+<button class="danger" onclick="resetAll()">Reset Entire Course</button>
 
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/supabase.min.js"></script>
-<script>
-// ────────────────────────────────────────────────
-//   Your existing Supabase logic remains unchanged
-//   (I only touched styles & minor title/header text)
-// ────────────────────────────────────────────────
 
+<script>
 const supabaseUrl = 'https://kpkpptqtuuhnbdntuluc.supabase.co';
-const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imtwa3BwdHF0dXVobmJkbnR1bHVjIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzExNTE2MjAsImV4cCI6MjA4NjcyNzYyMH0.qUgRlbvjhi_cB7PTmSJLm62YFf3nJyYtJsnqbP97FrM';
+const supabaseKey = 'YOUR_PUBLIC_ANON_KEY';
 const { createClient } = supabase;
 const client = createClient(supabaseUrl, supabaseKey);
 
 const sectionsList = [
-  "Foundations of Architecture",
-  "System Design Principles",
-  "Scalability & Distributed Systems",
-  "Database Design",
-  "Security & Reliability",
-  "Architecture Patterns",
-  "Performance Optimization",
-  "Deployment & DevOps"
+    "Foundations of Architecture",
+    "System Design Principles",
+    "Scalability & Distributed Systems",
+    "Database Design",
+    "Security & Reliability",
+    "Architecture Patterns",
+    "Performance Optimization",
+    "Deployment & DevOps"
 ];
 
 let currentUser = null;
 let progress = {};
 
 document.addEventListener('DOMContentLoaded', async () => {
-  const { data: { user } } = await client.auth.getUser();
 
-  if (!user) {
-    window.location.href = "index.html";
-    return;
-  }
+    const { data: { user } } = await client.auth.getUser();
 
-  currentUser = user;
-  document.getElementById("userEmail").innerText = user.email;
+    if (!user) {
+        window.location.href = "index.html";
+        return;
+    }
 
-  await loadProgress();
-  renderSections();
-  updateProgress();
+    currentUser = user;
+    document.getElementById("userEmail").innerText = user.email;
 
-  document.getElementById("logoutBtn").addEventListener("click", async () => {
-    await client.auth.signOut();
-    window.location.href = "index.html";
-  });
+    await loadProgress();
+    renderSections();
+    updateProgress();
+
+    document.getElementById("logoutBtn").addEventListener("click", async () => {
+        await client.auth.signOut();
+        window.location.href = "index.html";
+    });
+
 });
 
 async function loadProgress() {
-  const { data, error } = await client
-    .from('user_progress')
-    .select('*')
-    .eq('user_id', currentUser.id);
+    const { data } = await client
+        .from('user_progress')
+        .select('*')
+        .eq('user_id', currentUser.id);
 
-  if (error) {
-    console.error(error);
-    return;
-  }
-
-  progress = {};
-  data.forEach(row => {
-    progress[row.section] = row.mastered;
-  });
+    progress = {};
+    data?.forEach(row => {
+        progress[row.section] = row.mastered;
+    });
 }
 
 function renderSections(){
-  const container = document.getElementById("sections");
-  container.innerHTML = "";
+    const container = document.getElementById("sections");
+    container.innerHTML = "";
 
-  sectionsList.forEach(section => {
-    const mastered = progress[section];
+    sectionsList.forEach(section => {
+        const mastered = progress[section];
 
-    const div = document.createElement("div");
-    div.className = "section";
+        const div = document.createElement("div");
+        div.className = "section";
 
-    div.innerHTML = `
-      <h3>${section}</h3>
-      <p>${mastered ? "The shape has been mastered." : "It is waiting for you."}</p>
-      <button class="small-btn" onclick="toggle('${section}')">
-        ${mastered ? "Return it" : "Claim mastery"}
-      </button>
-    `;
+        div.innerHTML = `
+            <h3>${section}</h3>
+            <p>${mastered ? "Section mastered." : "Ready to begin."}</p>
+            <button class="small-btn" onclick="toggle('${section}')">
+                ${mastered ? "Undo Mastery" : "Mark Mastered"}
+            </button>
+        `;
 
-    container.appendChild(div);
-  });
+        container.appendChild(div);
+    });
 }
 
 async function toggle(section){
-  const mastered = progress[section];
+    const mastered = progress[section];
 
-  if (mastered) {
-    await client
-      .from('user_progress')
-      .delete()
-      .eq('user_id', currentUser.id)
-      .eq('section', section);
+    if (mastered) {
+        await client.from('user_progress')
+            .delete()
+            .eq('user_id', currentUser.id)
+            .eq('section', section);
+        delete progress[section];
+    } else {
+        await client.from('user_progress')
+            .upsert({
+                user_id: currentUser.id,
+                section: section,
+                mastered: true
+            }, { onConflict: ['user_id', 'section'] });
 
-    delete progress[section];
-  } else {
-    await client
-      .from('user_progress')
-      .upsert({
-        user_id: currentUser.id,
-        section: section,
-        mastered: true
-      }, { onConflict: ['user_id', 'section'] });
+        progress[section] = true;
+    }
 
-    progress[section] = true;
-  }
-
-  renderSections();
-  updateProgress();
+    renderSections();
+    updateProgress();
 }
 
 function updateProgress(){
-  const completed = Object.values(progress).filter(v => v).length;
-  const percent = (completed / sectionsList.length) * 100;
-  document.getElementById("progressFill").style.width = percent + "%";
+    const completed = Object.values(progress).filter(v => v).length;
+    const percent = (completed / sectionsList.length) * 100;
+    document.getElementById("progressFill").style.width = percent + "%";
 }
-
-// Optional: if you want real backwards speech feel, you could reverse section titles here
-// (but it makes the UI hard to use — better as easter egg on hover or something)
 </script>
+
 </body>
 </html>
