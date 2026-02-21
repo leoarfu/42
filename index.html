@@ -579,7 +579,7 @@ invaderInner.parentElement.addEventListener('click', () => {
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script>
 const supabaseUrl = 'https://kpkpptqtuuhnbdntuluc.supabase.co';
-const supabaseKey = 'sb_publishable_aws8RQ085UqKFBUWfojluQ_o9R9WKBb';
+const supabaseKey = 'sb_publishable_aws8RQ085UqKFBUWfojluQ_o9R9WKBb'; // Note: Ensure this is your actual anon key
 const { createClient } = supabase;
 const client = createClient(supabaseUrl, supabaseKey);
 
@@ -591,10 +591,18 @@ const passwordInput = document.getElementById('passwordInput');
 const godspeedBtn = document.getElementById('godspeedBtn');
 const authMessage = document.getElementById('authMessage');
 
-// ✅ Auto-redirect if already logged in
+// 1️⃣ LISTEN FOR EMAIL LINKS & MAGIC LOGINS
+// This catches the user the second they return from clicking the email link
+client.auth.onAuthStateChange((event, session) => {
+    if (event === 'SIGNED_IN' && session) {
+        window.location.href = "dashboard.html";
+    }
+});
+
+// 2️⃣ AUTO-REDIRECT IF ALREADY LOGGED IN
 document.addEventListener('DOMContentLoaded', async () => {
-    const { data: { user } } = await client.auth.getUser();
-    if (user) {
+    const { data: { session } } = await client.auth.getSession();
+    if (session) {
         window.location.href = "dashboard.html";
     }
 });
@@ -602,64 +610,81 @@ document.addEventListener('DOMContentLoaded', async () => {
 launchBtn.addEventListener('click', () => {
     authModal.style.display = "flex";
     authMessage.innerText = "";
+    authMessage.style.color = "white";
 });
 
 closeModal.addEventListener('click', () => {
     authModal.style.display = "none";
 });
     
+// 3️⃣ THE MASTER AUTHENTICATION FLOW
 godspeedBtn.addEventListener('click', async () => {
-
     const email = emailInput.value.trim();
     const password = passwordInput.value.trim();
 
     if (!email || !password) {
+        authMessage.style.color = "#ff004f";
         authMessage.innerText = "Enter email and password.";
         return;
     }
 
-    authMessage.innerText = "Launching...";
+    authMessage.style.color = "#00d9ff";
+    authMessage.innerText = "Initiating launch sequence...";
 
-    // 1️⃣ Try login
-    const { data: loginData, error: loginError } =
-        await client.auth.signInWithPassword({
-            email,
-            password
-        });
+    // Step A: Attempt to log the user in first
+    const { data: signInData, error: signInError } = await client.auth.signInWithPassword({
+        email,
+        password
+    });
 
-    if (!loginError && loginData.user) {
-        window.location.href = "dashboard.html";
-        return;
+    // If login succeeds, the onAuthStateChange listener above will handle the redirect.
+    if (!signInError && signInData.session) return;
+
+    // Step B: Handle Login Failures & Intelligent Signup
+    if (signInError) {
+        if (signInError.message === "Invalid login credentials") {
+            // This means either the password is wrong OR the user doesn't exist yet.
+            // Let's attempt a signup.
+            const { data: signUpData, error: signUpError } = await client.auth.signUp({
+                email,
+                password
+            });
+
+            if (signUpError) {
+                authMessage.style.color = "#ff004f";
+                authMessage.innerText = signUpError.message; // e.g., "Password should be at least 6 characters"
+                return;
+            }
+
+            // Supabase Quirk: If email confirmations are ON, and an existing user tries to sign up again, 
+            // Supabase returns a fake success object with empty identities to prevent snooping.
+            if (signUpData.user && signUpData.user.identities && signUpData.user.identities.length === 0) {
+                authMessage.style.color = "#ff004f";
+                authMessage.innerText = "Incorrect password. Please try again.";
+                return;
+            }
+
+            // Genuine new account created
+            authMessage.style.color = "#39ff14";
+            authMessage.innerText = "Account created. Check your email to confirm before launch.";
+            
+        } else if (signInError.message === "Email not confirmed") {
+            authMessage.style.color = "#ff004f";
+            authMessage.innerText = "Please confirm your email address via the link sent to you.";
+        } else {
+            // Catch-all for rate limits, network errors, etc.
+            authMessage.style.color = "#ff004f";
+            authMessage.innerText = signInError.message;
+        }
     }
-
-    // 2️⃣ If login fails, try signup
-    const { data: signUpData, error: signUpError } =
-        await client.auth.signUp({
-            email,
-            password
-        });
-
-    if (!signUpError && signUpData.user) {
-        authMessage.innerText =
-            "Account created. Check your email to confirm before launch.";
-        return;
-    }
-
-    // 3️⃣ If signup failed → account exists → wrong password
-    authMessage.innerText =
-        "Invalid login credentials.";
 });
     
-    const togglePassword = document.getElementById("togglePassword");
-    togglePassword.addEventListener("click", () => {
+// TOGGLE PASSWORD VISIBILITY
+const togglePassword = document.getElementById("togglePassword");
+togglePassword.addEventListener("click", () => {
     const type = passwordInput.getAttribute("type");
-    passwordInput.setAttribute(
-        "type",
-        type === "password" ? "text" : "password"
-    );
-
-    togglePassword.innerText =
-        type === "password" ? "HIDE" : "SHOW";
+    passwordInput.setAttribute("type", type === "password" ? "text" : "password");
+    togglePassword.innerText = type === "password" ? "🦉" : "👁️";
 });
 </script>
 </body>
