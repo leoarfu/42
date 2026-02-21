@@ -254,12 +254,18 @@ footer {
 .password-wrapper input {
     width: 100%;
     padding: 10px;
-    background: rgba(0, 0, 0, 0.7); /* Slightly darker background */
-    border: 1.5px solid #ffffff; /* White border to match lines */
+    background: rgba(0, 0, 0, 0.7); 
+    border: 1.5px solid #ffffff; 
     color: white;
     font-family: 'Orbitron', sans-serif;
     outline: none;
     transition: all 0.3s ease;
+    
+    /* ADD THIS: Stops iOS from auto-zooming when typing */
+    font-size: 16px !important; 
+    
+    /* ADD THIS: Adds breathing room so things don't squish */
+    margin-bottom: 15px; 
 }
 
 .input-wrapper input:focus,
@@ -303,18 +309,26 @@ footer {
 
 .modal-lodge-container {
     background-color: #111;
-    /* White Zig-Zag pattern */
     background-image: url("data:image/svg+xml,%3Csvg width='100' height='50' viewBox='0 0 100 50' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M0 50 L25 10 L50 50 L75 10 L100 50' fill='none' stroke='%23ffffff' stroke-width='2.5' stroke-linecap='square'/%3E%3C/svg%3E");
     background-size: 60px 30px;
-    padding: 40px 30px 30px; /* Extra top padding so content doesn't hit the X */
+    padding: 40px 30px 30px; 
     border: 2px solid #ffffff;
     max-width: 360px;
     width: 90%;
     text-align: center;
     position: relative;
     box-shadow: 0 0 20px rgba(255, 255, 255, 0.3);
-    /* 0.4s linear infinite keeps the current flowing continuously */
     animation: electric-flow 0.4s linear infinite; 
+    
+    /* ADD THESE 3 LINES: Protects against landscape and keyboard squishing */
+    max-height: 85vh; 
+    overflow-y: auto; 
+    scrollbar-width: none; /* Hides default scrollbar in Firefox */
+}
+
+/* Hides default scrollbar in Chrome/Safari to keep it looking clean */
+.modal-lodge-container::-webkit-scrollbar {
+    display: none;
 }
 
 /* Dark glass overlay to make inputs readable */
