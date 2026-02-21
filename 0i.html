@@ -308,6 +308,8 @@ footer {
 
 /* ---------- AUTH MODAL: BLACK LODGE ELECTRICITY ---------- */
 
+/* ---------- AUTH MODAL: WHITE ELECTRIC LODGE ---------- */
+
 .modal-backdrop {
     display: none; /* Toggled via JS */
     position: fixed;
@@ -320,41 +322,85 @@ footer {
 
 .modal-lodge-container {
     background-color: #111;
-    /* The SVG Zig-Zag pattern */
-    background-image: url("data:image/svg+xml,%3Csvg width='100' height='50' viewBox='0 0 100 50' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M0 50 L25 10 L50 50 L75 10 L100 50' fill='none' stroke='%23ff004f' stroke-width='2' stroke-linecap='square'/%3E%3C/svg%3E");
+    /* White Zig-Zag pattern */
+    background-image: url("data:image/svg+xml,%3Csvg width='100' height='50' viewBox='0 0 100 50' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M0 50 L25 10 L50 50 L75 10 L100 50' fill='none' stroke='%23ffffff' stroke-width='2.5' stroke-linecap='square'/%3E%3C/svg%3E");
     background-size: 60px 30px;
-    padding: 30px;
-    border: 2px solid #ff004f;
+    padding: 40px 30px 30px; /* Extra top padding so content doesn't hit the X */
+    border: 2px solid #ffffff;
     max-width: 360px;
     width: 90%;
     text-align: center;
     position: relative;
-    box-shadow: 0 0 15px rgba(255, 0, 79, 0.2);
-    animation: high-voltage-jitter 0.15s infinite;
+    box-shadow: 0 0 20px rgba(255, 255, 255, 0.3);
+    /* 0.4s linear infinite keeps the current flowing continuously */
+    animation: electric-flow 0.4s linear infinite; 
 }
 
-/* Semi-transparent overlay to ensure your text/inputs remain readable */
+/* Dark glass overlay to make inputs readable */
 .modal-lodge-container::before {
     content: '';
     position: absolute;
     top: 0; left: 0; right: 0; bottom: 0;
-    background: rgba(17, 17, 17, 0.85); /* Adjust to reveal more or less of the lines */
+    background: rgba(10, 10, 10, 0.85); 
     z-index: 1;
 }
 
-/* Pull the modal contents above the dark overlay */
+/* Pull contents above the dark overlay */
 .modal-lodge-container > * {
     position: relative;
     z-index: 2;
 }
 
-/* The vibrating electricity animation */
-@keyframes high-voltage-jitter {
-    0% { background-position: 0px 0px; box-shadow: 0 0 15px rgba(255, 0, 79, 0.3); }
-    25% { background-position: 1px -1px; }
-    50% { background-position: -1px 1px; box-shadow: 0 0 20px rgba(0, 217, 255, 0.2); }
-    75% { background-position: 2px 0px; }
-    100% { background-position: 0px 0px; box-shadow: 0 0 15px rgba(255, 0, 79, 0.3); }
+/* Propagating, vibrating electricity */
+@keyframes electric-flow {
+    0%   { background-position: 0px 0px;   filter: brightness(1); }
+    25%  { background-position: 15px 1px;  filter: brightness(1.2); }
+    50%  { background-position: 30px -1px; filter: brightness(0.9); box-shadow: 0 0 25px rgba(255, 255, 255, 0.6); }
+    75%  { background-position: 45px 2px;  filter: brightness(1.4); }
+    100% { background-position: 60px 0px;  filter: brightness(1); }
+}
+
+/* ---------- TWIN PEAKS GODSPEED BUTTON ---------- */
+.twin-peaks-btn {
+    margin-top: 20px;
+    padding: 10px 20px;
+    background: transparent;
+    border: none;
+    color: #39ff14; /* Neon green */
+    font-size: 28px;
+    font-weight: 900;
+    font-family: 'Arial', sans-serif; /* Fallback sans-serif matches the logo well */
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    cursor: pointer;
+    /* The brown/orange outline */
+    -webkit-text-stroke: 1.5px #a04000; 
+    text-shadow: 2px 2px 4px rgba(0,0,0,0.9), 0 0 10px rgba(57, 255, 20, 0.3);
+    transition: transform 0.2s ease, text-shadow 0.2s ease;
+}
+
+.twin-peaks-btn:hover {
+    transform: scale(1.05);
+    text-shadow: 2px 2px 4px rgba(0,0,0,0.9), 0 0 20px rgba(57, 255, 20, 0.8);
+}
+
+/* ---------- FIXED CLOSE BUTTON ---------- */
+.close-btn {
+    position: absolute;
+    top: 10px;
+    right: 15px;
+    background: transparent;
+    border: none;
+    color: #ffffff;
+    font-size: 24px;
+    cursor: pointer;
+    z-index: 3; /* Sits above everything */
+    transition: 0.2s ease;
+}
+
+.close-btn:hover {
+    transform: scale(1.2);
+    color: #ff004f;
 }
 
 </style>
@@ -431,7 +477,10 @@ footer {
 
 <div id="authModal" class="modal-backdrop">
     <div class="modal-lodge-container">
-        <h2 style="color:#ff004f; margin-bottom: 15px;">Welcome</h2>
+        
+        <button id="closeModal" class="close-btn">×</button>
+
+        <h2 style="color:#ffffff; margin-bottom: 20px; font-weight: 800; letter-spacing: 2px;">WELCOME</h2>
         
         <div class="input-wrapper">
             <input id="emailInput" type="email" placeholder="Email">
@@ -441,10 +490,9 @@ footer {
             <span id="togglePassword">SHOW</span>
         </div>
         
-        <button id="godspeedBtn" style="margin-top: 15px; padding: 12px 28px; font-size: 14px; background: linear-gradient(45deg, #ff004f, #00d9ff); border: none; color: black; cursor: pointer; transition: 0.3s ease; font-family: 'Orbitron', sans-serif;">Godspeed</button>
+        <button id="godspeedBtn" class="twin-peaks-btn">Godspeed</button>
         
-        <button id="closeModal" class="close-btn">×</button>
-        <p id="authMessage" style="color:white; font-size:13px; margin-top:10px; height: 15px;"></p>
+        <p id="authMessage" style="color:white; font-size:13px; margin-top:15px; height: 15px;"></p>
     </div>
 </div>
     
