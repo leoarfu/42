@@ -1,0 +1,666 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, shrink-to-fit=no">
+<title>LEO Architecture Fundamentals — LEOAF</title>
+
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;600;800&display=swap" rel="stylesheet">
+
+<style>
+* { box-sizing: border-box; margin:0; padding:0; }
+
+html {
+    height: 100%;
+    /* Prevents iOS from inflating text size on rotation */
+    -webkit-text-size-adjust: 100%; 
+}
+    
+body {
+    font-family: 'Orbitron', sans-serif;
+    background: #000;
+    color: white;
+    overflow-x: hidden;
+    position: relative;
+    /* Use min-height so the body can grow if content is taller than screen */
+    min-height: 100vh; 
+    min-height: calc(var(--vh, 1vh) * 100);
+    /* Remove height: 100% here to allow scrolling in landscape */
+}
+
+/* Canvas Background */
+#starsCanvas {
+    position: fixed;
+    top:0;
+    left:0;
+    width:100%;
+    height:100%;
+    z-index:-1;
+}
+
+/* ---------- HEADER ---------- */
+header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 18px clamp(20px, 5vw, 60px);
+}
+
+.logo {
+    font-weight: 800;
+    font-size: clamp(18px, 2vw, 24px);
+    letter-spacing: 3px;
+}
+
+.logo span:first-child { color: white; }
+.logo span:last-child { color: #ff004f; }
+
+header button {
+    background: transparent;
+    border: 1px solid #ff004f;
+    color: #ff004f;
+    padding: 6px 14px;
+    margin-left: 8px;
+    cursor: pointer;
+    transition: 0.3s ease;
+    font-size: 12px;
+}
+
+header button:hover {
+    background: #ff004f;
+    color: black;
+}
+
+/* ---------- HERO ---------- */
+.hero {
+    text-align: center;
+    padding: clamp(40px, 6vw, 70px) 20px 40px;
+    position: relative;
+    z-index: 1;
+    min-height: 60vh;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+}
+
+.hero h1 {
+    font-size: clamp(26px, 5vw, 44px);
+    margin-bottom: 20px;
+    font-weight: 800;
+}
+
+.hero p {
+    max-width: 650px;
+    margin: auto;
+    font-size: 15px;
+    opacity: 0.85;
+    line-height: 1.5;
+}
+
+/* Reduce spacing when in landscape mode on mobile */
+@media (max-height: 500px) and (orientation: landscape) {
+    .hero {
+        padding-top: 20px;
+        min-height: auto;
+    }
+    /* FIX: Prevent text from blowing up in landscape */
+    .hero h1 {
+        font-size: 28px; 
+    }
+    /* FIX: Hide the invader or make it smaller so it doesn't block the view */
+    .invader {
+        font-size: 20px;
+        top: 80%; /* Move it out of the way of text */
+    }
+}
+  
+.lightning {
+    width: clamp(60px, 6vw, 110px);
+    margin: 0 auto 18px;
+    display: block;
+    animation: boltGlow 3s ease-in-out infinite;
+}
+
+@keyframes boltGlow {
+    0% { filter: drop-shadow(0 0 8px #ff004f); }
+    50% { filter: drop-shadow(0 0 20px #00d9ff); }
+    100% { filter: drop-shadow(0 0 8px #ff004f); }
+}
+
+.invader {
+    position: fixed;
+    font-size: clamp(26px, 3vw, 40px);
+    top: 40%;
+    left: -50px;
+    animation: orbitDrift 25s linear infinite;
+}
+
+@keyframes orbitDrift {
+    0%   { transform: translate(0, -20px); }
+    25%  { transform: translate(30vw, -60px); }
+    50%  { transform: translate(65vw, 10px); }
+    75%  { transform: translate(40vw, 60px); }
+    100% { transform: translate(110vw, -10px); }
+}
+
+/* ---------- CURRICULUM ---------- */
+.curriculum {
+    max-width: 1000px;
+    margin: 30px auto;
+    padding: 0 20px;
+    position: relative;
+    z-index: 1;
+}
+
+.phase-card {
+    background: rgba(255,255,255,0.05);
+    padding: 18px;
+    margin-bottom: 12px;
+    border-left: 3px solid #ff004f;
+    transition: 0.3s ease;
+}
+
+.phase-card:hover {
+    background: rgba(0,217,255,0.1);
+    transform: translateX(4px);
+}
+
+.phase-card h3 {
+    margin: 0 0 6px;
+    font-size: 16px;
+    color: #00d9ff;
+}
+
+.phase-card p {
+    margin: 0;
+    font-size: 13px;
+    opacity: 0.75;
+}
+
+/* ---------- CTA ---------- */
+.cta {
+    text-align: center;
+    margin: 40px 20px 60px;
+    position: relative;
+    z-index: 1;
+}
+
+.cta button {
+    padding: 12px 28px;
+    font-size: 14px;
+    background: linear-gradient(45deg, #ff004f, #00d9ff);
+    border: none;
+    color: black;
+    cursor: pointer;
+    transition: 0.3s ease;
+}
+
+.cta button:hover {
+    transform: scale(1.05);
+}
+
+/* ---------- FOOTER ---------- */
+footer {
+    text-align: center;
+    padding: 30px;
+    opacity: 0.4;
+    font-size: 12px;
+    position: relative;
+    z-index: 1;
+}
+.invader-inner {
+    display: inline-block;
+    transform-origin: center;
+}
+
+/* ---------- AUTH MODAL BUTTONS (Clean Bowie Style) ---------- */
+
+.auth-btn {
+    background: transparent;
+    border: 1px solid #ff004f;
+    color: #ff004f;
+    padding: 8px 18px;
+    font-size: 12px;
+    margin: 8px 6px;
+    cursor: pointer;
+    transition: 0.3s ease;
+    letter-spacing: 1px;
+}
+
+.auth-btn:hover {
+    background: #ff004f;
+    color: black;
+}
+
+/* Close button */
+.close-btn {
+    position: absolute;
+    top: 8px;
+    right: 12px;
+    background: transparent;
+    border: none;
+    color: #ff004f;
+    font-size: 18px;
+    cursor: pointer;
+    transition: 0.2s ease;
+}
+
+.close-btn:hover {
+    transform: scale(1.2);
+    color: #00d9ff;
+}
+
+.input-wrapper input,
+.password-wrapper input {
+    width: 100%;
+    padding: 10px;
+    background: rgba(0, 0, 0, 0.7); /* Slightly darker background */
+    border: 1.5px solid #ffffff; /* White border to match lines */
+    color: white;
+    font-family: 'Orbitron', sans-serif;
+    outline: none;
+    transition: all 0.3s ease;
+}
+
+.input-wrapper input:focus,
+.password-wrapper input:focus {
+    border-color: #39ff14; /* Twin Peaks Green on focus */
+    box-shadow: 0 0 10px rgba(57, 255, 20, 0.5); /* Soft green glow */
+}
+
+
+#togglePassword {
+    position: absolute;
+    right: 10px;
+    top: 50%;
+    transform: translateY(-50%);
+    font-size: 11px;
+    color: #00d9ff;
+    cursor: pointer;
+    letter-spacing: 1px;
+    opacity: 0.8;
+    transition: 0.2s ease;
+}
+
+#togglePassword:hover {
+    opacity: 1;
+    color: #ff004f;
+}
+
+/* ---------- AUTH MODAL: BLACK LODGE ELECTRICITY ---------- */
+
+/* ---------- AUTH MODAL: WHITE ELECTRIC LODGE ---------- */
+
+.modal-backdrop {
+    display: none; /* Toggled via JS */
+    position: fixed;
+    top: 0; left: 0; width: 100%; height: 100%;
+    background: rgba(0, 0, 0, 0.9);
+    justify-content: center;
+    align-items: center;
+    z-index: 10;
+}
+
+.modal-lodge-container {
+    background-color: #111;
+    /* White Zig-Zag pattern */
+    background-image: url("data:image/svg+xml,%3Csvg width='100' height='50' viewBox='0 0 100 50' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M0 50 L25 10 L50 50 L75 10 L100 50' fill='none' stroke='%23ffffff' stroke-width='2.5' stroke-linecap='square'/%3E%3C/svg%3E");
+    background-size: 60px 30px;
+    padding: 40px 30px 30px; /* Extra top padding so content doesn't hit the X */
+    border: 2px solid #ffffff;
+    max-width: 360px;
+    width: 90%;
+    text-align: center;
+    position: relative;
+    box-shadow: 0 0 20px rgba(255, 255, 255, 0.3);
+    /* 0.4s linear infinite keeps the current flowing continuously */
+    animation: electric-flow 0.4s linear infinite; 
+}
+
+/* Dark glass overlay to make inputs readable */
+.modal-lodge-container::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0; bottom: 0;
+    background: rgba(10, 10, 10, 0.85); 
+    z-index: 1;
+}
+
+/* Pull contents above the dark overlay */
+.modal-lodge-container > * {
+    position: relative;
+    z-index: 2;
+}
+
+/* Propagating, vibrating electricity */
+@keyframes electric-flow {
+    0%   { background-position: 0px 0px;   filter: brightness(1); }
+    25%  { background-position: 15px 1px;  filter: brightness(1.2); }
+    50%  { background-position: 30px -1px; filter: brightness(0.9); box-shadow: 0 0 25px rgba(255, 255, 255, 0.6); }
+    75%  { background-position: 45px 2px;  filter: brightness(1.4); }
+    100% { background-position: 60px 0px;  filter: brightness(1); }
+}
+
+/* ---------- TWIN PEAKS GODSPEED BUTTON ---------- */
+.twin-peaks-btn {
+    margin-top: 20px;
+    padding: 10px 20px;
+    background: transparent;
+    border: none;
+    color: #39ff14; /* Neon green */
+    font-size: 28px;
+    font-weight: 900;
+    font-family: 'Arial', sans-serif; /* Fallback sans-serif matches the logo well */
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    cursor: pointer;
+    /* The brown/orange outline */
+    -webkit-text-stroke: 1.5px #a04000; 
+    text-shadow: 2px 2px 4px rgba(0,0,0,0.9), 0 0 10px rgba(57, 255, 20, 0.3);
+    transition: transform 0.2s ease, text-shadow 0.2s ease;
+}
+
+.twin-peaks-btn:hover {
+    transform: scale(1.05);
+    text-shadow: 2px 2px 4px rgba(0,0,0,0.9), 0 0 20px rgba(57, 255, 20, 0.8);
+}
+
+/* ---------- FIXED CLOSE BUTTON ---------- */
+.close-btn {
+    position: absolute;
+    top: 10px;
+    right: 15px;
+    background: transparent;
+    border: none;
+    color: #ffffff;
+    font-size: 24px;
+    cursor: pointer;
+    z-index: 3; /* Sits above everything */
+    transition: 0.2s ease;
+}
+
+.close-btn:hover {
+    transform: scale(1.2);
+    color: #ff004f;
+}
+
+</style>
+</head>
+<body>
+
+<canvas id="starsCanvas"></canvas>
+
+<header>
+    <div class="logo"><span>LEO</span><span>AF</span></div>
+    <div>
+        <button id="launchBtn">Launch</button>
+       <!-- <button id="openLogin">Login</button>
+        <button id="openRegister">Register</button> -->
+    </div>
+</header>
+
+<!-- HERO SECTION -->
+<section class="hero">
+    <h1>LEO Architecture Fundamentals</h1>
+
+    <svg class="lightning" viewBox="0 0 120 220">
+        <polygon points="70,0 30,110 65,110 40,220 100,95 60,95"
+                 fill="url(#grad)" />
+        <defs>
+            <linearGradient id="grad" x1="0%" y1="0%" x2="0%" y2="100%">
+                <stop offset="0%" style="stop-color:#ff004f"/>
+                <stop offset="50%" style="stop-color:#ff004f"/>
+                <stop offset="50%" style="stop-color:#00d9ff"/>
+                <stop offset="100%" style="stop-color:#00d9ff"/>
+            </linearGradient>
+        </defs>
+    </svg>
+
+    <!-- Space Invader with inner wrapper for spinning -->
+    <div class="invader"><span class="invader-inner">👾</span></div>
+
+    <p>
+        A structured learning system for mastering modern low-Earth-orbit satellite architecture —
+        engineering, spectrum strategy, geopolitics, and full constellation design.
+    </p>
+</section>
+
+<section class="curriculum">
+    <div class="phase-card">
+        <h3>Phase 0 — Why Space Is Having Its Rockstar Era</h3>
+        <p>The shift. The players. The stakes.</p>
+    </div>
+    <div class="phase-card">
+        <h3>Phase 1 — Learn the Physics (Before You Bend It)</h3>
+        <p>Orbits, RF fundamentals, networking basics.</p>
+    </div>
+    <div class="phase-card">
+        <h3>Phase 2 — Engineer the Constellation</h3>
+        <p>Link budgets, spacecraft systems, architecture tradeoffs.</p>
+    </div>
+    <div class="phase-card">
+        <h3>Phase 3 — Money, Power & Spectrum Battles</h3>
+        <p>Regulation, sustainability, geopolitics.</p>
+    </div>
+    <div class="phase-card">
+        <h3>Phase 4 — Choose Your Mission</h3>
+        <p>Engineer. Strategist. Analyst. Architect.</p>
+    </div>
+    <div class="phase-card">
+        <h3>Build Your Cosmic Empire — Design Your Own Constellation</h3>
+        <p>From requirements to pitch deck.</p>
+    </div>
+</section>
+
+<footer>
+© 2026 LEOAF<br>ESTABLISHED IN THE FUTURE
+</footer>
+
+<div id="authModal" class="modal-backdrop">
+    <div class="modal-lodge-container">
+        
+        <button id="closeModal" class="close-btn">×</button>
+
+        <h2 style="color:#ffffff; margin-bottom: 20px; font-weight: 800; letter-spacing: 2px;">WELCOME</h2>
+        
+        <div class="input-wrapper">
+            <input id="emailInput" type="email" placeholder="Email">
+        </div>
+        <div class="password-wrapper">
+            <input id="passwordInput" type="password" placeholder="Password">
+            <span id="togglePassword">SHOW</span>
+        </div>
+        
+        <button id="godspeedBtn" class="twin-peaks-btn">Godspeed</button>
+        
+        <p id="authMessage" style="color:white; font-size:13px; margin-top:15px; height: 15px;"></p>
+    </div>
+</div>
+    
+<script>
+    
+    // ---- FIX MOBILE VIEWPORT HEIGHT ----
+function setViewportHeight() {
+    const vh = window.innerHeight * 0.01;
+    document.documentElement.style.setProperty('--vh', `${vh}px`);
+}
+
+setViewportHeight();
+window.addEventListener('resize', setViewportHeight);
+    
+// --------------------
+// Starfield Canvas (Optimized for Mobile Rotation)
+// --------------------
+const canvas = document.getElementById('starsCanvas');
+const ctx = canvas.getContext('2d');
+
+let stars = [];
+const STAR_COUNT = 200;
+// Store width to check for actual rotation vs. vertical url-bar resize
+let lastWidth = window.innerWidth; 
+
+function initStars() {
+    stars = [];
+    for (let i = 0; i < STAR_COUNT; i++) {
+        stars.push({
+            x: Math.random() * canvas.width,
+            y: Math.random() * canvas.height,
+            size: Math.random() * 1.5 + 0.5,
+            speed: Math.random() * 0.2 + 0.05,
+            hue: Math.random() * 360
+        });
+    }
+}
+
+function resizeCanvas() {
+    const newWidth = window.innerWidth;
+    const newHeight = window.innerHeight;
+
+    // Update canvas drawing buffer
+    canvas.width = newWidth;
+    canvas.height = newHeight;
+    
+    // We update the width variable, but we DO NOT call initStars().
+    // This keeps the current stars flowing, even if the screen size changes.
+    lastWidth = newWidth;
+}
+
+
+// Initial load
+resizeCanvas();
+initStars(); // Ensure stars exist on load
+
+window.addEventListener('resize', resizeCanvas);
+
+function animateStars(){
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    stars.forEach(star => {
+        star.y -= star.speed;
+        
+        // Reset to bottom if it goes off top
+        if(star.y < 0) {
+            star.y = canvas.height;
+            star.x = Math.random() * canvas.width; // Randomize X on re-entry
+        }
+        
+        ctx.beginPath();
+        ctx.fillStyle = `hsl(${star.hue}, 80%, 80%)`; 
+        ctx.arc(star.x, star.y, star.size, 0, Math.PI*2);
+        ctx.fill();
+    });
+    requestAnimationFrame(animateStars);
+}
+animateStars();
+
+</script>
+
+<script>
+// ---------- SPACE INVADER CLICK: FAST SPIN ----------
+const invaderInner = document.querySelector('.invader-inner');
+
+invaderInner.parentElement.addEventListener('click', () => {
+    invaderInner.style.transition = 'transform 0.1s linear';
+    let spinDegrees = 0;
+    const spinInterval = setInterval(() => {
+        spinDegrees += 60; // rotate 60deg per tick
+        invaderInner.style.transform = `rotate(${spinDegrees}deg)`;
+    }, 50); // 20 spins/sec
+
+    setTimeout(() => {
+        clearInterval(spinInterval);
+        // Smoothly return to normal
+        invaderInner.style.transition = 'transform 0.5s ease';
+        invaderInner.style.transform = 'rotate(0deg)';
+    }, 2000);
+});
+</script>
+
+<!-- Supabase JS SDK -->
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script>
+const supabaseUrl = 'https://kpkpptqtuuhnbdntuluc.supabase.co';
+const supabaseKey = 'YOUR_KEY';
+const { createClient } = supabase;
+const client = createClient(supabaseUrl, supabaseKey);
+
+const authModal = document.getElementById('authModal');
+const launchBtn = document.getElementById('launchBtn');
+const closeModal = document.getElementById('closeModal');
+const emailInput = document.getElementById('emailInput');
+const passwordInput = document.getElementById('passwordInput');
+const godspeedBtn = document.getElementById('godspeedBtn');
+const authMessage = document.getElementById('authMessage');
+
+// ✅ Auto-redirect if already logged in
+document.addEventListener('DOMContentLoaded', async () => {
+    const { data: { user } } = await client.auth.getUser();
+    if (user) {
+        window.location.href = "dashboard.html";
+    }
+});
+
+launchBtn.addEventListener('click', () => {
+    authModal.style.display = "flex";
+    authMessage.innerText = "";
+});
+
+closeModal.addEventListener('click', () => {
+    authModal.style.display = "none";
+});
+    
+godspeedBtn.addEventListener('click', async () => {
+
+    const email = emailInput.value.trim();
+    const password = passwordInput.value.trim();
+
+    if (!email || !password) {
+        authMessage.innerText = "Enter email and password.";
+        return;
+    }
+
+    authMessage.innerText = "Launching...";
+
+    // 1️⃣ Try login
+    const { data: loginData, error: loginError } =
+        await client.auth.signInWithPassword({
+            email,
+            password
+        });
+
+    if (!loginError && loginData.user) {
+        window.location.href = "dashboard.html";
+        return;
+    }
+
+    // 2️⃣ If login fails, try signup
+    const { data: signUpData, error: signUpError } =
+        await client.auth.signUp({
+            email,
+            password
+        });
+
+    if (!signUpError && signUpData.user) {
+        authMessage.innerText =
+            "Account created. Check your email to confirm before launch.";
+        return;
+    }
+
+    // 3️⃣ If signup failed → account exists → wrong password
+    authMessage.innerText =
+        "Invalid login credentials.";
+});
+    
+    const togglePassword = document.getElementById("togglePassword");
+    togglePassword.addEventListener("click", () => {
+    const type = passwordInput.getAttribute("type");
+    passwordInput.setAttribute(
+        "type",
+        type === "password" ? "text" : "password"
+    );
+
+    togglePassword.innerText =
+        type === "password" ? "HIDE" : "SHOW";
+});
+</script>
+</body>
+</html>
