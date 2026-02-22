@@ -250,51 +250,56 @@ footer {
     color: #00d9ff;
 }
 
+/* Ensure the wrapper acts as an anchor for the absolute-positioned emoji */
+.password-wrapper {
+    position: relative; 
+    width: 100%;
+    margin-bottom: 15px; /* Adds breathing room */
+}
+
+.input-wrapper {
+    width: 100%;
+    margin-bottom: 15px;
+}
+
 .input-wrapper input,
 .password-wrapper input {
     width: 100%;
-    padding: 10px;
+    padding: 12px 40px 12px 12px; /* Extra padding on the right so text doesn't hide behind the emoji */
     background: rgba(0, 0, 0, 0.7); 
     border: 1.5px solid #ffffff; 
     color: white;
     font-family: 'Orbitron', sans-serif;
+    font-size: 16px !important; /* Stops iOS auto-zoom */
     outline: none;
     transition: all 0.3s ease;
-    
-    /* ADD THIS: Stops iOS from auto-zooming when typing */
-    font-size: 16px !important; 
-    
-    /* ADD THIS: Adds breathing room so things don't squish */
-    margin-bottom: 15px; 
 }
 
 .input-wrapper input:focus,
 .password-wrapper input:focus {
-    border-color: #39ff14; /* Twin Peaks Green on focus */
-    box-shadow: 0 0 10px rgba(57, 255, 20, 0.5); /* Soft green glow */
+    border-color: #39ff14; 
+    box-shadow: 0 0 10px rgba(57, 255, 20, 0.5); 
 }
-
 
 #togglePassword {
     position: absolute;
-    right: 10px;
+    right: 12px;
     top: 50%;
     transform: translateY(-50%);
-    font-size: 11px;
-    color: #00d9ff;
+    font-size: 20px; /* Bigger, properly sized emoji */
     cursor: pointer;
-    letter-spacing: 1px;
-    opacity: 0.8;
+    opacity: 0.7;
     transition: 0.2s ease;
+    user-select: none; /* Stops the user from accidentally highlighting the emoji */
+    z-index: 5; /* Keeps it above the input */
 }
 
 #togglePassword:hover {
     opacity: 1;
-    color: #ff004f;
+    transform: translateY(-50%) scale(1.1); /* Slight pop effect on hover */
 }
 
 /* ---------- AUTH MODAL: BLACK LODGE ELECTRICITY ---------- */
-
 /* ---------- AUTH MODAL: WHITE ELECTRIC LODGE ---------- */
 
 .modal-backdrop {
@@ -302,8 +307,13 @@ footer {
     position: fixed;
     top: 0; left: 0; width: 100%; height: 100%;
     background: rgba(0, 0, 0, 0.9);
+    
+    /* Change from center to flex-start to allow auto-margins to work */
     justify-content: center;
-    align-items: center;
+    align-items: flex-start; 
+    
+    overflow-y: auto; /* Let the whole dark screen scroll if needed */
+    padding: 20px; /* Keep it away from the extreme edges of the phone */
     z-index: 10;
 }
 
@@ -314,12 +324,17 @@ footer {
     padding: 40px 30px 30px; 
     border: 2px solid #ffffff;
     max-width: 360px;
-    width: 90%;
+    width: 100%;
     text-align: center;
     position: relative;
     box-shadow: 0 0 20px rgba(255, 255, 255, 0.3);
     animation: electric-flow 0.4s linear infinite; 
     
+    /* Auto margin safely centers the box, preventing it from clipping off the top */
+    margin: auto; 
+    margin-top: 10vh; /* Pushes it slightly down for aesthetic balance */
+}
+
     /* ADD THESE 3 LINES: Protects against landscape and keyboard squishing */
     max-height: 85vh; 
     overflow-y: auto; 
