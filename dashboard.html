@@ -305,43 +305,80 @@ modules.forEach(card => {
 loadProgress();
 
 // Starfield Canvas 
+// 3D Starfield Canvas (Warp Effect)
 const canvas = document.getElementById('starsCanvas');
 const ctx = canvas.getContext('2d');
 let stars = [];
-const STAR_COUNT = 200;
+const STAR_COUNT = 400; // Increased count for better 3D density
+let centerX, centerY;
 
 function initStars() {
     stars = [];
     for (let i = 0; i < STAR_COUNT; i++) {
         stars.push({
-            x: Math.random() * canvas.width,
-            y: Math.random() * canvas.height,
-            size: Math.random() * 1.5 + 0.5,
-            speed: Math.random() * 0.2 + 0.05,
+            x: Math.random() * canvas.width - centerX,
+            y: Math.random() * canvas.height - centerY,
+            z: Math.random() * canvas.width, // Depth
+            speed: Math.random() * 2 + 0.5, // Warp speed variation
             hue: Math.random() * 360
         });
     }
 }
 
-function resizeCanvas() { canvas.width = window.innerWidth; canvas.height = window.innerHeight; }
-resizeCanvas(); initStars(); window.addEventListener('resize', resizeCanvas);
+function resizeCanvas() { 
+    canvas.width = window.innerWidth; 
+    canvas.height = window.innerHeight; 
+    centerX = canvas.width / 2;
+    centerY = canvas.height / 2;
+    initStars(); 
+}
 
-function animateStars(){
-    ctx.clearRect(0, 0, canvas.width, canvas.height);
+resizeCanvas(); 
+window.addEventListener('resize', resizeCanvas);
+
+function animateStars() {
+    // Creates a slight motion blur effect by drawing a semi-transparent black rectangle
+    ctx.fillStyle = 'rgba(0, 0, 0, 0.4)';
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+    
     stars.forEach(star => {
-        star.y -= star.speed;
-        if(star.y < 0) { star.y = canvas.height; star.x = Math.random() * canvas.width; }
+        // Get previous 2D coordinates before moving the star
+        let px = (star.x / star.z) * canvas.width + centerX;
+        let py = (star.y / star.z) * canvas.width + centerY;
+
+        // Move the star closer on the Z axis
+        star.z -= star.speed;
+
+        // If the star passes the screen, reset it far into the distance
+        if (star.z <= 0) {
+            star.x = Math.random() * canvas.width - centerX;
+            star.y = Math.random() * canvas.height - centerY;
+            star.z = canvas.width;
+            
+            // Recalculate previous coords so it doesn't draw a line across the screen
+            px = (star.x / star.z) * canvas.width + centerX;
+            py = (star.y / star.z) * canvas.width + centerY;
+        }
+
+        // Get new 2D coordinates
+        let sx = (star.x / star.z) * canvas.width + centerX;
+        let sy = (star.y / star.z) * canvas.width + centerY;
+        
+        // Stars get bigger and brighter as they get closer
+        let size = Math.max(0.1, (1 - star.z / canvas.width) * 3);
+        let opacity = 1 - (star.z / canvas.width);
+
+        // Draw the star streak
         ctx.beginPath();
-        ctx.fillStyle = `hsl(${star.hue}, 80%, 80%)`; 
-        ctx.arc(star.x, star.y, star.size, 0, Math.PI*2);
-        ctx.fill();
+        ctx.strokeStyle = `hsla(${star.hue}, 80%, 80%, ${opacity})`;
+        ctx.lineWidth = size;
+        ctx.moveTo(px, py);
+        ctx.lineTo(sx, sy);
+        ctx.stroke();
     });
     requestAnimationFrame(animateStars);
 }
 animateStars();
 
-function setViewportHeight() { document.documentElement.style.setProperty('--vh', `${window.innerHeight * 0.01}px`); }
-setViewportHeight(); window.addEventListener('resize', setViewportHeight);
-</script>
 </body>
 </html>
