@@ -1,0 +1,209 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, shrink-to-fit=no">
+<title>Phase 0: The Briefing — LEOAF</title>
+
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;600;800&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+
+<style>
+/* Base Reset & Mobile Fix */
+* { box-sizing: border-box; margin:0; padding:0; }
+
+html, body {
+    max-width: 100vw;
+    overflow-x: hidden;
+    background: #000;
+    color: #e5e7eb; /* Soft off-white for reading comfort */
+    font-family: 'Inter', sans-serif; /* Default body font */
+    min-height: 100vh;
+}
+
+#starsCanvas {
+    position: fixed; top:0; left:0; width:100%; height:100%; z-index:-1;
+    opacity: 0.6; /* Dimmer stars on reading pages so text pops */
+}
+
+/* ---------- HEADER ---------- */
+header {
+    display: flex; justify-content: space-between; align-items: center;
+    padding: 15px clamp(20px, 5vw, 40px);
+    border-bottom: 1px solid rgba(255, 0, 79, 0.3);
+    background: rgba(0, 0, 0, 0.85); backdrop-filter: blur(8px);
+    position: sticky; top: 0; z-index: 10;
+}
+
+.nav-left a {
+    color: #00d9ff; font-family: 'Orbitron', sans-serif;
+    text-decoration: none; font-size: 12px; letter-spacing: 1px;
+    display: flex; align-items: center; gap: 8px; transition: 0.2s;
+}
+
+.nav-left a:hover { color: #fff; text-shadow: 0 0 8px #00d9ff; }
+
+.logo { font-family: 'Orbitron', sans-serif; font-weight: 800; font-size: 18px; letter-spacing: 2px; text-decoration: none; }
+.logo span:first-child { color: white; }
+.logo span:last-child { color: #ff004f; }
+
+/* ---------- CONTENT CONTAINER ---------- */
+.lesson-container {
+    width: 100%; max-width: 800px; /* Optimal reading width */
+    margin: 40px auto 80px; padding: 0 20px;
+    position: relative; z-index: 1;
+}
+
+/* Typography for Lesson Text */
+.lesson-container h1, .lesson-container h2, .lesson-container h3 {
+    font-family: 'Orbitron', sans-serif;
+    color: #ffffff;
+}
+
+.lesson-title { font-size: clamp(28px, 5vw, 42px); font-weight: 800; margin-bottom: 10px; line-height: 1.2; }
+.lesson-subtitle { font-family: 'Inter', sans-serif; color: #ff004f; font-size: 16px; margin-bottom: 40px; font-weight: 500; letter-spacing: 1px;}
+
+.lesson-content h2 { font-size: 22px; color: #00d9ff; margin: 40px 0 15px; border-bottom: 1px solid rgba(0, 217, 255, 0.2); padding-bottom: 8px; }
+.lesson-content h3 { font-size: 18px; margin: 25px 0 10px; color: #e5e7eb; }
+
+.lesson-content p { font-size: 16px; line-height: 1.7; margin-bottom: 20px; color: #d1d5db; }
+.lesson-content ul { margin-bottom: 20px; padding-left: 20px; }
+.lesson-content li { font-size: 16px; line-height: 1.7; margin-bottom: 10px; color: #d1d5db; }
+
+/* Highlighting key terms */
+.highlight { color: #39ff14; font-weight: 600; }
+
+/* Data Tables */
+.data-table { width: 100%; border-collapse: collapse; margin: 30px 0; background: rgba(255,255,255,0.02); }
+.data-table th, .data-table td { border: 1px solid rgba(255, 255, 255, 0.1); padding: 12px 15px; text-align: left; font-size: 14px; }
+.data-table th { background: rgba(0, 217, 255, 0.1); color: #00d9ff; font-family: 'Orbitron', sans-serif; letter-spacing: 1px; }
+
+/* ---------- FOOTER ACTION ---------- */
+.lesson-footer {
+    margin-top: 60px; padding-top: 30px; border-top: 1px solid rgba(57, 255, 20, 0.3);
+    display: flex; justify-content: space-between; align-items: center;
+}
+
+.complete-btn {
+    background: transparent; border: 1px solid #39ff14; color: #39ff14;
+    padding: 12px 24px; cursor: pointer; transition: 0.3s ease;
+    font-size: 14px; font-family: 'Orbitron', sans-serif; letter-spacing: 1px;
+    display: flex; align-items: center; gap: 10px; text-decoration: none;
+}
+
+.complete-btn:hover { background: rgba(57, 255, 20, 0.1); box-shadow: 0 0 15px rgba(57, 255, 20, 0.4); }
+
+</style>
+</head>
+<body>
+
+<canvas id="starsCanvas"></canvas>
+
+<header>
+    <div class="nav-left">
+        <a href="dashboard.html">← DASHBOARD</a>
+    </div>
+    <a href="dashboard.html" class="logo"><span>LEO</span><span>AF</span></a>
+</header>
+
+<main class="lesson-container">
+    <h1 class="lesson-title">PHASE 0: THE BRIEFING</h1>
+    <div class="lesson-subtitle">EARTH'S CONNECTIVITY GAPS & THE LEO GRAVEYARD</div>
+
+    <div class="lesson-content">
+        <p>Before you bend the physics of low-Earth orbit, you must understand why we are going there in the first place. This phase establishes the terrestrial baseline, the economic constraints of the "Last Mile," and the brutal history of early space internet attempts.</p>
+
+        <h2>0.1 The Anatomy of Terrestrial Networks</h2>
+        <p>The internet is physical. It is a massive nervous system of submarine fiber-optic cables, terrestrial backbones, and Internet Exchange Points (IXPs). However, terrestrial infrastructure suffers from a fatal flaw: <span class="highlight">The Last Mile Economics</span>.</p>
+        
+        <ul>
+            <li><strong>Trenching Costs:</strong> Laying fiber costs tens of thousands of dollars per mile. In urban centers, the ROI is immediate. In rural areas, it is an economic impossibility without state subsidies.</li>
+            <li><strong>Cellular Limits:</strong> 4G and 5G rely on line-of-sight to cellular towers. Mountains, forests, and sheer distance cause severe signal attenuation.</li>
+        </ul>
+
+        <h2>0.4 Legacy Space (GEO & MEO)</h2>
+        <p>Before LEO, space connectivity was dominated by Geostationary (GEO) satellites. Parked 35,786 km above the equator, a single GEO satellite can cover a third of the Earth. But it comes with a physical tax that cannot be engineered away: the speed of light.</p>
+
+        <table class="data-table">
+            <thead>
+                <tr>
+                    <th>Orbit Type</th>
+                    <th>Altitude</th>
+                    <th>Typical Latency</th>
+                    <th>Primary Use Case</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>GEO (Geostationary)</td>
+                    <td>~35,786 km</td>
+                    <td>~600 ms</td>
+                    <td>Broadcast TV, Legacy Maritime, Rural Web Browsing</td>
+                </tr>
+                <tr>
+                    <td>MEO (Medium Earth)</td>
+                    <td>~8,000 km</td>
+                    <td>~150 ms</td>
+                    <td>GPS, O3b Enterprise Backhaul</td>
+                </tr>
+                <tr>
+                    <td>LEO (Low Earth)</td>
+                    <td>~550 km</td>
+                    <td>~30 ms</td>
+                    <td>Low-Latency Global Broadband, Tactical, Aviation</td>
+                </tr>
+            </tbody>
+        </table>
+
+        <h2>0.5 The 1990s LEO Graveyard</h2>
+        <p>LEO is not a new idea. In the 1990s, companies like Iridium, Teledesic, and Globalstar attempted to build massive constellations. They almost all ended in spectacular bankruptcy. Why?</p>
+        <p>They lacked the three modern enablers: <strong>Reusable launch vehicles</strong> (which dropped launch costs from $10k/kg to <$2k/kg), <strong>mass-produced spacecraft</strong>, and <strong>cheap phased-array antennas</strong> for the consumer ground terminals.</p>
+
+        </div>
+
+    <div class="lesson-footer">
+        <span style="color: #aaaaaa; font-size: 12px; font-family: 'Orbitron';">END OF MODULE</span>
+        <a href="dashboard.html" class="complete-btn" onclick="localStorage.setItem('leoaf_phase0', 'true');">MARK COMPLETE ✔</a>
+    </div>
+
+</main>
+
+<script>
+// Basic Starfield Canvas for Lesson Pages (Slower, fewer stars for less distraction)
+const canvas = document.getElementById('starsCanvas');
+const ctx = canvas.getContext('2d');
+let stars = [];
+const STAR_COUNT = 100; // Reduced for readability
+
+function initStars() {
+    stars = [];
+    for (let i = 0; i < STAR_COUNT; i++) {
+        stars.push({
+            x: Math.random() * canvas.width,
+            y: Math.random() * canvas.height,
+            size: Math.random() * 1.2 + 0.3,
+            speed: Math.random() * 0.1 + 0.02, // Slower movement
+            hue: Math.random() * 360
+        });
+    }
+}
+
+function resizeCanvas() { canvas.width = window.innerWidth; canvas.height = window.innerHeight; }
+resizeCanvas(); initStars(); window.addEventListener('resize', resizeCanvas);
+
+function animateStars(){
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    stars.forEach(star => {
+        star.y -= star.speed;
+        if(star.y < 0) { star.y = canvas.height; star.x = Math.random() * canvas.width; }
+        ctx.beginPath();
+        ctx.fillStyle = `hsl(${star.hue}, 80%, 80%)`; 
+        ctx.arc(star.x, star.y, star.size, 0, Math.PI*2);
+        ctx.fill();
+    });
+    requestAnimationFrame(animateStars);
+}
+animateStars();
+</script>
+
+</body>
+</html>
