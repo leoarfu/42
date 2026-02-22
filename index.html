@@ -520,6 +520,7 @@ footer {
         <div class="password-wrapper">
             <input id="passwordInput" type="password" placeholder="Password">
             <span id="togglePassword">👁️</span>
+            <p id="forgotPassword" style="cursor:pointer; font-size:10px; color:#00d9ff; margin-top:8px; text-align:right; opacity:0.7; letter-spacing:1px;">Lost Password?</p>
         </div>
         
         <button id="godspeedBtn" class="twin-peaks-btn">Godspeed</button>
@@ -741,6 +742,33 @@ togglePassword.addEventListener("click", () => {
     passwordInput.setAttribute("type", type === "password" ? "text" : "password");
     togglePassword.innerText = type === "password" ? "🦉" : "👁️";
 });
+
+// FORGOT PASSWORD LOGIC
+const forgotPassword = document.getElementById('forgotPassword');
+forgotPassword.addEventListener('click', async () => {
+    const email = emailInput.value.trim();
+    if (!email) {
+        authMessage.style.color = "#ff004f";
+        authMessage.innerText = "Enter your email first.";
+        return;
+    }
+
+    authMessage.style.color = "#00d9ff";
+    authMessage.innerText = "Sending reset link...";
+
+    const { error } = await client.auth.resetPasswordForEmail(email, {
+        redirectTo: 'https://leoarfu.github.io/42/dashboard.html?reset=true',
+    });
+
+    if (error) {
+        authMessage.style.color = "#ff004f";
+        authMessage.innerText = error.message;
+    } else {
+        authMessage.style.color = "#39ff14";
+        authMessage.innerText = "Check your email for the reset link.";
+    }
+});
+    
 </script>
 </body>
 </html>
