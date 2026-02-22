@@ -697,8 +697,12 @@ godspeedBtn.addEventListener('click', async () => {
             // This means either the password is wrong OR the user doesn't exist yet.
             // Let's attempt a signup.
             const { data: signUpData, error: signUpError } = await client.auth.signUp({
-                email,
-                password
+                 email,
+                 password,
+            options: {
+             /* This tells Supabase to send them exactly here after clicking the email link */
+            emailRedirectTo: 'https://leoarfu.github.io/42/dashboard.html'
+                 }
             });
 
             if (signUpError) {
