@@ -1,0 +1,292 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, shrink-to-fit=no">
+<title>RAN & Telecom Tech — Deep Dive</title>
+
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;600;800&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+
+<style>
+/* Base Reset & Mobile Fix */
+* { box-sizing: border-box; margin:0; padding:0; }
+
+html, body {
+    max-width: 100vw;
+    overflow-x: hidden;
+    background: #000;
+    color: #e5e7eb;
+    font-family: 'Inter', sans-serif;
+    min-height: 100vh;
+}
+
+#starsCanvas {
+    position: fixed; top:0; left:0; width:100%; height:100%; z-index:-1;
+    opacity: 0.6;
+}
+
+/* ---------- HEADER ---------- */
+header {
+    display: flex; justify-content: space-between; align-items: center;
+    padding: 15px clamp(20px, 5vw, 40px);
+    border-bottom: 1px solid rgba(57, 255, 20, 0.3);
+    background: rgba(0, 0, 0, 0.85); backdrop-filter: blur(8px);
+    position: sticky; top: 0; z-index: 10;
+}
+
+.nav-left a {
+    color: #39ff14; font-family: 'Orbitron', sans-serif;
+    text-decoration: none; font-size: 12px; letter-spacing: 1px;
+    display: flex; align-items: center; gap: 8px; transition: 0.2s;
+}
+
+.nav-left a:hover { color: #fff; text-shadow: 0 0 8px #39ff14; }
+
+.logo { font-family: 'Orbitron', sans-serif; font-weight: 800; font-size: 18px; letter-spacing: 2px; text-decoration: none; }
+.logo span:first-child { color: white; }
+.logo span:last-child { color: #39ff14; }
+
+/* ---------- CONTENT CONTAINER ---------- */
+.lesson-container {
+    width: 100%; max-width: 800px;
+    margin: 40px auto 80px; padding: 0 20px;
+    position: relative; z-index: 1;
+}
+
+/* Typography for Lesson Text */
+.lesson-container h1, .lesson-container h2, .lesson-container h3 {
+    font-family: 'Orbitron', sans-serif;
+    color: #ffffff;
+}
+
+.lesson-title { font-size: clamp(28px, 5vw, 42px); font-weight: 800; margin-bottom: 10px; line-height: 1.2; }
+.lesson-subtitle { font-family: 'Inter', sans-serif; color: #39ff14; font-size: 16px; margin-bottom: 40px; font-weight: 500; letter-spacing: 1px;}
+
+.lesson-content h2 { font-size: 22px; color: #39ff14; margin: 40px 0 15px; border-bottom: 1px solid rgba(57, 255, 20, 0.2); padding-bottom: 8px; }
+.lesson-content h3 { font-size: 18px; margin: 25px 0 10px; color: #e5e7eb; }
+
+.lesson-content p { font-size: 16px; line-height: 1.7; margin-bottom: 20px; color: #d1d5db; }
+.lesson-content ul { margin-bottom: 20px; padding-left: 20px; }
+.lesson-content li { font-size: 16px; line-height: 1.7; margin-bottom: 10px; color: #d1d5db; }
+
+/* Highlighting key terms */
+.highlight { color: #39ff14; font-weight: 600; }
+
+/* Data Tables */
+.data-table { width: 100%; border-collapse: collapse; margin: 30px 0; background: rgba(255,255,255,0.02); }
+.data-table th, .data-table td { border: 1px solid rgba(57, 255, 20, 0.1); padding: 12px 15px; text-align: left; font-size: 14px; }
+.data-table th { background: rgba(57, 255, 20, 0.1); color: #39ff14; font-family: 'Orbitron', sans-serif; letter-spacing: 1px; }
+
+/* Resource Links */
+.resource-link {
+    color: #00d9ff;
+    text-decoration: none;
+    transition: 0.2s;
+    font-family: 'Orbitron', sans-serif;
+    font-size: 14px;
+    letter-spacing: 0.5px;
+}
+
+.resource-link:hover {
+    color: #fff;
+    text-shadow: 0 0 8px #00d9ff;
+}
+
+/* ---------- FOOTER ACTION ---------- */
+.lesson-footer {
+    margin-top: 60px; padding-top: 30px; border-top: 1px solid rgba(57, 255, 20, 0.3);
+    display: flex; justify-content: space-between; align-items: center;
+}
+
+.complete-btn {
+    background: transparent; border: 1px solid #39ff14; color: #39ff14;
+    padding: 12px 24px; cursor: pointer; transition: 0.3s ease;
+    font-size: 14px; font-family: 'Orbitron', sans-serif; letter-spacing: 1px;
+    display: flex; align-items: center; gap: 10px; text-decoration: none;
+}
+
+.complete-btn:hover { background: rgba(57, 255, 20, 0.1); box-shadow: 0 0 15px rgba(57, 255, 20, 0.4); }
+</style>
+</head>
+<body>
+
+<canvas id="starsCanvas"></canvas>
+
+<header>
+    <div class="nav-left">
+        <a href="#">← BACK TO DASHBOARD</a>
+    </div>
+    <a href="#" class="logo"><span>TELECOM</span><span>TECH</span></a>
+</header>
+
+<main class="lesson-container">
+    <h1 class="lesson-title">RAN & TELECOM TECHNOLOGIES</h1>
+    <div class="lesson-subtitle">A DEEP DIVE INTO MODERN MOBILE NETWORKS</div>
+
+    <div class="lesson-content">
+        <p>This guide covers the essential technologies powering modern mobile networks, from the Radio Access Network (RAN) to advanced protocols like 5G NR. Whether you're preparing for a technical interview or expanding your knowledge, this resource will help you understand the core concepts and tools used in telecom today.</p>
+
+        <h2>1. WHAT IS RAN?</h2>
+        <p><strong>Radio Access Network (RAN)</strong> is the part of a mobile network that connects individual devices (e.g., smartphones) to the core network. It includes base stations (e.g., gNodeB for 5G, eNodeB for 4G) and manages radio resources, enabling wireless communication.</p>
+
+        <ul>
+            <li><strong>Key Functions:</strong> Manages radio resources, handles handover between cells, and ensures connectivity.</li>
+            <li><strong>Evolution:</strong> From 2G's BTS (Base Transceiver Station) to 5G's gNodeB, RAN has evolved to support higher speeds, lower latency, and advanced features like network slicing.</li>
+        </ul>
+
+        <p>For more details, check out the <a href="https://www.3gpp.org/" class="resource-link" target="_blank">3GPP RAN specifications</a>.</p>
+
+        <h2>2. C/C++ IN TELECOM</h2>
+        <p>C/C++ is widely used in telecom systems due to its performance and low-level control over hardware. It's essential for developing real-time applications like baseband processing and protocol stacks.</p>
+
+        <ul>
+            <li><strong>Key Concepts:</strong> Memory management, multithreading, and performance optimization.</li>
+            <li><strong>Use Cases:</strong> Baseband processing, protocol stack implementation, and embedded systems.</li>
+        </ul>
+
+        <p>Learn more about C++ in telecom: <a href="https://isocpp.org/" class="resource-link" target="_blank">ISO C++</a>.</p>
+
+        <h2>3. LINUX MULTITHREADING</h2>
+        <p>Linux multithreading is crucial for telecom applications, where multiple tasks (e.g., handling multiple user connections) must run concurrently to ensure performance and responsiveness.</p>
+
+        <ul>
+            <li><strong>Key Concepts:</strong> POSIX threads (pthreads), synchronization (mutexes, semaphores), and avoiding race conditions.</li>
+            <li><strong>Tools:</strong> Debugging with <code>gdb</code>, <code>strace</code>, and <code>valgrind</code>.</li>
+        </ul>
+
+        <p>Explore Linux multithreading: <a href="https://man7.org/linux/man-pages/" class="resource-link" target="_blank">Linux Manual Pages</a>.</p>
+
+        <h2>4. 5G/LTE TECHNOLOGIES</h2>
+        <p>5G and LTE are generations of mobile network technology. 5G offers faster speeds, lower latency, and support for advanced features like network slicing and massive MIMO.</p>
+
+        <ul>
+            <li><strong>Key Features:</strong> Millimeter-wave (mmWave), massive MIMO, network slicing, and ultra-reliable low-latency communication (URLLC).</li>
+            <li><strong>5G NR (New Radio):</strong> The global standard for 5G wireless communication.</li>
+        </ul>
+
+        <p>For more on 5G: <a href="https://www.5g-americas.com/" class="resource-link" target="_blank">5G Americas</a>.</p>
+
+        <h2>5. DEBUGGING GNODEB AND LOG ANALYSIS</h2>
+        <p>Debugging gNodeB involves identifying and resolving issues in 5G base stations. Log analysis is critical for diagnosing problems like connection drops or latency spikes.</p>
+
+        <ul>
+            <li><strong>Tools:</strong> Wireshark, QXDM, and proprietary log analyzers.</li>
+            <li><strong>Process:</strong> Filtering logs, recognizing patterns, and root cause analysis.</li>
+        </ul>
+
+        <p>Learn about Wireshark: <a href="https://www.wireshark.org/" class="resource-link" target="_blank">Wireshark</a>.</p>
+
+        <h2>6. CI/CD, JENKINS, GIT</h2>
+        <p>CI/CD automates the integration, testing, and deployment of telecom software. Jenkins is a popular tool for creating CI/CD pipelines, while Git manages version control.</p>
+
+        <ul>
+            <li><strong>Key Concepts:</strong> Automated testing, deployment pipelines, and Git workflows (e.g., GitFlow).</li>
+            <li><strong>Tools:</strong> Jenkins, GitHub Actions, and GitLab CI.</li>
+        </ul>
+
+        <p>Explore Jenkins: <a href="https://www.jenkins.io/" class="resource-link" target="_blank">Jenkins</a>.</p>
+
+        <h2>7. PROTOCOL DEVELOPMENT: 3GPP, 5G NR, HLD/LLD</h2>
+        <p>Protocol development involves creating and implementing communication protocols based on 3GPP standards. HLD (High-Level Design) and LLD (Low-Level Design) documents outline system architecture and implementation details.</p>
+
+        <ul>
+            <li><strong>Key Standards:</strong> 3GPP releases (e.g., Release 16, 17 for 5G).</li>
+            <li><strong>Next-Gen Features:</strong> Network slicing, carrier aggregation, and massive MIMO.</li>
+        </ul>
+
+        <p>For 3GPP standards: <a href="https://www.3gpp.org/specifications" class="resource-link" target="_blank">3GPP Specifications</a>.</p>
+
+        <table class="data-table">
+            <thead>
+                <tr>
+                    <th>Technology</th>
+                    <th>Key Features</th>
+                    <th>Use Cases</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>RAN</td>
+                    <td>Radio resource management, handover, connectivity</td>
+                    <td>Mobile networks, base stations</td>
+                </tr>
+                <tr>
+                    <td>C/C++</td>
+                    <td>Performance, low-level control, real-time processing</td>
+                    <td>Baseband processing, protocol stacks</td>
+                </tr>
+                <tr>
+                    <td>Linux Multithreading</td>
+                    <td>Concurrency, synchronization, real-time scheduling</td>
+                    <td>Telecom applications, embedded systems</td>
+                </tr>
+                <tr>
+                    <td>5G/LTE</td>
+                    <td>High speed, low latency, network slicing</td>
+                    <td>Mobile broadband, IoT, industrial applications</td>
+                </tr>
+                <tr>
+                    <td>gNodeB Debugging</td>
+                    <td>Log analysis, root cause analysis, performance tuning</td>
+                    <td>5G base stations, network optimization</td>
+                </tr>
+                <tr>
+                    <td>CI/CD</td>
+                    <td>Automated testing, deployment pipelines, version control</td>
+                    <td>Software development, DevOps</td>
+                </tr>
+                <tr>
+                    <td>Protocol Development</td>
+                    <td>3GPP standards, HLD/LLD, next-gen features</td>
+                    <td>5G NR, network slicing, carrier aggregation</td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+
+    <div class="lesson-footer">
+        <span style="color: #aaaaaa; font-size: 12px; font-family: 'Orbitron';">END OF MODULE</span>
+        <a href="#" class="complete-btn">MARK COMPLETE ✔</a>
+    </div>
+</main>
+
+<script>
+// Starfield Canvas
+const canvas = document.getElementById('starsCanvas');
+const ctx = canvas.getContext('2d');
+let stars = [];
+const STAR_COUNT = 100;
+
+function initStars() {
+    stars = [];
+    for (let i = 0; i < STAR_COUNT; i++) {
+        stars.push({
+            x: Math.random() * canvas.width,
+            y: Math.random() * canvas.height,
+            size: Math.random() * 1.2 + 0.3,
+            speed: Math.random() * 0.1 + 0.02,
+            hue: Math.random() * 360
+        });
+    }
+}
+
+function resizeCanvas() { canvas.width = window.innerWidth; canvas.height = window.innerHeight; }
+resizeCanvas(); initStars(); window.addEventListener('resize', resizeCanvas);
+
+function animateStars(){
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    stars.forEach(star => {
+        star.y -= star.speed;
+        if(star.y < 0) { star.y = canvas.height; star.x = Math.random() * canvas.width; }
+        ctx.beginPath();
+        ctx.fillStyle = `hsl(${star.hue}, 80%, 80%)`;
+        ctx.arc(star.x, star.y, star.size, 0, Math.PI*2);
+        ctx.fill();
+    });
+    requestAnimationFrame(animateStars);
+}
+animateStars();
+</script>
+
+</body>
+</html>
