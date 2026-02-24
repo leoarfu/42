@@ -1,0 +1,419 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, shrink-to-fit=no">
+<title>Command Center — LEOAF</title>
+
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;600;800&family=Inter:wght@400;600&display=swap" rel="stylesheet">
+
+<style>
+* { box-sizing: border-box; margin:0; padding:0; }
+
+html { height: 100%;
+      -webkit-text-size-adjust: 100%;
+      max-width: 100vw;
+      overflow-x: hidden;
+}
+    
+body {
+    font-family: 'Orbitron', sans-serif;
+    background: #000;
+    color: white;
+    overflow-x: hidden;
+    max-width: 100vw;
+    position: relative;
+    min-height: 100vh; 
+}
+
+#starsCanvas {
+    position: fixed; top:0; left:0; width:100%; height:100%; z-index:-1;
+}
+
+/* ---------- HEADER ---------- */
+header {
+    display: flex; justify-content: space-between; align-items: center;
+    padding: 18px clamp(20px, 5vw, 60px);
+    border-bottom: 1px solid rgba(255, 0, 79, 0.3);
+    background: rgba(0, 0, 0, 0.7); backdrop-filter: blur(5px);
+    position: sticky; top: 0; z-index: 10;
+}
+
+.logo {
+    font-weight: 800; font-size: clamp(18px, 2vw, 24px);
+    letter-spacing: 3px; text-decoration: none;
+}
+
+.logo span:first-child { color: white; }
+.logo span:last-child { color: #ff004f; }
+
+.header-controls { display: flex; align-items: center; gap: 15px; }
+
+.user-id {
+    font-size: 10px; color: #00d9ff; letter-spacing: 1px;
+    opacity: 0.8; display: none;
+}
+
+.logoff-btn {
+    background: transparent; border: 1px solid #ff004f; color: #ff004f;
+    padding: 6px 14px; cursor: pointer; transition: 0.3s ease;
+    font-size: 11px; font-family: 'Orbitron', sans-serif; letter-spacing: 1px;
+}
+
+.logoff-btn:hover { background: #ff004f; color: black; box-shadow: 0 0 10px #ff004f; }
+
+/* ---------- DASHBOARD CONTAINER ---------- */
+.dashboard {
+    width: 100%;
+    max-width: 900px;
+    margin: 40px auto;
+    padding: 0 15px;
+    box-sizing: border-box;
+    position: relative; z-index: 1;
+}
+
+.welcome-msg {
+    font-size: clamp(22px, 4vw, 32px); margin-bottom: 10px;
+    font-weight: 800; letter-spacing: 1px;
+}
+
+/* ---------- PROGRESS BAR ---------- */
+.mission-control {
+    background: rgba(17, 17, 17, 0.8);
+    border: 1px solid rgba(0, 217, 255, 0.3);
+    padding: 25px; margin-bottom: 40px;
+    box-shadow: inset 0 0 20px rgba(0, 217, 255, 0.05);
+}
+
+.progress-header {
+    display: flex; justify-content: space-between; align-items: flex-end; margin-bottom: 15px;
+}
+
+.progress-header h2 { font-size: 16px; color: #00d9ff; letter-spacing: 2px; }
+.progress-stats { font-size: 14px; color: #39ff14; }
+
+.progress-track {
+    width: 100%; height: 12px; background: rgba(255, 255, 255, 0.1);
+    border-radius: 6px; overflow: hidden; position: relative;
+}
+
+.progress-fill {
+    height: 100%; width: 0%; background: linear-gradient(90deg, #00d9ff, #39ff14);
+    box-shadow: 0 0 10px rgba(57, 255, 20, 0.5);
+    transition: width 0.8s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* ---------- CURRICULUM LIST ---------- */
+.module-list { display: flex; flex-direction: column; gap: 15px; }
+
+.module-card {
+    display: flex; align-items: center;
+    background: rgba(255, 255, 255, 0.03); border-left: 3px solid #ff004f;
+    padding: 20px; text-decoration: none; color: white;
+    transition: 0.3s ease; position: relative;
+}
+
+.module-card:hover {
+    background: rgba(0, 217, 255, 0.08); transform: translateX(4px);
+    border-left-color: #00d9ff;
+}
+
+.module-info { flex-grow: 1; margin-left: 20px; }
+.module-info h3 { margin: 0 0 8px; font-size: 18px; color: #ffffff; letter-spacing: 1px; }
+.module-info p { margin: 0; font-size: 14px; color: #aaaaaa; font-family: 'Inter', sans-serif; line-height: 1.5; }
+
+/* ---------- CHECKBOX STYLING ---------- */
+.check-wrapper {
+    position: relative; width: 30px; height: 30px;
+    display: flex; justify-content: center; align-items: center;
+    cursor: pointer; z-index: 2;
+}
+
+.custom-checkbox {
+    width: 24px; height: 24px; border: 2px solid #ff004f; background: transparent;
+    transition: 0.3s ease; display: flex; justify-content: center; align-items: center;
+}
+
+.check-wrapper:hover .custom-checkbox { box-shadow: 0 0 10px rgba(255, 0, 79, 0.5); }
+
+/* Completed State Styles */
+.module-card.completed {
+    border-left-color: #39ff14; background: rgba(57, 255, 20, 0.03); opacity: 0.7;
+}
+
+.module-card.completed:hover { opacity: 1; background: rgba(57, 255, 20, 0.08); }
+
+.module-card.completed .custom-checkbox {
+    border-color: #39ff14; background: rgba(57, 255, 20, 0.2);
+}
+
+.module-card.completed .custom-checkbox::after {
+    content: '✔'; color: #39ff14; font-size: 16px; text-shadow: 0 0 5px #39ff14;
+}
+
+.module-card.completed .module-info h3 {
+    color: #39ff14; text-decoration: line-through; text-decoration-color: rgba(57, 255, 20, 0.5);
+}
+</style>
+</head>
+<body>
+
+<canvas id="starsCanvas"></canvas>
+
+<header>
+    <a href="dashboard.html" class="logo"><span>LEO</span><span>AF</span></a>
+    <div class="header-controls">
+        <span id="userEmail" class="user-id">AGENT</span>
+        <button id="logoffBtn" class="logoff-btn">ABORT</button>
+    </div>
+</header>
+
+<main class="dashboard">
+    <h1 class="welcome-msg">MISSION DASHBOARD</h1>
+
+    <div class="mission-control">
+        <div class="progress-header">
+            <h2>TRAINING PROGRESS</h2>
+            <span class="progress-stats" id="progressText">0%</span>
+        </div>
+        <div class="progress-track">
+            <div class="progress-fill" id="progressFill"></div>
+        </div>
+    </div>
+
+    <div class="module-list" id="moduleList">
+
+        <!-- YEAR 1 – FOUNDATIONS -->
+        <div class="module-card" style="border-left-color: #ff004f; background: rgba(255,0,79,0.03); pointer-events: none; cursor: default;">
+            <div class="module-info">
+                <h3>Year 1 — Foundations (Months 1–12)</h3>
+                <p>Bridge GEO/aviation experience to dynamic LEO reality: orbits, budgets, phased arrays, mesh basics. First simulations & Python scripts.</p>
+            </div>
+        </div>
+
+        <a href="q1-connectivity.html" class="module-card" data-id="q1-connectivity">
+            <div class="check-wrapper" title="Mark as Completed"><div class="custom-checkbox"></div></div>
+            <div class="module-info">
+                <h3>Q1 · Months 1–3 — Connectivity Landscape & Satcom Refresh</h3>
+                <p>Human connectivity needs · Terrestrial baselines (fiber/5G limits) · GEO/MEO/LEO comparison · Historical LEO failures (Iridium, Teledesic, etc.) · Aviation/rural pain points</p>
+            </div>
+        </a>
+
+        <a href="q2-orbital-mechanics.html" class="module-card" data-id="q2-orbital-mechanics">
+            <div class="check-wrapper" title="Mark as Completed"><div class="custom-checkbox"></div></div>
+            <div class="module-info">
+                <h3>Q2 · Months 4–6 — Orbital Mechanics & Constellations 101</h3>
+                <p>Kepler/Newton basics · Orbital elements · LEO dynamics (velocity, Doppler, ground tracks) · Visibility/revisit/handover · Walker Delta & polar patterns · SGP4/TLE intro</p>
+            </div>
+        </a>
+
+        <a href="q3-link-budgets-phased-arrays.html" class="module-card" data-id="q3-link-budgets-phased-arrays">
+            <div class="check-wrapper" title="Mark as Completed"><div class="custom-checkbox"></div></div>
+            <div class="module-info">
+                <h3>Q3 · Months 7–9 — RF Link Budgets + Phased Arrays</h3>
+                <p>Full link budget math (path loss, Eb/N0, rain fade) · Spot beams & hopping · AESA theory (steering, grating lobes, calibration) · LEO vs GEO terminal differences · Aviation radome constraints</p>
+            </div>
+        </a>
+
+        <a href="q4-networking-mobility.html" class="module-card" data-id="q4-networking-mobility">
+            <div class="check-wrapper" title="Mark as Completed"><div class="custom-checkbox"></div></div>
+            <div class="module-info">
+                <h3>Q4 · Months 10–12 — Networking Intro & Mobility</h3>
+                <p>Mesh vs bent-pipe · RF vs optical ISL intro · Handover mechanics · TCP/QUIC in mobility · SDN basics · 5G NTN overview · Predictive handovers for aircraft</p>
+            </div>
+        </a>
+
+        <!-- YEAR 2 – ADVANCED & PORTFOLIO -->
+        <div class="module-card" style="margin-top: 2.5rem; border-left-color: #00d9ff; background: rgba(0,217,255,0.03); pointer-events: none; cursor: default;">
+            <div class="module-info">
+                <h3>Year 2 — Advanced Applications & Portfolio (Months 13–24)</h3>
+                <p>Constellation design at scale, laser routing, economic modeling, capstone projects, GitHub portfolio polish. Job-ready technical fluency.</p>
+            </div>
+        </div>
+
+        <a href="q5-constellation-simulation.html" class="module-card" data-id="q5-constellation-simulation">
+            <div class="check-wrapper" title="Mark as Completed"><div class="custom-checkbox"></div></div>
+            <div class="module-info">
+                <h3>Q5 · Months 13–15 — Constellation Design & Simulation</h3>
+                <p>Walker optimization · Planes/inclination/altitude trades · Coverage probability & revisit metrics · GMAT/Poliastro full-constellation modeling · Regulatory basics (ITU/FCC filings)</p>
+            </div>
+        </a>
+
+        <a href="q6-isl-routing.html" class="module-card" data-id="q6-isl-routing">
+            <div class="check-wrapper" title="Mark as Completed"><div class="custom-checkbox"></div></div>
+            <div class="module-info">
+                <h3>Q6 · Months 16–18 — Inter-Satellite Networking & Routing</h3>
+                <p>Optical ISL physics & PAT · SDN controllers in space · MPLS/Segment Routing · Latency-aware congestion · End-to-end routing sims · Fleet automation & FDIR concepts</p>
+            </div>
+        </a>
+
+        <a href="q7-economics-regs-project1.html" class="module-card" data-id="q7-economics-regs-project1">
+            <div class="check-wrapper" title="Mark as Completed"><div class="custom-checkbox"></div></div>
+            <div class="module-info">
+                <h3>Q7 · Months 19–21 — Economics, Regulations & Project #1</h3>
+                <p>CapEx/OpEx breakdown · Break-even & ARPU modeling · Spectrum coordination · Debris/Kessler risks · Capstone #1: Full constellation simulator repo & coverage plots</p>
+            </div>
+        </a>
+
+        <a href="q8-capstone2-job-prep.html" class="module-card" data-id="q8-capstone2-job-prep">
+            <div class="check-wrapper" title="Mark as Completed"><div class="custom-checkbox"></div></div>
+            <div class="module-info">
+                <h3>Q8 · Months 22–24 — Capstone Project #2 & Final Polish</h3>
+                <p>End-to-end aviation service case (latency/throughput/gateways) · Portfolio refinement · Technical whitepapers & presentations · Mock interviews & first-principles prep</p>
+            </div>
+        </a>
+
+        <!-- FINAL CAPSTONE / ENDGAME -->
+        <div class="module-card" style="margin-top: 2.5rem; background: rgba(57,255,20,0.08); border-left: 3px solid #39ff14; pointer-events: none; cursor: default;">
+            <div class="module-info">
+                <h3>Mission Endgame — Constellation Architect Ready</h3>
+                <p>~300 hours · Deep LEO fluency · Working orbit/handover/routing sims · Portfolio with models, budgets, trade studies & memos · Systems-level understanding of modern mega-constellations (~9,700+ operational satellites in orbit as of Feb 2026).</p>
+            </div>
+        </div>
+
+    </div>
+</main>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script>
+// Supabase Auth Logic
+const supabaseUrl = 'https://kpkpptqtuuhnbdntuluc.supabase.co';
+const supabaseKey = 'sb_publishable_aws8RQ085UqKFBUWfojluQ_o9R9WKBb'; 
+const { createClient } = supabase;
+const client = createClient(supabaseUrl, supabaseKey);
+
+document.addEventListener('DOMContentLoaded', async () => {
+    const { data: { session } } = await client.auth.getSession();
+    if (!session) { window.location.href = "index.html"; return; }
+
+    const emailEl = document.getElementById('userEmail');
+    if(session.user.email) {
+        emailEl.innerText = session.user.email.toUpperCase();
+        emailEl.style.display = 'block';
+    }
+});
+
+document.getElementById('logoffBtn').addEventListener('click', async () => {
+    await client.auth.signOut();
+    window.location.href = "index.html";
+});
+
+// Progress Bar & Checkbox Logic
+const modules = document.querySelectorAll('.module-card');
+const progressFill = document.getElementById('progressFill');
+const progressText = document.getElementById('progressText');
+
+function loadProgress() {
+    let completedCount = 0;
+    modules.forEach(card => {
+        const id = card.getAttribute('data-id');
+        if (localStorage.getItem(`leoaf_${id}`) === 'true') {
+            card.classList.add('completed');
+            completedCount++;
+        }
+    });
+    updateProgressBar(completedCount, modules.length);
+}
+
+function updateProgressBar(completed, total) {
+    const percentage = Math.round((completed / total) * 100);
+    progressFill.style.width = percentage + '%';
+    progressText.innerText = `${percentage}% COMPLETE`;
+}
+
+modules.forEach(card => {
+    const checkWrapper = card.querySelector('.check-wrapper');
+    const id = card.getAttribute('data-id');
+
+    checkWrapper.addEventListener('click', (e) => {
+        e.preventDefault(); 
+        const isNowCompleted = card.classList.toggle('completed');
+        localStorage.setItem(`leoaf_${id}`, isNowCompleted);
+        const currentCompleted = document.querySelectorAll('.module-card.completed').length;
+        updateProgressBar(currentCompleted, modules.length);
+    });
+});
+
+loadProgress();
+
+// Starfield Canvas 
+// 3D Starfield Canvas (Warp Effect)
+const canvas = document.getElementById('starsCanvas');
+const ctx = canvas.getContext('2d');
+let stars = [];
+const STAR_COUNT = 400; // Increased count for better 3D density
+let centerX, centerY;
+
+function initStars() {
+    stars = [];
+    for (let i = 0; i < STAR_COUNT; i++) {
+        stars.push({
+            x: Math.random() * canvas.width - centerX,
+            y: Math.random() * canvas.height - centerY,
+            z: Math.random() * canvas.width, // Depth
+            speed: Math.random() * 2 + 0.5, // Warp speed variation
+            hue: Math.random() * 360
+        });
+    }
+}
+
+function resizeCanvas() { 
+    canvas.width = window.innerWidth; 
+    canvas.height = window.innerHeight; 
+    centerX = canvas.width / 2;
+    centerY = canvas.height / 2;
+    initStars(); 
+}
+
+resizeCanvas(); 
+window.addEventListener('resize', resizeCanvas);
+
+function animateStars() {
+    // Creates a slight motion blur effect by drawing a semi-transparent black rectangle
+    ctx.fillStyle = 'rgba(0, 0, 0, 0.4)';
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+    
+    stars.forEach(star => {
+        // Get previous 2D coordinates before moving the star
+        let px = (star.x / star.z) * canvas.width + centerX;
+        let py = (star.y / star.z) * canvas.width + centerY;
+
+        // Move the star closer on the Z axis
+        star.z -= star.speed;
+
+        // If the star passes the screen, reset it far into the distance
+        if (star.z <= 0) {
+            star.x = Math.random() * canvas.width - centerX;
+            star.y = Math.random() * canvas.height - centerY;
+            star.z = canvas.width;
+            
+            // Recalculate previous coords so it doesn't draw a line across the screen
+            px = (star.x / star.z) * canvas.width + centerX;
+            py = (star.y / star.z) * canvas.width + centerY;
+        }
+
+        // Get new 2D coordinates
+        let sx = (star.x / star.z) * canvas.width + centerX;
+        let sy = (star.y / star.z) * canvas.width + centerY;
+        
+        // Stars get bigger and brighter as they get closer
+        let size = Math.max(0.1, (1 - star.z / canvas.width) * 3);
+        let opacity = 1 - (star.z / canvas.width);
+
+        // Draw the star streak
+        ctx.beginPath();
+        ctx.strokeStyle = `hsla(${star.hue}, 80%, 80%, ${opacity})`;
+        ctx.lineWidth = size;
+        ctx.moveTo(px, py);
+        ctx.lineTo(sx, sy);
+        ctx.stroke();
+    });
+    requestAnimationFrame(animateStars);
+}
+animateStars();
+
+function setViewportHeight() { document.documentElement.style.setProperty('--vh', `${window.innerHeight * 0.01}px`); }
+setViewportHeight(); window.addEventListener('resize', setViewportHeight);
+</script>
+</body>
+</html>
