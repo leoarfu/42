@@ -7,208 +7,79 @@
 <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;600;800&family=Inter:wght@300;400;600&display=swap" rel="stylesheet">
 <style>
 * { box-sizing:border-box; margin:0; padding:0; }
-body {
-    background:#000;
-    color:#f0f0f0;
-    font-family:'Inter', sans-serif;
-    line-height:1.6;
-    min-height:100vh;
-}
+body { background:#000; color:#f0f0f0; font-family:'Inter',sans-serif; line-height:1.65; min-height:100vh; }
 #starsCanvas { position:fixed; inset:0; z-index:-1; }
 
-/* Header – solid black, no bleed-through */
+/* Solid opaque header */
 header {
-    background:#000;
-    border-bottom:1px solid #ff004f33;
-    position:sticky;
-    top:0;
-    z-index:100;
+    background:#000; border-bottom:1px solid #ff004f33;
+    position:sticky; top:0; z-index:100;
     padding:1rem clamp(1.5rem,5vw,4rem);
-    display:flex;
-    justify-content:space-between;
-    align-items:center;
+    display:flex; justify-content:space-between; align-items:center;
     box-shadow:0 4px 16px #0008;
 }
-.logo {
-    font-family:'Orbitron',sans-serif;
-    font-size:clamp(1.4rem,4vw,2rem);
-    font-weight:800;
-    letter-spacing:3px;
-    text-decoration:none;
-}
+.nav-left { display:flex; align-items:center; gap:2rem; }
+.logo { font-family:'Orbitron',sans-serif; font-size:clamp(1.4rem,4vw,2rem); font-weight:800; letter-spacing:3px; text-decoration:none; }
 .logo span:first-child { color:#fff; }
 .logo span:last-child { color:#ff004f; }
-.nav-left { display:flex; align-items:center; gap:2rem; }
-.back-dashboard {
-    color:#00d9ff;
-    font-size:0.95rem;
-    text-decoration:none;
-    opacity:0.9;
-}
-.back-dashboard:hover { color:#39ff14; text-decoration:underline; opacity:1; }
+.back-dashboard { color:#00d9ff; font-size:0.95rem; text-decoration:none; }
+.back-dashboard:hover { color:#39ff14; text-decoration:underline; }
 .logoff-btn {
-    background:transparent;
-    border:1px solid #ff004f;
-    color:#ff004f;
-    padding:0.5rem 1rem;
-    font-size:0.85rem;
-    cursor:pointer;
-    border-radius:4px;
+    background:transparent; border:1px solid #ff004f; color:#ff004f;
+    padding:0.5rem 1rem; font-size:0.85rem; cursor:pointer; border-radius:4px;
 }
-.logoff-btn:hover {
-    background:#ff004f;
-    color:#000;
-}
+.logoff-btn:hover { background:#ff004f; color:#000; }
 
-/* Content area – safe from header overlap */
-.content {
-    max-width:960px;
-    margin:0 auto;
-    padding:clamp(100px,12vh,140px) 1.5rem 4rem;
-}
+/* Content */
+.content { max-width:960px; margin:0 auto; padding:clamp(100px,12vh,140px) 1.5rem 4rem; }
+h1 { font-family:'Orbitron',sans-serif; font-size:clamp(2.2rem,6vw,3.6rem); text-align:center; margin-bottom:1.5rem; letter-spacing:1px; color:#00d9ff; }
 
-/* Big friendly title */
-h1 {
-    font-family:'Orbitron',sans-serif;
-    font-size:clamp(2.2rem,6vw,3.6rem);
-    text-align:center;
-    margin-bottom:1.5rem;
-    letter-spacing:1px;
-    color:#00d9ff;
-}
-
-/* Quarter checkbox – top right, playful */
+/* Quarter checkbox */
 .check-container {
-    position:absolute;
-    top:clamp(110px,13vh,150px);
-    right:1.5rem;
-    display:flex;
-    align-items:center;
-    gap:0.8rem;
-    cursor:pointer;
+    position:absolute; top:clamp(110px,13vh,150px); right:1.5rem;
+    display:flex; align-items:center; gap:0.8rem; cursor:pointer;
 }
 .check-label { font-size:0.95rem; color:#aaa; }
 .custom-checkbox {
-    width:32px;
-    height:32px;
-    border:2px solid #ff004f;
-    border-radius:6px;
-    display:flex;
-    align-items:center;
-    justify-content:center;
-    background:transparent;
-    transition:0.2s;
+    width:32px; height:32px; border:2px solid #ff004f; border-radius:6px;
+    display:flex; align-items:center; justify-content:center; background:transparent;
 }
-.check-container:hover .custom-checkbox { box-shadow:0 0 12px #ff004f66; }
-.completed .custom-checkbox {
-    border-color:#39ff14;
-    background:rgba(57,255,20,0.2);
-}
-.completed .custom-checkbox::after {
-    content:'🚀';
-    font-size:1.1rem;
-}
+.custom-checkbox.checked { border-color:#39ff14; background:rgba(57,255,20,0.25); }
+.custom-checkbox.checked::after { content:'🚀'; font-size:1.2rem; }
 
-/* Cards – softer, more spacious */
+/* Cards & Accordions */
 .section-card {
-    background:rgba(255,255,255,0.025);
-    border:1px solid rgba(0,217,255,0.15);
-    border-radius:12px;
-    padding:2rem;
-    margin:2.5rem 0;
-    box-shadow:0 4px 20px #0008;
+    background:rgba(255,255,255,0.025); border:1px solid rgba(0,217,255,0.15);
+    border-radius:12px; padding:2rem; margin:2.5rem 0; box-shadow:0 4px 20px #0008;
 }
-.section-card h2 {
-    font-family:'Orbitron',sans-serif;
-    color:#00d9ff;
-    font-size:1.5rem;
-    margin-bottom:1.2rem;
-}
+.section-card h2 { font-family:'Orbitron',sans-serif; color:#00d9ff; font-size:1.55rem; margin-bottom:1.2rem; }
 
-/* Accordion – fun & clear */
 .accordion-header {
-    background:rgba(0,217,255,0.06);
-    padding:1.1rem 1.4rem;
-    border-radius:8px;
-    margin:1rem 0;
-    cursor:pointer;
-    display:flex;
-    align-items:center;
-    gap:1rem;
+    background:rgba(0,217,255,0.06); padding:1.1rem 1.4rem; border-radius:8px;
+    margin:1rem 0; cursor:pointer; display:flex; align-items:center; gap:1rem;
     transition:all 0.2s ease;
-    user-select:none;
 }
-.accordion-header:hover { background:rgba(0,217,255,0.12); transform:translateX(4px); }
+.accordion-header:hover { background:rgba(0,217,255,0.12); transform:translateX(6px); }
 .accordion-header.active { background:rgba(57,255,20,0.12); }
-.accordion-header .check-small {
-    width:24px;
-    height:24px;
-    flex-shrink:0;
-}
-.custom-checkbox-small {
-    width:20px;
-    height:20px;
-    border:2px solid #888;
-    border-radius:4px;
-    display:flex;
-    align-items:center;
-    justify-content:center;
-}
-.custom-checkbox-small.checked {
-    border-color:#39ff14;
-    background:rgba(57,255,20,0.25);
-}
-.custom-checkbox-small.checked::after { content:'✓'; color:#39ff14; font-weight:bold; }
 .accordion-header h3 { margin:0; font-size:1.15rem; flex:1; }
+.check-small { width:26px; height:26px; flex-shrink:0; cursor:pointer; }
+.custom-checkbox-small {
+    width:22px; height:22px; border:2px solid #888; border-radius:4px;
+    display:flex; align-items:center; justify-content:center;
+}
+.custom-checkbox-small.checked { border-color:#39ff14; background:rgba(57,255,20,0.25); }
+.custom-checkbox-small.checked::after { content:'✓'; color:#39ff14; font-weight:bold; }
+
 .accordion-content {
-    display:none;
-    padding:1.6rem 1.4rem;
-    background:rgba(0,0,0,0.35);
-    border-radius:0 0 8px 8px;
-    border:1px solid rgba(57,255,20,0.2);
-    margin-top:-8px;
+    display:none; padding:1.8rem 1.6rem; background:rgba(0,0,0,0.35);
+    border-radius:0 0 8px 8px; border:1px solid rgba(57,255,20,0.2); margin-top:-8px;
 }
-.accordion-content p, .accordion-content li { color:#ddd; }
-.equation {
-    font-family:monospace;
-    background:#111;
-    padding:1rem;
-    border-radius:6px;
-    margin:1.2rem 0;
-    color:#00d9ff;
-}
-.code-snippet {
-    background:#0a0a0a;
-    padding:1rem;
-    border-radius:6px;
-    font-family:monospace;
-    font-size:0.92rem;
-    overflow-x:auto;
-    margin:1.2rem 0;
-    border-left:4px solid #39ff14;
-}
-
-/* Buttons inside content */
-.mark-done-btn {
-    margin-top:1.5rem;
-    padding:0.7rem 1.4rem;
-    background:rgba(57,255,20,0.2);
-    border:none;
-    border-radius:6px;
-    color:#fff;
-    cursor:pointer;
-    font-size:0.95rem;
-}
-.mark-done-btn:hover { background:rgba(57,255,20,0.45); }
-
-/* Note at bottom */
-.mission-note {
-    text-align:center;
-    margin:5rem 0 3rem;
-    font-size:1rem;
-    color:#00d9ff88;
-    font-style:italic;
-}
+.equation { font-family:monospace; background:#111; padding:1.2rem; border-radius:8px; margin:1.2rem 0; color:#00d9ff; line-height:1.4; }
+.code-snippet { background:#0a0a0a; padding:1rem; border-radius:6px; font-family:monospace; font-size:0.93rem; overflow-x:auto; margin:1.2rem 0; border-left:4px solid #39ff14; }
+.takeaway { background:rgba(57,255,20,0.08); border-left:4px solid #39ff14; padding:1rem; border-radius:6px; margin:1.5rem 0; font-style:italic; }
+.mark-done-btn { margin-top:1.8rem; padding:0.75rem 1.6rem; background:rgba(57,255,20,0.2); border:none; border-radius:6px; color:#fff; cursor:pointer; }
+.mark-done-btn:hover { background:rgba(57,255,20,0.5); }
+.mission-note { text-align:center; margin:6rem 0 3rem; font-size:1.05rem; color:#00d9ff88; font-style:italic; }
 </style>
 </head>
 <body>
@@ -234,131 +105,127 @@ h1 {
 
     <div class="section-card">
         <h2>🎯 What you'll master this quarter</h2>
-        <p>GEO satellites sit still. LEO ones zoom around the planet ~15 times a day. That's why handovers happen constantly and why constellations need hundreds or thousands of satellites.</p>
-        <p>This quarter turns that "moving target" reality into intuition you can simulate and explain.</p>
-        <p>By the end → your first real orbit plots, pass predictions, and a solid mental model of why LEO behaves so differently from GEO.</p>
+        <p>GEO satellites sit still in the sky. LEO satellites scream around the planet ~15 times a day. This quarter turns that fast motion from “scary” into “I totally get it” — with real simulations you can run today.</p>
     </div>
 
     <div class="section-card">
-        <h2>Core Topics – click to dive in 🚀</h2>
+        <h2>Core Topics – click any header to expand 🚀</h2>
 
-        <!-- Topic 1 -->
+        <!-- FULLY DEVELOPED SECTION 1 -->
         <div class="accordion-header" data-target="topic1">
             <div class="check-small" data-id="q2_topic1"><div class="custom-checkbox-small"></div></div>
             <h3>1. Newton’s law of gravitation & centripetal force balance</h3>
         </div>
         <div id="topic1" class="accordion-content">
-            <p>The force that keeps your coffee cup on the table also keeps satellites from flying off into space.</p>
+            <h4>Why this section exists</h4>
+            <p>This is the very first “why” of satellite orbits. Everything else in LEO (handovers, constellation size, Doppler, revisit time) comes from this single equation. Understand it once → the rest of the course clicks.</p>
+
+            <h4>The physics, explained like you’re 30,000 ft up</h4>
+            <p>Gravity pulls the satellite toward Earth’s center. The satellite’s forward speed tries to make it fly straight off into space. When these two forces are perfectly balanced → stable circular orbit.</p>
+
             <div class="equation">
-F_grav = G × M_earth × m / r²  
-= centripetal force = m × v² / r
+                Gravitational force = Centripetal force<br>
+                G × M × m / r²  =  m × v² / r
             </div>
-            <p>→ Orbital velocity simplifies to:</p>
-            <div class="equation">v = √(G M_earth / r)</div>
-            <p><strong>Quick numbers (550 km LEO):</strong> ~7.67 km/s (~27,600 km/h)</p>
-            <p><strong>Why you care:</strong> Lower altitude = much faster satellites = frequent handovers and stronger Doppler.</p>
+
+            <p>The “m” cancels out (nice!). So orbital velocity becomes:</p>
+            <div class="equation">v = √(G × M / r)</div>
+
+            <h4>Real numbers that matter for LEO vs GEO</h4>
+            <table style="width:100%; border-collapse:collapse; margin:1.2rem 0; background:#111; border-radius:6px; overflow:hidden;">
+                <tr style="background:#222;"><th style="padding:12px; text-align:left;">Orbit</th><th>Altitude</th><th>Speed</th><th>Period</th><th>Orbits per day</th></tr>
+                <tr><td style="padding:12px;">Typical LEO (Starlink)</td><td>~550 km</td><td>~7.67 km/s (27,600 km/h)</td><td>~95.6 min</td><td>~15.1</td></tr>
+                <tr><td style="padding:12px;">ISS</td><td>~400 km</td><td>~7.66 km/s</td><td>~92.7 min</td><td>~15.5</td></tr>
+                <tr><td style="padding:12px;">GEO (your old world)</td><td>35,786 km</td><td>~3.07 km/s</td><td>24 h (sidereal)</td><td>1</td></tr>
+            </table>
+
+            <h4>Real-life translation</h4>
+            <ul>
+                <li>At 550 km a satellite whips around Earth every ~96 minutes → it disappears over the horizon in minutes.</li>
+                <li>Your terminal (or plane) must switch satellites constantly → that’s why LEO handovers are a big engineering challenge.</li>
+                <li>GEO satellites stay fixed in the sky → no handovers, but 600+ ms latency. LEO gives ~20–40 ms but needs a huge constellation.</li>
+            </ul>
+
+            <div class="takeaway">
+                <strong>Key takeaway:</strong> Lower altitude = much faster satellites = you need many of them for continuous coverage. This single fact explains why Starlink needs thousands of satellites while a GEO system needs only a handful.
+            </div>
+
+            <h4>Try it yourself – copy-paste Python</h4>
             <div class="code-snippet">
-# Quick Python check
 import math
-G = 6.67430e-11
-M = 5.972e24
-R_earth = 6371000
-r = R_earth + 550000
-v = math.sqrt(G * M / r)
-print(f"LEO speed: {v/1000:.2f} km/s")
+
+G = 6.67430e-11          # m³ kg⁻¹ s⁻²
+M_earth = 5.972e24       # kg
+R_earth = 6371000        # m
+
+def orbital_velocity(altitude_km):
+    r = R_earth + altitude_km * 1000
+    return math.sqrt(G * M_earth / r) / 1000   # km/s
+
+print("550 km LEO speed :", round(orbital_velocity(550), 2), "km/s")
+print("GEO speed       :", round(orbital_velocity(35786), 2), "km/s")
             </div>
+
             <button class="mark-done-btn">Got it – mark complete</button>
         </div>
 
-        <!-- Topic 2 -->
+        <!-- Other topics as accordions (ready for you to expand the same way) -->
         <div class="accordion-header" data-target="topic2">
             <div class="check-small" data-id="q2_topic2"><div class="custom-checkbox-small"></div></div>
             <h3>2. Kepler’s third law – orbital period vs altitude</h3>
         </div>
-        <div id="topic2" class="accordion-content">
-            <p>T² ∝ a³ → the higher you go, the slower you orbit.</p>
-            <div class="equation">T = 2π √(a³ / μ)     (μ ≈ 3.986 × 10¹⁴ m³/s²)</div>
-            <p>Real examples:</p>
-            <ul>
-                <li>Starlink (~550 km) → ~95–96 minutes per orbit</li>
-                <li>ISS (~400 km) → ~92 minutes</li>
-                <li>GEO (35,786 km) → exactly 1 sidereal day (~1436 min)</li>
-            </ul>
-            <p><strong>Fun fact:</strong> LEO satellites see ~15 sunrises/sunsets per day!</p>
-            <button class="mark-done-btn">Got it – mark complete</button>
-        </div>
+        <div id="topic2" class="accordion-content"><p>Coming soon – expand me the same way as topic 1 🌌</p></div>
 
-        <!-- Topic 3 -->
         <div class="accordion-header" data-target="topic3">
             <div class="check-small" data-id="q2_topic3"><div class="custom-checkbox-small"></div></div>
             <h3>3. Satellite visibility cone & pass duration</h3>
         </div>
-        <div id="topic3" class="accordion-content">
-            <p>How long can your terminal "see" one satellite?</p>
-            <p>At 550 km altitude and 10° minimum elevation:</p>
-            <ul>
-                <li>Max distance to horizon ≈ 2300–2500 km</li>
-                <li>Typical pass duration: 4–12 minutes</li>
-                <li>Zenith pass (directly overhead) → longest visibility</li>
-            </ul>
-            <p><strong>Aviation angle:</strong> Plane at 900 km/h crosses a visibility cone very quickly → need fast, predictive handovers.</p>
-            <button class="mark-done-btn">Got it – mark complete</button>
-        </div>
+        <div id="topic3" class="accordion-content"><p>Coming soon – expand me the same way as topic 1 🌌</p></div>
 
-        <!-- Remaining topics – empty accordions ready to be filled -->
         <div class="accordion-header" data-target="topic4">
             <div class="check-small" data-id="q2_topic4"><div class="custom-checkbox-small"></div></div>
             <h3>4. LEO ground tracks & nodal precession (J₂ effect)</h3>
         </div>
-        <div id="topic4" class="accordion-content">
-            <p>Coming soon – fill me in! 🌍</p>
-        </div>
+        <div id="topic4" class="accordion-content"><p>Coming soon – expand me the same way as topic 1 🌌</p></div>
 
         <div class="accordion-header" data-target="topic5">
             <div class="check-small" data-id="q2_topic5"><div class="custom-checkbox-small"></div></div>
             <h3>5. Visibility, passes & handover frequency</h3>
         </div>
-        <div id="topic5" class="accordion-content">
-            <p>Coming soon – fill me in! 🔄</p>
-        </div>
+        <div id="topic5" class="accordion-content"><p>Coming soon – expand me the same way as topic 1 🌌</p></div>
 
         <div class="accordion-header" data-target="topic6">
             <div class="check-small" data-id="q2_topic6"><div class="custom-checkbox-small"></div></div>
             <h3>6. Constellation fundamentals (Walker patterns, streets-of-coverage)</h3>
         </div>
-        <div id="topic6" class="accordion-content">
-            <p>Coming soon – fill me in! ⭐</p>
-        </div>
+        <div id="topic6" class="accordion-content"><p>Coming soon – expand me the same way as topic 1 🌌</p></div>
 
         <div class="accordion-header" data-target="topic7">
             <div class="check-small" data-id="q2_topic7"><div class="custom-checkbox-small"></div></div>
             <h3>7. Tools & data sources (SGP4, TLEs, Celestrak, Skyfield, Poliastro)</h3>
         </div>
-        <div id="topic7" class="accordion-content">
-            <p>Coming soon – fill me in! 🛠️</p>
-        </div>
+        <div id="topic7" class="accordion-content"><p>Coming soon – expand me the same way as topic 1 🌌</p></div>
 
     </div>
 
     <div class="section-card">
-        <h2>📚 Best free resources to start</h2>
+        <h2>📚 Best free resources</h2>
         <ul>
             <li>MIT OCW – Aerospace orbital mechanics lectures</li>
             <li>YouTube – Prof. Shane Ross Orbital Mechanics playlist</li>
-            <li>Book (free excerpts) – Fundamentals of Astrodynamics (Ch 1–4)</li>
-            <li>Poliastro & Skyfield docs + example notebooks</li>
-            <li>NASA GMAT – free download & beginner guides</li>
+            <li>Fundamentals of Astrodynamics (free PDF excerpts, Ch 1–4)</li>
+            <li>Poliastro & Skyfield Python tutorials</li>
+            <li>NASA GMAT – free tool + beginner guides</li>
         </ul>
     </div>
 
     <div class="section-card">
         <h2>🛠️ Hands-on this quarter</h2>
         <ul>
-            <li>Ground track plot of a real satellite (ISS or Starlink)</li>
-            <li>Visibility & pass schedule over your city for 1 week</li>
-            <li>LEO vs GEO velocity & period comparison script</li>
+            <li>Ground-track plot of a real satellite</li>
+            <li>Visibility passes over Toulouse for 1 week</li>
+            <li>LEO vs GEO velocity & period comparison</li>
             <li>GitHub folder: /q2-orbital-mechanics</li>
-            <li>Quick note: "Why LEO handovers matter for aviation"</li>
         </ul>
     </div>
 
@@ -371,96 +238,64 @@ print(f"LEO speed: {v/1000:.2f} km/s")
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script>
-// ── Supabase Auth ────────────────────────────────────────
+// Auth
 const supabaseUrl = 'https://kpkpptqtuuhnbdntuluc.supabase.co';
 const supabaseKey = 'sb_publishable_aws8RQ085UqKFBUWfojluQ_o9R9WKBb';
 const { createClient } = supabase;
 const client = createClient(supabaseUrl, supabaseKey);
 
-document.getElementById('logoffBtn')?.addEventListener('click', async () => {
+document.getElementById('logoffBtn').addEventListener('click', async () => {
     await client.auth.signOut();
     window.location.href = "index.html";
 });
 
-// ── Quarter completion ───────────────────────────────────
+// Quarter toggle
 const quarterCheck = document.getElementById('quarterCheck');
 const quarterId = 'q2-orbital-mechanics';
 
 function loadQuarter() {
-    if (localStorage.getItem(`leoaf_${quarterId}`) === 'true') {
-        document.body.classList.add('completed');
-    }
+    if (localStorage.getItem(`leoaf_${quarterId}`) === 'true') document.body.classList.add('completed');
 }
-
-quarterCheck?.addEventListener('click', () => {
+quarterCheck.addEventListener('click', () => {
     document.body.classList.toggle('completed');
     localStorage.setItem(`leoaf_${quarterId}`, document.body.classList.contains('completed'));
 });
 loadQuarter();
 
-// ── Accordion open/close ─────────────────────────────────
+// Accordion
 document.querySelectorAll('.accordion-header').forEach(header => {
     header.addEventListener('click', e => {
-        if (e.target.closest('.check-small')) return; // don't toggle when clicking checkbox
+        if (e.target.closest('.check-small')) return;
         const target = document.getElementById(header.dataset.target);
-        const isOpen = target.style.display === 'block';
-        target.style.display = isOpen ? 'none' : 'block';
-        header.classList.toggle('active', !isOpen);
+        const open = target.style.display === 'block';
+        target.style.display = open ? 'none' : 'block';
+        header.classList.toggle('active', !open);
     });
 });
 
-// ── Per-topic completion ─────────────────────────────────
-document.querySelectorAll('.mark-done-btn').forEach(btn => {
-    btn.addEventListener('click', () => {
-        const content = btn.closest('.accordion-content');
-        const header = content.previousElementSibling;
-        const cb = header.querySelector('.custom-checkbox-small');
-        const id = header.querySelector('.check-small')?.dataset.id;
-
-        cb?.classList.add('checked');
-        if (id) localStorage.setItem(`leoaf_${id}`, 'true');
-    });
-});
-
-// Restore per-topic checks
+// Per-topic toggle (now fully clickable and reversible)
 document.querySelectorAll('.check-small').forEach(el => {
     const id = el.dataset.id;
-    if (localStorage.getItem(`leoaf_${id}`) === 'true') {
-        el.querySelector('.custom-checkbox-small')?.classList.add('checked');
-    }
+    const box = el.querySelector('.custom-checkbox-small');
+
+    // Load saved state
+    if (localStorage.getItem(`leoaf_${id}`) === 'true') box.classList.add('checked');
+
+    el.addEventListener('click', e => {
+        e.stopImmediatePropagation();
+        box.classList.toggle('checked');
+        localStorage.setItem(`leoaf_${id}`, box.classList.contains('checked'));
+    });
 });
 
-// Stars (optional – remove canvas + this block if unwanted)
+// Optional stars
 const canvas = document.getElementById('starsCanvas');
 if (canvas) {
     const ctx = canvas.getContext('2d');
     let stars = [];
-    function init() {
-        canvas.width = window.innerWidth;
-        canvas.height = window.innerHeight;
-        stars = [];
-        for(let i=0; i<300; i++){
-            stars.push({
-                x:Math.random()*canvas.width,
-                y:Math.random()*canvas.height,
-                size:Math.random()*1.2+0.3,
-                speed:Math.random()*0.4+0.1
-            });
-        }
-    }
-    function animate(){
-        ctx.fillStyle='rgba(0,0,0,0.1)';
-        ctx.fillRect(0,0,canvas.width,canvas.height);
-        stars.forEach(s=>{
-            s.y += s.speed;
-            if(s.y > canvas.height) s.y = 0;
-            ctx.fillStyle='#fff';
-            ctx.fillRect(s.x,s.y,s.size,s.size);
-        });
-        requestAnimationFrame(animate);
-    }
-    init(); animate();
-    window.addEventListener('resize', init);
+    function init(){ canvas.width = window.innerWidth; canvas.height = window.innerHeight; stars = []; for(let i=0;i<300;i++) stars.push({x:Math.random()*canvas.width, y:Math.random()*canvas.height, size:Math.random()*1.2+0.3, speed:Math.random()*0.4+0.1}); }
+    function animate(){ ctx.fillStyle='rgba(0,0,0,0.12)'; ctx.fillRect(0,0,canvas.width,canvas.height); stars.forEach(s=>{ s.y += s.speed; if(s.y>canvas.height) s.y=0; ctx.fillStyle='#fff'; ctx.fillRect(s.x,s.y,s.size,s.size); }); requestAnimationFrame(animate); }
+    init(); animate(); window.addEventListener('resize', init);
 }
 </script>
 </body>
