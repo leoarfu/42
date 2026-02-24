@@ -77,11 +77,23 @@ h1 { font-family:'Orbitron',sans-serif; font-size:clamp(2.2rem,6vw,3.6rem); text
     border-radius:0 0 8px 8px; border:1px solid rgba(57,255,20,0.2); margin-top:-8px;
 }
 .close-accordion {
-    display:block; margin:1.5rem auto 0.5rem; padding:0.4rem 1rem;
-    background:rgba(255,255,255,0.08); border:none; border-radius:6px;
-    color:#aaa; cursor:pointer; font-size:0.85rem; text-align:center; width:fit-content;
+    display: block;
+    margin: 1.8rem auto 0.5rem;
+    padding: 0.5rem 1.2rem;
+    background: rgba(255,255,255,0.06);
+    border: 1px solid rgba(255,255,255,0.12);
+    border-radius: 6px;
+    color: #aaa;
+    cursor: pointer;
+    font-size: 0.82rem;          /* smaller */
+    text-align: center;
+    width: fit-content;
+    transition: all 0.2s;
 }
-.close-accordion:hover { background:rgba(255,255,255,0.15); color:#fff; }
+.close-accordion:hover {
+    background: rgba(255,255,255,0.12);
+    color: #fff;
+}
 
 /* Other styles */
 .equation { font-family:monospace; background:#111; padding:1.2rem; border-radius:8px; margin:1.2rem 0; color:#00d9ff; line-height:1.4; }
@@ -231,7 +243,8 @@ print(f"20,200 km MEO speed: {round(meo_speed, 2)} km/s")
 
             <button class="mark-done-btn" data-id="q2_topic1">Mark as complete</button>
 
-            <a href="#" class="close-accordion" onclick="document.getElementById('topic1').style.display='none'; document.querySelector('[data-target=\"topic1\"]').classList.remove('active'); return false;">Collapse ↑</a>
+            <button class="close-accordion" onclick="closeAccordion('topic1')">Collapse ↑</button>
+            <!-- <a href="#" class="close-accordion" onclick="document.getElementById('topic1').style.display='none'; document.querySelector('[data-target=\"topic1\"]').classList.remove('active'); return false;">Collapse ↑</a>-->
         </div>
 
         <!-- Other topics (placeholders with collapse link) -->
@@ -492,6 +505,13 @@ document.querySelectorAll('.check-small').forEach(el => {
 });
 updateQuarterVisual();
 
+function closeAccordion(targetId) {
+    const content = document.getElementById(targetId);
+    const header = content.previousElementSibling;
+    content.style.display = 'none';
+    header.classList.remove('active');
+}
+    
 // Optional stars
 const canvas = document.getElementById('starsCanvas');
 if (canvas) {
