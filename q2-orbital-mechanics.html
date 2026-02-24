@@ -1,0 +1,197 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, shrink-to-fit=no">
+<title>Q2 — Orbital Mechanics & Constellations 101 | LEOAF</title>
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;600;800&family=Inter:wght@400;600&display=swap" rel="stylesheet">
+<style>
+/* Reuse same global styles from dashboard.html – copy-paste or link externally later */
+* { box-sizing: border-box; margin:0; padding:0; }
+html, body { height:100%; background:#000; color:white; font-family:'Orbitron',sans-serif; overflow-x:hidden; }
+#starsCanvas { position:fixed; top:0; left:0; width:100%; height:100%; z-index:-1; }
+/* Header – identical to dashboard */
+header {
+    display:flex; justify-content:space-between; align-items:center;
+    padding:18px clamp(20px,5vw,60px);
+    border-bottom:1px solid rgba(255,0,79,0.3);
+    background:rgba(0,0,0,0.7); backdrop-filter:blur(5px);
+    position:sticky; top:0; z-index:10;
+}
+.logo { font-weight:800; font-size:clamp(18px,2vw,24px); letter-spacing:3px; text-decoration:none; }
+.logo span:first-child { color:white; }
+.logo span:last-child { color:#ff004f; }
+.logoff-btn {
+    background:transparent; border:1px solid #ff004f; color:#ff004f;
+    padding:6px 14px; cursor:pointer; font-size:11px; letter-spacing:1px;
+}
+.logoff-btn:hover { background:#ff004f; color:black; box-shadow:0 0 10px #ff004f; }
+/* Content wrapper */
+.content {
+    max-width:900px; margin:40px auto; padding:0 20px; position:relative; z-index:1;
+}
+h1 { font-size:clamp(28px,6vw,42px); text-align:center; margin-bottom:10px; letter-spacing:2px; }
+.back-link { display:block; text-align:center; margin:20px 0; font-size:14px; color:#00d9ff; text-decoration:none; }
+.back-link:hover { text-decoration:underline; }
+/* Section cards */
+.section-card {
+    background:rgba(255,255,255,0.03); border-left:3px solid #ff004f;
+    padding:20px; margin:20px 0; border-radius:4px;
+}
+.section-card h2 { margin:0 0 12px; color:#00d9ff; font-size:20px; letter-spacing:1px; }
+.section-card h3 { margin:18px 0 8px; color:#ffffff; font-size:16px; }
+.section-card ul { padding-left:20px; margin:8px 0; font-family:'Inter',sans-serif; font-size:14px; line-height:1.6; color:#cccccc; }
+.section-card li { margin-bottom:6px; }
+.check-wrapper {
+    float:right; width:30px; height:30px; cursor:pointer;
+}
+.custom-checkbox {
+    width:24px; height:24px; border:2px solid #ff004f; background:transparent;
+    display:flex; justify-content:center; align-items:center;
+}
+.completed .custom-checkbox { border-color:#39ff14; background:rgba(57,255,20,0.2); }
+.completed .custom-checkbox::after { content:'✔'; color:#39ff14; font-size:16px; text-shadow:0 0 5px #39ff14; }
+.completed h1, .completed .section-card h2 { color:#39ff14; text-decoration:line-through; text-decoration-color:rgba(57,255,20,0.5); }
+/* Footer note */
+.mission-note {
+    text-align:center; margin:60px 0 40px; font-size:13px; opacity:0.7; color:#00d9ff;
+}
+</style>
+</head>
+<body>
+
+<canvas id="starsCanvas"></canvas>
+
+<header>
+    <a href="dashboard.html" class="logo"><span>LEO</span><span>AF</span></a>
+    <button id="logoffBtn" class="logoff-btn">ABORT</button>
+</header>
+
+<div class="content">
+
+    <a href="dashboard.html" class="back-link">← Back to Mission Dashboard</a>
+
+    <h1>Q2 · Months 4–6<br>Orbital Mechanics & Constellations 101</h1>
+
+    <div class="check-wrapper" title="Mark Quarter as Completed" id="quarterCheck">
+        <div class="custom-checkbox"></div>
+    </div>
+
+    <div class="section-card">
+        <h2>Quarter Objectives</h2>
+        <p>Master the "moving target" reality of LEO that never existed in GEO. Build intuition for why handovers happen every few minutes, why Doppler is significant, and how constellations achieve global coverage without stationary satellites.</p>
+        <p>By the end: Run your first Python orbit simulations and visualize ground tracks & visibility windows.</p>
+    </div>
+
+    <div class="section-card">
+        <h2>Core Topics & Sub-Sections</h2>
+        
+        <h3>1. Foundational Orbital Physics</h3>
+        <ul>
+            <li>Newton’s law of gravitation & centripetal force balance</li>
+            <li>Kepler’s three laws (focus on 1st & 3rd for period vs altitude)</li>
+            <li>Orbital elements: semi-major axis, eccentricity, inclination, RAAN, argument of perigee, true anomaly</li>
+            <li>Vis-viva equation & specific mechanical energy</li>
+        </ul>
+
+        <h3>2. LEO vs GEO/MEO Regimes</h3>
+        <ul>
+            <li>Altitude ranges & typical velocities (~7.6 km/s in LEO)</li>
+            <li>Orbital period formula (T = 2π √(a³/μ))</li>
+            <li>Ground track patterns & nodal precession due to J2 perturbation</li>
+            <li>Why LEO needs many satellites for continuous coverage</li>
+        </ul>
+
+        <h3>3. Visibility, Passes & Handovers</h3>
+        <ul>
+            <li>Satellite visibility cone & elevation angle</li>
+            <li>Pass duration & maximum elevation calculations</li>
+            <li>Revisit time & coverage gap analysis</li>
+            <li>Handover frequency in LEO (~every 5–10 min)</li>
+        </ul>
+
+        <h3>4. Constellation Fundamentals</h3>
+        <ul>
+            <li>Walker Delta & Walker Star patterns</li>
+            <li>Number of planes, satellites per plane, inclination/phasing</li>
+            <li>Streets-of-coverage method</li>
+            <li>Basic coverage probability & quality metrics</li>
+        </ul>
+
+        <h3>5. Tools & Data Sources</h3>
+        <ul>
+            <li>SGP4 propagator & Two-Line Element (TLE) format</li>
+            <li>Celestrak / Space-Track for real satellite ephemeris</li>
+        </ul>
+    </div>
+
+    <div class="section-card">
+        <h2>Recommended Resources (Free-First)</h2>
+        <ul>
+            <li>MIT OpenCourseWare – Introduction to Aerospace Engineering (orbital mechanics lectures & notes)</li>
+            <li>YouTube: Prof. Shane Ross – Orbital Mechanics playlist (first 5–8 videos)</li>
+            <li>Book (free PDF excerpts): Fundamentals of Astrodynamics (Bate, Mueller, White) – Ch. 1–4</li>
+            <li>Poliastro documentation & quick-start tutorials</li>
+            <li>Skyfield documentation – Earth satellites & ground station access</li>
+            <li>NASA GMAT (General Mission Analysis Tool) – free download + basic tutorials</li>
+        </ul>
+    </div>
+
+    <div class="section-card">
+        <h2>Hands-On Deliverables & Mini-Projects</h2>
+        <ul>
+            <li>Install Python + Skyfield/Poliastro via pip (or use Google Colab)</li>
+            <li>Script #1: Plot ground track of a single LEO satellite (e.g., ISS) over 24 hours</li>
+            <li>Script #2: Compute visibility windows & pass schedule for a ground station in Toulouse over one week</li>
+            <li>Script #3: Compare orbital period & velocity for 550 km LEO vs 35,786 km GEO</li>
+            <li>Bonus: Visualize a simple 10-satellite mini-constellation ground tracks</li>
+            <li>Upload scripts + plots to your GitHub repo (create folder: /q2-orbital-mechanics)</li>
+            <li>Write 1-page notes: "Why handovers are inevitable in LEO – and how aviation terminals must handle them"</li>
+        </ul>
+    </div>
+
+    <div class="mission-note">
+        "The stars are not static — neither are the satellites. Master motion now, command constellations later."
+    </div>
+
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script>
+// Supabase Auth (same as dashboard)
+const supabaseUrl = 'https://kpkpptqtuuhnbdntuluc.supabase.co';
+const supabaseKey = 'sb_publishable_aws8RQ085UqKFBUWfojluQ_o9R9WKBb';
+const { createClient } = supabase;
+const client = createClient(supabaseUrl, supabaseKey);
+
+document.getElementById('logoffBtn').addEventListener('click', async () => {
+    await client.auth.signOut();
+    window.location.href = "index.html";
+});
+
+// Progress for this quarter
+const quarterCheck = document.getElementById('quarterCheck');
+const quarterId = 'q2-orbital-mechanics';
+
+function loadQuarterProgress() {
+    if (localStorage.getItem(`leoaf_${quarterId}`) === 'true') {
+        document.body.classList.add('completed');
+    }
+}
+
+function toggleQuarter() {
+    const isCompleted = document.body.classList.toggle('completed');
+    localStorage.setItem(`leoaf_${quarterId}`, isCompleted);
+}
+
+quarterCheck.addEventListener('click', toggleQuarter);
+loadQuarterProgress();
+
+// Starfield (copy same warp effect from dashboard.html)
+const canvas = document.getElementById('starsCanvas');
+const ctx = canvas.getContext('2d');
+// ... paste your full animateStars / initStars / resizeCanvas functions here ...
+// (to avoid duplication you can later extract to shared.js)
+</script>
+</body>
+</html>
