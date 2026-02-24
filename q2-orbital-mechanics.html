@@ -3,102 +3,212 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, shrink-to-fit=no">
-<title>Q2 — Orbital Mechanics & Constellations 101 | LEOAF</title>
-<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;600;800&family=Inter:wght@400;600&display=swap" rel="stylesheet">
+<title>Q2 – Orbital Mechanics & Constellations 101 • LEOAF</title>
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;600;800&family=Inter:wght@300;400;600&display=swap" rel="stylesheet">
 <style>
-* { box-sizing: border-box; margin:0; padding:0; }
-html, body { height:100%; background:#000; color:white; font-family:'Orbitron',sans-serif; overflow-x:hidden; }
+* { box-sizing:border-box; margin:0; padding:0; }
+body {
+    background:#000;
+    color:#f0f0f0;
+    font-family:'Inter', sans-serif;
+    line-height:1.6;
+    min-height:100vh;
+}
+#starsCanvas { position:fixed; inset:0; z-index:-1; }
 
-/* Stars canvas (optional – remove if you want fully static page) */
-#starsCanvas { position:fixed; top:0; left:0; width:100%; height:100%; z-index:-1; }
-
-/* Header – fully opaque, solid black */
+/* Header – solid black, no bleed-through */
 header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding: 18px clamp(20px, 5vw, 60px);
-    background: #000000;                      /* solid opaque black */
-    border-bottom: 1px solid #ff004f33;       /* subtle separator */
-    position: sticky;
-    top: 0;
-    z-index: 10;
-    box-shadow: 0 4px 12px rgba(0,0,0,0.6);   /* depth when scrolling */
+    background:#000;
+    border-bottom:1px solid #ff004f33;
+    position:sticky;
+    top:0;
+    z-index:100;
+    padding:1rem clamp(1.5rem,5vw,4rem);
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    box-shadow:0 4px 16px #0008;
 }
-.nav-left { display:flex; align-items:center; gap:30px; }
-.logo { font-weight:800; font-size:clamp(18px,2vw,24px); letter-spacing:3px; text-decoration:none; }
-.logo span:first-child { color:white; }
+.logo {
+    font-family:'Orbitron',sans-serif;
+    font-size:clamp(1.4rem,4vw,2rem);
+    font-weight:800;
+    letter-spacing:3px;
+    text-decoration:none;
+}
+.logo span:first-child { color:#fff; }
 .logo span:last-child { color:#ff004f; }
+.nav-left { display:flex; align-items:center; gap:2rem; }
 .back-dashboard {
-    font-size:13px; color:#00d9ff; text-decoration:none; letter-spacing:1px;
-    opacity:0.85; transition:0.2s;
+    color:#00d9ff;
+    font-size:0.95rem;
+    text-decoration:none;
+    opacity:0.9;
 }
-.back-dashboard:hover { opacity:1; text-decoration:underline; color:#39ff14; }
+.back-dashboard:hover { color:#39ff14; text-decoration:underline; opacity:1; }
 .logoff-btn {
-    background:transparent; border:1px solid #ff004f; color:#ff004f;
-    padding:6px 14px; cursor:pointer; font-size:11px; letter-spacing:1px;
+    background:transparent;
+    border:1px solid #ff004f;
+    color:#ff004f;
+    padding:0.5rem 1rem;
+    font-size:0.85rem;
+    cursor:pointer;
+    border-radius:4px;
 }
-.logoff-btn:hover { background:#ff004f; color:black; box-shadow:0 0 10px #ff004f; }
+.logoff-btn:hover {
+    background:#ff004f;
+    color:#000;
+}
 
-/* Main content – top padding prevents overlap with sticky header */
+/* Content area – safe from header overlap */
 .content {
-    max-width:900px; margin:0 auto; padding:100px 20px 60px; /* increased top padding */
-    position:relative; z-index:1;
+    max-width:960px;
+    margin:0 auto;
+    padding:clamp(100px,12vh,140px) 1.5rem 4rem;
 }
-h1 { font-size:clamp(28px,6vw,42px); text-align:center; margin-bottom:20px; letter-spacing:2px; }
 
-/* Section cards */
-.section-card {
-    background:rgba(255,255,255,0.03); border-left:3px solid #ff004f;
-    padding:24px; margin:32px 0; border-radius:4px; position:relative;
+/* Big friendly title */
+h1 {
+    font-family:'Orbitron',sans-serif;
+    font-size:clamp(2.2rem,6vw,3.6rem);
+    text-align:center;
+    margin-bottom:1.5rem;
+    letter-spacing:1px;
+    color:#00d9ff;
 }
-.section-card h2 { margin:0 0 16px; color:#00d9ff; font-size:20px; letter-spacing:1px; }
 
-/* Quarter-level checkbox (top-right) */
+/* Quarter checkbox – top right, playful */
 .check-container {
-    position:absolute; top:24px; right:24px; display:flex; align-items:center; gap:10px;
-    cursor:pointer; user-select:none; z-index:2;
+    position:absolute;
+    top:clamp(110px,13vh,150px);
+    right:1.5rem;
+    display:flex;
+    align-items:center;
+    gap:0.8rem;
+    cursor:pointer;
 }
-.check-label { font-size:13px; color:#aaaaaa; letter-spacing:0.5px; }
-.check-wrapper { width:28px; height:28px; display:flex; justify-content:center; align-items:center; }
+.check-label { font-size:0.95rem; color:#aaa; }
 .custom-checkbox {
-    width:24px; height:24px; border:2px solid #ff004f; background:transparent;
-    border-radius:4px; display:flex; justify-content:center; align-items:center;
+    width:32px;
+    height:32px;
+    border:2px solid #ff004f;
+    border-radius:6px;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    background:transparent;
+    transition:0.2s;
 }
-.check-container:hover .custom-checkbox { box-shadow:0 0 12px rgba(255,0,79,0.4); }
-.completed .custom-checkbox { border-color:#39ff14; background:rgba(57,255,20,0.15); }
-.completed .custom-checkbox::after { content:'✔'; color:#39ff14; font-size:16px; text-shadow:0 0 6px #39ff14; }
-.completed h1, .completed .section-card h2 { color:#39ff14; text-decoration:line-through; text-decoration-color:rgba(57,255,20,0.5); }
+.check-container:hover .custom-checkbox { box-shadow:0 0 12px #ff004f66; }
+.completed .custom-checkbox {
+    border-color:#39ff14;
+    background:rgba(57,255,20,0.2);
+}
+.completed .custom-checkbox::after {
+    content:'🚀';
+    font-size:1.1rem;
+}
 
-/* Accordion */
+/* Cards – softer, more spacious */
+.section-card {
+    background:rgba(255,255,255,0.025);
+    border:1px solid rgba(0,217,255,0.15);
+    border-radius:12px;
+    padding:2rem;
+    margin:2.5rem 0;
+    box-shadow:0 4px 20px #0008;
+}
+.section-card h2 {
+    font-family:'Orbitron',sans-serif;
+    color:#00d9ff;
+    font-size:1.5rem;
+    margin-bottom:1.2rem;
+}
+
+/* Accordion – fun & clear */
 .accordion-header {
-    cursor:pointer; padding:14px 20px; background:rgba(0,217,255,0.04);
-    margin:10px 0; border-radius:4px; display:flex; align-items:center; gap:12px;
-    transition:background 0.2s;
+    background:rgba(0,217,255,0.06);
+    padding:1.1rem 1.4rem;
+    border-radius:8px;
+    margin:1rem 0;
+    cursor:pointer;
+    display:flex;
+    align-items:center;
+    gap:1rem;
+    transition:all 0.2s ease;
+    user-select:none;
 }
-.accordion-header:hover { background:rgba(0,217,255,0.08); }
-.accordion-header.active { background:rgba(57,255,20,0.08); }
-.accordion-header h3 { margin:0; flex:1; font-size:16px; }
+.accordion-header:hover { background:rgba(0,217,255,0.12); transform:translateX(4px); }
+.accordion-header.active { background:rgba(57,255,20,0.12); }
+.accordion-header .check-small {
+    width:24px;
+    height:24px;
+    flex-shrink:0;
+}
+.custom-checkbox-small {
+    width:20px;
+    height:20px;
+    border:2px solid #888;
+    border-radius:4px;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+}
+.custom-checkbox-small.checked {
+    border-color:#39ff14;
+    background:rgba(57,255,20,0.25);
+}
+.custom-checkbox-small.checked::after { content:'✓'; color:#39ff14; font-weight:bold; }
+.accordion-header h3 { margin:0; font-size:1.15rem; flex:1; }
 .accordion-content {
-    display:none; padding:20px; background:rgba(0,0,0,0.4);
-    border-left:3px solid #39ff14; margin:0 0 16px 20px; border-radius:0 0 4px 4px;
+    display:none;
+    padding:1.6rem 1.4rem;
+    background:rgba(0,0,0,0.35);
+    border-radius:0 0 8px 8px;
+    border:1px solid rgba(57,255,20,0.2);
+    margin-top:-8px;
 }
+.accordion-content p, .accordion-content li { color:#ddd; }
 .equation {
-    font-family:monospace; background:rgba(255,255,255,0.05); padding:12px;
-    border-radius:4px; margin:12px 0; color:#00d9ff;
+    font-family:monospace;
+    background:#111;
+    padding:1rem;
+    border-radius:6px;
+    margin:1.2rem 0;
+    color:#00d9ff;
 }
 .code-snippet {
-    background:#111; padding:12px; border-radius:4px; font-family:monospace;
-    font-size:13px; overflow-x:auto; margin:12px 0;
+    background:#0a0a0a;
+    padding:1rem;
+    border-radius:6px;
+    font-family:monospace;
+    font-size:0.92rem;
+    overflow-x:auto;
+    margin:1.2rem 0;
+    border-left:4px solid #39ff14;
 }
-.mark-done-btn {
-    margin-top:16px; padding:8px 16px; background:#39ff1440; border:none;
-    color:white; cursor:pointer; border-radius:4px; font-size:13px;
-}
-.mark-done-btn:hover { background:#39ff1480; }
 
-/* Footer note */
-.mission-note { text-align:center; margin:80px 0 40px; font-size:13px; opacity:0.7; color:#00d9ff; }
+/* Buttons inside content */
+.mark-done-btn {
+    margin-top:1.5rem;
+    padding:0.7rem 1.4rem;
+    background:rgba(57,255,20,0.2);
+    border:none;
+    border-radius:6px;
+    color:#fff;
+    cursor:pointer;
+    font-size:0.95rem;
+}
+.mark-done-btn:hover { background:rgba(57,255,20,0.45); }
+
+/* Note at bottom */
+.mission-note {
+    text-align:center;
+    margin:5rem 0 3rem;
+    font-size:1rem;
+    color:#00d9ff88;
+    font-style:italic;
+}
 </style>
 </head>
 <body>
@@ -108,197 +218,249 @@ h1 { font-size:clamp(28px,6vw,42px); text-align:center; margin-bottom:20px; lett
 <header>
     <div class="nav-left">
         <a href="dashboard.html" class="logo"><span>LEO</span><span>AF</span></a>
-        <a href="dashboard.html" class="back-dashboard">← MISSION DASHBOARD</a>
+        <a href="dashboard.html" class="back-dashboard">← Mission Dashboard</a>
     </div>
     <button id="logoffBtn" class="logoff-btn">ABORT</button>
 </header>
 
 <div class="content">
 
-    <h1>Q2 · Months 4–6<br>Orbital Mechanics & Constellations 101</h1>
+    <h1>Q2 – Orbital Mechanics & Constellations 101</h1>
 
-    <div class="check-container" id="quarterCheck" title="Mark Quarter as Completed">
+    <div class="check-container" id="quarterCheck">
         <div class="check-wrapper"><div class="custom-checkbox"></div></div>
-        <span class="check-label">MARK COMPLETE</span>
+        <span class="check-label">MARK QUARTER COMPLETE</span>
     </div>
 
     <div class="section-card">
-        <h2>Quarter Objectives</h2>
-        <p>Understand why LEO satellites are fast-moving targets (unlike GEO). Learn the physics that drives handover frequency, Doppler shift, and constellation scale. Build your first orbit visualization scripts.</p>
-        <p>End goal: Simulate passes, ground tracks, and basic multi-satellite coverage.</p>
+        <h2>🎯 What you'll master this quarter</h2>
+        <p>GEO satellites sit still. LEO ones zoom around the planet ~15 times a day. That's why handovers happen constantly and why constellations need hundreds or thousands of satellites.</p>
+        <p>This quarter turns that "moving target" reality into intuition you can simulate and explain.</p>
+        <p>By the end → your first real orbit plots, pass predictions, and a solid mental model of why LEO behaves so differently from GEO.</p>
     </div>
 
     <div class="section-card">
-        <h2>Core Topics & Sub-Sections</h2>
+        <h2>Core Topics – click to dive in 🚀</h2>
 
-        <!-- Accordion 1 – fully filled example -->
+        <!-- Topic 1 -->
         <div class="accordion-header" data-target="topic1">
             <div class="check-small" data-id="q2_topic1"><div class="custom-checkbox-small"></div></div>
             <h3>1. Newton’s law of gravitation & centripetal force balance</h3>
         </div>
         <div id="topic1" class="accordion-content">
-            <p>Gravitational force provides the centripetal acceleration needed for circular orbit:</p>
-            <div class="equation">F_grav = G · M · m / r² = m · v² / r</div>
-            <p>⇒ Orbital velocity: v = √(G M / r)</p>
-            <p>Where:<br>• G = 6.67430 × 10⁻¹¹ m³ kg⁻¹ s⁻²<br>• M = Earth mass ≈ 5.972 × 10²⁴ kg<br>• r = Earth radius + altitude</p>
-            <p><strong>Key takeaway:</strong> Higher altitude → lower velocity & longer period. LEO (~550 km) → ~7.6 km/s, period ~95 min. GEO (35,786 km) → ~3.07 km/s, period = 24 h.</p>
+            <p>The force that keeps your coffee cup on the table also keeps satellites from flying off into space.</p>
+            <div class="equation">
+F_grav = G × M_earth × m / r²  
+= centripetal force = m × v² / r
+            </div>
+            <p>→ Orbital velocity simplifies to:</p>
+            <div class="equation">v = √(G M_earth / r)</div>
+            <p><strong>Quick numbers (550 km LEO):</strong> ~7.67 km/s (~27,600 km/h)</p>
+            <p><strong>Why you care:</strong> Lower altitude = much faster satellites = frequent handovers and stronger Doppler.</p>
             <div class="code-snippet">
-# Quick Python check (Skyfield or simple math)
+# Quick Python check
 import math
 G = 6.67430e-11
 M = 5.972e24
-R_earth = 6371e3
-alt_leo = 550e3
-r_leo = R_earth + alt_leo
-v_leo = math.sqrt(G * M / r_leo)
-print(f"LEO velocity: {v_leo/1000:.2f} km/s")
+R_earth = 6371000
+r = R_earth + 550000
+v = math.sqrt(G * M / r)
+print(f"LEO speed: {v/1000:.2f} km/s")
             </div>
-            <button class="mark-done-btn">I've studied this – mark complete</button>
+            <button class="mark-done-btn">Got it – mark complete</button>
         </div>
 
-        <!-- Accordion 2 – fully filled example -->
+        <!-- Topic 2 -->
         <div class="accordion-header" data-target="topic2">
             <div class="check-small" data-id="q2_topic2"><div class="custom-checkbox-small"></div></div>
             <h3>2. Kepler’s third law – orbital period vs altitude</h3>
         </div>
         <div id="topic2" class="accordion-content">
-            <p>T² ∝ a³  ⇒  T = 2π √(a³ / μ)  where μ = G M ≈ 3.986 × 10¹⁴ m³/s²</p>
-            <p>Examples:</p>
+            <p>T² ∝ a³ → the higher you go, the slower you orbit.</p>
+            <div class="equation">T = 2π √(a³ / μ)     (μ ≈ 3.986 × 10¹⁴ m³/s²)</div>
+            <p>Real examples:</p>
             <ul>
-                <li>LEO 550 km: a ≈ 6921 km → T ≈ 95.6 minutes</li>
-                <li>Starlink typical ~540–570 km → ~95 min</li>
-                <li>GEO 35,786 km: a ≈ 42,164 km → T = 1436 min = 23h 56min (sidereal day)</li>
+                <li>Starlink (~550 km) → ~95–96 minutes per orbit</li>
+                <li>ISS (~400 km) → ~92 minutes</li>
+                <li>GEO (35,786 km) → exactly 1 sidereal day (~1436 min)</li>
             </ul>
-            <p><strong>Why it matters for LEO:</strong> Short period = satellites circle Earth ~15× per day → frequent handovers but also many revisit opportunities.</p>
-            <button class="mark-done-btn">I've studied this – mark complete</button>
+            <p><strong>Fun fact:</strong> LEO satellites see ~15 sunrises/sunsets per day!</p>
+            <button class="mark-done-btn">Got it – mark complete</button>
         </div>
 
-        <!-- Accordion 3 – fully filled example -->
+        <!-- Topic 3 -->
         <div class="accordion-header" data-target="topic3">
             <div class="check-small" data-id="q2_topic3"><div class="custom-checkbox-small"></div></div>
             <h3>3. Satellite visibility cone & pass duration</h3>
         </div>
         <div id="topic3" class="accordion-content">
-            <p>Visibility depends on minimum elevation angle (usually 5–25° for user terminals to avoid obstacles/atmosphere).</p>
-            <p>Maximum slant range ≈ 2300–2500 km for 550 km altitude at 10° elevation.</p>
-            <p>Typical pass duration over one ground point: 4–12 minutes (longer near zenith, shorter near horizon).</p>
-            <p><strong>Handover implication:</strong> Aircraft at 900 km/h crosses visibility cone in ~minutes → need make-before-break logic.</p>
-            <div class="code-snippet">
-# Rough pass duration estimate (simplified)
-altitude = 550e3  # m
-R_earth = 6371e3
-min_el = 10       # degrees
-theta = 90 + min_el
-slant = altitude / math.sin(math.radians(min_el))
-print(f"Max slant range ≈ {slant/1000:.0f} km")
-            </div>
-            <button class="mark-done-btn">I've studied this – mark complete</button>
+            <p>How long can your terminal "see" one satellite?</p>
+            <p>At 550 km altitude and 10° minimum elevation:</p>
+            <ul>
+                <li>Max distance to horizon ≈ 2300–2500 km</li>
+                <li>Typical pass duration: 4–12 minutes</li>
+                <li>Zenith pass (directly overhead) → longest visibility</li>
+            </ul>
+            <p><strong>Aviation angle:</strong> Plane at 900 km/h crosses a visibility cone very quickly → need fast, predictive handovers.</p>
+            <button class="mark-done-btn">Got it – mark complete</button>
         </div>
 
-        <!-- Add more accordions the same way for the remaining sub-topics -->
+        <!-- Remaining topics – empty accordions ready to be filled -->
         <div class="accordion-header" data-target="topic4">
             <div class="check-small" data-id="q2_topic4"><div class="custom-checkbox-small"></div></div>
-            <h3>4. LEO ground tracks & nodal precession</h3>
+            <h3>4. LEO ground tracks & nodal precession (J₂ effect)</h3>
         </div>
-        <div id="topic4" class="accordion-content" style="display:none;">
-            <p>(content placeholder – expand later)</p>
+        <div id="topic4" class="accordion-content">
+            <p>Coming soon – fill me in! 🌍</p>
         </div>
 
-        <!-- ... add the rest similarly ... -->
+        <div class="accordion-header" data-target="topic5">
+            <div class="check-small" data-id="q2_topic5"><div class="custom-checkbox-small"></div></div>
+            <h3>5. Visibility, passes & handover frequency</h3>
+        </div>
+        <div id="topic5" class="accordion-content">
+            <p>Coming soon – fill me in! 🔄</p>
+        </div>
+
+        <div class="accordion-header" data-target="topic6">
+            <div class="check-small" data-id="q2_topic6"><div class="custom-checkbox-small"></div></div>
+            <h3>6. Constellation fundamentals (Walker patterns, streets-of-coverage)</h3>
+        </div>
+        <div id="topic6" class="accordion-content">
+            <p>Coming soon – fill me in! ⭐</p>
+        </div>
+
+        <div class="accordion-header" data-target="topic7">
+            <div class="check-small" data-id="q2_topic7"><div class="custom-checkbox-small"></div></div>
+            <h3>7. Tools & data sources (SGP4, TLEs, Celestrak, Skyfield, Poliastro)</h3>
+        </div>
+        <div id="topic7" class="accordion-content">
+            <p>Coming soon – fill me in! 🛠️</p>
+        </div>
 
     </div>
 
     <div class="section-card">
-        <h2>Recommended Resources (Free-First)</h2>
+        <h2>📚 Best free resources to start</h2>
         <ul>
-            <li>MIT OpenCourseWare – Introduction to Aerospace Engineering (orbital mechanics lectures & notes)</li>
-            <li>YouTube: Prof. Shane Ross – Orbital Mechanics playlist (first 5–8 videos)</li>
-            <li>Book excerpts: Fundamentals of Astrodynamics (Bate, Mueller, White) – Ch. 1–4</li>
-            <li>Poliastro & Skyfield Python docs + tutorials</li>
-            <li>NASA GMAT – free download & beginner tutorials</li>
+            <li>MIT OCW – Aerospace orbital mechanics lectures</li>
+            <li>YouTube – Prof. Shane Ross Orbital Mechanics playlist</li>
+            <li>Book (free excerpts) – Fundamentals of Astrodynamics (Ch 1–4)</li>
+            <li>Poliastro & Skyfield docs + example notebooks</li>
+            <li>NASA GMAT – free download & beginner guides</li>
         </ul>
     </div>
 
     <div class="section-card">
-        <h2>Hands-On Deliverables</h2>
+        <h2>🛠️ Hands-on this quarter</h2>
         <ul>
-            <li>Script: Single satellite ground track plot (Skyfield/Poliastro)</li>
-            <li>Script: Visibility passes over Toulouse (1 week)</li>
-            <li>Compare LEO vs GEO velocity & period</li>
+            <li>Ground track plot of a real satellite (ISS or Starlink)</li>
+            <li>Visibility & pass schedule over your city for 1 week</li>
+            <li>LEO vs GEO velocity & period comparison script</li>
             <li>GitHub folder: /q2-orbital-mechanics</li>
-            <li>1-page note: "LEO handover implications for aviation"</li>
+            <li>Quick note: "Why LEO handovers matter for aviation"</li>
         </ul>
     </div>
 
     <div class="mission-note">
-        "Motion is the fundamental difference between GEO and LEO. Master it here."
+        Motion is the biggest difference between GEO and LEO.<br>
+        Nail it here → command constellations later. 🌌
     </div>
 
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script>
-// Supabase Auth
+// ── Supabase Auth ────────────────────────────────────────
 const supabaseUrl = 'https://kpkpptqtuuhnbdntuluc.supabase.co';
 const supabaseKey = 'sb_publishable_aws8RQ085UqKFBUWfojluQ_o9R9WKBb';
 const { createClient } = supabase;
 const client = createClient(supabaseUrl, supabaseKey);
 
-document.getElementById('logoffBtn').addEventListener('click', async () => {
+document.getElementById('logoffBtn')?.addEventListener('click', async () => {
     await client.auth.signOut();
     window.location.href = "index.html";
 });
 
-// Quarter-level completion
+// ── Quarter completion ───────────────────────────────────
 const quarterCheck = document.getElementById('quarterCheck');
 const quarterId = 'q2-orbital-mechanics';
 
-function loadQuarterProgress() {
+function loadQuarter() {
     if (localStorage.getItem(`leoaf_${quarterId}`) === 'true') {
         document.body.classList.add('completed');
     }
 }
 
-quarterCheck.addEventListener('click', () => {
-    const isCompleted = document.body.classList.toggle('completed');
-    localStorage.setItem(`leoaf_${quarterId}`, isCompleted);
+quarterCheck?.addEventListener('click', () => {
+    document.body.classList.toggle('completed');
+    localStorage.setItem(`leoaf_${quarterId}`, document.body.classList.contains('completed'));
 });
-loadQuarterProgress();
+loadQuarter();
 
-// Accordion toggle
+// ── Accordion open/close ─────────────────────────────────
 document.querySelectorAll('.accordion-header').forEach(header => {
-    header.addEventListener('click', (e) => {
-        // Prevent checkbox click from toggling accordion
-        if (e.target.closest('.check-small')) return;
-        
-        const targetId = header.getAttribute('data-target');
-        const content = document.getElementById(targetId);
-        const isOpen = content.style.display === 'block';
-        content.style.display = isOpen ? 'none' : 'block';
+    header.addEventListener('click', e => {
+        if (e.target.closest('.check-small')) return; // don't toggle when clicking checkbox
+        const target = document.getElementById(header.dataset.target);
+        const isOpen = target.style.display === 'block';
+        target.style.display = isOpen ? 'none' : 'block';
         header.classList.toggle('active', !isOpen);
     });
 });
 
-// Per-topic completion
+// ── Per-topic completion ─────────────────────────────────
 document.querySelectorAll('.mark-done-btn').forEach(btn => {
     btn.addEventListener('click', () => {
         const content = btn.closest('.accordion-content');
         const header = content.previousElementSibling;
-        const checkbox = header.querySelector('.custom-checkbox-small');
-        const topicId = header.querySelector('.check-small').getAttribute('data-id');
-        
-        checkbox.classList.add('checked');
-        localStorage.setItem(`leoaf_${topicId}`, 'true');
-        
-        // Optional: check if all topics done → auto-complete quarter
+        const cb = header.querySelector('.custom-checkbox-small');
+        const id = header.querySelector('.check-small')?.dataset.id;
+
+        cb?.classList.add('checked');
+        if (id) localStorage.setItem(`leoaf_${id}`, 'true');
     });
 });
 
-// Optional stars (copy from dashboard if desired)
+// Restore per-topic checks
+document.querySelectorAll('.check-small').forEach(el => {
+    const id = el.dataset.id;
+    if (localStorage.getItem(`leoaf_${id}`) === 'true') {
+        el.querySelector('.custom-checkbox-small')?.classList.add('checked');
+    }
+});
+
+// Stars (optional – remove canvas + this block if unwanted)
 const canvas = document.getElementById('starsCanvas');
 if (canvas) {
     const ctx = canvas.getContext('2d');
-    // ... paste starfield code here if keeping animation ...
+    let stars = [];
+    function init() {
+        canvas.width = window.innerWidth;
+        canvas.height = window.innerHeight;
+        stars = [];
+        for(let i=0; i<300; i++){
+            stars.push({
+                x:Math.random()*canvas.width,
+                y:Math.random()*canvas.height,
+                size:Math.random()*1.2+0.3,
+                speed:Math.random()*0.4+0.1
+            });
+        }
+    }
+    function animate(){
+        ctx.fillStyle='rgba(0,0,0,0.1)';
+        ctx.fillRect(0,0,canvas.width,canvas.height);
+        stars.forEach(s=>{
+            s.y += s.speed;
+            if(s.y > canvas.height) s.y = 0;
+            ctx.fillStyle='#fff';
+            ctx.fillRect(s.x,s.y,s.size,s.size);
+        });
+        requestAnimationFrame(animate);
+    }
+    init(); animate();
+    window.addEventListener('resize', init);
 }
 </script>
 </body>
