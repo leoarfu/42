@@ -10,7 +10,7 @@
 body { background:#000; color:#f0f0f0; font-family:'Inter',sans-serif; line-height:1.65; min-height:100vh; }
 #starsCanvas { position:fixed; inset:0; z-index:-1; }
 
-/* Solid opaque header */
+/* Header – fully solid black */
 header {
     background:#000;
     border-bottom:1px solid #ff004f33;
@@ -31,11 +31,11 @@ header {
 }
 .logoff-btn:hover { background:#ff004f; color:#000; }
 
-/* Content – safe from header */
+/* Content – safe padding from header */
 .content { max-width:960px; margin:0 auto; padding:clamp(100px,12vh,140px) 1.5rem 4rem; }
 h1 { font-family:'Orbitron',sans-serif; font-size:clamp(2.2rem,6vw,3.6rem); text-align:center; margin-bottom:1.5rem; letter-spacing:1px; color:#00d9ff; }
 
-/* Quarter-level checkbox (top-right, visual only) */
+/* Quarter checkbox – visual status only */
 .check-container {
     position:absolute; top:clamp(110px,13vh,150px); right:1.5rem;
     display:flex; align-items:center; gap:0.8rem; pointer-events:none;
@@ -77,8 +77,12 @@ h1 { font-family:'Orbitron',sans-serif; font-size:clamp(2.2rem,6vw,3.6rem); text
     border-radius:0 0 8px 8px; border:1px solid rgba(57,255,20,0.2); margin-top:-8px;
 }
 .equation { font-family:monospace; background:#111; padding:1.2rem; border-radius:8px; margin:1.2rem 0; color:#00d9ff; line-height:1.4; }
-.code-snippet { background:#0a0a0a; padding:1rem; border-radius:6px; font-family:monospace; font-size:0.93rem; overflow-x:auto; margin:1.2rem 0; border-left:4px solid #39ff14; }
-.takeaway { background:rgba(57,255,20,0.08); border-left:4px solid #39ff14; padding:1rem; border-radius:6px; margin:1.5rem 0; font-style:italic; }
+.code-snippet { 
+    background:#0a0a0a; padding:1.4rem; border-radius:8px; 
+    font-family:monospace; font-size:0.93rem; overflow-x:auto; 
+    margin:1.5rem 0; border-left:4px solid #39ff14; position:relative;
+}
+.takeaway { background:rgba(57,255,20,0.08); border-left:4px solid #39ff14; padding:1.2rem; border-radius:6px; margin:1.5rem 0; font-style:italic; }
 .mark-done-btn { margin-top:1.8rem; padding:0.75rem 1.6rem; background:rgba(57,255,20,0.2); border:none; border-radius:6px; color:#fff; cursor:pointer; }
 .mark-done-btn:hover { background:rgba(57,255,20,0.5); }
 .mission-note { text-align:center; margin:6rem 0 3rem; font-size:1.05rem; color:#00d9ff88; font-style:italic; }
@@ -155,18 +159,63 @@ h1 { font-family:'Orbitron',sans-serif; font-size:clamp(2.2rem,6vw,3.6rem); text
 
             <h4>Try it yourself – copy-paste & run</h4>
             <div class="code-snippet">
+<pre><code class="language-python">
 import math
 
-G = 6.67430e-11          # m³ kg⁻¹ s⁻²
-M_earth = 5.972e24       # kg
-R_earth = 6371000        # m
+# ────────────────────────────────────────────────
+#   Orbital Velocity Calculator
+#   Computes circular orbital speed for any altitude
+#   Based on Newton's law of gravitation = centripetal force
+# ────────────────────────────────────────────────
+
+# Universal gravitational constant (m³ kg⁻¹ s⁻²)
+G = 6.67430e-11
+
+# Mass of Earth (kg) – standard value used by NASA/ESA
+M_earth = 5.972e24
+
+# Mean radius of Earth (meters) – volumetric mean radius
+R_earth = 6371000
 
 def orbital_velocity(altitude_km):
+    """
+    Calculate circular orbital velocity at given altitude above Earth's surface.
+    
+    Parameters:
+        altitude_km (float): Altitude in kilometers above Earth's surface
+        
+    Returns:
+        float: Orbital speed in km/s
+    """
+    # Distance from center of Earth to satellite (meters)
     r = R_earth + altitude_km * 1000
-    return math.sqrt(G * M_earth / r) / 1000   # km/s
+    
+    # Orbital speed in meters per second
+    # v = sqrt(G M / r)
+    v_ms = math.sqrt(G * M_earth / r)
+    
+    # Convert to km/s
+    return v_ms / 1000
 
-print("550 km LEO speed :", round(orbital_velocity(550), 2), "km/s")
-print("GEO speed       :", round(orbital_velocity(35786), 2), "km/s")
+
+# ────────────────────────────────────────────────
+#   Example calculations – typical real-world altitudes
+# ────────────────────────────────────────────────
+
+# Starlink / modern LEO altitude (~550 km)
+leo_speed = orbital_velocity(550)
+print(f"550 km LEO speed  : {round(leo_speed, 2)} km/s")
+
+# Classic GEO altitude
+geo_speed = orbital_velocity(35786)
+print(f"GEO speed         : {round(geo_speed, 2)} km/s")
+
+
+# Bonus: Try other altitudes yourself!
+# Example: Medium Earth Orbit (like GPS ~20,200 km)
+meo_speed = orbital_velocity(20200)
+print(f"20,200 km MEO speed: {round(meo_speed, 2)} km/s")
+</code></pre>
             </div>
             <p><strong>How to run it (3 easy ways):</strong></p>
             <ol style="margin-left:1.5rem; color:#ccc;">
@@ -174,12 +223,11 @@ print("GEO speed       :", round(orbital_velocity(35786), 2), "km/s")
                 <li><strong>Best for learning:</strong> <a href="https://colab.research.google.com" target="_blank" style="color:#00d9ff;">colab.research.google.com</a> → New notebook → paste in a cell → Shift+Enter</li>
                 <li><strong>Local:</strong> Save as orbit_speed.py → run with python orbit_speed.py</li>
             </ol>
-            <p>Change 550 to 1200 or 35786 and watch how speed drops as altitude increases.</p>
 
             <button class="mark-done-btn">I've studied & ran it – mark complete</button>
         </div>
 
-        <!-- Remaining accordions (placeholders) -->
+        <!-- Other topics as placeholders -->
         <div class="accordion-header" data-target="topic2">
             <div class="check-small" data-id="q2_topic2"><div class="custom-checkbox-small"></div></div>
             <h3>2. Kepler’s third law – orbital period vs altitude</h3>
@@ -271,13 +319,14 @@ document.getElementById('logoffBtn').addEventListener('click', async () => {
     window.location.href = "index.html";
 });
 
-// Quarter completion (visual only – controlled from inside topics)
+// Quarter visual status (updates when all topics are checked)
 const quarterCheck = document.getElementById('quarterCheck');
 const quarterId = 'q2-orbital-mechanics';
 
 function updateQuarterVisual() {
-    const allChecked = document.querySelectorAll('.custom-checkbox-small.checked').length === document.querySelectorAll('.check-small').length;
-    if (allChecked) {
+    const totalTopics = document.querySelectorAll('.check-small').length;
+    const checkedTopics = document.querySelectorAll('.custom-checkbox-small.checked').length;
+    if (checkedTopics === totalTopics && totalTopics > 0) {
         quarterCheck.querySelector('.custom-checkbox').classList.add('checked');
         localStorage.setItem(`leoaf_${quarterId}`, 'true');
     } else {
@@ -286,17 +335,18 @@ function updateQuarterVisual() {
     }
 }
 
-// Accordion + per-topic completion
+// Accordion toggle
 document.querySelectorAll('.accordion-header').forEach(header => {
     header.addEventListener('click', e => {
         if (e.target.closest('.check-small')) return;
         const target = document.getElementById(header.dataset.target);
-        const open = target.style.display === 'block';
-        target.style.display = open ? 'none' : 'block';
-        header.classList.toggle('active', !open);
+        const isOpen = target.style.display === 'block';
+        target.style.display = isOpen ? 'none' : 'block';
+        header.classList.toggle('active', !isOpen);
     });
 });
 
+// Per-topic completion – only from inside button
 document.querySelectorAll('.mark-done-btn').forEach(btn => {
     btn.addEventListener('click', () => {
         const content = btn.closest('.accordion-content');
@@ -304,13 +354,15 @@ document.querySelectorAll('.mark-done-btn').forEach(btn => {
         const cb = header.querySelector('.custom-checkbox-small');
         const id = header.querySelector('.check-small')?.dataset.id;
 
-        cb?.classList.toggle('checked');
-        localStorage.setItem(`leoaf_${id}`, cb?.classList.contains('checked'));
-        updateQuarterVisual();
+        if (cb) {
+            cb.classList.toggle('checked');
+            localStorage.setItem(`leoaf_${id}`, cb.classList.contains('checked'));
+            updateQuarterVisual();
+        }
     });
 });
 
-// Restore saved states
+// Restore saved states on load
 document.querySelectorAll('.check-small').forEach(el => {
     const id = el.dataset.id;
     if (localStorage.getItem(`leoaf_${id}`) === 'true') {
@@ -319,7 +371,7 @@ document.querySelectorAll('.check-small').forEach(el => {
 });
 updateQuarterVisual();
 
-// Optional stars (remove canvas + this block if unwanted)
+// Optional stars
 const canvas = document.getElementById('starsCanvas');
 if (canvas) {
     const ctx = canvas.getContext('2d');
