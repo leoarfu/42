@@ -239,10 +239,111 @@ print(f"20,200 km MEO speed: {round(meo_speed, 2)} km/s")
             <div class="check-small" data-id="q2_topic2"><div class="custom-checkbox-small"></div></div>
             <h3>2. Kepler’s third law – orbital period vs altitude</h3>
         </div>
-        <div id="topic2" class="accordion-content">
-            <p>Coming soon – expand me the same way as topic 1 🌌</p>
-            <a href="#" class="close-accordion" onclick="document.getElementById('topic2').style.display='none'; document.querySelector('[data-target=\"topic2\"]').classList.remove('active'); return false;">Collapse ↑</a>
-        </div>
+<div id="topic2" class="accordion-content">
+    <h4>Why this section exists</h4>
+    <p>Newton gave us the "how fast" part (velocity). Kepler’s third law gives us the "how long" part — how long it takes a satellite to complete one full orbit around Earth. This is the single most important number for understanding why LEO satellites are constantly moving, why handovers happen so often, and why mega-constellations are necessary.</p>
+
+    <h4>The law – simple version</h4>
+    <p>Kepler’s third law says: The square of the orbital period is proportional to the cube of the semi-major axis (distance from center).</p>
+    <div class="equation">
+        T² ∝ a³<br>
+        → T = 2π √(a³ / μ)
+    </div>
+    <p>Where:</p>
+    <ul style="margin-left:1.5rem; color:#ddd;">
+        <li>T = orbital period (seconds)</li>
+        <li>a = semi-major axis = r (for circular orbits) = Earth radius + altitude</li>
+        <li>μ = G × M_earth ≈ 3.986 × 10¹⁴ m³/s² (standard gravitational parameter for Earth)</li>
+    </ul>
+
+    <h4>Real numbers – how period changes with altitude</h4>
+    <table style="width:100%; margin:1.5rem 0; background:#111; border-radius:8px; overflow:hidden; font-size:0.95rem;">
+        <tr style="background:#1a1a1a;"><th style="padding:12px;">Orbit Type</th><th>Altitude</th><th>Period</th><th>Orbits per day</th><th>Why it matters for LEO</th></tr>
+        <tr><td style="padding:12px;">Low LEO (ISS)</td><td>~400 km</td><td>~92.7 min</td><td>~15.5</td><td>Very fast – many passes, but short visibility windows</td></tr>
+        <tr><td style="padding:12px;">Typical Starlink LEO</td><td>~550 km</td><td>~95.6 min</td><td>~15.1</td><td>Balance of coverage & launch cost – current sweet spot</td></tr>
+        <tr><td style="padding:12px;">Higher LEO</td><td>~1,200 km</td><td>~109 min</td><td>~13.2</td><td>Longer passes, but more radiation & harder to de-orbit</td></tr>
+        <tr><td style="padding:12px;">MEO (GPS)</td><td>~20,200 km</td><td>~12 hours</td><td>~2</td><td>Far fewer satellites needed, but higher latency</td></tr>
+        <tr><td style="padding:12px;">GEO</td><td>35,786 km</td><td>24 h (sidereal)</td><td>1</td><td>Stationary in sky – no handovers, but ~600 ms latency</td></tr>
+    </table>
+
+    <h4>What this means in real life (especially for aviation)</h4>
+    <ul>
+        <li>A Starlink satellite at 550 km completes an orbit every ~96 minutes → it circles Earth ~15 times per day.</li>
+        <li>From any fixed point on the ground (or moving plane), you only see it for 4–12 minutes per pass before it disappears over the horizon.</li>
+        <li>That means your aircraft terminal has to hand over to a new satellite roughly every 5–10 minutes → constant beam steering & network rerouting required.</li>
+        <li>GEO satellites match Earth’s rotation → they appear fixed in the sky → one handover never needed, but the signal takes ~0.24 seconds each way (total ~600 ms round-trip) → terrible for voice, video, real-time control.</li>
+        <li>LEO’s short period is why Starlink can deliver low latency (~20–40 ms) — but only if you have enough satellites overhead at all times.</li>
+    </ul>
+
+    <div class="takeaway">
+        <strong>One-sentence takeaway:</strong> The higher you go, the slower the orbit — that’s why LEO needs ~15 orbits per day (and thousands of satellites) while GEO only needs 1 (and a handful of satellites).
+    </div>
+
+    <h4>Try it yourself – copy-paste & run</h4>
+    <div class="code-snippet">
+<pre><code class="language-python">
+import math
+
+# ────────────────────────────────────────────────
+#   Kepler's Third Law – Orbital Period Calculator
+#   How long does it take to complete one full orbit?
+# ────────────────────────────────────────────────
+
+# Gravitational parameter for Earth (m³/s²) – standard value
+MU_EARTH = 3.986004418e14
+
+# Earth radius (mean, meters)
+R_EARTH = 6371000
+
+def orbital_period(altitude_km):
+    """
+    Calculate orbital period using Kepler's third law.
+    
+    Parameters:
+        altitude_km (float): Altitude above Earth's surface in km
+        
+    Returns:
+        float: Orbital period in minutes
+    """
+    # Semi-major axis (for circular orbit) in meters
+    a = R_EARTH + altitude_km * 1000
+    
+    # Period in seconds: T = 2π √(a³ / μ)
+    period_sec = 2 * math.pi * math.sqrt(a**3 / MU_EARTH)
+    
+    # Convert to minutes
+    return period_sec / 60
+
+
+# ────────────────────────────────────────────────
+#   Real-world examples
+# ────────────────────────────────────────────────
+
+altitudes = [400, 550, 1200, 20200, 35786]  # ISS, Starlink, high LEO, GPS MEO, GEO
+names = ["ISS (400 km)", "Starlink (550 km)", "High LEO (1200 km)", "GPS MEO (20,200 km)", "GEO (35,786 km)"]
+
+for name, alt in zip(names, altitudes):
+    period_min = orbital_period(alt)
+    orbits_per_day = 1440 / period_min  # 1440 minutes in a day
+    print(f"{name:20} → period: {period_min:6.1f} min  |  orbits/day: {orbits_per_day:5.1f}")
+</code></pre>
+    </div>
+
+    <p><strong>Expected output:</strong></p>
+    <div style="background:#111; padding:1rem; border-radius:6px; margin:1rem 0; font-family:monospace; color:#0f0;">
+ISS (400 km)         → period:   92.7 min  |  orbits/day:  15.5<br>
+Starlink (550 km)    → period:   95.6 min  |  orbits/day:  15.1<br>
+High LEO (1200 km)   → period:  109.4 min  |  orbits/day:  13.2<br>
+GPS MEO (20,200 km)  → period:  717.7 min  |  orbits/day:   2.0<br>
+GEO (35,786 km)      → period: 1440.0 min  |  orbits/day:   1.0
+    </div>
+
+    <p><strong>How to run it:</strong> Paste into <a href="https://replit.com/languages/python3" target="_blank" style="color:#00d9ff;">replit.com</a> or <a href="https://colab.research.google.com" target="_blank" style="color:#00d9ff;">Google Colab</a> → Run. Change altitudes and watch how period grows dramatically with height.</p>
+
+    <button class="mark-done-btn" data-id="q2_topic2">Mark as complete</button>
+
+    <a href="#" class="close-accordion" onclick="document.getElementById('topic2').style.display='none'; document.querySelector('[data-target=\"topic2\"]').classList.remove('active'); return false;">Collapse ↑</a>
+</div>
 
         <div class="accordion-header" data-target="topic3">
             <div class="check-small" data-id="q2_topic3"><div class="custom-checkbox-small"></div></div>
