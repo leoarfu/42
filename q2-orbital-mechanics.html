@@ -12,7 +12,8 @@ body { background:#000; color:#f0f0f0; font-family:'Inter',sans-serif; line-heig
 
 /* Solid opaque header */
 header {
-    background:#000; border-bottom:1px solid #ff004f33;
+    background:#000;
+    border-bottom:1px solid #ff004f33;
     position:sticky; top:0; z-index:100;
     padding:1rem clamp(1.5rem,5vw,4rem);
     display:flex; justify-content:space-between; align-items:center;
@@ -30,14 +31,14 @@ header {
 }
 .logoff-btn:hover { background:#ff004f; color:#000; }
 
-/* Content */
+/* Content – safe from header */
 .content { max-width:960px; margin:0 auto; padding:clamp(100px,12vh,140px) 1.5rem 4rem; }
 h1 { font-family:'Orbitron',sans-serif; font-size:clamp(2.2rem,6vw,3.6rem); text-align:center; margin-bottom:1.5rem; letter-spacing:1px; color:#00d9ff; }
 
-/* Quarter checkbox */
+/* Quarter-level checkbox (top-right, visual only) */
 .check-container {
     position:absolute; top:clamp(110px,13vh,150px); right:1.5rem;
-    display:flex; align-items:center; gap:0.8rem; cursor:pointer;
+    display:flex; align-items:center; gap:0.8rem; pointer-events:none;
 }
 .check-label { font-size:0.95rem; color:#aaa; }
 .custom-checkbox {
@@ -47,13 +48,14 @@ h1 { font-family:'Orbitron',sans-serif; font-size:clamp(2.2rem,6vw,3.6rem); text
 .custom-checkbox.checked { border-color:#39ff14; background:rgba(57,255,20,0.25); }
 .custom-checkbox.checked::after { content:'🚀'; font-size:1.2rem; }
 
-/* Cards & Accordions */
+/* Cards */
 .section-card {
     background:rgba(255,255,255,0.025); border:1px solid rgba(0,217,255,0.15);
     border-radius:12px; padding:2rem; margin:2.5rem 0; box-shadow:0 4px 20px #0008;
 }
 .section-card h2 { font-family:'Orbitron',sans-serif; color:#00d9ff; font-size:1.55rem; margin-bottom:1.2rem; }
 
+/* Accordions */
 .accordion-header {
     background:rgba(0,217,255,0.06); padding:1.1rem 1.4rem; border-radius:8px;
     margin:1rem 0; cursor:pointer; display:flex; align-items:center; gap:1rem;
@@ -61,14 +63,14 @@ h1 { font-family:'Orbitron',sans-serif; font-size:clamp(2.2rem,6vw,3.6rem); text
 }
 .accordion-header:hover { background:rgba(0,217,255,0.12); transform:translateX(6px); }
 .accordion-header.active { background:rgba(57,255,20,0.12); }
-.accordion-header h3 { margin:0; font-size:1.15rem; flex:1; }
-.check-small { width:26px; height:26px; flex-shrink:0; cursor:pointer; }
+.accordion-header .check-small { width:26px; height:26px; flex-shrink:0; pointer-events:none; }
 .custom-checkbox-small {
     width:22px; height:22px; border:2px solid #888; border-radius:4px;
     display:flex; align-items:center; justify-content:center;
 }
 .custom-checkbox-small.checked { border-color:#39ff14; background:rgba(57,255,20,0.25); }
 .custom-checkbox-small.checked::after { content:'✓'; color:#39ff14; font-weight:bold; }
+.accordion-header h3 { margin:0; font-size:1.15rem; flex:1; }
 
 .accordion-content {
     display:none; padding:1.8rem 1.6rem; background:rgba(0,0,0,0.35);
@@ -105,7 +107,7 @@ h1 { font-family:'Orbitron',sans-serif; font-size:clamp(2.2rem,6vw,3.6rem); text
 
     <div class="section-card">
         <h2>🎯 What you'll master this quarter</h2>
-        <p>GEO satellites sit still in the sky. LEO satellites scream around the planet ~15 times a day. This quarter turns that fast motion from “scary” into “I totally get it” — with real simulations you can run today.</p>
+        <p>GEO satellites sit still. LEO satellites scream around Earth ~15 times a day. This quarter makes that fast motion feel natural — with real simulations you can run today.</p>
     </div>
 
     <div class="section-card">
@@ -118,39 +120,40 @@ h1 { font-family:'Orbitron',sans-serif; font-size:clamp(2.2rem,6vw,3.6rem); text
         </div>
         <div id="topic1" class="accordion-content">
             <h4>Why this section exists</h4>
-            <p>This is the very first “why” of satellite orbits. Everything else in LEO (handovers, constellation size, Doppler, revisit time) comes from this single equation. Understand it once → the rest of the course clicks.</p>
+            <p>This is ground zero for understanding orbits. Every LEO challenge (handovers every 5–10 min, huge constellations, strong Doppler, short passes) comes from satellites moving very fast. This equation explains why.</p>
 
-            <h4>The physics, explained like you’re 30,000 ft up</h4>
-            <p>Gravity pulls the satellite toward Earth’s center. The satellite’s forward speed tries to make it fly straight off into space. When these two forces are perfectly balanced → stable circular orbit.</p>
+            <h4>The physics – coffee cup vs satellite</h4>
+            <p>Gravity pulls the satellite toward Earth’s center. Its forward speed tries to make it fly straight off into space. When these two forces are perfectly balanced → stable circular orbit.</p>
 
             <div class="equation">
                 Gravitational force = Centripetal force<br>
-                G × M × m / r²  =  m × v² / r
+                G × M_earth × m / r²  =  m × v² / r
             </div>
 
-            <p>The “m” cancels out (nice!). So orbital velocity becomes:</p>
-            <div class="equation">v = √(G × M / r)</div>
+            <p>The satellite mass (m) cancels out — nice! So orbital velocity becomes:</p>
+            <div class="equation">v = √(G M_earth / r)</div>
 
-            <h4>Real numbers that matter for LEO vs GEO</h4>
-            <table style="width:100%; border-collapse:collapse; margin:1.2rem 0; background:#111; border-radius:6px; overflow:hidden;">
-                <tr style="background:#222;"><th style="padding:12px; text-align:left;">Orbit</th><th>Altitude</th><th>Speed</th><th>Period</th><th>Orbits per day</th></tr>
-                <tr><td style="padding:12px;">Typical LEO (Starlink)</td><td>~550 km</td><td>~7.67 km/s (27,600 km/h)</td><td>~95.6 min</td><td>~15.1</td></tr>
-                <tr><td style="padding:12px;">ISS</td><td>~400 km</td><td>~7.66 km/s</td><td>~92.7 min</td><td>~15.5</td></tr>
-                <tr><td style="padding:12px;">GEO (your old world)</td><td>35,786 km</td><td>~3.07 km/s</td><td>24 h (sidereal)</td><td>1</td></tr>
+            <h4>Real numbers – LEO vs GEO</h4>
+            <table style="width:100%; margin:1.5rem 0; background:#111; border-radius:8px; overflow:hidden; font-size:0.95rem;">
+                <tr style="background:#1a1a1a;"><th style="padding:12px;">Orbit</th><th>Altitude</th><th>Speed</th><th>Period</th><th>Orbits/day</th></tr>
+                <tr><td style="padding:12px;">Starlink LEO</td><td>~550 km</td><td>7.67 km/s</td><td>95.6 min</td><td>15.1</td></tr>
+                <tr><td style="padding:12px;">ISS</td><td>~400 km</td><td>7.66 km/s</td><td>92.7 min</td><td>15.5</td></tr>
+                <tr><td style="padding:12px;">GEO</td><td>35,786 km</td><td>3.07 km/s</td><td>24 h</td><td>1</td></tr>
             </table>
 
-            <h4>Real-life translation</h4>
+            <h4>What this means in real life</h4>
             <ul>
-                <li>At 550 km a satellite whips around Earth every ~96 minutes → it disappears over the horizon in minutes.</li>
-                <li>Your terminal (or plane) must switch satellites constantly → that’s why LEO handovers are a big engineering challenge.</li>
-                <li>GEO satellites stay fixed in the sky → no handovers, but 600+ ms latency. LEO gives ~20–40 ms but needs a huge constellation.</li>
+                <li>A LEO satellite circles Earth ~15× per day → it disappears over your horizon in minutes.</li>
+                <li>Your aircraft terminal must switch satellites constantly (handovers) → that’s why phased arrays and predictive routing exist.</li>
+                <li>GEO satellites stay fixed → zero handovers, but latency ~600 ms (bad for video calls, gaming, ATC).</li>
+                <li>LEO latency ~20–40 ms → game changer for aviation internet, but requires thousands of satellites.</li>
             </ul>
 
             <div class="takeaway">
-                <strong>Key takeaway:</strong> Lower altitude = much faster satellites = you need many of them for continuous coverage. This single fact explains why Starlink needs thousands of satellites while a GEO system needs only a handful.
+                <strong>One-sentence takeaway:</strong> Lower altitude = dramatically faster satellites = you need many more of them to keep coverage continuous. That single fact explains why Starlink has ~9,800 satellites in orbit (Feb 2026) while a GEO broadband system needs only 3–5.
             </div>
 
-            <h4>Try it yourself – copy-paste Python</h4>
+            <h4>Try it yourself – copy-paste & run</h4>
             <div class="code-snippet">
 import math
 
@@ -165,46 +168,65 @@ def orbital_velocity(altitude_km):
 print("550 km LEO speed :", round(orbital_velocity(550), 2), "km/s")
 print("GEO speed       :", round(orbital_velocity(35786), 2), "km/s")
             </div>
+            <p><strong>How to run it (3 easy ways):</strong></p>
+            <ol style="margin-left:1.5rem; color:#ccc;">
+                <li><strong>Fastest:</strong> Go to <a href="https://replit.com/languages/python3" target="_blank" style="color:#00d9ff;">replit.com</a> → paste → click Run</li>
+                <li><strong>Best for learning:</strong> <a href="https://colab.research.google.com" target="_blank" style="color:#00d9ff;">colab.research.google.com</a> → New notebook → paste in a cell → Shift+Enter</li>
+                <li><strong>Local:</strong> Save as orbit_speed.py → run with python orbit_speed.py</li>
+            </ol>
+            <p>Change 550 to 1200 or 35786 and watch how speed drops as altitude increases.</p>
 
-            <button class="mark-done-btn">Got it – mark complete</button>
+            <button class="mark-done-btn">I've studied & ran it – mark complete</button>
         </div>
 
-        <!-- Other topics as accordions (ready for you to expand the same way) -->
+        <!-- Remaining accordions (placeholders) -->
         <div class="accordion-header" data-target="topic2">
             <div class="check-small" data-id="q2_topic2"><div class="custom-checkbox-small"></div></div>
             <h3>2. Kepler’s third law – orbital period vs altitude</h3>
         </div>
-        <div id="topic2" class="accordion-content"><p>Coming soon – expand me the same way as topic 1 🌌</p></div>
+        <div id="topic2" class="accordion-content">
+            <p>Coming soon – expand me the same way as topic 1 🌌</p>
+        </div>
 
         <div class="accordion-header" data-target="topic3">
             <div class="check-small" data-id="q2_topic3"><div class="custom-checkbox-small"></div></div>
             <h3>3. Satellite visibility cone & pass duration</h3>
         </div>
-        <div id="topic3" class="accordion-content"><p>Coming soon – expand me the same way as topic 1 🌌</p></div>
+        <div id="topic3" class="accordion-content">
+            <p>Coming soon – expand me the same way as topic 1 🌌</p>
+        </div>
 
         <div class="accordion-header" data-target="topic4">
             <div class="check-small" data-id="q2_topic4"><div class="custom-checkbox-small"></div></div>
             <h3>4. LEO ground tracks & nodal precession (J₂ effect)</h3>
         </div>
-        <div id="topic4" class="accordion-content"><p>Coming soon – expand me the same way as topic 1 🌌</p></div>
+        <div id="topic4" class="accordion-content">
+            <p>Coming soon – expand me the same way as topic 1 🌌</p>
+        </div>
 
         <div class="accordion-header" data-target="topic5">
             <div class="check-small" data-id="q2_topic5"><div class="custom-checkbox-small"></div></div>
             <h3>5. Visibility, passes & handover frequency</h3>
         </div>
-        <div id="topic5" class="accordion-content"><p>Coming soon – expand me the same way as topic 1 🌌</p></div>
+        <div id="topic5" class="accordion-content">
+            <p>Coming soon – expand me the same way as topic 1 🌌</p>
+        </div>
 
         <div class="accordion-header" data-target="topic6">
             <div class="check-small" data-id="q2_topic6"><div class="custom-checkbox-small"></div></div>
             <h3>6. Constellation fundamentals (Walker patterns, streets-of-coverage)</h3>
         </div>
-        <div id="topic6" class="accordion-content"><p>Coming soon – expand me the same way as topic 1 🌌</p></div>
+        <div id="topic6" class="accordion-content">
+            <p>Coming soon – expand me the same way as topic 1 🌌</p>
+        </div>
 
         <div class="accordion-header" data-target="topic7">
             <div class="check-small" data-id="q2_topic7"><div class="custom-checkbox-small"></div></div>
             <h3>7. Tools & data sources (SGP4, TLEs, Celestrak, Skyfield, Poliastro)</h3>
         </div>
-        <div id="topic7" class="accordion-content"><p>Coming soon – expand me the same way as topic 1 🌌</p></div>
+        <div id="topic7" class="accordion-content">
+            <p>Coming soon – expand me the same way as topic 1 🌌</p>
+        </div>
 
     </div>
 
@@ -238,7 +260,7 @@ print("GEO speed       :", round(orbital_velocity(35786), 2), "km/s")
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script>
-// Auth
+// Supabase Auth
 const supabaseUrl = 'https://kpkpptqtuuhnbdntuluc.supabase.co';
 const supabaseKey = 'sb_publishable_aws8RQ085UqKFBUWfojluQ_o9R9WKBb';
 const { createClient } = supabase;
@@ -249,20 +271,22 @@ document.getElementById('logoffBtn').addEventListener('click', async () => {
     window.location.href = "index.html";
 });
 
-// Quarter toggle
+// Quarter completion (visual only – controlled from inside topics)
 const quarterCheck = document.getElementById('quarterCheck');
 const quarterId = 'q2-orbital-mechanics';
 
-function loadQuarter() {
-    if (localStorage.getItem(`leoaf_${quarterId}`) === 'true') document.body.classList.add('completed');
+function updateQuarterVisual() {
+    const allChecked = document.querySelectorAll('.custom-checkbox-small.checked').length === document.querySelectorAll('.check-small').length;
+    if (allChecked) {
+        quarterCheck.querySelector('.custom-checkbox').classList.add('checked');
+        localStorage.setItem(`leoaf_${quarterId}`, 'true');
+    } else {
+        quarterCheck.querySelector('.custom-checkbox').classList.remove('checked');
+        localStorage.removeItem(`leoaf_${quarterId}`);
+    }
 }
-quarterCheck.addEventListener('click', () => {
-    document.body.classList.toggle('completed');
-    localStorage.setItem(`leoaf_${quarterId}`, document.body.classList.contains('completed'));
-});
-loadQuarter();
 
-// Accordion
+// Accordion + per-topic completion
 document.querySelectorAll('.accordion-header').forEach(header => {
     header.addEventListener('click', e => {
         if (e.target.closest('.check-small')) return;
@@ -273,22 +297,29 @@ document.querySelectorAll('.accordion-header').forEach(header => {
     });
 });
 
-// Per-topic toggle (now fully clickable and reversible)
-document.querySelectorAll('.check-small').forEach(el => {
-    const id = el.dataset.id;
-    const box = el.querySelector('.custom-checkbox-small');
+document.querySelectorAll('.mark-done-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+        const content = btn.closest('.accordion-content');
+        const header = content.previousElementSibling;
+        const cb = header.querySelector('.custom-checkbox-small');
+        const id = header.querySelector('.check-small')?.dataset.id;
 
-    // Load saved state
-    if (localStorage.getItem(`leoaf_${id}`) === 'true') box.classList.add('checked');
-
-    el.addEventListener('click', e => {
-        e.stopImmediatePropagation();
-        box.classList.toggle('checked');
-        localStorage.setItem(`leoaf_${id}`, box.classList.contains('checked'));
+        cb?.classList.toggle('checked');
+        localStorage.setItem(`leoaf_${id}`, cb?.classList.contains('checked'));
+        updateQuarterVisual();
     });
 });
 
-// Optional stars
+// Restore saved states
+document.querySelectorAll('.check-small').forEach(el => {
+    const id = el.dataset.id;
+    if (localStorage.getItem(`leoaf_${id}`) === 'true') {
+        el.querySelector('.custom-checkbox-small')?.classList.add('checked');
+    }
+});
+updateQuarterVisual();
+
+// Optional stars (remove canvas + this block if unwanted)
 const canvas = document.getElementById('starsCanvas');
 if (canvas) {
     const ctx = canvas.getContext('2d');
