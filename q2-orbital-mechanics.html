@@ -6,11 +6,13 @@
 <title>Q2 — Orbital Mechanics & Constellations 101 | LEOAF</title>
 <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;600;800&family=Inter:wght@400;600&display=swap" rel="stylesheet">
 <style>
-/* Reuse same global styles from dashboard.html – copy-paste or link externally later */
 * { box-sizing: border-box; margin:0; padding:0; }
 html, body { height:100%; background:#000; color:white; font-family:'Orbitron',sans-serif; overflow-x:hidden; }
+
+/* Stars (optional — comment out canvas/script if you want static pages) */
 #starsCanvas { position:fixed; top:0; left:0; width:100%; height:100%; z-index:-1; }
-/* Header – identical to dashboard */
+
+/* Header – now with back link integrated */
 header {
     display:flex; justify-content:space-between; align-items:center;
     padding:18px clamp(20px,5vw,60px);
@@ -21,40 +23,61 @@ header {
 .logo { font-weight:800; font-size:clamp(18px,2vw,24px); letter-spacing:3px; text-decoration:none; }
 .logo span:first-child { color:white; }
 .logo span:last-child { color:#ff004f; }
+
+.nav-left { display:flex; align-items:center; gap:30px; }
+.back-dashboard {
+    font-size:13px; color:#00d9ff; text-decoration:none; letter-spacing:1px;
+    opacity:0.85; transition:0.2s;
+}
+.back-dashboard:hover { opacity:1; text-decoration:underline; color:#39ff14; }
+
 .logoff-btn {
     background:transparent; border:1px solid #ff004f; color:#ff004f;
     padding:6px 14px; cursor:pointer; font-size:11px; letter-spacing:1px;
 }
 .logoff-btn:hover { background:#ff004f; color:black; box-shadow:0 0 10px #ff004f; }
-/* Content wrapper */
+
+/* Main content – important: top padding prevents hiding under sticky header */
 .content {
-    max-width:900px; margin:40px auto; padding:0 20px; position:relative; z-index:1;
+    max-width:900px; margin:0 auto; padding:90px 20px 40px; /* 90px ≈ header height + buffer */
+    position:relative; z-index:1;
 }
 h1 { font-size:clamp(28px,6vw,42px); text-align:center; margin-bottom:10px; letter-spacing:2px; }
-.back-link { display:block; text-align:center; margin:20px 0; font-size:14px; color:#00d9ff; text-decoration:none; }
-.back-link:hover { text-decoration:underline; }
-/* Section cards */
+
+/* Quarter card / sections */
 .section-card {
     background:rgba(255,255,255,0.03); border-left:3px solid #ff004f;
-    padding:20px; margin:20px 0; border-radius:4px;
+    padding:24px; margin:24px 0; border-radius:4px; position:relative;
 }
-.section-card h2 { margin:0 0 12px; color:#00d9ff; font-size:20px; letter-spacing:1px; }
-.section-card h3 { margin:18px 0 8px; color:#ffffff; font-size:16px; }
-.section-card ul { padding-left:20px; margin:8px 0; font-family:'Inter',sans-serif; font-size:14px; line-height:1.6; color:#cccccc; }
-.section-card li { margin-bottom:6px; }
+.section-card h2 { margin:0 0 14px; color:#00d9ff; font-size:20px; letter-spacing:1px; }
+.section-card h3 { margin:20px 0 8px; color:#ffffff; font-size:17px; }
+.section-card ul { padding-left:24px; margin:10px 0; font-family:'Inter',sans-serif; font-size:14px; line-height:1.6; color:#cccccc; }
+.section-card li { margin-bottom:8px; }
+
+/* Improved checkbox + label (top-right corner) */
+.check-container {
+    position:absolute; top:20px; right:20px; display:flex; align-items:center; gap:8px;
+    cursor:pointer; user-select:none; z-index:2;
+}
+.check-label {
+    font-size:13px; color:#aaaaaa; letter-spacing:0.5px; opacity:0.9;
+}
 .check-wrapper {
-    float:right; width:30px; height:30px; cursor:pointer;
+    width:28px; height:28px; display:flex; justify-content:center; align-items:center;
 }
 .custom-checkbox {
     width:24px; height:24px; border:2px solid #ff004f; background:transparent;
-    display:flex; justify-content:center; align-items:center;
+    display:flex; justify-content:center; align-items:center; border-radius:4px;
+    transition:0.2s;
 }
-.completed .custom-checkbox { border-color:#39ff14; background:rgba(57,255,20,0.2); }
-.completed .custom-checkbox::after { content:'✔'; color:#39ff14; font-size:16px; text-shadow:0 0 5px #39ff14; }
+.check-container:hover .custom-checkbox { box-shadow:0 0 12px rgba(255,0,79,0.4); }
+.completed .custom-checkbox { border-color:#39ff14; background:rgba(57,255,20,0.15); }
+.completed .custom-checkbox::after { content:'✔'; color:#39ff14; font-size:16px; text-shadow:0 0 6px #39ff14; }
 .completed h1, .completed .section-card h2 { color:#39ff14; text-decoration:line-through; text-decoration-color:rgba(57,255,20,0.5); }
+
 /* Footer note */
 .mission-note {
-    text-align:center; margin:60px 0 40px; font-size:13px; opacity:0.7; color:#00d9ff;
+    text-align:center; margin:80px 0 40px; font-size:13px; opacity:0.7; color:#00d9ff;
 }
 </style>
 </head>
@@ -63,18 +86,20 @@ h1 { font-size:clamp(28px,6vw,42px); text-align:center; margin-bottom:10px; lett
 <canvas id="starsCanvas"></canvas>
 
 <header>
-    <a href="dashboard.html" class="logo"><span>LEO</span><span>AF</span></a>
+    <div class="nav-left">
+        <a href="dashboard.html" class="logo"><span>LEO</span><span>AF</span></a>
+        <a href="dashboard.html" class="back-dashboard">← MISSION DASHBOARD</a>
+    </div>
     <button id="logoffBtn" class="logoff-btn">ABORT</button>
 </header>
 
 <div class="content">
 
-    <a href="dashboard.html" class="back-link">← Back to Mission Dashboard</a>
-
     <h1>Q2 · Months 4–6<br>Orbital Mechanics & Constellations 101</h1>
 
-    <div class="check-wrapper" title="Mark Quarter as Completed" id="quarterCheck">
-        <div class="custom-checkbox"></div>
+    <div class="check-container" id="quarterCheck" title="Mark Quarter as Completed">
+        <div class="check-wrapper"><div class="custom-checkbox"></div></div>
+        <span class="check-label">MARK COMPLETE</span>
     </div>
 
     <div class="section-card">
@@ -125,6 +150,7 @@ h1 { font-size:clamp(28px,6vw,42px); text-align:center; margin-bottom:10px; lett
         </ul>
     </div>
 
+    <!-- Resources and Deliverables sections unchanged from previous version -->
     <div class="section-card">
         <h2>Recommended Resources (Free-First)</h2>
         <ul>
@@ -158,7 +184,7 @@ h1 { font-size:clamp(28px,6vw,42px); text-align:center; margin-bottom:10px; lett
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script>
-// Supabase Auth (same as dashboard)
+// Supabase Auth (same as before)
 const supabaseUrl = 'https://kpkpptqtuuhnbdntuluc.supabase.co';
 const supabaseKey = 'sb_publishable_aws8RQ085UqKFBUWfojluQ_o9R9WKBb';
 const { createClient } = supabase;
@@ -169,7 +195,7 @@ document.getElementById('logoffBtn').addEventListener('click', async () => {
     window.location.href = "index.html";
 });
 
-// Progress for this quarter
+// Quarter completion toggle
 const quarterCheck = document.getElementById('quarterCheck');
 const quarterId = 'q2-orbital-mechanics';
 
@@ -187,11 +213,8 @@ function toggleQuarter() {
 quarterCheck.addEventListener('click', toggleQuarter);
 loadQuarterProgress();
 
-// Starfield (copy same warp effect from dashboard.html)
-const canvas = document.getElementById('starsCanvas');
-const ctx = canvas.getContext('2d');
-// ... paste your full animateStars / initStars / resizeCanvas functions here ...
-// (to avoid duplication you can later extract to shared.js)
+// Optional: keep stars if you want (copy animateStars / initStars / resizeCanvas from dashboard.html here)
+// If you prefer static pages → just remove <canvas id="starsCanvas"></canvas> and the star scripts
 </script>
 </body>
 </html>
