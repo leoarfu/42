@@ -9,81 +9,96 @@
 * { box-sizing: border-box; margin:0; padding:0; }
 html, body { height:100%; background:#000; color:white; font-family:'Orbitron',sans-serif; overflow-x:hidden; }
 
-/* Stars (optional — comment out canvas/script if you want static pages) */
+/* Stars canvas (optional – remove if you want fully static page) */
 #starsCanvas { position:fixed; top:0; left:0; width:100%; height:100%; z-index:-1; }
 
-/* Header – now with back link integrated */
+/* Header – fully opaque, solid black */
 header {
     display: flex;
     justify-content: space-between;
     align-items: center;
     padding: 18px clamp(20px, 5vw, 60px);
-    background: #000000;                     /* fully opaque black */
-    border-bottom: 1px solid #ff004f33;      /* subtle pinkish border instead of heavy one */
+    background: #000000;                      /* solid opaque black */
+    border-bottom: 1px solid #ff004f33;       /* subtle separator */
     position: sticky;
     top: 0;
     z-index: 10;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.6); /* optional depth when scrolling */
+    box-shadow: 0 4px 12px rgba(0,0,0,0.6);   /* depth when scrolling */
 }
+.nav-left { display:flex; align-items:center; gap:30px; }
 .logo { font-weight:800; font-size:clamp(18px,2vw,24px); letter-spacing:3px; text-decoration:none; }
 .logo span:first-child { color:white; }
 .logo span:last-child { color:#ff004f; }
-
-.nav-left { display:flex; align-items:center; gap:30px; }
 .back-dashboard {
     font-size:13px; color:#00d9ff; text-decoration:none; letter-spacing:1px;
     opacity:0.85; transition:0.2s;
 }
 .back-dashboard:hover { opacity:1; text-decoration:underline; color:#39ff14; }
-
 .logoff-btn {
     background:transparent; border:1px solid #ff004f; color:#ff004f;
     padding:6px 14px; cursor:pointer; font-size:11px; letter-spacing:1px;
 }
 .logoff-btn:hover { background:#ff004f; color:black; box-shadow:0 0 10px #ff004f; }
 
-/* Main content – important: top padding prevents hiding under sticky header */
+/* Main content – top padding prevents overlap with sticky header */
 .content {
-    max-width:900px; margin:0 auto; padding:90px 20px 40px; /* 90px ≈ header height + buffer */
+    max-width:900px; margin:0 auto; padding:100px 20px 60px; /* increased top padding */
     position:relative; z-index:1;
 }
-h1 { font-size:clamp(28px,6vw,42px); text-align:center; margin-bottom:10px; letter-spacing:2px; }
+h1 { font-size:clamp(28px,6vw,42px); text-align:center; margin-bottom:20px; letter-spacing:2px; }
 
-/* Quarter card / sections */
+/* Section cards */
 .section-card {
     background:rgba(255,255,255,0.03); border-left:3px solid #ff004f;
-    padding:24px; margin:24px 0; border-radius:4px; position:relative;
+    padding:24px; margin:32px 0; border-radius:4px; position:relative;
 }
-.section-card h2 { margin:0 0 14px; color:#00d9ff; font-size:20px; letter-spacing:1px; }
-.section-card h3 { margin:20px 0 8px; color:#ffffff; font-size:17px; }
-.section-card ul { padding-left:24px; margin:10px 0; font-family:'Inter',sans-serif; font-size:14px; line-height:1.6; color:#cccccc; }
-.section-card li { margin-bottom:8px; }
+.section-card h2 { margin:0 0 16px; color:#00d9ff; font-size:20px; letter-spacing:1px; }
 
-/* Improved checkbox + label (top-right corner) */
+/* Quarter-level checkbox (top-right) */
 .check-container {
-    position:absolute; top:20px; right:20px; display:flex; align-items:center; gap:8px;
+    position:absolute; top:24px; right:24px; display:flex; align-items:center; gap:10px;
     cursor:pointer; user-select:none; z-index:2;
 }
-.check-label {
-    font-size:13px; color:#aaaaaa; letter-spacing:0.5px; opacity:0.9;
-}
-.check-wrapper {
-    width:28px; height:28px; display:flex; justify-content:center; align-items:center;
-}
+.check-label { font-size:13px; color:#aaaaaa; letter-spacing:0.5px; }
+.check-wrapper { width:28px; height:28px; display:flex; justify-content:center; align-items:center; }
 .custom-checkbox {
     width:24px; height:24px; border:2px solid #ff004f; background:transparent;
-    display:flex; justify-content:center; align-items:center; border-radius:4px;
-    transition:0.2s;
+    border-radius:4px; display:flex; justify-content:center; align-items:center;
 }
 .check-container:hover .custom-checkbox { box-shadow:0 0 12px rgba(255,0,79,0.4); }
 .completed .custom-checkbox { border-color:#39ff14; background:rgba(57,255,20,0.15); }
 .completed .custom-checkbox::after { content:'✔'; color:#39ff14; font-size:16px; text-shadow:0 0 6px #39ff14; }
 .completed h1, .completed .section-card h2 { color:#39ff14; text-decoration:line-through; text-decoration-color:rgba(57,255,20,0.5); }
 
-/* Footer note */
-.mission-note {
-    text-align:center; margin:80px 0 40px; font-size:13px; opacity:0.7; color:#00d9ff;
+/* Accordion */
+.accordion-header {
+    cursor:pointer; padding:14px 20px; background:rgba(0,217,255,0.04);
+    margin:10px 0; border-radius:4px; display:flex; align-items:center; gap:12px;
+    transition:background 0.2s;
 }
+.accordion-header:hover { background:rgba(0,217,255,0.08); }
+.accordion-header.active { background:rgba(57,255,20,0.08); }
+.accordion-header h3 { margin:0; flex:1; font-size:16px; }
+.accordion-content {
+    display:none; padding:20px; background:rgba(0,0,0,0.4);
+    border-left:3px solid #39ff14; margin:0 0 16px 20px; border-radius:0 0 4px 4px;
+}
+.equation {
+    font-family:monospace; background:rgba(255,255,255,0.05); padding:12px;
+    border-radius:4px; margin:12px 0; color:#00d9ff;
+}
+.code-snippet {
+    background:#111; padding:12px; border-radius:4px; font-family:monospace;
+    font-size:13px; overflow-x:auto; margin:12px 0;
+}
+.mark-done-btn {
+    margin-top:16px; padding:8px 16px; background:#39ff1440; border:none;
+    color:white; cursor:pointer; border-radius:4px; font-size:13px;
+}
+.mark-done-btn:hover { background:#39ff1480; }
+
+/* Footer note */
+.mission-note { text-align:center; margin:80px 0 40px; font-size:13px; opacity:0.7; color:#00d9ff; }
 </style>
 </head>
 <body>
@@ -109,87 +124,121 @@ h1 { font-size:clamp(28px,6vw,42px); text-align:center; margin-bottom:10px; lett
 
     <div class="section-card">
         <h2>Quarter Objectives</h2>
-        <p>Master the "moving target" reality of LEO that never existed in GEO. Build intuition for why handovers happen every few minutes, why Doppler is significant, and how constellations achieve global coverage without stationary satellites.</p>
-        <p>By the end: Run your first Python orbit simulations and visualize ground tracks & visibility windows.</p>
+        <p>Understand why LEO satellites are fast-moving targets (unlike GEO). Learn the physics that drives handover frequency, Doppler shift, and constellation scale. Build your first orbit visualization scripts.</p>
+        <p>End goal: Simulate passes, ground tracks, and basic multi-satellite coverage.</p>
     </div>
 
     <div class="section-card">
         <h2>Core Topics & Sub-Sections</h2>
-        
-        <h3>1. Foundational Orbital Physics</h3>
-        <ul>
-            <li>Newton’s law of gravitation & centripetal force balance</li>
-            <li>Kepler’s three laws (focus on 1st & 3rd for period vs altitude)</li>
-            <li>Orbital elements: semi-major axis, eccentricity, inclination, RAAN, argument of perigee, true anomaly</li>
-            <li>Vis-viva equation & specific mechanical energy</li>
-        </ul>
 
-        <h3>2. LEO vs GEO/MEO Regimes</h3>
-        <ul>
-            <li>Altitude ranges & typical velocities (~7.6 km/s in LEO)</li>
-            <li>Orbital period formula (T = 2π √(a³/μ))</li>
-            <li>Ground track patterns & nodal precession due to J2 perturbation</li>
-            <li>Why LEO needs many satellites for continuous coverage</li>
-        </ul>
+        <!-- Accordion 1 – fully filled example -->
+        <div class="accordion-header" data-target="topic1">
+            <div class="check-small" data-id="q2_topic1"><div class="custom-checkbox-small"></div></div>
+            <h3>1. Newton’s law of gravitation & centripetal force balance</h3>
+        </div>
+        <div id="topic1" class="accordion-content">
+            <p>Gravitational force provides the centripetal acceleration needed for circular orbit:</p>
+            <div class="equation">F_grav = G · M · m / r² = m · v² / r</div>
+            <p>⇒ Orbital velocity: v = √(G M / r)</p>
+            <p>Where:<br>• G = 6.67430 × 10⁻¹¹ m³ kg⁻¹ s⁻²<br>• M = Earth mass ≈ 5.972 × 10²⁴ kg<br>• r = Earth radius + altitude</p>
+            <p><strong>Key takeaway:</strong> Higher altitude → lower velocity & longer period. LEO (~550 km) → ~7.6 km/s, period ~95 min. GEO (35,786 km) → ~3.07 km/s, period = 24 h.</p>
+            <div class="code-snippet">
+# Quick Python check (Skyfield or simple math)
+import math
+G = 6.67430e-11
+M = 5.972e24
+R_earth = 6371e3
+alt_leo = 550e3
+r_leo = R_earth + alt_leo
+v_leo = math.sqrt(G * M / r_leo)
+print(f"LEO velocity: {v_leo/1000:.2f} km/s")
+            </div>
+            <button class="mark-done-btn">I've studied this – mark complete</button>
+        </div>
 
-        <h3>3. Visibility, Passes & Handovers</h3>
-        <ul>
-            <li>Satellite visibility cone & elevation angle</li>
-            <li>Pass duration & maximum elevation calculations</li>
-            <li>Revisit time & coverage gap analysis</li>
-            <li>Handover frequency in LEO (~every 5–10 min)</li>
-        </ul>
+        <!-- Accordion 2 – fully filled example -->
+        <div class="accordion-header" data-target="topic2">
+            <div class="check-small" data-id="q2_topic2"><div class="custom-checkbox-small"></div></div>
+            <h3>2. Kepler’s third law – orbital period vs altitude</h3>
+        </div>
+        <div id="topic2" class="accordion-content">
+            <p>T² ∝ a³  ⇒  T = 2π √(a³ / μ)  where μ = G M ≈ 3.986 × 10¹⁴ m³/s²</p>
+            <p>Examples:</p>
+            <ul>
+                <li>LEO 550 km: a ≈ 6921 km → T ≈ 95.6 minutes</li>
+                <li>Starlink typical ~540–570 km → ~95 min</li>
+                <li>GEO 35,786 km: a ≈ 42,164 km → T = 1436 min = 23h 56min (sidereal day)</li>
+            </ul>
+            <p><strong>Why it matters for LEO:</strong> Short period = satellites circle Earth ~15× per day → frequent handovers but also many revisit opportunities.</p>
+            <button class="mark-done-btn">I've studied this – mark complete</button>
+        </div>
 
-        <h3>4. Constellation Fundamentals</h3>
-        <ul>
-            <li>Walker Delta & Walker Star patterns</li>
-            <li>Number of planes, satellites per plane, inclination/phasing</li>
-            <li>Streets-of-coverage method</li>
-            <li>Basic coverage probability & quality metrics</li>
-        </ul>
+        <!-- Accordion 3 – fully filled example -->
+        <div class="accordion-header" data-target="topic3">
+            <div class="check-small" data-id="q2_topic3"><div class="custom-checkbox-small"></div></div>
+            <h3>3. Satellite visibility cone & pass duration</h3>
+        </div>
+        <div id="topic3" class="accordion-content">
+            <p>Visibility depends on minimum elevation angle (usually 5–25° for user terminals to avoid obstacles/atmosphere).</p>
+            <p>Maximum slant range ≈ 2300–2500 km for 550 km altitude at 10° elevation.</p>
+            <p>Typical pass duration over one ground point: 4–12 minutes (longer near zenith, shorter near horizon).</p>
+            <p><strong>Handover implication:</strong> Aircraft at 900 km/h crosses visibility cone in ~minutes → need make-before-break logic.</p>
+            <div class="code-snippet">
+# Rough pass duration estimate (simplified)
+altitude = 550e3  # m
+R_earth = 6371e3
+min_el = 10       # degrees
+theta = 90 + min_el
+slant = altitude / math.sin(math.radians(min_el))
+print(f"Max slant range ≈ {slant/1000:.0f} km")
+            </div>
+            <button class="mark-done-btn">I've studied this – mark complete</button>
+        </div>
 
-        <h3>5. Tools & Data Sources</h3>
-        <ul>
-            <li>SGP4 propagator & Two-Line Element (TLE) format</li>
-            <li>Celestrak / Space-Track for real satellite ephemeris</li>
-        </ul>
+        <!-- Add more accordions the same way for the remaining sub-topics -->
+        <div class="accordion-header" data-target="topic4">
+            <div class="check-small" data-id="q2_topic4"><div class="custom-checkbox-small"></div></div>
+            <h3>4. LEO ground tracks & nodal precession</h3>
+        </div>
+        <div id="topic4" class="accordion-content" style="display:none;">
+            <p>(content placeholder – expand later)</p>
+        </div>
+
+        <!-- ... add the rest similarly ... -->
+
     </div>
 
-    <!-- Resources and Deliverables sections unchanged from previous version -->
     <div class="section-card">
         <h2>Recommended Resources (Free-First)</h2>
         <ul>
             <li>MIT OpenCourseWare – Introduction to Aerospace Engineering (orbital mechanics lectures & notes)</li>
             <li>YouTube: Prof. Shane Ross – Orbital Mechanics playlist (first 5–8 videos)</li>
-            <li>Book (free PDF excerpts): Fundamentals of Astrodynamics (Bate, Mueller, White) – Ch. 1–4</li>
-            <li>Poliastro documentation & quick-start tutorials</li>
-            <li>Skyfield documentation – Earth satellites & ground station access</li>
-            <li>NASA GMAT (General Mission Analysis Tool) – free download + basic tutorials</li>
+            <li>Book excerpts: Fundamentals of Astrodynamics (Bate, Mueller, White) – Ch. 1–4</li>
+            <li>Poliastro & Skyfield Python docs + tutorials</li>
+            <li>NASA GMAT – free download & beginner tutorials</li>
         </ul>
     </div>
 
     <div class="section-card">
-        <h2>Hands-On Deliverables & Mini-Projects</h2>
+        <h2>Hands-On Deliverables</h2>
         <ul>
-            <li>Install Python + Skyfield/Poliastro via pip (or use Google Colab)</li>
-            <li>Script #1: Plot ground track of a single LEO satellite (e.g., ISS) over 24 hours</li>
-            <li>Script #2: Compute visibility windows & pass schedule for a ground station in Toulouse over one week</li>
-            <li>Script #3: Compare orbital period & velocity for 550 km LEO vs 35,786 km GEO</li>
-            <li>Bonus: Visualize a simple 10-satellite mini-constellation ground tracks</li>
-            <li>Upload scripts + plots to your GitHub repo (create folder: /q2-orbital-mechanics)</li>
-            <li>Write 1-page notes: "Why handovers are inevitable in LEO – and how aviation terminals must handle them"</li>
+            <li>Script: Single satellite ground track plot (Skyfield/Poliastro)</li>
+            <li>Script: Visibility passes over Toulouse (1 week)</li>
+            <li>Compare LEO vs GEO velocity & period</li>
+            <li>GitHub folder: /q2-orbital-mechanics</li>
+            <li>1-page note: "LEO handover implications for aviation"</li>
         </ul>
     </div>
 
     <div class="mission-note">
-        "The stars are not static — neither are the satellites. Master motion now, command constellations later."
+        "Motion is the fundamental difference between GEO and LEO. Master it here."
     </div>
 
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script>
-// Supabase Auth (same as before)
+// Supabase Auth
 const supabaseUrl = 'https://kpkpptqtuuhnbdntuluc.supabase.co';
 const supabaseKey = 'sb_publishable_aws8RQ085UqKFBUWfojluQ_o9R9WKBb';
 const { createClient } = supabase;
@@ -200,7 +249,7 @@ document.getElementById('logoffBtn').addEventListener('click', async () => {
     window.location.href = "index.html";
 });
 
-// Quarter completion toggle
+// Quarter-level completion
 const quarterCheck = document.getElementById('quarterCheck');
 const quarterId = 'q2-orbital-mechanics';
 
@@ -210,16 +259,47 @@ function loadQuarterProgress() {
     }
 }
 
-function toggleQuarter() {
+quarterCheck.addEventListener('click', () => {
     const isCompleted = document.body.classList.toggle('completed');
     localStorage.setItem(`leoaf_${quarterId}`, isCompleted);
-}
-
-quarterCheck.addEventListener('click', toggleQuarter);
+});
 loadQuarterProgress();
 
-// Optional: keep stars if you want (copy animateStars / initStars / resizeCanvas from dashboard.html here)
-// If you prefer static pages → just remove <canvas id="starsCanvas"></canvas> and the star scripts
+// Accordion toggle
+document.querySelectorAll('.accordion-header').forEach(header => {
+    header.addEventListener('click', (e) => {
+        // Prevent checkbox click from toggling accordion
+        if (e.target.closest('.check-small')) return;
+        
+        const targetId = header.getAttribute('data-target');
+        const content = document.getElementById(targetId);
+        const isOpen = content.style.display === 'block';
+        content.style.display = isOpen ? 'none' : 'block';
+        header.classList.toggle('active', !isOpen);
+    });
+});
+
+// Per-topic completion
+document.querySelectorAll('.mark-done-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+        const content = btn.closest('.accordion-content');
+        const header = content.previousElementSibling;
+        const checkbox = header.querySelector('.custom-checkbox-small');
+        const topicId = header.querySelector('.check-small').getAttribute('data-id');
+        
+        checkbox.classList.add('checked');
+        localStorage.setItem(`leoaf_${topicId}`, 'true');
+        
+        // Optional: check if all topics done → auto-complete quarter
+    });
+});
+
+// Optional stars (copy from dashboard if desired)
+const canvas = document.getElementById('starsCanvas');
+if (canvas) {
+    const ctx = canvas.getContext('2d');
+    // ... paste starfield code here if keeping animation ...
+}
 </script>
 </body>
 </html>
