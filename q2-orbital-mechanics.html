@@ -508,8 +508,16 @@ updateQuarterVisual();
 function closeAccordion(targetId) {
     const content = document.getElementById(targetId);
     const header = content.previousElementSibling;
+    
+    // Hide content
     content.style.display = 'none';
     header.classList.remove('active');
+    
+    // Smoothly scroll to the header (so user doesn't stay at bottom)
+    header.scrollIntoView({ 
+        behavior: 'smooth', 
+        block: 'start'      // align to top of viewport
+    });
 }
     
 // Optional stars
