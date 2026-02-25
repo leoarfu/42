@@ -34,11 +34,16 @@ body {
 
 /* ---------- HEADER ---------- */
 header {
-    display: flex; justify-content: space-between; align-items: center;
-    padding: 18px clamp(20px, 5vw, 60px);
-    border-bottom: 1px solid rgba(255, 0, 79, 0.3);
-    background: rgba(0, 0, 0, 0.7); backdrop-filter: blur(5px);
-    position: sticky; top: 0; z-index: 10;
+    background: #000;                      /* solid black like page 2 */
+    border-bottom: 1px solid #ff004f33;    /* same subtle pinkish border */
+    position: sticky;
+    top: 0;
+    z-index: 100;                          /* higher than content */
+    padding: 1rem clamp(1.5rem, 5vw, 4rem); /* more generous padding like page 2 */
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    box-shadow: 0 4px 16px #0008;          /* soft shadow for depth */
 }
 
 .logo {
@@ -156,6 +161,36 @@ header {
 .module-card.completed .module-info h3 {
     color: #39ff14; text-decoration: line-through; text-decoration-color: rgba(57, 255, 20, 0.5);
 }
+
+.nav-left {
+    display: flex;
+    align-items: center;
+    gap: 2rem;
+}
+.back-dashboard {
+    color: #00d9ff;
+    font-size: 0.95rem;
+    text-decoration: none;
+}
+.back-dashboard:hover {
+    color: #39ff14;
+    text-decoration: underline;
+}
+.logoff-btn {
+    /* your existing styles are fine, or copy page 2's */
+    background: transparent;
+    border: 1px solid #ff004f;
+    color: #ff004f;
+    padding: 0.5rem 1rem;
+    font-size: 0.85rem;
+    cursor: pointer;
+    border-radius: 4px;
+}
+.logoff-btn:hover {
+    background: #ff004f;
+    color: #000;
+}
+
 </style>
 </head>
 <body>
@@ -163,7 +198,11 @@ header {
 <canvas id="starsCanvas"></canvas>
 
 <header>
-    <a href="dashboard.html" class="logo"><span>LEO</span><span>AF</span></a>
+    <div class="nav-left">
+        <a href="dashboard.html" class="logo"><span>LEO</span><span>AF</span></a>
+        <!-- Optional: add back link if you want consistency -->
+        <!-- <a href="dashboard.html" class="back-dashboard">← Mission Dashboard</a> -->
+    </div>
     <div class="header-controls">
         <span id="userEmail" class="user-id">AGENT</span>
         <button id="logoffBtn" class="logoff-btn">ABORT</button>
