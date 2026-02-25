@@ -338,7 +338,7 @@ loadProgress();
 
 // Starfield Canvas 
 // 3D Starfield Canvas (Warp Effect)
-const canvas = document.getElementById('starsCanvas');
+/* const canvas = document.getElementById('starsCanvas');
 const ctx = canvas.getContext('2d');
 let stars = [];
 const STAR_COUNT = 400; // Increased count for better 3D density
@@ -410,7 +410,17 @@ function animateStars() {
     });
     requestAnimationFrame(animateStars);
 }
-animateStars();
+animateStars(); */
+
+// Optional stars
+const canvas = document.getElementById('starsCanvas');
+if (canvas) {
+    const ctx = canvas.getContext('2d');
+    let stars = [];
+    function init(){ canvas.width = window.innerWidth; canvas.height = window.innerHeight; stars = []; for(let i=0;i<300;i++) stars.push({x:Math.random()*canvas.width, y:Math.random()*canvas.height, size:Math.random()*1.2+0.3, speed:Math.random()*0.4+0.1}); }
+    function animate(){ ctx.fillStyle='rgba(0,0,0,0.12)'; ctx.fillRect(0,0,canvas.width,canvas.height); stars.forEach(s=>{ s.y += s.speed; if(s.y>canvas.height) s.y=0; ctx.fillStyle='#fff'; ctx.fillRect(s.x,s.y,s.size,s.size); }); requestAnimationFrame(animate); }
+    init(); animate(); window.addEventListener('resize', init);
+}
 
 function setViewportHeight() { document.documentElement.style.setProperty('--vh', `${window.innerHeight * 0.01}px`); }
 setViewportHeight(); window.addEventListener('resize', setViewportHeight);
