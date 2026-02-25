@@ -27,7 +27,9 @@ body {
 }
 
 #starsCanvas {
-    position: fixed; top:0; left:0; width:100%; height:100%; z-index:-1;
+    position: fixed;
+    inset: 0;
+    z-index: -1;
 }
 
 /* ---------- HEADER ---------- */
@@ -417,9 +419,39 @@ const canvas = document.getElementById('starsCanvas');
 if (canvas) {
     const ctx = canvas.getContext('2d');
     let stars = [];
-    function init(){ canvas.width = window.innerWidth; canvas.height = window.innerHeight; stars = []; for(let i=0;i<300;i++) stars.push({x:Math.random()*canvas.width, y:Math.random()*canvas.height, size:Math.random()*1.2+0.3, speed:Math.random()*0.4+0.1}); }
-    function animate(){ ctx.fillStyle='rgba(0,0,0,0.12)'; ctx.fillRect(0,0,canvas.width,canvas.height); stars.forEach(s=>{ s.y += s.speed; if(s.y>canvas.height) s.y=0; ctx.fillStyle='#fff'; ctx.fillRect(s.x,s.y,s.size,s.size); }); requestAnimationFrame(animate); }
-    init(); animate(); window.addEventListener('resize', init);
+    
+    function init() {
+        canvas.width = window.innerWidth;
+        canvas.height = window.innerHeight;
+        stars = [];
+        for (let i = 0; i < 300; i++) {
+            stars.push({
+                x: Math.random() * canvas.width,
+                y: Math.random() * canvas.height,
+                size: Math.random() * 1.2 + 0.3,
+                speed: Math.random() * 0.4 + 0.1
+            });
+        }
+    }
+    
+    function animate() {
+        ctx.fillStyle = 'rgba(0,0,0,0.12)';           // slight trail/fade effect
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+        
+        stars.forEach(s => {
+            s.y += s.speed;                           // move downward
+            if (s.y > canvas.height) s.y = 0;         // wrap around top
+            ctx.fillStyle = '#fff';
+            ctx.fillRect(s.x, s.y, s.size, s.size);   // draw small square star
+        });
+        
+        requestAnimationFrame(animate);
+    }
+    
+    init();
+    animate();
+    
+    window.addEventListener('resize', init);          // handle window resize
 }
 
 function setViewportHeight() { document.documentElement.style.setProperty('--vh', `${window.innerHeight * 0.01}px`); }
