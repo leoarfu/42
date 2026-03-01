@@ -535,54 +535,59 @@ function closeAccordion(targetId) {
     header.scrollIntoView({ behavior: 'smooth', block: 'start' });
 }
 
-// ── Quarter visual ────────────────────────────────
+// ── Set quarter visual state (single source of truth) ──
+function setQuarterState(done) {
+    const quarterCb = document.querySelector('#quarterCheck .custom-checkbox');
+    const quarterContainer = document.getElementById('quarterCheck');
+    if (!quarterCb) return;
+    if (done) {
+        quarterCb.classList.add('checked');
+        quarterContainer.classList.add('completed');
+    } else {
+        quarterCb.classList.remove('checked');
+        quarterContainer.classList.remove('completed');
+    }
+}
+
+// ── Auto-update quarter when topics change ────────
 async function updateQuarterVisual() {
     const total = document.querySelectorAll('.check-small').length;
     const checked = document.querySelectorAll('.custom-checkbox-small.checked').length;
-    const quarterCb = document.querySelector('#quarterCheck .custom-checkbox');
-    if (!quarterCb) return;
-    if (checked === total && total > 0) {
-        quarterCb.classList.add('checked');
-        await upsertSection('q2-orbital-mechanics', true);
-    } else {
-        quarterCb.classList.remove('checked');
-        await upsertSection('q2-orbital-mechanics', false);
-    }
-    // when marking complete
-    quarterCb.classList.add('checked');
-    document.getElementById('quarterCheck').classList.add('completed');
+    const done = checked === total && total > 0;
+    setQuarterState(done);
+    await upsertSection('q2-orbital-mechanics', done);
+}
 
-   // when unmarking
-   quarterCb.classList.remove('checked');
-   document.getElementById('quarterCheck').classList.remove('completed');
-   }
-
-// ── Manual quarter click with warning ────────────
+// ── Manual quarter click with fun popup ──────────
 document.getElementById('quarterCheck').addEventListener('click', async () => {
     const quarterCb = document.querySelector('#quarterCheck .custom-checkbox');
     const isCurrentlyChecked = quarterCb.classList.contains('checked');
 
     const message = isCurrentlyChecked
-        ? 'Unmark this quarter as complete?'
-        : 'Mark this entire quarter as complete?';
+        ? '🚀 Unmark this quarter? Back to the launchpad...'
+        : '🌌 Lock in Q2 as complete? Houston, we have liftoff!';
 
     const confirmed = confirm(message);
     if (!confirmed) return;
 
     const newState = !isCurrentlyChecked;
-    quarterCb.classList.toggle('checked', newState);
+    setQuarterState(newState);
     await upsertSection('q2-orbital-mechanics', newState);
 });
 
 // ── Load saved progress from Supabase ────────────
 async function loadProgress() {
     const mastered = await getMasteredSections();
+
+    // Restore topic checkboxes
     document.querySelectorAll('.check-small').forEach(el => {
         const id = el.dataset.id;
         if (mastered.includes(id)) {
             el.querySelector('.custom-checkbox-small')?.classList.add('checked');
         }
     });
+
+    // Restore mark done buttons
     document.querySelectorAll('.mark-done-btn').forEach(btn => {
         const id = btn.dataset.id;
         const header = btn.closest('.accordion-content').previousElementSibling;
@@ -594,12 +599,10 @@ async function loadProgress() {
             btn.textContent = 'Mark as complete';
         }
     });
-        const quarterRow = await getSection('q2-orbital-mechanics');
-        if (quarterRow && quarterRow.mastered) {
-        document.querySelector('#quarterCheck .custom-checkbox')?.classList.add('checked');
-        document.getElementById('quarterCheck').classList.add('completed');
-        }
-    updateQuarterVisual();
+
+    // Restore quarter button — fetch directly so it's independent of topics
+    const quarterRow = await getSection('q2-orbital-mechanics');
+    setQuarterState(quarterRow && quarterRow.mastered);
 }
 
 // ── Mark done button clicks ───────────────────────
@@ -611,7 +614,7 @@ document.querySelectorAll('.mark-done-btn').forEach(btn => {
         const isChecked = cb.classList.toggle('checked');
         btn.textContent = isChecked ? 'Unmark / revisit' : 'Mark as complete';
         await upsertSection(id, isChecked);
-        updateQuarterVisual();
+        await updateQuarterVisual();
     });
 });
 
