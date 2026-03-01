@@ -561,10 +561,15 @@ async function loadProgress() {
     });
     document.querySelectorAll('.mark-done-btn').forEach(btn => {
         const id = btn.dataset.id;
-        const header = btn.closest('.accordion-content').previousElementSibling;
-        const cb = header.querySelector('.custom-checkbox-small');
-        if (mastered.includes(id)) { btn.textContent = 'Unmark / revisit'; cb?.classList.add('checked'); }
-        else { btn.textContent = 'Mark as complete'; }
+        const accordionContent = btn.closest('.accordion-content');
+        const accordionHeader = accordionContent.previousElementSibling;
+        const cb = accordionHeader.querySelector('.check-small .custom-checkbox-small');
+        if (mastered.includes(id)) {
+            btn.textContent = 'Unmark / revisit';
+            cb?.classList.add('checked');
+        } else {
+            btn.textContent = 'Mark as complete';
+        }
     });
     const quarterRow = await getSection('q2-orbital-mechanics');
     setQuarterState(quarterRow && quarterRow.mastered);
@@ -573,13 +578,15 @@ async function loadProgress() {
 document.querySelectorAll('.mark-done-btn').forEach(btn => {
     btn.addEventListener('click', async () => {
         const id = btn.dataset.id;
-        const header = btn.closest('.accordion-content').previousElementSibling;
-        const cb = header.querySelector('.custom-checkbox-small');
-        const isChecked = cb.classList.toggle('checked');
+        // The accordion-content's previous sibling is the accordion-header
+        const accordionContent = btn.closest('.accordion-content');
+        const accordionHeader = accordionContent.previousElementSibling;
+        // The checkbox is inside .check-small inside the header
+        const cb = accordionHeader.querySelector('.check-small .custom-checkbox-small');
+        if (!cb) return;
+        const isChecked = !cb.classList.contains('checked');
+        cb.classList.toggle('checked', isChecked);
         btn.textContent = isChecked ? 'Unmark / revisit' : 'Mark as complete';
-        // Also update the check-small wrapper's data state visually
-        const checkSmall = header.querySelector('.check-small');
-        if (checkSmall) checkSmall.querySelector('.custom-checkbox-small')?.classList.toggle('checked', isChecked);
         await upsertSection(id, isChecked);
         await updateQuarterVisual();
     });
