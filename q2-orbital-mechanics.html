@@ -522,78 +522,101 @@ if (canvas) {
 <!-- 1. Supabase CDN -->
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
-<!-- 2. Supabase Init + Auth + Progress Logic -->
+<!-- 2. Init + Auth + Progress Logic -->
 <script>
-// ── Init ──────────────────────────────────────────
 const supabaseUrl = 'https://kpkpptqtuuhnbdntuluc.supabase.co';
 const supabaseKey = 'sb_publishable_aws8RQ085UqKFBUWfojluQ_o9R9WKBb';
 const { createClient } = supabase;
 const client = createClient(supabaseUrl, supabaseKey);
 
-// ── UI Elements ───────────────────────────────────
-const modules = document.querySelectorAll('.module-card');
-const progressFill = document.getElementById('progressFill');
-const progressText = document.getElementById('progressText');
-
-// ── Progress Bar ──────────────────────────────────
-function updateProgressBar(completed, total) {
-    const percentage = Math.round((completed / total) * 100);
-    progressFill.style.width = percentage + '%';
-    progressText.innerText = `${percentage}% COMPLETE`;
-}
-
-// ── Load Progress from Supabase ───────────────────
-async function loadProgress() {
-    const mastered = await getMasteredSections();
-    let completedCount = 0;
-    modules.forEach(card => {
-        const id = card.getAttribute('data-id');
-        if (mastered.includes(id)) {
-            card.classList.add('completed');
-            completedCount++;
-        }
-    });
-    updateProgressBar(completedCount, modules.length);
-}
-
-// ── Checkbox Click Handler ────────────────────────
-modules.forEach(card => {
-    const checkWrapper = card.querySelector('.check-wrapper');
-    if (!checkWrapper) return; // skip cards without a check-wrapper;
-    const id = card.getAttribute('data-id');
-    checkWrapper.addEventListener('click', async (e) => {
-        e.preventDefault();
-        const isNowCompleted = card.classList.toggle('completed');
-        await upsertSection(id, isNowCompleted);
-        const currentCompleted = document.querySelectorAll('.module-card.completed').length;
-        updateProgressBar(currentCompleted, modules.length);
-    });
-});
-
-// ── Auth + Boot ───────────────────────────────────
-document.addEventListener('DOMContentLoaded', async () => {
-    const { data: { session } } = await client.auth.getSession();
-    if (!session) { window.location.href = "index.html"; return; }
-
-    const emailEl = document.getElementById('userEmail');
-    if (session.user.email) {
-        emailEl.innerText = session.user.email.toUpperCase();
-        emailEl.style.display = 'block';
-    }
-
-    await loadProgress(); // load AFTER confirming user is logged in
-});
-
-// ── Logoff ────────────────────────────────────────
 document.getElementById('logoffBtn').addEventListener('click', async () => {
     await client.auth.signOut();
     window.location.href = "index.html";
 });
+
+document.querySelectorAll('.accordion-header').forEach(header => {
+    header.addEventListener('click', e => {
+        if (e.target.closest('.check-small')) return;
+        const target = document.getElementById(header.dataset.target);
+        const isOpen = target.style.display === 'block';
+        target.style.display = isOpen ? 'none' : 'block';
+        header.classList.toggle('active', !isOpen);
+    });
+});
+
+function closeAccordion(targetId) {
+    const content = document.getElementById(targetId);
+    const header = content.previousElementSibling;
+    content.style.display = 'none';
+    header.classList.remove('active');
+    header.scrollIntoView({ behavior: 'smooth', block: 'start' });
+}
+
+async function updateQuarterVisual() {
+    const total = document.querySelectorAll('.check-small').length;
+    const checked = document.querySelectorAll('.custom-checkbox-small.checked').length;
+    const quarterCb = document.querySelector('#quarterCheck .custom-checkbox');
+    if (!quarterCb) return;
+    if (checked === total && total > 0) {
+        quarterCb.classList.add('checked');
+        await upsertSection('q2-orbital-mechanics', true);
+    } else {
+        quarterCb.classList.remove('checked');
+        await upsertSection('q2-orbital-mechanics', false);
+    }
+}
+
+async function loadProgress() {
+    const mastered = await getMasteredSections();
+    document.querySelectorAll('.check-small').forEach(el => {
+        const id = el.dataset.id;
+        if (mastered.includes(id)) {
+            el.querySelector('.custom-checkbox-small')?.classList.add('checked');
+        }
+    });
+    document.querySelectorAll('.mark-done-btn').forEach(btn => {
+        const id = btn.dataset.id;
+        const header = btn.closest('.accordion-content').previousElementSibling;
+        const cb = header.querySelector('.custom-checkbox-small');
+        if (mastered.includes(id)) {
+            btn.textContent = 'Unmark / revisit';
+            cb?.classList.add('checked');
+        } else {
+            btn.textContent = 'Mark as complete';
+        }
+    });
+    updateQuarterVisual();
+}
+
+document.querySelectorAll('.mark-done-btn').forEach(btn => {
+    btn.addEventListener('click', async () => {
+        const id = btn.dataset.id;
+        const header = btn.closest('.accordion-content').previousElementSibling;
+        const cb = header.querySelector('.custom-checkbox-small');
+        const isChecked = cb.classList.toggle('checked');
+        btn.textContent = isChecked ? 'Unmark / revisit' : 'Mark as complete';
+        await upsertSection(id, isChecked);
+        updateQuarterVisual();
+    });
+});
+
+document.addEventListener('DOMContentLoaded', async () => {
+    const { data: { session } } = await client.auth.getSession();
+    if (!session) { window.location.href = "index.html"; return; }
+    await loadProgress();
+});
+
+const canvas = document.getElementById('starsCanvas');
+if (canvas) {
+    const ctx = canvas.getContext('2d');
+    let stars = [];
+    function init(){ canvas.width=window.innerWidth; canvas.height=window.innerHeight; stars=[]; for(let i=0;i<300;i++) stars.push({x:Math.random()*canvas.width,y:Math.random()*canvas.height,size:Math.random()*1.2+0.3,speed:Math.random()*0.4+0.1}); }
+    function animate(){ ctx.fillStyle='rgba(0,0,0,0.12)'; ctx.fillRect(0,0,canvas.width,canvas.height); stars.forEach(s=>{ s.y+=s.speed; if(s.y>canvas.height) s.y=0; ctx.fillStyle='#fff'; ctx.fillRect(s.x,s.y,s.size,s.size); }); requestAnimationFrame(animate); }
+    init(); animate(); window.addEventListener('resize',init);
+}
 </script>
 
-<!-- 3. User Progress Functions (must come after client is defined) -->
+<!-- 3. User Progress Functions (must be last) -->
 <script src="user_progress.js"></script>
-
-</script>
 </body>
 </html>
