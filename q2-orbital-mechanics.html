@@ -150,6 +150,82 @@ h1 { font-family:'Orbitron',sans-serif; font-size:clamp(2.2rem,6vw,3.6rem); text
 .mission-note { text-align:center; margin:6rem 0 3rem; font-size:1.05rem; color:#00d9ff88; font-style:italic; }
 }
 
+/* Custom confirm modal */
+.modal-overlay {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.85);
+    z-index: 1000;
+    align-items: center;
+    justify-content: center;
+}
+.modal-overlay.active { display: flex; }
+.modal-box {
+    background: #000;
+    border: 1px solid #00d9ff44;
+    border-radius: 4px;
+    max-width: 420px;
+    width: 90%;
+    padding: 2.5rem 2rem;
+    text-align: center;
+    box-shadow: 0 0 60px #00d9ff11, 0 0 120px #00000099;
+    font-family: 'Orbitron', sans-serif;
+}
+.modal-eye {
+    font-size: 3rem;
+    margin-bottom: 1.5rem;
+    display: block;
+    filter: drop-shadow(0 0 12px #ff004f);
+}
+.modal-title {
+    font-size: 0.75rem;
+    letter-spacing: 4px;
+    color: #00d9ff;
+    text-transform: uppercase;
+    margin-bottom: 1rem;
+}
+.modal-message {
+    font-size: 1rem;
+    color: #f0f0f0;
+    line-height: 1.7;
+    margin-bottom: 2rem;
+    font-family: 'Inter', sans-serif;
+    font-style: italic;
+}
+.modal-buttons {
+    display: flex;
+    gap: 1rem;
+    justify-content: center;
+}
+.modal-btn {
+    padding: 0.6rem 1.4rem;
+    font-family: 'Orbitron', sans-serif;
+    font-size: 0.75rem;
+    letter-spacing: 2px;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+.modal-btn-confirm {
+    background: transparent;
+    border: 1px solid #00d9ff;
+    color: #00d9ff;
+}
+.modal-btn-confirm:hover {
+    background: #00d9ff;
+    color: #000;
+}
+.modal-btn-cancel {
+    background: transparent;
+    border: 1px solid #ffffff22;
+    color: #666;
+}
+.modal-btn-cancel:hover {
+    border-color: #ff004f;
+    color: #ff004f;
+}
+
 </style>
 </head>
 <body>
@@ -482,6 +558,18 @@ GEO (35,786 km)      → period: 1440.0 min  |  orbits/day:   1.0
 
 </div>
 
+<div class="modal-overlay" id="confirmModal">
+    <div class="modal-box">
+        <span class="modal-eye" id="modalEye">🔴</span>
+        <div class="modal-title" id="modalTitle">MISSION CONTROL</div>
+        <p class="modal-message" id="modalMessage"></p>
+        <div class="modal-buttons">
+            <button class="modal-btn modal-btn-confirm" id="modalConfirm">AFFIRMATIVE</button>
+            <button class="modal-btn modal-btn-cancel" id="modalCancel">NEGATIVE</button>
+        </div>
+    </div>
+</div>
+
 <script>
 // stars
 const canvas = document.getElementById('starsCanvas');
@@ -558,17 +646,39 @@ async function updateQuarterVisual() {
     await upsertSection('q2-orbital-mechanics', done);
 }
 
-// ── Manual quarter click with fun popup ──────────
+// ── HAL 9000 style confirm modal ─────────────────
+function showConfirm(message, title, onConfirm) {
+    document.getElementById('modalMessage').textContent = message;
+    document.getElementById('modalTitle').textContent = title;
+    const overlay = document.getElementById('confirmModal');
+    overlay.classList.add('active');
+
+    document.getElementById('modalConfirm').onclick = () => {
+        overlay.classList.remove('active');
+        onConfirm();
+    };
+    document.getElementById('modalCancel').onclick = () => {
+        overlay.classList.remove('active');
+    };
+}
+
+// ── Manual quarter click ──────────────────────────
 document.getElementById('quarterCheck').addEventListener('click', async () => {
     const quarterCb = document.querySelector('#quarterCheck .custom-checkbox');
     const isCurrentlyChecked = quarterCb.classList.contains('checked');
 
     const message = isCurrentlyChecked
-        ? '🚀 Unmark this quarter? Back to the launchpad...'
-        : '🌌 Lock in Q2 as complete? Houston, we have liftoff!';
+        ? "I'm afraid I can't let you undo that, Dave. Are you sure you want to unmark this quarter?"
+        : "I have complete confidence in this mission, Dave. Shall I lock in Q2 as complete?";
 
-    const confirmed = confirm(message);
-    if (!confirmed) return;
+    const title = isCurrentlyChecked ? 'REVERSION REQUESTED' : 'MISSION MILESTONE';
+
+    showConfirm(message, title, async () => {
+        const newState = !isCurrentlyChecked;
+        setQuarterState(newState);
+        await upsertSection('q2-orbital-mechanics', newState);
+    });
+});
 
     const newState = !isCurrentlyChecked;
     setQuarterState(newState);
