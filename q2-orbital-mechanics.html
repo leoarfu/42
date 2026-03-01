@@ -106,7 +106,7 @@ h1 { font-family:'Orbitron',sans-serif; font-size:clamp(2.2rem,6vw,3.6rem); text
 .check-container {
     position:absolute; top:clamp(110px,13vh,150px); right:1.5rem;
     display:flex; align-items:center; gap:0.8rem;
-    cursor:pointer;  /* ← change pointer-events:none to this */
+    cursor:pointer;
 }
 
 </style>
@@ -127,10 +127,10 @@ h1 { font-family:'Orbitron',sans-serif; font-size:clamp(2.2rem,6vw,3.6rem); text
 
     <h1>Q2 – Orbital Mechanics & Constellations 101</h1>
 
-    <div class="check-container" id="quarterCheck">
-        <div class="check-wrapper"><div class="custom-checkbox"></div></div>
-        <span class="check-label">MARK QUARTER COMPLETE</span>
-    </div>
+   <div class="check-container" id="quarterCheck">
+    <div class="custom-checkbox"></div>
+    <span class="check-label">MARK QUARTER COMPLETE</span>
+   </div>
 
     <div class="section-card">
         <h2>🎯 What you'll master this quarter</h2>
@@ -546,6 +546,10 @@ async function loadProgress() {
             btn.textContent = 'Mark as complete';
         }
     });
+        const quarterRow = await getSection('q2-orbital-mechanics');
+        if (quarterRow && quarterRow.mastered) {
+        document.querySelector('#quarterCheck .custom-checkbox')?.classList.add('checked');
+}
     updateQuarterVisual();
 }
 
