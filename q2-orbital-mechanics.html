@@ -563,8 +563,8 @@ document.getElementById('quarterCheck').addEventListener('click', async () => {
     const isCurrentlyChecked = quarterCb.classList.contains('checked');
 
     const message = isCurrentlyChecked
-        ? 'Unmark this quarter as complete? This will overwrite your current progress status.'
-        : 'Mark this entire quarter as complete? This will overwrite your current progress status.';
+        ? 'Unmark this quarter as complete?'
+        : 'Mark this entire quarter as complete?';
 
     const confirmed = confirm(message);
     if (!confirmed) return;
@@ -597,7 +597,8 @@ async function loadProgress() {
         const quarterRow = await getSection('q2-orbital-mechanics');
         if (quarterRow && quarterRow.mastered) {
         document.querySelector('#quarterCheck .custom-checkbox')?.classList.add('checked');
-}
+        document.getElementById('quarterCheck').classList.add('completed');
+        }
     updateQuarterVisual();
 }
 
