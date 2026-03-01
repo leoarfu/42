@@ -434,19 +434,7 @@ GEO (35,786 km)      → period: 1440.0 min  |  orbits/day:   1.0
 
 </div>
 
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script>
-// Supabase Auth
-const supabaseUrl = 'https://kpkpptqtuuhnbdntuluc.supabase.co';
-const supabaseKey = 'sb_publishable_aws8RQ085UqKFBUWfojluQ_o9R9WKBb';
-const { createClient } = supabase;
-const client = createClient(supabaseUrl, supabaseKey);
-
-document.getElementById('logoffBtn').addEventListener('click', async () => {
-    await client.auth.signOut();
-    window.location.href = "index.html";
-});
-
 // Quarter visual status
 const quarterCheck = document.getElementById('quarterCheck');
 const quarterId = 'q2-orbital-mechanics';
@@ -530,6 +518,82 @@ if (canvas) {
     function animate(){ ctx.fillStyle='rgba(0,0,0,0.12)'; ctx.fillRect(0,0,canvas.width,canvas.height); stars.forEach(s=>{ s.y += s.speed; if(s.y>canvas.height) s.y=0; ctx.fillStyle='#fff'; ctx.fillRect(s.x,s.y,s.size,s.size); }); requestAnimationFrame(animate); }
     init(); animate(); window.addEventListener('resize', init);
 }
+
+<!-- 1. Supabase CDN -->
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+<!-- 2. Supabase Init + Auth + Progress Logic -->
+<script>
+// ── Init ──────────────────────────────────────────
+const supabaseUrl = 'https://kpkpptqtuuhnbdntuluc.supabase.co';
+const supabaseKey = 'sb_publishable_aws8RQ085UqKFBUWfojluQ_o9R9WKBb';
+const { createClient } = supabase;
+const client = createClient(supabaseUrl, supabaseKey);
+
+// ── UI Elements ───────────────────────────────────
+const modules = document.querySelectorAll('.module-card');
+const progressFill = document.getElementById('progressFill');
+const progressText = document.getElementById('progressText');
+
+// ── Progress Bar ──────────────────────────────────
+function updateProgressBar(completed, total) {
+    const percentage = Math.round((completed / total) * 100);
+    progressFill.style.width = percentage + '%';
+    progressText.innerText = `${percentage}% COMPLETE`;
+}
+
+// ── Load Progress from Supabase ───────────────────
+async function loadProgress() {
+    const mastered = await getMasteredSections();
+    let completedCount = 0;
+    modules.forEach(card => {
+        const id = card.getAttribute('data-id');
+        if (mastered.includes(id)) {
+            card.classList.add('completed');
+            completedCount++;
+        }
+    });
+    updateProgressBar(completedCount, modules.length);
+}
+
+// ── Checkbox Click Handler ────────────────────────
+modules.forEach(card => {
+    const checkWrapper = card.querySelector('.check-wrapper');
+    if (!checkWrapper) return; // skip cards without a check-wrapper;
+    const id = card.getAttribute('data-id');
+    checkWrapper.addEventListener('click', async (e) => {
+        e.preventDefault();
+        const isNowCompleted = card.classList.toggle('completed');
+        await upsertSection(id, isNowCompleted);
+        const currentCompleted = document.querySelectorAll('.module-card.completed').length;
+        updateProgressBar(currentCompleted, modules.length);
+    });
+});
+
+// ── Auth + Boot ───────────────────────────────────
+document.addEventListener('DOMContentLoaded', async () => {
+    const { data: { session } } = await client.auth.getSession();
+    if (!session) { window.location.href = "index.html"; return; }
+
+    const emailEl = document.getElementById('userEmail');
+    if (session.user.email) {
+        emailEl.innerText = session.user.email.toUpperCase();
+        emailEl.style.display = 'block';
+    }
+
+    await loadProgress(); // load AFTER confirming user is logged in
+});
+
+// ── Logoff ────────────────────────────────────────
+document.getElementById('logoffBtn').addEventListener('click', async () => {
+    await client.auth.signOut();
+    window.location.href = "index.html";
+});
+</script>
+
+<!-- 3. User Progress Functions (must come after client is defined) -->
+<script src="user_progress.js"></script>
+
 </script>
 </body>
 </html>
