@@ -1,0 +1,462 @@
+<!DOCTYPE html>
+
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, shrink-to-fit=no">
+<title>Command Center — LEOAF</title>
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;600;800&family=Inter:wght@400;600&display=swap" rel="stylesheet">
+<style>
+* { box-sizing: border-box; margin:0; padding:0; }
+html { height:100%; -webkit-text-size-adjust:100%; max-width:100vw; overflow-x:hidden; }
+body {
+    font-family:'Orbitron',sans-serif;
+    background:#000; color:white;
+    overflow-x:hidden; max-width:100vw;
+    position:relative; min-height:100vh;
+}
+#starsCanvas { position:fixed; inset:0; z-index:-1; }
+
+/* ––––– HEADER ––––– */
+header {
+background:#000; border-bottom:1px solid #ff004f33;
+position:sticky; top:0; z-index:100;
+padding:1rem clamp(1.5rem,5vw,4rem);
+display:flex; justify-content:space-between; align-items:center;
+box-shadow:0 4px 16px #0008;
+}
+.logo { font-weight:800; font-size:clamp(18px,2vw,24px); letter-spacing:3px; text-decoration:none; }
+.logo span:first-child { color:white; }
+.logo span:last-child { color:#ff004f; }
+.nav-left { display:flex; align-items:center; gap:2rem; }
+.header-controls { display:flex; align-items:center; gap:15px; }
+.user-id { font-size:10px; color:#00d9ff; letter-spacing:1px; opacity:0.8; display:none; }
+.logoff-btn {
+background:transparent; border:1px solid #ff004f; color:#ff004f;
+padding:6px 14px; cursor:pointer; transition:0.3s ease;
+font-size:11px; font-family:‘Orbitron’,sans-serif; letter-spacing:1px; border-radius:4px;
+}
+.logoff-btn:hover { background:#ff004f; color:black; box-shadow:0 0 10px #ff004f; }
+
+/* ––––– DASHBOARD ––––– */
+.dashboard { width:100%; max-width:960px; margin:40px auto; padding:0 15px; box-sizing:border-box; position:relative; z-index:1; }
+.welcome-msg { font-size:clamp(22px,4vw,32px); margin-bottom:10px; font-weight:800; letter-spacing:1px; }
+
+/* ––––– PROGRESS BAR ––––– */
+.mission-control {
+background:rgba(17,17,17,0.8); border:1px solid rgba(0,217,255,0.3);
+padding:25px; margin-bottom:40px; box-shadow:inset 0 0 20px rgba(0,217,255,0.05);
+}
+.progress-header { display:flex; justify-content:space-between; align-items:flex-end; margin-bottom:15px; }
+.progress-header h2 { font-size:16px; color:#00d9ff; letter-spacing:2px; }
+.progress-stats { font-size:14px; color:#39ff14; }
+.progress-track { width:100%; height:12px; background:rgba(255,255,255,0.1); border-radius:6px; overflow:hidden; }
+.progress-fill {
+height:100%; width:0%; background:linear-gradient(90deg,#00d9ff,#39ff14);
+box-shadow:0 0 10px rgba(57,255,20,0.5);
+transition:width 0.8s cubic-bezier(0.4,0,0.2,1);
+}
+
+/* ––––– YEAR HEADERS ––––– */
+.year-header {
+display:flex; align-items:center;
+padding:20px; margin-top:2.5rem; margin-bottom:0;
+border-left:3px solid #00d9ff;
+background:rgba(0,217,255,0.03);
+pointer-events:none; cursor:default;
+}
+.year-header .module-info h3 { color:#00d9ff; font-size:17px; letter-spacing:1px; margin-bottom:6px; }
+.year-header .module-info p { color:#aaa; font-size:13px; font-family:‘Inter’,sans-serif; line-height:1.5; }
+.year-header .module-info { margin-left:0; }
+
+/* ––––– MODULE CARDS ––––– */
+.module-list { display:flex; flex-direction:column; gap:15px; }
+.module-card {
+display:flex; align-items:flex-start;
+background:rgba(255,255,255,0.03); border-left:3px solid #ff004f;
+padding:20px; text-decoration:none; color:white;
+transition:0.3s ease; position:relative;
+}
+.module-card:hover { background:rgba(0,217,255,0.08); transform:translateX(4px); border-left-color:#00d9ff; }
+.module-info { flex-grow:1; margin-left:20px; }
+.module-info h3 { margin:0 0 6px; font-size:16px; color:#ffffff; letter-spacing:1px; }
+.module-info p { margin:0 0 6px; font-size:13px; color:#aaaaaa; font-family:‘Inter’,sans-serif; line-height:1.6; }
+.module-meta {
+display:flex; gap:1.5rem; margin-top:8px;
+}
+.module-meta span {
+font-size:11px; letter-spacing:1px; font-family:‘Orbitron’,sans-serif;
+padding:3px 8px; border-radius:3px;
+}
+.meta-months { color:#00d9ff88; border:1px solid #00d9ff22; }
+.meta-hours { color:#39ff1488; border:1px solid #39ff1422; }
+
+/* ––––– CHECKBOX ––––– */
+.check-wrapper {
+position:relative; width:30px; height:30px; flex-shrink:0;
+display:flex; justify-content:center; align-items:center;
+cursor:pointer; z-index:2; margin-top:2px;
+}
+.custom-checkbox {
+width:24px; height:24px; border:2px solid #ff004f; background:transparent;
+transition:0.3s ease; display:flex; justify-content:center; align-items:center;
+}
+.check-wrapper:hover .custom-checkbox { box-shadow:0 0 10px rgba(255,0,79,0.5); }
+
+/* ––––– COMPLETED STATE ––––– */
+.module-card.completed { border-left-color:#39ff14; background:rgba(57,255,20,0.03); opacity:0.7; }
+.module-card.completed:hover { opacity:1; background:rgba(57,255,20,0.08); }
+.module-card.completed .custom-checkbox { border-color:#39ff14; background:rgba(57,255,20,0.2); }
+.module-card.completed .custom-checkbox::after { content:‘✔’; color:#39ff14; font-size:16px; text-shadow:0 0 5px #39ff14; }
+.module-card.completed .module-info h3 { color:#39ff14; text-decoration:line-through; text-decoration-color:rgba(57,255,20,0.5); }
+
+/* ––––– ENDGAME CARD ––––– */
+.endgame-card {
+margin-top:2.5rem; background:rgba(57,255,20,0.08);
+border-left:3px solid #39ff14; padding:20px;
+pointer-events:none; cursor:default;
+}
+.endgame-card h3 { color:#39ff14; font-size:17px; letter-spacing:1px; margin-bottom:8px; }
+.endgame-card p { color:#aaa; font-size:13px; font-family:‘Inter’,sans-serif; line-height:1.6; }
+.endgame-total {
+display:inline-block; margin-top:10px;
+font-size:11px; color:#39ff14; font-family:‘Orbitron’,sans-serif;
+letter-spacing:2px; border:1px solid #39ff1444; padding:4px 10px;
+}
+
+/* ––––– BRAZIL MODAL ––––– */
+.modal-overlay { display:none; position:fixed; inset:0; background:rgba(0,0,0,0.92); z-index:1000; align-items:center; justify-content:center; }
+.modal-overlay.active { display:flex; }
+.modal-box {
+background:#1a1500; border:3px double #c8a84b; border-radius:0;
+max-width:460px; width:90%; padding:0;
+font-family:‘Courier New’,Courier,monospace;
+box-shadow:4px 4px 0 #000, 8px 8px 0 #c8a84b22;
+}
+.modal-header-bar { background:#c8a84b; padding:0.4rem 1rem; display:flex; justify-content:space-between; align-items:center; }
+.modal-header-bar span { font-size:0.7rem; letter-spacing:2px; color:#000; font-weight:bold; text-transform:uppercase; }
+.modal-stamp {
+color:#8b0000; opacity:0.85; transform:rotate(-8deg); display:inline-block;
+border:3px solid #8b0000; padding:0.1rem 0.5rem;
+font-family:‘Courier New’,monospace; font-weight:bold;
+font-size:0.8rem; letter-spacing:3px; line-height:1.6; margin-bottom:0.5rem;
+}
+.modal-body { padding:1.5rem 2rem 2rem; text-align:left; }
+.modal-form-ref { font-size:0.65rem; color:#c8a84b88; letter-spacing:1px; margin-bottom:1rem; text-align:right; }
+.modal-title { font-size:0.8rem; letter-spacing:3px; color:#c8a84b; text-transform:uppercase; margin-bottom:0.25rem; font-weight:bold; }
+.modal-subtitle { font-size:0.65rem; color:#c8a84b66; letter-spacing:2px; margin-bottom:1.25rem; text-transform:uppercase; }
+.modal-message { font-size:0.82rem; color:#d4b96a; line-height:1.8; margin-bottom:1.5rem; border-left:2px solid #c8a84b44; padding-left:0.75rem; }
+.modal-field-label { font-size:0.65rem; color:#c8a84b88; letter-spacing:2px; text-transform:uppercase; margin-bottom:0.3rem; display:block; }
+.modal-input {
+width:100%; padding:0.6rem 0.75rem; margin-bottom:1rem;
+background:#0d0d00; border:1px solid #c8a84b44; border-radius:0;
+color:#d4b96a; font-size:0.85rem; font-family:‘Courier New’,monospace;
+outline:none; transition:border 0.2s; letter-spacing:1px;
+}
+.modal-input:focus { border-color:#c8a84b; background:#111100; }
+.modal-input::placeholder { color:#c8a84b33; }
+.modal-error { color:#8b0000; font-size:0.75rem; margin-bottom:1rem; font-family:‘Courier New’,monospace; min-height:1rem; letter-spacing:1px; }
+.modal-footer { display:flex; justify-content:space-between; align-items:center; margin-top:0.5rem; }
+.modal-small-print { font-size:0.55rem; color:#c8a84b33; max-width:55%; line-height:1.5; }
+.modal-btn { padding:0.6rem 1.2rem; font-family:‘Courier New’,monospace; font-size:0.75rem; letter-spacing:2px; border-radius:0; cursor:pointer; transition:all 0.2s; text-transform:uppercase; font-weight:bold; }
+.modal-btn-confirm { background:#c8a84b; border:2px solid #c8a84b; color:#000; }
+.modal-btn-confirm:hover { background:#d4b96a; border-color:#d4b96a; }
+.modal-divider { border:none; border-top:1px solid #c8a84b22; margin:1rem 0; }
+</style>
+
+</head>
+<body>
+
+<canvas id="starsCanvas"></canvas>
+
+<header>
+    <div class="nav-left">
+        <a href="dashboard.html" class="logo"><span>LEO</span><span>AF</span></a>
+    </div>
+    <div class="header-controls">
+        <span id="userEmail" class="user-id">AGENT</span>
+        <button id="logoffBtn" class="logoff-btn">ABORT</button>
+    </div>
+</header>
+
+<main class="dashboard">
+    <h1 class="welcome-msg">MISSION DASHBOARD</h1>
+
+```
+<div class="mission-control">
+    <div class="progress-header">
+        <h2>TRAINING PROGRESS</h2>
+        <span class="progress-stats" id="progressText">0%</span>
+    </div>
+    <div class="progress-track">
+        <div class="progress-fill" id="progressFill"></div>
+    </div>
+</div>
+
+<div class="module-list" id="moduleList">
+
+    <!-- YEAR 1 -->
+    <div class="year-header">
+        <div class="module-info">
+            <h3>Year 1 — Foundations (Months 1–12)</h3>
+            <p>Bridge GEO/aviation experience to dynamic LEO reality. Orbits, RF fundamentals, terminal engineering, networking, and security. First simulations & Python scripts.</p>
+        </div>
+    </div>
+
+    <a href="q1-connectivity.html" class="module-card" data-id="q1-connectivity">
+        <div class="check-wrapper" title="Mark as Completed"><div class="custom-checkbox"></div></div>
+        <div class="module-info">
+            <h3>Q1 — Connectivity Landscape & Satcom Refresh</h3>
+            <p>Human connectivity needs · Terrestrial baselines (fiber/5G limits) · GEO/MEO/LEO comparison · Multi-orbit hybrid architectures intro · Historical LEO failures (Iridium, Teledesic) · Aviation/maritime/rural pain points · Ground segment overview: gateways, teleports, PoPs, traffic flow end-to-end</p>
+            <div class="module-meta">
+                <span class="meta-months">MONTHS 1–3</span>
+                <span class="meta-hours">~60 HRS</span>
+            </div>
+        </div>
+    </a>
+
+    <a href="q2-orbital-mechanics.html" class="module-card" data-id="q2-orbital-mechanics">
+        <div class="check-wrapper" title="Mark as Completed"><div class="custom-checkbox"></div></div>
+        <div class="module-info">
+            <h3>Q2 — Orbital Mechanics & Constellation Design</h3>
+            <p>Kepler/Newton basics · Orbital elements · LEO dynamics (velocity, Doppler, ground tracks) · Visibility/revisit/handover · Walker Delta & polar patterns · SGP4/TLE intro · Constellation optimization (planes/inclination/altitude trades) · Coverage probability & revisit metrics · GMAT/Poliastro modeling · Regulatory basics intro (ITU/FCC)</p>
+            <div class="module-meta">
+                <span class="meta-months">MONTHS 4–6</span>
+                <span class="meta-hours">~80 HRS</span>
+            </div>
+        </div>
+    </a>
+
+    <a href="q3-link-budgets-phased-arrays.html" class="module-card" data-id="q3-link-budgets-phased-arrays">
+        <div class="check-wrapper" title="Mark as Completed"><div class="custom-checkbox"></div></div>
+        <div class="module-info">
+            <h3>Q3 — RF Link Budgets, Spectrum & Terminal Engineering</h3>
+            <p>Full link budget math (path loss, Eb/N0, rain fade) · Ka/Ku/V-band characteristics · Spectrum coordination & interference · EPFD limits · Adjacent satellite interference · ITU coordination deep dive · Spot beams & hopping · AESA theory (steering, grating lobes, calibration) · Aviation terminal constraints: SWaP, DO-160, radome & installation · LEO vs GEO terminal differences</p>
+            <div class="module-meta">
+                <span class="meta-months">MONTHS 7–9</span>
+                <span class="meta-hours">~90 HRS</span>
+            </div>
+        </div>
+    </a>
+
+    <a href="q4-networking-mobility.html" class="module-card" data-id="q4-networking-mobility">
+        <div class="check-wrapper" title="Mark as Completed"><div class="custom-checkbox"></div></div>
+        <div class="module-info">
+            <h3>Q4 — Networking, Mobility & Security</h3>
+            <p>Mesh vs bent-pipe · RF vs optical ISL intro · Handover mechanics · TCP/QUIC in mobility · SDN basics · 5G NTN overview · Predictive handovers for aircraft · Ground segment architecture deep dive · LEO security: signal spoofing, jamming, cyber threats · Encryption standards for aviation · Threat modeling for constellation operations</p>
+            <div class="module-meta">
+                <span class="meta-months">MONTHS 10–12</span>
+                <span class="meta-hours">~80 HRS</span>
+            </div>
+        </div>
+    </a>
+
+    <!-- YEAR 2 -->
+    <div class="year-header" style="margin-top:2.5rem;">
+        <div class="module-info">
+            <h3>Year 2 — Advanced Applications & Portfolio (Months 13–24)</h3>
+            <p>ISL routing, ground operations, fleet management, economics, regulatory depth, capstone projects and portfolio polish. Job-ready technical fluency.</p>
+        </div>
+    </div>
+
+    <a href="q5-isl-routing.html" class="module-card" data-id="q5-isl-routing">
+        <div class="check-wrapper" title="Mark as Completed"><div class="custom-checkbox"></div></div>
+        <div class="module-info">
+            <h3>Q5 — Inter-Satellite Networking & Routing</h3>
+            <p>Optical ISL physics & PAT (point, acquire, track) · SDN controllers in space · MPLS/Segment Routing · Latency-aware congestion control · End-to-end routing simulations · Fleet automation & FDIR concepts · Multi-orbit integration (hybrid LEO+GEO/MEO) · Latency comparison across hybrid topologies</p>
+            <div class="module-meta">
+                <span class="meta-months">MONTHS 13–15</span>
+                <span class="meta-hours">~90 HRS</span>
+            </div>
+        </div>
+    </a>
+
+    <a href="q6-ground-operations.html" class="module-card" data-id="q6-ground-operations">
+        <div class="check-wrapper" title="Mark as Completed"><div class="custom-checkbox"></div></div>
+        <div class="module-info">
+            <h3>Q6 — Ground Segment, Operations & Fleet Management</h3>
+            <p>Ground station network architecture, redundancy & diversity · TT&C (telemetry, tracking & command) deep dive · LEOP (Launch and Early Orbit Phase) · Anomaly resolution & FDIR · Day-to-day fleet operations · Spectrum management in operations · Gateway design & PoP placement optimization · Kessler syndrome & debris risk · Deorbit planning & compliance</p>
+            <div class="module-meta">
+                <span class="meta-months">MONTHS 16–18</span>
+                <span class="meta-hours">~70 HRS</span>
+            </div>
+        </div>
+    </a>
+
+    <a href="q7-economics-regs-project1.html" class="module-card" data-id="q7-economics-regs-project1">
+        <div class="check-wrapper" title="Mark as Completed"><div class="custom-checkbox"></div></div>
+        <div class="module-info">
+            <h3>Q7 — Economics, Regulations & Capstone #1</h3>
+            <p>CapEx/OpEx breakdown · Break-even & ARPU modeling · Spectrum coordination (ITU advanced) · Debris/Kessler policy · Regulatory landscape: FCC, OFCOM, national licensing · Capstone #1: Full constellation simulator repo with coverage plots, handover analysis & link budget outputs</p>
+            <div class="module-meta">
+                <span class="meta-months">MONTHS 19–21</span>
+                <span class="meta-hours">~70 HRS</span>
+            </div>
+        </div>
+    </a>
+
+    <a href="q8-capstone2-job-prep.html" class="module-card" data-id="q8-capstone2-job-prep">
+        <div class="check-wrapper" title="Mark as Completed"><div class="custom-checkbox"></div></div>
+        <div class="module-info">
+            <h3>Q8 — Capstone #2, Portfolio & Career Prep</h3>
+            <p>End-to-end aviation service case (latency/throughput/gateways/security) · Terminal selection trade study · Multi-orbit hybrid architecture paper · Portfolio refinement · Technical whitepapers & presentations · Mock interviews & first-principles prep</p>
+            <div class="module-meta">
+                <span class="meta-months">MONTHS 22–24</span>
+                <span class="meta-hours">~80 HRS</span>
+            </div>
+        </div>
+    </a>
+
+    <!-- ENDGAME -->
+    <div class="endgame-card">
+        <h3>Mission Endgame — Constellation Architect Ready</h3>
+        <p>Deep LEO fluency across orbital mechanics, RF engineering, terminal design, networking, security, ground operations and economics. Working orbit/handover/routing simulations. Portfolio with models, budgets, trade studies, whitepapers and capstone projects. Systems-level understanding of modern mega-constellations.</p>
+        <div class="endgame-total">~620 HOURS TOTAL · 24 MONTHS</div>
+    </div>
+
+</div>
+```
+
+</main>
+
+<!-- Brazil Password Reset Modal -->
+
+<div class="modal-overlay" id="resetModal">
+    <div class="modal-box">
+        <div class="modal-header-bar">
+            <span>Ministry of Information</span>
+            <span>Form 27B/6</span>
+        </div>
+        <div class="modal-body">
+            <div class="modal-form-ref">REF: CREDMOD/PWD/{{ USER }}/IMMEDIATE</div>
+            <div class="modal-stamp">CONFIDENTIAL</div>
+            <div class="modal-title">Credential Modification Request</div>
+            <div class="modal-subtitle">Central Services — Security Division</div>
+            <hr class="modal-divider">
+            <p class="modal-message">
+                Your identity token has been flagged for re-certification under
+                Directive 7.4 (Security Compliance). Please supply a replacement
+                access code below. Failure to comply may result in suspension
+                of information privileges. Have a pleasant day.
+            </p>
+            <label class="modal-field-label" for="newPassword">New Access Code</label>
+            <input class="modal-input" type="password" id="newPassword" placeholder="••••••••" />
+            <label class="modal-field-label" for="confirmPassword">Re-enter Access Code (Form Duplicate)</label>
+            <input class="modal-input" type="password" id="confirmPassword" placeholder="••••••••" />
+            <div class="modal-error" id="resetError"></div>
+            <hr class="modal-divider">
+            <div class="modal-footer">
+                <div class="modal-small-print">
+                    By submitting this form you acknowledge compliance with
+                    Information Control Act §14. Processing time: 6–8 working decades.
+                </div>
+                <button class="modal-btn modal-btn-confirm" id="resetSubmit">SUBMIT FORM</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Stars -->
+
+<script>
+const canvas = document.getElementById('starsCanvas');
+if (canvas) {
+    const ctx = canvas.getContext('2d');
+    let stars = [];
+    function init() {
+        canvas.width = window.innerWidth; canvas.height = window.innerHeight; stars = [];
+        for (let i = 0; i < 300; i++) stars.push({ x:Math.random()*canvas.width, y:Math.random()*canvas.height, size:Math.random()*1.2+0.3, speed:Math.random()*0.4+0.1 });
+    }
+    function animate() {
+        ctx.fillStyle='rgba(0,0,0,0.12)'; ctx.fillRect(0,0,canvas.width,canvas.height);
+        stars.forEach(s => { s.y+=s.speed; if(s.y>canvas.height) s.y=0; ctx.fillStyle='#fff'; ctx.fillRect(s.x,s.y,s.size,s.size); });
+        requestAnimationFrame(animate);
+    }
+    init(); animate(); window.addEventListener('resize', init);
+}
+</script>
+
+<!-- 1. Supabase CDN -->
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+<!-- 2. Supabase client init -->
+
+<script src="supabase.js"></script>
+
+<!-- 3. User progress functions -->
+
+<script src="user_progress.js"></script>
+
+<!-- 4. Dashboard logic -->
+
+<script>
+
+const modules = document.querySelectorAll('.module-card[data-id]');
+const progressFill = document.getElementById('progressFill');
+const progressText = document.getElementById('progressText');
+
+function updateProgressBar(completed, total) {
+    const percentage = Math.round((completed / total) * 100);
+    progressFill.style.width = percentage + '%';
+    progressText.innerText = `${percentage}% COMPLETE`;
+}
+
+async function loadProgress() {
+    const mastered = await getMasteredSections();
+    let completedCount = 0;
+    modules.forEach(card => {
+        const id = card.getAttribute('data-id');
+        if (mastered.includes(id)) { card.classList.add('completed'); completedCount++; }
+    });
+    updateProgressBar(completedCount, modules.length);
+}
+
+modules.forEach(card => {
+    const checkWrapper = card.querySelector('.check-wrapper');
+    if (!checkWrapper) return;
+    const id = card.getAttribute('data-id');
+    checkWrapper.addEventListener('click', async (e) => {
+        e.preventDefault();
+        const isNowCompleted = card.classList.toggle('completed');
+        await upsertSection(id, isNowCompleted);
+        const currentCompleted = document.querySelectorAll('.module-card[data-id].completed').length;
+        updateProgressBar(currentCompleted, modules.length);
+    });
+});
+
+// Password Reset Modal
+function showResetModal() { document.getElementById('resetModal').classList.add('active'); }
+
+document.getElementById('resetSubmit').addEventListener('click', async () => {
+    const newPassword = document.getElementById('newPassword').value;
+    const confirmPassword = document.getElementById('confirmPassword').value;
+    const errorEl = document.getElementById('resetError');
+    if (!newPassword || newPassword.length < 6) { errorEl.textContent = '⚠ Access code must be at least 6 characters.'; return; }
+    if (newPassword !== confirmPassword) { errorEl.textContent = '⚠ Access codes do not match. Please resubmit Form 27B/6.'; return; }
+    errorEl.textContent = '';
+    document.getElementById('resetSubmit').textContent = 'PROCESSING...';
+    const { error } = await client.auth.updateUser({ password: newPassword });
+    if (error) { errorEl.textContent = '⚠ ' + error.message; document.getElementById('resetSubmit').textContent = 'SUBMIT FORM'; return; }
+    document.getElementById('resetModal').classList.remove('active');
+    window.history.replaceState({}, document.title, window.location.pathname);
+});
+
+document.addEventListener('DOMContentLoaded', async () => {
+    const { data: { session } } = await client.auth.getSession();
+    if (!session) { window.location.href = "index.html"; return; }
+    const params = new URLSearchParams(window.location.search);
+    if (params.get('reset') === 'true') showResetModal();
+    const emailEl = document.getElementById('userEmail');
+    if (session.user.email) { emailEl.innerText = session.user.email.toUpperCase(); emailEl.style.display = 'block'; }
+    await loadProgress();
+});
+
+document.getElementById('logoffBtn').addEventListener('click', async () => {
+    await client.auth.signOut();
+    window.location.href = "index.html";
+});
+</script>
+
+</body>
+</html>
