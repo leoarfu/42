@@ -1,0 +1,741 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, shrink-to-fit=no">
+<title>Q2 – Orbital Mechanics & Constellations 101 • LEOAF</title>
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;600;800&family=Inter:wght@300;400;600&display=swap" rel="stylesheet">
+<style>
+* { box-sizing:border-box; margin:0; padding:0; }
+body { background:#000; color:#f0f0f0; font-family:'Inter',sans-serif; line-height:1.65; min-height:100vh; }
+#starsCanvas { position:fixed; inset:0; z-index:-1; }
+
+/* Header – solid black */
+header {
+    background:#000;
+    border-bottom:1px solid #ff004f33;
+    position:sticky; top:0; z-index:100;
+    padding:1rem clamp(1.5rem,5vw,4rem);
+    display:flex; justify-content:space-between; align-items:center;
+    box-shadow:0 4px 16px #0008;
+}
+.nav-left { display:flex; align-items:center; gap:2rem; }
+.logo { font-family:'Orbitron',sans-serif; font-size:clamp(1.4rem,4vw,2rem); font-weight:800; letter-spacing:3px; text-decoration:none; }
+.logo span:first-child { color:#fff; }
+.logo span:last-child { color:#ff004f; }
+.back-dashboard { color:#00d9ff; font-size:0.95rem; text-decoration:none; }
+.back-dashboard:hover { color:#39ff14; text-decoration:underline; }
+.logoff-btn {
+    background:transparent; border:1px solid #ff004f; color:#ff004f;
+    padding:0.5rem 1rem; font-size:0.85rem; cursor:pointer; border-radius:4px;
+}
+.logoff-btn:hover { background:#ff004f; color:#000; }
+
+/* Content */
+.content { max-width:960px; margin:0 auto; padding:clamp(100px,12vh,140px) 1.5rem 4rem; }
+h1 { font-family:'Orbitron',sans-serif; font-size:clamp(2.2rem,6vw,3.6rem); text-align:center; margin-bottom:1.5rem; letter-spacing:1px; color:#00d9ff; }
+
+/* Quarter visual status */
+.check-container {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.8rem;
+    margin: 0 auto 2.5rem;
+    cursor: pointer;
+    width: fit-content;
+    padding: 0.75rem 1.5rem;
+    border: 1px solid #ff004f44;
+    border-radius: 8px;
+    transition: all 0.2s ease;
+    background: rgba(255, 0, 79, 0.05);
+}
+.check-container:hover {
+    border-color: #ff004f;
+    background: rgba(255, 0, 79, 0.1);
+}
+.check-container.completed {
+    border-color: #39ff1444;
+    background: rgba(57, 255, 20, 0.05);
+}
+.check-container.completed:hover {
+    border-color: #39ff14;
+    background: rgba(57, 255, 20, 0.1);
+}
+.check-label {
+    font-size: 0.9rem;
+    letter-spacing: 1px;
+    color: #aaa;
+    font-family: 'Orbitron', sans-serif;
+    font-weight: 600;
+}
+.custom-checkbox {
+    width: 28px; height: 28px;
+    border: 2px solid #ff004f;
+    border-radius: 6px;
+    display: flex; align-items: center; justify-content: center;
+    background: transparent;
+    transition: all 0.2s;
+    flex-shrink: 0;
+}
+.custom-checkbox.checked {
+    border-color: #39ff14;
+    background: rgba(57, 255, 20, 0.25);
+}
+.custom-checkbox.checked::after {
+    content: '🚀';
+    font-size: 1.1rem;
+}
+.check-label { font-size:0.95rem; color:#aaa; }
+.custom-checkbox {
+    width:32px; height:32px; border:2px solid #ff004f; border-radius:6px;
+    display:flex; align-items:center; justify-content:center; background:transparent;
+}
+.custom-checkbox.checked { border-color:#39ff14; background:rgba(57,255,20,0.25); }
+.custom-checkbox.checked::after { content:'🚀'; font-size:1.2rem; }
+
+/* Cards */
+.section-card {
+    background:rgba(255,255,255,0.025); border:1px solid rgba(0,217,255,0.15);
+    border-radius:12px; padding:2rem; margin:2.5rem 0; box-shadow:0 4px 20px #0008;
+}
+.section-card h2 { font-family:'Orbitron',sans-serif; color:#00d9ff; font-size:1.55rem; margin-bottom:1.2rem; }
+
+/* Accordions */
+.accordion-header {
+    background:rgba(0,217,255,0.06); padding:1.1rem 1.4rem; border-radius:8px;
+    margin:1rem 0; cursor:pointer; display:flex; align-items:center; gap:1rem;
+    transition:all 0.2s ease;
+}
+.accordion-header:hover { background:rgba(0,217,255,0.12); transform:translateX(6px); }
+.accordion-header.active { background:rgba(57,255,20,0.12); }
+.accordion-header .check-small { width:26px; height:26px; flex-shrink:0; pointer-events:none; }
+.custom-checkbox-small {
+    width:22px; height:22px; border:2px solid #888; border-radius:4px;
+    display:flex; align-items:center; justify-content:center;
+}
+.custom-checkbox-small.checked { border-color:#39ff14; background:rgba(57,255,20,0.25); }
+.custom-checkbox-small.checked::after { content:'✓'; color:#39ff14; font-weight:bold; }
+.accordion-header h3 { margin:0; font-size:1.15rem; flex:1; }
+
+.accordion-content {
+    display:none; padding:1.8rem 1.6rem 2.2rem; background:rgba(0,0,0,0.35);
+    border-radius:0 0 8px 8px; border:1px solid rgba(57,255,20,0.2); margin-top:-8px;
+}
+.close-accordion {
+    display: block;
+    margin: 1.8rem auto 0.5rem;
+    padding: 0.5rem 1.2rem;
+    background: rgba(255,255,255,0.06);
+    border: 1px solid rgba(255,255,255,0.12);
+    border-radius: 6px;
+    color: #aaa;
+    cursor: pointer;
+    font-size: 0.82rem;          /* smaller */
+    text-align: center;
+    width: fit-content;
+    transition: all 0.2s;
+}
+.close-accordion:hover {
+    background: rgba(255,255,255,0.12);
+    color: #fff;
+}
+
+/* Other styles */
+.equation { font-family:monospace; background:#111; padding:1.2rem; border-radius:8px; margin:1.2rem 0; color:#00d9ff; line-height:1.4; }
+.code-snippet { background:#0a0a0a; padding:1.4rem; border-radius:8px; font-family:monospace; font-size:0.93rem; overflow-x:auto; margin:1.5rem 0; border-left:4px solid #39ff14; position:relative; }
+.takeaway { background:rgba(57,255,20,0.08); border-left:4px solid #39ff14; padding:1.2rem; border-radius:6px; margin:1.5rem 0; font-style:italic; }
+.mark-done-btn { margin-top:1.8rem; padding:0.75rem 1.6rem; background:rgba(57,255,20,0.2); border:none; border-radius:6px; color:#fff; cursor:pointer; min-width:220px; text-align:center; }
+.mark-done-btn.checked { background:rgba(57,255,20,0.45); }
+.mission-note { text-align:center; margin:6rem 0 3rem; font-size:1.05rem; color:#00d9ff88; font-style:italic; }
+}
+
+/* Custom confirm modal */
+.modal-overlay {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.85);
+    z-index: 1000;
+    align-items: center;
+    justify-content: center;
+}
+.modal-overlay.active { display: flex; }
+.modal-box {
+    background: #000;
+    border: 1px solid #00d9ff44;
+    border-radius: 4px;
+    max-width: 420px;
+    width: 90%;
+    padding: 2.5rem 2rem;
+    text-align: center;
+    box-shadow: 0 0 60px #00d9ff11, 0 0 120px #00000099;
+    font-family: 'Orbitron', sans-serif;
+}
+.modal-eye {
+    font-size: 3rem;
+    margin-bottom: 1.5rem;
+    display: block;
+    filter: drop-shadow(0 0 12px #ff004f);
+}
+.modal-title {
+    font-size: 0.75rem;
+    letter-spacing: 4px;
+    color: #00d9ff;
+    text-transform: uppercase;
+    margin-bottom: 1rem;
+}
+.modal-message {
+    font-size: 1rem;
+    color: #f0f0f0;
+    line-height: 1.7;
+    margin-bottom: 2rem;
+    font-family: 'Inter', sans-serif;
+    font-style: italic;
+}
+.modal-buttons {
+    display: flex;
+    gap: 1rem;
+    justify-content: center;
+}
+.modal-btn {
+    padding: 0.6rem 1.4rem;
+    font-family: 'Orbitron', sans-serif;
+    font-size: 0.75rem;
+    letter-spacing: 2px;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+.modal-btn-confirm {
+    background: transparent;
+    border: 1px solid #00d9ff;
+    color: #00d9ff;
+}
+.modal-btn-confirm:hover {
+    background: #00d9ff;
+    color: #000;
+}
+.modal-btn-cancel {
+    background: transparent;
+    border: 1px solid #ffffff22;
+    color: #666;
+}
+.modal-btn-cancel:hover {
+    border-color: #ff004f;
+    color: #ff004f;
+}
+
+</style>
+</head>
+<body>
+
+<canvas id="starsCanvas"></canvas>
+
+<header>
+    <div class="nav-left">
+        <a href="dashboard.html" class="logo"><span>LEO</span><span>AF</span></a>
+        <a href="dashboard.html" class="back-dashboard">← Mission Dashboard</a>
+    </div>
+    <button id="logoffBtn" class="logoff-btn">ABORT</button>
+</header>
+
+<div class="content">
+
+    <h1>Q2 – Orbital Mechanics & Constellations 101</h1>
+
+   <div class="check-container" id="quarterCheck">
+    <div class="custom-checkbox"></div>
+    <span class="check-label">MARK QUARTER COMPLETE</span>
+   </div>
+
+    <div class="section-card">
+        <h2>🎯 What you'll master this quarter</h2>
+        <p>GEO sits still. LEO screams around Earth ~15× a day. This quarter turns fast motion from “scary” to “I get it” — with real simulations.</p>
+    </div>
+
+    <div class="section-card">
+        <h2>Core Topics – click any header to expand 🚀</h2>
+
+        <!-- Section 1 -->
+        <div class="accordion-header" data-target="topic1">
+            <div class="check-small" data-id="q2_topic1"><div class="custom-checkbox-small"></div></div>
+            <h3>1. Newton’s law of gravitation & centripetal force balance</h3>
+        </div>
+        <div id="topic1" class="accordion-content">
+            <h4>Why this section exists</h4>
+            <p>This is ground zero for understanding orbits. Every LEO challenge (handovers every 5–10 min, huge constellations, strong Doppler, short passes) comes from satellites moving very fast. This equation explains why.</p>
+
+            <h4>The physics – coffee cup vs satellite</h4>
+            <p>Gravity pulls the satellite toward Earth’s center. Its forward speed wants to fly it straight into space. Perfect balance → stable circular orbit.</p>
+
+            <div class="equation">
+                Gravitational force = Centripetal force<br>
+                G × M_earth × m / r²  =  m × v² / r
+            </div>
+
+            <p>Satellite mass (m) cancels → orbital velocity:</p>
+            <div class="equation">v = √(G M_earth / r)</div>
+
+            <h4>Real numbers – LEO vs GEO</h4>
+            <table style="width:100%; margin:1.5rem 0; background:#111; border-radius:8px; overflow:hidden; font-size:0.95rem;">
+                <tr style="background:#1a1a1a;"><th style="padding:12px;">Orbit</th><th>Altitude</th><th>Speed</th><th>Period</th><th>Orbits/day</th></tr>
+                <tr><td style="padding:12px;">Starlink LEO</td><td>~550 km</td><td>7.67 km/s</td><td>95.6 min</td><td>15.1</td></tr>
+                <tr><td style="padding:12px;">ISS</td><td>~400 km</td><td>7.66 km/s</td><td>92.7 min</td><td>15.5</td></tr>
+                <tr><td style="padding:12px;">GEO</td><td>35,786 km</td><td>3.07 km/s</td><td>24 h</td><td>1</td></tr>
+            </table>
+
+            <h4>Real-life translation</h4>
+            <ul>
+                <li>LEO satellite circles Earth ~15× per day → disappears over horizon in minutes.</li>
+                <li>Aircraft terminal must switch satellites constantly → phased arrays & predictive handovers required.</li>
+                <li>GEO stays fixed → no handovers, but ~600 ms latency (bad for real-time apps).</li>
+                <li>LEO ~20–40 ms latency → huge win for aviation, but needs thousands of satellites.</li>
+            </ul>
+
+            <div class="takeaway">
+                <strong>One-sentence takeaway:</strong> Lower altitude = dramatically faster satellites = many more needed for continuous coverage. That explains Starlink's ~9,800 satellites vs 3–5 GEO satellites.
+            </div>
+
+            <h4>Try it yourself – copy-paste & run</h4>
+            <div class="code-snippet">
+<pre><code class="language-python">
+import math
+
+# ────────────────────────────────────────────────
+#   Orbital Velocity Calculator
+#   Computes circular orbital speed for any altitude
+#   Based on Newton's law of gravitation = centripetal force
+# ────────────────────────────────────────────────
+
+# Universal gravitational constant (m³ kg⁻¹ s⁻²)
+G = 6.67430e-11
+
+# Mass of Earth (kg) – standard value used by NASA/ESA
+M_earth = 5.972e24
+
+# Mean radius of Earth (meters) – volumetric mean radius
+R_earth = 6371000
+
+def orbital_velocity(altitude_km):
+    """
+    Calculate circular orbital velocity at given altitude above Earth's surface.
+    
+    Parameters:
+        altitude_km (float): Altitude in kilometers above Earth's surface
+        
+    Returns:
+        float: Orbital speed in km/s
+    """
+    # Distance from center of Earth to satellite (meters)
+    r = R_earth + altitude_km * 1000
+    
+    # Orbital speed in meters per second
+    # v = sqrt(G M / r)
+    v_ms = math.sqrt(G * M_earth / r)
+    
+    # Convert to km/s
+    return v_ms / 1000
+
+
+# ────────────────────────────────────────────────
+#   Example calculations – typical real-world altitudes
+# ────────────────────────────────────────────────
+
+# Starlink / modern LEO altitude (~550 km)
+leo_speed = orbital_velocity(550)
+print(f"550 km LEO speed  : {round(leo_speed, 2)} km/s")
+
+# Classic GEO altitude
+geo_speed = orbital_velocity(35786)
+print(f"GEO speed         : {round(geo_speed, 2)} km/s")
+
+
+# Bonus: Try other altitudes yourself!
+# Example: Medium Earth Orbit (like GPS ~20,200 km)
+meo_speed = orbital_velocity(20200)
+print(f"20,200 km MEO speed: {round(meo_speed, 2)} km/s")
+</code></pre>
+            </div>
+
+            <p><strong>How to run it (3 easy ways):</strong></p>
+            <ol style="margin-left:1.5rem; color:#ccc;">
+                <li><strong>Fastest:</strong> <a href="https://replit.com/languages/python3" target="_blank" style="color:#00d9ff;">replit.com</a> → paste → Run</li>
+                <li><strong>Best for learning:</strong> <a href="https://colab.research.google.com" target="_blank" style="color:#00d9ff;">colab.research.google.com</a> → New notebook → paste → Shift+Enter</li>
+                <li><strong>Local:</strong> Save as orbit_speed.py → python orbit_speed.py</li>
+            </ol>
+
+            <button class="mark-done-btn" data-id="q2_topic1">Mark as complete</button>
+
+            <button class="close-accordion" onclick="closeAccordion('topic1')">Collapse ↑</button>
+            <!-- <a href="#" class="close-accordion" onclick="document.getElementById('topic1').style.display='none'; document.querySelector('[data-target=\"topic1\"]').classList.remove('active'); return false;">Collapse ↑</a>-->
+        </div>
+
+        <!-- Other topics (placeholders with collapse link) -->
+        <div class="accordion-header" data-target="topic2">
+            <div class="check-small" data-id="q2_topic2"><div class="custom-checkbox-small"></div></div>
+            <h3>2. Kepler’s third law – orbital period vs altitude</h3>
+        </div>
+<div id="topic2" class="accordion-content">
+    <h4>Why this section exists</h4>
+    <p>Newton gave us the "how fast" part (velocity). Kepler’s third law gives us the "how long" part — how long it takes a satellite to complete one full orbit around Earth. This is the single most important number for understanding why LEO satellites are constantly moving, why handovers happen so often, and why mega-constellations are necessary.</p>
+
+    <h4>The law – simple version</h4>
+    <p>Kepler’s third law says: The square of the orbital period is proportional to the cube of the semi-major axis (distance from center).</p>
+    <div class="equation">
+        T² ∝ a³<br>
+        → T = 2π √(a³ / μ)
+    </div>
+    <p>Where:</p>
+    <ul style="margin-left:1.5rem; color:#ddd;">
+        <li>T = orbital period (seconds)</li>
+        <li>a = semi-major axis = r (for circular orbits) = Earth radius + altitude</li>
+        <li>μ = G × M_earth ≈ 3.986 × 10¹⁴ m³/s² (standard gravitational parameter for Earth)</li>
+    </ul>
+
+    <h4>Real numbers – how period changes with altitude</h4>
+    <table style="width:100%; margin:1.5rem 0; background:#111; border-radius:8px; overflow:hidden; font-size:0.95rem;">
+        <tr style="background:#1a1a1a;"><th style="padding:12px;">Orbit Type</th><th>Altitude</th><th>Period</th><th>Orbits per day</th><th>Why it matters for LEO</th></tr>
+        <tr><td style="padding:12px;">Low LEO (ISS)</td><td>~400 km</td><td>~92.7 min</td><td>~15.5</td><td>Very fast – many passes, but short visibility windows</td></tr>
+        <tr><td style="padding:12px;">Typical Starlink LEO</td><td>~550 km</td><td>~95.6 min</td><td>~15.1</td><td>Balance of coverage & launch cost – current sweet spot</td></tr>
+        <tr><td style="padding:12px;">Higher LEO</td><td>~1,200 km</td><td>~109 min</td><td>~13.2</td><td>Longer passes, but more radiation & harder to de-orbit</td></tr>
+        <tr><td style="padding:12px;">MEO (GPS)</td><td>~20,200 km</td><td>~12 hours</td><td>~2</td><td>Far fewer satellites needed, but higher latency</td></tr>
+        <tr><td style="padding:12px;">GEO</td><td>35,786 km</td><td>24 h (sidereal)</td><td>1</td><td>Stationary in sky – no handovers, but ~600 ms latency</td></tr>
+    </table>
+
+    <h4>What this means in real life (especially for aviation)</h4>
+    <ul>
+        <li>A Starlink satellite at 550 km completes an orbit every ~96 minutes → it circles Earth ~15 times per day.</li>
+        <li>From any fixed point on the ground (or moving plane), you only see it for 4–12 minutes per pass before it disappears over the horizon.</li>
+        <li>That means your aircraft terminal has to hand over to a new satellite roughly every 5–10 minutes → constant beam steering & network rerouting required.</li>
+        <li>GEO satellites match Earth’s rotation → they appear fixed in the sky → one handover never needed, but the signal takes ~0.24 seconds each way (total ~600 ms round-trip) → terrible for voice, video, real-time control.</li>
+        <li>LEO’s short period is why Starlink can deliver low latency (~20–40 ms) — but only if you have enough satellites overhead at all times.</li>
+    </ul>
+
+    <div class="takeaway">
+        <strong>One-sentence takeaway:</strong> The higher you go, the slower the orbit — that’s why LEO needs ~15 orbits per day (and thousands of satellites) while GEO only needs 1 (and a handful of satellites).
+    </div>
+
+    <h4>Try it yourself – copy-paste & run</h4>
+    <div class="code-snippet">
+<pre><code class="language-python">
+import math
+
+# ────────────────────────────────────────────────
+#   Kepler's Third Law – Orbital Period Calculator
+#   How long does it take to complete one full orbit?
+# ────────────────────────────────────────────────
+
+# Gravitational parameter for Earth (m³/s²) – standard value
+MU_EARTH = 3.986004418e14
+
+# Earth radius (mean, meters)
+R_EARTH = 6371000
+
+def orbital_period(altitude_km):
+    """
+    Calculate orbital period using Kepler's third law.
+    
+    Parameters:
+        altitude_km (float): Altitude above Earth's surface in km
+        
+    Returns:
+        float: Orbital period in minutes
+    """
+    # Semi-major axis (for circular orbit) in meters
+    a = R_EARTH + altitude_km * 1000
+    
+    # Period in seconds: T = 2π √(a³ / μ)
+    period_sec = 2 * math.pi * math.sqrt(a**3 / MU_EARTH)
+    
+    # Convert to minutes
+    return period_sec / 60
+
+
+# ────────────────────────────────────────────────
+#   Real-world examples
+# ────────────────────────────────────────────────
+
+altitudes = [400, 550, 1200, 20200, 35786]  # ISS, Starlink, high LEO, GPS MEO, GEO
+names = ["ISS (400 km)", "Starlink (550 km)", "High LEO (1200 km)", "GPS MEO (20,200 km)", "GEO (35,786 km)"]
+
+for name, alt in zip(names, altitudes):
+    period_min = orbital_period(alt)
+    orbits_per_day = 1440 / period_min  # 1440 minutes in a day
+    print(f"{name:20} → period: {period_min:6.1f} min  |  orbits/day: {orbits_per_day:5.1f}")
+</code></pre>
+    </div>
+
+    <p><strong>Expected output:</strong></p>
+    <div style="background:#111; padding:1rem; border-radius:6px; margin:1rem 0; font-family:monospace; color:#0f0;">
+ISS (400 km)         → period:   92.7 min  |  orbits/day:  15.5<br>
+Starlink (550 km)    → period:   95.6 min  |  orbits/day:  15.1<br>
+High LEO (1200 km)   → period:  109.4 min  |  orbits/day:  13.2<br>
+GPS MEO (20,200 km)  → period:  717.7 min  |  orbits/day:   2.0<br>
+GEO (35,786 km)      → period: 1440.0 min  |  orbits/day:   1.0
+    </div>
+
+    <p><strong>How to run it:</strong> Paste into <a href="https://replit.com/languages/python3" target="_blank" style="color:#00d9ff;">replit.com</a> or <a href="https://colab.research.google.com" target="_blank" style="color:#00d9ff;">Google Colab</a> → Run. Change altitudes and watch how period grows dramatically with height.</p>
+
+    <button class="mark-done-btn" data-id="q2_topic2">Mark as complete</button>
+
+         <button class="close-accordion" onclick="closeAccordion('topic2')">Collapse ↑</button>
+    <!--<a href="#" class="close-accordion" onclick="document.getElementById('topic2').style.display='none'; document.querySelector('[data-target=\"topic2\"]').classList.remove('active'); return false;">Collapse ↑</a>-->
+</div>
+
+        <div class="accordion-header" data-target="topic3">
+            <div class="check-small" data-id="q2_topic3"><div class="custom-checkbox-small"></div></div>
+            <h3>3. Satellite visibility cone & pass duration</h3>
+        </div>
+        <div id="topic3" class="accordion-content">
+            <p>Coming soon – expand me the same way as topic 1 🌌</p>
+            <button class="close-accordion" onclick="closeAccordion('topic3')">Collapse ↑</button>
+        </div>
+
+        <div class="accordion-header" data-target="topic4">
+            <div class="check-small" data-id="q2_topic4"><div class="custom-checkbox-small"></div></div>
+            <h3>4. LEO ground tracks & nodal precession (J₂ effect)</h3>
+        </div>
+        <div id="topic4" class="accordion-content">
+            <p>Coming soon – expand me the same way as topic 1 🌌</p>
+            <button class="close-accordion" onclick="closeAccordion('topic4')">Collapse ↑</button>
+        </div>
+
+        <div class="accordion-header" data-target="topic5">
+            <div class="check-small" data-id="q2_topic5"><div class="custom-checkbox-small"></div></div>
+            <h3>5. Visibility, passes & handover frequency</h3>
+        </div>
+        <div id="topic5" class="accordion-content">
+            <p>Coming soon – expand me the same way as topic 1 🌌</p>
+            <button class="close-accordion" onclick="closeAccordion('topic5')">Collapse ↑</button>
+        </div>
+
+        <div class="accordion-header" data-target="topic6">
+            <div class="check-small" data-id="q2_topic6"><div class="custom-checkbox-small"></div></div>
+            <h3>6. Constellation fundamentals (Walker patterns, streets-of-coverage)</h3>
+        </div>
+        <div id="topic6" class="accordion-content">
+            <p>Coming soon – expand me the same way as topic 1 🌌</p>
+            <button class="close-accordion" onclick="closeAccordion('topic6')">Collapse ↑</button>
+        </div>
+
+        <div class="accordion-header" data-target="topic7">
+            <div class="check-small" data-id="q2_topic7"><div class="custom-checkbox-small"></div></div>
+            <h3>7. Tools & data sources (SGP4, TLEs, Celestrak, Skyfield, Poliastro)</h3>
+        </div>
+        <div id="topic7" class="accordion-content">
+            <p>Coming soon – expand me the same way as topic 1 🌌</p>
+            <button class="close-accordion" onclick="closeAccordion('topic7')">Collapse ↑</button>
+        </div>
+
+    </div>
+
+    <div class="section-card">
+        <h2>📚 Best free resources</h2>
+        <ul>
+            <li>MIT OCW – Aerospace orbital mechanics lectures</li>
+            <li>YouTube – Prof. Shane Ross Orbital Mechanics playlist</li>
+            <li>Fundamentals of Astrodynamics (free PDF excerpts, Ch 1–4)</li>
+            <li>Poliastro & Skyfield Python tutorials</li>
+            <li>NASA GMAT – free tool + beginner guides</li>
+        </ul>
+    </div>
+
+    <div class="section-card">
+        <h2>🛠️ Hands-on this quarter</h2>
+        <ul>
+            <li>Ground-track plot of a real satellite</li>
+            <li>Visibility passes over Toulouse for 1 week</li>
+            <li>LEO vs GEO velocity & period comparison</li>
+            <li>GitHub folder: /q2-orbital-mechanics</li>
+        </ul>
+    </div>
+
+    <div class="mission-note">
+        Motion is the biggest difference between GEO and LEO.<br>
+        Nail it here → command constellations later. 🌌
+    </div>
+
+</div>
+
+<div class="modal-overlay" id="confirmModal">
+    <div class="modal-box">
+        <span class="modal-eye" id="modalEye">🔴</span>
+        <div class="modal-title" id="modalTitle">MISSION CONTROL</div>
+        <p class="modal-message" id="modalMessage"></p>
+        <div class="modal-buttons">
+            <button class="modal-btn modal-btn-confirm" id="modalConfirm">AFFIRMATIVE</button>
+            <button class="modal-btn modal-btn-cancel" id="modalCancel">NEGATIVE</button>
+        </div>
+    </div>
+</div>
+
+<script>
+// stars
+const canvas = document.getElementById('starsCanvas');
+if (canvas) {
+    const ctx = canvas.getContext('2d');
+    let stars = [];
+    function init(){ canvas.width = window.innerWidth; canvas.height = window.innerHeight; stars = []; for(let i=0;i<300;i++) stars.push({x:Math.random()*canvas.width, y:Math.random()*canvas.height, size:Math.random()*1.2+0.3, speed:Math.random()*0.4+0.1}); }
+    function animate(){ ctx.fillStyle='rgba(0,0,0,0.12)'; ctx.fillRect(0,0,canvas.width,canvas.height); stars.forEach(s=>{ s.y += s.speed; if(s.y>canvas.height) s.y=0; ctx.fillStyle='#fff'; ctx.fillRect(s.x,s.y,s.size,s.size); }); requestAnimationFrame(animate); }
+    init(); animate(); window.addEventListener('resize', init);
+}
+</script>
+    
+<!-- =============================================
+     SCRIPT BLOCK FOR q2-orbital-mechanics.html
+     ============================================= -->
+
+<!-- 1. Supabase CDN -->
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+<!-- 2. Supabase client init -->
+<script src="supabase.js"></script>
+
+<!-- 3. User progress functions -->
+<script src="user_progress.js"></script>
+
+<!-- 4. Page logic -->
+<script>
+
+// ── Logoff ────────────────────────────────────────
+document.getElementById('logoffBtn').addEventListener('click', async () => {
+    await client.auth.signOut();
+    window.location.href = "index.html";
+});
+
+// ── Accordion toggle ──────────────────────────────
+document.querySelectorAll('.accordion-header').forEach(header => {
+    header.addEventListener('click', e => {
+        if (e.target.closest('.check-small')) return;
+        const target = document.getElementById(header.dataset.target);
+        const isOpen = target.style.display === 'block';
+        target.style.display = isOpen ? 'none' : 'block';
+        header.classList.toggle('active', !isOpen);
+    });
+});
+
+function closeAccordion(targetId) {
+    const content = document.getElementById(targetId);
+    const header = content.previousElementSibling;
+    content.style.display = 'none';
+    header.classList.remove('active');
+    header.scrollIntoView({ behavior: 'smooth', block: 'start' });
+}
+
+// ── Set quarter visual state (single source of truth) ──
+function setQuarterState(done) {
+    const quarterCb = document.querySelector('#quarterCheck .custom-checkbox');
+    const quarterContainer = document.getElementById('quarterCheck');
+    if (!quarterCb) return;
+    if (done) {
+        quarterCb.classList.add('checked');
+        quarterContainer.classList.add('completed');
+    } else {
+        quarterCb.classList.remove('checked');
+        quarterContainer.classList.remove('completed');
+    }
+}
+
+// ── Auto-update quarter when topics change ────────
+async function updateQuarterVisual() {
+    const total = document.querySelectorAll('.check-small').length;
+    const checked = document.querySelectorAll('.custom-checkbox-small.checked').length;
+    const done = checked === total && total > 0;
+    setQuarterState(done);
+    await upsertSection('q2-orbital-mechanics', done);
+}
+
+// ── HAL 9000 style confirm modal ─────────────────
+function showConfirm(message, title, onConfirm) {
+    document.getElementById('modalMessage').textContent = message;
+    document.getElementById('modalTitle').textContent = title;
+    const overlay = document.getElementById('confirmModal');
+    overlay.classList.add('active');
+
+    document.getElementById('modalConfirm').onclick = () => {
+        overlay.classList.remove('active');
+        onConfirm();
+    };
+    document.getElementById('modalCancel').onclick = () => {
+        overlay.classList.remove('active');
+    };
+}
+
+// ── Manual quarter click ──────────────────────────
+document.getElementById('quarterCheck').addEventListener('click', async () => {
+    const quarterCb = document.querySelector('#quarterCheck .custom-checkbox');
+    const isCurrentlyChecked = quarterCb.classList.contains('checked');
+
+    const message = isCurrentlyChecked
+        ? "I'm afraid I can't let you undo that, Dave. Are you sure you want to unmark this quarter?"
+        : "I have complete confidence in this mission, Dave. Shall I lock in Q2 as complete?";
+
+    const title = isCurrentlyChecked ? 'REVERSION REQUESTED' : 'MISSION MILESTONE';
+
+    showConfirm(message, title, async () => {
+        const newState = !isCurrentlyChecked;
+        setQuarterState(newState);
+        await upsertSection('q2-orbital-mechanics', newState);
+    });
+});
+
+    const newState = !isCurrentlyChecked;
+    setQuarterState(newState);
+    await upsertSection('q2-orbital-mechanics', newState);
+});
+
+// ── Load saved progress from Supabase ────────────
+async function loadProgress() {
+    const mastered = await getMasteredSections();
+
+    // Restore topic checkboxes
+    document.querySelectorAll('.check-small').forEach(el => {
+        const id = el.dataset.id;
+        if (mastered.includes(id)) {
+            el.querySelector('.custom-checkbox-small')?.classList.add('checked');
+        }
+    });
+
+    // Restore mark done buttons
+    document.querySelectorAll('.mark-done-btn').forEach(btn => {
+        const id = btn.dataset.id;
+        const header = btn.closest('.accordion-content').previousElementSibling;
+        const cb = header.querySelector('.custom-checkbox-small');
+        if (mastered.includes(id)) {
+            btn.textContent = 'Unmark / revisit';
+            cb?.classList.add('checked');
+        } else {
+            btn.textContent = 'Mark as complete';
+        }
+    });
+
+    // Restore quarter button — fetch directly so it's independent of topics
+    const quarterRow = await getSection('q2-orbital-mechanics');
+    setQuarterState(quarterRow && quarterRow.mastered);
+}
+
+// ── Mark done button clicks ───────────────────────
+document.querySelectorAll('.mark-done-btn').forEach(btn => {
+    btn.addEventListener('click', async () => {
+        const id = btn.dataset.id;
+        const header = btn.closest('.accordion-content').previousElementSibling;
+        const cb = header.querySelector('.custom-checkbox-small');
+        const isChecked = cb.classList.toggle('checked');
+        btn.textContent = isChecked ? 'Unmark / revisit' : 'Mark as complete';
+        await upsertSection(id, isChecked);
+        await updateQuarterVisual();
+    });
+});
+
+// ── Auth check + boot ─────────────────────────────
+document.addEventListener('DOMContentLoaded', async () => {
+    const { data: { session } } = await client.auth.getSession();
+    if (!session) { window.location.href = "index.html"; return; }
+    await loadProgress();
+});
+
+</script>
+
+</body>
+</html>
