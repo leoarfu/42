@@ -102,6 +102,13 @@ h1 { font-family:'Orbitron',sans-serif; font-size:clamp(2.2rem,6vw,3.6rem); text
 .mark-done-btn { margin-top:1.8rem; padding:0.75rem 1.6rem; background:rgba(57,255,20,0.2); border:none; border-radius:6px; color:#fff; cursor:pointer; min-width:220px; text-align:center; }
 .mark-done-btn.checked { background:rgba(57,255,20,0.45); }
 .mission-note { text-align:center; margin:6rem 0 3rem; font-size:1.05rem; color:#00d9ff88; font-style:italic; }
+
+.check-container {
+    position:absolute; top:clamp(110px,13vh,150px); right:1.5rem;
+    display:flex; align-items:center; gap:0.8rem;
+    cursor:pointer;  /* ← change pointer-events:none to this */
+}
+
 </style>
 </head>
 <body>
@@ -487,7 +494,7 @@ function closeAccordion(targetId) {
     header.scrollIntoView({ behavior: 'smooth', block: 'start' });
 }
 
-// ── Quarter visual (rocket appears when all topics done) ──
+// ── Quarter visual ────────────────────────────────
 async function updateQuarterVisual() {
     const total = document.querySelectorAll('.check-small').length;
     const checked = document.querySelectorAll('.custom-checkbox-small.checked').length;
@@ -501,6 +508,23 @@ async function updateQuarterVisual() {
         await upsertSection('q2-orbital-mechanics', false);
     }
 }
+
+// ── Manual quarter click with warning ────────────
+document.getElementById('quarterCheck').addEventListener('click', async () => {
+    const quarterCb = document.querySelector('#quarterCheck .custom-checkbox');
+    const isCurrentlyChecked = quarterCb.classList.contains('checked');
+
+    const message = isCurrentlyChecked
+        ? 'Unmark this quarter as complete? This will overwrite your current progress status.'
+        : 'Mark this entire quarter as complete? This will overwrite your current progress status.';
+
+    const confirmed = confirm(message);
+    if (!confirmed) return;
+
+    const newState = !isCurrentlyChecked;
+    quarterCb.classList.toggle('checked', newState);
+    await upsertSection('q2-orbital-mechanics', newState);
+});
 
 // ── Load saved progress from Supabase ────────────
 async function loadProgress() {
