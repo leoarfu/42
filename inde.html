@@ -1,0 +1,277 @@
+<!DOCTYPE html>
+
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, shrink-to-fit=no">
+<title>LEO Architecture Fundamentals - LEOAF</title>
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;600;800&display=swap" rel="stylesheet">
+
+<!-- Favicons -->
+
+<link rel="icon" href="favicon.ico" sizes="any" type="image/x-icon">
+<link rel="icon" href="favicon.svg" type="image/svg+xml">
+<link rel="icon" type="image/png" sizes="96x96" href="favicon-96x96.png">
+<link rel="apple-touch-icon" sizes="180x180" href="apple-touch-icon.png">
+<link rel="manifest" href="site.webmanifest">
+
+<meta name="theme-color" content="#0f0f0f">
+
+<style>
+* { box-sizing: border-box; margin:0; padding:0; }
+html { height: 100%; -webkit-text-size-adjust: 100%; }
+body {
+    font-family: 'Orbitron', sans-serif;
+    background: #000; color: white;
+    overflow-x: hidden; position: relative;
+    min-height: 100vh; 
+    min-height: calc(var(--vh, 1vh) * 100);
+}
+#starsCanvas { position: fixed; top:0; left:0; width:100%; height:100%; z-index:-1; }
+
+/* ---------- HEADER ---------- */
+header { display: flex; justify-content: space-between; align-items: center; padding: 18px clamp(20px, 5vw, 60px); }
+.logo { font-weight: 800; font-size: clamp(18px, 2vw, 24px); letter-spacing: 3px; }
+.logo span:first-child { color: white; }
+.logo span:last-child { color: #ff004f; }
+header button { background: transparent; border: 1px solid #ff004f; color: #ff004f; padding: 6px 14px; margin-left: 8px; cursor: pointer; transition: 0.3s ease; font-size: 12px; }
+header button:hover { background: #ff004f; color: black; }
+
+/* ---------- HERO ---------- */
+.hero { text-align: center; padding: clamp(40px, 6vw, 70px) 20px 40px; position: relative; z-index: 1; min-height: 60vh; display: flex; flex-direction: column; justify-content: center; }
+.hero h1 { font-size: clamp(26px, 5vw, 44px); margin-bottom: 20px; font-weight: 800; }
+.hero p { max-width: 650px; margin: auto; font-size: 15px; line-height: 1.5; opacity: 0; transform: translateY(15px); animation: fadeUpIn 1.2s ease-out forwards; animation-delay: 0.5s; }
+@keyframes fadeUpIn { 0% { opacity: 0; transform: translateY(15px); } 100% { opacity: 0.85; transform: translateY(0); } }
+@media (max-height: 500px) and (orientation: landscape) { .hero { padding-top: 20px; min-height: auto; } .hero h1 { font-size: 28px; } .invader { font-size: 20px; top: 80%; } }
+
+.lightning { width: clamp(60px, 6vw, 110px); margin: 0 auto 18px; display: block; animation: boltGlow 3s ease-in-out infinite; }
+@keyframes boltGlow { 0% { filter: drop-shadow(0 0 8px #ff004f); } 50% { filter: drop-shadow(0 0 20px #00d9ff); } 100% { filter: drop-shadow(0 0 8px #ff004f); } }
+
+.invader { position: fixed; font-size: clamp(26px, 3vw, 40px); top: 40%; left: -50px; animation: orbitDrift 25s linear infinite; }
+@keyframes orbitDrift { 0% { transform: translate(0, -20px); } 25% { transform: translate(30vw, -60px); } 50% { transform: translate(65vw, 10px); } 75% { transform: translate(40vw, 60px); } 100% { transform: translate(110vw, -10px); } }
+.invader-inner { display: inline-block; transform-origin: center; }
+
+/* ---------- CURRICULUM ---------- */
+.curriculum { max-width: 1000px; margin: 30px auto; padding: 0 20px; position: relative; z-index: 1; }
+.phase-card { background: rgba(255,255,255,0.05); padding: 18px; margin-bottom: 12px; border-left: 3px solid #ff004f; transition: 0.3s ease; }
+.phase-card:hover { background: rgba(0,217,255,0.15) !important; transform: translateX(4px); }
+.phase-card h3 { margin: 0 0 6px; font-size: 15px; color: #00d9ff; letter-spacing: 1.2px; text-transform: uppercase; }
+.phase-card p { margin: 0; font-size: 13px; opacity: 0.9; line-height: 1.45; }
+
+/* ---------- FOOTER ---------- */
+footer { text-align: center; padding: 30px; opacity: 0.4; font-size: 12px; position: relative; z-index: 1; }
+
+/* ---------- AUTH MODAL ---------- */
+.auth-btn { background: transparent; border: 1px solid #ff004f; color: #ff004f; padding: 8px 18px; font-size: 12px; margin: 8px 6px; cursor: pointer; transition: 0.3s ease; letter-spacing: 1px; }
+.auth-btn:hover { background: #ff004f; color: black; }
+.password-wrapper { position: relative; width: 100%; }
+.input-wrapper { width: 100%; margin-bottom: 15px; }
+.input-wrapper input, .password-wrapper input { width: 100%; padding: 12px 40px 12px 12px; background: rgba(0, 0, 0, 0.7); border: 1.5px solid #ffffff; color: white; font-family: 'Orbitron', sans-serif; font-size: 16px !important; outline: none; transition: all 0.3s ease; }
+.input-wrapper input:focus, .password-wrapper input:focus { border-color: #39ff14; box-shadow: 0 0 10px rgba(57, 255, 20, 0.5); }
+#togglePassword { position: absolute; right: 12px; top: 50%; transform: translateY(-50%); font-size: 26px; cursor: pointer; opacity: 0.7; transition: 0.2s ease; user-select: none; z-index: 5; }
+#togglePassword:hover { opacity: 1; transform: translateY(-50%) scale(1.1); }
+.modal-backdrop { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.9); justify-content: center; align-items: flex-start; overflow-y: auto; padding: 20px; z-index: 10; }
+.modal-lodge-container { background-color: #111; background-image: url("data:image/svg+xml,%3Csvg width='100' height='50' viewBox='0 0 100 50' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M0 50 L25 10 L50 50 L75 10 L100 50' fill='none' stroke='%23ffffff' stroke-width='2.5' stroke-linecap='square'/%3E%3C/svg%3E"); background-size: 60px 30px; padding: 40px 30px 30px; border: 2px solid #ffffff; max-width: 360px; width: 100%; text-align: center; position: relative; box-shadow: 0 0 20px rgba(255, 255, 255, 0.3); animation: electric-flow 0.4s linear infinite; margin: auto; margin-top: 10vh; max-height: 85vh; overflow-y: auto; scrollbar-width: none; }
+.modal-lodge-container::-webkit-scrollbar { display: none; }
+.modal-lodge-container::before { content: ''; position: absolute; top: 0; left: 0; right: 0; bottom: 0; background: rgba(10, 10, 10, 0.85); z-index: 1; }
+.modal-lodge-container > * { position: relative; z-index: 2; }
+@keyframes electric-flow { 0% { background-position: 0px 0px; filter: brightness(1); } 25% { background-position: 15px 1px; filter: brightness(1.2); } 50% { background-position: 30px -1px; filter: brightness(0.9); box-shadow: 0 0 25px rgba(255, 255, 255, 0.6); } 75% { background-position: 45px 2px; filter: brightness(1.4); } 100% { background-position: 60px 0px; filter: brightness(1); } }
+.twin-peaks-btn { margin-top: 20px; padding: 10px 20px; background: transparent; border: none; color: #39ff14; font-size: 28px; font-weight: 900; font-family: 'Arial', sans-serif; letter-spacing: 2px; text-transform: uppercase; cursor: pointer; -webkit-text-stroke: 1.5px #a04000; text-shadow: 2px 2px 4px rgba(0,0,0,0.9), 0 0 10px rgba(57, 255, 20, 0.3); transition: transform 0.2s ease, text-shadow 0.2s ease; }
+.twin-peaks-btn:hover { transform: scale(1.05); text-shadow: 2px 2px 4px rgba(0,0,0,0.9), 0 0 20px rgba(57, 255, 20, 0.8); }
+.close-btn { position: absolute; top: 10px; right: 15px; background: transparent; border: none; color: #ffffff; font-size: 24px; cursor: pointer; z-index: 3; transition: 0.2s ease; }
+.close-btn:hover { transform: scale(1.2); color: #ff004f; }
+</style>
+
+</head>
+<body>
+
+<canvas id="starsCanvas"></canvas>
+
+<header>
+    <div class="logo"><span>LEO</span><span>AF</span></div>
+    <div>
+        <button id="launchBtn">BLAST-OFF</button>
+    </div>
+</header>
+
+<section class="hero">
+    <h1>LEO Architecture Fundamentals</h1>
+    <svg class="lightning" viewBox="0 0 120 220">
+        <polygon points="70,0 30,110 65,110 40,220 100,95 60,95" fill="url(#grad)" />
+        <defs>
+            <linearGradient id="grad" x1="0%" y1="0%" x2="0%" y2="100%">
+                <stop offset="0%" style="stop-color:#ff004f"/>
+                <stop offset="50%" style="stop-color:#ff004f"/>
+                <stop offset="50%" style="stop-color:#00d9ff"/>
+                <stop offset="100%" style="stop-color:#00d9ff"/>
+            </linearGradient>
+        </defs>
+    </svg>
+    <div class="invader"><span class="invader-inner">👾</span></div>
+    <p>A structured learning system for mastering modern low-Earth-orbit satellite architecture — engineering, spectrum strategy, geopolitics, and full constellation design.</p>
+</section>
+
+<section class="curriculum">
+
+```
+<!-- YEAR 1 -->
+<div class="phase-card" style="margin-top: 2.5rem; border-left-color: #00d9ff;">
+    <h3>Year 1 — Foundations (Months 1–12)</h3>
+    <p>Bridge GEO/aviation expertise to LEO reality. Orbits, RF engineering, terminal design, networking and security. First simulations and Python scripts start here.</p>
+</div>
+<div class="phase-card">
+    <h3>Q1 · Months 1–3 · ~60 hrs — Connectivity Landscape & Satcom Refresh</h3>
+    <p>Why LEO emerged · GEO/MEO/LEO comparison · Multi-orbit hybrid architectures · Historical failures · Ground segment overview</p>
+</div>
+<div class="phase-card">
+    <h3>Q2 · Months 4–6 · ~80 hrs — Orbital Mechanics & Constellation Design</h3>
+    <p>Kepler/Newton basics · Doppler & ground tracks · Walker patterns · Constellation optimization · GMAT/Poliastro modeling</p>
+</div>
+<div class="phase-card">
+    <h3>Q3 · Months 7–9 · ~90 hrs — RF Link Budgets, Spectrum & Terminal Engineering</h3>
+    <p>Link budget math · Ka/Ku/V-band · Spectrum coordination & EPFD · AESA phased arrays · Aviation terminal constraints (SWaP, DO-160)</p>
+</div>
+<div class="phase-card">
+    <h3>Q4 · Months 10–12 · ~80 hrs — Networking, Mobility & Security</h3>
+    <p>Mesh vs bent-pipe · Handover mechanics · TCP/QUIC in mobility · 5G NTN · LEO security: spoofing, jamming & encryption</p>
+</div>
+
+<!-- YEAR 2 -->
+<div class="phase-card" style="margin-top: 2.5rem; border-left-color: #00d9ff;">
+    <h3>Year 2 — Advanced Applications & Portfolio (Months 13–24)</h3>
+    <p>ISL routing, ground operations, fleet management, economics and regulatory depth. Capstone projects and portfolio polish. Job-ready technical fluency.</p>
+</div>
+<div class="phase-card">
+    <h3>Q5 · Months 13–15 · ~90 hrs — Inter-Satellite Networking & Routing</h3>
+    <p>Optical ISL physics · SDN in space · MPLS/Segment Routing · Multi-orbit hybrid topologies · End-to-end routing simulations</p>
+</div>
+<div class="phase-card">
+    <h3>Q6 · Months 16–18 · ~70 hrs — Ground Segment, Operations & Fleet Management</h3>
+    <p>TT&C deep dive · LEOP & anomaly resolution · Gateway design · Fleet ops · Debris risk & deorbit planning</p>
+</div>
+<div class="phase-card">
+    <h3>Q7 · Months 19–21 · ~70 hrs — Economics, Regulations & Capstone #1</h3>
+    <p>CapEx/OpEx modeling · Break-even & ARPU · ITU/FCC regulatory landscape · Capstone: full constellation simulator repo</p>
+</div>
+<div class="phase-card">
+    <h3>Q8 · Months 22–24 · ~80 hrs — Capstone #2, Portfolio & Career Prep</h3>
+    <p>End-to-end aviation service case · Terminal trade study · Multi-orbit architecture paper · Portfolio, whitepapers & mock interviews</p>
+</div>
+
+<!-- ENDGAME -->
+<div class="phase-card" style="margin-top: 2.5rem; background: rgba(57,255,20,0.08); border-left: 3px solid #39ff14;">
+    <h3>Endgame — Mission Accomplished</h3>
+    <p>~620 focused hours · Deep LEO fluency across orbits, RF, terminals, networking, security, ground ops and economics · Working simulation tools · Constellation design capstones · Portfolio ready to demonstrate systems-level mastery of modern mega-constellations.</p>
+</div>
+```
+
+</section>
+
+<footer>
+© 2026 LEOAF<br>ESTABLISHED IN THE FUTURE
+</footer>
+
+<div id="authModal" class="modal-backdrop">
+    <div class="modal-lodge-container">
+        <button id="closeModal" class="close-btn">×</button>
+        <h2 style="color:#ffffff; margin-bottom: 20px; font-weight: 800; letter-spacing: 2px;">WELCOME</h2>
+        <div class="input-wrapper">
+            <input id="emailInput" type="email" placeholder="Email">
+        </div>
+        <div class="password-wrapper">
+            <input id="passwordInput" type="password" placeholder="Password">
+            <span id="togglePassword">👁️</span>
+        </div>
+        <p id="forgotPassword" style="cursor:pointer; font-size:10px; color:#00d9ff; margin-bottom:15px; text-align:right; opacity:0.7; letter-spacing:1px;">My password went to Mars while I'm floating 'round my tin can</p>
+        <button id="godspeedBtn" class="twin-peaks-btn">Godspeed</button>
+        <p id="authMessage" style="color:white; font-size:13px; margin-top:15px; height: 15px;"></p>
+    </div>
+</div>
+
+<script>
+function setViewportHeight() { const vh = window.innerHeight * 0.01; document.documentElement.style.setProperty('--vh', `${vh}px`); }
+setViewportHeight(); window.addEventListener('resize', setViewportHeight);
+
+const canvas = document.getElementById('starsCanvas');
+const ctx = canvas.getContext('2d');
+let stars = [];
+const STAR_COUNT = 200;
+let lastWidth = window.innerWidth;
+function initStars() { stars = []; for (let i = 0; i < STAR_COUNT; i++) { stars.push({ x: Math.random() * canvas.width, y: Math.random() * canvas.height, size: Math.random() * 1.5 + 0.5, speed: Math.random() * 0.2 + 0.05, hue: Math.random() * 360 }); } }
+function resizeCanvas() { canvas.width = window.innerWidth; canvas.height = window.innerHeight; lastWidth = window.innerWidth; }
+resizeCanvas(); initStars();
+window.addEventListener('resize', resizeCanvas);
+function animateStars() { ctx.clearRect(0, 0, canvas.width, canvas.height); stars.forEach(star => { star.y -= star.speed; if (star.y < 0) { star.y = canvas.height; star.x = Math.random() * canvas.width; } ctx.beginPath(); ctx.fillStyle = `hsl(${star.hue}, 80%, 80%)`; ctx.arc(star.x, star.y, star.size, 0, Math.PI*2); ctx.fill(); }); requestAnimationFrame(animateStars); }
+animateStars();
+</script>
+
+<script>
+const invaderInner = document.querySelector('.invader-inner');
+invaderInner.parentElement.addEventListener('click', () => {
+    invaderInner.style.transition = 'transform 0.1s linear';
+    let spinDegrees = 0;
+    const spinInterval = setInterval(() => { spinDegrees += 60; invaderInner.style.transform = `rotate(${spinDegrees}deg)`; }, 50);
+    setTimeout(() => { clearInterval(spinInterval); invaderInner.style.transition = 'transform 0.5s ease'; invaderInner.style.transform = 'rotate(0deg)'; }, 2000);
+});
+</script>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+<script>
+const supabaseUrl = 'https://kpkpptqtuuhnbdntuluc.supabase.co';
+const supabaseKey = 'sb_publishable_aws8RQ085UqKFBUWfojluQ_o9R9WKBb';
+const { createClient } = supabase;
+const client = createClient(supabaseUrl, supabaseKey);
+
+const authModal = document.getElementById('authModal');
+const launchBtn = document.getElementById('launchBtn');
+const closeModal = document.getElementById('closeModal');
+const emailInput = document.getElementById('emailInput');
+const passwordInput = document.getElementById('passwordInput');
+const godspeedBtn = document.getElementById('godspeedBtn');
+const authMessage = document.getElementById('authMessage');
+
+client.auth.onAuthStateChange((event, session) => { if (event === 'SIGNED_IN' && session) { window.location.href = "dashboard.html"; } });
+
+document.addEventListener('DOMContentLoaded', async () => { const { data: { session } } = await client.auth.getSession(); if (session) { window.location.href = "dashboard.html"; } });
+
+launchBtn.addEventListener('click', () => { authModal.style.display = "flex"; authMessage.innerText = ""; authMessage.style.color = "white"; });
+closeModal.addEventListener('click', () => { authModal.style.display = "none"; });
+
+godspeedBtn.addEventListener('click', async () => {
+    const email = emailInput.value.trim();
+    const password = passwordInput.value.trim();
+    if (!email || !password) { authMessage.style.color = "#ff004f"; authMessage.innerText = "Enter email and password."; return; }
+    authMessage.style.color = "#00d9ff"; authMessage.innerText = "Initiating launch sequence...";
+    const { data: signInData, error: signInError } = await client.auth.signInWithPassword({ email, password });
+    if (!signInError && signInData.session) return;
+    if (signInError) {
+        if (signInError.message === "Invalid login credentials") {
+            const { data: signUpData, error: signUpError } = await client.auth.signUp({ email, password, options: { emailRedirectTo: 'https://leoarfu.github.io/42/dashboard.html' } });
+            if (signUpError) { authMessage.style.color = "#ff004f"; authMessage.innerText = signUpError.message; return; }
+            if (signUpData.user && signUpData.user.identities && signUpData.user.identities.length === 0) { authMessage.style.color = "#ff004f"; authMessage.innerText = "Incorrect password. Please try again."; return; }
+            authMessage.style.color = "#39ff14"; authMessage.innerText = "Account created. Check your email to confirm before launch.";
+        } else if (signInError.message === "Email not confirmed") {
+            authMessage.style.color = "#ff004f"; authMessage.innerText = "Please confirm your email address via the link sent to you.";
+        } else { authMessage.style.color = "#ff004f"; authMessage.innerText = signInError.message; }
+    }
+});
+
+const togglePassword = document.getElementById("togglePassword");
+togglePassword.addEventListener("click", () => { const type = passwordInput.getAttribute("type"); passwordInput.setAttribute("type", type === "password" ? "text" : "password"); togglePassword.innerText = type === "password" ? "🦉" : "👁️"; });
+
+const forgotPassword = document.getElementById('forgotPassword');
+forgotPassword.addEventListener('click', async () => {
+    const email = emailInput.value.trim();
+    if (!email) { authMessage.style.color = "#ff004f"; authMessage.innerText = "Enter your email first."; return; }
+    authMessage.style.color = "#00d9ff"; authMessage.innerText = "Sending reset link...";
+    const { error } = await client.auth.resetPasswordForEmail(email, { redirectTo: 'https://leoarfu.github.io/42/dashboard.html?reset=true' });
+    if (error) { authMessage.style.color = "#ff004f"; authMessage.innerText = error.message; }
+    else { authMessage.style.color = "#39ff14"; authMessage.innerText = "Check your email for the reset link."; }
+});
+</script>
+
+<script src="user_progress.js"></script>
+
+</body>
+</html>
