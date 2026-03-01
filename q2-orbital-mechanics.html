@@ -520,21 +520,29 @@ if (canvas) {
 }
 </script>
     
+<!-- =============================================
+     SCRIPT BLOCK FOR q2-orbital-mechanics.html
+     ============================================= -->
+
 <!-- 1. Supabase CDN -->
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
-<!-- 2. Init + Auth + Progress Logic -->
-<script>
-const supabaseUrl = 'https://kpkpptqtuuhnbdntuluc.supabase.co';
-const supabaseKey = 'sb_publishable_aws8RQ085UqKFBUWfojluQ_o9R9WKBb';
-const { createClient } = supabase;
-const client = createClient(supabaseUrl, supabaseKey);
+<!-- 2. Supabase client init -->
+<script src="supabase.js"></script>
 
+<!-- 3. User progress functions -->
+<script src="user_progress.js"></script>
+
+<!-- 4. Page logic -->
+<script>
+
+// ── Logoff ────────────────────────────────────────
 document.getElementById('logoffBtn').addEventListener('click', async () => {
     await client.auth.signOut();
     window.location.href = "index.html";
 });
 
+// ── Accordion toggle ──────────────────────────────
 document.querySelectorAll('.accordion-header').forEach(header => {
     header.addEventListener('click', e => {
         if (e.target.closest('.check-small')) return;
@@ -553,6 +561,7 @@ function closeAccordion(targetId) {
     header.scrollIntoView({ behavior: 'smooth', block: 'start' });
 }
 
+// ── Quarter visual (rocket appears when all topics done) ──
 async function updateQuarterVisual() {
     const total = document.querySelectorAll('.check-small').length;
     const checked = document.querySelectorAll('.custom-checkbox-small.checked').length;
@@ -567,6 +576,7 @@ async function updateQuarterVisual() {
     }
 }
 
+// ── Load saved progress from Supabase ────────────
 async function loadProgress() {
     const mastered = await getMasteredSections();
     document.querySelectorAll('.check-small').forEach(el => {
@@ -589,6 +599,7 @@ async function loadProgress() {
     updateQuarterVisual();
 }
 
+// ── Mark done button clicks ───────────────────────
 document.querySelectorAll('.mark-done-btn').forEach(btn => {
     btn.addEventListener('click', async () => {
         const id = btn.dataset.id;
@@ -601,23 +612,14 @@ document.querySelectorAll('.mark-done-btn').forEach(btn => {
     });
 });
 
+// ── Auth check + boot ─────────────────────────────
 document.addEventListener('DOMContentLoaded', async () => {
     const { data: { session } } = await client.auth.getSession();
     if (!session) { window.location.href = "index.html"; return; }
     await loadProgress();
 });
 
-const canvas = document.getElementById('starsCanvas');
-if (canvas) {
-    const ctx = canvas.getContext('2d');
-    let stars = [];
-    function init(){ canvas.width=window.innerWidth; canvas.height=window.innerHeight; stars=[]; for(let i=0;i<300;i++) stars.push({x:Math.random()*canvas.width,y:Math.random()*canvas.height,size:Math.random()*1.2+0.3,speed:Math.random()*0.4+0.1}); }
-    function animate(){ ctx.fillStyle='rgba(0,0,0,0.12)'; ctx.fillRect(0,0,canvas.width,canvas.height); stars.forEach(s=>{ s.y+=s.speed; if(s.y>canvas.height) s.y=0; ctx.fillStyle='#fff'; ctx.fillRect(s.x,s.y,s.size,s.size); }); requestAnimationFrame(animate); }
-    init(); animate(); window.addEventListener('resize',init);
-}
 </script>
 
-<!-- 3. User Progress Functions (must be last) -->
-<script src="user_progress.js"></script>
 </body>
 </html>
