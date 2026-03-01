@@ -8,38 +8,40 @@
 <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;600;800&family=Inter:wght@300;400;600&display=swap" rel="stylesheet">
 <style>
 * { box-sizing:border-box; margin:0; padding:0; }
-body { background:#000; color:#f0f0f0; font-family:'Inter',sans-serif; line-height:1.65; min-height:100vh; }
+html { overflow-x:hidden; }
+body { background:#000; color:#f0f0f0; font-family:'Inter',sans-serif; line-height:1.65; min-height:100vh; overflow-x:hidden; width:100%; }
 
 /* ── Header ─────────────────────────────────────── */
 header {
 background:#000; border-bottom:1px solid #ff004f33;
 position:sticky; top:0; z-index:100;
-padding:0.75rem 1rem;
+padding:0.6rem 1rem;
 display:flex; justify-content:space-between; align-items:center;
 box-shadow:0 4px 16px #0008;
+min-height:0; width:100%;
 }
-.nav-left { display:flex; align-items:center; gap:1rem; }
-.logo { font-family:‘Orbitron’,sans-serif; font-size:clamp(1.1rem,3vw,1.6rem); font-weight:800; letter-spacing:3px; text-decoration:none; white-space:nowrap; }
+.nav-left { display:flex; align-items:center; gap:0.75rem; flex:1; min-width:0; }
+.logo { font-family:‘Orbitron’,sans-serif; font-size:clamp(0.95rem,3vw,1.6rem); font-weight:800; letter-spacing:2px; text-decoration:none; white-space:nowrap; flex-shrink:0; }
 .logo span:first-child { color:#fff; }
 .logo span:last-child { color:#ff004f; }
-.back-dashboard { color:#00d9ff; font-size:0.85rem; text-decoration:none; white-space:nowrap; }
+.back-dashboard { color:#00d9ff; font-size:clamp(0.7rem,2vw,0.85rem); text-decoration:none; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
 .back-dashboard:hover { color:#39ff14; text-decoration:underline; }
 .logoff-btn {
 background:transparent; border:1px solid #ff004f; color:#ff004f;
-padding:0.4rem 0.75rem; font-size:0.78rem; cursor:pointer; border-radius:4px;
+padding:0.35rem 0.65rem; font-size:clamp(0.65rem,2vw,0.78rem); cursor:pointer; border-radius:4px;
 white-space:nowrap; flex-shrink:0;
 }
 .logoff-btn:hover { background:#ff004f; color:#000; }
 
 /* ── Content ─────────────────────────────────────── */
-.content { max-width:860px; margin:0 auto; padding:2rem 1rem 4rem; }
+.content { max-width:860px; margin:0 auto; padding:1.5rem 1rem 4rem; width:100%; }
 
 h1 {
 font-family:‘Orbitron’,sans-serif;
-font-size:clamp(1.4rem,5vw,2.8rem);
+font-size:clamp(1.2rem,4vw,2.8rem);
 text-align:center; margin-bottom:1.25rem;
 letter-spacing:1px; color:#00d9ff;
-line-height:1.2;
+line-height:1.2; word-break:break-word;
 }
 
 /* ── Quarter complete button ─────────────────────── */
@@ -234,18 +236,26 @@ width:fit-content; transition:all 0.2s;
 /* ── Misc ────────────────────────────────────────── */
 .mission-note { text-align:center; margin:4rem 0 2rem; font-size:0.95rem; color:#00d9ff88; font-style:italic; }
 
-/* ── Mobile tweaks ───────────────────────────────── */
+/* ── Mobile portrait ─────────────────────────────── */
 @media (max-width:480px) {
-header { padding:0.6rem 0.75rem; }
-.back-dashboard { font-size:0.78rem; }
-h1 { font-size:1.3rem; }
-.accordion-header h3 { font-size:0.88rem; }
-.content { padding:1.5rem 0.75rem 3rem; }
-.check-label { font-size:0.75rem; }
-.accordion-content { padding:1.25rem 0.9rem 1.5rem; }
-.accordion-content p, .accordion-content li { font-size:0.92rem; }
-.equation { font-size:0.88rem; padding:0.8rem; }
-.code-snippet { font-size:0.78rem; padding:0.9rem; }
+h1 { font-size:1.2rem; }
+.accordion-header h3 { font-size:0.85rem; }
+.content { padding:1.25rem 0.75rem 3rem; }
+.check-label { font-size:0.72rem; }
+.accordion-content { padding:1.1rem 0.8rem 1.4rem; }
+.accordion-content p, .accordion-content li { font-size:0.9rem; }
+.equation { font-size:0.85rem; padding:0.75rem; }
+.code-snippet { font-size:0.76rem; padding:0.85rem; }
+}
+
+/* ── Landscape phones ────────────────────────────── */
+@media (max-height:500px) and (orientation:landscape) {
+header { padding:0.4rem 0.9rem; }
+h1 { font-size:clamp(1rem,3.5vw,1.8rem); margin-bottom:0.75rem; }
+.content { padding:1rem 1rem 3rem; }
+.check-container { margin-bottom:1rem; padding:0.5rem 1rem; }
+.check-label { font-size:0.72rem; }
+.accordion-content { padding:1rem 0.9rem 1.25rem; }
 }
 
 /* ── HAL 9000 Modal ──────────────────────────────── */
@@ -434,11 +444,12 @@ print(f”MEO GPS    : {orbital_velocity(20200):.2f} km/s”)</code></pre></div>
 <div class="section-card">
     <h2>📚 Best free resources</h2>
     <ul>
-        <li>MIT OCW – Aerospace orbital mechanics lectures</li>
-        <li>YouTube – Prof. Shane Ross Orbital Mechanics playlist</li>
-        <li>Fundamentals of Astrodynamics (free PDF excerpts, Ch 1–4)</li>
-        <li>Poliastro & Skyfield Python tutorials</li>
-        <li>NASA GMAT – free tool + beginner guides</li>
+        <li><a href="https://ocw.mit.edu/courses/16-346-astrodynamics-fall-2008/" target="_blank" rel="noopener" style="color:#00d9ff;">MIT OCW – Astrodynamics (16.346)</a></li>
+        <li><a href="https://www.youtube.com/playlist?list=PLybg94GvOJ9HjfB5BmBohFQiWJp5pMgG1" target="_blank" rel="noopener" style="color:#00d9ff;">YouTube – Prof. Shane Ross Orbital Mechanics playlist</a></li>
+        <li><a href="https://drive.google.com/file/d/1vCDiXSyvjQXlizMnmQXF9tei1n1SKZJ5/view" target="_blank" rel="noopener" style="color:#00d9ff;">Fundamentals of Astrodynamics – Bate, Mueller & White (free PDF)</a></li>
+        <li><a href="https://docs.poliastro.space/en/stable/" target="_blank" rel="noopener" style="color:#00d9ff;">Poliastro Python library – docs & tutorials</a></li>
+        <li><a href="https://rhodesmill.org/skyfield/" target="_blank" rel="noopener" style="color:#00d9ff;">Skyfield Python library – satellite tracking</a></li>
+        <li><a href="https://software.nasa.gov/software/GSC-17177-1" target="_blank" rel="noopener" style="color:#00d9ff;">NASA GMAT – free orbital simulation tool</a></li>
     </ul>
 </div>
 
@@ -566,6 +577,9 @@ document.querySelectorAll('.mark-done-btn').forEach(btn => {
         const cb = header.querySelector('.custom-checkbox-small');
         const isChecked = cb.classList.toggle('checked');
         btn.textContent = isChecked ? 'Unmark / revisit' : 'Mark as complete';
+        // Also update the check-small wrapper's data state visually
+        const checkSmall = header.querySelector('.check-small');
+        if (checkSmall) checkSmall.querySelector('.custom-checkbox-small')?.classList.toggle('checked', isChecked);
         await upsertSection(id, isChecked);
         await updateQuarterVisual();
     });
