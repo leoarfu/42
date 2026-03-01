@@ -561,9 +561,8 @@ async function loadProgress() {
     });
     document.querySelectorAll('.mark-done-btn').forEach(btn => {
         const id = btn.dataset.id;
-        const accordionContent = btn.closest('.accordion-content');
-        const accordionHeader = accordionContent.previousElementSibling;
-        const cb = accordionHeader.querySelector('.check-small .custom-checkbox-small');
+        const checkSmall = document.querySelector(`.check-small[data-id="${id}"]`);
+        const cb = checkSmall?.querySelector('.custom-checkbox-small');
         if (mastered.includes(id)) {
             btn.textContent = 'Unmark / revisit';
             cb?.classList.add('checked');
@@ -578,11 +577,9 @@ async function loadProgress() {
 document.querySelectorAll('.mark-done-btn').forEach(btn => {
     btn.addEventListener('click', async () => {
         const id = btn.dataset.id;
-        // The accordion-content's previous sibling is the accordion-header
-        const accordionContent = btn.closest('.accordion-content');
-        const accordionHeader = accordionContent.previousElementSibling;
-        // The checkbox is inside .check-small inside the header
-        const cb = accordionHeader.querySelector('.check-small .custom-checkbox-small');
+        // Find the checkbox by matching data-id directly — no DOM traversal needed
+        const checkSmall = document.querySelector(`.check-small[data-id="${id}"]`);
+        const cb = checkSmall?.querySelector('.custom-checkbox-small');
         if (!cb) return;
         const isChecked = !cb.classList.contains('checked');
         cb.classList.toggle('checked', isChecked);
