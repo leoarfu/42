@@ -1,0 +1,213 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Q1 — GEO vs LEO Systems Thinking</title>
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;600;800&family=Inter:wght@400;600&display=swap" rel="stylesheet">
+
+<style>
+body {
+    margin:0;
+    background:#000;
+    color:white;
+    font-family:'Orbitron',sans-serif;
+}
+
+.container {
+    max-width:900px;
+    margin:60px auto;
+    padding:0 20px;
+}
+
+h1 {
+    font-size:28px;
+    margin-bottom:30px;
+}
+
+.section {
+    border-left:3px solid #ff004f;
+    padding:25px;
+    margin-bottom:35px;
+    background:rgba(255,255,255,0.03);
+    transition:0.3s ease;
+}
+
+.section.completed {
+    border-left-color:#39ff14;
+    background:rgba(57,255,20,0.05);
+}
+
+.section.completed h2 {
+    color:#39ff14;
+    text-decoration:line-through;
+}
+
+h2 {
+    margin:0 0 10px;
+    font-size:18px;
+}
+
+p {
+    font-family:'Inter',sans-serif;
+    font-size:14px;
+    line-height:1.6;
+    color:#aaa;
+}
+
+.meta {
+    margin-top:10px;
+    font-size:12px;
+    color:#00d9ff;
+    letter-spacing:1px;
+}
+
+button {
+    margin-top:15px;
+    padding:8px 14px;
+    background:transparent;
+    border:1px solid #00d9ff;
+    color:#00d9ff;
+    font-family:'Orbitron',sans-serif;
+    font-size:11px;
+    cursor:pointer;
+    transition:0.3s ease;
+}
+
+button:hover {
+    background:#00d9ff;
+    color:black;
+}
+
+.progress-box {
+    margin-bottom:40px;
+}
+
+.progress-bar {
+    height:10px;
+    background:rgba(255,255,255,0.1);
+    border-radius:5px;
+    overflow:hidden;
+}
+
+.progress-fill {
+    height:100%;
+    width:0%;
+    background:linear-gradient(90deg,#00d9ff,#39ff14);
+    transition:0.6s ease;
+}
+</style>
+</head>
+
+<body>
+
+<div class="container">
+
+<h1>Q1 — GEO vs LEO Systems Thinking (30 Hours)</h1>
+
+<div class="progress-box">
+<div id="progressText">0% Complete</div>
+<div class="progress-bar">
+<div id="progressFill" class="progress-fill"></div>
+</div>
+</div>
+
+<!-- SECTION 1 -->
+<div class="section" data-id="q1-global">
+<h2>1. Global Connectivity Reality</h2>
+<p>Fiber limits. RTT geography. GEO latency physics. Why 600 ms RTT changes application behavior. Compare GEO vs 1200km LEO vs fiber.</p>
+<div class="meta">~5 HOURS</div>
+<button onclick="toggleSection('q1-global')">MARK COMPLETE</button>
+</div>
+
+<!-- SECTION 2 -->
+<div class="section" data-id="q1-multi-orbit">
+<h2>2. Multi-Orbit Architecture</h2>
+<p>GEO/MEO/LEO trade matrix. Bent-pipe vs regenerative. Hybrid architectures. When GEO still wins.</p>
+<div class="meta">~6 HOURS</div>
+<button onclick="toggleSection('q1-multi-orbit')">MARK COMPLETE</button>
+</div>
+
+<!-- SECTION 3 -->
+<div class="section" data-id="q1-mobility">
+<h2>3. Aviation & Maritime Constraints</h2>
+<p>SWaP limits. Beam tracking at Mach 0.85. Polar gaps. Maritime stabilization.</p>
+<div class="meta">~6 HOURS</div>
+<button onclick="toggleSection('q1-mobility')">MARK COMPLETE</button>
+</div>
+
+<!-- SECTION 4 -->
+<div class="section" data-id="q1-gateway">
+<h2>4. Gateway & Cloud Topology</h2>
+<p>Gateway siting logic. Fiber adjacency. Cloud PoPs. Redundancy patterns. Backhaul economics.</p>
+<div class="meta">~7 HOURS</div>
+<button onclick="toggleSection('q1-gateway')">MARK COMPLETE</button>
+</div>
+
+<!-- SECTION 5 -->
+<div class="section" data-id="q1-economics">
+<h2>5. Why Mega-Constellations Exist</h2>
+<p>Capacity density math. Spot beam reuse. Launch cost economics. CapEx vs OpEx logic.</p>
+<div class="meta">~6 HOURS</div>
+<button onclick="toggleSection('q1-economics')">MARK COMPLETE</button>
+</div>
+
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="supabase.js"></script>
+<script src="user_progress.js"></script>
+
+<script>
+document.addEventListener("DOMContentLoaded", async () => {
+
+    const mastered = await getMasteredSections();
+
+    const sections = document.querySelectorAll(".section");
+    let completed = 0;
+
+    sections.forEach(section => {
+        const id = section.dataset.id;
+
+        if (mastered.includes(id)) {
+            section.classList.add("completed");
+            completed++;
+        }
+    });
+
+    updateProgress(completed, sections.length);
+});
+
+async function toggleSection(id) {
+
+    const section = document.querySelector(`[data-id="${id}"]`);
+    const mastered = await getMasteredSections();
+
+    if (mastered.includes(id)) {
+        await unmarkSection(id);
+        section.classList.remove("completed");
+    } else {
+        await markSectionComplete(id);
+        section.classList.add("completed");
+    }
+
+    const updated = await getMasteredSections();
+    const sections = document.querySelectorAll(".section");
+
+    let completed = 0;
+    sections.forEach(s => {
+        if (updated.includes(s.dataset.id)) completed++;
+    });
+
+    updateProgress(completed, sections.length);
+}
+
+function updateProgress(done, total) {
+    const percent = Math.round((done/total)*100);
+    document.getElementById("progressFill").style.width = percent + "%";
+    document.getElementById("progressText").innerText = percent + "% Complete";
+}
+</script>
+
+</body>
+</html>
