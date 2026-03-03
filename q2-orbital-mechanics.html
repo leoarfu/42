@@ -1,0 +1,217 @@
+<div class="content">
+<h1>Q2 – Orbital Mechanics & LEO Constellation Engineering</h1>
+
+<div class="check-container" id="quarterCheck">
+    <div class="custom-checkbox"></div>
+    <span class="check-label">MARK QUARTER COMPLETE</span>
+</div>
+
+<div class="section-card">
+    <h2>🎯 Quarter Objective</h2>
+    <p style="color:#ccc; font-size:0.95rem;">
+    Move from “I know orbital formulas” to “I can reason about constellation behavior, coverage gaps,
+    revisit times, and handover dynamics from first principles.”
+    </p>
+</div>
+
+<div class="section-card">
+    <h2>Core Engineering Blocks</h2>
+
+    <!-- ========================================================= -->
+    <!-- 1. Energy & Orbital Velocity -->
+    <!-- ========================================================= -->
+
+    <div class="accordion-header" data-target="q2_energy">
+        <div class="check-small" data-id="q2-energy"><div class="custom-checkbox-small"></div></div>
+        <h3>1. Orbital Energy & Velocity — Why LEO Moves So Fast</h3>
+    </div>
+
+    <div id="q2_energy" class="accordion-content">
+
+        <h4>Two-body dynamics foundation</h4>
+        <p>For circular orbit:</p>
+
+        <div class="equation">
+            v = √(μ / r)
+        </div>
+
+        <p>
+        μ = GM ≈ 3.986 × 10¹⁴ m³/s²  
+        r = Rₑ + h
+        </p>
+
+        <h4>Specific orbital energy</h4>
+
+        <div class="equation">
+            ε = - μ / (2a)
+        </div>
+
+        <p>
+        Lower orbit → more negative energy → deeper gravity well → higher velocity.
+        </p>
+
+        <h4>Engineering implications</h4>
+
+        <ul>
+            <li>550 km LEO ≈ 7.6 km/s</li>
+            <li>GEO ≈ 3.07 km/s</li>
+            <li>Velocity drives Doppler (~±40 kHz at Ku/Ka)</li>
+            <li>Velocity drives rapid link geometry evolution</li>
+        </ul>
+
+        <div class="takeaway">
+            <strong>Essential:</strong> LEO latency advantage comes from low altitude.  
+            Low altitude requires high velocity.  
+            High velocity drives every systems problem downstream.
+        </div>
+
+        <button class="mark-done-btn" data-id="q2-energy">Mark as complete</button>
+        <button class="close-accordion" onclick="closeAccordion('q2_energy')">Collapse ↑</button>
+    </div>
+
+
+    <!-- ========================================================= -->
+    <!-- 2. Orbital Period -->
+    <!-- ========================================================= -->
+
+    <div class="accordion-header" data-target="q2_period">
+        <div class="check-small" data-id="q2-period"><div class="custom-checkbox-small"></div></div>
+        <h3>2. Kepler's Third Law — Period & Revisit Mechanics</h3>
+    </div>
+
+    <div id="q2_period" class="accordion-content">
+
+        <div class="equation">
+            T = 2π √(a³ / μ)
+        </div>
+
+        <h4>Numbers you must know cold</h4>
+
+        <ul>
+            <li>400–600 km LEO → ~90–97 min</li>
+            <li>MEO (GPS) → ~12 hours</li>
+            <li>GEO → 23h 56m (sidereal day)</li>
+        </ul>
+
+        <h4>Constellation insight</h4>
+
+        <p>
+        LEO satellite completes ~15 orbits/day.
+        Earth rotates beneath it.
+        Ground track shifts west each orbit.
+        </p>
+
+        <div class="takeaway">
+            <strong>Essential:</strong> Period determines revisit time, 
+            constellation phasing, and repeat-ground-track design.
+        </div>
+
+        <button class="mark-done-btn" data-id="q2-period">Mark as complete</button>
+        <button class="close-accordion" onclick="closeAccordion('q2_period')">Collapse ↑</button>
+    </div>
+
+
+    <!-- ========================================================= -->
+    <!-- 3. J2 Perturbation -->
+    <!-- ========================================================= -->
+
+    <div class="accordion-header" data-target="q2_j2">
+        <div class="check-small" data-id="q2-j2"><div class="custom-checkbox-small"></div></div>
+        <h3>3. J₂ Effect — Nodal Precession & Plane Drift</h3>
+    </div>
+
+    <div id="q2_j2" class="accordion-content">
+
+        <div class="equation">
+            dΩ/dt = - (3/2) n J₂ (Rₑ / p)² cos i
+        </div>
+
+        <p>
+        Earth is not a perfect sphere.
+        Oblateness causes RAAN drift.
+        </p>
+
+        <h4>Why this matters for LEO networks</h4>
+
+        <ul>
+            <li>Constellation planes drift relative to each other</li>
+            <li>Sun-synchronous orbits exploit J₂ intentionally</li>
+            <li>Phasing maintenance requires propulsion</li>
+        </ul>
+
+        <div class="takeaway">
+            <strong>Essential:</strong> J₂ is not “theory.”  
+            It directly affects long-term constellation geometry stability.
+        </div>
+
+        <button class="mark-done-btn" data-id="q2-j2">Mark as complete</button>
+        <button class="close-accordion" onclick="closeAccordion('q2_j2')">Collapse ↑</button>
+    </div>
+
+
+    <!-- ========================================================= -->
+    <!-- 4. Atmospheric Drag -->
+    <!-- ========================================================= -->
+
+    <div class="accordion-header" data-target="q2_drag">
+        <div class="check-small" data-id="q2-drag"><div class="custom-checkbox-small"></div></div>
+        <h3>4. Atmospheric Drag & Lifetime Engineering</h3>
+    </div>
+
+    <div id="q2_drag" class="accordion-content">
+
+        <div class="equation">
+            a_drag ∝ ρ v² (A/m)
+        </div>
+
+        <h4>LEO reality</h4>
+
+        <ul>
+            <li>400 km → strong drag</li>
+            <li>550 km → moderate drag</li>
+            <li>Solar cycle increases density</li>
+        </ul>
+
+        <h4>System implications</h4>
+
+        <ul>
+            <li>Constellations must continuously raise orbit</li>
+            <li>Fuel budget defines satellite lifetime</li>
+            <li>Drag causes semi-major axis decay → period changes</li>
+        </ul>
+
+        <div class="takeaway">
+            <strong>Essential:</strong> Drag makes LEO dynamic.  
+            Unlike GEO, nothing “just stays there.”
+        </div>
+
+        <button class="mark-done-btn" data-id="q2-drag">Mark as complete</button>
+        <button class="close-accordion" onclick="closeAccordion('q2_drag')">Collapse ↑</button>
+    </div>
+
+</div>
+
+
+<!-- ABSOLUTE ESSENTIALS SECTION -->
+
+<div class="section-card">
+    <h2>🧠 Absolute Essentials — Know 100% at All Times</h2>
+
+    <ul>
+        <li>LEO velocity ≈ 7.6 km/s</li>
+        <li>LEO period ≈ 95 minutes</li>
+        <li>LEO = ~15 orbits per day</li>
+        <li>Lower altitude → higher velocity → more Doppler</li>
+        <li>J₂ causes RAAN drift (plane precession)</li>
+        <li>Drag reduces semi-major axis → lowers period</li>
+        <li>Constellation design = geometry + phasing + revisit control</li>
+    </ul>
+
+</div>
+
+<div class="mission-note">
+    Master motion → understand coverage.<br>
+    Understand coverage → design constellations.
+</div>
+
+</div>
