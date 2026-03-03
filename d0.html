@@ -255,9 +255,9 @@ letter-spacing:2px; border:1px solid #39ff1444; padding:4px 10px;
 <script>
 document.addEventListener("DOMContentLoaded", async () => {
 
-    // =============================
-    // 1️⃣ Show Logged In Email
-    // =============================
+    // ============================
+    // Show Logged In Email
+    // ============================
     const { data: { session } } = await client.auth.getSession();
     if (session?.user?.email) {
         const emailSpan = document.getElementById("userEmail");
@@ -265,65 +265,64 @@ document.addEventListener("DOMContentLoaded", async () => {
         emailSpan.style.display = "inline";
     }
 
-    // =============================
-    // 2️⃣ Define Full Curriculum
-    // (REAL lesson IDs — must match quarter pages)
-    // =============================
-    const curriculum = {
-        q1: ["q1-intro","q1-geo-vs-leo","q1-hybrid"],
-        q2: ["q2-energy","q2-period","q2-j2","q2-drag"],
-        q3: ["q3-link-budget","q3-doppler"],
-        q4: ["q4-handover","q4-routing"],
-        q5: [],
-        q6: [],
-        q7: [],
-        q8: []
-    };
+    // ============================
+    // Load ALL progress rows
+    // ============================
+    const allProgress = await getAllProgress();
 
-    async function refreshDashboard() {
+    // Group by module prefix (q1, q2, q3...)
+    const moduleMap = {};
 
-        const masteredSections = await getMasteredSections();
+    allProgress.forEach(row => {
+        const section = row.section;      // "q2-energy"
+        const mastered = row.mastered;    // true/false
 
-        let totalLessons = 0;
-        let totalMastered = 0;
+        const prefix = section.split("-")[0];
 
-        document.querySelectorAll(".module-card").forEach(card => {
+        if (!moduleMap[prefix]) {
+            moduleMap[prefix] = {
+                total: 0,
+                mastered: 0
+            };
+        }
 
-            const moduleId = card.dataset.id;
-            if (!moduleId) return;
+        moduleMap[prefix].total += 1;
 
-            const prefix = moduleId.split("-")[0];
-            const lessons = curriculum[prefix] || [];
+        if (mastered === true) {
+            moduleMap[prefix].mastered += 1;
+        }
+    });
 
-            const masteredCount = lessons.filter(id =>
-                masteredSections.includes(id)
-            ).length;
+    let totalLessons = 0;
+    let totalMastered = 0;
 
-            totalLessons += lessons.length;
-            totalMastered += masteredCount;
+    document.querySelectorAll(".module-card").forEach(card => {
 
-            // Restore green completed state
-            if (lessons.length > 0 && masteredCount === lessons.length) {
-                card.classList.add("completed");
-            } else {
-                card.classList.remove("completed");
-            }
-        });
+        const moduleId = card.dataset.id;
+        if (!moduleId) return;
 
-        const percent = totalLessons > 0
-            ? Math.round((totalMastered / totalLessons) * 100)
-            : 0;
+        const prefix = moduleId.split("-")[0];
+        const data = moduleMap[prefix];
 
-        document.getElementById("progressFill").style.width = percent + "%";
-        document.getElementById("progressText").innerText = percent + "%";
-    }
+        if (!data) return;
 
-    await refreshDashboard();
+        totalLessons += data.total;
+        totalMastered += data.mastered;
 
-    // =============================
-    // 3️⃣ Live Update Listener
-    // =============================
-    window.addEventListener("progressUpdated", refreshDashboard);
+        if (data.total > 0 && data.mastered === data.total) {
+            card.classList.add("completed");
+        } else {
+            card.classList.remove("completed");
+        }
+
+    });
+
+    const percent = totalLessons > 0
+        ? Math.round((totalMastered / totalLessons) * 100)
+        : 0;
+
+    document.getElementById("progressFill").style.width = percent + "%";
+    document.getElementById("progressText").innerText = percent + "%";
 
 });
 </script>
