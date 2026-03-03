@@ -252,6 +252,63 @@ letter-spacing:2px; border:1px solid #39ff1444; padding:4px 10px;
 </div>
 </main>
 
+<script>
+document.addEventListener("DOMContentLoaded", async () => {
+
+    // Get mastered sections from Supabase
+    const masteredSections = await getMasteredSections();
+
+    const moduleCards = document.querySelectorAll('.module-card');
+
+    let totalLessons = 0;
+    let totalMastered = 0;
+
+    moduleCards.forEach(card => {
+
+        const moduleId = card.dataset.id;
+        if (!moduleId) return;
+
+        const modulePrefix = moduleId.split('-')[0]; // e.g. "q2"
+
+        // Find lessons that belong to this module
+        const relatedLessons = masteredSections.filter(section =>
+            section.startsWith(modulePrefix + '-')
+        );
+
+        // Count ALL lessons for this prefix (from database)
+        // We assume all existing sections in DB define total lesson count
+        const allLessonsForModule = masteredSections.filter(section =>
+            section.startsWith(modulePrefix + '-')
+        );
+
+        const masteredCount = relatedLessons.length;
+        const totalCount = allLessonsForModule.length;
+
+        totalLessons += totalCount;
+        totalMastered += masteredCount;
+
+        if (totalCount > 0 && masteredCount === totalCount) {
+            card.classList.add('completed');
+        } else {
+            card.classList.remove('completed');
+        }
+
+    });
+
+    // Update global progress bar
+    if (totalLessons > 0) {
+        const percent = Math.round((totalMastered / totalLessons) * 100);
+
+        const progressFill = document.getElementById('progressFill');
+        const progressText = document.getElementById('progressText');
+
+        if (progressFill) progressFill.style.width = percent + "%";
+        if (progressText) progressText.innerText = percent + "%";
+    }
+
+});
+</script>
+
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="supabase.js"></script>
 <script src="user_progress.js"></script>
