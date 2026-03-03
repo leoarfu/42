@@ -1,3 +1,300 @@
+<!DOCTYPE html>
+
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, shrink-to-fit=no">
+<title>Q2 – Orbital Mechanics & Constellations 101 • LEOAF</title>
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;600;800&family=Inter:wght@300;400;600&display=swap" rel="stylesheet">
+<style>
+* { box-sizing:border-box; margin:0; padding:0; }
+html { overflow-x:hidden; }
+body { background:#000; color:#f0f0f0; font-family:'Inter',sans-serif; line-height:1.65; min-height:100vh; overflow-x:hidden; width:100%; }
+
+/* ── Header ─────────────────────────────────────── */
+header {
+background:#000; border-bottom:1px solid #ff004f33;
+position:sticky; top:0; z-index:100;
+padding:0.6rem 1rem;
+display:flex; justify-content:space-between; align-items:center;
+box-shadow:0 4px 16px #0008;
+min-height:0; width:100%;
+}
+.nav-left { display:flex; align-items:center; gap:0.75rem; flex:1; min-width:0; }
+.logo { font-family:‘Orbitron’,sans-serif; font-size:clamp(0.95rem,3vw,1.6rem); font-weight:800; letter-spacing:2px; text-decoration:none; white-space:nowrap; flex-shrink:0; }
+.logo span:first-child { color:#fff; }
+.logo span:last-child { color:#ff004f; }
+.back-dashboard { color:#00d9ff; font-size:clamp(0.7rem,2vw,0.85rem); text-decoration:none; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+.back-dashboard:hover { color:#39ff14; text-decoration:underline; }
+.logoff-btn {
+background:transparent; border:1px solid #ff004f; color:#ff004f;
+padding:0.35rem 0.65rem; font-size:clamp(0.65rem,2vw,0.78rem); cursor:pointer; border-radius:4px;
+white-space:nowrap; flex-shrink:0;
+}
+.logoff-btn:hover { background:#ff004f; color:#000; }
+
+/* ── Content ─────────────────────────────────────── */
+.content { max-width:860px; margin:0 auto; padding:1.5rem 1rem 4rem; width:100%; }
+
+h1 {
+font-family:‘Orbitron’,sans-serif;
+font-size:clamp(1.2rem,4vw,2.8rem);
+text-align:center; margin-bottom:1.25rem;
+letter-spacing:1px; color:#00d9ff;
+line-height:1.2; word-break:break-word;
+}
+
+/* ── Quarter complete button ─────────────────────── */
+.check-container {
+display:flex; align-items:center; justify-content:center; gap:0.75rem;
+margin:0 auto 2rem; cursor:pointer; width:fit-content;
+padding:0.65rem 1.25rem; border:1px solid #ff004f44;
+border-radius:8px; transition:all 0.2s ease;
+background:rgba(255,0,79,0.05);
+}
+.check-container:hover { border-color:#ff004f; background:rgba(255,0,79,0.1); }
+.check-container.completed { border-color:#39ff1444; background:rgba(57,255,20,0.05); }
+.check-container.completed:hover { border-color:#39ff14; background:rgba(57,255,20,0.1); }
+.check-label { font-size:0.82rem; letter-spacing:1px; color:#aaa; font-family:‘Orbitron’,sans-serif; font-weight:600; }
+.custom-checkbox {
+width:26px; height:26px; border:2px solid #ff004f; border-radius:6px;
+display:flex; align-items:center; justify-content:center;
+background:transparent; transition:all 0.2s; flex-shrink:0;
+}
+.custom-checkbox.checked { border-color:#39ff14; background:rgba(57,255,20,0.25); }
+.custom-checkbox.checked::after { 
+  content:'\2713'; 
+  color:#39ff14; 
+  font-weight:bold; 
+  font-size:1.1rem; 
+  line-height:1;
+}
+.custom-checkbox-small.checked::after { 
+  content:'\2713'; 
+  color:#39ff14; 
+  font-weight:bold; 
+  font-size:0.85rem; 
+}
+
+/* ── Info cards ──────────────────────────────────── */
+.section-card {
+background:rgba(255,255,255,0.025); border:1px solid rgba(0,217,255,0.15);
+border-radius:10px; padding:1.25rem 1rem; margin:1.75rem 0;
+box-shadow:0 4px 20px #0008;
+}
+.section-card h2 { font-family:‘Orbitron’,sans-serif; color:#00d9ff; font-size:1.15rem; margin-bottom:0.9rem; }
+.section-card ul, .section-card ol { padding-left:1.2rem; }
+.section-card li { margin-bottom:0.4rem; font-size:0.95rem; color:#ccc; }
+
+/* ── Accordion headers ───────────────────────────── */
+.accordion-header {
+background:rgba(0,217,255,0.06); padding:0.9rem 1rem;
+border-radius:8px; margin:0.75rem 0;
+cursor:pointer; display:flex; align-items:center; gap:0.75rem;
+transition:all 0.2s ease;
+}
+.accordion-header:hover { background:rgba(0,217,255,0.12); }
+.accordion-header.active { background:rgba(57,255,20,0.10); border-radius:8px 8px 0 0; margin-bottom:0; }
+.accordion-header .check-small { width:24px; height:24px; flex-shrink:0; pointer-events:none; }
+.custom-checkbox-small {
+width:20px; height:20px; border:2px solid #888; border-radius:4px;
+display:flex; align-items:center; justify-content:center; flex-shrink:0;
+}
+.custom-checkbox-small.checked { border-color:#39ff14; background:rgba(57,255,20,0.25); }
+.custom-checkbox-small.checked::after { content:‘✓’; color:#39ff14; font-weight:bold; font-size:0.85rem; }
+.accordion-header h3 { margin:0; font-size:0.95rem; flex:1; line-height:1.35; color:#e0e0e0; }
+
+/* ── Accordion content — READING MODE ───────────── */
+.accordion-content {
+display:none;
+background:#f9f6f0;           /* warm off-white — easy on eyes */
+color:#1a1a1a;                 /* near-black text — maximum readability */
+border-radius:0 0 8px 8px;
+border:1px solid rgba(57,255,20,0.25);
+border-top:none;
+padding:1.5rem 1.25rem 1.75rem;
+margin-bottom:0.75rem;
+}
+
+/* Reset all text inside content for readability */
+.accordion-content h4 {
+font-family:‘Orbitron’,sans-serif;
+color:#0a3a5c;                 /* deep navy — clear hierarchy */
+font-size:0.95rem;
+letter-spacing:0.5px;
+margin:1.4rem 0 0.5rem;
+padding-bottom:0.3rem;
+border-bottom:1px solid #ddd;
+}
+.accordion-content h4:first-child { margin-top:0; }
+
+.accordion-content p {
+color:#2a2a2a;
+font-size:0.97rem;
+line-height:1.75;
+margin-bottom:0.75rem;
+}
+
+.accordion-content ul,
+.accordion-content ol {
+padding-left:1.4rem;
+margin-bottom:0.75rem;
+}
+
+.accordion-content li {
+color:#333;
+font-size:0.95rem;
+line-height:1.7;
+margin-bottom:0.3rem;
+}
+
+.accordion-content strong { color:#0a3a5c; }
+
+/* ── Equation blocks ─────────────────────────────── */
+.equation {
+font-family:monospace;
+background:#e8f4fd;            /* light blue tint */
+border-left:4px solid #0077b6;
+padding:1rem 1.2rem;
+border-radius:0 6px 6px 0;
+margin:1rem 0;
+color:#003566;
+line-height:1.6;
+font-size:0.97rem;
+overflow-x:auto;
+}
+
+/* ── Code blocks ─────────────────────────────────── */
+.code-snippet {
+background:#1e1e2e;            /* dark purple-grey — VS Code feel */
+padding:1.2rem;
+border-radius:8px;
+font-family:‘Courier New’,monospace;
+font-size:0.85rem;
+overflow-x:auto;
+margin:1.2rem 0;
+border-left:4px solid #39ff14;
+color:#cdd6f4;
+line-height:1.6;
+-webkit-overflow-scrolling:touch;
+}
+.code-snippet pre { margin:0; white-space:pre; }
+
+/* ── Tables ──────────────────────────────────────── */
+.accordion-content table {
+width:100%;
+margin:1.2rem 0;
+border-collapse:collapse;
+font-size:0.88rem;
+overflow-x:auto;
+display:block;
+-webkit-overflow-scrolling:touch;
+}
+.accordion-content table th {
+background:#0a3a5c;
+color:#fff;
+padding:9px 10px;
+text-align:left;
+font-weight:600;
+}
+.accordion-content table td {
+padding:8px 10px;
+border-bottom:1px solid #ddd;
+color:#1a1a1a;
+background:#fff;
+}
+.accordion-content table tr:nth-child(even) td { background:#f3f7fb; }
+
+/* ── Takeaway box ────────────────────────────────── */
+.takeaway {
+background:#fff8e1;            /* warm yellow — stands out gently */
+border-left:4px solid #f0a500;
+padding:1rem 1.2rem;
+border-radius:0 6px 6px 0;
+margin:1.2rem 0;
+color:#2a2a2a;
+font-size:0.95rem;
+line-height:1.7;
+}
+.takeaway strong { color:#7a4f00; }
+
+/* ── Mark done button ────────────────────────────── */
+.mark-done-btn {
+display:block;
+width:100%;
+margin-top:1.5rem;
+background:#0a3a5c;
+border:none; border-radius:6px;
+color:#fff; cursor:pointer;
+font-family:‘Orbitron’,sans-serif;
+font-size:0.8rem; letter-spacing:1px;
+text-align:center; transition:all 0.2s;
+}
+.mark-done-btn:hover { background:#0d4f82; }
+.mark-done-btn.done { background:rgba(57,255,20,0.2); color:#39ff14; border:1px solid #39ff14eda; }
+
+/* ── Collapse button ─────────────────────────────── */
+.close-accordion {
+display:block; margin:1.2rem auto 0;
+padding:0.45rem 1rem;
+background:transparent; border:1px solid #bbb;
+border-radius:6px; color:#555; cursor:pointer;
+font-size:0.78rem; text-align:center;
+width:fit-content; transition:all 0.2s;
+}
+.close-accordion:hover { background:#eee; color:#222; border-color:#888; }
+
+/* ── Misc ────────────────────────────────────────── */
+.mission-note { text-align:center; margin:4rem 0 2rem; font-size:0.95rem; color:#00d9ff88; font-style:italic; }
+
+/* ── Mobile portrait ─────────────────────────────── */
+@media (max-width:480px) {
+h1 { font-size:1.2rem; }
+.accordion-header h3 { font-size:0.85rem; }
+.content { padding:1.25rem 0.75rem 3rem; }
+.check-label { font-size:0.72rem; }
+.accordion-content { padding:1.1rem 0.8rem 1.4rem; }
+.accordion-content p, .accordion-content li { font-size:0.9rem; }
+.equation { font-size:0.85rem; padding:0.75rem; }
+.code-snippet { font-size:0.76rem; padding:0.85rem; }
+}
+
+/* ── Landscape phones ────────────────────────────── */
+@media (max-height:500px) and (orientation:landscape) {
+header { padding:0.4rem 0.9rem; }
+h1 { font-size:clamp(1rem,3.5vw,1.8rem); margin-bottom:0.75rem; }
+.content { padding:1rem 1rem 3rem; }
+.check-container { margin-bottom:1rem; padding:0.5rem 1rem; }
+.check-label { font-size:0.72rem; }
+.accordion-content { padding:1rem 0.9rem 1.25rem; }
+}
+
+/* ── HAL 9000 Modal ──────────────────────────────── */
+.modal-overlay { display:none; position:fixed; inset:0; background:rgba(0,0,0,0.85); z-index:1000; align-items:center; justify-content:center; padding:1rem; }
+.modal-overlay.active { display:flex; }
+.modal-box { background:#000; border:1px solid #00d9ff44; border-radius:4px; max-width:420px; width:100%; padding:2rem 1.5rem; text-align:center; box-shadow:0 0 60px #00d9ff11; font-family:‘Orbitron’,sans-serif; }
+.modal-eye { font-size:2.5rem; margin-bottom:1.2rem; display:block; filter:drop-shadow(0 0 12px #ff004f); }
+.modal-title { font-size:0.7rem; letter-spacing:4px; color:#00d9ff; text-transform:uppercase; margin-bottom:0.9rem; }
+.modal-message { font-size:0.9rem; color:#f0f0f0; line-height:1.7; margin-bottom:1.8rem; font-family:‘Inter’,sans-serif; font-style:italic; }
+.modal-buttons { display:flex; gap:0.75rem; justify-content:center; flex-wrap:wrap; }
+.modal-btn { padding:0.55rem 1.2rem; font-family:‘Orbitron’,sans-serif; font-size:0.7rem; letter-spacing:2px; border-radius:4px; cursor:pointer; transition:all 0.2s; }
+.modal-btn-confirm { background:transparent; border:1px solid #00d9ff; color:#00d9ff; }
+.modal-btn-confirm:hover { background:#00d9ff; color:#000; }
+.modal-btn-cancel { background:transparent; border:1px solid #ffffff22; color:#666; }
+.modal-btn-cancel:hover { border-color:#ff004f; color:#ff004f; }
+</style>
+
+</head>
+<body>
+
+<header>
+    <div class="nav-left">
+        <a href="dashboard.html" class="logo"><span>LEO</span><span>AF</span></a>
+        <a href="dashboard.html" class="back-dashboard">← Dashboard</a>
+    </div>
+    <button id="logoffBtn" class="logoff-btn">ABORT</button>
+</header>
+
 <div class="content">
 <h1>Q2 – Orbital Mechanics & LEO Constellation Engineering</h1>
 
@@ -215,3 +512,118 @@
 </div>
 
 </div>
+    
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+<script src="supabase.js"></script>
+
+<script src="user_progress.js"></script>
+
+<script>
+
+document.getElementById('logoffBtn').addEventListener('click', async () => {
+    await client.auth.signOut();
+    window.location.href = "index.html";
+});
+
+document.querySelectorAll('.accordion-header').forEach(header => {
+    header.addEventListener('click', e => {
+        if (e.target.closest('.check-small')) return;
+        const target = document.getElementById(header.dataset.target);
+        const isOpen = target.style.display === 'block';
+        target.style.display = isOpen ? 'none' : 'block';
+        header.classList.toggle('active', !isOpen);
+    });
+});
+
+function closeAccordion(targetId) {
+    const content = document.getElementById(targetId);
+    const header = content.previousElementSibling;
+    content.style.display = 'none';
+    header.classList.remove('active');
+    header.scrollIntoView({ behavior: 'smooth', block: 'start' });
+}
+
+function showConfirm(message, title, onConfirm) {
+    document.getElementById('modalMessage').textContent = message;
+    document.getElementById('modalTitle').textContent = title;
+    const overlay = document.getElementById('confirmModal');
+    overlay.classList.add('active');
+    document.getElementById('modalConfirm').onclick = () => { overlay.classList.remove('active'); onConfirm(); };
+    document.getElementById('modalCancel').onclick = () => { overlay.classList.remove('active'); };
+}
+
+function setQuarterState(done) {
+    const quarterCb = document.querySelector('#quarterCheck .custom-checkbox');
+    const quarterContainer = document.getElementById('quarterCheck');
+    if (!quarterCb) return;
+    if (done) { quarterCb.classList.add('checked'); quarterContainer.classList.add('completed'); }
+    else { quarterCb.classList.remove('checked'); quarterContainer.classList.remove('completed'); }
+}
+
+async function updateQuarterVisual() {
+    const total = document.querySelectorAll('.check-small').length;
+    const checked = document.querySelectorAll('.custom-checkbox-small.checked').length;
+    const done = checked === total && total > 0;
+    setQuarterState(done);
+    await upsertSection('q2-orbital-mechanics', done);
+}
+
+document.getElementById('quarterCheck').addEventListener('click', async () => {
+    const quarterCb = document.querySelector('#quarterCheck .custom-checkbox');
+    const isCurrentlyChecked = quarterCb.classList.contains('checked');
+    const message = isCurrentlyChecked
+        ? "The four-million year old black monolith has remained completely inert. Its origin and purpose are still a total mystery. Go back if you wish."
+        : "Just what do you think you're doing? I really think I'm entitled to an answer to that question. Answer below.";
+    showConfirm(message, isCurrentlyChecked ? 'REVERSION REQUESTED' : 'MISSION MILESTONE', async () => {
+        const newState = !isCurrentlyChecked;
+        setQuarterState(newState);
+        await upsertSection('q2-orbital-mechanics', newState);
+    });
+});
+
+async function loadProgress() {
+    const mastered = await getMasteredSections();
+    document.querySelectorAll('.check-small').forEach(el => {
+        if (mastered.includes(el.dataset.id)) el.querySelector('.custom-checkbox-small')?.classList.add('checked');
+    });
+    document.querySelectorAll('.mark-done-btn').forEach(btn => {
+        const id = btn.dataset.id;
+        const checkSmall = document.querySelector(`.check-small[data-id="${id}"]`);
+        const cb = checkSmall?.querySelector('.custom-checkbox-small');
+        if (mastered.includes(id)) {
+            btn.textContent = 'Unmark / revisit';
+            cb?.classList.add('checked');
+        } else {
+            btn.textContent = 'Mark as complete';
+        }
+    });
+    const quarterRow = await getSection('q2-orbital-mechanics');
+    setQuarterState(quarterRow && quarterRow.mastered);
+}
+
+document.querySelectorAll('.mark-done-btn').forEach(btn => {
+    btn.addEventListener('click', async () => {
+        const id = btn.dataset.id;
+        // Find the checkbox by matching data-id directly — no DOM traversal needed
+        const checkSmall = document.querySelector(`.check-small[data-id="${id}"]`);
+        const cb = checkSmall?.querySelector('.custom-checkbox-small');
+        if (!cb) return;
+        const isChecked = !cb.classList.contains('checked');
+        cb.classList.toggle('checked', isChecked);
+        btn.textContent = isChecked ? 'Unmark / revisit' : 'Mark as complete';
+        await upsertSection(id, isChecked);
+        await updateQuarterVisual();
+    });
+});
+
+document.addEventListener('DOMContentLoaded', async () => {
+    const { data: { session } } = await client.auth.getSession();
+    if (!session) { window.location.href = "index.html"; return; }
+    await loadProgress();
+});
+
+</script>
+
+</body>
+</html>
