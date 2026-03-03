@@ -255,86 +255,76 @@ letter-spacing:2px; border:1px solid #39ff1444; padding:4px 10px;
 <script>
 document.addEventListener("DOMContentLoaded", async () => {
 
-    // ===============================
-    // 1️⃣ SHOW USER EMAIL
-    // ===============================
-
+    // =============================
+    // 1️⃣ Show Logged In Email
+    // =============================
     const { data: { session } } = await client.auth.getSession();
     if (session?.user?.email) {
         const emailSpan = document.getElementById("userEmail");
-        if (emailSpan) {
-            emailSpan.textContent = session.user.email;
-            emailSpan.style.display = "inline";
-        }
+        emailSpan.textContent = session.user.email;
+        emailSpan.style.display = "inline";
     }
 
-    // ===============================
-    // 2️⃣ DEFINE FULL CURRICULUM MAP
-    // (Update counts if you add lessons)
-    // ===============================
-
+    // =============================
+    // 2️⃣ Define Full Curriculum
+    // (REAL lesson IDs — must match quarter pages)
+    // =============================
     const curriculum = {
-        q1: 12,
-        q2: 18,
-        q3: 20,
-        q4: 16,
-        q5: 18,
-        q6: 14,
-        q7: 14,
-        q8: 16
+        q1: ["q1-intro","q1-geo-vs-leo","q1-hybrid"],
+        q2: ["q2-energy","q2-period","q2-j2","q2-drag"],
+        q3: ["q3-link-budget","q3-doppler"],
+        q4: ["q4-handover","q4-routing"],
+        q5: [],
+        q6: [],
+        q7: [],
+        q8: []
     };
 
-    // ===============================
-    // 3️⃣ LOAD MASTERED SECTIONS
-    // ===============================
+    async function refreshDashboard() {
 
-    const masteredSections = await getMasteredSections();
+        const masteredSections = await getMasteredSections();
 
-    let totalLessons = 0;
-    let totalMastered = 0;
+        let totalLessons = 0;
+        let totalMastered = 0;
 
-    const moduleCards = document.querySelectorAll(".module-card");
+        document.querySelectorAll(".module-card").forEach(card => {
 
-    moduleCards.forEach(card => {
+            const moduleId = card.dataset.id;
+            if (!moduleId) return;
 
-        const moduleId = card.dataset.id;
-        if (!moduleId) return;
+            const prefix = moduleId.split("-")[0];
+            const lessons = curriculum[prefix] || [];
 
-        const prefix = moduleId.split("-")[0]; // q2 etc
-        const expectedCount = curriculum[prefix] || 0;
+            const masteredCount = lessons.filter(id =>
+                masteredSections.includes(id)
+            ).length;
 
-        const masteredCount = masteredSections.filter(section =>
-            section.startsWith(prefix + "-")
-        ).length;
+            totalLessons += lessons.length;
+            totalMastered += masteredCount;
 
-        totalLessons += expectedCount;
-        totalMastered += masteredCount;
+            // Restore green completed state
+            if (lessons.length > 0 && masteredCount === lessons.length) {
+                card.classList.add("completed");
+            } else {
+                card.classList.remove("completed");
+            }
+        });
 
-        if (expectedCount > 0 && masteredCount >= expectedCount) {
-            card.classList.add("completed");
-        } else {
-            card.classList.remove("completed");
-        }
+        const percent = totalLessons > 0
+            ? Math.round((totalMastered / totalLessons) * 100)
+            : 0;
 
-    });
+        document.getElementById("progressFill").style.width = percent + "%";
+        document.getElementById("progressText").innerText = percent + "%";
+    }
 
-    // ===============================
-    // 4️⃣ UPDATE GLOBAL PROGRESS BAR
-    // ===============================
+    await refreshDashboard();
 
-    const percent = totalLessons > 0
-        ? Math.round((totalMastered / totalLessons) * 100)
-        : 0;
+    // =============================
+    // 3️⃣ Live Update Listener
+    // =============================
+    window.addEventListener("progressUpdated", refreshDashboard);
 
-    const progressFill = document.getElementById("progressFill");
-    const progressText = document.getElementById("progressText");
-
-    if (progressFill) progressFill.style.width = percent + "%";
-    if (progressText) progressText.innerText = percent + "%";
-
-});
-    window.addEventListener("progressUpdated", () => {
-    location.reload();
 });
 </script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
