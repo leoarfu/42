@@ -1,0 +1,260 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, shrink-to-fit=no">
+<title>Command Center — LEOAF</title>
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;600;800&family=Inter:wght@400;600&display=swap" rel="stylesheet">
+
+<style>
+/* --- YOUR ORIGINAL CSS UNCHANGED --- */
+/* (Keeping everything exactly as-is to preserve vibe & behavior) */
+
+* { box-sizing: border-box; margin:0; padding:0; }
+html { height:100%; -webkit-text-size-adjust:100%; max-width:100vw; overflow-x:hidden; }
+body {
+    font-family:'Orbitron',sans-serif;
+    background:#000; color:white;
+    overflow-x:hidden; max-width:100vw;
+    position:relative; min-height:100vh;
+}
+#starsCanvas { position:fixed; inset:0; z-index:-1; }
+
+/* HEADER */
+header {
+background:#000; border-bottom:1px solid #ff004f33;
+position:sticky; top:0; z-index:100;
+padding:1rem clamp(1.5rem,5vw,4rem);
+display:flex; justify-content:space-between; align-items:center;
+box-shadow:0 4px 16px #0008;
+}
+.logo { font-weight:800; font-size:clamp(18px,2vw,24px); letter-spacing:3px; text-decoration:none; }
+.logo span:first-child { color:white; }
+.logo span:last-child { color:#ff004f; }
+.nav-left { display:flex; align-items:center; gap:2rem; }
+.header-controls { display:flex; align-items:center; gap:15px; }
+.user-id { font-size:10px; color:#00d9ff; letter-spacing:1px; opacity:0.8; display:none; }
+.logoff-btn {
+background:transparent; border:1px solid #ff004f; color:#ff004f;
+padding:6px 14px; cursor:pointer; transition:0.3s ease;
+font-size:11px; font-family:'Orbitron',sans-serif; letter-spacing:1px; border-radius:4px;
+}
+.logoff-btn:hover { background:#ff004f; color:black; box-shadow:0 0 10px #ff004f; }
+
+/* DASHBOARD */
+.dashboard { width:100%; max-width:960px; margin:40px auto; padding:0 15px; position:relative; z-index:1; }
+.welcome-msg { font-size:clamp(22px,4vw,32px); margin-bottom:10px; font-weight:800; letter-spacing:1px; }
+
+/* PROGRESS */
+.mission-control {
+background:rgba(17,17,17,0.8); border:1px solid rgba(0,217,255,0.3);
+padding:25px; margin-bottom:40px; box-shadow:inset 0 0 20px rgba(0,217,255,0.05);
+}
+.progress-header { display:flex; justify-content:space-between; align-items:flex-end; margin-bottom:15px; }
+.progress-header h2 { font-size:16px; color:#00d9ff; letter-spacing:2px; }
+.progress-stats { font-size:14px; color:#39ff14; }
+.progress-track { width:100%; height:12px; background:rgba(255,255,255,0.1); border-radius:6px; overflow:hidden; }
+.progress-fill {
+height:100%; width:0%; background:linear-gradient(90deg,#00d9ff,#39ff14);
+box-shadow:0 0 10px rgba(57,255,20,0.5);
+transition:width 0.8s cubic-bezier(0.4,0,0.2,1);
+}
+
+/* YEAR HEADERS */
+.year-header {
+display:flex; align-items:center;
+padding:20px; margin-top:2.5rem; margin-bottom:0;
+border-left:3px solid #00d9ff;
+background:rgba(0,217,255,0.03);
+pointer-events:none;
+}
+.year-header .module-info h3 { color:#00d9ff; font-size:17px; letter-spacing:1px; margin-bottom:6px; }
+.year-header .module-info p { color:#aaa; font-size:13px; font-family:'Inter',sans-serif; line-height:1.5; }
+
+/* MODULE CARDS */
+.module-list { display:flex; flex-direction:column; gap:15px; }
+.module-card {
+display:flex; align-items:flex-start;
+background:rgba(255,255,255,0.03); border-left:3px solid #ff004f;
+padding:20px; text-decoration:none; color:white;
+transition:0.3s ease; position:relative;
+}
+.module-card:hover { background:rgba(0,217,255,0.08); transform:translateX(4px); border-left-color:#00d9ff; }
+.module-info { flex-grow:1; margin-left:20px; }
+.module-info h3 { margin:0 0 6px; font-size:16px; color:#ffffff; letter-spacing:1px; }
+.module-info p { margin:0 0 6px; font-size:13px; color:#aaaaaa; font-family:'Inter',sans-serif; line-height:1.6; }
+.module-meta { display:flex; gap:1.5rem; margin-top:8px; }
+.module-meta span {
+font-size:11px; letter-spacing:1px; font-family:'Orbitron',sans-serif;
+padding:3px 8px; border-radius:3px;
+}
+.meta-months { color:#00d9ff88; border:1px solid #00d9ff22; }
+.meta-hours { color:#39ff1488; border:1px solid #39ff1422; }
+
+/* COMPLETED */
+.module-card.completed { border-left-color:#39ff14; background:rgba(57,255,20,0.03); }
+.module-card.completed .module-info h3 { color:#39ff14; text-decoration:line-through; }
+
+/* ENDGAME */
+.endgame-card {
+margin-top:2.5rem; background:rgba(57,255,20,0.08);
+border-left:3px solid #39ff14; padding:20px;
+}
+.endgame-card h3 { color:#39ff14; font-size:17px; letter-spacing:1px; margin-bottom:8px; }
+.endgame-card p { color:#aaa; font-size:13px; font-family:'Inter',sans-serif; line-height:1.6; }
+.endgame-total {
+display:inline-block; margin-top:10px;
+font-size:11px; color:#39ff14; font-family:'Orbitron',sans-serif;
+letter-spacing:2px; border:1px solid #39ff1444; padding:4px 10px;
+}
+</style>
+</head>
+
+<body>
+
+<canvas id="starsCanvas"></canvas>
+
+<header>
+    <div class="nav-left">
+        <a href="dashboard.html" class="logo"><span>LEO</span><span>AF</span></a>
+    </div>
+    <div class="header-controls">
+        <span id="userEmail" class="user-id">AGENT</span>
+        <button id="logoffBtn" class="logoff-btn">ABORT</button>
+    </div>
+</header>
+
+<main class="dashboard">
+<h1 class="welcome-msg">MISSION DASHBOARD</h1>
+
+<div class="mission-control">
+    <div class="progress-header">
+        <h2>CONSTELLATION ARCHITECT PROGRESSION</h2>
+        <span class="progress-stats" id="progressText">0%</span>
+    </div>
+    <div class="progress-track">
+        <div class="progress-fill" id="progressFill"></div>
+    </div>
+</div>
+
+<div class="module-list" id="moduleList">
+
+<!-- YEAR 1 -->
+<div class="year-header">
+<div class="module-info">
+<h3>Year 1 — From GEO Expert to LEO Systems Architect</h3>
+<p>Replace static-orbit intuition with dynamic constellation thinking. Orbital mechanics, RF, phased arrays, mobility, and networking under constant motion.</p>
+</div>
+</div>
+
+<a href="q1-connectivity.html" class="module-card" data-id="q1-connectivity">
+<div class="module-info">
+<h3>Q1 — Global Connectivity & Multi-Orbit Context</h3>
+<p>Terrestrial limits · GEO/MEO/LEO comparison · Hybrid architectures · Aviation & maritime pain points · Gateway/PoP data flows · Why mega-constellations exist</p>
+<div class="module-meta">
+<span class="meta-months">MONTHS 1–3</span>
+<span class="meta-hours">~60 HRS</span>
+</div>
+</div>
+</a>
+
+<a href="q2-orbital-mechanics.html" class="module-card" data-id="q2-orbital-mechanics">
+<div class="module-info">
+<h3>Q2 — Orbital Mechanics & Constellation Engineering</h3>
+<p>Velocity & energy · Ground tracks · J₂ precession · Visibility cones · Handover cadence · Walker patterns · Coverage optimization · Simulation with SGP4</p>
+<div class="module-meta">
+<span class="meta-months">MONTHS 4–6</span>
+<span class="meta-hours">~80 HRS</span>
+</div>
+</div>
+</a>
+
+<a href="q3-link-budgets-phased-arrays.html" class="module-card" data-id="q3-link-budgets-phased-arrays">
+<div class="module-info">
+<h3>Q3 — RF Systems & Phased Array Mastery</h3>
+<p>Full link budgets · Ka/Ku/V band trade-offs · EPFD & ITU realities · AESA steering physics · Aviation SWaP constraints · LEO Doppler implications</p>
+<div class="module-meta">
+<span class="meta-months">MONTHS 7–9</span>
+<span class="meta-hours">~90 HRS</span>
+</div>
+</div>
+</a>
+
+<a href="q4-networking-mobility.html" class="module-card" data-id="q4-networking-mobility">
+<div class="module-info">
+<h3>Q4 — Networking, Mobility & Secure Operations</h3>
+<p>Mesh vs bent-pipe · Handover logic · TCP/QUIC under mobility · SDN · 5G NTN · LEO cybersecurity · Predictive routing for aircraft</p>
+<div class="module-meta">
+<span class="meta-months">MONTHS 10–12</span>
+<span class="meta-hours">~80 HRS</span>
+</div>
+</div>
+</a>
+
+<!-- YEAR 2 -->
+<div class="year-header">
+<div class="module-info">
+<h3>Year 2 — Real Constellation Architecture & Operations</h3>
+<p>ISL routing, fleet management, economics, regulatory depth, and capstone-level system design.</p>
+</div>
+</div>
+
+<a href="q5-isl-routing.html" class="module-card" data-id="q5-isl-routing">
+<div class="module-info">
+<h3>Q5 — Optical ISLs & Space-Based Routing</h3>
+<p>Point-acquire-track · SDN in orbit · MPLS/segment routing · Latency-aware congestion control · Hybrid LEO/GEO integration</p>
+<div class="module-meta">
+<span class="meta-months">MONTHS 13–15</span>
+<span class="meta-hours">~90 HRS</span>
+</div>
+</div>
+</a>
+
+<a href="q6-ground-operations.html" class="module-card" data-id="q6-ground-operations">
+<div class="module-info">
+<h3>Q6 — Ground Segment & Fleet Control</h3>
+<p>TT&C · LEOP · Gateway redundancy · Debris mitigation · Deorbit compliance · Constellation health monitoring</p>
+<div class="module-meta">
+<span class="meta-months">MONTHS 16–18</span>
+<span class="meta-hours">~70 HRS</span>
+</div>
+</div>
+</a>
+
+<a href="q7-economics-regs-project1.html" class="module-card" data-id="q7-economics-regs-project1">
+<div class="module-info">
+<h3>Q7 — Economics, Regulation & Capstone Simulator</h3>
+<p>CapEx/OpEx modeling · ARPU math · ITU/FCC deep dive · Full constellation simulation repo with coverage + handover metrics</p>
+<div class="module-meta">
+<span class="meta-months">MONTHS 19–21</span>
+<span class="meta-hours">~70 HRS</span>
+</div>
+</div>
+</a>
+
+<a href="q8-capstone2-job-prep.html" class="module-card" data-id="q8-capstone2-job-prep">
+<div class="module-info">
+<h3>Q8 — Aviation Case Study & Architect Portfolio</h3>
+<p>End-to-end aircraft connectivity design · Multi-orbit trade study · Terminal selection · Whitepapers · Interview-level mastery</p>
+<div class="module-meta">
+<span class="meta-months">MONTHS 22–24</span>
+<span class="meta-hours">~80 HRS</span>
+</div>
+</div>
+</a>
+
+<div class="endgame-card">
+<h3>Mission Endgame — LEO Constellation Architect</h3>
+<p>You think in planes, not satellites. In coverage probability, not beams. In latency maps, not static links. You design systems that move at 7.6 km/s and still feel stable to passengers at 35,000 ft.</p>
+<div class="endgame-total">~620 HOURS · 24 MONTHS · SYSTEMS-LEVEL MASTERY</div>
+</div>
+
+</div>
+</main>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="supabase.js"></script>
+<script src="user_progress.js"></script>
+
+</body>
+</html>
