@@ -1,0 +1,200 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>LEO Architect Dashboard</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<style>
+body {
+    font-family: Arial, sans-serif;
+    background:#0f172a;
+    color:white;
+    margin:0;
+    padding:0;
+}
+
+header {
+    padding:20px;
+    background:#111827;
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+}
+
+.progress-container {
+    width:100%;
+    background:#1f2937;
+    height:20px;
+    border-radius:10px;
+    margin-top:10px;
+    overflow:hidden;
+}
+
+.progress-fill {
+    height:100%;
+    width:0%;
+    background:#22c55e;
+    transition:0.3s;
+}
+
+.module-grid {
+    display:grid;
+    grid-template-columns:repeat(auto-fit,minmax(280px,1fr));
+    gap:20px;
+    padding:30px;
+}
+
+.module-card {
+    background:#1e293b;
+    padding:20px;
+    border-radius:10px;
+    cursor:pointer;
+    transition:0.3s;
+    border:1px solid #334155;
+}
+
+.module-card.completed {
+    background:#064e3b;
+    text-decoration:line-through;
+}
+
+.module-card:hover {
+    transform:scale(1.02);
+}
+
+.module-hours {
+    font-size:0.9rem;
+    color:#94a3b8;
+    margin-top:10px;
+}
+
+button {
+    background:#ef4444;
+    border:none;
+    padding:8px 14px;
+    border-radius:6px;
+    cursor:pointer;
+    color:white;
+}
+
+button:hover {
+    opacity:0.8;
+}
+</style>
+</head>
+<body>
+
+<header>
+    <div>
+        <h2>LEO Satcom Architect Track</h2>
+        Logged in as: <span id="userEmail" style="display:none;"></span>
+        <div class="progress-container">
+            <div id="progressFill" class="progress-fill"></div>
+        </div>
+        <div id="progressText" style="margin-top:5px;font-size:0.9rem;"></div>
+    </div>
+    <button id="logoffBtn">Abort</button>
+</header>
+
+<div class="module-grid">
+
+<div class="module-card" data-id="q1-geo-vs-leo" onclick="location.href='q1.html'">
+<h3>Q1 – GEO vs LEO Systems Thinking</h3>
+<p>Orbital regimes, latency physics, architectural paradigm shifts.</p>
+<div class="module-hours">30 Hours</div>
+</div>
+
+<div class="module-card" data-id="q2-orbital-mechanics" onclick="location.href='q2.html'">
+<h3>Q2 – Orbital Mechanics & Constellation Geometry</h3>
+<p>Velocity, period, coverage geometry, J₂, drag, Walker constellations.</p>
+<div class="module-hours">40 Hours</div>
+</div>
+
+<div class="module-card" data-id="q3-rf-link-budget" onclick="location.href='q3.html'">
+<h3>Q3 – RF, Link Budget & Doppler Engineering</h3>
+<p>Dynamic link budgets, Doppler compensation, phased arrays.</p>
+<div class="module-hours">45 Hours</div>
+</div>
+
+<div class="module-card" data-id="q4-mobility-handover" onclick="location.href='q4.html'">
+<h3>Q4 – Mobility & Handover Architecture</h3>
+<p>Beam hopping, session continuity, aviation mobility.</p>
+<div class="module-hours">45 Hours</div>
+</div>
+
+<div class="module-card" data-id="q5-network-architecture" onclick="location.href='q5.html'">
+<h3>Q5 – Constellation Network Architecture</h3>
+<p>ISLs, routing in moving graphs, topology evolution.</p>
+<div class="module-hours">50 Hours</div>
+</div>
+
+<div class="module-card" data-id="q6-ground-segment" onclick="location.href='q6.html'">
+<h3>Q6 – Ground Segment & Service Orchestration</h3>
+<p>Gateways, POPs, cloud integration, SDN.</p>
+<div class="module-hours">40 Hours</div>
+</div>
+
+<div class="module-card" data-id="q7-aviation-services" onclick="location.href='q7.html'">
+<h3>Q7 – Aviation & Mobility Services</h3>
+<p>IFC architecture, regulatory, service tiers.</p>
+<div class="module-hours">35 Hours</div>
+</div>
+
+<div class="module-card" data-id="q8-capstone-architecture" onclick="location.href='q8.html'">
+<h3>Q8 – LEO Service Platform Architecture (Capstone)</h3>
+<p>Design your own constellation-backed service stack.</p>
+<div class="module-hours">50 Hours</div>
+</div>
+
+</div>
+
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="supabase.js"></script>
+<script src="user_progress.js"></script>
+
+<script>
+document.addEventListener("DOMContentLoaded", async () => {
+
+    const { data: { session } } = await client.auth.getSession();
+    if (!session) {
+        window.location.href = "index.html";
+        return;
+    }
+
+    document.getElementById("userEmail").textContent = session.user.email;
+    document.getElementById("userEmail").style.display = "inline";
+
+    const moduleCards = document.querySelectorAll(".module-card");
+    const totalModules = moduleCards.length;
+
+    const masteredSections = await getMasteredSections();
+
+    let masteredCount = 0;
+
+    moduleCards.forEach(card => {
+        const id = card.dataset.id;
+        if (masteredSections.includes(id)) {
+            card.classList.add("completed");
+            masteredCount++;
+        } else {
+            card.classList.remove("completed");
+        }
+    });
+
+    const percent = Math.round((masteredCount / totalModules) * 100);
+
+    document.getElementById("progressFill").style.width = percent + "%";
+    document.getElementById("progressText").textContent = percent + "% Complete";
+
+});
+
+document.getElementById("logoffBtn").addEventListener("click", async () => {
+    await client.auth.signOut();
+    window.location.href = "index.html";
+});
+</script>
+
+</body>
+</html>
