@@ -255,9 +255,9 @@ letter-spacing:2px; border:1px solid #39ff1444; padding:4px 10px;
 <script>
 document.addEventListener("DOMContentLoaded", async () => {
 
-    // ============================
-    // Show Logged In Email
-    // ============================
+    // =============================
+    // SHOW USER EMAIL
+    // =============================
     const { data: { session } } = await client.auth.getSession();
     if (session?.user?.email) {
         const emailSpan = document.getElementById("userEmail");
@@ -265,64 +265,87 @@ document.addEventListener("DOMContentLoaded", async () => {
         emailSpan.style.display = "inline";
     }
 
-    // ============================
-    // Load ALL progress rows
-    // ============================
-    const allProgress = await getAllProgress();
+    // =============================
+    // FULL CURRICULUM DEFINITION
+    // 🔴 YOU MUST LIST ALL LESSON IDs HERE
+    // =============================
+    const curriculum = [
+        // Q1
+        "q1-intro",
+        "q1-geo-vs-leo",
+        "q1-hybrid",
 
-    // Group by module prefix (q1, q2, q3...)
-    const moduleMap = {};
+        // Q2
+        "q2-energy",
+        "q2-period",
+        "q2-j2",
+        "q2-drag",
 
-    allProgress.forEach(row => {
-        const section = row.section;      // "q2-energy"
-        const mastered = row.mastered;    // true/false
+        // Q3
+        "q3-link-budget",
+        "q3-doppler",
 
-        const prefix = section.split("-")[0];
+        // Q4
+        "q4-handover",
+        "q4-routing"
 
-        if (!moduleMap[prefix]) {
-            moduleMap[prefix] = {
-                total: 0,
-                mastered: 0
-            };
-        }
+        // Continue for all quarters
+    ];
 
-        moduleMap[prefix].total += 1;
+    const masteredRows = await getMasteredSections();
 
-        if (mastered === true) {
-            moduleMap[prefix].mastered += 1;
-        }
-    });
+    const masteredSet = new Set(masteredRows);
 
-    let totalLessons = 0;
+    let totalLessons = curriculum.length;
     let totalMastered = 0;
 
-    document.querySelectorAll(".module-card").forEach(card => {
-
-        const moduleId = card.dataset.id;
-        if (!moduleId) return;
-
-        const prefix = moduleId.split("-")[0];
-        const data = moduleMap[prefix];
-
-        if (!data) return;
-
-        totalLessons += data.total;
-        totalMastered += data.mastered;
-
-        if (data.total > 0 && data.mastered === data.total) {
-            card.classList.add("completed");
-        } else {
-            card.classList.remove("completed");
+    curriculum.forEach(id => {
+        if (masteredSet.has(id)) {
+            totalMastered++;
         }
-
     });
 
+    // =============================
+    // UPDATE PROGRESS BAR
+    // =============================
     const percent = totalLessons > 0
         ? Math.round((totalMastered / totalLessons) * 100)
         : 0;
 
     document.getElementById("progressFill").style.width = percent + "%";
     document.getElementById("progressText").innerText = percent + "%";
+
+    // =============================
+    // UPDATE MODULE CARDS
+    // =============================
+    const modules = {};
+
+    curriculum.forEach(id => {
+        const prefix = id.split("-")[0];
+
+        if (!modules[prefix]) {
+            modules[prefix] = { total: 0, mastered: 0 };
+        }
+
+        modules[prefix].total++;
+
+        if (masteredSet.has(id)) {
+            modules[prefix].mastered++;
+        }
+    });
+
+    document.querySelectorAll(".module-card").forEach(card => {
+        const prefix = card.dataset.id.split("-")[0];
+        const moduleData = modules[prefix];
+
+        if (!moduleData) return;
+
+        if (moduleData.mastered === moduleData.total) {
+            card.classList.add("completed");
+        } else {
+            card.classList.remove("completed");
+        }
+    });
 
 });
 </script>
