@@ -251,7 +251,6 @@ letter-spacing:2px; border:1px solid #39ff1444; padding:4px 10px;
 
 </div>
 </main>
-
 <script>
 document.addEventListener("DOMContentLoaded", async () => {
 
@@ -352,6 +351,51 @@ document.addEventListener("DOMContentLoaded", async () => {
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="supabase.js"></script>
 <script src="user_progress.js"></script>
+
+<script>
+document.addEventListener("DOMContentLoaded", async () => {
+
+    // ===== PROTECT PAGE =====
+    const { data: { session } } = await client.auth.getSession();
+    if (!session) {
+        window.location.href = "index.html";
+        return;
+    }
+
+    // ===== SHOW EMAIL =====
+    const emailSpan = document.getElementById("userEmail");
+    emailSpan.textContent = session.user.email;
+    emailSpan.style.display = "inline";
+
+    // ===== GET MODULES DIRECTLY FROM PAGE =====
+    const moduleCards = document.querySelectorAll(".module-card");
+    const totalModules = moduleCards.length;
+
+    const masteredSections = await getMasteredSections();
+
+    let masteredCount = 0;
+
+    moduleCards.forEach(card => {
+        const id = card.dataset.id;
+
+        if (masteredSections.includes(id)) {
+            card.classList.add("completed");
+            masteredCount++;
+        } else {
+            card.classList.remove("completed");
+        }
+    });
+
+    // ===== UPDATE PROGRESS BAR =====
+    const percent = totalModules > 0
+        ? Math.round((masteredCount / totalModules) * 100)
+        : 0;
+
+    document.getElementById("progressFill").style.width = percent + "%";
+    document.getElementById("progressText").textContent = percent + "%";
+
+});
+</script>
 
 <script>
 document.getElementById("logoffBtn").addEventListener("click", async () => {
