@@ -255,60 +255,85 @@ letter-spacing:2px; border:1px solid #39ff1444; padding:4px 10px;
 <script>
 document.addEventListener("DOMContentLoaded", async () => {
 
-    // Get mastered sections from Supabase
-    const masteredSections = await getMasteredSections();
+    // ===============================
+    // 1️⃣ SHOW USER EMAIL
+    // ===============================
 
-    const moduleCards = document.querySelectorAll('.module-card');
+    const { data: { session } } = await client.auth.getSession();
+    if (session?.user?.email) {
+        const emailSpan = document.getElementById("userEmail");
+        if (emailSpan) {
+            emailSpan.textContent = session.user.email;
+            emailSpan.style.display = "inline";
+        }
+    }
+
+    // ===============================
+    // 2️⃣ DEFINE FULL CURRICULUM MAP
+    // (Update counts if you add lessons)
+    // ===============================
+
+    const curriculum = {
+        q1: 12,
+        q2: 18,
+        q3: 20,
+        q4: 16,
+        q5: 18,
+        q6: 14,
+        q7: 14,
+        q8: 16
+    };
+
+    // ===============================
+    // 3️⃣ LOAD MASTERED SECTIONS
+    // ===============================
+
+    const masteredSections = await getMasteredSections();
 
     let totalLessons = 0;
     let totalMastered = 0;
+
+    const moduleCards = document.querySelectorAll(".module-card");
 
     moduleCards.forEach(card => {
 
         const moduleId = card.dataset.id;
         if (!moduleId) return;
 
-        const modulePrefix = moduleId.split('-')[0]; // e.g. "q2"
+        const prefix = moduleId.split("-")[0]; // q2 etc
+        const expectedCount = curriculum[prefix] || 0;
 
-        // Find lessons that belong to this module
-        const relatedLessons = masteredSections.filter(section =>
-            section.startsWith(modulePrefix + '-')
-        );
+        const masteredCount = masteredSections.filter(section =>
+            section.startsWith(prefix + "-")
+        ).length;
 
-        // Count ALL lessons for this prefix (from database)
-        // We assume all existing sections in DB define total lesson count
-        const allLessonsForModule = masteredSections.filter(section =>
-            section.startsWith(modulePrefix + '-')
-        );
-
-        const masteredCount = relatedLessons.length;
-        const totalCount = allLessonsForModule.length;
-
-        totalLessons += totalCount;
+        totalLessons += expectedCount;
         totalMastered += masteredCount;
 
-        if (totalCount > 0 && masteredCount === totalCount) {
-            card.classList.add('completed');
+        if (expectedCount > 0 && masteredCount >= expectedCount) {
+            card.classList.add("completed");
         } else {
-            card.classList.remove('completed');
+            card.classList.remove("completed");
         }
 
     });
 
-    // Update global progress bar
-    if (totalLessons > 0) {
-        const percent = Math.round((totalMastered / totalLessons) * 100);
+    // ===============================
+    // 4️⃣ UPDATE GLOBAL PROGRESS BAR
+    // ===============================
 
-        const progressFill = document.getElementById('progressFill');
-        const progressText = document.getElementById('progressText');
+    const percent = totalLessons > 0
+        ? Math.round((totalMastered / totalLessons) * 100)
+        : 0;
 
-        if (progressFill) progressFill.style.width = percent + "%";
-        if (progressText) progressText.innerText = percent + "%";
-    }
+    const progressFill = document.getElementById("progressFill");
+    const progressText = document.getElementById("progressText");
+
+    if (progressFill) progressFill.style.width = percent + "%";
+    if (progressText) progressText.innerText = percent + "%";
 
 });
 </script>
-
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="supabase.js"></script>
 <script src="user_progress.js"></script>
