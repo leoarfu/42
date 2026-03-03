@@ -298,7 +298,7 @@ h1 { font-size:clamp(1rem,3.5vw,1.8rem); margin-bottom:0.75rem; }
 <div class="content">
 <h1>Q2 – Orbital Mechanics & LEO Constellation Engineering</h1>
 
-<div class="check-container" id="quarterCheck">
+<div class="check-container" data-id="q2-orbital-mechanics">
     <div class="custom-checkbox"></div>
     <span class="check-label">MARK QUARTER COMPLETE</span>
 </div>
@@ -625,5 +625,54 @@ document.addEventListener('DOMContentLoaded', async () => {
 
 </script>
 
+<script>
+// ===============================
+// Quarter Completion Logic
+// ===============================
+
+document.addEventListener("DOMContentLoaded", async () => {
+
+    const quarterBox = document.querySelector('.check-container');
+    const quarterId = quarterBox.dataset.id;
+    const checkbox = quarterBox.querySelector('.custom-checkbox');
+
+    // Restore state
+    const section = await getSection(quarterId);
+    if (section?.mastered) {
+        checkbox.classList.add("checked");
+        quarterBox.classList.add("completed");
+    }
+
+    // Toggle
+    quarterBox.addEventListener("click", async () => {
+
+        const isChecked = checkbox.classList.contains("checked");
+
+        if (!isChecked) {
+
+            const confirmComplete = confirm(
+                "Mark entire quarter as complete?\n\nMake sure all sections are mastered."
+            );
+
+            if (!confirmComplete) return;
+
+            await upsertSection(quarterId, true);
+
+            checkbox.classList.add("checked");
+            quarterBox.classList.add("completed");
+
+        } else {
+
+            await upsertSection(quarterId, false);
+
+            checkbox.classList.remove("checked");
+            quarterBox.classList.remove("completed");
+        }
+
+    });
+
+});
+</script>
+  
 </body>
 </html>
