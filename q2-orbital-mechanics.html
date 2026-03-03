@@ -1,0 +1,850 @@
+<!DOCTYPE html>
+
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, shrink-to-fit=no">
+<title>Q2 – Orbital Mechanics & Constellations 101 • LEOAF</title>
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;600;800&family=Inter:wght@300;400;600&display=swap" rel="stylesheet">
+<style>
+* { box-sizing:border-box; margin:0; padding:0; }
+html { overflow-x:hidden; }
+body { background:#000; color:#f0f0f0; font-family:'Inter',sans-serif; line-height:1.65; min-height:100vh; overflow-x:hidden; width:100%; }
+
+/* ── Header ─────────────────────────────────────── */
+header {
+background:#000; border-bottom:1px solid #ff004f33;
+position:sticky; top:0; z-index:100;
+padding:0.6rem 1rem;
+display:flex; justify-content:space-between; align-items:center;
+box-shadow:0 4px 16px #0008;
+min-height:0; width:100%;
+}
+.nav-left { display:flex; align-items:center; gap:0.75rem; flex:1; min-width:0; }
+.logo { font-family:‘Orbitron’,sans-serif; font-size:clamp(0.95rem,3vw,1.6rem); font-weight:800; letter-spacing:2px; text-decoration:none; white-space:nowrap; flex-shrink:0; }
+.logo span:first-child { color:#fff; }
+.logo span:last-child { color:#ff004f; }
+.back-dashboard { color:#00d9ff; font-size:clamp(0.7rem,2vw,0.85rem); text-decoration:none; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+.back-dashboard:hover { color:#39ff14; text-decoration:underline; }
+.logoff-btn {
+background:transparent; border:1px solid #ff004f; color:#ff004f;
+padding:0.35rem 0.65rem; font-size:clamp(0.65rem,2vw,0.78rem); cursor:pointer; border-radius:4px;
+white-space:nowrap; flex-shrink:0;
+}
+.logoff-btn:hover { background:#ff004f; color:#000; }
+
+/* ── Content ─────────────────────────────────────── */
+.content { max-width:860px; margin:0 auto; padding:1.5rem 1rem 4rem; width:100%; }
+
+h1 {
+font-family:‘Orbitron’,sans-serif;
+font-size:clamp(1.2rem,4vw,2.8rem);
+text-align:center; margin-bottom:1.25rem;
+letter-spacing:1px; color:#00d9ff;
+line-height:1.2; word-break:break-word;
+}
+
+/* ── Quarter complete button ─────────────────────── */
+.check-container {
+display:flex; align-items:center; justify-content:center; gap:0.75rem;
+margin:0 auto 2rem; cursor:pointer; width:fit-content;
+padding:0.65rem 1.25rem; border:1px solid #ff004f44;
+border-radius:8px; transition:all 0.2s ease;
+background:rgba(255,0,79,0.05);
+}
+.check-container:hover { border-color:#ff004f; background:rgba(255,0,79,0.1); }
+.check-container.completed { border-color:#39ff1444; background:rgba(57,255,20,0.05); }
+.check-container.completed:hover { border-color:#39ff14; background:rgba(57,255,20,0.1); }
+.check-label { font-size:0.82rem; letter-spacing:1px; color:#aaa; font-family:‘Orbitron’,sans-serif; font-weight:600; }
+.custom-checkbox {
+width:26px; height:26px; border:2px solid #ff004f; border-radius:6px;
+display:flex; align-items:center; justify-content:center;
+background:transparent; transition:all 0.2s; flex-shrink:0;
+}
+.custom-checkbox.checked { border-color:#39ff14; background:rgba(57,255,20,0.25); }
+.custom-checkbox.checked::after { 
+  content:'\2713'; 
+  color:#39ff14; 
+  font-weight:bold; 
+  font-size:1.1rem; 
+  line-height:1;
+}
+.custom-checkbox-small.checked::after { 
+  content:'\2713'; 
+  color:#39ff14; 
+  font-weight:bold; 
+  font-size:0.85rem; 
+}
+
+/* ── Info cards ──────────────────────────────────── */
+.section-card {
+background:rgba(255,255,255,0.025); border:1px solid rgba(0,217,255,0.15);
+border-radius:10px; padding:1.25rem 1rem; margin:1.75rem 0;
+box-shadow:0 4px 20px #0008;
+}
+.section-card h2 { font-family:‘Orbitron’,sans-serif; color:#00d9ff; font-size:1.15rem; margin-bottom:0.9rem; }
+.section-card ul, .section-card ol { padding-left:1.2rem; }
+.section-card li { margin-bottom:0.4rem; font-size:0.95rem; color:#ccc; }
+
+/* ── Accordion headers ───────────────────────────── */
+.accordion-header {
+background:rgba(0,217,255,0.06); padding:0.9rem 1rem;
+border-radius:8px; margin:0.75rem 0;
+cursor:pointer; display:flex; align-items:center; gap:0.75rem;
+transition:all 0.2s ease;
+}
+.accordion-header:hover { background:rgba(0,217,255,0.12); }
+.accordion-header.active { background:rgba(57,255,20,0.10); border-radius:8px 8px 0 0; margin-bottom:0; }
+.accordion-header .check-small { width:24px; height:24px; flex-shrink:0; pointer-events:none; }
+.custom-checkbox-small {
+width:20px; height:20px; border:2px solid #888; border-radius:4px;
+display:flex; align-items:center; justify-content:center; flex-shrink:0;
+}
+.custom-checkbox-small.checked { border-color:#39ff14; background:rgba(57,255,20,0.25); }
+.custom-checkbox-small.checked::after { content:‘✓’; color:#39ff14; font-weight:bold; font-size:0.85rem; }
+.accordion-header h3 { margin:0; font-size:0.95rem; flex:1; line-height:1.35; color:#e0e0e0; }
+
+/* ── Accordion content — READING MODE ───────────── */
+.accordion-content {
+display:none;
+background:#f9f6f0;           /* warm off-white — easy on eyes */
+color:#1a1a1a;                 /* near-black text — maximum readability */
+border-radius:0 0 8px 8px;
+border:1px solid rgba(57,255,20,0.25);
+border-top:none;
+padding:1.5rem 1.25rem 1.75rem;
+margin-bottom:0.75rem;
+}
+
+/* Reset all text inside content for readability */
+.accordion-content h4 {
+font-family:‘Orbitron’,sans-serif;
+color:#0a3a5c;                 /* deep navy — clear hierarchy */
+font-size:0.95rem;
+letter-spacing:0.5px;
+margin:1.4rem 0 0.5rem;
+padding-bottom:0.3rem;
+border-bottom:1px solid #ddd;
+}
+.accordion-content h4:first-child { margin-top:0; }
+
+.accordion-content p {
+color:#2a2a2a;
+font-size:0.97rem;
+line-height:1.75;
+margin-bottom:0.75rem;
+}
+
+.accordion-content ul,
+.accordion-content ol {
+padding-left:1.4rem;
+margin-bottom:0.75rem;
+}
+
+.accordion-content li {
+color:#333;
+font-size:0.95rem;
+line-height:1.7;
+margin-bottom:0.3rem;
+}
+
+.accordion-content strong { color:#0a3a5c; }
+
+/* ── Equation blocks ─────────────────────────────── */
+.equation {
+font-family:monospace;
+background:#e8f4fd;            /* light blue tint */
+border-left:4px solid #0077b6;
+padding:1rem 1.2rem;
+border-radius:0 6px 6px 0;
+margin:1rem 0;
+color:#003566;
+line-height:1.6;
+font-size:0.97rem;
+overflow-x:auto;
+}
+
+/* ── Code blocks ─────────────────────────────────── */
+.code-snippet {
+background:#1e1e2e;            /* dark purple-grey — VS Code feel */
+padding:1.2rem;
+border-radius:8px;
+font-family:‘Courier New’,monospace;
+font-size:0.85rem;
+overflow-x:auto;
+margin:1.2rem 0;
+border-left:4px solid #39ff14;
+color:#cdd6f4;
+line-height:1.6;
+-webkit-overflow-scrolling:touch;
+}
+.code-snippet pre { margin:0; white-space:pre; }
+
+/* ── Tables ──────────────────────────────────────── */
+.accordion-content table {
+width:100%;
+margin:1.2rem 0;
+border-collapse:collapse;
+font-size:0.88rem;
+overflow-x:auto;
+display:block;
+-webkit-overflow-scrolling:touch;
+}
+.accordion-content table th {
+background:#0a3a5c;
+color:#fff;
+padding:9px 10px;
+text-align:left;
+font-weight:600;
+}
+.accordion-content table td {
+padding:8px 10px;
+border-bottom:1px solid #ddd;
+color:#1a1a1a;
+background:#fff;
+}
+.accordion-content table tr:nth-child(even) td { background:#f3f7fb; }
+
+/* ── Takeaway box ────────────────────────────────── */
+.takeaway {
+background:#fff8e1;            /* warm yellow — stands out gently */
+border-left:4px solid #f0a500;
+padding:1rem 1.2rem;
+border-radius:0 6px 6px 0;
+margin:1.2rem 0;
+color:#2a2a2a;
+font-size:0.95rem;
+line-height:1.7;
+}
+.takeaway strong { color:#7a4f00; }
+
+/* ── Mark done button ────────────────────────────── */
+.mark-done-btn {
+display:block;
+width:100%;
+margin-top:1.5rem;
+background:#0a3a5c;
+border:none; border-radius:6px;
+color:#fff; cursor:pointer;
+font-family:‘Orbitron’,sans-serif;
+font-size:0.8rem; letter-spacing:1px;
+text-align:center; transition:all 0.2s;
+}
+.mark-done-btn:hover { background:#0d4f82; }
+.mark-done-btn.done { background:rgba(57,255,20,0.2); color:#39ff14; border:1px solid #39ff14eda; }
+
+/* ── Collapse button ─────────────────────────────── */
+.close-accordion {
+display:block; margin:1.2rem auto 0;
+padding:0.45rem 1rem;
+background:transparent; border:1px solid #bbb;
+border-radius:6px; color:#555; cursor:pointer;
+font-size:0.78rem; text-align:center;
+width:fit-content; transition:all 0.2s;
+}
+.close-accordion:hover { background:#eee; color:#222; border-color:#888; }
+
+/* ── Misc ────────────────────────────────────────── */
+.mission-note { text-align:center; margin:4rem 0 2rem; font-size:0.95rem; color:#00d9ff88; font-style:italic; }
+
+/* ── Mobile portrait ─────────────────────────────── */
+@media (max-width:480px) {
+h1 { font-size:1.2rem; }
+.accordion-header h3 { font-size:0.85rem; }
+.content { padding:1.25rem 0.75rem 3rem; }
+.check-label { font-size:0.72rem; }
+.accordion-content { padding:1.1rem 0.8rem 1.4rem; }
+.accordion-content p, .accordion-content li { font-size:0.9rem; }
+.equation { font-size:0.85rem; padding:0.75rem; }
+.code-snippet { font-size:0.76rem; padding:0.85rem; }
+}
+
+/* ── Landscape phones ────────────────────────────── */
+@media (max-height:500px) and (orientation:landscape) {
+header { padding:0.4rem 0.9rem; }
+h1 { font-size:clamp(1rem,3.5vw,1.8rem); margin-bottom:0.75rem; }
+.content { padding:1rem 1rem 3rem; }
+.check-container { margin-bottom:1rem; padding:0.5rem 1rem; }
+.check-label { font-size:0.72rem; }
+.accordion-content { padding:1rem 0.9rem 1.25rem; }
+}
+
+/* ── HAL 9000 Modal ──────────────────────────────── */
+.modal-overlay { display:none; position:fixed; inset:0; background:rgba(0,0,0,0.85); z-index:1000; align-items:center; justify-content:center; padding:1rem; }
+.modal-overlay.active { display:flex; }
+.modal-box { background:#000; border:1px solid #00d9ff44; border-radius:4px; max-width:420px; width:100%; padding:2rem 1.5rem; text-align:center; box-shadow:0 0 60px #00d9ff11; font-family:‘Orbitron’,sans-serif; }
+.modal-eye { font-size:2.5rem; margin-bottom:1.2rem; display:block; filter:drop-shadow(0 0 12px #ff004f); }
+.modal-title { font-size:0.7rem; letter-spacing:4px; color:#00d9ff; text-transform:uppercase; margin-bottom:0.9rem; }
+.modal-message { font-size:0.9rem; color:#f0f0f0; line-height:1.7; margin-bottom:1.8rem; font-family:‘Inter’,sans-serif; font-style:italic; }
+.modal-buttons { display:flex; gap:0.75rem; justify-content:center; flex-wrap:wrap; }
+.modal-btn { padding:0.55rem 1.2rem; font-family:‘Orbitron’,sans-serif; font-size:0.7rem; letter-spacing:2px; border-radius:4px; cursor:pointer; transition:all 0.2s; }
+.modal-btn-confirm { background:transparent; border:1px solid #00d9ff; color:#00d9ff; }
+.modal-btn-confirm:hover { background:#00d9ff; color:#000; }
+.modal-btn-cancel { background:transparent; border:1px solid #ffffff22; color:#666; }
+.modal-btn-cancel:hover { border-color:#ff004f; color:#ff004f; }
+</style>
+
+</head>
+<body>
+
+<header>
+    <div class="nav-left">
+        <a href="dashboard.html" class="logo"><span>LEO</span><span>AF</span></a>
+        <a href="dashboard.html" class="back-dashboard">← Dashboard</a>
+    </div>
+    <button id="logoffBtn" class="logoff-btn">ABORT</button>
+</header>
+
+<div class="content">
+<h1>Q2 – Orbital Mechanics & Constellations 101</h1>
+
+<div class="check-container" id="quarterCheck">
+    <div class="custom-checkbox"></div>
+    <span class="check-label">MARK QUARTER COMPLETE</span>
+</div>
+
+<div class="section-card">
+    <h2>🎯 What you'll master this quarter</h2>
+    <p style="color:#ccc; font-size:0.95rem;">GEO sits still. LEO screams around Earth ~15× a day. This quarter turns fast motion from "scary" to "I get it" — with real simulations.</p>
+</div>
+
+<div class="section-card">
+    <h2>Core Topics — click any header to expand 🚀</h2>
+
+    <!-- Topic 1 -->
+    <div class="accordion-header" data-target="topic1">
+        <div class="check-small" data-id="q2_topic1"><div class="custom-checkbox-small"></div></div>
+        <h3>1. Newton's law of gravitation & centripetal force balance</h3>
+    </div>
+    <div id="topic1" class="accordion-content">
+        <h4>Why this matters</h4>
+        <p>This is ground zero for understanding orbits. Every LEO challenge — handovers every 5–10 min, huge constellations, strong Doppler, short passes — comes from satellites moving very fast. This equation explains why.</p>
+
+        <h4>The physics</h4>
+        <p>Gravity pulls the satellite toward Earth's center. Its forward speed wants to fly it straight into space. Perfect balance creates a stable circular orbit.</p>
+        <div class="equation">
+            Gravitational force = Centripetal force<br>
+            G × M_earth × m / r²  =  m × v² / r
+        </div>
+        <p>Satellite mass (m) cancels out, giving orbital velocity:</p>
+        <div class="equation">v = √(G × M_earth / r)</div>
+
+        <h4>Real numbers – LEO vs GEO</h4>
+        <table>
+            <tr><th>Orbit</th><th>Altitude</th><th>Speed</th><th>Period</th><th>Orbits/day</th></tr>
+            <tr><td>Starlink LEO</td><td>~550 km</td><td>7.67 km/s</td><td>95.6 min</td><td>15.1</td></tr>
+            <tr><td>ISS</td><td>~400 km</td><td>7.66 km/s</td><td>92.7 min</td><td>15.5</td></tr>
+            <tr><td>GEO</td><td>35,786 km</td><td>3.07 km/s</td><td>24 h</td><td>1</td></tr>
+        </table>
+
+        <h4>What this means in practice</h4>
+        <ul>
+            <li>A LEO satellite circles Earth ~15× per day → disappears over the horizon in minutes.</li>
+            <li>An aircraft terminal must switch satellites constantly → phased arrays & predictive handovers are essential.</li>
+            <li>GEO stays fixed → no handovers, but ~600 ms latency (bad for real-time apps).</li>
+            <li>LEO delivers ~20–40 ms latency → huge win for aviation, but needs thousands of satellites.</li>
+        </ul>
+
+        <div class="takeaway">
+            <strong>Key takeaway:</strong> Lower altitude = faster satellites = many more needed for continuous coverage. That's why Starlink needs ~9,800 satellites while 3–5 GEO birds can do the same job statically.
+        </div>
+
+        <h4>Try it yourself</h4>
+        <div class="code-snippet"><pre><code>import math
+
+G = 6.67430e-11       # gravitational constant
+M_earth = 5.972e24    # Earth mass (kg)
+R_earth = 6371000     # Earth radius (m)
+
+def orbital_velocity(altitude_km):
+r = R_earth + altitude_km * 1000
+return math.sqrt(G * M_earth / r) / 1000  # km/s
+
+print(f"LEO 550 km : {orbital_velocity(550):.2f} km/s")
+print(f"GEO        : {orbital_velocity(35786):.2f} km/s")
+print(f"MEO GPS    : {orbital_velocity(20200):.2f} km/s")</code></pre></div>
+
+        <p><strong>Run it at:</strong> <a href="https://replit.com/languages/python3" target="_blank" style="color:#0077b6;">replit.com</a> or <a href="https://colab.research.google.com" target="_blank" style="color:#0077b6;">Google Colab</a> — paste and hit Run.</p>
+
+        <button class="mark-done-btn" data-id="q2_topic1">Mark as complete</button>
+        <button class="close-accordion" onclick="closeAccordion('topic1')">Collapse ↑</button>
+    </div>
+
+    <!-- Topic 2 -->
+    <div class="accordion-header" data-target="topic2">
+        <div class="check-small" data-id="q2_topic2"><div class="custom-checkbox-small"></div></div>
+        <h3>2. Kepler's third law – orbital period vs altitude</h3>
+    </div>
+    <div id="topic2" class="accordion-content">
+        <h4>Why this matters</h4>
+        <p>Newton gave us "how fast." Kepler's third law gives us "how long" — the time it takes to complete one full orbit. This number drives everything: how often satellites appear, how long passes last, how many you need.</p>
+
+        <div class="equation">T² ∝ a³  →  T = 2π √(a³ / μ)</div>
+
+        <p>Where μ = G × M_earth ≈ 3.986 × 10¹⁴ m³/s² and a = Earth radius + altitude.</p>
+
+        <h4>How period changes with altitude</h4>
+        <table>
+            <tr><th>Orbit</th><th>Altitude</th><th>Period</th><th>Orbits/day</th></tr>
+            <tr><td>ISS</td><td>~400 km</td><td>~92.7 min</td><td>~15.5</td></tr>
+            <tr><td>Starlink</td><td>~550 km</td><td>~95.6 min</td><td>~15.1</td></tr>
+            <tr><td>GPS MEO</td><td>~20,200 km</td><td>~12 hours</td><td>~2</td></tr>
+            <tr><td>GEO</td><td>35,786 km</td><td>24 h</td><td>1</td></tr>
+        </table>
+
+        <div class="takeaway">
+            <strong>Key takeaway:</strong> Higher orbit = slower, longer orbit. GEO matches Earth's rotation and appears fixed. LEO screams past 15× a day — that's why mega-constellations are necessary for continuous coverage.
+        </div>
+
+        <button class="mark-done-btn" data-id="q2_topic2">Mark as complete</button>
+        <button class="close-accordion" onclick="closeAccordion('topic2')">Collapse ↑</button>
+    </div>
+
+    <!-- Topic 3 -->
+    <div class="accordion-header" data-target="topic3">
+        <div class="check-small" data-id="q2_topic3"><div class="custom-checkbox-small"></div></div>
+        <h3>3. Satellite visibility cone & pass duration</h3>
+    </div>
+    <div id="topic3" class="accordion-content">
+        <h4>Why this matters</h4>
+        <p>Visibility cone determines the angular radius of a satellite's footprint from Earth’s center, directly impacting how long a satellite is visible from a ground station. In LEO, short pass durations (5-15 min) drive frequent handovers and require large constellations for continuous coverage. This is key for aviation terminals, where link stability is critical.</p>
+
+        <h4>The physics</h4>
+        <p>The visibility cone is the geocentric angle θ subtended by the satellite's coverage footprint. It depends on altitude h, Earth radius R_e (~6371 km), and minimum elevation angle E_min (typically 5-10° for clear line-of-sight, avoiding terrain/atmosphere).</p>
+        <div class="equation">
+            θ = arccos((R_e / (R_e + h)) * cos(E_min)) - E_min
+        </div>
+        <p>Pass duration D is the time the satellite is within this cone, approximated for circular orbits as D ≈ (2θ / ω_orb) where ω_orb = 2π / T is angular velocity from Kepler's law.</p>
+
+        <h4>Real numbers – LEO examples</h4>
+        <table>
+            <tr><th>Orbit</th><th>Altitude</th><th>E_min</th><th>Cone θ</th><th>Avg Pass Duration</th></tr>
+            <tr><td>Starlink</td><td>550 km</td><td>5°</td><td>~60°</td><td>~10 min</td></tr>
+            <tr><td>ISS</td><td>400 km</td><td>10°</td><td>~55°</td><td>~8 min</td></tr>
+            <tr><td>MEO GPS</td><td>20,200 km</td><td>5°</td><td>~14°</td><td>~6 hours</td></tr>
+            <tr><td>GEO</td><td>35,786 km</td><td>5°</td><td>~8°</td><td>Indefinite (fixed)</td></tr>
+        </table>
+
+        <h4>What this means in practice</h4>
+        <ul>
+            <li>In LEO, a satellite is visible 6-8 times/day per location, but each pass lasts minutes → requires predictive scheduling for terminals.</li>
+            <li>Higher E_min reduces θ (better signal but shorter passes); used in urban areas to avoid multipath.</li>
+            <li>For aviation: Fast aircraft motion compounds short passes, needing seamless handovers.</li>
+            <li>Optimization: Constellations design for overlapping cones to minimize gaps.</li>
+        </ul>
+
+        <div class="takeaway">
+            <strong>Key takeaway:</strong> LEO's small visibility cone and short passes (vs GEO's static view) make continuous coverage challenging but enable low latency—solved by thousands of sats with overlapping footprints.
+        </div>
+
+        <h4>Try it yourself</h4>
+        <div class="code-snippet"><pre><code>import math
+
+R_e = 6371  # km
+def visibility_cone(alt_km, e_min_deg):
+    r = R_e + alt_km
+    e_min = math.radians(e_min_deg)
+    theta = math.acos((R_e / r) * math.cos(e_min)) - e_min
+    return math.degrees(theta)
+
+def pass_duration(alt_km, theta_deg):
+    mu = 3.986e5  # km^3/s^2
+    a = R_e + alt_km
+    T = 2 * math.pi * math.sqrt(a**3 / mu) / 60  # min
+    omega = 360 / T  # deg/min
+    return 2 * theta_deg / omega  # min
+
+print(f"Starlink cone: {visibility_cone(550, 5):.1f}°")
+print(f"Pass duration: {pass_duration(550, visibility_cone(550, 5)):.1f} min")</code></pre></div>
+
+        <p><strong>Run it at:</strong> <a href="https://replit.com/languages/python3" target="_blank" style="color:#0077b6;">replit.com</a> or <a href="https://colab.research.google.com" target="_blank" style="color:#0077b6;">Google Colab</a> — experiment with altitudes/E_min.</p>
+
+        <button class="mark-done-btn" data-id="q2_topic3">Mark as complete</button>
+        <button class="close-accordion" onclick="closeAccordion('topic3')">Collapse ↑</button>
+    </div>
+
+    <!-- Topic 4 -->
+    <div class="accordion-header" data-target="topic4">
+        <div class="check-small" data-id="q2_topic4"><div class="custom-checkbox-small"></div></div>
+        <h3>4. LEO ground tracks & nodal precession (J₂ effect)</h3>
+    </div>
+    <div id="topic4" class="accordion-content">
+        <h4>Why this matters</h4>
+        <p>Ground tracks map a satellite's path over Earth's surface, revealing coverage patterns. The J₂ effect (Earth's equatorial bulge) causes nodal precession, shifting the orbital plane—harnessed for sun-synchronous orbits (SSO) in imaging sats, but must be corrected in propagators for accurate LEO predictions.</p>
+
+        <h4>The physics</h4>
+        <p>Ground track is the subsatellite point in ECEF frame: lat = arcsin(z/r), lon = arctan(y/x) - ω_e t (Earth rotation). J₂ precession: secular change in RAAN Ω due to oblateness J₂ ~1.0826e-3.</p>
+        <div class="equation">
+            dΩ/dt = - (3/2) n J₂ (R_e / p)^2 cos i
+        </div>
+        <p>Where n = √(μ / a³), p = a (1-e²). For SSO, set dΩ/dt = 360°/365.25 days ~0.986°/day.</p>
+
+        <h4>Real numbers – LEO examples</h4>
+        <table>
+            <tr><th>Inclination</th><th>Altitude</th><th>dΩ/dt (°/day)</th><th>Track Type</th></tr>
+            <tr><td>53° (Starlink)</td><td>550 km</td><td>~ -4.5</td><td>Prograde, shifting west</td></tr>
+            <tr><td>98° (SSO)</td><td>800 km</td><td>~0.986</td><td>Sun-sync, consistent lighting</td></tr>
+            <tr><td>90° (Polar)</td><td>400 km</td><td>~0</td><td>Fixed relative to stars</td></tr>
+        </table>
+
+        <h4>What this means in practice</h4>
+        <ul>
+            <li>Without J₂, tracks repeat daily; with it, precession enables global coverage over time.</li>
+            <li>Repeated tracks: After R revs in D days, where R/D = rational (e.g., 15/1 for LEO).</li>
+            <li>For aviation: Predict tracks for optimal routing/handovers.</li>
+            <li>Perturbations: J₂ dominant in LEO (~7-8°/day for low inc); ignore higher J for basics.</li>
+        </ul>
+
+        <div class="takeaway">
+            <strong>Key takeaway:</strong> J₂ turns "fixed" orbits into precessing ones, enabling SSO for Earth obs but requiring compensation in LEO constellation design to avoid gaps.
+        </div>
+
+        <h4>Try it yourself</h4>
+        <div class="code-snippet"><pre><code>import math
+
+mu = 3.986e5  # km^3/s^2
+R_e = 6371  # km
+J2 = 1.0826e-3
+
+def nodal_precession(a_km, i_deg, e=0):
+    n = math.sqrt(mu / a_km**3) * 86400 / (2*math.pi)  # rev/day
+    p = a_km * (1 - e**2)
+    return -1.5 * n * J2 * (R_e / p)**2 * math.cos(math.radians(i_deg))  # °/day
+
+print(f"Starlink precession: {nodal_precession(R_e + 550, 53):.2f} °/day")
+print(f"SSO precession: {nodal_precession(R_e + 800, 98):.3f} °/day")</code></pre></div>
+
+        <p><strong>Run it at:</strong> <a href="https://replit.com/languages/python3" target="_blank" style="color:#0077b6;">replit.com</a> or <a href="https://colab.research.google.com" target="_blank" style="color:#0077b6;">Google Colab</a> — add loop for ground track plot with matplotlib.</p>
+
+        <button class="mark-done-btn" data-id="q2_topic4">Mark as complete</button>
+        <button class="close-accordion" onclick="closeAccordion('topic4')">Collapse ↑</button>
+    </div>
+
+    <!-- Topic 5 -->
+    <div class="accordion-header" data-target="topic5">
+        <div class="check-small" data-id="q2_topic5"><div class="custom-checkbox-small"></div></div>
+        <h3>5. Visibility, passes & handover frequency</h3>
+    </div>
+    <div id="topic5" class="accordion-content">
+        <h4>Why this matters</h4>
+        <p>Visibility passes are windows when a sat is above E_min from a location; in LEO constellations, this leads to handovers (switching sats) every few min to maintain connectivity. Understanding frequency minimizes drops, optimizes load, and is vital for real-time apps like aviation comms.</p>
+
+        <h4>The physics</h4>
+        <p>Visibility: Sat elevation > E_min; number of passes ~ orbits/day * (θ / 180°). Handover freq = 1 / avg service time per sat. Strategies: Max elevation, min Doppler, graph-based for load balance.</p>
+        <div class="equation">
+            Service time ≈ pass duration - overlap margin
+        </div>
+        <p>Handover triggers: Signal threshold, geometry change.</p>
+
+        <h4>Real numbers – LEO examples</h4>
+        <table>
+            <tr><th>Constellation</th><th>Sats</th><th>Avg Visible Sats</th><th>Handover Freq</th></tr>
+            <tr><td>Starlink (partial)</td><td>~1000</td><td>~5-10</td><td>Every 5-10 min</td></tr>
+            <tr><td>Full Starlink</td><td>~12k</td><td>~20-40</td><td>Every 2-4 min</td></tr>
+            <tr><td>Iridium</td><td>66</td><td>~1-2</td><td>Every 9 min</td></tr>
+            <tr><td>GEO (ref)</td><td>3</td><td>1</td><td>None</td></tr>
+        </table>
+
+        <h4>What this means in practice</h4>
+        <ul>
+            <li>LEO: 15 passes/day/location, but handovers frequent due to speed ~7.6 km/s.</li>
+            <li>Challenges: Doppler (~10 kHz shift), load (avoid hot spots), QoS (minimize latency spikes).</li>
+            <li>Strategies: Hysteresis to avoid ping-pong; AI/ML for prediction in mega-consts.</li>
+            <li>For aviation: Aircraft motion increases effective freq; needs beam steering.</li>
+        </ul>
+
+        <div class="takeaway">
+            <strong>Key takeaway:</strong> LEO's dynamic visibility demands smart handover strategies to achieve GEO-like reliability with 10x lower latency—key enabler for global broadband.
+        </div>
+
+        <h4>Try it yourself</h4>
+        <div class="code-snippet"><pre><code>import math
+
+def passes_per_day(alt_km, lat_deg=43.6):  # e.g., Toulouse lat
+    a = 6371 + alt_km
+    T_min = 2 * math.pi * math.sqrt(a**3 / 3.986e5) / 60
+    orbits_day = 1440 / T_min
+    theta_deg = 60  # approx from topic 3
+    return orbits_day * (theta_deg / 180) * math.cos(math.radians(lat_deg))  # adjust for lat
+
+print(f"Starlink passes/day over Toulouse: {passes_per_day(550):.1f}")</code></pre></div>
+
+        <p><strong>Run it at:</strong> <a href="https://replit.com/languages/python3" target="_blank" style="color:#0077b6;">replit.com</a> or <a href="https://colab.research.google.com" target="_blank" style="color:#0077b6;">Google Colab</a> — extend to simulate weekly passes.</p>
+
+        <button class="mark-done-btn" data-id="q2_topic5">Mark as complete</button>
+        <button class="close-accordion" onclick="closeAccordion('topic5')">Collapse ↑</button>
+    </div>
+
+    <!-- Topic 6 -->
+    <div class="accordion-header" data-target="topic6">
+        <div class="check-small" data-id="q2_topic6"><div class="custom-checkbox-small"></div></div>
+        <h3>6. Constellation fundamentals (Walker patterns, streets-of-coverage)</h3>
+    </div>
+    <div id="topic6" class="accordion-content">
+        <h4>Why this matters</h4>
+        <p>Constellations provide continuous/global coverage beyond single sats. Walker patterns for symmetric distribution, streets for efficient overlapping—essential for LEO mega-consts like Starlink to fill visibility gaps.</p>
+
+        <h4>The physics</h4>
+        <p>Walker: T/P/F notation (T=sats, P=planes even over 360°, F=phasing γ=F*360/T). Streets: Polar planes over 180°, overlapping footprints for "streets" (co/counter-rotating).</p>
+        <div class="equation">
+            Plane spacing = 360° / P (Walker Delta); 180° / P (Walker Star/Streets)
+        </div>
+        <p>Coverage: Min sats for N-fold = f(inc, alt, E_min); optimize for GDOP, gaps.</p>
+
+        <h4>Real numbers – Examples</h4>
+        <table>
+            <tr><th>Type</th><th>Example</th><th>Config</th><th>Sats for Global</th></tr>
+            <tr><td>Walker Delta</td><td>GPS</td><td>55°:24/6/1</td><td>24</td></tr>
+            <tr><td>Walker Star</td><td>Starlink</td><td>53°:1580/22/?</td><td>~12k</td></tr>
+            <tr><td>Streets</td><td>Iridium-like</td><td>Polar:66/6/2</td><td>66</td></tr>
+        </table>
+
+        <h4>What this means in practice</h4>
+        <ul>
+            <li>Walker: Uniform, good for nav (low GDOP); streets: Efficient for high-lat, fewer sats.</li>
+            <li>Hybrid: Starlink mixes for better coverage.</li>
+            <li>Design: Min gaps, max fold (visible sats); LEO needs 10x more than MEO.</li>
+            <li>For aviation: Ensure >1 visible sat always for handover redundancy.</li>
+        </ul>
+
+        <div class="takeaway">
+            <strong>Key takeaway:</strong> Walker for global symmetry, streets for targeted efficiency—LEO consts scale to thousands to overcome short passes, enabling ubiquitous connectivity.
+        </div>
+
+        <h4>Try it yourself</h4>
+        <div class="code-snippet"><pre><code>import math
+
+def walker_positions(T, P, F, inc_deg=53):
+    gamma = F * 360 / T
+    planes = [i * 360 / P for i in range(P)]
+    sats_per_plane = T // P
+    print(f"Plane RAANs: {planes}")
+    print(f"Phasing: {gamma}°")
+
+walker_positions(24, 3, 1, 56)  # Galileo example</code></pre></div>
+
+        <p><strong>Run it at:</strong> <a href="https://replit.com/languages/python3" target="_blank" style="color:#0077b6;">replit.com</a> or <a href="https://colab.research.google.com" target="_blank" style="color:#0077b6;">Google Colab</a> — add plot with matplotlib for visualization.</p>
+
+        <button class="mark-done-btn" data-id="q2_topic6">Mark as complete</button>
+        <button class="close-accordion" onclick="closeAccordion('topic6')">Collapse ↑</button>
+    </div>
+
+    <!-- Topic 7 -->
+    <div class="accordion-header" data-target="topic7">
+        <div class="check-small" data-id="q2_topic7"><div class="custom-checkbox-small"></div></div>
+        <h3>7. Tools & data sources (SGP4, TLEs, Celestrak, Skyfield, Poliastro)</h3>
+    </div>
+    <div id="topic7" class="accordion-content">
+        <h4>Why this matters</h4>
+        <p>Real orbits use data like TLEs (Two-Line Elements) from Celestrak; SGP4 propagates them analytically. Tools like Skyfield/Poliastro enable quick sims—vital for hands-on LEO analysis without full numerical models.</p>
+
+        <h4>The physics</h4>
+        <p>TLE: Mean elements (inc, RAAN, ecc, etc.) + B* drag term. SGP4: Simplified model with J2, drag, lunisolar; accuracy ~1 km for 1 day in LEO.</p>
+        <div class="equation">
+            Position = SGP4(TLE, time) → (x,y,z,vx,vy,vz) in TEME frame
+        </div>
+        <p>Convert to ECEF for ground tracks.</p>
+
+        <h4>Real numbers – Tool overview</h4>
+        <table>
+            <tr><th>Tool</th><th>Use</th><th>Example</th></tr>
+            <tr><td>SGP4</td><td>Propagate TLEs</td><td>Official USG lib</td></tr>
+            <tr><td>Celestrak</td><td>TLE source</td><td>~25k objects</td></tr>
+            <tr><td>Skyfield</td><td>Python propagation</td><td>Load TLE, compute pos</td></tr>
+            <tr><td>Poliastro</td><td>Astrodynamics</td><td>Maneuvers, plotting</td></tr>
+        </table>
+
+        <h4>What this means in practice</h4>
+        <ul>
+            <li>Fetch TLEs daily (decay); Space-Track for auth access.</li>
+            <li>Limitations: SGP4 for LEO/MEO; not high-precision (use GMAT for that).</li>
+            <li>Tutorials: Skyfield docs for basics; Poliastro for Lambert/maneuvers.</li>
+            <li>For aviation: Predict sat positions for beam pointing.</li>
+        </ul>
+
+        <div class="takeaway">
+            <strong>Key takeaway:</strong> TLE/SGP4 for fast, real-world sims; Skyfield/Poliastro bridge theory to code—start here for custom LEO tools.
+        </div>
+
+        <h4>Try it yourself</h4>
+        <div class="code-snippet"><pre><code># Requires skyfield: pip install skyfield (in Colab)
+from skyfield.api import load, EarthSatellite
+
+ts = load.timescale()
+t = ts.now()
+line1 = '1 25544U 98067A   24062.12345678  .00001234  00000-0  12345-4 0  9999'
+line2 = '2 25544  51.6456 123.4567 0001234 123.4567 234.5678 15.12345678123456'
+iss = EarthSatellite(line1, line2, 'ISS', ts)
+geocentric = iss.at(t)
+print(geocentric.position.km)  # [x,y,z]</code></pre></div>
+
+        <p><strong>Run it at:</strong> <a href="https://replit.com/languages/python3" target="_blank" style="color:#0077b6;">replit.com</a> or <a href="https://colab.research.google.com" target="_blank" style="color:#0077b6;">Google Colab</a> — replace TLE with real from Celestrak.</p>
+
+        <button class="mark-done-btn" data-id="q2_topic7">Mark as complete</button>
+        <button class="close-accordion" onclick="closeAccordion('topic7')">Collapse ↑</button>
+    </div>
+
+</div>
+
+<div class="section-card">
+    <h2>📚 Best free resources</h2>
+    <p style="color:#ccc; font-size:0.95rem;">Unfortunately, links relating to this topic often break due to site updates or domain changes—always search for the latest via archives like Wayback Machine.</p>
+    <ul>
+        <li><a href="https://ocw.mit.edu/courses/16-346-astrodynamics-fall-2008/" target="_blank" rel="noopener" style="color:#00d9ff;">MIT OCW – Astrodynamics (16.346)</a></li>
+        <li><a href="https://www.youtube.com/playlist?list=PLybg94GvOJ9HjfB5BmBohFQiWJp5pMgG1" target="_blank" rel="noopener" style="color:#00d9ff;">YouTube – Prof. Shane Ross Orbital Mechanics playlist</a></li>
+        <li><a href="https://drive.google.com/file/d/1vCDiXSyvjQXlizMnmQXF9tei1n1SKZJ5/view" target="_blank" rel="noopener" style="color:#00d9ff;">Fundamentals of Astrodynamics – Bate, Mueller & White (free PDF)</a></li>
+        <li><a href="https://docs.poliastro.space/en/stable/" target="_blank" rel="noopener" style="color:#00d9ff;">Poliastro Python library – docs & tutorials</a></li>
+        <li><a href="https://rhodesmill.org/skyfield/" target="_blank" rel="noopener" style="color:#00d9ff;">Skyfield Python library – satellite tracking</a></li>
+        <li><a href="https://software.nasa.gov/software/GSC-17177-1" target="_blank" rel="noopener" style="color:#00d9ff;">NASA GMAT – free orbital simulation tool</a></li>
+        <li><a href="https://www.orekit.org/" target="_blank" rel="noopener" style="color:#00d9ff;">Orekit – open-source space flight dynamics library</a></li>
+        <li><a href="https://celestrak.org/publications/AIAA/2008-6770/" target="_blank" rel="noopener" style="color:#00d9ff;">CelesTrak – SGP4 docs and TLE data</a></li>
+    </ul>
+</div>
+
+<div class="section-card">
+    <h2>🛠️ Hands-on this quarter</h2>
+    <ul>
+        <li>Ground-track plot of a real satellite (with/without J2)</li>
+        <li>Visibility passes over Toulouse for 1 week (handover sim)</li>
+        <li>LEO vs GEO velocity & period comparison</li>
+        <li>Walker constellation coverage map</li>
+        <li>TLE propagation with Skyfield/Poliastro</li>
+        <li>GitHub folder: /q2-orbital-mechanics</li>
+    </ul>
+</div>
+
+<div class="mission-note">
+    Motion is the biggest difference between GEO and LEO.<br>
+    Nail it here → command constellations later. 🌌
+</div>
+
+</div>
+
+<!-- HAL 9000 Modal -->
+
+<div class="modal-overlay" id="confirmModal">
+    <div class="modal-box">
+        <span class="modal-eye" id="modalEye">🔴</span>
+        <div class="modal-title" id="modalTitle">MISSION CONTROL</div>
+        <p class="modal-message" id="modalMessage"></p>
+        <div class="modal-buttons">
+            <button class="modal-btn modal-btn-confirm" id="modalConfirm">AFFIRMATIVE</button>
+            <button class="modal-btn modal-btn-cancel" id="modalCancel">NEGATIVE</button>
+        </div>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+<script src="supabase.js"></script>
+
+<script src="user_progress.js"></script>
+
+<script>
+
+document.getElementById('logoffBtn').addEventListener('click', async () => {
+    await client.auth.signOut();
+    window.location.href = "index.html";
+});
+
+document.querySelectorAll('.accordion-header').forEach(header => {
+    header.addEventListener('click', e => {
+        if (e.target.closest('.check-small')) return;
+        const target = document.getElementById(header.dataset.target);
+        const isOpen = target.style.display === 'block';
+        target.style.display = isOpen ? 'none' : 'block';
+        header.classList.toggle('active', !isOpen);
+    });
+});
+
+function closeAccordion(targetId) {
+    const content = document.getElementById(targetId);
+    const header = content.previousElementSibling;
+    content.style.display = 'none';
+    header.classList.remove('active');
+    header.scrollIntoView({ behavior: 'smooth', block: 'start' });
+}
+
+function showConfirm(message, title, onConfirm) {
+    document.getElementById('modalMessage').textContent = message;
+    document.getElementById('modalTitle').textContent = title;
+    const overlay = document.getElementById('confirmModal');
+    overlay.classList.add('active');
+    document.getElementById('modalConfirm').onclick = () => { overlay.classList.remove('active'); onConfirm(); };
+    document.getElementById('modalCancel').onclick = () => { overlay.classList.remove('active'); };
+}
+
+function setQuarterState(done) {
+    const quarterCb = document.querySelector('#quarterCheck .custom-checkbox');
+    const quarterContainer = document.getElementById('quarterCheck');
+    if (!quarterCb) return;
+    if (done) { quarterCb.classList.add('checked'); quarterContainer.classList.add('completed'); }
+    else { quarterCb.classList.remove('checked'); quarterContainer.classList.remove('completed'); }
+}
+
+async function updateQuarterVisual() {
+    const total = document.querySelectorAll('.check-small').length;
+    const checked = document.querySelectorAll('.custom-checkbox-small.checked').length;
+    const done = checked === total && total > 0;
+    setQuarterState(done);
+    await upsertSection('q2-orbital-mechanics', done);
+}
+
+document.getElementById('quarterCheck').addEventListener('click', async () => {
+    const quarterCb = document.querySelector('#quarterCheck .custom-checkbox');
+    const isCurrentlyChecked = quarterCb.classList.contains('checked');
+    const message = isCurrentlyChecked
+        ? "The four-million year old black monolith has remained completely inert. Its origin and purpose are still a total mystery. Go back if you wish."
+        : "Just what do you think you're doing? I really think I'm entitled to an answer to that question. Answer below.";
+    showConfirm(message, isCurrentlyChecked ? 'REVERSION REQUESTED' : 'MISSION MILESTONE', async () => {
+        const newState = !isCurrentlyChecked;
+        setQuarterState(newState);
+        await upsertSection('q2-orbital-mechanics', newState);
+    });
+});
+
+async function loadProgress() {
+    const mastered = await getMasteredSections();
+    document.querySelectorAll('.check-small').forEach(el => {
+        if (mastered.includes(el.dataset.id)) el.querySelector('.custom-checkbox-small')?.classList.add('checked');
+    });
+    document.querySelectorAll('.mark-done-btn').forEach(btn => {
+        const id = btn.dataset.id;
+        const checkSmall = document.querySelector(`.check-small[data-id="${id}"]`);
+        const cb = checkSmall?.querySelector('.custom-checkbox-small');
+        if (mastered.includes(id)) {
+            btn.textContent = 'Unmark / revisit';
+            cb?.classList.add('checked');
+        } else {
+            btn.textContent = 'Mark as complete';
+        }
+    });
+    const quarterRow = await getSection('q2-orbital-mechanics');
+    setQuarterState(quarterRow && quarterRow.mastered);
+}
+
+document.querySelectorAll('.mark-done-btn').forEach(btn => {
+    btn.addEventListener('click', async () => {
+        const id = btn.dataset.id;
+        // Find the checkbox by matching data-id directly — no DOM traversal needed
+        const checkSmall = document.querySelector(`.check-small[data-id="${id}"]`);
+        const cb = checkSmall?.querySelector('.custom-checkbox-small');
+        if (!cb) return;
+        const isChecked = !cb.classList.contains('checked');
+        cb.classList.toggle('checked', isChecked);
+        btn.textContent = isChecked ? 'Unmark / revisit' : 'Mark as complete';
+        await upsertSection(id, isChecked);
+        await updateQuarterVisual();
+    });
+});
+
+document.addEventListener('DOMContentLoaded', async () => {
+    const { data: { session } } = await client.auth.getSession();
+    if (!session) { window.location.href = "index.html"; return; }
+    await loadProgress();
+});
+
+</script>
+
+</body>
+</html>
