@@ -53,6 +53,7 @@ async function upsertSection(section, mastered) {
         .single();
 
     if (error) { console.error('Error upserting section:', error.message); return null; }
+    window.dispatchEvent(new Event("progressUpdated"));
     return data;
 }
 
