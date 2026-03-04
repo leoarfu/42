@@ -1,0 +1,573 @@
+<!DOCTYPE html>
+
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, shrink-to-fit=no">
+<title>L01 — Why LEO Now · LEOAF</title>
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;600;800&family=Share+Tech+Mono&display=swap" rel="stylesheet">
+<link rel="icon" href="favicon.ico" sizes="any" type="image/x-icon">
+<link rel="manifest" href="site.webmanifest">
+<meta name="theme-color" content="#0f0f0f">
+
+<style>
+* { box-sizing:border-box; margin:0; padding:0; }
+html { height:100%; -webkit-text-size-adjust:100%; overflow-x:hidden; }
+body { font-family:'Share Tech Mono',monospace; background:#000; color:white; overflow-x:hidden; min-height:100vh; }
+#starsCanvas { position:fixed; inset:0; z-index:-1; }
+
+/* HEADER */
+header {
+    background:#000; border-bottom:1px solid #ff004f33;
+    position:sticky; top:0; z-index:100;
+    padding:1rem clamp(1.5rem,5vw,4rem);
+    display:flex; justify-content:space-between; align-items:center;
+    box-shadow:0 4px 16px #0008;
+}
+.logo { font-family:'Orbitron',sans-serif; font-weight:800; font-size:clamp(16px,2vw,22px); letter-spacing:3px; text-decoration:none; }
+.logo span:first-child { color:white; }
+.logo span:last-child { color:#ff004f; }
+.nav-right { display:flex; align-items:center; gap:10px; }
+.nav-btn {
+    background:transparent; border:1px solid #ff004f44; color:#ff004f;
+    padding:6px 14px; cursor:pointer; transition:0.3s ease;
+    font-size:11px; font-family:'Orbitron',sans-serif; letter-spacing:1px;
+    text-decoration:none; display:inline-block;
+}
+.nav-btn:hover { background:#ff004f; color:black; }
+
+/* BREADCRUMB */
+.breadcrumb { padding:14px clamp(1.5rem,5vw,4rem); font-size:11px; color:#ffffff44; letter-spacing:1px; position:relative; z-index:1; }
+.breadcrumb a { color:#00d9ff66; text-decoration:none; }
+.breadcrumb a:hover { color:#00d9ff; }
+.breadcrumb span { margin:0 8px; }
+
+/* LESSON LAYOUT */
+.lesson-wrap { max-width:780px; margin:0 auto; padding:0 clamp(1.5rem,5vw,4rem) 80px; position:relative; z-index:1; }
+
+/* LESSON HEADER */
+.lesson-header { padding: 30px 0 28px; border-bottom:1px solid #ffffff11; margin-bottom:36px; }
+.lesson-tag { font-family:'Orbitron',sans-serif; font-size:10px; color:#ff004f; letter-spacing:3px; margin-bottom:10px; }
+.lesson-header h1 { font-family:'Orbitron',sans-serif; font-size:clamp(20px,3.5vw,30px); font-weight:800; line-height:1.2; margin-bottom:12px; }
+.lesson-meta { display:flex; gap:10px; flex-wrap:wrap; }
+.l-pill { font-family:'Orbitron',sans-serif; font-size:10px; padding:3px 10px; border:1px solid; letter-spacing:1px; }
+.l-pill-q { color:#ff004f; border-color:#ff004f44; }
+.l-pill-t { color:#39ff14; border-color:#39ff1444; }
+
+/* CONTENT SECTIONS */
+.content-block { margin-bottom:40px; }
+.content-block h2 {
+    font-family:'Orbitron',sans-serif; font-size:13px; color:#00d9ff;
+    letter-spacing:2px; text-transform:uppercase;
+    margin-bottom:16px; padding-bottom:8px;
+    border-bottom:1px solid #00d9ff22;
+}
+.content-block h3 {
+    font-family:'Orbitron',sans-serif; font-size:11px; color:#ffffff99;
+    letter-spacing:1.5px; text-transform:uppercase; margin:20px 0 10px;
+}
+.content-block p { font-size:13px; line-height:1.85; opacity:0.85; margin-bottom:14px; }
+.content-block ul { padding-left:0; margin-bottom:14px; }
+.content-block ul li { font-size:13px; line-height:1.8; opacity:0.85; padding-left:18px; position:relative; margin-bottom:4px; }
+.content-block ul li::before { content:'›'; position:absolute; left:0; color:#00d9ff; }
+
+/* CALLOUT BOXES */
+.callout {
+    border-left:3px solid #00d9ff; background:rgba(0,217,255,0.05);
+    padding:14px 18px; margin:20px 0; font-size:12px; line-height:1.75;
+}
+.callout.red { border-left-color:#ff004f; background:rgba(255,0,79,0.05); }
+.callout.green { border-left-color:#39ff14; background:rgba(57,255,20,0.05); }
+.callout strong { font-family:'Orbitron',sans-serif; font-size:10px; letter-spacing:1px; display:block; margin-bottom:6px; }
+
+/* KEY NUMBER */
+.key-numbers { display:grid; grid-template-columns:repeat(auto-fit,minmax(150px,1fr)); gap:12px; margin:20px 0; }
+.kn-item { background:rgba(255,255,255,0.03); border:1px solid #ffffff11; padding:14px; text-align:center; }
+.kn-val { font-family:'Orbitron',sans-serif; font-size:clamp(18px,3vw,26px); font-weight:800; color:#00d9ff; display:block; }
+.kn-label { font-size:10px; opacity:0.55; letter-spacing:1px; margin-top:4px; display:block; }
+
+/* SVG DIAGRAM */
+.diagram-wrap { margin:24px 0; background:rgba(255,255,255,0.02); border:1px solid #ffffff11; padding:20px; overflow-x:auto; }
+.diagram-wrap figcaption { font-size:11px; color:#ffffff44; margin-top:12px; text-align:center; letter-spacing:1px; }
+
+/* QUIZ */
+.quiz-block { background:rgba(17,17,17,0.8); border:1px solid #ff004f33; padding:24px; margin:40px 0; }
+.quiz-block h2 { font-family:'Orbitron',sans-serif; font-size:13px; color:#ff004f; letter-spacing:2px; margin-bottom:20px; padding-bottom:8px; border-bottom:1px solid #ff004f22; }
+.quiz-q { margin-bottom:24px; }
+.quiz-q p { font-size:13px; opacity:0.9; margin-bottom:12px; line-height:1.6; }
+.quiz-options { display:flex; flex-direction:column; gap:8px; }
+.quiz-opt {
+    background:rgba(255,255,255,0.03); border:1px solid #ffffff22;
+    padding:10px 14px; cursor:pointer; font-size:12px; font-family:'Share Tech Mono',monospace;
+    transition:0.2s ease; text-align:left; color:white;
+}
+.quiz-opt:hover { background:rgba(0,217,255,0.08); border-color:#00d9ff44; }
+.quiz-opt.correct { background:rgba(57,255,20,0.1); border-color:#39ff14; color:#39ff14; }
+.quiz-opt.wrong   { background:rgba(255,0,79,0.1);  border-color:#ff004f; color:#ff004f; }
+.quiz-opt:disabled { cursor:default; }
+.quiz-feedback { font-size:12px; margin-top:10px; min-height:18px; line-height:1.6; opacity:0.85; }
+.quiz-score { font-family:'Orbitron',sans-serif; font-size:12px; color:#39ff14; margin-top:16px; letter-spacing:1px; display:none; }
+
+/* PYTHON EXERCISE */
+.py-block { background:rgba(10,10,10,0.9); border:1px solid #39ff1422; padding:24px; margin:40px 0; }
+.py-block h2 { font-family:'Orbitron',sans-serif; font-size:13px; color:#39ff14; letter-spacing:2px; margin-bottom:12px; padding-bottom:8px; border-bottom:1px solid #39ff1422; }
+.py-block p { font-size:13px; opacity:0.8; margin-bottom:16px; line-height:1.7; }
+.py-block pre {
+    background:#050505; border:1px solid #39ff1433; padding:18px;
+    font-family:'Share Tech Mono',monospace; font-size:12px;
+    line-height:1.7; overflow-x:auto; color:#39ff14;
+    white-space:pre; margin-bottom:14px;
+}
+.py-block .py-note { font-size:11px; color:#ffffff44; line-height:1.7; }
+
+/* COMPLETE BUTTON */
+.complete-wrap { margin-top:50px; padding-top:30px; border-top:1px solid #ffffff11; text-align:center; }
+.complete-btn {
+    font-family:'Orbitron',sans-serif; font-size:13px; letter-spacing:2px;
+    padding:14px 40px; background:transparent;
+    border:1px solid #39ff14; color:#39ff14;
+    cursor:pointer; transition:0.3s ease;
+}
+.complete-btn:hover { background:#39ff14; color:black; box-shadow:0 0 20px rgba(57,255,20,0.4); }
+.complete-btn.done { background:rgba(57,255,20,0.1); cursor:default; opacity:0.7; }
+.complete-msg { font-size:12px; color:#39ff14; margin-top:14px; min-height:18px; letter-spacing:1px; }
+
+/* NAV ARROWS */
+.lesson-nav { display:flex; justify-content:space-between; margin-top:30px; }
+.lesson-nav a { font-family:'Orbitron',sans-serif; font-size:11px; color:#00d9ff66; text-decoration:none; letter-spacing:1px; transition:0.2s; }
+.lesson-nav a:hover { color:#00d9ff; }
+
+footer { text-align:center; padding:30px; opacity:0.3; font-size:11px; position:relative; z-index:1; letter-spacing:1px; }
+</style>
+
+</head>
+<body>
+
+<canvas id="starsCanvas"></canvas>
+
+<header>
+    <a href="dashboard.html" class="logo"><span>LEO</span><span>AF</span></a>
+    <div class="nav-right">
+        <a href="q1.html" class="nav-btn">← Q1 HUB</a>
+        <button id="logoffBtn" class="nav-btn">ABORT</button>
+    </div>
+</header>
+
+<div class="breadcrumb">
+    <a href="dashboard.html">DASHBOARD</a><span>/</span>
+    <a href="q1.html">Q1</a><span>/</span>
+    <span style="color:#ffffff88;">LESSON 01 — WHY LEO NOW</span>
+</div>
+
+<div class="lesson-wrap">
+
+```
+<div class="lesson-header">
+    <div class="lesson-tag">Q1 · LESSON 01 OF 15</div>
+    <h1>Why LEO Now</h1>
+    <div class="lesson-meta">
+        <div class="l-pill l-pill-q">QUARTER 1</div>
+        <div class="l-pill l-pill-t">~4 HOURS</div>
+    </div>
+</div>
+
+<!-- ═══ READING CONTENT ═══ -->
+
+<div class="content-block">
+    <h2>1. The Problem GEO Could Not Solve</h2>
+    <p>For the first 40 years of commercial satellite communications, geostationary orbit was the only practical option. Sit a satellite at 35,786 km above the equator and it appears stationary from the ground — one satellite covers a third of the Earth's surface, ground antennas are simple fixed dishes, and the system scales without the complexity of tracking a moving object.</p>
+    <p>But GEO carries an unavoidable physical penalty: the round-trip signal delay. At the speed of light, a single hop to GEO and back takes approximately 240–280 ms. Add terrestrial network processing and you reach 600 ms or more of round-trip time. For voice calls that means noticeable echo. For TCP-based data protocols it means every packet acknowledgement carries that delay, throttling throughput. For real-time applications — trading, gaming, aviation safety services, video conferencing — GEO latency is simply disqualifying.</p>
+    <p>The satellite industry tried to paper over this problem with TCP acceleration proxies, spoofing protocols, and pre-fetching tricks. These worked well enough for broadcast and simple web traffic in the 2000s, but the internet was evolving. HTTPS encryption broke transparent proxies. WebRTC and modern video codecs demanded sub-100 ms latency. Cloud-native applications assumed always-on, low-latency connectivity that GEO fundamentally could not deliver.</p>
+
+    <div class="callout red">
+        <strong>THE CORE CONSTRAINT</strong>
+        GEO latency is not an engineering problem waiting to be solved. It is a consequence of orbital altitude and the speed of light. No amount of signal processing eliminates it. The only fix is to bring the satellite closer to Earth.
+    </div>
+
+    <h3>The bandwidth illusion</h3>
+    <p>GEO operators responded to latency criticism by pointing to bandwidth. High-throughput satellites (HTS) using spot beams and frequency reuse pushed per-satellite capacity from a few Gbps toward 100–200 Gbps by the mid-2010s. ViaSat-3 was designed for over 1 Tbps. More bandwidth meant cheaper broadband for rural users. The story seemed compelling.</p>
+    <p>But bandwidth and latency are independent dimensions. A 1 Tbps GEO satellite still delivers 600 ms RTT. For the growing share of internet traffic that was latency-sensitive, more GEO capacity was irrelevant. The satellite industry was solving the wrong problem.</p>
+</div>
+
+<div class="content-block">
+    <h2>2. What Changed to Make LEO Viable</h2>
+    <p>LEO is not a new idea. Motorola's Iridium constellation launched its first satellite in 1997. The concept of hundreds of small satellites in low orbit had been studied since the 1980s. The reason it failed commercially in the 1990s and why it succeeded two decades later comes down to cost — specifically the cost of building and launching satellites at scale.</p>
+
+    <div class="key-numbers">
+        <div class="kn-item">
+            <span class="kn-val">$1B+</span>
+            <span class="kn-label">Cost to build a GEO satellite (2000s)</span>
+        </div>
+        <div class="kn-item">
+            <span class="kn-val">~$500K</span>
+            <span class="kn-label">Target unit cost per Starlink v1 satellite</span>
+        </div>
+        <div class="kn-item">
+            <span class="kn-val">$65K/kg</span>
+            <span class="kn-label">Launch cost to LEO, Shuttle era</span>
+        </div>
+        <div class="kn-item">
+            <span class="kn-val">~$2K/kg</span>
+            <span class="kn-label">Launch cost to LEO, Falcon 9 reuse era</span>
+        </div>
+    </div>
+
+    <h3>The three enablers</h3>
+    <p><strong>Miniaturisation and commoditisation.</strong> The smartphone revolution drove aggressive cost reduction in processors, memory, radios, sensors, and solar cells. Satellite components that previously required bespoke aerospace manufacturing could increasingly be sourced from commercial supply chains. A LEO satellite in 2020 carries more computing power than a GEO satellite from 2000, at a fraction of the mass and cost.</p>
+    <p><strong>Reusable launch vehicles.</strong> SpaceX's development of Falcon 9 with a reusable first stage transformed the economics of launch. Before Falcon 9, getting 1 kg to LEO cost $20,000–65,000 depending on the vehicle. By 2020, Starlink launches on Falcon 9 were achieving effective costs below $2,000/kg — and SpaceX's own Starship aims to reduce this further by an order of magnitude. Without cheap launch, a 4,000-satellite constellation is economically impossible.</p>
+    <p><strong>Phased-array terminal technology.</strong> A GEO terminal is a fixed dish pointing at a stationary target. A LEO terminal must track satellites moving at ~7.5 km/s across the sky, handing off between satellites every few minutes. Mechanical tracking antennas are bulky, fragile, and expensive. Electronically steered phased-array antennas — flat panels with no moving parts — became manufacturable at consumer price points around 2018–2020. This was the final enabling technology that made LEO broadband commercially deployable.</p>
+
+    <div class="callout green">
+        <strong>KEY INSIGHT FOR ARCHITECTS</strong>
+        The LEO opportunity is fundamentally a manufacturing and launch cost story, not a physics story. The physics of low-Earth orbit have been understood for decades. What changed was the industrial infrastructure needed to exploit those physics economically.
+    </div>
+</div>
+
+<div class="content-block">
+    <h2>3. The Demand Side: Why Connectivity Became Infrastructure</h2>
+    <p>Even with dramatically lower costs, mega-constellations require enormous capital investment — SpaceX's Starlink program is estimated to have consumed $10–15 billion to reach operational scale. That capital only makes sense if the addressable market is large enough and durable enough to justify it.</p>
+    <p>The demand argument rests on three pillars.</p>
+
+    <h3>The unconnected billions</h3>
+    <p>Approximately 3 billion people remained without reliable internet access as of 2020, mostly in rural and remote areas where terrestrial infrastructure is economically unviable. Satellite is the only practical technology for many of these locations. Even capturing a small fraction of this market at modest ARPU represents tens of billions of dollars annually.</p>
+
+    <h3>The mobility market</h3>
+    <p>Aviation and maritime connectivity were historically served by GEO satellites using Ku-band. The latency and bandwidth limitations of GEO became increasingly visible as passengers expected inflight WiFi to match their home broadband. Airlines were paying hundreds of millions of dollars per year for GEO capacity that delivered an inferior experience. The global connected aircraft market alone represented a multi-billion dollar annual opportunity that LEO could fundamentally reshape.</p>
+
+    <h3>Government and defence</h3>
+    <p>Governments increasingly viewed ubiquitous, resilient, low-latency connectivity as a strategic asset. The US Department of Defense has contracted with SpaceX for Starlink services. NATO allies have explored LEO for battlefield communications. Ukraine's use of Starlink terminals from early 2022 demonstrated operational military value in ways that reshaped government procurement thinking globally. Government and defence contracts provide stable, high-margin revenue that underpins the economics of commercial LEO constellations.</p>
+</div>
+
+<div class="content-block">
+    <h2>4. The Competitive Landscape Crystallises</h2>
+    <p>Between 2015 and 2022, the LEO broadband market went from a theoretical concept to a genuine industry with multiple well-funded competitors. Understanding who entered, why, and with what architecture is foundational to everything in Q1.</p>
+
+    <div class="callout">
+        <strong>THE FOUR MAIN ACTORS</strong>
+        SpaceX Starlink (US) · Amazon Kuiper (US) · OneWeb / Eutelsat (UK/France) · Telesat Lightspeed (Canada). Each made distinct architectural choices driven by their respective funding structures, launch access, target markets, and technical bets. You will study each in depth in Lessons 7–10.
+    </div>
+
+    <p>The competitive dynamic is unusual compared to most industries. SpaceX had a structural advantage: it built the launch vehicle as well as the satellites, giving it launch cost and cadence advantages no competitor could match in the near term. Amazon had cloud infrastructure and distribution advantages. OneWeb had spectrum filings and a completed first-generation constellation before entering bankruptcy. Telesat had MEO engineering heritage and government backing.</p>
+    <p>For the systems architect, the important lesson is that architecture choices cannot be separated from business context. Starlink's flat-panel consumer terminal was designed for a direct-to-consumer retail model. OneWeb's terminal strategy was B2B-only, targeting telcos and aviation integrators. These are not just marketing decisions — they drive antenna design, frequency plan, gateway topology, and service level architecture.</p>
+</div>
+
+<!-- DIAGRAM -->
+<div class="content-block">
+    <h2>5. Visualising the Shift</h2>
+    <div class="diagram-wrap">
+        <svg viewBox="0 0 700 320" width="100%" xmlns="http://www.w3.org/2000/svg" font-family="Share Tech Mono, monospace">
+
+            <!-- Background grid -->
+            <defs>
+                <pattern id="grid" width="40" height="40" patternUnits="userSpaceOnUse">
+                    <path d="M 40 0 L 0 0 0 40" fill="none" stroke="#ffffff08" stroke-width="0.5"/>
+                </pattern>
+            </defs>
+            <rect width="700" height="320" fill="url(#grid)"/>
+
+            <!-- Earth -->
+            <circle cx="350" cy="280" r="50" fill="#001a2c" stroke="#00d9ff33" stroke-width="1"/>
+            <text x="350" y="284" text-anchor="middle" font-size="11" fill="#00d9ff88">EARTH</text>
+
+            <!-- LEO arc -->
+            <ellipse cx="350" cy="280" rx="120" ry="110" fill="none" stroke="#39ff14" stroke-width="1" stroke-dasharray="4,3"/>
+            <text x="225" y="175" font-size="10" fill="#39ff1499" text-anchor="middle">LEO</text>
+            <text x="225" y="188" font-size="9" fill="#39ff1466" text-anchor="middle">550–1200 km</text>
+            <text x="225" y="200" font-size="9" fill="#39ff1466" text-anchor="middle">~20–40 ms RTT</text>
+
+            <!-- MEO arc -->
+            <ellipse cx="350" cy="280" rx="200" ry="180" fill="none" stroke="#00d9ff" stroke-width="1" stroke-dasharray="4,3"/>
+            <text x="158" y="108" font-size="10" fill="#00d9ff99" text-anchor="middle">MEO</text>
+            <text x="158" y="121" font-size="9" fill="#00d9ff66" text-anchor="middle">8,000–20,000 km</text>
+            <text x="158" y="133" font-size="9" fill="#00d9ff66" text-anchor="middle">~125–140 ms RTT</text>
+
+            <!-- GEO line (partial arc, very large) -->
+            <path d="M 30 260 Q 350 -80 670 260" fill="none" stroke="#ff004f" stroke-width="1" stroke-dasharray="4,3"/>
+            <text x="490" y="55" font-size="10" fill="#ff004f99" text-anchor="middle">GEO</text>
+            <text x="490" y="68" font-size="9" fill="#ff004f66" text-anchor="middle">35,786 km</text>
+            <text x="490" y="80" font-size="9" fill="#ff004f66" text-anchor="middle">~600 ms RTT</text>
+
+            <!-- LEO satellite dot -->
+            <circle cx="295" cy="172" r="5" fill="#39ff14"/>
+            <line x1="295" y1="172" x2="350" y2="238" stroke="#39ff1444" stroke-width="1" stroke-dasharray="3,3"/>
+
+            <!-- GEO satellite dot -->
+            <circle cx="350" cy="20" r="5" fill="#ff004f"/>
+            <line x1="350" y1="20" x2="350" y2="230" stroke="#ff004f44" stroke-width="1" stroke-dasharray="3,3"/>
+
+            <!-- Legend -->
+            <rect x="20" y="10" width="12" height="3" fill="#39ff14"/>
+            <text x="38" y="18" font-size="10" fill="#39ff14">LEO — low latency, many satellites needed</text>
+            <rect x="20" y="26" width="12" height="3" fill="#ff004f"/>
+            <text x="38" y="34" font-size="10" fill="#ff004f">GEO — high latency, wide coverage per satellite</text>
+        </svg>
+        <figcaption>ORBITAL ALTITUDE VS LATENCY — NOT TO SCALE</figcaption>
+    </div>
+</div>
+
+<div class="content-block">
+    <h2>6. Implications for the Systems Architect</h2>
+    <p>Before moving on, internalise these architectural implications of the LEO shift. They will reappear throughout the programme.</p>
+    <ul>
+        <li><strong>Coverage requires constellations, not satellites.</strong> A single LEO satellite covers a ground footprint for only minutes. Full global coverage requires hundreds to thousands of satellites. This drives every cost, operational, and regulatory challenge in the programme.</li>
+        <li><strong>Handover is not optional.</strong> Unlike GEO where the terminal points at a fixed target indefinitely, every LEO terminal must continuously hand off between satellites. This is a networking problem, a RF problem, and a latency problem simultaneously.</li>
+        <li><strong>The terminal is the bottleneck.</strong> Ground segment cost and form factor determine which markets LEO can serve. An expensive, heavy, power-hungry terminal cannot serve aviation or maritime. This is why phased-array terminal technology is so central to the LEO story.</li>
+        <li><strong>Scale changes economics non-linearly.</strong> The cost per bit delivered by a LEO constellation improves as satellites are added (up to a point), because more satellites means more capacity over the same gateway and spectrum investment. Understanding constellation scaling economics is an architect-level skill.</li>
+        <li><strong>Regulatory complexity scales with constellation size.</strong> A single GEO satellite requires one ITU filing. A 4,000-satellite constellation requires coordination of thousands of orbital slots, frequency assignments, and interference analyses. The regulatory dimension is not optional for an architect.</li>
+    </ul>
+</div>
+
+<!-- ═══ QUIZ ═══ -->
+<div class="quiz-block">
+    <h2>KNOWLEDGE CHECK</h2>
+
+    <div class="quiz-q" id="q1">
+        <p>1. What is the approximate one-way signal delay to a geostationary satellite and back?</p>
+        <div class="quiz-options">
+            <button class="quiz-opt" data-q="1" data-correct="false">A — Approximately 20–40 ms</button>
+            <button class="quiz-opt" data-q="1" data-correct="false">B — Approximately 100–120 ms</button>
+            <button class="quiz-opt" data-q="1" data-correct="true">C — Approximately 240–280 ms one-way (600 ms+ RTT)</button>
+            <button class="quiz-opt" data-q="1" data-correct="false">D — Approximately 500 ms one-way</button>
+        </div>
+        <div class="quiz-feedback" id="fb1"></div>
+    </div>
+
+    <div class="quiz-q" id="q2">
+        <p>2. Which of the following was the critical enabling technology that made LEO consumer terminals commercially viable around 2018–2020?</p>
+        <div class="quiz-options">
+            <button class="quiz-opt" data-q="2" data-correct="false">A — Software-defined radio</button>
+            <button class="quiz-opt" data-q="2" data-correct="true">B — Electronically steered phased-array antennas manufacturable at consumer price points</button>
+            <button class="quiz-opt" data-q="2" data-correct="false">C — Higher-power satellite transponders</button>
+            <button class="quiz-opt" data-q="2" data-correct="false">D — Advances in TCP acceleration proxies</button>
+        </div>
+        <div class="quiz-feedback" id="fb2"></div>
+    </div>
+
+    <div class="quiz-q" id="q3">
+        <p>3. SpaceX's structural advantage in the LEO market over competitors like OneWeb and Kuiper is primarily:</p>
+        <div class="quiz-options">
+            <button class="quiz-opt" data-q="3" data-correct="false">A — Superior satellite RF technology</button>
+            <button class="quiz-opt" data-q="3" data-correct="false">B — Earlier spectrum filings at the ITU</button>
+            <button class="quiz-opt" data-q="3" data-correct="true">C — Ownership of the launch vehicle, giving unmatched launch cost and cadence</button>
+            <button class="quiz-opt" data-q="3" data-correct="false">D — A larger ground station network</button>
+        </div>
+        <div class="quiz-feedback" id="fb3"></div>
+    </div>
+
+    <div class="quiz-q" id="q4">
+        <p>4. Why does increasing GEO satellite capacity (bandwidth) not solve the latency problem?</p>
+        <div class="quiz-options">
+            <button class="quiz-opt" data-q="4" data-correct="false">A — Because GEO satellites use older modulation schemes that limit throughput</button>
+            <button class="quiz-opt" data-q="4" data-correct="true">B — Because bandwidth and latency are independent — a higher-capacity GEO satellite still has the same 600 ms RTT imposed by orbital altitude and the speed of light</button>
+            <button class="quiz-opt" data-q="4" data-correct="false">C — Because GEO HTS satellites are too expensive to operate</button>
+            <button class="quiz-opt" data-q="4" data-correct="false">D — Because interference limits throughput before latency becomes the binding constraint</button>
+        </div>
+        <div class="quiz-feedback" id="fb4"></div>
+    </div>
+
+    <div class="quiz-q" id="q5">
+        <p>5. From an architect's perspective, why does LEO coverage require a constellation rather than a single satellite?</p>
+        <div class="quiz-options">
+            <button class="quiz-opt" data-q="5" data-correct="false">A — Because a single LEO satellite lacks sufficient transmit power</button>
+            <button class="quiz-opt" data-q="5" data-correct="false">B — Because regulatory rules prohibit single-satellite LEO operators</button>
+            <button class="quiz-opt" data-q="5" data-correct="true">C — Because a single LEO satellite covers a ground footprint for only a few minutes before passing over the horizon, requiring a constellation to maintain continuous coverage</button>
+            <button class="quiz-opt" data-q="5" data-correct="false">D — Because a single LEO satellite cannot carry enough spectrum</button>
+        </div>
+        <div class="quiz-feedback" id="fb5"></div>
+    </div>
+
+    <div class="quiz-score" id="quizScore"></div>
+</div>
+
+<!-- ═══ PYTHON EXERCISE ═══ -->
+<div class="py-block">
+    <h2>PYTHON EXERCISE — LATENCY CALCULATOR</h2>
+    <p>Write a Python script that calculates the one-way propagation delay (in milliseconds) and round-trip time for a given orbital altitude. Then compare GEO, MEO, and LEO values side by side. This is the kind of back-of-envelope calculation you will run constantly as an architect.</p>
+
+    <pre>
+```
+
+# LEO vs GEO Latency Calculator
+
+# ─────────────────────────────
+
+# Constants
+
+C = 299_792  # speed of light, km/s
+
+def propagation_delay_ms(altitude_km, elevation_deg=90):
+“””
+Calculate one-way signal delay in ms.
+elevation_deg: ground terminal elevation angle to satellite.
+At 90° (directly overhead) the path = altitude.
+At lower elevations the slant range increases.
+“””
+import math
+earth_radius_km = 6371
+# Slant range from ground to satellite using law of cosines
+# r = sqrt(Re^2 + (Re+h)^2 - 2*Re*(Re+h)*cos(90+el)) simplified:
+elev_rad = math.radians(elevation_deg)
+Re = earth_radius_km
+h = altitude_km
+# Slant range:
+slant = math.sqrt(
+Re**2 + (Re + h)**2
+- 2 * Re * (Re + h) * math.cos(math.radians(90 + elevation_deg))
+)
+delay_s = slant / C
+return delay_s * 1000  # convert to ms
+
+# ── Exercise: fill in the altitudes and print a comparison table ──
+
+orbits = {
+“GEO”:              35_786,
+“MEO (O3b/SES)”:   8_062,
+“LEO (Starlink)”:   550,
+“LEO (OneWeb)”:     1_200,
+“VLEO”:             300,
+}
+
+print(f”{‘Orbit’:<22} {‘Alt (km)’:>10} {‘1-way @ 90° (ms)’:>18} {‘RTT @ 90° (ms)’:>16}”)
+print(“─” * 70)
+for name, alt in orbits.items():
+ow = propagation_delay_ms(alt, elevation_deg=90)
+rtt = ow * 2
+print(f”{name:<22} {alt:>10,} {ow:>18.1f} {rtt:>16.1f}”)
+
+# ── Extension: plot RTT vs elevation angle for Starlink at 550 km ──
+
+# Try: import matplotlib.pyplot as plt
+
+# elevation angles from 5° to 90°, plot the RTT curve
+
+# What is the RTT at 5° vs 90° elevation?
+
+# At what elevation angle does RTT exceed 15 ms?
+
+```
+    </pre>
+
+    <p class="py-note">Run this in a local Python environment (Python 3.8+, no external dependencies for the base exercise). For the extension plot you will need <code>matplotlib</code>. Expected output: GEO RTT ≈ 239 ms one-way / 478 ms RTT at zenith. Starlink at 550 km ≈ 1.8 ms one-way at zenith — note this is propagation only, not full network RTT.</p>
+
+    <div class="callout green" style="margin-top:16px;">
+        <strong>GOING FURTHER</strong>
+        Modify the script to account for a realistic ground network RTT budget (add 20–50 ms for terrestrial legs and processing) and compare the resulting end-to-end RTT with GEO. At what point does network overhead dominate over propagation delay at LEO altitudes?
+    </div>
+</div>
+
+<!-- ═══ MARK COMPLETE ═══ -->
+<div class="complete-wrap">
+    <button class="complete-btn" id="completeBtn">MARK LESSON COMPLETE</button>
+    <div class="complete-msg" id="completeMsg"></div>
+</div>
+
+<div class="lesson-nav">
+    <a href="q1.html">← BACK TO Q1</a>
+    <a href="q1-2.html">LESSON 02 — ORBITAL REGIMES COMPARED →</a>
+</div>
+```
+
+</div>
+
+<footer>© 2026 LEOAF · Q1 · LESSON 01 OF 15</footer>
+
+<!-- Stars -->
+
+<script>
+const canvas = document.getElementById('starsCanvas');
+const ctx = canvas.getContext('2d');
+let stars = [];
+function initStars() { stars=[]; for(let i=0;i<200;i++) stars.push({x:Math.random()*canvas.width,y:Math.random()*canvas.height,size:Math.random()*1.5+0.5,speed:Math.random()*0.2+0.05,hue:Math.random()*360}); }
+function resizeCanvas() { canvas.width=window.innerWidth; canvas.height=window.innerHeight; }
+resizeCanvas(); initStars(); window.addEventListener('resize',resizeCanvas);
+function animateStars() { ctx.clearRect(0,0,canvas.width,canvas.height); stars.forEach(s=>{s.y-=s.speed;if(s.y<0){s.y=canvas.height;s.x=Math.random()*canvas.width;} ctx.beginPath();ctx.fillStyle=`hsl(${s.hue},80%,80%)`;ctx.arc(s.x,s.y,s.size,0,Math.PI*2);ctx.fill();}); requestAnimationFrame(animateStars); }
+animateStars();
+</script>
+
+<!-- Quiz logic -->
+
+<script>
+const feedbacks = {
+    1: { correct: "Correct. GEO one-way delay is ~240–280 ms, giving a round-trip of ~500–600 ms before any network processing is added.", wrong: "Not quite. At 35,786 km and the speed of light (~300,000 km/s), one-way delay is ~120 ms for the uplink plus ~120 ms for the downlink — roughly 240–280 ms one-way, ~600 ms RTT." },
+    2: { correct: "Correct. Electronically steered phased-array (flat panel) antennas were the critical breakthrough — no moving parts, manufacturable at scale, able to track fast-moving LEO satellites automatically.", wrong: "Not quite. The key enabler was the electronically steered phased-array antenna becoming manufacturable at consumer price points, enabling flat-panel terminals that track LEO satellites without mechanical movement." },
+    3: { correct: "Correct. SpaceX builds and operates Falcon 9 and Falcon Heavy. Launching its own constellation on its own rockets at marginal cost gives a structural advantage over any competitor paying market rates for launch.", wrong: "Not quite. SpaceX's structural advantage is ownership of the launch vehicle. This gives unmatched launch cost (near marginal cost for Starlink) and the cadence to build out the constellation faster than any competitor." },
+    4: { correct: "Correct. Bandwidth and latency are independent variables. A 1 Tbps GEO satellite still delivers 600 ms RTT. More capacity does not change the orbital altitude or the speed of light.", wrong: "Not quite. The reason is that bandwidth and latency are completely independent. No matter how much capacity a GEO satellite carries, the signal still has to travel 35,786 km at the speed of light." },
+    5: { correct: "Correct. A LEO satellite at 550 km completes an orbit in ~95 minutes and is above the horizon for any given ground point for only 5–10 minutes. Continuous coverage requires enough satellites that at least one is always visible.", wrong: "Not quite. The reason is orbital geometry: a single LEO satellite moves across the sky in minutes and drops below the horizon. A constellation ensures continuous coverage by having multiple satellites always in view." }
+};
+
+let scores = {};
+document.querySelectorAll('.quiz-opt').forEach(btn => {
+    btn.addEventListener('click', function() {
+        const q = this.dataset.q;
+        if (scores[q] !== undefined) return; // already answered
+        const correct = this.dataset.correct === 'true';
+        scores[q] = correct ? 1 : 0;
+        // Disable all options for this question
+        document.querySelectorAll(`.quiz-opt[data-q="${q}"]`).forEach(b => {
+            b.disabled = true;
+            if (b.dataset.correct === 'true') b.classList.add('correct');
+        });
+        if (!correct) this.classList.add('wrong');
+        document.getElementById(`fb${q}`).textContent = correct ? '✓ ' + feedbacks[q].correct : '✗ ' + feedbacks[q].wrong;
+        document.getElementById(`fb${q}`).style.color = correct ? '#39ff14' : '#ff004f';
+        // Show score if all answered
+        if (Object.keys(scores).length === 5) {
+            const total = Object.values(scores).reduce((a,b)=>a+b,0);
+            const el = document.getElementById('quizScore');
+            el.style.display = 'block';
+            el.textContent = `SCORE: ${total} / 5 — ${total===5?'PERFECT. PROCEED TO EXERCISE.':total>=3?'SOLID. REVIEW ANY MISSED ITEMS.':'REVISIT THE READING BEFORE PROCEEDING.'}`;
+        }
+    });
+});
+</script>
+
+<!-- Supabase & mark complete -->
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+<script src="supabase.js"></script>
+
+<script src="user_progress.js"></script>
+
+<script>
+const LESSON_ID = 'q1-1';
+
+document.addEventListener('DOMContentLoaded', async () => {
+    const { data: { session } } = await client.auth.getSession();
+    if (!session) { window.location.href = 'index.html'; return; }
+
+    document.getElementById('logoffBtn').addEventListener('click', async () => {
+        await client.auth.signOut(); window.location.href = 'index.html';
+    });
+
+    // Check if already complete
+    const mastered = await getMasteredSections();
+    if (mastered.includes(LESSON_ID)) {
+        const btn = document.getElementById('completeBtn');
+        btn.textContent = '✓ LESSON COMPLETE';
+        btn.classList.add('done');
+        document.getElementById('completeMsg').textContent = 'This lesson is already marked complete.';
+    }
+
+    document.getElementById('completeBtn').addEventListener('click', async () => {
+        const btn = document.getElementById('completeBtn');
+        const msg = document.getElementById('completeMsg');
+        if (btn.classList.contains('done')) return;
+        msg.style.color = '#00d9ff';
+        msg.textContent = 'Saving...';
+        const ok = await markSectionComplete(LESSON_ID);
+        if (ok) {
+            btn.textContent = '✓ LESSON COMPLETE';
+            btn.classList.add('done');
+            msg.style.color = '#39ff14';
+            msg.textContent = 'Progress saved. Proceed to Lesson 02.';
+        } else {
+            msg.style.color = '#ff004f';
+            msg.textContent = 'Error saving progress. Try again.';
+        }
+    });
+});
+</script>
+
+</body>
+</html>
