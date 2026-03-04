@@ -1,0 +1,324 @@
+<!DOCTYPE html>
+
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, shrink-to-fit=no">
+<title>Command Center — LEOAF</title>
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;600;800&family=Share+Tech+Mono&display=swap" rel="stylesheet">
+
+<!-- Favicons -->
+
+<link rel="icon" href="favicon.ico" sizes="any" type="image/x-icon">
+<link rel="icon" href="favicon.svg" type="image/svg+xml">
+<link rel="icon" type="image/png" sizes="96x96" href="favicon-96x96.png">
+<link rel="apple-touch-icon" sizes="180x180" href="apple-touch-icon.png">
+<link rel="manifest" href="site.webmanifest">
+<meta name="theme-color" content="#0f0f0f">
+
+<style>
+* { box-sizing: border-box; margin:0; padding:0; }
+html { height:100%; -webkit-text-size-adjust:100%; max-width:100vw; overflow-x:hidden; }
+body {
+    font-family: 'Share Tech Mono', monospace;
+    background:#000; color:white;
+    overflow-x:hidden; max-width:100vw;
+    position:relative; min-height:100vh;
+}
+#starsCanvas { position:fixed; inset:0; z-index:-1; }
+
+/* HEADER */
+header {
+    background:#000; border-bottom:1px solid #ff004f33;
+    position:sticky; top:0; z-index:100;
+    padding:1rem clamp(1.5rem,5vw,4rem);
+    display:flex; justify-content:space-between; align-items:center;
+    box-shadow:0 4px 16px #0008;
+}
+.logo { font-family:'Orbitron',sans-serif; font-weight:800; font-size:clamp(18px,2vw,24px); letter-spacing:3px; text-decoration:none; }
+.logo span:first-child { color:white; }
+.logo span:last-child { color:#ff004f; }
+.nav-left { display:flex; align-items:center; gap:2rem; }
+.header-controls { display:flex; align-items:center; gap:15px; }
+.user-id { font-size:10px; color:#00d9ff; letter-spacing:1px; opacity:0.8; display:none; }
+.logoff-btn {
+    background:transparent; border:1px solid #ff004f; color:#ff004f;
+    padding:6px 14px; cursor:pointer; transition:0.3s ease;
+    font-size:11px; font-family:'Orbitron',sans-serif; letter-spacing:1px;
+}
+.logoff-btn:hover { background:#ff004f; color:black; box-shadow:0 0 10px #ff004f; }
+
+/* DASHBOARD */
+.dashboard { width:100%; max-width:960px; margin:40px auto; padding:0 15px; position:relative; z-index:1; }
+.welcome-msg { font-family:'Orbitron',sans-serif; font-size:clamp(22px,4vw,32px); margin-bottom:10px; font-weight:800; letter-spacing:1px; }
+
+/* PROGRESS */
+.mission-control {
+    background:rgba(17,17,17,0.8); border:1px solid rgba(0,217,255,0.3);
+    padding:25px; margin-bottom:40px; box-shadow:inset 0 0 20px rgba(0,217,255,0.05);
+}
+.progress-header { display:flex; justify-content:space-between; align-items:flex-end; margin-bottom:15px; }
+.progress-header h2 { font-family:'Orbitron',sans-serif; font-size:13px; color:#00d9ff; letter-spacing:2px; }
+.progress-stats { font-family:'Orbitron',sans-serif; font-size:14px; color:#39ff14; }
+.progress-track { width:100%; height:12px; background:rgba(255,255,255,0.1); overflow:hidden; }
+.progress-fill {
+    height:100%; width:0%; background:linear-gradient(90deg,#00d9ff,#39ff14);
+    box-shadow:0 0 10px rgba(57,255,20,0.5);
+    transition:width 0.8s cubic-bezier(0.4,0,0.2,1);
+}
+
+/* YEAR HEADERS */
+.year-header {
+    display:flex; align-items:center;
+    padding:18px; margin-top:2.5rem; margin-bottom:0;
+    border-left:3px solid #00d9ff;
+    background:rgba(0,217,255,0.04);
+    pointer-events:none;
+}
+.year-header .year-text { flex:1; }
+.year-header .year-text h3 { font-family:'Orbitron',sans-serif; color:#00d9ff; font-size:15px; letter-spacing:1px; margin-bottom:6px; text-transform:uppercase; }
+.year-header .year-text p { color:#aaa; font-size:13px; line-height:1.5; }
+.year-badge { font-family:'Orbitron',sans-serif; font-size:10px; color:#00d9ff; border:1px solid #00d9ff; padding:4px 10px; letter-spacing:1px; white-space:nowrap; opacity:0.7; align-self:flex-start; }
+
+/* MODULE CARDS */
+.module-list { display:flex; flex-direction:column; gap:10px; }
+.module-card {
+    background:rgba(255,255,255,0.04); border-left:3px solid #ff004f;
+    padding:18px 20px; text-decoration:none; color:white;
+    transition:0.3s ease; display:block;
+}
+.module-card:hover { background:rgba(0,217,255,0.1); transform:translateX(4px); border-left-color:#00d9ff; }
+.module-card h3 { font-family:'Orbitron',sans-serif; margin:0 0 6px; font-size:13px; color:#ffffff; letter-spacing:1px; text-transform:uppercase; }
+.module-card p { margin:0 0 8px; font-size:12px; color:#aaaaaa; line-height:1.6; }
+.module-meta { display:flex; gap:1rem; flex-wrap:wrap; }
+.module-meta span {
+    font-family:'Orbitron',sans-serif; font-size:10px; letter-spacing:1px;
+    padding:3px 8px;
+}
+.meta-months { color:#00d9ff88; border:1px solid #00d9ff22; }
+.meta-hours  { color:#39ff1488; border:1px solid #39ff1422; }
+
+/* COMPLETED */
+.module-card.completed { border-left-color:#39ff14; background:rgba(57,255,20,0.04); }
+.module-card.completed h3 { color:#39ff14; text-decoration:line-through; }
+
+/* ENDGAME */
+.endgame-card {
+    margin-top:2.5rem; background:rgba(57,255,20,0.06);
+    border-left:3px solid #39ff14; padding:20px;
+    display:flex; justify-content:space-between; align-items:flex-start; flex-wrap:wrap; gap:12px;
+}
+.endgame-card h3 { font-family:'Orbitron',sans-serif; color:#39ff14; font-size:15px; letter-spacing:1px; margin-bottom:8px; text-transform:uppercase; }
+.endgame-card p { color:#aaa; font-size:12px; line-height:1.6; flex:1 1 60%; }
+.endgame-total {
+    font-family:'Orbitron',sans-serif; font-size:clamp(18px,3vw,28px); font-weight:800;
+    color:#39ff14; text-shadow:0 0 20px rgba(57,255,20,0.5); white-space:nowrap;
+}
+.endgame-total span { display:block; font-size:10px; color:white; opacity:0.5; letter-spacing:1px; margin-top:2px; text-align:right; }
+
+/* RESPONSIVE */
+@media (max-width:600px) {
+    .year-header { flex-direction:column; gap:10px; }
+    .endgame-card { flex-direction:column; }
+    .endgame-total span { text-align:left; }
+}
+</style>
+
+</head>
+
+<body>
+
+<canvas id="starsCanvas"></canvas>
+
+<header>
+    <div class="nav-left">
+        <a href="dashboard.html" class="logo"><span>LEO</span><span>AF</span></a>
+    </div>
+    <div class="header-controls">
+        <span id="userEmail" class="user-id">AGENT</span>
+        <button id="logoffBtn" class="logoff-btn">ABORT</button>
+    </div>
+</header>
+
+<main class="dashboard">
+<h1 class="welcome-msg">MISSION DASHBOARD</h1>
+
+<div class="mission-control">
+    <div class="progress-header">
+        <h2>CONSTELLATION ARCHITECT PROGRESSION</h2>
+        <span class="progress-stats" id="progressText">0%</span>
+    </div>
+    <div class="progress-track">
+        <div class="progress-fill" id="progressFill"></div>
+    </div>
+</div>
+
+<div class="module-list">
+
+<!-- YEAR 1 -->
+
+<div class="year-header">
+    <div class="year-text">
+        <h3>Year 1 — Foundations · Months 1–12</h3>
+        <p>Bridge GEO/aviation expertise to LEO reality. Orbits, RF engineering, terminal design, space weather, networking and security.</p>
+    </div>
+    <div class="year-badge">~310 HRS · Q1–Q4</div>
+</div>
+
+<a href="q1.html" class="module-card" data-id="q1">
+    <h3>Q1 — Connectivity Landscape & Satcom Refresh</h3>
+    <p>Why LEO emerged · GEO/MEO/LEO/VLEO comparison · Multi-orbit hybrid architectures · Historical failures · Case studies: Starlink, OneWeb, Kuiper, Telesat Lightspeed · Ground segment overview · GEO vs LEO business model delta</p>
+    <div class="module-meta">
+        <span class="meta-months">MONTHS 1–3</span>
+        <span class="meta-hours">~60 HRS</span>
+    </div>
+</a>
+
+<a href="q2.html" class="module-card" data-id="q2">
+    <h3>Q2 — Orbital Mechanics & Constellation Design</h3>
+    <p>Kepler/Newton basics · Doppler & ground tracks · Walker patterns (delta & star) · Polar vs inclined orbits · Optical ISL geometry intro · Constellation optimization tradeoffs · Launch & deployment logistics: rideshare, phasing burns, orbital raising · GMAT/Poliastro modeling · Python ground-track visualizer</p>
+    <div class="module-meta">
+        <span class="meta-months">MONTHS 4–6</span>
+        <span class="meta-hours">~80 HRS</span>
+    </div>
+</a>
+
+<a href="q3.html" class="module-card" data-id="q3">
+    <h3>Q3 — RF Link Budgets, Spectrum & Terminal Engineering</h3>
+    <p>Link budget math (Eb/N0, G/T, EIRP) · Ka/Ku/V/E-band tradeoffs · Spectrum coordination & EPFD limits · AESA phased arrays · Aviation terminal constraints: SWaP, DO-160, aero certification · Space weather & ionospheric effects on link margin · Radiation hardening basics for payload designers</p>
+    <div class="module-meta">
+        <span class="meta-months">MONTHS 7–9</span>
+        <span class="meta-hours">~90 HRS</span>
+    </div>
+</a>
+
+<a href="q4.html" class="module-card" data-id="q4">
+    <h3>Q4 — Networking, Mobility, Safety & Security</h3>
+    <p>Mesh vs bent-pipe architectures · Handover mechanics & beam switching · TCP/QUIC performance in high-mobility · 5G NTN integration · Aviation safety services: ACARS, ADS-B, ATC datalink, IFE QoS · LEO security: RF spoofing, jamming, meaconing · Ground segment hardening · Supply chain & firmware threats · Encryption at link and network layer</p>
+    <div class="module-meta">
+        <span class="meta-months">MONTHS 10–12</span>
+        <span class="meta-hours">~80 HRS</span>
+    </div>
+</a>
+
+<!-- YEAR 2 -->
+
+<div class="year-header">
+    <div class="year-text">
+        <h3>Year 2 — Advanced Applications & Portfolio · Months 13–24</h3>
+        <p>ISL routing, ground operations, fleet management, debris, economics and regulatory depth. Capstone projects and portfolio polish.</p>
+    </div>
+    <div class="year-badge">~350 HRS · Q5–Q8</div>
+</div>
+
+<a href="q5.html" class="module-card" data-id="q5">
+    <h3>Q5 — Inter-Satellite Networking & Routing</h3>
+    <p>Optical ISL physics & pointing mechanics · Laser link budget and acquisition · SDN in space · MPLS/Segment Routing for constellation topologies · Multi-orbit hybrid topologies · Routing under constellation churn · End-to-end latency modeling · Full routing simulation: Python or NS-3</p>
+    <div class="module-meta">
+        <span class="meta-months">MONTHS 13–15</span>
+        <span class="meta-hours">~90 HRS</span>
+    </div>
+</a>
+
+<a href="q6.html" class="module-card" data-id="q6">
+    <h3>Q6 — Ground Segment, Operations & Fleet Management</h3>
+    <p>TT&C architecture deep dive · LEOP & early orbit operations · Anomaly resolution playbooks · Gateway design & PoP placement · Fleet ops at scale · Conjunction analysis & collision avoidance · Debris risk quantification & deorbit compliance · ITU end-of-life disposal rules</p>
+    <div class="module-meta">
+        <span class="meta-months">MONTHS 16–18</span>
+        <span class="meta-hours">~80 HRS</span>
+    </div>
+</a>
+
+<a href="q7.html" class="module-card" data-id="q7">
+    <h3>Q7 — Economics, Regulations & Capstone #1</h3>
+    <p>CapEx/OpEx modeling: satellite unit cost, launch amortization, ground infra · Break-even analysis & ARPU targets · ITU filing procedures & coordination timelines · NGSO/GSO interference rules (Appendix 17, EPFD limits) · FCC bond & milestone requirements · Spectrum as competitive moat · Capstone #1: full constellation simulator repo</p>
+    <div class="module-meta">
+        <span class="meta-months">MONTHS 19–21</span>
+        <span class="meta-hours">~80 HRS</span>
+    </div>
+</a>
+
+<a href="q8.html" class="module-card" data-id="q8">
+    <h3>Q8 — Capstone #2, Portfolio & Career Prep</h3>
+    <p>End-to-end aviation LEO service case: terminal trade study, link budget, constellation sizing, economics, regulatory path · Multi-orbit architecture paper (MEO+LEO hybrid) · Portfolio assembly: simulator repo, trade studies, whitepapers · Mock system design interviews · Technical writing for RFPs and proposals</p>
+    <div class="module-meta">
+        <span class="meta-months">MONTHS 22–24</span>
+        <span class="meta-hours">~100 HRS</span>
+    </div>
+</a>
+
+<!-- ENDGAME -->
+
+<div class="endgame-card">
+    <div>
+        <h3>Endgame — Mission Accomplished</h3>
+        <p>Deep LEO fluency across orbital mechanics, RF & link budgets, terminal engineering, space weather, networking, safety services, security, ISLs, ground ops, debris, economics and regulation. Two constellation capstones. Portfolio ready to demonstrate systems-level mastery of modern mega-constellations.</p>
+    </div>
+    <div class="endgame-total">~660 HRS<span>MISSION COMPLETE</span></div>
+</div>
+
+</div>
+</main>
+
+<!-- Stars -->
+
+<script>
+function setViewportHeight() { const vh = window.innerHeight * 0.01; document.documentElement.style.setProperty('--vh', `${vh}px`); }
+setViewportHeight(); window.addEventListener('resize', setViewportHeight);
+
+const canvas = document.getElementById('starsCanvas');
+const ctx = canvas.getContext('2d');
+let stars = [];
+function initStars() { stars = []; for (let i = 0; i < 200; i++) { stars.push({ x: Math.random() * canvas.width, y: Math.random() * canvas.height, size: Math.random() * 1.5 + 0.5, speed: Math.random() * 0.2 + 0.05, hue: Math.random() * 360 }); } }
+function resizeCanvas() { canvas.width = window.innerWidth; canvas.height = window.innerHeight; }
+resizeCanvas(); initStars();
+window.addEventListener('resize', resizeCanvas);
+function animateStars() { ctx.clearRect(0, 0, canvas.width, canvas.height); stars.forEach(s => { s.y -= s.speed; if (s.y < 0) { s.y = canvas.height; s.x = Math.random() * canvas.width; } ctx.beginPath(); ctx.fillStyle = `hsl(${s.hue},80%,80%)`; ctx.arc(s.x, s.y, s.size, 0, Math.PI*2); ctx.fill(); }); requestAnimationFrame(animateStars); }
+animateStars();
+</script>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+<script src="supabase.js"></script>
+
+<script src="user_progress.js"></script>
+
+<script>
+document.addEventListener("DOMContentLoaded", async () => {
+
+    const { data: { session } } = await client.auth.getSession();
+    if (!session) { window.location.href = "index.html"; return; }
+
+    document.getElementById("userEmail").textContent = session.user.email;
+    document.getElementById("userEmail").style.display = "inline";
+
+    const moduleCards = document.querySelectorAll(".module-card");
+    const totalModules = moduleCards.length;
+
+    const mastered = await getMasteredSections();
+    let masteredCount = 0;
+
+    moduleCards.forEach(card => {
+        const id = card.dataset.id;
+        if (mastered.includes(id)) {
+            card.classList.add("completed");
+            masteredCount++;
+        } else {
+            card.classList.remove("completed");
+        }
+    });
+
+    const percent = totalModules > 0 ? Math.round((masteredCount / totalModules) * 100) : 0;
+    document.getElementById("progressFill").style.width = percent + "%";
+    document.getElementById("progressText").textContent = percent + "%";
+
+    document.getElementById("logoffBtn").addEventListener("click", async () => {
+        await client.auth.signOut();
+        window.location.href = "index.html";
+    });
+
+});
+</script>
+
+</body>
+</html>
