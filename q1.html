@@ -3,225 +3,180 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Q1 — GEO vs LEO Systems Thinking</title>
+<title>Q1 — Global Connectivity | LEOAF</title>
+
 <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;600;800&family=Inter:wght@400;600&display=swap" rel="stylesheet">
 
 <style>
-body { margin:0; background:#000; color:white; font-family:'Orbitron',sans-serif; }
-.container { max-width:960px; margin:60px auto; padding:0 20px; }
+*{box-sizing:border-box;margin:0;padding:0;}
+body{font-family:'Orbitron',sans-serif;background:#000;color:white;min-height:100vh;}
 
-.top-nav { margin-bottom:30px; }
-.top-nav a {
-color:#00d9ff; text-decoration:none; font-size:12px;
-border:1px solid #00d9ff33; padding:6px 12px;
+header{
+background:#000;border-bottom:1px solid #ff004f33;
+position:sticky;top:0;z-index:100;
+padding:1rem 3rem;
+display:flex;justify-content:space-between;align-items:center;
 }
-.top-nav a:hover { background:#00d9ff; color:black; }
+.logo{font-weight:800;font-size:22px;letter-spacing:3px;text-decoration:none;}
+.logo span:first-child{color:white;}
+.logo span:last-child{color:#ff004f;}
+.header-controls{display:flex;align-items:center;gap:15px;}
+.user-id{font-size:12px;color:#00d9ff;display:none;}
+.logoff-btn{
+background:transparent;border:1px solid #ff004f;color:#ff004f;
+padding:6px 14px;cursor:pointer;font-size:11px;
+}
+.logoff-btn:hover{background:#ff004f;color:black;}
 
-h1 { margin-bottom:30px; }
-
-.progress-bar { height:10px; background:#111; margin-bottom:30px; }
-.progress-fill {
-height:100%; width:0%;
-background:linear-gradient(90deg,#00d9ff,#39ff14);
-transition:0.4s;
+.container{max-width:900px;margin:40px auto;padding:0 20px;}
+h1{font-size:28px;margin-bottom:20px;}
+.back-link{
+display:inline-block;margin-bottom:30px;
+color:#00d9ff;text-decoration:none;font-size:13px;
 }
 
-.section {
+.accordion-item{
 border-left:3px solid #ff004f;
-background:#111;
-margin-bottom:15px;
+background:#111;margin-bottom:15px;
 }
-
-.section.completed {
-border-left-color:#39ff14;
+.accordion-header{
+padding:18px;cursor:pointer;
+font-weight:600;font-size:15px;
 }
-
-.section h2 {
-margin:0;
-padding:15px;
-cursor:pointer;
-font-size:16px;
-}
-
-.section.completed h2 {
-color:#39ff14;
-text-decoration:line-through;
-}
-
-.content {
-display:none;
-padding:15px;
+.accordion-content{
+display:none;padding:20px;
 font-family:'Inter',sans-serif;
-font-size:14px;
-line-height:1.6;
-color:#aaa;
+color:#ccc;line-height:1.7;font-size:14px;
+}
+.accordion-item.active .accordion-content{
+display:block;
 }
 
-button {
-margin-top:15px;
-padding:8px 14px;
-background:transparent;
-border:1px solid #00d9ff;
-color:#00d9ff;
-cursor:pointer;
-font-family:'Orbitron';
-font-size:11px;
+.complete-section{
+margin-top:40px;text-align:center;
 }
-button:hover { background:#00d9ff; color:black; }
-
-.meta {
-font-size:11px;
-color:#39ff14;
-margin-top:10px;
+.complete-btn{
+background:#ff004f;color:white;
+border:none;padding:12px 24px;
+font-family:'Orbitron';cursor:pointer;
+letter-spacing:1px;
+}
+.complete-btn.completed{
+background:#39ff14;color:black;
 }
 </style>
 </head>
+
 <body>
 
-<div class="container">
-
-<div class="top-nav">
-<a href="dashboard.html">← BACK TO DASHBOARD</a>
+<header>
+<a href="dashboard.html" class="logo">
+<span>LEO</span><span>AF</span>
+</a>
+<div class="header-controls">
+<span id="userEmail" class="user-id"></span>
+<button id="logoffBtn" class="logoff-btn">ABORT</button>
 </div>
+</header>
 
-<h1>Q1 — GEO vs LEO Systems Thinking (30 Hours)</h1>
+<main class="container">
 
-<div class="progress-bar">
-<div id="progressFill" class="progress-fill"></div>
-</div>
-<div id="progressText">0%</div>
+<a href="dashboard.html" class="back-link">← BACK TO DASHBOARD</a>
 
-<!-- SECTION 1 -->
-<div class="section" data-id="q1-global">
-<h2 onclick="toggleAccordion(this)">1. Global Connectivity Reality</h2>
-<div class="content">
-<p>
-Understand the physics of latency. GEO round-trip time averages ~600ms due to 35,786 km altitude.
-LEO at 1,200 km reduces RTT below 50ms.
-Map latency vs geography and compare to transatlantic fiber (~70ms).
-</p>
+<h1>Q1 — Global Connectivity & Multi-Orbit Context</h1>
 
-<p>
-Exercise: Calculate RTT for 550km LEO using speed of light and slant range.
-</p>
-
-<div class="meta">~5 HOURS</div>
-<button onclick="toggleComplete('q1-global', this)">MARK COMPLETE</button>
+<div class="accordion-item">
+<div class="accordion-header">1. Why Terrestrial Networks Break</div>
+<div class="accordion-content">
+Fiber and cellular infrastructure scale well in dense regions but collapse economically in oceans, deserts, air corridors, and polar routes. Aviation exposes this brutally: aircraft move between coverage zones every minutes, not hours. The limitation is not bandwidth — it’s geometry and economics.
 </div>
 </div>
 
-<!-- SECTION 2 -->
-<div class="section" data-id="q1-multi-orbit">
-<h2 onclick="toggleAccordion(this)">2. Multi-Orbit Architecture</h2>
-<div class="content">
-<p>
-Compare GEO broadcast dominance vs LEO latency advantage.
-Understand regenerative payloads vs bent pipe.
-When does hybrid architecture outperform pure LEO?
-</p>
+<div class="accordion-item">
+<div class="accordion-header">2. GEO vs MEO vs LEO Reality</div>
+<div class="accordion-content">
+GEO provides stability and massive coverage but ~600ms RTT.  
+MEO reduces latency but still relies on fewer satellites.  
+LEO trades satellite count for latency (~20–40ms) and mobility complexity.  
 
-<p>
-Design exercise: Build connectivity architecture for global airline fleet.
-</p>
-
-<div class="meta">~6 HOURS</div>
-<button onclick="toggleComplete('q1-multi-orbit', this)">MARK COMPLETE</button>
+As an architect, the shift is from “link design” to “dynamic constellation behavior”.
 </div>
 </div>
 
-<!-- SECTION 3 -->
-<div class="section" data-id="q1-mobility">
-<h2 onclick="toggleAccordion(this)">3. Aviation & Maritime Constraints</h2>
-<div class="content">
-<p>
-Aircraft move at 900 km/h. Satellites at 7.6 km/s.
-Understand dual-motion tracking complexity.
-SWaP constraints for aero terminals.
-Polar routing challenges.
-</p>
-
-<div class="meta">~6 HOURS</div>
-<button onclick="toggleComplete('q1-mobility', this)">MARK COMPLETE</button>
+<div class="accordion-item">
+<div class="accordion-header">3. Aviation & Maritime Pain Points</div>
+<div class="accordion-content">
+Aircraft require seamless handover at 800 km/h while crossing beam footprints every few minutes. Maritime demands persistent coverage over sparse oceans. GEO beam hopping struggles here. LEO enables lower latency and smaller terminals but requires predictive routing.
 </div>
 </div>
 
-<!-- SECTION 4 -->
-<div class="section" data-id="q1-gateway">
-<h2 onclick="toggleAccordion(this)">4. Gateway & Cloud Topology</h2>
-<div class="content">
-<p>
-Gateway placement must balance fiber adjacency and regulatory constraints.
-Design redundancy zones.
-Map traffic from aircraft → satellite → gateway → cloud PoP.
-</p>
+<div class="accordion-item">
+<div class="accordion-header">4. Hybrid Architectures</div>
+<div class="accordion-content">
+The future is not LEO alone. It is hybrid:  
+LEO for latency-sensitive traffic  
+GEO for broadcast & bulk  
+Terrestrial for dense metro  
 
-<div class="meta">~7 HOURS</div>
-<button onclick="toggleComplete('q1-gateway', this)">MARK COMPLETE</button>
+Architectural skill lies in traffic steering and policy orchestration.
 </div>
 </div>
 
-<!-- SECTION 5 -->
-<div class="section" data-id="q1-economics">
-<h2 onclick="toggleAccordion(this)">5. Why Mega-Constellations Exist</h2>
-<div class="content">
-<p>
-Capacity density math.
-Beam reuse vs altitude tradeoff.
-Launch cost economics.
-Why 3,000 satellites can outperform 3 GEO spacecraft for mobility.
-</p>
-
-<div class="meta">~6 HOURS</div>
-<button onclick="toggleComplete('q1-economics', this)">MARK COMPLETE</button>
-</div>
+<div class="complete-section">
+<button id="completeBtn" class="complete-btn">
+MARK QUARTER COMPLETE
+</button>
 </div>
 
-</div>
+</main>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="supabase.js"></script>
 <script src="user_progress.js"></script>
 
 <script>
-function toggleAccordion(el){
-const content = el.nextElementSibling;
-content.style.display = content.style.display === "block" ? "none" : "block";
+document.addEventListener("DOMContentLoaded", async () => {
+
+const { data: { session } } = await client.auth.getSession();
+if (!session) {
+window.location.href="index.html";
+return;
 }
 
-async function toggleComplete(id, btn){
+document.getElementById("userEmail").textContent=session.user.email;
+document.getElementById("userEmail").style.display="inline";
 
-const mastered = await getMasteredSections();
-const section = document.querySelector(`[data-id="${id}"]`);
+// Accordion
+document.querySelectorAll(".accordion-header").forEach(header=>{
+header.addEventListener("click",()=>{
+header.parentElement.classList.toggle("active");
+});
+});
 
-if(mastered.includes(id)){
-await unmarkSection(id);
-section.classList.remove("completed");
-btn.textContent="MARK COMPLETE";
-}else{
-await markSectionComplete(id);
-section.classList.add("completed");
-btn.textContent="COMPLETED";
+// Completion
+const quarterId="q1-connectivity";
+const completeBtn=document.getElementById("completeBtn");
+
+const mastered=await getMasteredSections();
+
+if(mastered.includes(quarterId)){
+completeBtn.classList.add("completed");
+completeBtn.textContent="✓ QUARTER COMPLETED";
 }
 
-updateProgress();
-}
+completeBtn.addEventListener("click",async()=>{
+await saveMasteredSection(quarterId);
+completeBtn.classList.add("completed");
+completeBtn.textContent="✓ QUARTER COMPLETED";
+alert("Q1 Completed. Mission logged.");
+});
 
-async function updateProgress(){
+});
 
-const all = document.querySelectorAll(".section");
-const mastered = await getMasteredSections();
-
-// FILTER ONLY Q1
-const q1Mastered = mastered.filter(id => id.startsWith("q1-"));
-
-const percent = Math.round((q1Mastered.length / all.length) * 100);
-
-document.getElementById("progressFill").style.width = percent+"%";
-document.getElementById("progressText").innerText = percent+"%";
-}
-
-document.addEventListener("DOMContentLoaded", async ()=>{
-updateProgress();
+// Logout
+document.getElementById("logoffBtn").addEventListener("click",async()=>{
+await client.auth.signOut();
+window.location.href="index.html";
 });
 </script>
 
