@@ -1,182 +1,444 @@
 <!DOCTYPE html>
+
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Q1 — Global Connectivity | LEOAF</title>
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, shrink-to-fit=no">
+<title>Q1 — Connectivity Landscape & Satcom Refresh · LEOAF</title>
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;600;800&family=Share+Tech+Mono&display=swap" rel="stylesheet">
 
-<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;600;800&family=Inter:wght@400;600&display=swap" rel="stylesheet">
+<!-- Favicons -->
+
+<link rel="icon" href="favicon.ico" sizes="any" type="image/x-icon">
+<link rel="icon" href="favicon.svg" type="image/svg+xml">
+<link rel="icon" type="image/png" sizes="96x96" href="favicon-96x96.png">
+<link rel="apple-touch-icon" sizes="180x180" href="apple-touch-icon.png">
+<link rel="manifest" href="site.webmanifest">
+<meta name="theme-color" content="#0f0f0f">
 
 <style>
-*{box-sizing:border-box;margin:0;padding:0;}
-body{font-family:'Orbitron',sans-serif;background:#000;color:white;min-height:100vh;}
+* { box-sizing: border-box; margin:0; padding:0; }
+html { height:100%; -webkit-text-size-adjust:100%; overflow-x:hidden; }
+body {
+    font-family: 'Share Tech Mono', monospace;
+    background:#000; color:white;
+    overflow-x:hidden; position:relative; min-height:100vh;
+}
+#starsCanvas { position:fixed; inset:0; z-index:-1; }
 
-header{
-background:#000;border-bottom:1px solid #ff004f33;
-position:sticky;top:0;z-index:100;
-padding:1rem 3rem;
-display:flex;justify-content:space-between;align-items:center;
+/* HEADER */
+header {
+    background:#000; border-bottom:1px solid #ff004f33;
+    position:sticky; top:0; z-index:100;
+    padding:1rem clamp(1.5rem,5vw,4rem);
+    display:flex; justify-content:space-between; align-items:center;
+    box-shadow:0 4px 16px #0008;
 }
-.logo{font-weight:800;font-size:22px;letter-spacing:3px;text-decoration:none;}
-.logo span:first-child{color:white;}
-.logo span:last-child{color:#ff004f;}
-.header-controls{display:flex;align-items:center;gap:15px;}
-.user-id{font-size:12px;color:#00d9ff;display:none;}
-.logoff-btn{
-background:transparent;border:1px solid #ff004f;color:#ff004f;
-padding:6px 14px;cursor:pointer;font-size:11px;
+.logo { font-family:'Orbitron',sans-serif; font-weight:800; font-size:clamp(16px,2vw,22px); letter-spacing:3px; text-decoration:none; }
+.logo span:first-child { color:white; }
+.logo span:last-child { color:#ff004f; }
+.nav-right { display:flex; align-items:center; gap:12px; }
+.nav-btn {
+    background:transparent; border:1px solid #ff004f44; color:#ff004f; 
+    padding:6px 14px; cursor:pointer; transition:0.3s ease;
+    font-size:11px; font-family:'Orbitron',sans-serif; letter-spacing:1px;
+    text-decoration:none; display:inline-block;
 }
-.logoff-btn:hover{background:#ff004f;color:black;}
+.nav-btn:hover { background:#ff004f; color:black; }
 
-.container{max-width:900px;margin:40px auto;padding:0 20px;}
-h1{font-size:28px;margin-bottom:20px;}
-.back-link{
-display:inline-block;margin-bottom:30px;
-color:#00d9ff;text-decoration:none;font-size:13px;
+/* BREADCRUMB */
+.breadcrumb {
+    padding: 14px clamp(1.5rem,5vw,4rem);
+    font-size:11px; color:#ffffff44; letter-spacing:1px;
+    position:relative; z-index:1;
+}
+.breadcrumb a { color:#00d9ff66; text-decoration:none; }
+.breadcrumb a:hover { color:#00d9ff; }
+.breadcrumb span { margin:0 8px; }
+
+/* HERO */
+.q-hero {
+    padding: clamp(30px,5vw,60px) clamp(1.5rem,5vw,4rem) 30px;
+    position:relative; z-index:1;
+    max-width:960px; margin:0 auto;
+}
+.q-tag { font-family:'Orbitron',sans-serif; font-size:11px; color:#ff004f; letter-spacing:3px; margin-bottom:12px; }
+.q-hero h1 { font-family:'Orbitron',sans-serif; font-size:clamp(22px,4vw,36px); font-weight:800; margin-bottom:14px; line-height:1.2; }
+.q-hero p { font-size:13px; line-height:1.7; opacity:0.75; max-width:680px; margin-bottom:24px; }
+
+/* META ROW */
+.meta-row { display:flex; flex-wrap:wrap; gap:10px; margin-bottom:30px; }
+.meta-pill {
+    font-family:'Orbitron',sans-serif; font-size:10px; letter-spacing:1.5px;
+    padding:5px 12px; border:1px solid;
+}
+.pill-months { color:#00d9ff; border-color:#00d9ff44; }
+.pill-hours  { color:#39ff14; border-color:#39ff1444; }
+.pill-lessons { color:#ff004f; border-color:#ff004f44; }
+
+/* PROGRESS BLOCK */
+.q-progress {
+    background:rgba(17,17,17,0.8); border:1px solid rgba(0,217,255,0.2);
+    padding:20px; margin-bottom:36px;
+    max-width:960px; margin-left:auto; margin-right:auto;
+    position:relative; z-index:1;
+    padding-left: clamp(1.5rem,5vw,4rem);
+    padding-right: clamp(1.5rem,5vw,4rem);
+}
+.progress-header { display:flex; justify-content:space-between; align-items:flex-end; margin-bottom:12px; }
+.progress-header h2 { font-family:'Orbitron',sans-serif; font-size:11px; color:#00d9ff; letter-spacing:2px; }
+.progress-pct { font-family:'Orbitron',sans-serif; font-size:13px; color:#39ff14; }
+.progress-track { width:100%; height:8px; background:rgba(255,255,255,0.08); }
+.progress-fill {
+    height:100%; width:0%;
+    background:linear-gradient(90deg,#00d9ff,#39ff14);
+    box-shadow:0 0 8px rgba(57,255,20,0.4);
+    transition:width 0.8s cubic-bezier(0.4,0,0.2,1);
 }
 
-.accordion-item{
-border-left:3px solid #ff004f;
-background:#111;margin-bottom:15px;
+/* LESSON LIST */
+.lesson-list {
+    max-width:960px; margin:0 auto 60px;
+    padding:0 clamp(1.5rem,5vw,4rem);
+    position:relative; z-index:1;
+    display:flex; flex-direction:column; gap:8px;
 }
-.accordion-header{
-padding:18px;cursor:pointer;
-font-weight:600;font-size:15px;
+.lesson-card {
+    display:flex; align-items:center; gap:16px;
+    background:rgba(255,255,255,0.03); border-left:3px solid #ff004f;
+    padding:16px 18px; text-decoration:none; color:white;
+    transition:0.3s ease;
 }
-.accordion-content{
-display:none;padding:20px;
-font-family:'Inter',sans-serif;
-color:#ccc;line-height:1.7;font-size:14px;
+.lesson-card:hover { background:rgba(0,217,255,0.08); transform:translateX(4px); border-left-color:#00d9ff; }
+.lesson-card.completed { border-left-color:#39ff14; background:rgba(57,255,20,0.04); }
+
+.lesson-num {
+    font-family:'Orbitron',sans-serif; font-size:11px; color:#ff004f;
+    min-width:32px; opacity:0.7;
 }
-.accordion-item.active .accordion-content{
-display:block;
+.lesson-card.completed .lesson-num { color:#39ff14; }
+
+.lesson-body { flex:1; }
+.lesson-body h3 {
+    font-family:'Orbitron',sans-serif; font-size:12px; letter-spacing:1px;
+    text-transform:uppercase; margin-bottom:5px; color:#fff;
+}
+.lesson-card.completed .lesson-body h3 { color:#39ff14; text-decoration:line-through; }
+.lesson-body p { font-size:11px; color:#888; line-height:1.5; }
+
+.lesson-right { display:flex; flex-direction:column; align-items:flex-end; gap:6px; }
+.lesson-hrs {
+    font-family:'Orbitron',sans-serif; font-size:10px;
+    color:#39ff1466; border:1px solid #39ff1422; padding:2px 8px; white-space:nowrap;
+}
+.check-icon { font-size:18px; opacity:0; transition:0.3s; }
+.lesson-card.completed .check-icon { opacity:1; }
+
+/* SECTION DIVIDERS */
+.section-label {
+    font-family:'Orbitron',sans-serif; font-size:10px; color:#ffffff33;
+    letter-spacing:3px; text-transform:uppercase;
+    padding:20px 0 8px; border-bottom:1px solid #ffffff11; margin-bottom:4px;
 }
 
-.complete-section{
-margin-top:40px;text-align:center;
-}
-.complete-btn{
-background:#ff004f;color:white;
-border:none;padding:12px 24px;
-font-family:'Orbitron';cursor:pointer;
-letter-spacing:1px;
-}
-.complete-btn.completed{
-background:#39ff14;color:black;
-}
+/* FOOTER */
+footer { text-align:center; padding:30px; opacity:0.3; font-size:11px; position:relative; z-index:1; letter-spacing:1px; }
 </style>
-</head>
 
+</head>
 <body>
 
+<canvas id="starsCanvas"></canvas>
+
 <header>
-<a href="dashboard.html" class="logo">
-<span>LEO</span><span>AF</span>
-</a>
-<div class="header-controls">
-<span id="userEmail" class="user-id"></span>
-<button id="logoffBtn" class="logoff-btn">ABORT</button>
-</div>
+    <a href="dashboard.html" class="logo"><span>LEO</span><span>AF</span></a>
+    <div class="nav-right">
+        <a href="dashboard.html" class="nav-btn">← DASHBOARD</a>
+        <button id="logoffBtn" class="nav-btn">ABORT</button>
+    </div>
 </header>
 
-<main class="container">
-
-<a href="dashboard.html" class="back-link">← BACK TO DASHBOARD</a>
-
-<h1>Q1 — Global Connectivity & Multi-Orbit Context</h1>
-
-<div class="accordion-item">
-<div class="accordion-header">1. Why Terrestrial Networks Break</div>
-<div class="accordion-content">
-Fiber and cellular infrastructure scale well in dense regions but collapse economically in oceans, deserts, air corridors, and polar routes. Aviation exposes this brutally: aircraft move between coverage zones every minutes, not hours. The limitation is not bandwidth — it’s geometry and economics.
-</div>
+<div class="breadcrumb">
+    <a href="dashboard.html">DASHBOARD</a>
+    <span>/</span>
+    <span style="color:#ffffff88;">Q1 — CONNECTIVITY LANDSCAPE</span>
 </div>
 
-<div class="accordion-item">
-<div class="accordion-header">2. GEO vs MEO vs LEO Reality</div>
-<div class="accordion-content">
-GEO provides stability and massive coverage but ~600ms RTT.  
-MEO reduces latency but still relies on fewer satellites.  
-LEO trades satellite count for latency (~20–40ms) and mobility complexity.  
-
-As an architect, the shift is from “link design” to “dynamic constellation behavior”.
-</div>
-</div>
-
-<div class="accordion-item">
-<div class="accordion-header">3. Aviation & Maritime Pain Points</div>
-<div class="accordion-content">
-Aircraft require seamless handover at 800 km/h while crossing beam footprints every few minutes. Maritime demands persistent coverage over sparse oceans. GEO beam hopping struggles here. LEO enables lower latency and smaller terminals but requires predictive routing.
-</div>
+<div class="q-hero">
+    <div class="q-tag">QUARTER 1 · YEAR 1 · FOUNDATIONS</div>
+    <h1>Connectivity Landscape<br>&amp; Satcom Refresh</h1>
+    <p>Why LEO emerged, how orbital regimes compare, what the mega-constellation pioneers built, where they failed, and the business and regulatory foundations underlying it all. This quarter builds the mental model everything else in the program sits on.</p>
+    <div class="meta-row">
+        <div class="meta-pill pill-months">MONTHS 1–3</div>
+        <div class="meta-pill pill-hours">~60 HOURS</div>
+        <div class="meta-pill pill-lessons">15 LESSONS</div>
+    </div>
 </div>
 
-<div class="accordion-item">
-<div class="accordion-header">4. Hybrid Architectures</div>
-<div class="accordion-content">
-The future is not LEO alone. It is hybrid:  
-LEO for latency-sensitive traffic  
-GEO for broadcast & bulk  
-Terrestrial for dense metro  
-
-Architectural skill lies in traffic steering and policy orchestration.
-</div>
+<div class="q-progress">
+    <div class="progress-header">
+        <h2>Q1 PROGRESS</h2>
+        <span class="progress-pct" id="progressPct">0 / 15 COMPLETE</span>
+    </div>
+    <div class="progress-track">
+        <div class="progress-fill" id="progressFill"></div>
+    </div>
 </div>
 
-<div class="complete-section">
-<button id="completeBtn" class="complete-btn">
-MARK QUARTER COMPLETE
-</button>
+<div class="lesson-list">
+
+```
+<!-- SECTION 1 -->
+<div class="section-label">Part I — Why LEO, Why Now</div>
+
+<a href="q1-1.html" class="lesson-card" data-id="q1-1">
+    <div class="lesson-num">01</div>
+    <div class="lesson-body">
+        <h3>Why LEO Now</h3>
+        <p>Market forces, latency physics, the limits of GEO, and the economic conditions that made mega-constellations viable in the 2010s.</p>
+    </div>
+    <div class="lesson-right">
+        <div class="lesson-hrs">~4 HRS</div>
+        <div class="check-icon">✓</div>
+    </div>
+</a>
+
+<a href="q1-2.html" class="lesson-card" data-id="q1-2">
+    <div class="lesson-num">02</div>
+    <div class="lesson-body">
+        <h3>Orbital Regimes Compared</h3>
+        <p>GEO, MEO, LEO, VLEO — altitude bands, coverage geometry, radiation belts, eclipse fractions, and the engineering tradeoffs at each regime.</p>
+    </div>
+    <div class="lesson-right">
+        <div class="lesson-hrs">~4 HRS</div>
+        <div class="check-icon">✓</div>
+    </div>
+</a>
+
+<a href="q1-3.html" class="lesson-card" data-id="q1-3">
+    <div class="lesson-num">03</div>
+    <div class="lesson-body">
+        <h3>The Physics of Latency</h3>
+        <p>Speed-of-light constraints, one-way and round-trip delay calculations, GEO vs LEO RTT comparison, and why 600 ms matters for real applications.</p>
+    </div>
+    <div class="lesson-right">
+        <div class="lesson-hrs">~4 HRS</div>
+        <div class="check-icon">✓</div>
+    </div>
+</a>
+
+<a href="q1-4.html" class="lesson-card" data-id="q1-4">
+    <div class="lesson-num">04</div>
+    <div class="lesson-body">
+        <h3>Multi-Orbit Hybrid Architectures</h3>
+        <p>When and why operators combine LEO with GEO or MEO, traffic steering logic, latency-sensitive vs bulk-capacity services, and real-world hybrid deployments.</p>
+    </div>
+    <div class="lesson-right">
+        <div class="lesson-hrs">~4 HRS</div>
+        <div class="check-icon">✓</div>
+    </div>
+</a>
+
+<!-- SECTION 2 -->
+<div class="section-label">Part II — Learning From Failure</div>
+
+<a href="q1-5.html" class="lesson-card" data-id="q1-5">
+    <div class="lesson-num">05</div>
+    <div class="lesson-body">
+        <h3>Historical Failures — Iridium Original</h3>
+        <p>The original Iridium constellation: what the architecture got right, what the business model got catastrophically wrong, and what the reborn Iridium NEXT fixed.</p>
+    </div>
+    <div class="lesson-right">
+        <div class="lesson-hrs">~4 HRS</div>
+        <div class="check-icon">✓</div>
+    </div>
+</a>
+
+<a href="q1-6.html" class="lesson-card" data-id="q1-6">
+    <div class="lesson-num">06</div>
+    <div class="lesson-body">
+        <h3>Historical Failures — Teledesic &amp; O3b Gen1</h3>
+        <p>Two very different collapses: Teledesic's over-engineered broadband vision and O3b's MEO pivot — lessons that shaped every constellation that came after.</p>
+    </div>
+    <div class="lesson-right">
+        <div class="lesson-hrs">~4 HRS</div>
+        <div class="check-icon">✓</div>
+    </div>
+</a>
+
+<!-- SECTION 3 -->
+<div class="section-label">Part III — The Modern Constellations</div>
+
+<a href="q1-7.html" class="lesson-card" data-id="q1-7">
+    <div class="lesson-num">07</div>
+    <div class="lesson-body">
+        <h3>Starlink Deep Dive</h3>
+        <p>Shell architecture Gen1 → Gen2, flat-panel terminal evolution, ISL rollout, capacity model, financial position, and competitive posture.</p>
+    </div>
+    <div class="lesson-right">
+        <div class="lesson-hrs">~4 HRS</div>
+        <div class="check-icon">✓</div>
+    </div>
+</a>
+
+<a href="q1-8.html" class="lesson-card" data-id="q1-8">
+    <div class="lesson-num">08</div>
+    <div class="lesson-body">
+        <h3>OneWeb Deep Dive</h3>
+        <p>Original architecture, bankruptcy and Bharti/UK Government rescue, current constellation status, B2B-only strategy, and aviation market focus.</p>
+    </div>
+    <div class="lesson-right">
+        <div class="lesson-hrs">~4 HRS</div>
+        <div class="check-icon">✓</div>
+    </div>
+</a>
+
+<a href="q1-9.html" class="lesson-card" data-id="q1-9">
+    <div class="lesson-num">09</div>
+    <div class="lesson-body">
+        <h3>Kuiper Deep Dive</h3>
+        <p>Amazon's approach to LEO: launch vehicle strategy, terminal design philosophy, AWS integration, target markets, and how it differentiates from Starlink.</p>
+    </div>
+    <div class="lesson-right">
+        <div class="lesson-hrs">~4 HRS</div>
+        <div class="check-icon">✓</div>
+    </div>
+</a>
+
+<a href="q1-10.html" class="lesson-card" data-id="q1-10">
+    <div class="lesson-num">10</div>
+    <div class="lesson-body">
+        <h3>Telesat Lightspeed Deep Dive</h3>
+        <p>MEO heritage, the full-mesh optical ISL architecture, aviation and enterprise focus, Canadian government backing, and what makes it architecturally distinct.</p>
+    </div>
+    <div class="lesson-right">
+        <div class="lesson-hrs">~4 HRS</div>
+        <div class="check-icon">✓</div>
+    </div>
+</a>
+
+<!-- SECTION 4 -->
+<div class="section-label">Part IV — Infrastructure & Economics</div>
+
+<a href="q1-11.html" class="lesson-card" data-id="q1-11">
+    <div class="lesson-num">11</div>
+    <div class="lesson-body">
+        <h3>Ground Segment Architecture</h3>
+        <p>Gateway siting, PoP topology, TT&C station design, backhaul requirements, cloud integration patterns, and how ground segment scales with constellation size.</p>
+    </div>
+    <div class="lesson-right">
+        <div class="lesson-hrs">~4 HRS</div>
+        <div class="check-icon">✓</div>
+    </div>
+</a>
+
+<a href="q1-12.html" class="lesson-card" data-id="q1-12">
+    <div class="lesson-num">12</div>
+    <div class="lesson-body">
+        <h3>User Terminals — Technology Overview</h3>
+        <p>From dish to flat panel: ESA evolution, electronically steered antenna basics, form factor tradeoffs, aero-specific constraints (SWaP, DO-160), and where terminal cost is heading.</p>
+    </div>
+    <div class="lesson-right">
+        <div class="lesson-hrs">~4 HRS</div>
+        <div class="check-icon">✓</div>
+    </div>
+</a>
+
+<a href="q1-13.html" class="lesson-card" data-id="q1-13">
+    <div class="lesson-num">13</div>
+    <div class="lesson-body">
+        <h3>GEO vs LEO Business Models</h3>
+        <p>CapEx structures, transponder leasing vs managed service, capacity economics, ARPU by market segment, and where each orbit wins commercially.</p>
+    </div>
+    <div class="lesson-right">
+        <div class="lesson-hrs">~4 HRS</div>
+        <div class="check-icon">✓</div>
+    </div>
+</a>
+
+<a href="q1-14.html" class="lesson-card" data-id="q1-14">
+    <div class="lesson-num">14</div>
+    <div class="lesson-body">
+        <h3>Spectrum &amp; Regulatory Landscape Intro</h3>
+        <p>Ka/Ku/V-band overview, ITU coordination basics, NGSO filing process at a high level, spectrum as competitive moat, and what to expect in Q7's deep dive.</p>
+    </div>
+    <div class="lesson-right">
+        <div class="lesson-hrs">~4 HRS</div>
+        <div class="check-icon">✓</div>
+    </div>
+</a>
+
+<!-- SECTION 5 -->
+<div class="section-label">Part V — Synthesis</div>
+
+<a href="q1-15.html" class="lesson-card" data-id="q1-15">
+    <div class="lesson-num">15</div>
+    <div class="lesson-body">
+        <h3>Q1 Synthesis — The LEO Architect's Mental Model</h3>
+        <p>Integrating all Q1 concepts into a working trade-off framework. How to think about orbit, ground, terminal, and economics simultaneously. Q2 preview and readiness check.</p>
+    </div>
+    <div class="lesson-right">
+        <div class="lesson-hrs">~4 HRS</div>
+        <div class="check-icon">✓</div>
+    </div>
+</a>
+```
+
 </div>
 
-</main>
+<footer>© 2026 LEOAF · Q1 OF 8</footer>
+
+<!-- Stars -->
+
+<script>
+function setVH() { document.documentElement.style.setProperty('--vh', `${window.innerHeight * 0.01}px`); }
+setVH(); window.addEventListener('resize', setVH);
+const canvas = document.getElementById('starsCanvas');
+const ctx = canvas.getContext('2d');
+let stars = [];
+function initStars() { stars = []; for (let i=0;i<200;i++) stars.push({x:Math.random()*canvas.width,y:Math.random()*canvas.height,size:Math.random()*1.5+0.5,speed:Math.random()*0.2+0.05,hue:Math.random()*360}); }
+function resizeCanvas() { canvas.width=window.innerWidth; canvas.height=window.innerHeight; }
+resizeCanvas(); initStars(); window.addEventListener('resize', resizeCanvas);
+function animateStars() { ctx.clearRect(0,0,canvas.width,canvas.height); stars.forEach(s=>{s.y-=s.speed; if(s.y<0){s.y=canvas.height;s.x=Math.random()*canvas.width;} ctx.beginPath();ctx.fillStyle=`hsl(${s.hue},80%,80%)`;ctx.arc(s.x,s.y,s.size,0,Math.PI*2);ctx.fill();}); requestAnimationFrame(animateStars); }
+animateStars();
+</script>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
 <script src="supabase.js"></script>
+
 <script src="user_progress.js"></script>
 
 <script>
 document.addEventListener("DOMContentLoaded", async () => {
 
-const { data: { session } } = await client.auth.getSession();
-if (!session) {
-window.location.href="index.html";
-return;
-}
+    // Auth check
+    const { data: { session } } = await client.auth.getSession();
+    if (!session) { window.location.href = "index.html"; return; }
 
-document.getElementById("userEmail").textContent=session.user.email;
-document.getElementById("userEmail").style.display="inline";
+    // Logoff
+    document.getElementById("logoffBtn").addEventListener("click", async () => {
+        await client.auth.signOut();
+        window.location.href = "index.html";
+    });
 
-// Accordion
-document.querySelectorAll(".accordion-header").forEach(header=>{
-header.addEventListener("click",()=>{
-header.parentElement.classList.toggle("active");
-});
-});
+    // Load completed lessons
+    const cards = document.querySelectorAll(".lesson-card");
+    const total = cards.length;
+    const mastered = await getMasteredSections();
+    let done = 0;
 
-// Completion
-const quarterId="q1-connectivity";
-const completeBtn=document.getElementById("completeBtn");
+    cards.forEach(card => {
+        if (mastered.includes(card.dataset.id)) {
+            card.classList.add("completed");
+            done++;
+        }
+    });
 
-const mastered=await getMasteredSections();
-
-if(mastered.includes(quarterId)){
-completeBtn.classList.add("completed");
-completeBtn.textContent="✓ QUARTER COMPLETED";
-}
-
-completeBtn.addEventListener("click",async()=>{
-await saveMasteredSection(quarterId);
-completeBtn.classList.add("completed");
-completeBtn.textContent="✓ QUARTER COMPLETED";
-alert("Q1 Completed. Mission logged.");
-});
-
-});
-
-// Logout
-document.getElementById("logoffBtn").addEventListener("click",async()=>{
-await client.auth.signOut();
-window.location.href="index.html";
+    // Progress bar
+    const pct = total > 0 ? Math.round((done / total) * 100) : 0;
+    document.getElementById("progressFill").style.width = pct + "%";
+    document.getElementById("progressPct").textContent = `${done} / ${total} COMPLETE`;
 });
 </script>
 
