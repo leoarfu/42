@@ -56,12 +56,13 @@ header {
 .lesson-intro { font-size:13px; line-height:1.85; opacity:0.75; }
 
 /* TABLE OF CONTENTS */
-.toc { background:rgba(0,217,255,0.04); border:1px solid #00d9ff22; padding:20px 24px; margin:30px 0; }
-.toc h4 { font-family:'Orbitron',sans-serif; font-size:10px; color:#00d9ff; letter-spacing:2px; margin-bottom:14px; }
-.toc ol { padding-left:18px; }
-.toc li { font-size:12px; line-height:1.9; opacity:0.7; }
-.toc li a { color:#00d9ff88; text-decoration:none; }
-.toc li a:hover { color:#00d9ff; }
+.toc { background:rgba(0,217,255,0.06); border:1px solid #00d9ff33; padding:24px 28px; margin:30px 0; }
+.toc h4 { font-family:'Orbitron',sans-serif; font-size:10px; color:#00d9ff; letter-spacing:2px; margin-bottom:16px; }
+.toc ol { padding-left:20px; }
+.toc li { font-size:13px; line-height:2.1; opacity:1; }
+.toc li a { color:#00d9ffbb; text-decoration:none; transition:0.15s; }
+.toc li a:hover { color:#ffffff; padding-left:4px; }
+.toc li::marker { color:#ff004f; font-family:'Orbitron',sans-serif; font-size:10px; }
 
 /* CONTENT SECTIONS */
 .content-block { margin-bottom:48px; }
@@ -178,7 +179,20 @@ header {
 .ref-prompt p { font-size:12px; opacity:0.8; line-height:1.75; margin-bottom:10px; }
 .ref-prompt ul li { font-size:12px; }
 
-/* COMPLETE */
+/* BACK TO TOP */
+.back-to-top {
+    position:fixed; bottom:28px; right:28px; z-index:200;
+    width:44px; height:44px; background:#000;
+    border:1px solid #00d9ff55; color:#00d9ff;
+    font-size:20px; cursor:pointer;
+    display:flex; align-items:center; justify-content:center;
+    opacity:0; pointer-events:none;
+    transition:opacity 0.3s ease, border-color 0.3s ease;
+}
+.back-to-top.visible { opacity:1; pointer-events:auto; }
+.back-to-top:hover { border-color:#00d9ff; background:#001a2c; }
+
+/* COMPLETE WRAP */
 .complete-wrap { margin-top:56px; padding-top:30px; border-top:1px solid #ffffff11; text-align:center; }
 .complete-btn {
     font-family:'Orbitron',sans-serif; font-size:13px; letter-spacing:2px;
@@ -1159,6 +1173,8 @@ print(f"  Break-even: {yrs_sens:.1f} years (was {yrs:.1f})")
 
 </div>
 
+<button class="back-to-top" id="backToTop" title="Back to top">↑</button>
+
 <footer>© 2026 LEOAF · Q1 · LESSON 01 OF 15</footer>
 
 <!-- Stars -->
@@ -1267,27 +1283,44 @@ document.addEventListener('DOMContentLoaded', async () => {
     const mastered = await getMasteredSections();
     const btn = document.getElementById('completeBtn');
     const msg = document.getElementById('completeMsg');
-    if (mastered.includes(LESSON_ID)) {
-        btn.textContent = '✓ LESSON COMPLETE';
-        btn.classList.add('done');
-        msg.textContent = 'This lesson is already marked complete.';
+
+    function setDone(done) {
+        if (done) {
+            btn.textContent = '✓ COMPLETE — CLICK TO UNDO';
+            btn.classList.add('done');
+            btn.style.cssText = 'border-color:#39ff14;color:#39ff14;background:rgba(57,255,20,0.1);cursor:pointer;opacity:1;';
+            msg.style.color = '#39ff14';
+            msg.textContent = 'Lesson marked complete. Click again to undo.';
+        } else {
+            btn.textContent = 'MARK LESSON COMPLETE';
+            btn.classList.remove('done');
+            btn.style.cssText = '';
+            msg.style.color = '#ffffff55';
+            msg.textContent = 'Not yet marked complete.';
+        }
     }
 
+    setDone(mastered.includes(LESSON_ID));
+
     btn.addEventListener('click', async () => {
-        if (btn.classList.contains('done')) return;
+        const isCurrentlyDone = btn.classList.contains('done');
         msg.style.color = '#00d9ff';
         msg.textContent = 'Saving...';
-        const ok = await upsertSection(LESSON_ID, true);
+        const ok = await upsertSection(LESSON_ID, !isCurrentlyDone);
         if (ok) {
-            btn.textContent = '✓ LESSON COMPLETE';
-            btn.classList.add('done');
-            msg.style.color = '#39ff14';
-            msg.textContent = 'Progress saved. Proceed to Lesson 02.';
+            setDone(!isCurrentlyDone);
         } else {
             msg.style.color = '#ff004f';
             msg.textContent = 'Error saving. Try again.';
         }
     });
+
+    // Back to top
+    const btt = document.getElementById('backToTop');
+    window.addEventListener('scroll', () => {
+        btt.classList.toggle('visible', window.scrollY > 400);
+    });
+    btt.addEventListener('click', () => window.scrollTo({ top: 0, behavior: 'smooth' }));
 });
 </script>
 
