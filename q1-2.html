@@ -475,25 +475,54 @@ footer { text-align:center; padding:30px; opacity:0.3; font-size:11px; position:
 <div class="content-block" id="s5">
     <h2>5. Eclipse Fractions and Power Budget Implications</h2>
 
-    <p>Every satellite in a non-geosynchronous orbit periodically passes behind Earth and enters eclipse — a period during which it receives no solar illumination and must rely entirely on battery power. The fraction of time spent in eclipse, the duration of individual eclipse events, and the cycle rate all feed directly into the power system design: solar array sizing, battery capacity, thermal management, and bus voltage regulation.</p>
+    <p>Every satellite in a non-geosynchronous orbit periodically passes behind Earth and enters eclipse — a period during which it receives no solar illumination and must rely entirely on battery power. The fraction of time spent in eclipse, the duration of individual eclipse events, and the cycle rate all feed directly into the power system design: solar array sizing, battery capacity, thermal management, and bus voltage regulation. Eclipse is not a marginal consideration — for a LEO constellation satellite, it is one of the two or three most consequential constraints on the power system design.</p>
 
-    <h3>Eclipse geometry</h3>
+    <h3>Eclipse geometry and the beta angle</h3>
 
-    <p>A satellite enters eclipse when it passes into Earth's shadow. For a circular orbit, the eclipse fraction depends on the orbital altitude and the angle between the orbital plane and the Sun direction (the beta angle). At zero beta angle (orbital plane containing the Sun), a satellite experiences the maximum possible eclipse fraction — typically 30–40% of the orbit at LEO altitudes. At a 90° beta angle (orbital plane perpendicular to the Sun direction), the satellite is in continuous sunlight — no eclipses at all. In practice, the beta angle varies continuously over the year as Earth orbits the Sun, so a satellite experiences a varying pattern of eclipse events rather than constant conditions.</p>
+    <p>A satellite enters eclipse when it passes through the cone of Earth's umbral shadow — the region where Earth completely blocks the Sun. The geometry is determined by two parameters: the orbital altitude (which sets the satellite's distance from Earth's shadow cone) and the beta angle (β), defined as the angle between the orbital plane and the Sun-satellite vector direction. Beta angle is the single most important parameter for predicting eclipse behaviour.</p>
 
-    <p>For a 550 km LEO orbit, the maximum eclipse duration at zero beta angle is approximately 35 minutes, occurring during each 95-minute orbit. That represents a 37% eclipse fraction. For a 1,200 km orbit, the eclipse fraction is slightly lower (the satellite is higher relative to Earth's shadow cone), and eclipse duration is similar at roughly 35–40 minutes per approximately 110-minute orbit.</p>
+    <p>At β = 0° (the orbital plane contains the Sun), the satellite passes through the widest part of Earth's shadow on every orbit, producing the maximum eclipse fraction. For a 550 km LEO orbit at β = 0°, Earth subtends a half-angle of approximately arcsin(6,371 / 6,921) ≈ 67° as seen from the satellite. The eclipse fraction of the orbit is approximately 2 × arcsin(6,371 / (6,371 + 550)) / (2π) ≈ 37% — meaning the satellite spends 37% of each 95-minute orbit in darkness, or about 35 minutes per orbit.</p>
 
-    <p>GEO satellites experience eclipses only during the two equinox periods each year (approximately March and September), when the Sun, Earth, and the satellite can align. These eclipse seasons last roughly 45 days each and produce eclipses of up to 72 minutes duration at maximum. For the remainder of the year, a GEO satellite is in continuous sunlight. This dramatically simplifies GEO power system design: the battery must sustain the satellite through a 72-minute eclipse occurring at most a few dozen times per year, rather than thousands of 35-minute eclipses per year as in LEO.</p>
+    <p>As β increases, the satellite's orbit tips relative to the Sun direction. At some critical beta angle — approximately arccos(6,371 / (6,371 + h)) for altitude h — the orbit no longer intersects Earth's shadow at all. For a 550 km orbit, this critical beta angle is approximately 67°. Above β = 67°, the satellite is in continuous sunlight. Below β = 67°, it experiences eclipses on every orbit, with the eclipse duration increasing as β decreases toward zero.</p>
 
-    <h3>Power system implications</h3>
+    <p>The beta angle is not constant — it changes throughout the year as Earth orbits the Sun and the Sun's ecliptic longitude shifts. For a given orbit inclination and RAAN (Right Ascension of the Ascending Node), the beta angle cycles through a range determined by the orbit's inclination relative to the ecliptic plane. For a 53° inclination orbit (Starlink primary shell), the beta angle cycles between approximately −(23.5° + 53°) and +(23.5° + 53°) — that is, between roughly −76° and +76°. In practice, the satellite spends part of each year above the critical beta angle (no eclipses) and part below it (eclipses on every orbit), with a smooth transition between the two states.</p>
 
-    <p>For a LEO satellite, the power system designer must accommodate thousands of charge-discharge cycles over the satellite's life. At one eclipse per 95-minute orbit and a 5-year design life, a LEO satellite at 550 km experiences approximately 27,000 eclipse cycles. Battery technology for space applications must therefore provide a very large number of deep-cycle events without significant capacity degradation. Modern Li-ion and lithium polymer cells are used in most new constellations, with depth of discharge carefully managed — typically 20–40% — to maximise cycle life. This contrasts with GEO satellites, which experience at most ~100 eclipse cycles per year and can tolerate deeper discharge with less cycle-life concern.</p>
+    <div class="key-numbers">
+        <div class="kn-item"><span class="kn-val">~35 min</span><span class="kn-label">Max eclipse duration per orbit, LEO 550 km (β=0°)</span></div>
+        <div class="kn-item"><span class="kn-val">~27,000</span><span class="kn-label">Eclipse cycles over 5-year LEO mission (550 km)</span></div>
+        <div class="kn-item"><span class="kn-val">72 min</span><span class="kn-label">Maximum GEO eclipse duration (equinox)</span></div>
+        <div class="kn-item"><span class="kn-val">~84</span><span class="kn-label">GEO eclipse events per year (equinox seasons)</span></div>
+    </div>
 
-    <p>The eclipse cycle also drives thermal cycling of the entire satellite structure. Each eclipse entry represents a cold soak as the solar panels, structure, and components drop in temperature; each eclipse exit brings rapid solar heating. Over 27,000 cycles, thermal fatigue becomes a meaningful design consideration for joints, connectors, and PCB laminates — particularly relevant for the high-throughput electronics of a broadband communications satellite.</p>
+    <h3>GEO eclipse: infrequent but long</h3>
+
+    <p>GEO satellites behave entirely differently. Because the geostationary orbit lies in the equatorial plane and the Sun moves above and below the equatorial plane over the course of the year (due to Earth's 23.5° axial tilt), the Sun–Earth–GEO alignment required to produce an eclipse only occurs during two periods centred on the spring and autumn equinoxes. These eclipse seasons each last approximately 44–46 days, during which the satellite experiences a daily eclipse whose duration varies from a few minutes at the start and end of the season to a maximum of approximately 72 minutes at the equinox itself.</p>
+
+    <p>Over a full year, a GEO satellite experiences approximately 84 eclipse events totalling around 1,100 minutes of accumulated eclipse time. By contrast, a LEO satellite at 550 km at β = 0° experiences one 35-minute eclipse per 95-minute orbit — or roughly 5,500 eclipses per year with accumulated eclipse time of approximately 192,000 minutes per year. The GEO satellite experiences 175× less eclipse time annually than the worst-case LEO satellite — and even a well-managed LEO satellite (averaging across the full beta angle range) sees roughly 50× more annual eclipse time than GEO.</p>
+
+    <h3>Solar array sizing</h3>
+
+    <p>The solar array must supply the satellite's full power load during sunlit periods and simultaneously charge the battery to sustain operation through the upcoming eclipse. This double duty — load power plus battery charging — sets the minimum solar array size. For a LEO satellite with a 35-minute eclipse in a 95-minute orbit (37% eclipse fraction), the array must generate enough energy during the 60-minute sunlit period to power the satellite for 95 minutes total. If the satellite load is P watts, the array must generate at least P × 95/60 = 1.58P watts during the sunlit period (before accounting for array degradation, temperature effects, and charging efficiency losses). In practice, margins and degradation push this ratio closer to 2–2.5P.</p>
+
+    <p>Solar array performance degrades over time due to radiation damage, micrometeorite impacts, and thermal cycling. At LEO altitudes, arrays typically lose 2–4% of their beginning-of-life output per year. A satellite designed to deliver a specific power level at end of life (the critical constraint for maintaining payload performance) must have an array sized to that degraded level — meaning the beginning-of-life array is oversized by the cumulative degradation margin. For a 5-year LEO mission with 3% annual degradation, the array must be approximately 16% larger than the end-of-life requirement.</p>
+
+    <h3>Battery technology and the cycle life problem</h3>
+
+    <p>The battery must deliver the satellite's full load during each eclipse. For a 2,000 W satellite load (representative for a modern broadband LEO satellite) and a 35-minute eclipse, the energy required per eclipse is 2,000 × (35/60) ≈ 1,167 Wh. At a maximum depth of discharge (DoD) of 30% — to preserve battery cycle life — the battery must have a nameplate capacity of 1,167 / 0.30 ≈ 3,890 Wh. At a typical Li-ion cell energy density of 150–200 Wh/kg, this implies a battery mass of roughly 20–26 kg — a significant fraction of a 300 kg satellite's mass budget.</p>
+
+    <p>Why is DoD limited to 30%? Lithium-ion cells in space applications follow a well-characterised degradation curve: the number of cycles to 80% capacity retention (the typical end-of-life criterion) drops steeply as DoD increases. At 100% DoD, a quality space Li-ion cell might achieve 500–1,000 cycles. At 50% DoD, 3,000–5,000 cycles. At 30% DoD, 10,000–20,000 cycles. At 20% DoD, 30,000+ cycles. The ~27,000 eclipse cycles over a 5-year LEO mission therefore mandate either 20–30% DoD operation or a battery chemistry with exceptional cycle life — driving cell selection, battery management system design, and mass budget in ways that have no GEO analogue.</p>
+
+    <p>Modern LEO constellations increasingly use lithium-ion cells with nickel-rich cathode chemistries (NMC, NCA) that offer high energy density at acceptable cycle life when operated conservatively. Some newer designs are exploring lithium-sulfur or solid-state chemistries for improved cycle life, though these are not yet in widespread constellation use. GEO satellites, with their ~1,500 total eclipse cycles over 15 years, can use deeper discharge and have historically used nickel-hydrogen (NiH₂) batteries — heavier but extremely reliable — transitioning to Li-ion in more recent designs.</p>
+
+    <h3>Thermal cycling consequences</h3>
+
+    <p>Each eclipse transition subjects the satellite to a temperature swing. In sunlight, a satellite's outer surfaces (solar panels, radiators, structure) can reach +80°C to +120°C on sun-facing sides. In eclipse, the same surfaces drop to −80°C to −100°C within minutes. The temperature delta per cycle is therefore 160–220°C. Over 27,000 cycles, differential thermal expansion between dissimilar materials — aluminium structure, carbon fibre panels, copper interconnects, PCB substrates — causes fatigue accumulation at joints, solder connections, and mechanical interfaces.</p>
+
+    <p>This thermal fatigue is not always the life-limiting mechanism (radiation damage to electronics often is), but it must be analysed and designed against. Printed circuit boards use controlled-expansion laminates. Flex harnesses accommodate differential movement between structures. Solder joints are specified for thermal cycling rather than just mechanical strength. Solar panel substrate materials are chosen partly for their thermal cycling stability. None of these are significant considerations for GEO, where 1,500 thermal cycles over 15 years is manageable with standard aerospace practice.</p>
 
     <div class="callout">
-        <strong>BETA ANGLE MANAGEMENT</strong>
-        Constellation operators sometimes choose specific orbital altitudes and RAAN (Right Ascension of Ascending Node) distributions partly to manage the range of beta angles experienced across the fleet. A well-distributed constellation will have satellites in all phases of beta-angle variation at any given time, ensuring the aggregate power output of the fleet remains stable even as individual satellites cycle between eclipse-heavy and eclipse-free conditions.
+        <strong>BETA ANGLE MANAGEMENT AND RAAN PHASING</strong>
+        Constellation operators carefully plan the RAAN (Right Ascension of the Ascending Node) distribution of satellites across orbital planes partly to manage the fleet-wide beta angle distribution. At any given time, some satellites will be at high beta (continuous sunlight, battery not cycling, array at full output) while others are at low beta (frequent deep eclipses, battery heavily exercised). A well-phased constellation distributes satellites across all beta angle phases, so the aggregate power generation and battery state-of-health across the fleet remains predictable. This also means that no single period of solar geometry simultaneously stress-tests all satellites — a fleet resilience consideration that is unique to multi-plane LEO constellations and has no GEO equivalent.
     </div>
 </div>
 
@@ -501,27 +530,83 @@ footer { text-align:center; padding:30px; opacity:0.3; font-size:11px; position:
 <div class="content-block" id="s6">
     <h2>6. Atmospheric Drag and Orbital Lifetime</h2>
 
-    <p>The atmosphere does not abruptly end — it thins exponentially with altitude, and its density at any given altitude varies significantly with solar activity (which heats and expands the upper atmosphere). Atmospheric drag is the dominant orbital perturbation below approximately 600 km and remains meaningful up to roughly 1,000 km. Understanding drag is essential for constellation designers: it determines satellite lifetime, the frequency of orbit-maintenance manoeuvres, fuel budget, and — critically — the passive deorbit timeline for end-of-life satellites.</p>
+    <p>The atmosphere does not abruptly end — it thins exponentially with altitude, and its density at any given altitude varies significantly with solar activity. Atmospheric drag is the dominant orbital perturbation below approximately 600 km and remains meaningful up to roughly 1,000 km. Understanding drag is essential for constellation designers: it determines satellite lifetime, the frequency and propellant cost of orbit-maintenance manoeuvres, the deorbit timeline for end-of-life satellites, and — increasingly — the regulatory compliance posture of the entire constellation programme.</p>
 
-    <h3>The drag force</h3>
+    <h3>The physics of drag deceleration</h3>
 
-    <p>Atmospheric drag decelerates a satellite in the direction opposite to its motion. The drag acceleration depends on the atmospheric density at the satellite's altitude, the satellite's ballistic coefficient (the ratio of mass to cross-sectional area times drag coefficient), and the orbital velocity. Because orbital velocity at LEO is roughly constant at 7–8 km/s, and atmospheric density falls exponentially with altitude, drag is extremely sensitive to altitude: a satellite at 400 km experiences roughly ten times more drag than one at 500 km, which experiences roughly ten times more than one at 600 km.</p>
+    <p>Drag force acts opposite to the direction of satellite motion and is given by:</p>
 
-    <p>Drag causes a gradual decrease in orbital altitude over time. As the altitude decreases, the satellite enters denser atmosphere, accelerating the decay — a runaway process that ends in atmospheric reentry. The time scale for natural decay (without propulsion) ranges from days (at 200 km) to decades (at 800 km) to centuries (at 1,200 km) depending on altitude, ballistic coefficient, and solar activity levels.</p>
+    <div class="callout">
+        <strong>DRAG FORCE AND BALLISTIC COEFFICIENT</strong>
+        F_drag = ½ · ρ · v² · C_D · A<br><br>
+        Drag acceleration: a_drag = F_drag / m = ½ · ρ · v² / B<br><br>
+        where ρ is atmospheric density (kg/m³), v is orbital velocity (m/s), C_D is the drag coefficient (typically 2.0–2.4 for a flat satellite body), A is the cross-sectional area (m²), m is satellite mass (kg), and B = m / (C_D · A) is the ballistic coefficient (kg/m²). Higher ballistic coefficient = less drag per unit of satellite mass.
+    </div>
+
+    <p>At 550 km altitude, a representative Starlink satellite (mass ~295 kg, cross-section ~8 m², C_D ≈ 2.2) has a ballistic coefficient of approximately 295 / (2.2 × 8) ≈ 17 kg/m². With thermospheric density at 550 km of approximately 2.7 × 10⁻¹¹ kg/m³ at moderate solar activity, and orbital velocity of 7,600 m/s, the drag acceleration is:</p>
+
+    <p>a_drag = ½ × 2.7×10⁻¹¹ × 7,600² / 17 ≈ 4.6 × 10⁻⁷ m/s²</p>
+
+    <p>This seems tiny — less than a millionth of a g. But applied continuously over months and years, it produces significant orbital decay. The rate of altitude loss is related to the drag deceleration by dh/dt ≈ −2 · a_drag · r / v (where r is orbital radius), which at 550 km works out to approximately −50 to −200 metres per day depending on solar activity. Over a year, the orbit decays by 20–70 km without propulsive correction.</p>
+
+    <h3>The exponential atmosphere and altitude sensitivity</h3>
+
+    <p>Atmospheric density decreases approximately exponentially with altitude, characterised by the scale height H — the altitude increase over which density drops by a factor of e (≈ 2.718). In the upper thermosphere (LEO altitudes), the scale height is approximately 60–90 km depending on altitude and solar conditions. This exponential dependence means drag is extraordinarily sensitive to altitude:</p>
+
+    <ul>
+        <li>A satellite at 400 km sees density roughly 10× higher than at 500 km (one scale height higher)</li>
+        <li>A satellite at 300 km sees density roughly 100× higher than at 500 km</li>
+        <li>A satellite at 600 km sees density roughly 10× lower than at 500 km</li>
+    </ul>
+
+    <p>This sensitivity is why the choice between 340 km and 550 km for a Starlink shell is not a minor detail — it represents a roughly 15× difference in drag force. At 340 km, Starlink satellites require near-continuous propulsion just to maintain altitude; at 550 km, periodic reboost manoeuvres suffice. The tradeoff is latency (340 km gives lower propagation delay) versus propellant consumption and satellite lifetime.</p>
 
     <h3>Solar activity and F10.7</h3>
 
-    <p>The Sun's output of extreme ultraviolet (EUV) radiation heats the thermosphere and ionosphere, causing the atmosphere to expand. During solar maximum (the peak of the approximately 11-year solar cycle), thermospheric density at LEO altitudes can be 5–10× higher than during solar minimum. This dramatically affects satellite drag and therefore orbital lifetime. A satellite designed to maintain its operational altitude for 5 years at solar minimum conditions may require significantly more fuel or may decay faster than planned when launched into a solar maximum period. The F10.7 index — a proxy for solar EUV flux measured by radio emissions at 10.7 cm wavelength — is the standard input for atmospheric density models used in satellite lifetime calculations.</p>
+    <p>The Sun's output of extreme ultraviolet (EUV) radiation heats the thermosphere and ionosphere, causing the atmosphere to expand. During solar maximum (the peak of the approximately 11-year solar cycle), thermospheric density at LEO altitudes can be 5–10× higher than during solar minimum. This dramatically affects satellite drag and therefore orbital lifetime and propellant consumption.</p>
 
-    <p>Starlink launched the first large batches of its constellation in 2019–2021, approaching solar minimum. As the current solar cycle (Cycle 25) entered its ascending phase in 2022–2024 — and turned out to be one of the most active cycles in decades — atmospheric drag on Starlink satellites increased significantly. SpaceX reported elevated satellite losses and faster-than-expected orbital decay for satellites in the lower shells. This is a real-world demonstration of how solar activity affects LEO constellation operations and why operators maintain propulsion capability on every satellite.</p>
+    <p>The F10.7 index — solar radio flux at 10.7 cm wavelength, measured daily in solar flux units (sfu) — is the standard proxy for solar EUV activity used in atmospheric models. F10.7 ranges from approximately 65–70 sfu at solar minimum to 200–250+ sfu at solar maximum. Most operational satellite lifetime calculations use the NRLMSISE-00 or JB2008 atmospheric models with F10.7 as the primary input. A satellite lifetime predicted assuming F10.7 = 70 (solar minimum) may be 3–5× shorter in reality if the satellite operates during F10.7 = 200 conditions.</p>
+
+    <p>Solar Cycle 25, which began in late 2019, turned out to be one of the most active in recent decades — significantly more active than predictions made at solar minimum. Starlink satellites in the lower shells experienced substantially higher drag than modelled. SpaceX reported elevated satellite attrition rates and increased propellant consumption for altitude maintenance. In February 2022, a Starlink batch of 49 satellites was lost when a geomagnetic storm temporarily increased atmospheric density at their deployment altitude of ~210 km, causing enough drag to push them below a survivable orbit before their thrusters could compensate. This is not an abstract risk — it happened at scale, and it influenced subsequent decisions about deployment altitude and propulsion system sizing for newer Starlink generations.</p>
+
+    <div class="callout amber">
+        <strong>THE FEBRUARY 2022 STARLINK LOSS</strong>
+        On 3 February 2022, SpaceX launched 49 Starlink satellites into a 210 km deployment orbit. A geomagnetic storm the following day compressed the magnetosphere and increased thermospheric density at that altitude. Despite the satellites being commanded to safe mode (minimum drag orientation), 38 of 49 re-entered within days — a $50M+ loss. SpaceX subsequently adjusted its deployment strategy to higher initial altitudes for some launches. This event is the most visible demonstration of solar weather as an operational risk for LEO constellations.
+    </div>
+
+    <h3>The ballistic coefficient and constellation design</h3>
+
+    <p>The ballistic coefficient B = m / (C_D · A) is under the designer's control to a limited extent. A heavier satellite (higher m) has less drag deceleration for a given area. A smaller cross-section (lower A) reduces drag. Some satellite designs include the ability to orient the satellite to reduce or maximise drag — presenting minimum cross-section for orbit maintenance, maximum cross-section for rapid deorbit. The Starlink v1.5 and v2 satellites feature adjustable solar panel orientation that serves partly this function.</p>
+
+    <p>For a constellation designer, the aggregate ballistic coefficient of the fleet matters for debris risk modelling. A constellation of 6,000 lightweight flat-panel satellites has a much lower aggregate ballistic coefficient than 6,000 traditional box-shaped satellites of the same mass — meaning faster natural deorbit after end of life, which is a debris mitigation benefit. This relationship between satellite form factor and debris risk is factored into FCC licence applications for new constellations, which must include quantitative orbital lifetime analyses.</p>
+
+    <h3>Orbit maintenance propellant budget</h3>
+
+    <p>For a satellite that must maintain a specific operational altitude against drag, the required ΔV (velocity change) per year equals the integrated drag deceleration over the year. From this, the Tsiolkovsky rocket equation gives the propellant mass fraction required:</p>
+
+    <div class="callout">
+        <strong>TSIOLKOVSKY ROCKET EQUATION</strong>
+        Δm/m₀ = 1 − exp(−ΔV / (g₀ · Isp))<br><br>
+        where Δm is propellant consumed, m₀ is initial satellite mass, ΔV is required velocity change (m/s), g₀ = 9.81 m/s², and Isp is the specific impulse of the propulsion system (seconds). Higher Isp = more efficient propulsion = less propellant for the same ΔV.
+    </div>
+
+    <p>For Starlink at 550 km, the annual drag ΔV at moderate solar activity is approximately 1–3 m/s/year. Over a 5-year mission, total drag makeup ΔV is approximately 5–15 m/s. Starlink uses krypton-fuelled Hall-effect ion thrusters with Isp ≈ 1,600 s, making the propellant fraction very small — on the order of 0.3–1% of satellite mass for drag makeup alone. The majority of the propulsion budget is reserved for orbit raising from deployment, collision avoidance manoeuvres, and end-of-life deorbit. This is why electric propulsion is essentially mandatory for LEO constellation satellites: chemical propulsion with Isp of 200–300 s would require impractical propellant fractions for the same total ΔV.</p>
 
     <h3>End-of-life deorbit requirements</h3>
 
-    <p>The FCC and other regulators now mandate that satellites in LEO deorbit within 5 years of end of mission. The ITU has historically used a 25-year guideline. The 5-year rule reflects growing concern about orbital debris accumulation as constellation populations grow into the thousands. For a satellite at 550 km with a typical ballistic coefficient, natural atmospheric decay alone would deorbit it within 2–5 years depending on solar activity — borderline compliant without active propulsion. SpaceX addresses this by using the satellite's ion thrusters to lower the orbit at end of life, ensuring rapid reentry. For satellites at 1,200 km (OneWeb), natural decay would take many decades — active deorbit manoeuvres are mandatory to meet the 5-year rule.</p>
+    <p>The FCC now mandates that US-licensed satellites deorbit within 5 years of end of mission, replacing the previous 25-year guideline. This rule reflects growing concern about collision probability as constellation populations grow into the thousands. The transition from 25 to 5 years is not trivial — it fundamentally changes the propulsion system design for satellites at altitudes where natural decay takes longer than 5 years.</p>
+
+    <p>At 550 km, natural atmospheric decay deorbits a Starlink-like satellite in approximately 4–7 years at moderate solar activity — borderline compliant without active deorbit, but not reliably so at all solar conditions. At 1,200 km (OneWeb), natural decay takes 50–200 years — active propulsive deorbit is mandatory. OneWeb satellites must lower their orbit to below approximately 600 km at end of life and then rely on natural decay for the remainder, or execute a direct deorbit burn. The propellant reserved for this end-of-life manoeuvre is a significant constraint on the satellite's mass budget and must be budgeted from the beginning of the design process.</p>
+
+    <h3>Conjunction analysis and collision avoidance</h3>
+
+    <p>With thousands of satellites in a given orbital shell, the probability of close approaches between operational satellites, defunct satellites, and catalogued debris becomes non-trivial. Space-Track (operated by the US Space Force's 18th Space Defense Squadron) issues conjunction data messages (CDMs) when two catalogued objects are predicted to approach within a threshold distance — typically 5 km radially and 1 km cross-track. Constellation operators receive dozens to hundreds of CDMs per day across their fleet and must triage them by collision probability to determine which require avoidance manoeuvres.</p>
+
+    <p>SpaceX has reported that Starlink performs hundreds of collision avoidance manoeuvres per year across the constellation, most of them small burns to adjust timing or altitude. The automation of conjunction screening and manoeuvre decision-making is itself a significant software engineering challenge — no human team could manually review and action CDMs at the volume generated by a 6,000-satellite constellation operating in a crowded orbital regime. The transition from manual to largely autonomous conjunction response is one of the defining operational engineering challenges of the mega-constellation era.</p>
 
     <div class="callout red">
         <strong>KESSLER SYNDROME</strong>
-        Proposed by NASA scientist Donald Kessler in 1978, Kessler syndrome describes a theoretical cascade: if satellite debris density in a given orbital shell exceeds a critical threshold, collisions between objects generate more debris, which causes more collisions, in a self-sustaining chain reaction that could make the affected orbit unusable for generations. The concern is not hypothetical — the 2009 Iridium–Cosmos collision and the debris fields from antisatellite weapons tests (China 2007, Russia 2021) have already increased debris density in some LEO shells. Mega-constellations adding thousands of satellites intensify this concern, which is why deorbit compliance, conjunction analysis, and autonomous collision avoidance are treated as fundamental requirements rather than optional features for any new LEO constellation.
+        Proposed by NASA scientist Donald Kessler in 1978, Kessler syndrome describes a theoretical cascade: if satellite and debris density in a given orbital shell exceeds a critical threshold, collisions generate more debris, which causes more collisions, in a self-sustaining chain reaction that could render the affected orbital shell unusable for generations. The 2009 Iridium–Cosmos collision at 789 km created over 2,300 trackable fragments. ASAT tests — China (2007, ~850 km), Russia (2021, ~480 km), and India (2019, ~285 km) — added further debris. The 2021 Russian test generated a field that required ISS crew to shelter and produced fragments that will remain in orbit for years. No collision cascade has yet triggered, but the debris environment at LEO altitudes is measurably worsening. For a constellation architect, this means deorbit compliance, propulsion reliability, conjunction avoidance, and failure mode analysis are not optional features — they are existential requirements for regulatory approval and long-term operational viability.
     </div>
 </div>
 
@@ -529,32 +614,232 @@ footer { text-align:center; padding:30px; opacity:0.3; font-size:11px; position:
 <div class="content-block" id="s7">
     <h2>7. Link Budget Sensitivity to Altitude</h2>
 
-    <p>The link budget is the accounting of signal power gains and losses between transmitter and receiver. Altitude affects two terms in the link budget directly: free-space path loss and propagation delay. Understanding how these scale with altitude is essential for comparing regimes quantitatively.</p>
+    <p>A link budget is the complete accounting of every gain and loss experienced by a signal as it travels from transmitter to receiver. It is the central engineering document that determines whether a satellite communications system will work at all, at what data rate, with what availability, and at what terminal cost. Every architectural choice — orbit altitude, frequency band, satellite antenna size, ground terminal size — shows up somewhere in the link budget. This section builds the link budget from first principles, works through a complete numerical example comparing LEO and GEO, and explains how each term changes with altitude.</p>
 
-    <h3>Free-space path loss</h3>
+    <h3>The link budget equation</h3>
 
-    <p>Free-space path loss (FSPL) is the attenuation of signal power due to the geometric spreading of the electromagnetic wave as it propagates through space. It is given by:</p>
+    <p>The fundamental link budget equation, in decibels, is:</p>
 
     <div class="callout">
-        <strong>FREE-SPACE PATH LOSS FORMULA</strong>
-        FSPL (dB) = 20·log₁₀(d) + 20·log₁₀(f) + 20·log₁₀(4π/c)<br><br>
-        Simplified: FSPL (dB) ≈ 92.4 + 20·log₁₀(d_km) + 20·log₁₀(f_GHz)<br><br>
-        where d is distance in km and f is frequency in GHz. Every doubling of distance adds 6 dB of path loss.
+        <strong>LINK BUDGET — CARRIER TO NOISE DENSITY RATIO</strong>
+        C/N₀ (dBHz) = EIRP (dBW) − FSPL (dB) − L_atm (dB) − L_misc (dB) + G/T (dB/K) − 10·log₁₀(k)<br><br>
+        where:<br>
+        EIRP = transmit power + transmit antenna gain (dBW)<br>
+        FSPL = free-space path loss (dB)<br>
+        L_atm = atmospheric attenuation including rain fade (dB)<br>
+        L_misc = miscellaneous losses: pointing, polarisation, implementation (dB)<br>
+        G/T = receive antenna gain minus system noise temperature (dB/K)<br>
+        k = Boltzmann's constant = 1.38×10⁻²³ J/K → 10·log₁₀(k) = −228.6 dBW/Hz/K<br><br>
+        The required C/N₀ for a given data rate R and modulation/coding scheme is:<br>
+        Required C/N₀ = Eb/N₀_required + 10·log₁₀(R)
     </div>
 
-    <p>At Ka-band (26.5 GHz uplink), the path loss from a ground terminal to a Starlink satellite at 550 km slant range (at zenith) is approximately 181 dB. To the same terminal talking to a GEO satellite at 35,786 km (at zenith), path loss is approximately 213 dB — a difference of 32 dB. This is a factor of about 1,600 in power. Put another way: to achieve the same received signal level at GEO that you achieve at LEO with a given ground terminal and satellite, you need either 1,600× more transmit power, 1,600× more antenna gain, or some combination. This path loss difference is the fundamental reason why GEO terminals are large dishes and LEO terminals can be small flat panels.</p>
+    <p>Every term on the right side of this equation is either a property of the satellite (EIRP), a property of the ground terminal (G/T), or a consequence of the geometry and environment (FSPL, L_atm). Orbital altitude directly controls FSPL — and FSPL is typically the largest single loss term in the budget, dominating everything else by 30–50 dB. Understanding FSPL is therefore understanding the dominant effect of altitude on system performance.</p>
 
-    <p>It is also why LEO satellites can achieve high data rates with modest-sized phased arrays. A 50 cm² phased array on a Starlink satellite can form beams with enough gain to close a multi-hundred-Mbps link to a consumer dish at 550 km. The equivalent GEO satellite would need a much larger reflector to achieve comparable performance — and GEO satellites do indeed carry large deployable reflectors for spot-beam systems.</p>
+    <h3>Free-space path loss in depth</h3>
+
+    <p>Free-space path loss arises from the geometric spreading of an electromagnetic wave as it propagates. An isotropic transmitter radiates power equally in all directions. At distance d, that power is spread over a sphere of area 4πd². A receive antenna with effective aperture A_eff captures the fraction A_eff / (4πd²) of the transmitted power. FSPL is conventionally defined as the ratio of transmitted to received power when both antennas are isotropic:</p>
+
+    <div class="callout">
+        <strong>FREE-SPACE PATH LOSS</strong>
+        FSPL = (4πd/λ)² = (4πdf/c)²<br><br>
+        In dB: FSPL (dB) = 20·log₁₀(4π/c) + 20·log₁₀(d) + 20·log₁₀(f)<br>
+        Numerically: FSPL (dB) ≈ 92.45 + 20·log₁₀(d_km) + 20·log₁₀(f_GHz)<br><br>
+        Key scaling relationships:<br>
+        — Every doubling of distance: +6 dB<br>
+        — Every doubling of frequency: +6 dB<br>
+        — GEO vs LEO 550 km (65× farther): +36.3 dB
+    </div>
+
+    <p>Working through the numbers at Ka-band (downlink at 20 GHz, a common choice for Starlink and ViaSat):</p>
+
+    <div class="key-numbers">
+        <div class="kn-item"><span class="kn-val">174 dB</span><span class="kn-label">FSPL at 550 km, 20 GHz (LEO zenith)</span></div>
+        <div class="kn-item"><span class="kn-val">210 dB</span><span class="kn-label">FSPL at 35,786 km, 20 GHz (GEO zenith)</span></div>
+        <div class="kn-item"><span class="kn-val">36 dB</span><span class="kn-label">Path loss advantage of LEO over GEO</span></div>
+        <div class="kn-item"><span class="kn-val">4,000×</span><span class="kn-label">Power ratio equivalent to 36 dB</span></div>
+    </div>
+
+    <p>The 36 dB difference is decisive. It means that for equal transmit power and equal receive antenna size, LEO delivers 4,000× more signal power to the ground terminal than GEO. Alternatively: a GEO system needs either a 4,000× larger transmit power, a 4,000× larger satellite antenna area, a 4,000× larger ground terminal dish, or some combination across all three — just to break even with LEO on signal level. This is not a minor engineering detail. It is the fundamental reason the entire commercial satellite industry is restructuring around LEO.</p>
+
+    <h3>EIRP: the satellite's transmitted power</h3>
+
+    <p>Effective Isotropic Radiated Power (EIRP) is the product of the satellite's transmit power and its transmit antenna gain, expressed in dBW. It represents the power that a hypothetical isotropic antenna would need to transmit to produce the same signal level in the beam direction as the actual antenna.</p>
+
+    <p>For a Starlink v1.5 satellite, the downlink EIRP per beam is approximately 45–50 dBW — representing perhaps 10–20 W of RF power combined with a phased array antenna gain of 30–35 dBi. The phased array forms dozens of simultaneous beams, each with this EIRP, covering the footprint beneath the satellite. The total satellite RF output power might be 1–2 kW across all beams simultaneously.</p>
+
+    <p>For a GEO high-throughput satellite (HTS) like ViaSat-3, the downlink EIRP per spot beam is typically 60–68 dBW — 10–20 dB higher than Starlink per beam — achieved with a large deployable reflector antenna (typically 2–5 metres diameter) fed by a high-power travelling wave tube amplifier (TWTA). The GEO operator is forced to spend this EIRP just to compensate for the 36 dB higher path loss to GEO. The reflector is large because gain must be high; the TWTA is high-power because the link budget demands it.</p>
+
+    <p>This comparison illustrates the cascade effect of orbital altitude on satellite design complexity and cost. A LEO satellite can close a high-throughput link with a compact solid-state phased array. A GEO satellite requires a precision deployable reflector — a complex mechanical system that must unfurl reliably in orbit after surviving launch vibration — and high-power amplifiers that generate heat requiring dedicated thermal management. The cost difference is not primarily about launch mass; it is about this engineering complexity driven by the path loss penalty.</p>
+
+    <h3>G/T: the ground terminal's receive quality</h3>
+
+    <p>G/T (pronounced "G over T") is the figure of merit for a receive terminal: the ratio of antenna gain to system noise temperature. It captures both how well the terminal collects signal (gain) and how much thermal noise it introduces (noise temperature). Higher G/T means the terminal can detect weaker signals.</p>
+
+    <p>Antenna gain at a given frequency scales with aperture area: G = η · (π · D / λ)² for a circular aperture of diameter D and efficiency η. Doubling the antenna diameter quadruples the gain (+6 dB). At Ka-band (20 GHz, λ = 15 mm), a 50 cm diameter dish with 60% efficiency has a gain of approximately 37 dBi. A 90 cm dish has approximately 43 dBi — a 6 dB improvement.</p>
+
+    <p>System noise temperature T_sys combines the sky noise temperature (typically 20–50 K at Ka-band for a clear sky looking at moderate elevation), the feed and LNA noise contribution, and the ambient temperature contribution from the ground via spillover. For a well-designed flat-panel terminal at Ka-band with a low-noise amplifier at ~80 K noise temperature, T_sys might be 110–150 K. A poorly designed system with high feed losses might have T_sys of 300–500 K — a 3–7 dB penalty on G/T.</p>
+
+    <p>For a LEO terminal, the phased array must steer electronically to track the satellite across the sky. Phased array antennas have gain that varies with steering angle — typically dropping 3–5 dB near the horizon compared to broadside. Since LEO satellites spend time at all elevation angles from near the horizon up to near zenith, the link budget must account for worst-case G/T at low elevation angles, which is lower than the peak G/T at broadside. This is a fundamental disadvantage of phased arrays versus mechanically steered dishes, which maintain near-peak gain at all pointing angles.</p>
+
+    <h3>A worked numerical example: LEO vs GEO downlink</h3>
+
+    <p>The following example compares a Ka-band downlink from a LEO satellite at 550 km against a GEO HTS satellite, both serving a consumer terminal. Numbers are representative — not drawn from any specific product specification.</p>
+
+    <div style="overflow-x:auto;">
+    <table class="compare-table" style="min-width:560px;">
+        <thead>
+            <tr>
+                <th>Link Budget Term</th>
+                <th>LEO (550 km, zenith)</th>
+                <th>GEO (35,786 km, zenith)</th>
+                <th>Notes</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td>Satellite Tx power (W)</td>
+                <td>15 W per beam</td>
+                <td>120 W per beam</td>
+                <td>GEO TWTA vs LEO solid-state</td>
+            </tr>
+            <tr>
+                <td>Satellite Tx power (dBW)</td>
+                <td>11.8 dBW</td>
+                <td>20.8 dBW</td>
+                <td></td>
+            </tr>
+            <tr>
+                <td>Satellite antenna gain</td>
+                <td>34 dBi</td>
+                <td>46 dBi</td>
+                <td>GEO large reflector vs LEO phased array</td>
+            </tr>
+            <tr>
+                <td><strong>Satellite EIRP</strong></td>
+                <td><strong>45.8 dBW</strong></td>
+                <td><strong>66.8 dBW</strong></td>
+                <td>GEO 21 dB higher — partially offsets path loss</td>
+            </tr>
+            <tr>
+                <td>Free-space path loss (20 GHz)</td>
+                <td>174.3 dB</td>
+                <td>210.6 dB</td>
+                <td>36.3 dB LEO advantage</td>
+            </tr>
+            <tr>
+                <td>Atmospheric attenuation</td>
+                <td>0.5 dB</td>
+                <td>0.5 dB</td>
+                <td>Clear sky, zenith (same path through troposphere)</td>
+            </tr>
+            <tr>
+                <td>Miscellaneous losses</td>
+                <td>1.0 dB</td>
+                <td>1.0 dB</td>
+                <td>Pointing, polarisation, implementation</td>
+            </tr>
+            <tr>
+                <td>Terminal antenna gain (50 cm dish)</td>
+                <td>37.2 dBi</td>
+                <td>37.2 dBi</td>
+                <td>Same physical terminal in both cases</td>
+            </tr>
+            <tr>
+                <td>System noise temperature</td>
+                <td>130 K → 21.1 dBK</td>
+                <td>130 K → 21.1 dBK</td>
+                <td></td>
+            </tr>
+            <tr>
+                <td>Terminal G/T</td>
+                <td>16.1 dB/K</td>
+                <td>16.1 dB/K</td>
+                <td></td>
+            </tr>
+            <tr>
+                <td>Boltzmann (−10·log₁₀(k))</td>
+                <td>+228.6 dBW/Hz/K</td>
+                <td>+228.6 dBW/Hz/K</td>
+                <td></td>
+            </tr>
+            <tr>
+                <td><strong>C/N₀ result</strong></td>
+                <td><strong>354.6 dBHz</strong></td>
+                <td><strong>339.4 dBHz</strong></td>
+                <td><strong>LEO 15.2 dB better C/N₀</strong></td>
+            </tr>
+            <tr>
+                <td>Available C/N for 250 MHz BW</td>
+                <td>354.6 − 83.98 = 70.6 dB</td>
+                <td>339.4 − 83.98 = 55.4 dB</td>
+                <td>Subtract 10·log₁₀(250×10⁶)</td>
+            </tr>
+            <tr>
+                <td>Typical modem threshold (e.g. DVB-S2X 32APSK 3/4)</td>
+                <td colspan="2" style="text-align:center;">~16 dB CNR</td>
+                <td>Both close the link with large margin</td>
+            </tr>
+            <tr>
+                <td>Margin above threshold</td>
+                <td class="hi">54.6 dB</td>
+                <td class="md">39.4 dB</td>
+                <td>LEO has 15 dB more margin to use for higher order modulation or rain fade</td>
+            </tr>
+        </tbody>
+    </table>
+    </div>
+
+    <p>The example reveals something important: even after accounting for GEO's higher EIRP (which partially compensates for its higher path loss), LEO still delivers 15 dB more carrier-to-noise ratio to the same terminal. That 15 dB margin can be spent in several ways. The system designer could use it to close a higher-order modulation scheme — for instance, 256APSK instead of 32APSK — and achieve roughly 3× higher spectral efficiency, translating to 3× more throughput per Hz of spectrum. Or the margin could be taken as rain fade protection, improving link availability in heavy precipitation. Or the terminal could be made smaller and cheaper by reducing antenna diameter until the LEO margin equals the GEO margin, while still closing the link at the same rate — the approach Starlink took with its consumer dish.</p>
 
     <h3>Rain fade and atmospheric effects</h3>
 
-    <p>Atmospheric attenuation — particularly rain fade at Ka and higher bands — is a function of the slant range through the atmosphere rather than the total range to the satellite. The troposphere, where most weather occurs, extends to approximately 12 km altitude. Both a LEO satellite and a GEO satellite are well above this layer; what matters is the length of the signal path through the troposphere, which depends on elevation angle rather than satellite altitude. At 30° elevation, the slant path through the troposphere is approximately 24 km; at 90° (zenith), it is approximately 12 km.</p>
+    <p>The worked example above assumed clear-sky conditions. In practice, rain and atmospheric gases attenuate the signal, and the system must maintain acceptable performance through specified rain conditions. The rain fade margin must be added to the required CNR threshold — the system must close the link not just in clear sky but in the worst rain conditions that occur with a given frequency.</p>
 
-    <p>Since LEO terminals on average see satellites at higher elevation angles than GEO terminals at mid-latitudes and high latitudes, LEO systems can have a slight rain fade advantage in these geographies. However, LEO systems also experience more frequent satellite handovers, and if a handover occurs during a rain event that affects one satellite but not another, the handover can actually improve link quality — a feature with no GEO equivalent.</p>
+    <p>Atmospheric attenuation at Ka-band (20 GHz downlink) from rain is typically 3–7 dB at moderate rain rates (25 mm/hour) at 30–45° elevation angles. The ITU-R P.618 rain attenuation model gives the excess attenuation for a given location, frequency, elevation angle, and availability target. A system targeting 99.9% availability (rain outage less than 8.76 hours per year) must add rain fade margin of approximately 4–8 dB in a moderate climate. A system targeting 99.5% availability (44 hours outage per year) needs only 2–4 dB.</p>
 
-    <h3>Doppler and frequency planning</h3>
+    <p>Crucially, rain fade margin is added to the required CNR, not subtracted from the available CNR — it increases the threshold the system must meet. The LEO system's 15 dB CNR advantage over GEO means it can absorb substantially more rain fade while still maintaining the link, or alternatively can target higher availability for the same terminal size. In maritime applications, where terminals must close links in tropical rain events at low elevation angles simultaneously with high sea states that degrade pointing accuracy, the LEO path loss advantage translates directly into better service in the worst conditions.</p>
 
-    <p>As covered in Section 3, LEO's high orbital velocity produces Doppler shifts of hundreds of kilohertz at Ka-band. This must be accounted for in frequency planning: the system must reserve enough guard band or implement real-time Doppler pre-compensation to prevent adjacent-channel interference and ensure modems can track the carrier. GEO satellites in zero-inclination orbit experience no Doppler shift on the ground segment (the satellite is stationary). Inclined GEO satellites — older GEO birds whose inclination has drifted with age and has not been corrected to save fuel — do produce Doppler at terrestrial rates, but this is a small effect compared to LEO.</p>
+    <h3>Slant range and non-zenith geometry</h3>
+
+    <p>The worked example used zenith geometry (satellite directly overhead) for simplicity. In practice, a LEO terminal sees satellites at varying elevation angles from the minimum cutoff (~25° for most Starlink terminals) to a maximum that depends on the pass geometry. The slant range at elevation angle ε is longer than the zenith range, and the path through the troposphere is longer (increasing atmospheric attenuation).</p>
+
+    <p>The slant range to a satellite at altitude h, seen at elevation angle ε, is:</p>
+
+    <div class="callout">
+        <strong>SLANT RANGE FORMULA</strong>
+        d = −Rₑ·sin(ε) + √(Rₑ²·sin²(ε) + h² + 2·Rₑ·h)<br><br>
+        At ε = 90° (zenith): d = h (trivially)<br>
+        At ε = 25°, h = 550 km: d ≈ 815 km (+3.4 dB path loss vs zenith)<br>
+        At ε = 10°, h = 550 km: d ≈ 1,690 km (+9.8 dB path loss vs zenith)
+    </div>
+
+    <p>The 3.4 dB additional path loss at 25° elevation compared to zenith is non-trivial — it represents a 40% reduction in signal power at the minimum usable elevation. Combined with the phased array's off-broadside gain reduction at low elevation angles (typically 2–4 dB), the link at minimum elevation is 5–7 dB weaker than at zenith. This worst-case geometry must be the one the link budget is designed to close — with rain fade margin on top. The minimum elevation angle specification therefore directly trades link quality (lower minimum elevation angle = worse worst-case link) against coverage continuity (lower minimum elevation angle = longer satellite passes = less frequent handovers). This tradeoff is a key constellation design parameter.</p>
+
+    <h3>Doppler shift and frequency planning</h3>
+
+    <p>LEO's high orbital velocity produces significant Doppler shift. At Ka-band downlink (20 GHz), the Doppler shift due to satellite radial velocity v_r is:</p>
+
+    <div class="callout">
+        <strong>DOPPLER SHIFT</strong>
+        Δf = f₀ · v_r / c<br><br>
+        Maximum radial velocity for 550 km LEO: ±7.6 km/s (at horizon)<br>
+        Maximum Doppler shift at 20 GHz: ±20,000 × 7,600 / 300,000,000 = ±507 kHz<br><br>
+        At 26.5 GHz (Ka uplink): ±672 kHz<br>
+        At 12 GHz (Ku downlink): ±304 kHz<br>
+        At 1.6 GHz (L-band): ±40 kHz
+    </div>
+
+    <p>These shifts must be compensated. The standard approach is Doppler pre-compensation at the transmitter: since the satellite's orbit is precisely known, the expected Doppler shift at any future time can be calculated and the transmit frequency offset accordingly so the received frequency is nominally on-target. Ground terminals do this in software on uplinks; satellites do it for downlinks. The residual Doppler after compensation — arising from ephemeris errors and latency in the compensation loop — must be within the modem's frequency acquisition and tracking range.</p>
+
+    <p>Doppler shift also affects frequency planning at the system level. Adjacent-channel interference analysis must account for the worst-case Doppler shifts of satellites at different positions in the sky. If two satellites are simultaneously visible to a terminal and one is approaching while the other is receding, their respective signals arrive at different frequencies — a natural form of frequency diversity that can be exploited or must at minimum be accounted for in the interference model.</p>
+
+    <div class="deep-dive">
+        <h4>DEEPER CONTEXT — AVIATION LINK BUDGETS</h4>
+        <p>Aviation terminals add two complications to the standard LEO link budget. First, the aircraft's own velocity contributes a second Doppler component. At 900 km/h (250 m/s) on a heading directly toward or away from the satellite, the additional Doppler shift at Ka-band (20 GHz) is approximately 250/300,000,000 × 20,000,000,000 = ±16,700 Hz ≈ ±17 kHz. This is small compared to the satellite-induced ±507 kHz, but it is non-negligible for high-order modulation schemes and must be tracked using the aircraft's inertial navigation system (INS) data fed to the modem in real time.</p>
+        <p>Second, the aircraft terminal's antenna pointing must compensate for the aircraft's attitude (pitch, roll, yaw) in addition to tracking the satellite's position. A phased array terminal on an aircraft measures its own attitude from the INS and combines this with the satellite ephemeris to compute the required beam steering angles, updating at high rate to maintain pointing through turbulence and manoeuvres. The pointing accuracy requirement is tight — a 1° pointing error on a 50 cm phased array at Ka-band costs approximately 0.5–1 dB of gain — and the system must maintain accuracy even during aggressive manoeuvres such as missed approaches and go-arounds where pitch and bank angles change rapidly.</p>
+        <p>These two factors — aircraft Doppler and dynamic pointing — are the primary technical differentiators between an aviation LEO terminal and a maritime or fixed LEO terminal. They explain why aviation-certified LEO terminal development has lagged maritime by 12–18 months despite the commercial demand being comparable: the avionics integration, INS coupling, and certification testing add significant time and cost.</p>
+    </div>
 </div>
 
 <!-- ═══ SECTION 8 ═══ -->
