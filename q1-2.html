@@ -1,0 +1,1353 @@
+<!DOCTYPE html>
+
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, shrink-to-fit=no">
+<title>L02 — Orbital Regimes Compared · LEOAF</title>
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;600;800&family=Share+Tech+Mono&family=Libre+Baskerville:ital,wght@0,400;0,700;1,400&display=swap" rel="stylesheet">
+<link rel="icon" href="favicon.ico" sizes="any" type="image/x-icon">
+<link rel="manifest" href="site.webmanifest">
+<meta name="theme-color" content="#0f0f0f">
+
+<style>
+* { box-sizing:border-box; margin:0; padding:0; }
+html { height:100%; -webkit-text-size-adjust:100%; overflow-x:hidden; }
+body { font-family:'Share Tech Mono',monospace; background:#000; color:white; overflow-x:hidden; min-height:100vh; }
+#starsCanvas { position:fixed; inset:0; z-index:-1; }
+
+header {
+    background:#000; border-bottom:1px solid #ff004f33;
+    position:sticky; top:0; z-index:100;
+    padding:1rem clamp(1.5rem,5vw,4rem);
+    display:flex; justify-content:space-between; align-items:center;
+    box-shadow:0 4px 16px #0008;
+}
+.logo { font-family:'Orbitron',sans-serif; font-weight:800; font-size:clamp(16px,2vw,22px); letter-spacing:3px; text-decoration:none; }
+.logo span:first-child { color:white; }
+.logo span:last-child { color:#ff004f; }
+.nav-right { display:flex; align-items:center; gap:10px; }
+.nav-btn {
+    background:transparent; border:1px solid #ff004f44; color:#ff004f;
+    padding:6px 14px; cursor:pointer; transition:0.3s ease;
+    font-size:11px; font-family:'Orbitron',sans-serif; letter-spacing:1px;
+    text-decoration:none; display:inline-block;
+}
+.nav-btn:hover { background:#ff004f; color:black; }
+
+.breadcrumb { padding:14px clamp(1.5rem,5vw,4rem); font-size:11px; color:#ffffff44; letter-spacing:1px; position:relative; z-index:1; }
+.breadcrumb a { color:#00d9ff66; text-decoration:none; }
+.breadcrumb a:hover { color:#00d9ff; }
+.breadcrumb span { margin:0 8px; }
+
+.lesson-wrap { max-width:820px; margin:0 auto; padding:0 clamp(1.5rem,5vw,4rem) 80px; position:relative; z-index:1; }
+
+.lesson-header { padding:30px 0 28px; border-bottom:1px solid #ffffff11; margin-bottom:36px; }
+.lesson-tag { font-family:'Orbitron',sans-serif; font-size:10px; color:#ff004f; letter-spacing:3px; margin-bottom:10px; }
+.lesson-header h1 { font-family:'Orbitron',sans-serif; font-size:clamp(20px,3.5vw,32px); font-weight:800; line-height:1.2; margin-bottom:12px; }
+.lesson-meta { display:flex; gap:10px; flex-wrap:wrap; margin-bottom:16px; }
+.l-pill { font-family:'Orbitron',sans-serif; font-size:10px; padding:3px 10px; border:1px solid; letter-spacing:1px; }
+.l-pill-q { color:#ff004f; border-color:#ff004f44; }
+.l-pill-t { color:#39ff14; border-color:#39ff1444; }
+.lesson-intro { font-size:13px; line-height:1.85; opacity:0.75; }
+
+.toc { background:rgba(0,217,255,0.06); border:1px solid #00d9ff33; padding:24px 28px; margin:30px 0; }
+.toc h4 { font-family:'Orbitron',sans-serif; font-size:10px; color:#00d9ff; letter-spacing:2px; margin-bottom:16px; }
+.toc ol { padding-left:20px; }
+.toc li { font-size:13px; line-height:2.1; }
+.toc li a { color:#00d9ffbb; text-decoration:none; transition:0.15s; }
+.toc li a:hover { color:#ffffff; padding-left:4px; }
+.toc li::marker { color:#ff004f; font-family:'Orbitron',sans-serif; font-size:10px; }
+
+/* CONTENT BLOCKS — light reading mode */
+.content-block {
+    background:#f5f2ec; color:#1a1a1a;
+    padding:36px clamp(24px,4vw,48px);
+    margin-bottom:24px;
+    border-left:4px solid #00d9ff;
+    position:relative; z-index:1;
+}
+.content-block h2 {
+    font-family:'Orbitron',sans-serif; font-size:13px; color:#003d66;
+    letter-spacing:2px; text-transform:uppercase;
+    margin-bottom:20px; padding-bottom:10px;
+    border-bottom:2px solid #00d9ff66;
+    scroll-margin-top:80px;
+}
+.content-block h3 {
+    font-family:'Orbitron',sans-serif; font-size:11px; color:#444;
+    letter-spacing:1.5px; text-transform:uppercase; margin:32px 0 14px;
+}
+.content-block p {
+    font-family:'Libre Baskerville',Georgia,serif;
+    font-size:15px; line-height:1.9; color:#1a1a1a; margin-bottom:18px;
+}
+.content-block ul, .content-block ol { padding-left:0; margin-bottom:16px; }
+.content-block ul li, .content-block ol li {
+    font-family:'Libre Baskerville',Georgia,serif;
+    font-size:14px; line-height:1.85; color:#1a1a1a;
+    padding-left:20px; position:relative; margin-bottom:8px;
+}
+.content-block ul li::before { content:'›'; position:absolute; left:0; color:#0077aa; }
+.content-block ol { counter-reset:item; }
+.content-block ol li { counter-increment:item; }
+.content-block ol li::before { content:counter(item)'.'; position:absolute; left:0; color:#cc0033; font-family:'Orbitron',sans-serif; font-size:10px; top:2px; }
+
+.callout { border-left:3px solid #0088cc; background:#e8f4fb; color:#1a1a1a; padding:16px 20px; margin:22px 0; font-size:12px; line-height:1.8; }
+.callout.red   { border-left-color:#cc0033; background:#fdecea; }
+.callout.green { border-left-color:#1a7a1a; background:#eafaea; }
+.callout.amber { border-left-color:#996600; background:#fef9ec; }
+.callout strong { font-family:'Orbitron',sans-serif; font-size:10px; letter-spacing:1px; display:block; margin-bottom:8px; color:inherit; }
+
+.key-numbers { display:grid; grid-template-columns:repeat(auto-fit,minmax(140px,1fr)); gap:12px; margin:22px 0; }
+.kn-item { background:#fff; border:1px solid #d0d0d0; padding:16px 12px; text-align:center; }
+.kn-val { font-family:'Orbitron',sans-serif; font-size:clamp(16px,2.5vw,22px); font-weight:800; color:#003d66; display:block; }
+.kn-label { font-size:10px; color:#555; letter-spacing:1px; margin-top:5px; display:block; line-height:1.4; }
+
+.compare-table { width:100%; border-collapse:collapse; margin:22px 0; font-size:12px; }
+.compare-table th { font-family:'Orbitron',sans-serif; font-size:10px; letter-spacing:1px; color:#003d66; padding:10px 12px; border-bottom:2px solid #00d9ff66; text-align:left; background:#eaf6fb; }
+.compare-table td { padding:10px 12px; border-bottom:1px solid #ddd; line-height:1.5; color:#1a1a1a; vertical-align:top; font-family:'Share Tech Mono',monospace; font-size:11px; }
+.compare-table tr:hover td { background:#f0f0f0; }
+.compare-table .hi { color:#1a7a1a; font-weight:bold; }
+.compare-table .lo { color:#cc0033; }
+.compare-table .md { color:#996600; }
+.compare-table .regime { font-family:'Orbitron',sans-serif; font-size:10px; letter-spacing:1px; }
+
+.diagram-wrap { margin:24px 0; background:#0a0a0a; border:1px solid #333; padding:20px; overflow-x:auto; }
+.diagram-wrap figcaption { font-size:11px; color:#ffffff44; margin-top:12px; text-align:center; letter-spacing:1px; }
+
+.deep-dive { background:#fffbf0; border:1px solid #e0c060; padding:20px 22px; margin:24px 0; }
+.deep-dive h4 { font-family:'Orbitron',sans-serif; font-size:10px; color:#996600; letter-spacing:2px; margin-bottom:12px; }
+.deep-dive p { font-family:'Libre Baskerville',Georgia,serif; font-size:13px; line-height:1.85; color:#333; margin-bottom:10px; }
+.deep-dive p:last-child { margin-bottom:0; }
+
+/* QUIZ — full dark */
+.quiz-block { background:rgba(17,17,17,0.95); border:1px solid #ff004f33; padding:28px; margin:48px 0 32px; position:relative; z-index:1; }
+.quiz-block h2 { font-family:'Orbitron',sans-serif; font-size:13px; color:#ff004f; letter-spacing:2px; margin-bottom:6px; }
+.quiz-intro { font-size:12px; color:#ffffff66; margin-bottom:24px; padding-bottom:16px; border-bottom:1px solid #ff004f22; line-height:1.6; }
+.quiz-q { margin-bottom:28px; }
+.quiz-q p { font-size:13px; color:#ffffffdd; margin-bottom:12px; line-height:1.65; }
+.quiz-q p strong { color:#00d9ff; }
+.quiz-options { display:flex; flex-direction:column; gap:8px; }
+.quiz-opt {
+    background:rgba(255,255,255,0.03); border:1px solid #ffffff1a;
+    padding:11px 16px; cursor:pointer; font-size:12px; font-family:'Share Tech Mono',monospace;
+    transition:0.2s ease; text-align:left; color:white; line-height:1.5;
+}
+.quiz-opt:hover:not(:disabled) { background:rgba(0,217,255,0.08); border-color:#00d9ff44; }
+.quiz-opt.correct { background:rgba(57,255,20,0.1); border-color:#39ff14; color:#39ff14; }
+.quiz-opt.wrong   { background:rgba(255,0,79,0.1);  border-color:#ff004f; color:#ff004f; }
+.quiz-opt:disabled { cursor:default; }
+.quiz-feedback { font-size:12px; margin-top:10px; min-height:18px; line-height:1.7; padding:0 4px; }
+.quiz-score { font-family:'Orbitron',sans-serif; font-size:12px; color:#39ff14; margin-top:20px; letter-spacing:1px; display:none; padding-top:16px; border-top:1px solid #39ff1433; }
+
+/* PYTHON */
+.py-block { background:rgba(10,10,10,0.95); border:1px solid #39ff1422; padding:28px; margin:32px 0; position:relative; z-index:1; }
+.py-block h2 { font-family:'Orbitron',sans-serif; font-size:13px; color:#39ff14; letter-spacing:2px; margin-bottom:8px; }
+.py-block .py-intro { font-size:12px; color:#ffffffaa; margin-bottom:20px; padding-bottom:16px; border-bottom:1px solid #39ff1422; line-height:1.7; }
+.py-exercise { margin-bottom:32px; }
+.py-exercise:last-child { margin-bottom:0; }
+.py-exercise h3 { font-family:'Orbitron',sans-serif; font-size:11px; color:#39ff1499; letter-spacing:1.5px; text-transform:uppercase; margin-bottom:10px; }
+.py-exercise p { font-size:12px; color:#ffffffaa; margin-bottom:14px; line-height:1.75; }
+.py-block pre {
+    background:#050505; border:1px solid #39ff1433; padding:20px;
+    font-family:'Share Tech Mono',monospace; font-size:11.5px;
+    line-height:1.75; overflow-x:auto; color:#39ff14;
+    white-space:pre; margin-bottom:12px;
+}
+.py-block .py-note { font-size:11px; color:#ffffff44; line-height:1.75; margin-top:10px; }
+.py-block .py-challenge { background:rgba(57,255,20,0.04); border-left:2px solid #39ff14; padding:12px 16px; margin-top:14px; font-size:12px; line-height:1.75; color:#ffffffaa; }
+.py-block .py-challenge strong { font-family:'Orbitron',sans-serif; font-size:10px; color:#39ff14; display:block; margin-bottom:6px; letter-spacing:1px; }
+
+/* REFLECTION */
+.reflection-block { background:rgba(255,170,0,0.04); border:1px solid #ffaa0033; padding:24px; margin:32px 0; position:relative; z-index:1; }
+.reflection-block h2 { font-family:'Orbitron',sans-serif; font-size:13px; color:#ffaa00; letter-spacing:2px; margin-bottom:8px; }
+.reflection-block .ref-intro { font-size:12px; color:#ffffffaa; margin-bottom:20px; padding-bottom:14px; border-bottom:1px solid #ffaa0022; line-height:1.7; }
+.ref-prompt { margin-bottom:24px; }
+.ref-prompt h3 { font-family:'Orbitron',sans-serif; font-size:11px; color:#ffaa0099; letter-spacing:1px; margin-bottom:8px; }
+.ref-prompt p { font-size:12px; color:#ffffffaa; line-height:1.75; margin-bottom:10px; }
+.ref-prompt ul li { font-size:12px; color:#ffffffaa; padding-left:16px; position:relative; margin-bottom:6px; line-height:1.7; }
+.ref-prompt ul li::before { content:'›'; position:absolute; left:0; color:#ffaa00; }
+
+/* BACK TO TOP */
+.back-to-top {
+    position:fixed; bottom:28px; right:28px; z-index:200;
+    width:44px; height:44px; background:#000;
+    border:1px solid #00d9ff55; color:#00d9ff;
+    font-size:20px; cursor:pointer;
+    display:flex; align-items:center; justify-content:center;
+    opacity:0; pointer-events:none;
+    transition:opacity 0.3s ease, border-color 0.3s ease;
+}
+.back-to-top.visible { opacity:1; pointer-events:auto; }
+.back-to-top:hover { border-color:#00d9ff; background:#001a2c; }
+
+/* COMPLETE */
+.complete-wrap { margin-top:56px; padding-top:30px; border-top:1px solid #ffffff11; text-align:center; position:relative; z-index:1; }
+.complete-btn {
+    font-family:'Orbitron',sans-serif; font-size:13px; letter-spacing:2px;
+    padding:14px 44px; background:transparent;
+    border:1px solid #39ff14; color:#39ff14; cursor:pointer; transition:0.3s ease;
+}
+.complete-btn:hover { background:#39ff14; color:black; box-shadow:0 0 20px rgba(57,255,20,0.4); }
+.complete-msg { font-size:12px; margin-top:14px; min-height:18px; letter-spacing:1px; }
+
+.lesson-nav { display:flex; justify-content:space-between; margin-top:30px; flex-wrap:wrap; gap:10px; position:relative; z-index:1; }
+.lesson-nav a { font-family:'Orbitron',sans-serif; font-size:11px; color:#00d9ff66; text-decoration:none; letter-spacing:1px; transition:0.2s; }
+.lesson-nav a:hover { color:#00d9ff; }
+
+footer { text-align:center; padding:30px; opacity:0.3; font-size:11px; position:relative; z-index:1; letter-spacing:1px; }
+
+@media (max-width:600px) {
+    .key-numbers { grid-template-columns:1fr 1fr; }
+    .compare-table { font-size:10px; }
+    .compare-table th, .compare-table td { padding:7px 7px; }
+}
+</style>
+
+</head>
+<body>
+
+<canvas id="starsCanvas"></canvas>
+
+<header>
+    <a href="dashboard.html" class="logo"><span>LEO</span><span>AF</span></a>
+    <div class="nav-right">
+        <a href="q1.html" class="nav-btn">← Q1 HUB</a>
+        <button id="logoffBtn" class="nav-btn">ABORT</button>
+    </div>
+</header>
+
+<div class="breadcrumb">
+    <a href="dashboard.html">DASHBOARD</a><span>/</span>
+    <a href="q1.html">Q1</a><span>/</span>
+    <span style="color:#ffffff88;">LESSON 02 — ORBITAL REGIMES COMPARED</span>
+</div>
+
+<div class="lesson-wrap">
+
+```
+<div class="lesson-header">
+    <div class="lesson-tag">Q1 · LESSON 02 OF 15</div>
+    <h1>Orbital Regimes Compared</h1>
+    <div class="lesson-meta">
+        <div class="l-pill l-pill-q">QUARTER 1</div>
+        <div class="l-pill l-pill-t">ORBITAL MECHANICS</div>
+    </div>
+    <p class="lesson-intro">Lesson 1 explained why the industry moved to LEO. This lesson builds the quantitative foundation: what exactly defines each orbital regime, how the physics changes across altitude bands, and what those changes mean for satellite design, service quality, and mission economics. By the end you will be able to derive — from first principles — why a given application belongs in a given orbit, and why no single orbit is universally superior.</p>
+</div>
+
+<div class="toc">
+    <h4>CONTENTS</h4>
+    <ol>
+        <li><a href="#s1">Orbital mechanics fundamentals</a></li>
+        <li><a href="#s2">The four regimes defined</a></li>
+        <li><a href="#s3">Coverage geometry: footprints, elevation angles, and the horizon</a></li>
+        <li><a href="#s4">Radiation environment across altitudes</a></li>
+        <li><a href="#s5">Eclipse fractions and power budget implications</a></li>
+        <li><a href="#s6">Atmospheric drag and orbital lifetime</a></li>
+        <li><a href="#s7">Link budget sensitivity to altitude</a></li>
+        <li><a href="#s8">The master tradeoff table</a></li>
+        <li><a href="#s9">Regime selection in practice</a></li>
+        <li><a href="#quiz">Knowledge check</a></li>
+        <li><a href="#python">Python exercises</a></li>
+        <li><a href="#reflect">Reflection prompts</a></li>
+    </ol>
+</div>
+
+<!-- ═══ SECTION 1 ═══ -->
+<div class="content-block" id="s1">
+    <h2>1. Orbital Mechanics Fundamentals</h2>
+
+    <p>Before comparing regimes, you need a working understanding of what determines an orbit. This section is not a full orbital mechanics course — that comes in Q2 — but it establishes the vocabulary and relationships you need to reason about altitude tradeoffs.</p>
+
+    <h3>Kepler's first and third laws</h3>
+
+    <p>Johannes Kepler's first law states that satellite orbits are ellipses with Earth at one focus. For commercial communications satellites, nearly all operational orbits are circular or near-circular — the two foci coincide at Earth's centre, the orbit has constant altitude, and the satellite moves at constant speed. Circular orbits simplify coverage analysis, link budget calculations, and ground antenna pointing, so they dominate in practice.</p>
+
+    <p>Kepler's third law establishes the fundamental relationship between orbital altitude and period: the square of the orbital period is proportional to the cube of the semi-major axis (for circular orbits, the orbital radius). In practical terms: the higher the orbit, the slower the satellite moves and the longer its orbital period. At GEO altitude, the period is exactly 24 hours — synchronised with Earth's rotation. At LEO altitudes of 500–600 km, the period is roughly 95–97 minutes. A LEO satellite therefore completes about 15 orbits per day.</p>
+
+    <p>The orbital velocity follows directly: a satellite must travel fast enough that the centripetal acceleration required to stay on the circular path equals Earth's gravitational acceleration at that altitude. At 550 km altitude, this works out to approximately 7.6 km/s. At GEO altitude, it is approximately 3.07 km/s. This velocity directly governs how quickly a LEO satellite transits the sky as seen from a ground station — the source of the handover challenge discussed in Lesson 1.</p>
+
+    <div class="key-numbers">
+        <div class="kn-item"><span class="kn-val">7.6 km/s</span><span class="kn-label">LEO orbital velocity (550 km)</span></div>
+        <div class="kn-item"><span class="kn-val">~95 min</span><span class="kn-label">LEO orbital period (550 km)</span></div>
+        <div class="kn-item"><span class="kn-val">3.07 km/s</span><span class="kn-label">GEO orbital velocity</span></div>
+        <div class="kn-item"><span class="kn-val">24 hrs</span><span class="kn-label">GEO orbital period (sidereal)</span></div>
+    </div>
+
+    <h3>Inclination and coverage</h3>
+
+    <p>Orbital inclination is the angle between the orbital plane and Earth's equatorial plane. A zero-inclination orbit is equatorial — the satellite stays above the equator. A 90° inclination is polar — the satellite passes over both poles. Inclinations between 0° and 90° are prograde (moving roughly eastward); inclinations between 90° and 180° are retrograde (moving roughly westward).</p>
+
+    <p>For communications constellations, inclination is one of the most consequential design choices because it determines the geographic distribution of coverage. A constellation with 53° inclination — like Starlink's primary shell — provides coverage up to approximately 53° latitude with denser revisit near that band and at the equator, and sparser coverage near 53° itself due to the geometry of inclined orbits. To serve polar regions consistently, you need high-inclination or polar orbits. This is why Starlink has a dedicated polar shell at 97.6° inclination (sun-synchronous) and OneWeb deployed all its satellites in near-polar orbits.</p>
+
+    <h3>The two-body problem and perturbations</h3>
+
+    <p>In the idealised two-body problem — one satellite orbiting one perfectly spherical, uniform Earth in a vacuum — orbits are perfect Keplerian ellipses that repeat indefinitely. Real orbits deviate from this ideal due to perturbations: Earth's equatorial bulge (J2 term), atmospheric drag at lower altitudes, solar radiation pressure, third-body effects from the Moon and Sun, and electromagnetic forces. For a systems architect, the most operationally important perturbations are atmospheric drag (dominant below 600 km) and J2-induced precession of the orbital plane (relevant for coverage uniformity in large constellations). These are treated quantitatively in the Python exercises below.</p>
+</div>
+
+<!-- ═══ SECTION 2 ═══ -->
+<div class="content-block" id="s2">
+    <h2>2. The Four Regimes Defined</h2>
+
+    <p>There is no universally standardised definition of orbital regime boundaries — different organisations and textbooks draw lines at slightly different altitudes. The definitions below reflect common industry usage and the boundaries that matter for the tradeoffs in this lesson.</p>
+
+    <h3>Very Low Earth Orbit (VLEO): 160–450 km</h3>
+
+    <p>VLEO is the regime closest to Earth, beginning just above the point where atmospheric drag becomes too severe for sustained orbit without continuous propulsion (roughly 160 km) and extending up to approximately 450 km. At these altitudes, orbital period is 87–93 minutes. Satellites experience significant atmospheric drag — even at 400 km, the residual atmosphere is dense enough to require regular reboost manoeuvres or continuous low-thrust propulsion to maintain altitude. The International Space Station orbits at approximately 400–410 km and requires periodic reboosts using visiting spacecraft or its own thrusters.</p>
+
+    <p>The communications case for VLEO is compelling on paper: propagation delay drops to 1–3 ms one-way, free-space path loss is dramatically lower than LEO (improving link margins or reducing terminal size and power), and Earth observation resolution improves. The case against is equally stark: current satellite propulsion systems make continuous drag compensation expensive in propellant mass and electric power, limiting satellite lifetime severely unless very efficient ion propulsion is used. No commercial communications constellation currently operates at VLEO altitudes, though several research projects and startups — including Skimsat and VLEO Tech — are actively working on the propulsion problem.</p>
+
+    <h3>Low Earth Orbit (LEO): 450–2,000 km</h3>
+
+    <p>LEO is the primary regime for modern broadband constellations. The altitude band is wide — from 450 km where drag becomes manageable with periodic chemical or electric thruster burns, to approximately 2,000 km where the inner Van Allen belt radiation begins to cause unacceptable component degradation for most satellite designs. Within this band there is significant architectural variation. Starlink operates multiple shells: the lowest at approximately 340–370 km (requiring continuous propulsion), the main operational shell at 540–560 km, and supplementary shells at higher altitudes. OneWeb operates at 1,200 km. The choice of specific altitude within LEO reflects a tradeoff among drag, radiation, coverage footprint, and latency.</p>
+
+    <p>Orbital period at LEO altitudes ranges from about 93 minutes (at 450 km) to about 127 minutes (at 2,000 km). A satellite at 550 km is visible from a ground station for approximately 8–12 minutes per pass, depending on the minimum elevation angle. This is the fundamental driver of the handover problem: a terminal must hand off from one satellite to the next every 8–12 minutes, continuously, for the lifetime of the service.</p>
+
+    <h3>Medium Earth Orbit (MEO): 2,000–35,000 km</h3>
+
+    <p>MEO is the regime between LEO and GEO, encompassing two very different populations of satellites. The first population is navigation satellites: GPS (20,200 km), GLONASS (19,100 km), Galileo (23,222 km), and BeiDou (MEO component at 21,528 km) all orbit in MEO because this altitude gives each satellite a large ground footprint enabling global coverage with relatively few spacecraft (24–30 for most GNSS systems), while maintaining sufficient signal strength for the precision timing required. Navigation is explicitly latency-insensitive — GNSS receivers need precise timing but do not care about propagation delay in the communications sense.</p>
+
+    <p>The second MEO population is broadband communications, specifically SES's O3b constellation (now O3b mPOWER). O3b satellites orbit at approximately 8,062 km altitude in an equatorial inclined orbit at 0°. At this altitude, one-way propagation delay is approximately 125 ms — significantly better than GEO's 240 ms, and the coverage footprint per satellite is large enough that O3b can cover most of the populated tropics and mid-latitudes with a small constellation. The tradeoff: latency is better than GEO but still worse than LEO, and the equatorial inclination limits coverage to approximately ±50° latitude. MEO broadband has found a niche in maritime and enterprise markets where the latency advantage over GEO is valuable but LEO constellations are not yet available.</p>
+
+    <p>The zone between approximately 1,500 km and 6,000 km is avoided for long-lifetime missions because it corresponds to the most intense part of the inner Van Allen belt. Satellites in this zone accumulate radiation damage rapidly. A GEO satellite has a design life of 15+ years with radiation-hardened electronics; a LEO satellite at 550 km might achieve 5–7 years. A satellite parked at 3,000 km in the heart of the inner belt might degrade in 1–2 years without extraordinary shielding.</p>
+
+    <h3>Geostationary Earth Orbit (GEO): 35,786 km</h3>
+
+    <p>GEO is not a band but a specific altitude at which the orbital period exactly matches Earth's sidereal rotation period of 23 hours, 56 minutes, and 4 seconds. A satellite in a circular, zero-inclination orbit at this altitude appears stationary from the ground. The geostationary arc is therefore a finite shared resource — satellites must be separated by sufficient angular distance (typically 2° for co-frequency operation) to avoid interference, and slots on the arc are allocated and coordinated by the ITU.</p>
+
+    <p>Because GEO requires zero inclination and the orbital radius is fixed, the only degrees of freedom for a GEO operator are the longitudinal slot (east-west position on the arc) and the frequency/polarisation plan. The arc is densely populated — several hundred operational satellites — and the most valuable slots (those that provide good coverage of major population centres and broadcast markets) are fully occupied. New GEO operators must obtain slots from the ITU filing process, which can take years and requires demonstrating that the satellite will not cause unacceptable interference to existing operators.</p>
+
+    <p>Above GEO, beyond the outer Van Allen belt, lies a region sometimes called High Earth Orbit (HEO) or super-GEO, used by highly elliptical orbits such as Molniya orbits for Arctic coverage. These are specialised mission types not relevant to broadband constellations and not covered in detail here.</p>
+
+    <div class="diagram-wrap">
+        <svg viewBox="0 0 720 520" width="100%" xmlns="http://www.w3.org/2000/svg" font-family="Share Tech Mono, monospace" font-size="9">
+            <defs>
+                <radialGradient id="eg" cx="50%" cy="50%"><stop offset="0%" stop-color="#003355"/><stop offset="100%" stop-color="#001122"/></radialGradient>
+                <radialGradient id="vag" cx="50%" cy="50%"><stop offset="0%" stop-color="#ffaa0000"/><stop offset="60%" stop-color="#ffaa0010"/><stop offset="100%" stop-color="#ffaa0000"/></radialGradient>
+                <pattern id="pg" width="40" height="40" patternUnits="userSpaceOnUse"><path d="M 40 0 L 0 0 0 40" fill="none" stroke="#ffffff05" stroke-width="0.5"/></pattern>
+            </defs>
+            <rect width="720" height="520" fill="url(#pg)"/>
+
+            <!-- Earth -->
+            <circle cx="360" cy="390" r="72" fill="url(#eg)" stroke="#00d9ff22" stroke-width="1.5"/>
+            <text x="360" y="394" text-anchor="middle" fill="#00d9ff55" letter-spacing="2" font-size="10">EARTH</text>
+            <text x="360" y="408" text-anchor="middle" fill="#00d9ff33" font-size="8">r = 6,371 km</text>
+
+            <!-- VLEO band -->
+            <ellipse cx="360" cy="390" rx="108" ry="104" fill="rgba(255,0,79,0.04)" stroke="#ff004f66" stroke-width="1" stroke-dasharray="2,3"/>
+            <ellipse cx="360" cy="390" rx="128" ry="123" fill="none" stroke="#ff004f44" stroke-width="0.5" stroke-dasharray="2,3"/>
+            <text x="214" y="298" fill="#ff004f99" text-anchor="middle">VLEO</text>
+            <text x="214" y="309" fill="#ff004f66" text-anchor="middle">160–450 km</text>
+
+            <!-- LEO band -->
+            <ellipse cx="360" cy="390" rx="128" ry="123" fill="rgba(57,255,20,0.03)" stroke="#39ff1466" stroke-width="1.5" stroke-dasharray="4,3"/>
+            <ellipse cx="360" cy="390" rx="198" ry="190" fill="none" stroke="#39ff1444" stroke-width="0.5" stroke-dasharray="3,4"/>
+            <!-- LEO satellite dot -->
+            <circle cx="218" cy="262" r="5" fill="#39ff14"/>
+            <text x="170" y="252" fill="#39ff14cc" font-size="10" text-anchor="middle">LEO</text>
+            <text x="170" y="264" fill="#39ff1488" text-anchor="middle">450–2,000 km</text>
+            <text x="170" y="275" fill="#39ff1466" text-anchor="middle">~7.6 km/s · 95 min</text>
+
+            <!-- Inner Van Allen belt -->
+            <ellipse cx="360" cy="390" rx="198" ry="190" fill="rgba(255,170,0,0.06)" stroke="#ffaa0055" stroke-width="5" stroke-dasharray="0"/>
+            <ellipse cx="360" cy="390" rx="270" ry="258" fill="rgba(255,170,0,0.03)" stroke="#ffaa0033" stroke-width="4"/>
+            <text x="540" y="195" fill="#ffaa0088" text-anchor="start">INNER VAN</text>
+            <text x="540" y="207" fill="#ffaa0088" text-anchor="start">ALLEN BELT</text>
+            <text x="540" y="218" fill="#ffaa0055" text-anchor="start">1,000–6,000 km</text>
+
+            <!-- MEO band -->
+            <ellipse cx="360" cy="390" rx="270" ry="258" fill="rgba(0,217,255,0.02)" stroke="#00d9ff44" stroke-width="1" stroke-dasharray="4,3"/>
+            <ellipse cx="360" cy="390" rx="390" ry="373" fill="none" stroke="#00d9ff22" stroke-width="0.5" stroke-dasharray="3,4"/>
+            <!-- MEO satellite dot -->
+            <circle cx="134" cy="165" r="5" fill="#00d9ff"/>
+            <text x="88" y="154" fill="#00d9ffcc" font-size="10" text-anchor="middle">MEO</text>
+            <text x="88" y="166" fill="#00d9ff88" text-anchor="middle">2,000–35,000 km</text>
+            <text x="88" y="177" fill="#00d9ff66" text-anchor="middle">~3–7 km/s</text>
+
+            <!-- Outer Van Allen belt -->
+            <ellipse cx="360" cy="390" rx="390" ry="373" fill="rgba(255,170,0,0.04)" stroke="#ffaa0044" stroke-width="4" stroke-dasharray="0"/>
+            <ellipse cx="360" cy="390" rx="465" ry="445" fill="rgba(255,170,0,0.02)" stroke="#ffaa0022" stroke-width="3"/>
+            <text x="600" y="100" fill="#ffaa0077" text-anchor="start">OUTER VAN</text>
+            <text x="600" y="112" fill="#ffaa0077" text-anchor="start">ALLEN BELT</text>
+            <text x="600" y="123" fill="#ffaa0055" text-anchor="start">13,000–60,000 km</text>
+
+            <!-- GEO arc (partial, above outer belt) -->
+            <path d="M 5 385 Q 360 -195 715 385" fill="none" stroke="#ff004f" stroke-width="1.5" stroke-dasharray="5,4"/>
+            <circle cx="360" cy="14" r="6" fill="#ff004f"/>
+            <text x="490" y="44" fill="#ff004fcc" font-size="10" text-anchor="middle">GEO</text>
+            <text x="490" y="56" fill="#ff004f88" text-anchor="middle">35,786 km</text>
+            <text x="490" y="67" fill="#ff004f66" text-anchor="middle">3.07 km/s · 24 hrs</text>
+
+            <!-- Altitude ruler on right -->
+            <line x1="668" y1="390" x2="668" y2="14" stroke="#ffffff22" stroke-width="1"/>
+            <line x1="663" y1="390" x2="673" y2="390" stroke="#ffffff33" stroke-width="1"/>
+            <text x="680" y="393" fill="#ffffff44" font-size="8">0 km</text>
+            <line x1="663" y1="316" x2="673" y2="316" stroke="#ff004f44" stroke-width="1"/>
+            <text x="680" y="319" fill="#ff004f66" font-size="8">550 km</text>
+            <line x1="663" y1="200" x2="673" y2="200" stroke="#00d9ff44" stroke-width="1"/>
+            <text x="680" y="203" fill="#00d9ff55" font-size="8">8,000 km</text>
+            <line x1="663" y1="14" x2="673" y2="14" stroke="#ff004f55" stroke-width="1"/>
+            <text x="680" y="17" fill="#ff004f66" font-size="8">35,786 km</text>
+            <text x="680" y="206" fill="#ffffff22" font-size="7" writing-mode="tb" transform="rotate(90,695,260)">NOT TO SCALE</text>
+        </svg>
+        <figcaption>ORBITAL REGIMES AND VAN ALLEN BELTS — SCHEMATIC, NOT TO SCALE</figcaption>
+    </div>
+</div>
+
+<!-- ═══ SECTION 3 ═══ -->
+<div class="content-block" id="s3">
+    <h2>3. Coverage Geometry: Footprints, Elevation Angles, and the Horizon</h2>
+
+    <p>Coverage geometry determines how many satellites you need, what elevation angles ground terminals experience, and how handover timing works. It is purely a function of orbital altitude and the minimum elevation angle your system requires.</p>
+
+    <h3>The instantaneous coverage footprint</h3>
+
+    <p>The coverage footprint of a satellite is the region of Earth's surface from which the satellite is visible above a given minimum elevation angle. For a circular orbit at altitude <em>h</em>, the half-angle of the coverage cone (measured at Earth's centre) is:</p>
+
+    <div class="callout">
+        <strong>COVERAGE HALF-ANGLE FORMULA</strong>
+        ρ = arccos(Rₑ · cos(ε) / (Rₑ + h)) − ε<br><br>
+        where ρ is the Earth central half-angle, Rₑ = 6,371 km is Earth's mean radius, h is altitude in km, and ε is the minimum elevation angle in radians. The coverage area as a fraction of Earth's total surface is (1 − cos(ρ)) / 2.
+    </div>
+
+    <p>Working through the numbers: a Starlink satellite at 550 km with a 25° minimum elevation angle covers approximately 1.3% of Earth's surface at any instant. Three GEO satellites at 10° minimum elevation cover roughly 93% of Earth's surface between ±75° latitude. This is why GEO achieved near-global coverage with three satellites while Starlink requires thousands — LEO satellites see a dramatically smaller slice of Earth at any moment.</p>
+
+    <p>The practical implication for constellation sizing goes beyond instantaneous coverage. A commercial service requires not just that a satellite be visible somewhere in the sky, but that it be visible above the minimum elevation angle at all times, everywhere in the service area. This continuous coverage requirement, combined with the need for handover margins and redundancy, means real constellations require substantially more satellites than the geometric minimum. A rule of thumb: multiply the geometric minimum by 3–5 for a continuous-coverage constellation with handover margins.</p>
+
+    <h3>Elevation angle and its consequences</h3>
+
+    <p>The elevation angle at which a ground terminal sees a satellite has cascading effects throughout the system. Low elevation angles mean the signal must travel through more atmosphere — more atmospheric attenuation, more rain fade margin required, and more multipath from reflections off terrain and structures. At 5° elevation, the signal passes through roughly ten times more atmosphere than at zenith (90°). At 10° elevation, roughly six times more. This is why satellite systems specify a minimum elevation angle: below some threshold, the link simply does not close reliably in most environments.</p>
+
+    <p>For LEO, the elevation angle seen by a terminal varies continuously as the satellite transits the sky. A satellite at 550 km altitude rises above a 25° elevation mask, reaches maximum elevation (which may be anywhere from 25° to 90° depending on the pass geometry), then drops back below the mask. The mean elevation angle during a usable pass is typically 40–55°. This is higher on average than a GEO terminal in the mid-latitudes might see (a GEO satellite at 30° west seen from Europe is at roughly 25–35° elevation), which is a genuine advantage for LEO link budgets in some geographies.</p>
+
+    <h3>Handover timing</h3>
+
+    <p>The time a LEO satellite is visible above a minimum elevation angle determines the maximum time between handovers. At 550 km altitude with a 25° elevation mask, a satellite is visible for approximately 4–7 minutes per pass. At 1,200 km (OneWeb), the pass duration extends to 9–14 minutes. These numbers drive the handover system design: beam management, Doppler compensation, timing, and the signalling overhead associated with handing a terminal from one satellite to the next. Aviation terminals, which are themselves moving at 250–900 km/h, must manage Doppler shift on both the satellite motion and aircraft motion axes simultaneously — a complication unique to that market.</p>
+
+    <div class="deep-dive">
+        <h4>DEEPER CONTEXT — DOPPLER SHIFT IN LEO</h4>
+        <p>A LEO satellite at 550 km moves at approximately 7.6 km/s relative to the Earth's surface. A ground terminal sees the satellite approaching at up to 7.6 km/s at the horizon, dropping to zero radial velocity at closest approach (zenith), then receding at up to 7.6 km/s. The resulting Doppler shift on a Ka-band signal (26 GHz) is approximately ±660 kHz at the horizon — a shift large enough to require explicit compensation in the modem and the beam management system.</p>
+        <p>For a fixed ground terminal this is manageable: the satellite's trajectory is known precisely from orbital elements, and the modem can pre-compensate. For an aircraft terminal, the aircraft's own velocity (typically 250–900 km/h or 70–250 m/s) adds a second Doppler component that must be tracked in real time using the aircraft's inertial navigation system data. At Ka-band, an aircraft at 900 km/h contributes up to ±22 kHz of Doppler — small compared to satellite motion but not negligible for high-order modulation schemes.</p>
+        <p>The combination of satellite-induced and aircraft-induced Doppler shift, changing geometry during a pass, and the need to hand over between satellites while maintaining uninterrupted service makes aviation terminal modem design substantially more complex than residential LEO terminals.</p>
+    </div>
+</div>
+
+<!-- ═══ SECTION 4 ═══ -->
+<div class="content-block" id="s4">
+    <h2>4. Radiation Environment Across Altitudes</h2>
+
+    <p>The radiation environment is one of the most important and least intuitive factors in orbit selection. Radiation affects satellite electronics through two mechanisms: total ionising dose (TID), which causes cumulative degradation of semiconductor devices over the satellite's lifetime, and single event effects (SEEs), which are transient or permanent upsets caused by individual high-energy particles passing through a device. The radiation environment varies dramatically across orbital regimes.</p>
+
+    <h3>Sources of space radiation</h3>
+
+    <p>Space radiation has three primary sources. First, galactic cosmic rays (GCRs) — high-energy protons and heavy ions originating outside the solar system — are present everywhere in the solar system and essentially impossible to shield against with reasonable satellite mass. They contribute a baseline radiation dose at all altitudes. Second, solar energetic particles (SEPs) — bursts of protons and electrons accelerated by solar flares and coronal mass ejections — cause dramatic but episodic increases in radiation flux, particularly dangerous for satellites in orbits that intersect the Van Allen belts. Third, trapped radiation in the Van Allen belts — protons and electrons trapped by Earth's magnetic field — represents the most intense chronic radiation environment for satellites in intermediate orbits.</p>
+
+    <h3>TID by orbit</h3>
+
+    <p>Total ionising dose, measured in kilorads (krad) or kilograys (kGy), is the accumulated radiation a satellite receives over its lifetime. Representative values for unshielded electronics:</p>
+
+    <div class="key-numbers">
+        <div class="kn-item"><span class="kn-val">1–5 krad/yr</span><span class="kn-label">LEO (550 km, 53° inclination)</span></div>
+        <div class="kn-item"><span class="kn-val">50–500 krad/yr</span><span class="kn-label">MEO inner belt (3,000 km)</span></div>
+        <div class="kn-item"><span class="kn-val">5–15 krad/yr</span><span class="kn-label">MEO O3b (8,062 km, equatorial)</span></div>
+        <div class="kn-item"><span class="kn-val">10–30 krad/yr</span><span class="kn-label">GEO (35,786 km)</span></div>
+    </div>
+
+    <p>These numbers explain several important industry facts. LEO constellations below 600 km accumulate modest TID — low enough that commercial off-the-shelf (COTS) electronics, selected and screened for radiation tolerance rather than specifically radiation-hardened, can often be used. This dramatically reduces satellite manufacturing cost. GPS satellites in MEO at 20,200 km require heavily radiation-hardened components and have historically been expensive partly for this reason. GEO satellites experience higher TID than low LEO, which is one driver of GEO satellite cost — a 15-year design life requires components rated for 150–450 krad total dose.</p>
+
+    <h3>The South Atlantic Anomaly</h3>
+
+    <p>The South Atlantic Anomaly (SAA) is a region over the South Atlantic Ocean and South America where the inner Van Allen belt dips closest to Earth's surface, due to a combination of the offset between Earth's geographic and magnetic poles and the non-uniform structure of the magnetic field. LEO satellites passing through the SAA experience significantly elevated radiation — proton fluxes can be 10–100× higher than elsewhere in the orbit. Satellite operators routinely disable or safeguard sensitive electronics during SAA passes. The ISS, Hubble, and most LEO spacecraft have well-developed SAA protection protocols. For constellation operators, the SAA contributes meaningfully to the cumulative radiation dose seen by satellites in low-inclination or highly inclined orbits that regularly pass through this region.</p>
+
+    <h3>Implications for component selection</h3>
+
+    <p>The radiation environment directly shapes satellite design philosophy. A Starlink satellite at 550 km, designed for a 5–7 year life with an eventual replacement strategy built into the constellation model, can use COTS components with selective hardening of the most radiation-sensitive devices. A GPS satellite designed for a 15-year life at 20,200 km must use radiation-hardened processors, FPGAs, and memory rated for several hundred krad — components that are substantially more expensive, lower performance, and available from a more restricted supplier base. A GEO satellite at 35,786 km uses radiation-hardened components rated for 150–300+ krad over a 15–18 year design life. This is one reason a single GEO satellite costs $150–400M and takes 5–8 years to build and launch.</p>
+
+    <div class="callout amber">
+        <strong>RADIATION HARDNESS ASSURANCE (RHA)</strong>
+        The process of qualifying electronic components for use in a radiation environment is called Radiation Hardness Assurance. It involves characterising a component's response to TID, SEE, and displacement damage dose (DDD) through testing with radioactive sources, proton beams, and heavy-ion accelerators. For a LEO constellation satellite, a pragmatic approach uses commercial parts with lot testing and selective qualification rather than full space-grade RHA — acceptable when the satellite life is short and the cost target is aggressive. For a GEO satellite intended to operate for 15+ years, full RHA on all critical components is mandatory.
+    </div>
+</div>
+
+<!-- ═══ SECTION 5 ═══ -->
+<div class="content-block" id="s5">
+    <h2>5. Eclipse Fractions and Power Budget Implications</h2>
+
+    <p>Every satellite in a non-geosynchronous orbit periodically passes behind Earth and enters eclipse — a period during which it receives no solar illumination and must rely entirely on battery power. The fraction of time spent in eclipse, the duration of individual eclipse events, and the cycle rate all feed directly into the power system design: solar array sizing, battery capacity, thermal management, and bus voltage regulation.</p>
+
+    <h3>Eclipse geometry</h3>
+
+    <p>A satellite enters eclipse when it passes into Earth's shadow. For a circular orbit, the eclipse fraction depends on the orbital altitude and the angle between the orbital plane and the Sun direction (the beta angle). At zero beta angle (orbital plane containing the Sun), a satellite experiences the maximum possible eclipse fraction — typically 30–40% of the orbit at LEO altitudes. At a 90° beta angle (orbital plane perpendicular to the Sun direction), the satellite is in continuous sunlight — no eclipses at all. In practice, the beta angle varies continuously over the year as Earth orbits the Sun, so a satellite experiences a varying pattern of eclipse events rather than constant conditions.</p>
+
+    <p>For a 550 km LEO orbit, the maximum eclipse duration at zero beta angle is approximately 35 minutes, occurring during each 95-minute orbit. That represents a 37% eclipse fraction. For a 1,200 km orbit, the eclipse fraction is slightly lower (the satellite is higher relative to Earth's shadow cone), and eclipse duration is similar at roughly 35–40 minutes per approximately 110-minute orbit.</p>
+
+    <p>GEO satellites experience eclipses only during the two equinox periods each year (approximately March and September), when the Sun, Earth, and the satellite can align. These eclipse seasons last roughly 45 days each and produce eclipses of up to 72 minutes duration at maximum. For the remainder of the year, a GEO satellite is in continuous sunlight. This dramatically simplifies GEO power system design: the battery must sustain the satellite through a 72-minute eclipse occurring at most a few dozen times per year, rather than thousands of 35-minute eclipses per year as in LEO.</p>
+
+    <h3>Power system implications</h3>
+
+    <p>For a LEO satellite, the power system designer must accommodate thousands of charge-discharge cycles over the satellite's life. At one eclipse per 95-minute orbit and a 5-year design life, a LEO satellite at 550 km experiences approximately 27,000 eclipse cycles. Battery technology for space applications must therefore provide a very large number of deep-cycle events without significant capacity degradation. Modern Li-ion and lithium polymer cells are used in most new constellations, with depth of discharge carefully managed — typically 20–40% — to maximise cycle life. This contrasts with GEO satellites, which experience at most ~100 eclipse cycles per year and can tolerate deeper discharge with less cycle-life concern.</p>
+
+    <p>The eclipse cycle also drives thermal cycling of the entire satellite structure. Each eclipse entry represents a cold soak as the solar panels, structure, and components drop in temperature; each eclipse exit brings rapid solar heating. Over 27,000 cycles, thermal fatigue becomes a meaningful design consideration for joints, connectors, and PCB laminates — particularly relevant for the high-throughput electronics of a broadband communications satellite.</p>
+
+    <div class="callout">
+        <strong>BETA ANGLE MANAGEMENT</strong>
+        Constellation operators sometimes choose specific orbital altitudes and RAAN (Right Ascension of Ascending Node) distributions partly to manage the range of beta angles experienced across the fleet. A well-distributed constellation will have satellites in all phases of beta-angle variation at any given time, ensuring the aggregate power output of the fleet remains stable even as individual satellites cycle between eclipse-heavy and eclipse-free conditions.
+    </div>
+</div>
+
+<!-- ═══ SECTION 6 ═══ -->
+<div class="content-block" id="s6">
+    <h2>6. Atmospheric Drag and Orbital Lifetime</h2>
+
+    <p>The atmosphere does not abruptly end — it thins exponentially with altitude, and its density at any given altitude varies significantly with solar activity (which heats and expands the upper atmosphere). Atmospheric drag is the dominant orbital perturbation below approximately 600 km and remains meaningful up to roughly 1,000 km. Understanding drag is essential for constellation designers: it determines satellite lifetime, the frequency of orbit-maintenance manoeuvres, fuel budget, and — critically — the passive deorbit timeline for end-of-life satellites.</p>
+
+    <h3>The drag force</h3>
+
+    <p>Atmospheric drag decelerates a satellite in the direction opposite to its motion. The drag acceleration depends on the atmospheric density at the satellite's altitude, the satellite's ballistic coefficient (the ratio of mass to cross-sectional area times drag coefficient), and the orbital velocity. Because orbital velocity at LEO is roughly constant at 7–8 km/s, and atmospheric density falls exponentially with altitude, drag is extremely sensitive to altitude: a satellite at 400 km experiences roughly ten times more drag than one at 500 km, which experiences roughly ten times more than one at 600 km.</p>
+
+    <p>Drag causes a gradual decrease in orbital altitude over time. As the altitude decreases, the satellite enters denser atmosphere, accelerating the decay — a runaway process that ends in atmospheric reentry. The time scale for natural decay (without propulsion) ranges from days (at 200 km) to decades (at 800 km) to centuries (at 1,200 km) depending on altitude, ballistic coefficient, and solar activity levels.</p>
+
+    <h3>Solar activity and F10.7</h3>
+
+    <p>The Sun's output of extreme ultraviolet (EUV) radiation heats the thermosphere and ionosphere, causing the atmosphere to expand. During solar maximum (the peak of the approximately 11-year solar cycle), thermospheric density at LEO altitudes can be 5–10× higher than during solar minimum. This dramatically affects satellite drag and therefore orbital lifetime. A satellite designed to maintain its operational altitude for 5 years at solar minimum conditions may require significantly more fuel or may decay faster than planned when launched into a solar maximum period. The F10.7 index — a proxy for solar EUV flux measured by radio emissions at 10.7 cm wavelength — is the standard input for atmospheric density models used in satellite lifetime calculations.</p>
+
+    <p>Starlink launched the first large batches of its constellation in 2019–2021, approaching solar minimum. As the current solar cycle (Cycle 25) entered its ascending phase in 2022–2024 — and turned out to be one of the most active cycles in decades — atmospheric drag on Starlink satellites increased significantly. SpaceX reported elevated satellite losses and faster-than-expected orbital decay for satellites in the lower shells. This is a real-world demonstration of how solar activity affects LEO constellation operations and why operators maintain propulsion capability on every satellite.</p>
+
+    <h3>End-of-life deorbit requirements</h3>
+
+    <p>The FCC and other regulators now mandate that satellites in LEO deorbit within 5 years of end of mission. The ITU has historically used a 25-year guideline. The 5-year rule reflects growing concern about orbital debris accumulation as constellation populations grow into the thousands. For a satellite at 550 km with a typical ballistic coefficient, natural atmospheric decay alone would deorbit it within 2–5 years depending on solar activity — borderline compliant without active propulsion. SpaceX addresses this by using the satellite's ion thrusters to lower the orbit at end of life, ensuring rapid reentry. For satellites at 1,200 km (OneWeb), natural decay would take many decades — active deorbit manoeuvres are mandatory to meet the 5-year rule.</p>
+
+    <div class="callout red">
+        <strong>KESSLER SYNDROME</strong>
+        Proposed by NASA scientist Donald Kessler in 1978, Kessler syndrome describes a theoretical cascade: if satellite debris density in a given orbital shell exceeds a critical threshold, collisions between objects generate more debris, which causes more collisions, in a self-sustaining chain reaction that could make the affected orbit unusable for generations. The concern is not hypothetical — the 2009 Iridium–Cosmos collision and the debris fields from antisatellite weapons tests (China 2007, Russia 2021) have already increased debris density in some LEO shells. Mega-constellations adding thousands of satellites intensify this concern, which is why deorbit compliance, conjunction analysis, and autonomous collision avoidance are treated as fundamental requirements rather than optional features for any new LEO constellation.
+    </div>
+</div>
+
+<!-- ═══ SECTION 7 ═══ -->
+<div class="content-block" id="s7">
+    <h2>7. Link Budget Sensitivity to Altitude</h2>
+
+    <p>The link budget is the accounting of signal power gains and losses between transmitter and receiver. Altitude affects two terms in the link budget directly: free-space path loss and propagation delay. Understanding how these scale with altitude is essential for comparing regimes quantitatively.</p>
+
+    <h3>Free-space path loss</h3>
+
+    <p>Free-space path loss (FSPL) is the attenuation of signal power due to the geometric spreading of the electromagnetic wave as it propagates through space. It is given by:</p>
+
+    <div class="callout">
+        <strong>FREE-SPACE PATH LOSS FORMULA</strong>
+        FSPL (dB) = 20·log₁₀(d) + 20·log₁₀(f) + 20·log₁₀(4π/c)<br><br>
+        Simplified: FSPL (dB) ≈ 92.4 + 20·log₁₀(d_km) + 20·log₁₀(f_GHz)<br><br>
+        where d is distance in km and f is frequency in GHz. Every doubling of distance adds 6 dB of path loss.
+    </div>
+
+    <p>At Ka-band (26.5 GHz uplink), the path loss from a ground terminal to a Starlink satellite at 550 km slant range (at zenith) is approximately 181 dB. To the same terminal talking to a GEO satellite at 35,786 km (at zenith), path loss is approximately 213 dB — a difference of 32 dB. This is a factor of about 1,600 in power. Put another way: to achieve the same received signal level at GEO that you achieve at LEO with a given ground terminal and satellite, you need either 1,600× more transmit power, 1,600× more antenna gain, or some combination. This path loss difference is the fundamental reason why GEO terminals are large dishes and LEO terminals can be small flat panels.</p>
+
+    <p>It is also why LEO satellites can achieve high data rates with modest-sized phased arrays. A 50 cm² phased array on a Starlink satellite can form beams with enough gain to close a multi-hundred-Mbps link to a consumer dish at 550 km. The equivalent GEO satellite would need a much larger reflector to achieve comparable performance — and GEO satellites do indeed carry large deployable reflectors for spot-beam systems.</p>
+
+    <h3>Rain fade and atmospheric effects</h3>
+
+    <p>Atmospheric attenuation — particularly rain fade at Ka and higher bands — is a function of the slant range through the atmosphere rather than the total range to the satellite. The troposphere, where most weather occurs, extends to approximately 12 km altitude. Both a LEO satellite and a GEO satellite are well above this layer; what matters is the length of the signal path through the troposphere, which depends on elevation angle rather than satellite altitude. At 30° elevation, the slant path through the troposphere is approximately 24 km; at 90° (zenith), it is approximately 12 km.</p>
+
+    <p>Since LEO terminals on average see satellites at higher elevation angles than GEO terminals at mid-latitudes and high latitudes, LEO systems can have a slight rain fade advantage in these geographies. However, LEO systems also experience more frequent satellite handovers, and if a handover occurs during a rain event that affects one satellite but not another, the handover can actually improve link quality — a feature with no GEO equivalent.</p>
+
+    <h3>Doppler and frequency planning</h3>
+
+    <p>As covered in Section 3, LEO's high orbital velocity produces Doppler shifts of hundreds of kilohertz at Ka-band. This must be accounted for in frequency planning: the system must reserve enough guard band or implement real-time Doppler pre-compensation to prevent adjacent-channel interference and ensure modems can track the carrier. GEO satellites in zero-inclination orbit experience no Doppler shift on the ground segment (the satellite is stationary). Inclined GEO satellites — older GEO birds whose inclination has drifted with age and has not been corrected to save fuel — do produce Doppler at terrestrial rates, but this is a small effect compared to LEO.</p>
+</div>
+
+<!-- ═══ SECTION 8 ═══ -->
+<div class="content-block" id="s8">
+    <h2>8. The Master Tradeoff Table</h2>
+
+    <p>The following table synthesises the key parameters for each orbital regime. Numbers are representative — actual values depend on specific altitude, inclination, and system design. Use this as a reference framework, not a precise specification.</p>
+
+    <div style="overflow-x:auto;">
+    <table class="compare-table" style="min-width:700px;">
+        <thead>
+            <tr>
+                <th>Parameter</th>
+                <th>VLEO<br><span style="font-weight:normal;opacity:0.7;">160–450 km</span></th>
+                <th>LEO<br><span style="font-weight:normal;opacity:0.7;">450–2,000 km</span></th>
+                <th>MEO<br><span style="font-weight:normal;opacity:0.7;">2,000–35,000 km</span></th>
+                <th>GEO<br><span style="font-weight:normal;opacity:0.7;">35,786 km</span></th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td>One-way latency (zenith)</td>
+                <td class="hi">0.5–1.5 ms</td>
+                <td class="hi">2–7 ms</td>
+                <td class="md">27–120 ms</td>
+                <td class="lo">119 ms</td>
+            </tr>
+            <tr>
+                <td>RTT (propagation only)</td>
+                <td class="hi">1–3 ms</td>
+                <td class="hi">4–14 ms</td>
+                <td class="md">54–240 ms</td>
+                <td class="lo">238 ms</td>
+            </tr>
+            <tr>
+                <td>Orbital period</td>
+                <td>87–93 min</td>
+                <td>93–127 min</td>
+                <td>2.3–24 hrs</td>
+                <td>24 hrs (sidereal)</td>
+            </tr>
+            <tr>
+                <td>Orbital velocity</td>
+                <td>7.8–7.9 km/s</td>
+                <td>6.9–7.8 km/s</td>
+                <td>3.1–6.9 km/s</td>
+                <td>3.07 km/s</td>
+            </tr>
+            <tr>
+                <td>Coverage per satellite (5° min el)</td>
+                <td class="lo">~0.3%</td>
+                <td class="lo">0.5–4%</td>
+                <td class="md">4–47%</td>
+                <td class="hi">~43%</td>
+            </tr>
+            <tr>
+                <td>Min satellites for global coverage</td>
+                <td class="lo">~300+</td>
+                <td class="lo">25–200 (geometric)</td>
+                <td class="md">3–25</td>
+                <td class="hi">3 (equatorial)</td>
+            </tr>
+            <tr>
+                <td>Free-space path loss (Ka, zenith)</td>
+                <td class="hi">~169 dB</td>
+                <td class="hi">176–185 dB</td>
+                <td class="md">196–212 dB</td>
+                <td class="lo">~213 dB</td>
+            </tr>
+            <tr>
+                <td>Radiation dose rate (TID)</td>
+                <td class="hi">Low (below belts)</td>
+                <td class="hi">Low–moderate</td>
+                <td class="lo">High (inner belt)</td>
+                <td class="md">Moderate–high</td>
+            </tr>
+            <tr>
+                <td>Atmospheric drag</td>
+                <td class="lo">Very high</td>
+                <td class="md">Low–moderate</td>
+                <td class="hi">Negligible</td>
+                <td class="hi">None</td>
+            </tr>
+            <tr>
+                <td>Eclipse fraction (typical)</td>
+                <td>30–40%</td>
+                <td>25–40%</td>
+                <td>5–25%</td>
+                <td class="hi">&lt;1% (seasonal)</td>
+            </tr>
+            <tr>
+                <td>Ground terminal tracking</td>
+                <td class="lo">Complex ESA required</td>
+                <td class="lo">ESA required</td>
+                <td class="md">Tracking required</td>
+                <td class="hi">Fixed dish</td>
+            </tr>
+            <tr>
+                <td>Polar coverage</td>
+                <td class="hi">Yes (if inclined)</td>
+                <td class="hi">Yes (if inclined)</td>
+                <td class="md">Limited (equatorial MEO)</td>
+                <td class="lo">No (&gt;75° lat)</td>
+            </tr>
+            <tr>
+                <td>Commercial design life (typical)</td>
+                <td class="lo">1–3 yrs (drag)</td>
+                <td class="md">5–7 yrs</td>
+                <td class="hi">10–15 yrs</td>
+                <td class="hi">15–18 yrs</td>
+            </tr>
+            <tr>
+                <td>Satellite cost driver</td>
+                <td>Propulsion</td>
+                <td>Volume manufacturing</td>
+                <td>Rad hardening</td>
+                <td>Rad hardening + size</td>
+            </tr>
+            <tr>
+                <td>Real examples</td>
+                <td>ISS (~408 km), research missions</td>
+                <td>Starlink (550), OneWeb (1,200)</td>
+                <td>GPS (20,200), O3b (8,062)</td>
+                <td>Intelsat, SES, ViaSat, Inmarsat</td>
+            </tr>
+        </tbody>
+    </table>
+    </div>
+</div>
+
+<!-- ═══ SECTION 9 ═══ -->
+<div class="content-block" id="s9">
+    <h2>9. Regime Selection in Practice</h2>
+
+    <p>Armed with the tradeoff table, you can now reason through orbit selection for specific applications. The following examples illustrate how the physical properties translate into architectural decisions.</p>
+
+    <h3>Consumer broadband</h3>
+    <p>The consumer broadband case almost exclusively selects LEO for new systems. The latency advantage over GEO is decisive for interactive applications (TCP, VoIP, video calling, cloud applications). The terminal cost advantage — LEO's lower path loss enables smaller, cheaper flat-panel antennas — is decisive for market scale. The coverage disadvantage (more satellites needed) is manageable at the economics enabled by reusable launch and consumer-grade satellite manufacturing. GEO HTS serves the same market but has an inherent latency ceiling that LEO does not. MEO is a niche choice for applications requiring better-than-GEO latency without the complexity of a large LEO constellation.</p>
+
+    <h3>Aviation and maritime</h3>
+    <p>Both markets are shifting strongly toward LEO. The latency improvement enables TCP performance at full throughput without acceleration, supporting streaming video at scale. The coverage improvement — including polar routes which GEO cannot serve — is valuable for transoceanic and transpolar flights and for shipping routes in high latitudes. The terminal challenge (tracking the moving satellite from a moving platform) is addressed by ESA technology. MEO (O3b mPOWER) holds a position in maritime for applications where GEO latency is unacceptable but a full LEO terminal is not yet certified or cost-justified.</p>
+
+    <h3>Navigation</h3>
+    <p>Navigation satellite systems are the definitive MEO application. The coverage footprint at 20,000 km enables global coverage with 24–30 satellites. The signal does not require low latency in the communications sense — it requires precise timing, which MEO provides well. The radiation environment at 20,000 km requires hardened electronics, accepted because navigation satellites are built to government budgets with long design lives. No LEO or GEO constellation can serve the GNSS function as efficiently — LEO requires too many satellites for global continuous coverage, and GEO provides insufficient geometric dilution of precision (GDOP) for precise positioning.</p>
+
+    <h3>Earth observation</h3>
+    <p>Remote sensing satellites use LEO almost exclusively, but for different reasons than communications. The primary driver is resolution: a camera with a given aperture achieves finer ground resolution from lower altitude. A 1-metre-resolution optical imager at 500 km altitude requires a 50 cm aperture; the same resolution from GEO would require a 37-metre telescope — physically impossible. Sun-synchronous LEO orbits (approximately 97–98° inclination) are preferred for Earth observation because they maintain a consistent local solar time for imaging, ensuring consistent lighting conditions on successive passes. Communications and Earth observation are therefore both LEO applications but for entirely different physical reasons.</p>
+
+    <h3>The emerging multi-orbit landscape</h3>
+    <p>The most sophisticated operators are now designing systems that deliberately span multiple regimes. SES operates both GEO (for broadcast and broad-area coverage) and MEO O3b (for enterprise and mobility latency-sensitive services). Viasat/Inmarsat has GEO capacity across multiple bands combined with LEO ambitions. Amazon Kuiper is pure LEO but integrates with AWS MEO edge computing infrastructure. The rationale for multi-orbit is that no single regime is optimal for all traffic types: bulk broadcast content suits GEO, latency-sensitive interactive traffic suits LEO, and some enterprise applications find MEO a useful middle ground. A systems architect who can only think in one regime is limited; the future belongs to those who can design for the full stack.</p>
+
+    <div class="callout green">
+        <strong>LESSON OBJECTIVE MET</strong>
+        You should now be able to: state the altitude boundaries and key physical properties of each regime; explain how coverage footprint, radiation dose, drag, eclipse fraction, path loss, and latency each vary with altitude; read a link budget and identify which terms are dominated by orbit choice; and recommend an orbital regime for a given application with a quantitative justification. If any section felt thin, re-read it and work through the Python exercises before proceeding.
+    </div>
+</div>
+
+<!-- ═══ QUIZ ═══ -->
+<div class="quiz-block" id="quiz">
+    <h2>KNOWLEDGE CHECK</h2>
+    <p class="quiz-intro">Ten questions. Some are recall; others require reasoning from the physical relationships covered in this lesson. One correct answer per question.</p>
+
+    <div class="quiz-q">
+        <p><strong>Q1.</strong> A satellite at 550 km altitude orbits Earth in approximately 95 minutes and moves at ~7.6 km/s. A ground station sees it rise above a 25° elevation mask and set again roughly 6 minutes later. What is the primary system design consequence of this 6-minute window?</p>
+        <div class="quiz-options">
+            <button class="quiz-opt" data-q="1" data-correct="false">A — The satellite must transmit at higher power to compensate for the short contact time</button>
+            <button class="quiz-opt" data-q="1" data-correct="true">B — The terminal must hand over to a new satellite every ~6 minutes, requiring a continuous beam management and handover system with no service interruption</button>
+            <button class="quiz-opt" data-q="1" data-correct="false">C — The ground station antenna must rotate faster than is mechanically feasible with a dish</button>
+            <button class="quiz-opt" data-q="1" data-correct="false">D — The link budget cannot close in a 6-minute window at LEO altitudes</button>
+        </div>
+        <div class="quiz-feedback" id="fb1"></div>
+    </div>
+
+    <div class="quiz-q">
+        <p><strong>Q2.</strong> Free-space path loss scales as 20·log₁₀(distance). A GEO satellite is approximately 65× farther away than a Starlink satellite at 550 km (at zenith). What is the resulting path loss difference in dB?</p>
+        <div class="quiz-options">
+            <button class="quiz-opt" data-q="2" data-correct="false">A — About 18 dB</button>
+            <button class="quiz-opt" data-q="2" data-correct="false">B — About 65 dB</button>
+            <button class="quiz-opt" data-q="2" data-correct="true">C — About 36 dB</button>
+            <button class="quiz-opt" data-q="2" data-correct="false">D — About 8 dB</button>
+        </div>
+        <div class="quiz-feedback" id="fb2"></div>
+    </div>
+
+    <div class="quiz-q">
+        <p><strong>Q3.</strong> Why is the altitude band between approximately 1,500 km and 6,000 km avoided for long-lifetime commercial satellite missions?</p>
+        <div class="quiz-options">
+            <button class="quiz-opt" data-q="3" data-correct="false">A — Atmospheric drag is too high for orbit maintenance at those altitudes</button>
+            <button class="quiz-opt" data-q="3" data-correct="true">B — It corresponds to the most intense part of the inner Van Allen belt, where radiation dose rates would rapidly degrade most satellite electronics</button>
+            <button class="quiz-opt" data-q="3" data-correct="false">C — International treaty prohibits commercial satellite operations in that altitude range</button>
+            <button class="quiz-opt" data-q="3" data-correct="false">D — Eclipse fractions at those altitudes are so high that power system design becomes infeasible</button>
+        </div>
+        <div class="quiz-feedback" id="fb3"></div>
+    </div>
+
+    <div class="quiz-q">
+        <p><strong>Q4.</strong> A LEO satellite at 550 km altitude experiences approximately 27,000 eclipse cycles over a 5-year design life. What specific battery technology requirement does this drive?</p>
+        <div class="quiz-options">
+            <button class="quiz-opt" data-q="4" data-correct="false">A — Higher energy density to last through the 72-minute eclipse duration</button>
+            <button class="quiz-opt" data-q="4" data-correct="true">B — Very high cycle life with controlled depth of discharge, since 27,000 charge-discharge cycles is orders of magnitude more than GEO batteries must endure</button>
+            <button class="quiz-opt" data-q="4" data-correct="false">C — Higher voltage rating because LEO satellites operate on higher bus voltages than GEO</button>
+            <button class="quiz-opt" data-q="4" data-correct="false">D — Radiation hardening of the battery management system to survive the Van Allen belts</button>
+        </div>
+        <div class="quiz-feedback" id="fb4"></div>
+    </div>
+
+    <div class="quiz-q">
+        <p><strong>Q5.</strong> The South Atlantic Anomaly (SAA) is significant for LEO satellite operators because:</p>
+        <div class="quiz-options">
+            <button class="quiz-opt" data-q="5" data-correct="false">A — Atmospheric density is higher over the South Atlantic due to the Coriolis effect, increasing drag</button>
+            <button class="quiz-opt" data-q="5" data-correct="false">B — Radio frequency interference from South American ground stations is concentrated there</button>
+            <button class="quiz-opt" data-q="5" data-correct="true">C — The inner Van Allen belt dips closest to Earth's surface over this region, exposing LEO satellites to significantly elevated radiation doses on each pass</button>
+            <button class="quiz-opt" data-q="5" data-correct="false">D — Eclipse events are longer over the South Atlantic due to the geometry of Earth's shadow</button>
+        </div>
+        <div class="quiz-feedback" id="fb5"></div>
+    </div>
+
+    <div class="quiz-q">
+        <p><strong>Q6.</strong> GPS satellites orbit at approximately 20,200 km in MEO. Why was MEO chosen for GNSS over LEO or GEO?</p>
+        <div class="quiz-options">
+            <button class="quiz-opt" data-q="6" data-correct="false">A — MEO provides lower signal latency than GEO, improving GPS timing accuracy</button>
+            <button class="quiz-opt" data-q="6" data-correct="true">B — MEO altitude gives each satellite a large ground footprint enabling global coverage with ~24 satellites, while also providing good geometric dilution of precision (GDOP) for accurate positioning — LEO would require hundreds of satellites; GEO cannot reach polar regions</button>
+            <button class="quiz-opt" data-q="6" data-correct="false">C — MEO satellites are cheaper to build than LEO satellites for navigation payloads</button>
+            <button class="quiz-opt" data-q="6" data-correct="false">D — MEO orbits are stable indefinitely without propulsion, reducing operating costs</button>
+        </div>
+        <div class="quiz-feedback" id="fb6"></div>
+    </div>
+
+    <div class="quiz-q">
+        <p><strong>Q7.</strong> During a period of high solar activity (solar maximum), what happens to the atmospheric drag experienced by LEO satellites, and why?</p>
+        <div class="quiz-options">
+            <button class="quiz-opt" data-q="7" data-correct="false">A — Drag decreases because solar wind pressure partially supports the satellite against gravity</button>
+            <button class="quiz-opt" data-q="7" data-correct="true">B — Drag increases significantly because solar EUV radiation heats and expands the upper atmosphere, raising thermospheric density at LEO altitudes by 5–10×</button>
+            <button class="quiz-opt" data-q="7" data-correct="false">C — Drag is unaffected by solar activity; it depends only on orbital altitude and satellite ballistic coefficient</button>
+            <button class="quiz-opt" data-q="7" data-correct="false">D — Drag decreases because the magnetosphere deflects more solar particles away from LEO during solar maximum</button>
+        </div>
+        <div class="quiz-feedback" id="fb7"></div>
+    </div>
+
+    <div class="quiz-q">
+        <p><strong>Q8.</strong> A Ku-band (12 GHz) signal from a Starlink satellite at 550 km zenith range has approximately X dB of free-space path loss. The same signal from a GEO satellite at 35,786 km zenith range has approximately X + 36 dB. If the LEO satellite path loss is 177 dB, what is the GEO path loss?</p>
+        <div class="quiz-options">
+            <button class="quiz-opt" data-q="8" data-correct="false">A — 195 dB</button>
+            <button class="quiz-opt" data-q="8" data-correct="false">B — 205 dB</button>
+            <button class="quiz-opt" data-q="8" data-correct="true">C — 213 dB</button>
+            <button class="quiz-opt" data-q="8" data-correct="false">D — 220 dB</button>
+        </div>
+        <div class="quiz-feedback" id="fb8"></div>
+    </div>
+
+    <div class="quiz-q">
+        <p><strong>Q9.</strong> Why do GEO satellites experience eclipses only during two short periods per year, while LEO satellites experience eclipses on nearly every orbit?</p>
+        <div class="quiz-options">
+            <button class="quiz-opt" data-q="9" data-correct="true">A — GEO satellites only enter Earth's shadow when the Sun, Earth, and satellite align, which only occurs near the equinoxes; for most of the year the Sun is above or below the equatorial plane and the satellite remains in sunlight. LEO satellites circle Earth 15× per day at all orientations and pass through Earth's shadow on most orbits.</button>
+            <button class="quiz-opt" data-q="9" data-correct="false">B — GEO satellites are high enough to avoid Earth's shadow entirely most of the year because Earth's shadow does not extend to GEO altitude</button>
+            <button class="quiz-opt" data-q="9" data-correct="false">C — GEO satellites use solar concentrators that can generate power even in partial shadow, avoiding true eclipse conditions</button>
+            <button class="quiz-opt" data-q="9" data-correct="false">D — LEO satellites are closer to the poles where nights are longer, causing more frequent eclipses</button>
+        </div>
+        <div class="quiz-feedback" id="fb9"></div>
+    </div>
+
+    <div class="quiz-q">
+        <p><strong>Q10.</strong> An operator is designing a satellite system to provide broadband connectivity to commercial fishing vessels operating throughout the Arctic Ocean, including at 85°N latitude, with latency below 100 ms RTT. Which orbital regime is the only viable choice and why?</p>
+        <div class="quiz-options">
+            <button class="quiz-opt" data-q="10" data-correct="false">A — GEO, because the large coverage footprint means one satellite can serve the entire Arctic region</button>
+            <button class="quiz-opt" data-q="10" data-correct="false">B — MEO equatorial (O3b-style), because it provides sufficient latency at 125 ms RTT</button>
+            <button class="quiz-opt" data-q="10" data-correct="true">C — LEO with high-inclination or polar orbits, because GEO cannot serve above ~75° latitude, equatorial MEO similarly fails at 85°N, and LEO with sufficient inclination provides both coverage and sub-100ms RTT</button>
+            <button class="quiz-opt" data-q="10" data-correct="false">D — VLEO, because it provides the lowest latency and drag is manageable with modern propulsion</button>
+        </div>
+        <div class="quiz-feedback" id="fb10"></div>
+    </div>
+
+    <div class="quiz-score" id="quizScore"></div>
+</div>
+
+<!-- ═══ PYTHON EXERCISES ═══ -->
+<div class="py-block" id="python">
+    <h2>PYTHON EXERCISES</h2>
+    <p class="py-intro">Three exercises. The first builds on the propagation work from Lesson 1 and extends it to full link budget estimation. The second quantifies atmospheric drag and orbital lifetime. The third models eclipse fractions across regimes. All use Python 3.8+ standard library except where noted.</p>
+
+    <div class="py-exercise">
+        <h3>Exercise 1 — Link Budget Comparison Across Regimes</h3>
+        <p>Build a simplified link budget for a Ka-band downlink from satellites at each orbital regime. Compute received signal level and estimate required terminal antenna size to achieve a target carrier-to-noise ratio.</p>
+```
+
+<pre>
+import math
+
+# ── Constants ──
+C      = 299_792_458      # speed of light, m/s
+KB     = 1.380649e-23     # Boltzmann's constant, J/K
+FREQ   = 26.5e9           # Ka-band downlink frequency, Hz
+LAMBDA = C / FREQ         # wavelength, m
+
+def fspl_db(range_km, freq_hz):
+    """Free-space path loss in dB."""
+    r = range_km * 1000  # m
+    return 20*math.log10(4*math.pi*r*freq_hz/C)
+
+def antenna_gain_db(diameter_m, freq_hz, efficiency=0.6):
+    """Parabolic antenna gain in dBi."""
+    lam = C / freq_hz
+    return 10*math.log10(efficiency * (math.pi * diameter_m / lam)**2)
+
+def eirp_dbw(tx_power_w, tx_gain_db):
+    """EIRP in dBW."""
+    return 10*math.log10(tx_power_w) + tx_gain_db
+
+def noise_power_dbw(noise_temp_k, bandwidth_hz):
+    """Thermal noise power in dBW."""
+    return 10*math.log10(KB * noise_temp_k * bandwidth_hz)
+
+# ── Satellite transmitter assumptions (representative) ──
+SAT_TX_POWER_W   = 20      # satellite downlink power per beam
+SAT_ANTENNA_DIAM = 0.4     # satellite phased array effective aperture, m
+
+sat_tx_gain = antenna_gain_db(SAT_ANTENNA_DIAM, FREQ)
+sat_eirp    = eirp_dbw(SAT_TX_POWER_W, sat_tx_gain)
+
+# ── System noise ──
+SYSTEM_NOISE_TEMP_K = 300  # ground terminal system noise temperature
+BANDWIDTH_HZ        = 250e6  # 250 MHz downlink channel
+
+noise = noise_power_dbw(SYSTEM_NOISE_TEMP_K, BANDWIDTH_HZ)
+
+# ── Orbits to compare ──
+regimes = {
+    "VLEO  300 km": 300,
+    "LEO   550 km": 550,
+    "LEO  1200 km": 1_200,
+    "MEO  8062 km": 8_062,
+    "GEO 35786 km": 35_786,
+}
+
+print(f"\n{'Regime':<18} {'FSPL dB':>9} {'Rx dBW':>10} {'CNR dB':>9} {'Need dish (m)':>14}")
+print("─" * 64)
+
+TARGET_CNR_DB = 15  # minimum CNR for high-throughput service
+
+for name, alt_km in regimes.items():
+    path_loss = fspl_db(alt_km, FREQ)
+    # Received power at a 0 dBi isotropic terminal:
+    rx_isotropic = sat_eirp - path_loss
+    cnr_isotropic = rx_isotropic - noise
+
+    # What dish diameter achieves TARGET_CNR_DB?
+    required_gain_db = TARGET_CNR_DB - cnr_isotropic  # additional gain needed
+    if required_gain_db < 0:
+        required_gain_db = 0  # isotropic is already sufficient
+    # Invert gain formula for diameter:
+    lam = C / FREQ
+    eff = 0.6
+    gain_linear = 10**(required_gain_db / 10)
+    required_diam = math.sqrt(gain_linear / eff) * lam / math.pi
+
+    print(f"{name:<18} {path_loss:>9.1f} {rx_isotropic:>10.1f} {cnr_isotropic:>9.1f} {required_diam:>13.2f}m")
+
+# ── Questions ──
+# 1. What does the required dish diameter tell you about the relative
+#    ease of deploying a consumer terminal for each regime?
+# 2. What would happen to these numbers at Ku-band (12 GHz) vs Ka-band?
+# 3. The model uses a single satellite transmit power. Real systems
+#    have EIRP constraints from licensing. How would EIRP limits
+#    affect the comparison between regimes?
+</pre>
+
+```
+        <div class="py-challenge">
+            <strong>EXTENSION</strong>
+            Add atmospheric attenuation to the model. For Ka-band at different elevation angles, add 1–4 dB for clear-sky gaseous absorption and a rain fade margin of 3–10 dB depending on target availability. Does this change the relative ranking of regimes? Why or why not?
+        </div>
+    </div>
+
+    <div class="py-exercise">
+        <h3>Exercise 2 — Atmospheric Drag and Orbital Lifetime</h3>
+        <p>Model the atmospheric drag deceleration and estimate the natural decay time for satellites at different altitudes. Use an exponential atmosphere model — a simplification, but adequate for first-order estimation.</p>
+```
+
+<pre>
+import math
+
+# ── Exponential atmosphere model ──
+# Density ρ(h) ≈ ρ₀ · exp(-h / H)
+# Reference values for representative LEO altitudes (MSIS model approximations)
+# These are rough mid-solar-activity values.
+
+def atm_density(alt_km):
+    """
+    Approximate thermospheric density kg/m³.
+    Uses piecewise exponential fit to NRLMSISE-00 at moderate solar activity.
+    """
+    if alt_km < 200:
+        rho0, H, h0 = 3.2e-9,  37.1, 150
+    elif alt_km < 400:
+        rho0, H, h0 = 9.5e-10, 51.0, 200
+    elif alt_km < 600:
+        rho0, H, h0 = 2.7e-11, 63.5, 400
+    elif alt_km < 800:
+        rho0, H, h0 = 5.2e-12, 73.5, 600
+    elif alt_km < 1200:
+        rho0, H, h0 = 1.8e-12, 88.0, 800
+    else:
+        rho0, H, h0 = 3.0e-13, 124.0, 1200
+    return rho0 * math.exp(-(alt_km - h0) / H)
+
+MU    = 3.986004418e14   # Earth gravitational parameter, m³/s²
+RE    = 6_371_000        # Earth radius, m
+
+def orbital_velocity(alt_km):
+    r = RE + alt_km * 1000
+    return math.sqrt(MU / r)
+
+def drag_acceleration(alt_km, cd=2.2, area_m2=10, mass_kg=300):
+    """
+    Drag deceleration in m/s².
+    cd: drag coefficient (2.2 typical for flat satellite)
+    area_m2: cross-sectional area
+    mass_kg: satellite mass
+    """
+    rho = atm_density(alt_km)
+    v   = orbital_velocity(alt_km)
+    bc  = mass_kg / (cd * area_m2)   # ballistic coefficient kg/m²
+    return 0.5 * rho * v**2 / bc
+
+def lifetime_years(alt_km, cd=2.2, area_m2=10, mass_kg=300, dt_days=1):
+    """
+    Estimate natural deorbit lifetime by integrating altitude decay.
+    Returns years to reach 120 km (reentry).
+    """
+    h = float(alt_km)
+    days = 0
+    dt_s = dt_days * 86400
+    while h > 120:
+        v    = orbital_velocity(h)
+        a    = drag_acceleration(h, cd, area_m2, mass_kg)
+        # Orbital decay rate: dh/dt = -2 * a * r / v (simplified)
+        r    = RE + h * 1000
+        dhdt = -2 * a * r / v       # m/s
+        dh   = dhdt * dt_s / 1000   # km per day
+        h   += dh
+        days += dt_days
+        if days > 365 * 200:        # cap at 200 years
+            return 200.0
+    return days / 365.25
+
+# ── Print comparison ──
+configs = [
+    ("ISS / VLEO",    400,  2.2,  70,   420),   # ISS-like
+    ("Starlink low",  340,  2.2,   8,   295),   # low shell
+    ("Starlink main", 550,  2.2,   8,   295),   # main shell
+    ("OneWeb",       1200,  2.2,   5,   150),   # OneWeb Gen1
+    ("Hubble (~LEO)", 538,  2.2,  13,  11_000), # large, heavy
+]
+
+print(f"\n{'Satellite':<18} {'Alt km':>7} {'BC kg/m²':>10} {'Drag m/s²':>12} {'Lifetime':>12}")
+print("─" * 63)
+for name, alt, cd, area, mass in configs:
+    bc     = mass / (cd * area)
+    drag   = drag_acceleration(alt, cd, area, mass)
+    life   = lifetime_years(alt, cd, area, mass)
+    life_s = f"{life:.1f} yrs" if life < 200 else ">200 yrs"
+    print(f"{name:<18} {alt:>7} {bc:>10.1f} {drag:>12.2e} {life_s:>12}")
+
+# ── Task: Solar maximum effect ──
+# At solar maximum, density roughly 5× higher at 550 km.
+# Estimate Starlink main-shell lifetime at solar maximum:
+class SolarMax:
+    def atm_density_max(alt_km, factor=5):
+        return atm_density(alt_km) * factor
+
+print("\n--- Solar max effect on Starlink 550 km shell ---")
+print("Implementing 5× density multiplier...")
+# Replace atm_density with multiplied version for this calc
+original = atm_density
+def atm_density(alt_km):  # shadow outer scope
+    if alt_km < 200:
+        rho0, H, h0 = 3.2e-9,  37.1, 150
+    elif alt_km < 400:
+        rho0, H, h0 = 9.5e-10, 51.0, 200
+    elif alt_km < 600:
+        rho0, H, h0 = 2.7e-11, 63.5, 400
+    elif alt_km < 800:
+        rho0, H, h0 = 5.2e-12, 73.5, 600
+    elif alt_km < 1200:
+        rho0, H, h0 = 1.8e-12, 88.0, 800
+    else:
+        rho0, H, h0 = 3.0e-13, 124.0, 1200
+    return rho0 * math.exp(-(alt_km - h0) / H) * 5   # solar max
+
+life_max = lifetime_years(550, 2.2, 8, 295)
+print(f"Starlink 550 km at solar maximum: {life_max:.1f} yrs natural decay")
+</pre>
+
+```
+        <p class="py-note">Expected: Starlink at 550 km nominal solar activity decays in roughly 4–7 years naturally. At solar maximum (5× density), this drops to under 2 years — consistent with SpaceX's reported experiences in the 2022–2024 active solar period.</p>
+        <div class="py-challenge">
+            <strong>EXTENSION</strong>
+            Compute the propellant mass required for Starlink at 550 km to maintain its altitude against drag for 7 years at solar maximum, assuming an ion thruster with Isp = 1,600 s. Use the Tsiolkovsky rocket equation. How does this propellant mass compare to the satellite's ~295 kg total mass? What does the answer tell you about propulsion system sizing for LEO constellations?
+        </div>
+    </div>
+
+    <div class="py-exercise">
+        <h3>Exercise 3 — Eclipse Fraction and Battery Sizing</h3>
+        <p>Compute eclipse fraction, cycle count over design life, and minimum battery capacity required to sustain a satellite through eclipse at each orbital altitude.</p>
+```
+
+<pre>
+import math
+
+RE = 6_371   # km
+
+def eclipse_fraction(alt_km, beta_deg=0):
+    """
+    Eclipse fraction of orbit at given altitude and beta angle.
+    beta_deg: angle between orbital plane and Sun direction (0 = max eclipse)
+    Returns fraction 0–1 (0 = no eclipse, 1 = permanent shadow — impossible).
+    At beta=0, approximately: fraction ≈ (1/π) * arcsin(RE / (RE + alt))
+    More precisely using the penumbra half-angle:
+    """
+    beta = math.radians(beta_deg)
+    rho  = math.asin(RE / (RE + alt_km))  # Earth subtended half-angle
+    # Eclipse occurs when beta < rho
+    if abs(beta) >= rho:
+        return 0.0   # no eclipse at this beta angle
+    # Eclipse fraction of orbit:
+    frac = (1 / math.pi) * math.acos(
+        math.sqrt(math.cos(rho)**2 - math.cos(beta)**2 - math.sin(rho)**2 * math.cos(beta)**2)
+        / (math.sin(rho) * math.sin(math.pi/2 - beta))
+    )
+    # Simplified formula for beta=0:
+    return (1 / math.pi) * math.acos(
+        math.sqrt(1 - (RE / (RE + alt_km))**2)
+    )
+
+def orbital_period_min(alt_km):
+    MU = 3.986004418e5  # km³/s²
+    r  = RE + alt_km
+    return 2 * math.pi * math.sqrt(r**3 / MU) / 60  # minutes
+
+# ── Compute for each regime ──
+altitudes = [
+    ("VLEO  300 km",   300),
+    ("LEO   550 km",   550),
+    ("LEO  1200 km",  1200),
+    ("MEO  8062 km",  8062),
+    ("GEO 35786 km", 35786),
+]
+
+DESIGN_LIFE_YRS = 5
+SATELLITE_POWER_W = 2_000  # satellite load during eclipse
+
+print(f"\n{'Regime':<18} {'Period min':>11} {'Eclipse %':>10} {'Eclipse min':>12} {'Cycles/yr':>11} {'Total cycles':>13} {'Min Wh':>9}")
+print("─" * 90)
+
+for name, alt in altitudes:
+    T    = orbital_period_min(alt)
+    frac = eclipse_fraction(alt)
+
+    if alt >= 35_000:
+        # GEO: ~84 eclipse events/year averaging ~35 min each
+        eclipses_per_year = 84
+        eclipse_min       = 35
+        frac_display      = eclipse_min / T
+    else:
+        eclipse_min       = frac * T
+        eclipses_per_year = (365.25 * 24 * 60) / T  # orbits per year
+
+    total_cycles = int(eclipses_per_year * DESIGN_LIFE_YRS)
+    min_wh       = (SATELLITE_POWER_W * eclipse_min / 60)  # Wh at 100% DoD
+    # At 30% max DoD to preserve cycle life:
+    battery_wh   = min_wh / 0.30
+
+    print(f"{name:<18} {T:>11.1f} {frac*100:>9.1f}% {eclipse_min:>11.1f} {eclipses_per_year:>11.0f} {total_cycles:>13,} {battery_wh:>9.0f}")
+
+print("\n* Battery Wh calculated at 30% max depth of discharge for cycle life")
+print("* Satellite load assumed 2,000 W during eclipse (conservative)")
+
+# ── Insight questions ──
+# 1. GEO has only ~84 eclipse events per year vs ~5,500 for LEO at 550 km.
+#    How does this affect the cycle-life requirement on battery chemistry?
+# 2. Why does a higher-altitude LEO (1,200 km) have a shorter eclipse
+#    duration percentage despite being farther from Earth?
+# 3. At 30% DoD, what technology could reduce battery mass
+#    while meeting 27,000+ cycle life for a 5-year LEO mission?
+</pre>
+
+```
+        <div class="py-challenge">
+            <strong>EXTENSION</strong>
+            Model the beta angle variation over a year for a 53° inclination orbit at 550 km. The beta angle cycles between approximately ±(obliquity + inclination) and ±(obliquity − inclination). For each beta angle, compute the eclipse fraction and plot eclipse fraction vs day of year. How many "eclipse-free" periods does a Starlink satellite experience annually, and how does this affect the solar array sizing?
+        </div>
+    </div>
+</div>
+
+<!-- ═══ REFLECTION ═══ -->
+<div class="reflection-block" id="reflect">
+    <h2>REFLECTION PROMPTS</h2>
+    <p class="ref-intro">Written synthesis, 200–400 words each. Write as if briefing a systems engineering team that has not read this lesson. Return to these after completing Lesson 3.</p>
+
+    <div class="ref-prompt">
+        <h3>Prompt 1 — Orbit Selection Justification</h3>
+        <p>A hypothetical operator wants to provide broadband connectivity to offshore oil and gas platforms operating globally, including in the Barents Sea (75°N) and around Antarctica (70°S). Monthly data volumes per platform are large (several TB/month) but latency tolerance is moderate — 300 ms RTT is acceptable for most applications, but video conferencing is desired. Platform antenna installation area is limited to 1 m² maximum.</p>
+        <ul>
+            <li>Which orbital regime(s) do you recommend and why?</li>
+            <li>What specific altitude within the regime, and what inclination?</li>
+            <li>Which parameters from the master tradeoff table most directly drove your recommendation?</li>
+            <li>What is the single biggest technical risk in your preferred solution?</li>
+        </ul>
+    </div>
+
+    <div class="ref-prompt">
+        <h3>Prompt 2 — Radiation and Lifetime</h3>
+        <p>An investor asks why a new LEO broadband constellation satellite costs $500,000 to manufacture while an equivalent GEO communications satellite costs $200 million. You have 5 minutes to explain, for a non-technical audience, why the cost difference exists and why it does not mean the GEO satellite is 400× better. Use the concepts from Sections 4, 5, and 6 in your answer.</p>
+    </div>
+
+    <div class="ref-prompt">
+        <h3>Prompt 3 — Kessler Syndrome and Constellation Design</h3>
+        <p>Kessler syndrome concerns you as a constellation architect. The 5-year deorbit rule is a regulatory constraint, but you also care about the problem independently of what regulators require. How does awareness of Kessler syndrome affect your architectural choices? Consider: altitude selection, satellite lifetime, propulsion sizing, fault response, and end-of-life planning. Are there altitude bands you would avoid even if regulators permitted them? Why?</p>
+    </div>
+
+    <div class="ref-prompt">
+        <h3>Prompt 4 — Your Domain: Aviation Regime Implications</h3>
+        <p>An airliner cruising at 35,000 ft (10.7 km) at 900 km/h on a transpolar route from London to Tokyo passes over the North Pole at 88°N. The aircraft needs continuous broadband connectivity throughout the route.</p>
+        <ul>
+            <li>At 88°N, which orbital regimes can serve the aircraft? Which cannot, and why?</li>
+            <li>The aircraft's ESA terminal has a maximum elevation angle range of 15°–75°. At what orbital altitude does a satellite need to be for the aircraft to see it above 15° from 88°N?</li>
+            <li>What are the Doppler shift implications at Ka-band for a satellite moving at 7.6 km/s and an aircraft moving at 250 m/s? Which dominates, and by how much?</li>
+        </ul>
+    </div>
+</div>
+
+<div class="complete-wrap">
+    <button class="complete-btn" id="completeBtn">MARK LESSON COMPLETE</button>
+    <div class="complete-msg" id="completeMsg"></div>
+</div>
+
+<div class="lesson-nav">
+    <a href="q1-1.html">← LESSON 01 — WHY LEO NOW</a>
+    <a href="q1-3.html">LESSON 03 — THE PHYSICS OF LATENCY →</a>
+</div>
+```
+
+</div>
+
+<button class="back-to-top" id="backToTop" title="Back to top">↑</button>
+
+<footer>© 2026 LEOAF · Q1 · LESSON 02 OF 15</footer>
+
+<!-- Stars -->
+
+<script>
+const canvas = document.getElementById('starsCanvas');
+const ctx = canvas.getContext('2d');
+let stars = [];
+function initStars() { stars=[]; for(let i=0;i<180;i++) stars.push({x:Math.random()*canvas.width,y:Math.random()*canvas.height,size:Math.random()*1.5+0.4,speed:Math.random()*0.18+0.04,hue:Math.random()*360}); }
+function resizeCanvas() { canvas.width=window.innerWidth; canvas.height=window.innerHeight; }
+resizeCanvas(); initStars(); window.addEventListener('resize', resizeCanvas);
+function animateStars() { ctx.clearRect(0,0,canvas.width,canvas.height); stars.forEach(s=>{s.y-=s.speed;if(s.y<0){s.y=canvas.height;s.x=Math.random()*canvas.width;} ctx.beginPath();ctx.fillStyle=`hsl(${s.hue},80%,80%)`;ctx.arc(s.x,s.y,s.size,0,Math.PI*2);ctx.fill();}); requestAnimationFrame(animateStars); }
+animateStars();
+</script>
+
+<!-- Quiz -->
+
+<script>
+const feedbacks = {
+    1: {
+        correct: "Correct. The 6-minute visibility window is the direct driver of the handover requirement. The terminal must seamlessly switch its beam and link from the departing satellite to an approaching one, requiring beam management, handover signalling, and modem re-acquisition — all while maintaining uninterrupted data flow to the user.",
+        wrong:   "Incorrect. The key consequence is the handover requirement. Every 6 minutes, the terminal must switch from one satellite to the next. This drives the entire beam management and tracking system design — it is the central engineering challenge that distinguishes LEO terminal design from GEO."
+    },
+    2: {
+        correct: "Correct. 20·log₁₀(65) = 20 × 1.813 = 36.3 dB ≈ 36 dB. Every doubling of distance adds 6 dB; a factor of 65 corresponds to a bit over 6 doublings. This 36 dB represents a factor of ~4,000 in power — the fundamental reason GEO terminals require large dishes while LEO terminals can be small flat panels.",
+        wrong:   "Incorrect. FSPL scales as 20·log₁₀(distance ratio). The ratio is 35,786 / 550 ≈ 65. So 20·log₁₀(65) ≈ 36 dB. Not 18 dB (which would be 10·log₁₀(65)), not 65 dB (the ratio itself), and not 8 dB."
+    },
+    3: {
+        correct: "Correct. The altitude band from ~1,500 to 6,000 km contains the most intense trapped proton radiation in the inner Van Allen belt. Satellites in this zone accumulate TID at rates 10–100× higher than at LEO or GEO altitudes, degrading electronics within months to a few years. This makes long-lifetime missions in this zone impractical without extraordinary shielding mass.",
+        wrong:   "Incorrect. The reason is radiation, not drag. Atmospheric drag is negligible above ~1,000 km. The 1,500–6,000 km band coincides with the core of the inner Van Allen belt — the most intense chronic radiation environment for satellites. Commercial operators avoid it because components would fail far before their design life."
+    },
+    4: {
+        correct: "Correct. 27,000 charge-discharge cycles over 5 years is orders of magnitude more than a GEO battery must endure (~100 cycles/year × 15 years = ~1,500 cycles). LEO battery design must prioritise cycle life above all else, using controlled depth of discharge (typically 20–40%) to prevent capacity fade, even at the cost of carrying more battery mass than the energy requirement alone would suggest.",
+        wrong:   "Incorrect. The key issue is cycle count, not duration or voltage. A GEO battery endures ~1,500 cycles over 15 years; a LEO battery endures ~27,000 cycles over 5 years. This cycle life requirement drives the choice of battery chemistry, cell selection, and depth-of-discharge management — the dominant battery design constraint for LEO."
+    },
+    5: {
+        correct: "Correct. The SAA exists because Earth's magnetic dipole axis is offset from its rotation axis and the magnetic field has an asymmetric structure. Over the South Atlantic, this causes the inner Van Allen belt to dip to altitudes as low as 200 km. LEO satellites passing through this region receive elevated proton fluxes — operators routinely disable sensitive electronics, including star trackers and certain memory devices, during SAA transits.",
+        wrong:   "Incorrect. The SAA is a radiation phenomenon. Earth's magnetic field is asymmetric — its dipole axis is offset from the geographic pole — causing the inner Van Allen belt to dip low over the South Atlantic. LEO satellites passing through this region experience dramatically elevated radiation doses from trapped protons."
+    },
+    6: {
+        correct: "Correct. MEO at 20,200 km gives each GPS satellite a ground footprint covering roughly 28% of Earth's surface. 24 satellites in appropriately distributed orbits can see every point on Earth continuously. GEO would require precise positioning from near-equatorial satellites — poor GDOP at high latitudes. LEO would require hundreds of satellites for continuous global coverage. MEO is the Goldilocks orbit for GNSS.",
+        wrong:   "Incorrect. The primary driver is coverage efficiency combined with GDOP. At 20,200 km, each satellite covers ~28% of Earth's surface, enabling global coverage with 24 satellites. GEO satellites cannot serve polar regions and provide poor GDOP for navigation. LEO requires too many satellites for continuous global coverage. MEO balances these requirements uniquely well for navigation."
+    },
+    7: {
+        correct: "Correct. Solar EUV radiation heats the thermosphere (80–600 km altitude), causing it to expand upward. At any given LEO altitude, more atmosphere is now overhead — density at 550 km can be 5–10× higher at solar maximum than solar minimum. Since drag is proportional to density, this directly increases drag force and reduces orbital lifetime. SpaceX experienced this during the active Solar Cycle 25 in 2022–2024.",
+        wrong:   "Incorrect. Drag increases during solar maximum. Solar EUV heats and expands the thermosphere, raising atmospheric density at LEO altitudes by up to 5–10×. Since drag force is proportional to atmospheric density, satellites experience significantly more deceleration, requiring more frequent orbital reboosts and reducing natural decay timescales."
+    },
+    8: {
+        correct: "Correct. 177 + 36 = 213 dB. This arithmetic follows directly from the FSPL formula: the GEO satellite is ~65× farther away than LEO at 550 km, corresponding to 20·log₁₀(65) ≈ 36 dB additional path loss.",
+        wrong:   "Incorrect. The calculation is straightforward: if LEO FSPL = 177 dB and GEO is 36 dB worse (from the 65× distance ratio), then GEO FSPL = 177 + 36 = 213 dB. This is consistent with typical Ka-band GEO link budget numbers."
+    },
+    9: {
+        correct: "Correct. GEO satellites sit in the equatorial plane. The Sun moves above and below the equatorial plane over the course of the year due to Earth's axial tilt. For most of the year, the Sun is north or south of the equatorial plane and the GEO satellite remains sunlit. Only near the equinoxes — when the Sun crosses the equatorial plane — can the Sun, Earth, and GEO satellite align to produce an eclipse. LEO satellites complete 15 orbits per day in all orientations and pass through Earth's shadow on most orbits year-round.",
+        wrong:   "Incorrect. The correct explanation is about the Sun's position relative to the equatorial plane. For most of the year, the Sun is above or below the equatorial plane (due to Earth's axial tilt), so it cannot align with the equatorial GEO satellite and Earth to produce an eclipse. Only near the equinoxes does this alignment occur. LEO satellites orbit in all orientations and pass through Earth's shadow ~15 times per day year-round."
+    },
+    10: {
+        correct: "Correct. GEO cannot serve above ~75° latitude — the 85°N requirement eliminates it immediately. Equatorial MEO (O3b at 8,062 km) provides coverage up to approximately ±50° latitude — 85°N is far outside its coverage zone. VLEO is not commercially operational. Only LEO with sufficiently high inclination (≥85°) or polar orbits can provide both coverage at 85°N and sub-100ms RTT. OneWeb's near-polar LEO constellation at 1,200 km is a direct example of a system designed for exactly this type of use case.",
+        wrong:   "Incorrect. The requirements — 85°N coverage AND sub-100ms RTT — together eliminate GEO (coverage fails above ~75°N), equatorial MEO (coverage fails above ~50°N, and 125ms RTT exceeds the limit), and VLEO (not commercially operational). Only LEO with polar or high-inclination orbits satisfies both constraints simultaneously."
+    }
+};
+
+let answered = {};
+document.querySelectorAll('.quiz-opt').forEach(btn => {
+    btn.addEventListener('click', function() {
+        const q = this.dataset.q;
+        if (answered[q] !== undefined) return;
+        const correct = this.dataset.correct === 'true';
+        answered[q] = correct;
+        document.querySelectorAll(`.quiz-opt[data-q="${q}"]`).forEach(b => {
+            b.disabled = true;
+            if (b.dataset.correct === 'true') b.classList.add('correct');
+        });
+        if (!correct) this.classList.add('wrong');
+        const fb = document.getElementById(`fb${q}`);
+        fb.textContent = (correct ? '✓ ' : '✗ ') + feedbacks[q][correct ? 'correct' : 'wrong'];
+        fb.style.color = correct ? '#39ff14' : '#ff004f';
+        if (Object.keys(answered).length === 10) {
+            const total = Object.values(answered).filter(Boolean).length;
+            const el = document.getElementById('quizScore');
+            el.style.display = 'block';
+            const pct = Math.round(total / 10 * 100);
+            el.textContent = `SCORE: ${total} / 10 (${pct}%) — ${pct===100?'PERFECT.':pct>=80?'STRONG. REVIEW ANY MISSES.':pct>=60?'ADEQUATE. REVISIT WEAK SECTIONS.':'REVISIT THE LESSON BEFORE PROCEEDING.'}`;
+        }
+    });
+});
+</script>
+
+<!-- Supabase -->
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+<script src="supabase.js"></script>
+
+<script src="user_progress.js"></script>
+
+<script>
+const LESSON_ID = 'q1-2';
+document.addEventListener('DOMContentLoaded', async () => {
+    const { data: { session } } = await client.auth.getSession();
+    if (!session) { window.location.href = 'index.html'; return; }
+
+    document.getElementById('logoffBtn').addEventListener('click', async () => {
+        await client.auth.signOut(); window.location.href = 'index.html';
+    });
+
+    const mastered = await getMasteredSections();
+    const btn = document.getElementById('completeBtn');
+    const msg = document.getElementById('completeMsg');
+
+    function setDone(done) {
+        if (done) {
+            btn.textContent = '✓ COMPLETE — CLICK TO UNDO';
+            btn.classList.add('done');
+            btn.style.cssText = 'border-color:#39ff14;color:#39ff14;background:rgba(57,255,20,0.1);cursor:pointer;opacity:1;';
+            msg.style.color = '#39ff14';
+            msg.textContent = 'Lesson marked complete. Click again to undo.';
+        } else {
+            btn.textContent = 'MARK LESSON COMPLETE';
+            btn.classList.remove('done');
+            btn.style.cssText = '';
+            msg.style.color = '#ffffff55';
+            msg.textContent = 'Not yet marked complete.';
+        }
+    }
+
+    setDone(mastered.includes(LESSON_ID));
+
+    btn.addEventListener('click', async () => {
+        const isCurrentlyDone = btn.classList.contains('done');
+        msg.style.color = '#00d9ff';
+        msg.textContent = 'Saving...';
+        const ok = await upsertSection(LESSON_ID, !isCurrentlyDone);
+        if (ok) {
+            setDone(!isCurrentlyDone);
+        } else {
+            msg.style.color = '#ff004f';
+            msg.textContent = 'Error saving. Try again.';
+        }
+    });
+
+    const btt = document.getElementById('backToTop');
+    window.addEventListener('scroll', () => {
+        btt.classList.toggle('visible', window.scrollY > 400);
+    });
+    btt.addEventListener('click', () => window.scrollTo({ top:0, behavior:'smooth' }));
+});
+</script>
+
+</body>
+</html>
