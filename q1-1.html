@@ -1,0 +1,1335 @@
+<!DOCTYPE html>
+
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, shrink-to-fit=no">
+<title>L01 — Why LEO Now · LEOAF</title>
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;600;800&family=Share+Tech+Mono&family=Libre+Baskerville:ital,wght@0,400;0,700;1,400&display=swap" rel="stylesheet">
+<link rel="icon" href="favicon.ico" sizes="any" type="image/x-icon">
+<link rel="manifest" href="site.webmanifest">
+<meta name="theme-color" content="#0f0f0f">
+
+<style>
+* { box-sizing:border-box; margin:0; padding:0; }
+html { height:100%; -webkit-text-size-adjust:100%; overflow-x:hidden; }
+body { font-family:'Share Tech Mono',monospace; background:#000; color:white; overflow-x:hidden; min-height:100vh; }
+#starsCanvas { position:fixed; inset:0; z-index:-1; }
+
+/* HEADER */
+header {
+    background:#000; border-bottom:1px solid #ff004f33;
+    position:sticky; top:0; z-index:100;
+    padding:1rem clamp(1.5rem,5vw,4rem);
+    display:flex; justify-content:space-between; align-items:center;
+    box-shadow:0 4px 16px #0008;
+}
+.logo { font-family:'Orbitron',sans-serif; font-weight:800; font-size:clamp(16px,2vw,22px); letter-spacing:3px; text-decoration:none; }
+.logo span:first-child { color:white; }
+.logo span:last-child { color:#ff004f; }
+.nav-right { display:flex; align-items:center; gap:10px; }
+.nav-btn {
+    background:transparent; border:1px solid #ff004f44; color:#ff004f;
+    padding:6px 14px; cursor:pointer; transition:0.3s ease;
+    font-size:11px; font-family:'Orbitron',sans-serif; letter-spacing:1px;
+    text-decoration:none; display:inline-block;
+}
+.nav-btn:hover { background:#ff004f; color:black; }
+
+/* BREADCRUMB */
+.breadcrumb { padding:14px clamp(1.5rem,5vw,4rem); font-size:11px; color:#ffffff44; letter-spacing:1px; position:relative; z-index:1; }
+.breadcrumb a { color:#00d9ff66; text-decoration:none; }
+.breadcrumb a:hover { color:#00d9ff; }
+.breadcrumb span { margin:0 8px; }
+
+/* LESSON LAYOUT */
+.lesson-wrap { max-width:820px; margin:0 auto; padding:0 clamp(1.5rem,5vw,4rem) 80px; position:relative; z-index:1; }
+
+/* LESSON HEADER */
+.lesson-header { padding:30px 0 28px; border-bottom:1px solid #ffffff11; margin-bottom:36px; }
+.lesson-tag { font-family:'Orbitron',sans-serif; font-size:10px; color:#ff004f; letter-spacing:3px; margin-bottom:10px; }
+.lesson-header h1 { font-family:'Orbitron',sans-serif; font-size:clamp(20px,3.5vw,32px); font-weight:800; line-height:1.2; margin-bottom:12px; }
+.lesson-meta { display:flex; gap:10px; flex-wrap:wrap; margin-bottom:16px; }
+.l-pill { font-family:'Orbitron',sans-serif; font-size:10px; padding:3px 10px; border:1px solid; letter-spacing:1px; }
+.l-pill-q { color:#ff004f; border-color:#ff004f44; }
+.l-pill-t { color:#39ff14; border-color:#39ff1444; }
+.lesson-intro { font-size:13px; line-height:1.85; opacity:0.75; }
+
+/* TABLE OF CONTENTS */
+.toc { background:rgba(0,217,255,0.06); border:1px solid #00d9ff33; padding:24px 28px; margin:30px 0; }
+.toc h4 { font-family:'Orbitron',sans-serif; font-size:10px; color:#00d9ff; letter-spacing:2px; margin-bottom:16px; }
+.toc ol { padding-left:20px; }
+.toc li { font-size:13px; line-height:2.1; opacity:1; }
+.toc li a { color:#00d9ffbb; text-decoration:none; transition:0.15s; }
+.toc li a:hover { color:#ffffff; padding-left:4px; }
+.toc li::marker { color:#ff004f; font-family:'Orbitron',sans-serif; font-size:10px; }
+
+/* CONTENT SECTIONS */
+.content-block { margin-bottom:48px; }
+.content-block h2 {
+    font-family:'Orbitron',sans-serif; font-size:13px; color:#00d9ff;
+    letter-spacing:2px; text-transform:uppercase;
+    margin-bottom:18px; padding-bottom:10px;
+    border-bottom:1px solid #00d9ff22;
+    scroll-margin-top:80px;
+}
+.content-block h3 {
+    font-family:'Orbitron',sans-serif; font-size:11px; color:#ffffff88;
+    letter-spacing:1.5px; text-transform:uppercase; margin:28px 0 12px;
+}
+.content-block h4 {
+    font-size:12px; color:#ffffff66; letter-spacing:1px; margin:20px 0 8px;
+    font-family:'Orbitron',sans-serif; font-size:10px;
+}
+.content-block p { font-size:13px; line-height:1.9; opacity:0.85; margin-bottom:16px; }
+.content-block ul, .content-block ol { padding-left:0; margin-bottom:16px; }
+.content-block ul li, .content-block ol li { font-size:13px; line-height:1.85; opacity:0.85; padding-left:20px; position:relative; margin-bottom:6px; }
+.content-block ul li::before { content:'›'; position:absolute; left:0; color:#00d9ff; }
+.content-block ol { counter-reset:item; }
+.content-block ol li { counter-increment:item; }
+.content-block ol li::before { content:counter(item)'.'; position:absolute; left:0; color:#ff004f; font-family:'Orbitron',sans-serif; font-size:10px; top:2px; }
+
+/* CALLOUT BOXES */
+.callout {
+    border-left:3px solid #00d9ff; background:rgba(0,217,255,0.05);
+    padding:16px 20px; margin:22px 0; font-size:12px; line-height:1.8;
+}
+.callout.red   { border-left-color:#ff004f; background:rgba(255,0,79,0.05); }
+.callout.green { border-left-color:#39ff14; background:rgba(57,255,20,0.05); }
+.callout.amber { border-left-color:#ffaa00; background:rgba(255,170,0,0.05); }
+.callout strong { font-family:'Orbitron',sans-serif; font-size:10px; letter-spacing:1px; display:block; margin-bottom:8px; color:inherit; }
+
+/* KEY NUMBERS GRID */
+.key-numbers { display:grid; grid-template-columns:repeat(auto-fit,minmax(140px,1fr)); gap:12px; margin:22px 0; }
+.kn-item { background:rgba(255,255,255,0.03); border:1px solid #ffffff11; padding:16px 12px; text-align:center; }
+.kn-val { font-family:'Orbitron',sans-serif; font-size:clamp(16px,2.5vw,24px); font-weight:800; color:#00d9ff; display:block; }
+.kn-label { font-size:10px; opacity:0.5; letter-spacing:1px; margin-top:5px; display:block; line-height:1.4; }
+
+/* COMPARISON TABLE */
+.compare-table { width:100%; border-collapse:collapse; margin:22px 0; font-size:12px; }
+.compare-table th { font-family:'Orbitron',sans-serif; font-size:10px; letter-spacing:1px; color:#00d9ff; padding:10px 12px; border-bottom:1px solid #00d9ff33; text-align:left; }
+.compare-table td { padding:10px 12px; border-bottom:1px solid #ffffff0a; line-height:1.5; opacity:0.85; vertical-align:top; }
+.compare-table tr:hover td { background:rgba(255,255,255,0.02); }
+.compare-table .hi { color:#39ff14; }
+.compare-table .lo { color:#ff004f; }
+.compare-table .md { color:#ffaa00; }
+
+/* TIMELINE */
+.timeline { margin:22px 0; }
+.tl-item { display:flex; gap:16px; margin-bottom:16px; }
+.tl-year { font-family:'Orbitron',sans-serif; font-size:11px; color:#ff004f; min-width:52px; padding-top:2px; }
+.tl-body { flex:1; border-left:1px solid #ff004f33; padding-left:16px; padding-bottom:8px; }
+.tl-body strong { font-family:'Orbitron',sans-serif; font-size:11px; color:#ffffff88; letter-spacing:1px; display:block; margin-bottom:4px; }
+.tl-body p { font-size:12px; opacity:0.75; line-height:1.7; margin:0; }
+
+/* SVG DIAGRAM */
+.diagram-wrap { margin:24px 0; background:rgba(255,255,255,0.02); border:1px solid #ffffff11; padding:20px; overflow-x:auto; }
+.diagram-wrap figcaption { font-size:11px; color:#ffffff44; margin-top:12px; text-align:center; letter-spacing:1px; }
+
+/* DEEP DIVE BOX */
+.deep-dive { background:rgba(255,170,0,0.04); border:1px solid #ffaa0022; padding:20px 22px; margin:24px 0; }
+.deep-dive h4 { font-family:'Orbitron',sans-serif; font-size:10px; color:#ffaa00; letter-spacing:2px; margin-bottom:12px; }
+.deep-dive p { font-size:12px; line-height:1.8; opacity:0.8; margin-bottom:10px; }
+.deep-dive p:last-child { margin-bottom:0; }
+
+/* QUIZ */
+.quiz-block { background:rgba(17,17,17,0.9); border:1px solid #ff004f33; padding:28px; margin:48px 0 32px; }
+.quiz-block h2 { font-family:'Orbitron',sans-serif; font-size:13px; color:#ff004f; letter-spacing:2px; margin-bottom:6px; }
+.quiz-intro { font-size:12px; opacity:0.6; margin-bottom:24px; padding-bottom:16px; border-bottom:1px solid #ff004f22; line-height:1.6; }
+.quiz-q { margin-bottom:28px; }
+.quiz-q p { font-size:13px; opacity:0.9; margin-bottom:12px; line-height:1.65; }
+.quiz-q p strong { color:#00d9ff; }
+.quiz-options { display:flex; flex-direction:column; gap:8px; }
+.quiz-opt {
+    background:rgba(255,255,255,0.03); border:1px solid #ffffff1a;
+    padding:11px 16px; cursor:pointer; font-size:12px; font-family:'Share Tech Mono',monospace;
+    transition:0.2s ease; text-align:left; color:white; line-height:1.5;
+}
+.quiz-opt:hover:not(:disabled) { background:rgba(0,217,255,0.08); border-color:#00d9ff44; }
+.quiz-opt.correct  { background:rgba(57,255,20,0.1);  border-color:#39ff14; color:#39ff14; }
+.quiz-opt.wrong    { background:rgba(255,0,79,0.1);   border-color:#ff004f; color:#ff004f; }
+.quiz-opt:disabled { cursor:default; }
+.quiz-feedback { font-size:12px; margin-top:10px; min-height:18px; line-height:1.7; opacity:0.9; padding:0 4px; }
+.quiz-score { font-family:'Orbitron',sans-serif; font-size:12px; color:#39ff14; margin-top:20px; letter-spacing:1px; display:none; padding-top:16px; border-top:1px solid #39ff1433; }
+
+/* PYTHON EXERCISES */
+.py-block { background:rgba(10,10,10,0.95); border:1px solid #39ff1422; padding:28px; margin:32px 0; }
+.py-block h2 { font-family:'Orbitron',sans-serif; font-size:13px; color:#39ff14; letter-spacing:2px; margin-bottom:8px; }
+.py-block .py-intro { font-size:12px; opacity:0.7; margin-bottom:20px; padding-bottom:16px; border-bottom:1px solid #39ff1422; line-height:1.7; }
+.py-exercise { margin-bottom:32px; }
+.py-exercise:last-child { margin-bottom:0; }
+.py-exercise h3 { font-family:'Orbitron',sans-serif; font-size:11px; color:#39ff1499; letter-spacing:1.5px; text-transform:uppercase; margin-bottom:10px; }
+.py-exercise p { font-size:12px; opacity:0.8; margin-bottom:14px; line-height:1.75; }
+.py-block pre {
+    background:#050505; border:1px solid #39ff1433; padding:20px;
+    font-family:'Share Tech Mono',monospace; font-size:11.5px;
+    line-height:1.75; overflow-x:auto; color:#39ff14;
+    white-space:pre; margin-bottom:12px;
+}
+.py-block .py-note { font-size:11px; color:#ffffff44; line-height:1.75; margin-top:10px; }
+.py-block .py-challenge { background:rgba(57,255,20,0.04); border-left:2px solid #39ff14; padding:12px 16px; margin-top:14px; font-size:12px; line-height:1.75; opacity:0.8; }
+.py-block .py-challenge strong { font-family:'Orbitron',sans-serif; font-size:10px; color:#39ff14; display:block; margin-bottom:6px; letter-spacing:1px; }
+
+/* REFLECTION */
+.reflection-block { background:rgba(255,170,0,0.04); border:1px solid #ffaa0033; padding:24px; margin:32px 0; }
+.reflection-block h2 { font-family:'Orbitron',sans-serif; font-size:13px; color:#ffaa00; letter-spacing:2px; margin-bottom:8px; }
+.reflection-block .ref-intro { font-size:12px; opacity:0.7; margin-bottom:20px; padding-bottom:14px; border-bottom:1px solid #ffaa0022; line-height:1.7; }
+.ref-prompt { margin-bottom:20px; }
+.ref-prompt h3 { font-family:'Orbitron',sans-serif; font-size:11px; color:#ffaa0099; letter-spacing:1px; margin-bottom:8px; }
+.ref-prompt p { font-size:12px; opacity:0.8; line-height:1.75; margin-bottom:10px; }
+.ref-prompt ul li { font-size:12px; }
+
+/* BACK TO TOP */
+.back-to-top {
+    position:fixed; bottom:28px; right:28px; z-index:200;
+    width:44px; height:44px; background:#000;
+    border:1px solid #00d9ff55; color:#00d9ff;
+    font-size:20px; cursor:pointer;
+    display:flex; align-items:center; justify-content:center;
+    opacity:0; pointer-events:none;
+    transition:opacity 0.3s ease, border-color 0.3s ease;
+}
+.back-to-top.visible { opacity:1; pointer-events:auto; }
+.back-to-top:hover { border-color:#00d9ff; background:#001a2c; }
+
+/* COMPLETE WRAP */
+.complete-wrap { margin-top:56px; padding-top:30px; border-top:1px solid #ffffff11; text-align:center; }
+.complete-btn {
+    font-family:'Orbitron',sans-serif; font-size:13px; letter-spacing:2px;
+    padding:14px 44px; background:transparent;
+    border:1px solid #39ff14; color:#39ff14; cursor:pointer; transition:0.3s ease;
+}
+.complete-btn:hover:not(.done) { background:#39ff14; color:black; box-shadow:0 0 20px rgba(57,255,20,0.4); }
+.complete-btn.done { background:rgba(57,255,20,0.1); cursor:default; opacity:0.7; }
+.complete-msg { font-size:12px; color:#39ff14; margin-top:14px; min-height:18px; letter-spacing:1px; }
+
+/* LESSON NAV */
+.lesson-nav { display:flex; justify-content:space-between; margin-top:30px; flex-wrap:wrap; gap:10px; }
+.lesson-nav a { font-family:'Orbitron',sans-serif; font-size:11px; color:#00d9ff66; text-decoration:none; letter-spacing:1px; transition:0.2s; }
+.lesson-nav a:hover { color:#00d9ff; }
+
+footer { text-align:center; padding:30px; opacity:0.3; font-size:11px; position:relative; z-index:1; letter-spacing:1px; }
+
+@media (max-width:600px) {
+    .key-numbers { grid-template-columns:1fr 1fr; }
+    .compare-table { font-size:11px; }
+    .compare-table th, .compare-table td { padding:8px 8px; }
+}
+
+/* ── LIGHT READING MODE ── */
+/* content-block sits on a warm off-white card, dark ink text */
+.content-block {
+    background: #f5f2ec;
+    color: #1a1a1a;
+    padding: 36px clamp(24px,4vw,48px);
+    margin-bottom: 24px;
+    border-left: 4px solid #00d9ff;
+    position: relative;
+    z-index: 1;
+}
+.content-block h2 {
+    font-family:'Orbitron',sans-serif; font-size:13px;
+    color:#003d66; letter-spacing:2px; text-transform:uppercase;
+    margin-bottom:20px; padding-bottom:10px;
+    border-bottom:2px solid #00d9ff66;
+    scroll-margin-top:80px;
+}
+.content-block h3 {
+    font-family:'Orbitron',sans-serif; font-size:11px;
+    color:#444; letter-spacing:1.5px; text-transform:uppercase;
+    margin:32px 0 14px;
+}
+.content-block p {
+    font-family:'Libre Baskerville', Georgia, serif;
+    font-size:15px; line-height:1.9; color:#1a1a1a;
+    opacity:1; margin-bottom:18px;
+}
+.content-block ul li, .content-block ol li {
+    font-family:'Libre Baskerville', Georgia, serif;
+    font-size:14px; line-height:1.85; color:#1a1a1a; opacity:1;
+    margin-bottom:8px;
+}
+.content-block ul li::before { color:#0077aa; }
+.content-block ol li::before { color:#cc0033; }
+
+/* callouts adapt to light background */
+.content-block .callout {
+    border-left:3px solid #0088cc;
+    background:#e8f4fb;
+    color:#1a1a1a;
+}
+.content-block .callout.red   { border-left-color:#cc0033; background:#fdecea; }
+.content-block .callout.green { border-left-color:#1a7a1a; background:#eafaea; }
+.content-block .callout.amber { border-left-color:#996600; background:#fef9ec; }
+.content-block .callout strong { color:inherit; }
+
+/* key numbers on light bg */
+.content-block .kn-item {
+    background:#fff; border:1px solid #d0d0d0;
+}
+.content-block .kn-label { color:#555; opacity:1; }
+
+/* tables on light bg */
+.content-block .compare-table th {
+    color:#003d66; border-bottom:2px solid #00d9ff66;
+}
+.content-block .compare-table td {
+    color:#1a1a1a; opacity:1;
+    border-bottom:1px solid #ddd;
+}
+.content-block .compare-table tr:hover td { background:#f0f0f0; }
+
+/* timeline on light bg */
+.content-block .tl-body strong { color:#333; }
+.content-block .tl-body p { font-size:13px; color:#444; }
+.content-block .tl-year { color:#cc0033; }
+.content-block .tl-body { border-left-color:#cc003344; }
+
+/* deep dive on light bg */
+.content-block .deep-dive {
+    background:#fffbf0; border:1px solid #e0c060;
+}
+.content-block .deep-dive p { font-size:13px; color:#333; }
+
+/* diagram stays dark */
+.content-block .diagram-wrap {
+    background:#0a0a0a; border:1px solid #333;
+}
+.content-block .diagram-wrap figcaption { color:#ffffff55; }
+
+/* TOC stays dark-themed but sits outside content-block */
+
+</style>
+
+</head>
+<body>
+
+<canvas id="starsCanvas"></canvas>
+
+<header>
+    <a href="dashboard.html" class="logo"><span>LEO</span><span>AF</span></a>
+    <div class="nav-right">
+        <a href="q1.html" class="nav-btn">← Q1 HUB</a>
+        <button id="logoffBtn" class="nav-btn">ABORT</button>
+    </div>
+</header>
+
+<div class="breadcrumb">
+    <a href="dashboard.html">DASHBOARD</a><span>/</span>
+    <a href="q1.html">Q1</a><span>/</span>
+    <span style="color:#ffffff88;">LESSON 01 — WHY LEO NOW</span>
+</div>
+
+<div class="lesson-wrap">
+
+```
+<div class="lesson-header">
+    <div class="lesson-tag">Q1 · LESSON 01 OF 15</div>
+    <h1>Why LEO Now</h1>
+    <div class="lesson-meta">
+        <div class="l-pill l-pill-q">QUARTER 1</div>
+        <div class="l-pill l-pill-t">FOUNDATIONS</div>
+    </div>
+    <p class="lesson-intro">This lesson establishes the strategic and technical context for everything that follows. Before studying orbits, link budgets, or constellation design, you need to understand why the industry moved to LEO, what made it possible, and what the competitive landscape looks like today. By the end you should be able to articulate — with numbers — the case for LEO to a sceptical GEO operator.</p>
+</div>
+
+<div class="toc">
+    <h4>CONTENTS</h4>
+    <ol>
+        <li><a href="#s1">The fundamental problem with GEO</a></li>
+        <li><a href="#s2">Why the 1990s LEO attempt failed</a></li>
+        <li><a href="#s3">What changed: the three industrial enablers</a></li>
+        <li><a href="#s4">The demand side: market forces that pulled LEO into existence</a></li>
+        <li><a href="#s5">The technology timeline</a></li>
+        <li><a href="#s6">The competitive landscape crystallises</a></li>
+        <li><a href="#s7">Architecture choices are business choices</a></li>
+        <li><a href="#s8">Geopolitics and the strategic dimension</a></li>
+        <li><a href="#s9">Implications for the systems architect</a></li>
+        <li><a href="#quiz">Knowledge check</a></li>
+        <li><a href="#python">Python exercises</a></li>
+        <li><a href="#reflect">Reflection prompts</a></li>
+    </ol>
+</div>
+
+<!-- ═══ SECTION 1 ═══ -->
+<div class="content-block" id="s1">
+    <h2>1. The Fundamental Problem With GEO</h2>
+
+    <p>Geostationary orbit sits at 35,786 km above the equator. A satellite placed there orbits at exactly the same angular rate as Earth rotates, making it appear stationary from the ground. This property is immensely useful: ground antennas can be fixed dishes, a single satellite covers roughly a third of Earth's surface, and the operator needs no tracking software to maintain a link. These advantages made GEO the dominant orbit for commercial satellite communications from the 1960s through the 2010s.</p>
+
+    <p>But that altitude comes with a physical cost that cannot be engineered away. Electromagnetic signals travel at the speed of light — approximately 299,792 km/s in vacuum. The one-way path from a ground terminal to a GEO satellite and back down to another terminal covers roughly 72,000 km. That journey takes approximately 240 ms. Add the return trip and you have a minimum round-trip propagation delay of around 480–550 ms before any network processing, switching, or queuing delay is included. In practice, real GEO internet connections exhibit round-trip times of 600–700 ms, occasionally more.</p>
+
+    <div class="key-numbers">
+        <div class="kn-item"><span class="kn-val">35,786</span><span class="kn-label">GEO altitude (km)</span></div>
+        <div class="kn-item"><span class="kn-val">~240 ms</span><span class="kn-label">One-way GEO propagation delay</span></div>
+        <div class="kn-item"><span class="kn-val">~600 ms</span><span class="kn-label">Typical GEO round-trip time</span></div>
+        <div class="kn-item"><span class="kn-val">299,792</span><span class="kn-label">Speed of light (km/s)</span></div>
+    </div>
+
+    <h3>Why 600 ms matters</h3>
+
+    <p>For broadcast television and one-way data delivery, GEO latency is irrelevant. A TV signal originating in a studio travels via GEO satellite to a receiver dish — the viewer does not care if the signal is 240 ms old. This is why GEO dominated broadcast for decades and continues to dominate it today.</p>
+
+    <p>The problem emerged as satellite was asked to carry interactive traffic. Voice calls became uncomfortable. The ITU's G.114 recommendation specifies that one-way delay above 150 ms causes noticeable degradation in conversational quality. GEO blows through that limit on the uplink alone. Satellite phone calls via GEO have a characteristic "satellite delay" that users find awkward and operators spent enormous effort mitigating with echo cancellers.</p>
+
+    <p>As internet traffic grew through the 2000s, the TCP congestion control problem became acute. TCP's acknowledgement mechanism — every data packet must be acknowledged before the sender can continue — was designed for terrestrial networks with latencies of tens of milliseconds. On a GEO link, the sender must wait 600 ms for each acknowledgement. TCP's congestion window, which controls how much data can be in flight at once, opens slowly because it backs off on perceived congestion. The result is that GEO links are dramatically under-utilised relative to their raw capacity. A satellite with 100 Gbps of physical capacity might deliver effective throughput of a fraction of that to TCP-based applications without acceleration.</p>
+
+    <p>The industry responded with Performance Enhancing Proxies (PEPs): software that sits at the gateway and "spoofs" TCP acknowledgements locally, fooling the sender's stack into thinking the link has low latency. PEPs worked adequately for unencrypted HTTP traffic. The widespread adoption of HTTPS from around 2014 onward — which encrypts the TCP layer end-to-end — killed transparent PEPs. The proxy could no longer see or modify the TCP headers. GEO operators lost their primary workaround for the latency problem at exactly the moment internet traffic was shifting decisively to encrypted protocols.</p>
+
+    <div class="callout red">
+        <strong>THE CONSTRAINT THAT CANNOT BE ENGINEERED AWAY</strong>
+        GEO latency is not a technology problem. It is not a modulation problem, a coding problem, or a signal processing problem. It is a consequence of the distance between the satellite and Earth combined with the finite speed of light. No future technology will eliminate it. The only solution is to move the satellite closer to Earth.
+    </div>
+
+    <h3>The bandwidth illusion</h3>
+
+    <p>The GEO industry's response to the latency critique in the 2010s was to pivot to high-throughput satellites (HTS). Instead of wide-beam coverage using a single transponder, HTS satellites used dozens or hundreds of narrow spot beams, each operating on the same frequency, with geographic separation preventing interference. This frequency reuse multiplied capacity dramatically. ViaSat-2, launched in 2017, delivered around 300 Gbps of total capacity. ViaSat-3, launched in 2023, was designed for over 1 Tbps per satellite. EchoStar's Jupiter 3, launched in 2023, also targeted 1 Tbps.</p>
+
+    <p>The HTS story was compelling: satellite broadband costs were falling, rural users were getting faster service, and the economics of capacity per dollar were improving rapidly. GEO operators presented HTS as the answer to LEO competition.</p>
+
+    <p>The flaw in this narrative is that bandwidth and latency are orthogonal. A 1 Tbps GEO satellite delivers its terabit at 600 ms RTT. For latency-insensitive applications — video streaming, file downloads, web browsing of static content — this is fine. But the internet was evolving in the opposite direction. Streaming services were adding live sports. Video calls became business-critical rather than novelties. Cloud gaming required sub-50 ms RTT. Financial trading demanded microsecond-level timing. The more latency-sensitive the application, the more GEO HTS capacity was irrelevant.</p>
+
+    <p>An analogy: building a wider motorway does not help if the speed limit is 5 km/h. GEO operators were widening the motorway. The industry needed to raise the speed limit — which meant changing the orbit.</p>
+
+    <h3>GEO coverage limitations</h3>
+
+    <p>Beyond latency, GEO has a geometric coverage problem. The geostationary arc is visible from latitudes roughly between 75°N and 75°S. Beyond those latitudes, the satellite is too close to the horizon for a practical link — the signal must pass through too much atmosphere, and the angle is geometrically unfavourable for antennas. The Arctic, most of Antarctica, northern Alaska, northern Canada, northern Russia, and Greenland are poorly served or unserved by GEO. These are precisely the regions where aviation routes (transpolar flights), shipping lanes, and remote resource extraction operations increasingly need connectivity. GEO's geometric limitation is a market limitation.</p>
+
+    <p>The diagram below shows all four orbital regimes to scale relative to Earth. Note the presence of <strong>Very Low Earth Orbit (VLEO)</strong> — altitudes between roughly 200 and 450 km. VLEO is not yet commercially operational at scale, but it is attracting significant research interest. At these altitudes, propagation delay drops further (under 3 ms RTT), radar and Earth-observation resolution improves due to reduced slant range, and transmit power requirements fall. The tradeoff is severe: atmospheric drag at VLEO altitudes requires constant propulsion to maintain orbit, dramatically shortening satellite lifetime without ion propulsion. A VLEO communications constellation would need either very efficient electric propulsion or extremely frequent replenishment launches. Several research programmes and startups are actively working on this problem; expect VLEO to become a practical regime within this decade.</p>
+
+    <div class="diagram-wrap">
+        <svg viewBox="0 0 700 360" width="100%" xmlns="http://www.w3.org/2000/svg" font-family="Share Tech Mono, monospace">
+            <defs>
+                <pattern id="grid2" width="35" height="35" patternUnits="userSpaceOnUse">
+                    <path d="M 35 0 L 0 0 0 35" fill="none" stroke="#ffffff06" stroke-width="0.5"/>
+                </pattern>
+                <radialGradient id="earthGrad" cx="50%" cy="50%">
+                    <stop offset="0%" style="stop-color:#003355"/>
+                    <stop offset="100%" style="stop-color:#001122"/>
+                </radialGradient>
+            </defs>
+            <rect width="700" height="360" fill="url(#grid2)"/>
+
+            <!-- Earth -->
+            <circle cx="350" cy="300" r="60" fill="url(#earthGrad)" stroke="#00d9ff22" stroke-width="1.5"/>
+            <text x="350" y="304" text-anchor="middle" font-size="11" fill="#00d9ff66" letter-spacing="2">EARTH</text>
+
+            <!-- VLEO -->
+            <ellipse cx="350" cy="300" rx="95" ry="88" fill="none" stroke="#ff004f88" stroke-width="1" stroke-dasharray="3,4"/>
+            <circle cx="278" cy="222" r="4" fill="#ff004f"/>
+            <text x="242" y="214" font-size="9" fill="#ff004f99" text-anchor="middle">VLEO</text>
+            <text x="242" y="225" font-size="8" fill="#ff004f66" text-anchor="middle">200–450 km</text>
+
+            <!-- LEO -->
+            <ellipse cx="350" cy="300" rx="148" ry="136" fill="none" stroke="#39ff14" stroke-width="1.5" stroke-dasharray="4,3"/>
+            <circle cx="224" cy="195" r="5" fill="#39ff14"/>
+            <text x="178" y="185" font-size="10" fill="#39ff14cc" text-anchor="middle">LEO</text>
+            <text x="178" y="198" font-size="9" fill="#39ff1488" text-anchor="middle">550–1,200 km</text>
+            <text x="178" y="210" font-size="9" fill="#39ff1466" text-anchor="middle">~15–25 ms RTT</text>
+
+            <!-- MEO -->
+            <ellipse cx="350" cy="300" rx="235" ry="215" fill="none" stroke="#00d9ff" stroke-width="1" stroke-dasharray="4,3"/>
+            <circle cx="148" cy="148" r="5" fill="#00d9ff"/>
+            <text x="100" y="136" font-size="10" fill="#00d9ffcc" text-anchor="middle">MEO</text>
+            <text x="100" y="149" font-size="9" fill="#00d9ff88" text-anchor="middle">8,000–20,000 km</text>
+            <text x="100" y="161" font-size="9" fill="#00d9ff66" text-anchor="middle">~130–150 ms RTT</text>
+
+            <!-- GEO (partial arc) -->
+            <path d="M 15 290 Q 350 -85 685 290" fill="none" stroke="#ff004f" stroke-width="1.5" stroke-dasharray="5,4"/>
+            <circle cx="350" cy="12" r="6" fill="#ff004f"/>
+            <text x="510" y="60" font-size="10" fill="#ff004fcc" text-anchor="middle">GEO</text>
+            <text x="510" y="73" font-size="9" fill="#ff004f88" text-anchor="middle">35,786 km</text>
+            <text x="510" y="85" font-size="9" fill="#ff004f66" text-anchor="middle">~600 ms RTT</text>
+
+            <!-- Coverage angle lines from GEO satellite -->
+            <line x1="350" y1="12" x2="130" y2="285" stroke="#ff004f22" stroke-width="1"/>
+            <line x1="350" y1="12" x2="570" y2="285" stroke="#ff004f22" stroke-width="1"/>
+            <text x="350" y="330" text-anchor="middle" font-size="9" fill="#ffffff33" letter-spacing="1">GEO COVERAGE ZONE (≈ 1/3 EARTH SURFACE)</text>
+
+            <!-- Van Allen belt indication -->
+            <ellipse cx="350" cy="300" rx="168" ry="155" fill="none" stroke="#ffaa0022" stroke-width="6" opacity="0.5"/>
+            <text x="580" y="145" font-size="8" fill="#ffaa0066" text-anchor="start">VAN ALLEN</text>
+            <text x="580" y="156" font-size="8" fill="#ffaa0066" text-anchor="start">BELTS</text>
+        </svg>
+        <figcaption>ORBITAL REGIMES — NOT TO SCALE · VAN ALLEN BELTS SHOWN SCHEMATICALLY</figcaption>
+    </div>
+
+    <div class="callout amber">
+        <strong>THE VAN ALLEN BELTS</strong>
+        The Van Allen radiation belts are two concentric zones of energetic charged particles — mainly protons and electrons — trapped by Earth's magnetic field. The inner belt extends roughly from 1,000 to 6,000 km altitude; the outer belt from approximately 13,000 to 60,000 km. Particles in these zones are accelerated to high energies and continuously bombard any satellite passing through them, causing cumulative radiation damage to electronics, solar cells, and sensors over time. This is why MEO is a difficult orbit for long-lifetime satellites — GPS and O3b satellites sit in MEO but require radiation-hardened components with significant cost and mass penalties. LEO constellations operating below ~1,200 km sit largely beneath the inner belt and experience a much lower radiation dose, which is one reason COTS (commercial off-the-shelf) electronics can be used with acceptable reliability. GEO satellites above the outer belt experience a different but stable radiation environment; they are outside the belts, not inside them. The belts are not relevant to signal propagation — radio waves pass through them unaffected — but they are a major driver of satellite design life, component selection, and orbit choice.
+    </div>
+</div>
+
+<!-- ═══ SECTION 2 ═══ -->
+<div class="content-block" id="s2">
+    <h2>2. Why the 1990s LEO Attempt Failed</h2>
+
+    <p>The idea of low-Earth-orbit broadband is not new. Multiple projects in the 1990s attempted exactly what Starlink and its contemporaries have built — and failed. Understanding why they failed is essential context for understanding what made the 2010s generation viable.</p>
+
+    <h3>Iridium (1997–1999)</h3>
+    <p>Motorola's Iridium system was a genuine engineering achievement. Sixty-six satellites in polar orbit at 780 km altitude, interconnected by radio inter-satellite links, providing global coverage including the poles. Iridium launched commercial service in November 1998. It filed for bankruptcy in August 1999 — nine months later — after attracting fewer than 55,000 subscribers against a break-even requirement estimated at 500,000–600,000.</p>
+
+    <p>The failure was not technical. It was a combination of cost, form factor, and timing. Iridium handsets were large, expensive (over $3,000 in 1999 dollars), and had poor battery life. Monthly service fees were high. Most critically, the mobile phone revolution was underway: GSM networks were expanding rapidly in the markets Iridium had targeted, and a GSM phone was cheaper, smaller, and more capable for most users. Iridium had spent a decade building a system for a world that was rapidly changing around it.</p>
+
+    <div class="callout amber">
+        <strong>THE IRIDIUM LESSON</strong>
+        A technically correct system can fail commercially if the user terminal is unacceptable, the price is wrong, and the terrestrial alternative improves faster than the satellite system deploys. The terminal problem haunted LEO thinking for two more decades.
+    </div>
+
+    <h3>Teledesic (1994–2002)</h3>
+    <p>Funded by Bill Gates and Craig McCaw, Teledesic was conceived as an "internet in the sky" — initially 840 satellites (later reduced to 288), delivering broadband to small fixed terminals globally. The concept was technically ahead of its time in the mid-1990s, anticipating internet connectivity needs that would not become mainstream for another decade. But the project collapsed in 2002 after spending over $900 million without launching a single operational satellite. The development costs were enormous, the launch infrastructure to deploy hundreds of satellites did not exist, and the commercial internet was not yet mature enough to create the demand that would justify the investment.</p>
+
+    <h3>Globalstar and the LEO voice services</h3>
+    <p>Globalstar launched its constellation in 1999 for satellite voice and data. Unlike Iridium it used a "bent-pipe" architecture — satellites simply relayed signals to ground gateways rather than routing calls through the constellation. This was cheaper to build but required gateway coverage. Globalstar filed for bankruptcy in 2002 with $3.3 billion in debt. Like Iridium, it was overtaken by the GSM mobile revolution.</p>
+
+    <h3>What the 1990s generation had in common</h3>
+    <p>All the 1990s LEO ventures shared the same fundamental constraint: satellite manufacturing was expensive, launch was expensive, and user terminals were expensive. The economics required enormous subscriber bases to achieve break-even, and none of them got there before running out of capital. The missing ingredients were cheap satellite production (requiring the industrial base created by the smartphone revolution), cheap and frequent launch (requiring reusable rockets), and cheap flat-panel terminals (requiring phased-array semiconductor manufacturing advances).</p>
+
+    <div class="compare-table" style="overflow-x:auto;">
+        <table class="compare-table" style="min-width:560px;">
+            <thead>
+                <tr>
+                    <th>System</th>
+                    <th>Satellites</th>
+                    <th>Altitude</th>
+                    <th>Fate</th>
+                    <th>Primary Failure Mode</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr><td>Iridium (1998)</td><td>66</td><td>780 km</td><td class="lo">Bankruptcy 1999</td><td>Terminal cost/size; GSM competition</td></tr>
+                <tr><td>Teledesic (planned)</td><td>840→288</td><td>700 km</td><td class="lo">Cancelled 2002</td><td>Development cost; no launch infrastructure</td></tr>
+                <tr><td>Globalstar (1999)</td><td>48</td><td>1,414 km</td><td class="lo">Bankruptcy 2002</td><td>GSM competition; debt burden</td></tr>
+                <tr><td>ICO Global (1999)</td><td>10 MEO</td><td>10,390 km</td><td class="lo">Bankruptcy 1999</td><td>Underfunding; Iridium fallout</td></tr>
+                <tr><td>Starlink (2019–)</td><td>6,000+</td><td>340–560 km</td><td class="hi">Operational</td><td>—</td></tr>
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<!-- ═══ SECTION 3 ═══ -->
+<div class="content-block" id="s3">
+    <h2>3. What Changed: The Three Industrial Enablers</h2>
+
+    <p>The 2010s LEO constellations are not simply a retry of the 1990s attempt with better luck. They became viable because three industrial transformations, each happening independently, converged to change the economics of every component in the system.</p>
+
+    <h3>Enabler 1: The smartphone supply chain</h3>
+    <p>The global smartphone market grew from essentially zero in 2007 to over 1.5 billion units per year by 2015. To meet that demand, semiconductor manufacturers invested hundreds of billions of dollars in fabrication capacity, driving dramatic reductions in the cost of processors, memory, radio frequency components, MEMS sensors, and solar cells. These components are also the building blocks of small satellites.</p>
+
+    <p>A satellite attitude control system in the 1990s used bespoke aerospace gyroscopes costing tens of thousands of dollars per unit. A MEMS gyroscope that could do a comparable job became available for a few dollars from consumer supply chains. GPS receivers for orbit determination, once specialised and expensive, became commodity components. Radiation-tolerant FPGA families and commercial-off-the-shelf (COTS) processors capable of surviving the LEO radiation environment at acceptable risk became available.</p>
+
+    <p>The consequence was that satellite manufacturing costs could be reduced by orders of magnitude — not incrementally, but dramatically — for missions operating at LEO altitudes where the radiation environment is less severe than GEO. SpaceX has cited target manufacturing costs per Starlink satellite of around $500,000–$750,000 at scale. Compare this to a GEO communications satellite at $150–400 million, or even a traditional small satellite at $5–50 million. The constellation economics that looked impossible with 1990s manufacturing costs became viable with 2020s costs.</p>
+
+    <h3>Enabler 2: Reusable launch vehicles</h3>
+    <p>Launch cost is the single largest variable in constellation economics for large constellations. SpaceX's Falcon 9 development, culminating in the first successful booster landing in December 2015, began a new phase in launch economics. By flying the same Falcon 9 first stage multiple times — SpaceX has now reflown individual boosters more than 20 times — the amortised cost per kilogram to LEO fell dramatically.</p>
+
+    <div class="key-numbers">
+        <div class="kn-item"><span class="kn-val">$65,000</span><span class="kn-label">$/kg to LEO, Space Shuttle era</span></div>
+        <div class="kn-item"><span class="kn-val">$10,000</span><span class="kn-label">$/kg to LEO, Falcon 9 expendable</span></div>
+        <div class="kn-item"><span class="kn-val">~$2,700</span><span class="kn-label">$/kg to LEO, Falcon 9 reusable (2020)</span></div>
+        <div class="kn-item"><span class="kn-val">&lt;$100</span><span class="kn-label">$/kg target, Starship (aspirational)</span></div>
+    </div>
+
+    <p>For SpaceX's own Starlink constellation, the effective launch cost is even lower because SpaceX is the customer — it pays only the marginal cost of propellant and ground operations rather than market rate. This is a structural advantage that no competitor can replicate unless they also own a launch vehicle. One Web, Kuiper, and Telesat all pay market rate for launch and factor that into their constellation economics.</p>
+
+    <p>Beyond cost, launch cadence matters. To deploy a 4,000-satellite constellation, an operator needs to launch hundreds of satellites per year. Falcon 9 demonstrated the ability to launch 60 Starlink satellites at a time on a two-week cadence. Starship, designed to carry 400+ Starlinks per flight, would accelerate this further. The ability to replenish and grow a constellation quickly is itself a competitive moat.</p>
+
+    <h3>Enabler 3: Flat-panel phased-array terminals</h3>
+    <p>This is the enabler that most people outside the industry underestimate. Building a constellation is the supply side of the LEO equation. But the business only works if users can afford and install a terminal. A GEO terminal is a fixed dish — mechanically simple, cheap to manufacture, pointed once and left alone. A LEO terminal must track satellites moving at 7–8 km/s across the sky, with a given satellite visible for 5–10 minutes before a handover to the next one.</p>
+
+    <p>Mechanical tracking antennas — dishes on motorised mounts — can do this job, and maritime and aviation markets used them for years. But they are bulky, have moving parts that fail, require calibration, and are expensive. A consumer-grade mechanical tracking antenna capable of LEO service would cost thousands of dollars to manufacture and would be too fragile and power-hungry for consumer residential, let alone mobile, deployment.</p>
+
+    <p>Electronically steered phased arrays solve this problem. A phased array antenna uses an array of small antenna elements, each connected to a phase-shifting circuit. By controlling the phase of the signal fed to each element, the antenna's beam can be steered electronically — no moving parts, response time measured in microseconds, beam steering across the full hemisphere in a fraction of a second. The challenge was cost: the semiconductor circuitry required for a high-performance phased array was prohibitively expensive until the mid-2010s.</p>
+
+    <p>Several trends converged: advances in 5G millimetre-wave silicon semiconductor processes; investment by the defence sector in AESA (Active Electronically Scanned Array) radar driving down component costs; and the general Moore's Law trajectory of RF semiconductor integration. By 2020, SpaceX had produced a consumer Starlink dish — internally called the "Dishy McFlatface" — at a reported manufacturing cost approaching $1,500 per unit, targeting an eventual sub-$500 price point. This was the unlock: a flat, lightweight, no-moving-parts terminal that a homeowner could install on a roof or a maritime operator could mount on a ship's superstructure.</p>
+
+    <div class="callout green">
+        <strong>THE SYNTHESIS</strong>
+        None of these three enablers alone was sufficient. Cheap satellites without cheap launch means the constellation is unaffordable. Cheap launch without cheap terminals means there are no users. Cheap terminals without satellites means there is no service. The convergence of all three, around 2018–2022, is what made the current LEO generation possible.
+    </div>
+</div>
+
+<!-- ═══ SECTION 4 ═══ -->
+<div class="content-block" id="s4">
+    <h2>4. The Demand Side: Market Forces That Pulled LEO Into Existence</h2>
+
+    <p>Even with dramatically lower costs, a mega-constellation requires $5–15 billion of capital investment before it generates meaningful revenue. Capital at that scale only flows when investors believe the addressable market is large, durable, and structurally underserved. The LEO case rested on three distinct market pillars, each large enough independently to justify investment.</p>
+
+    <h3>The unconnected billions</h3>
+    <p>International Telecommunication Union data for 2020 indicated approximately 2.9 billion people without internet access, concentrated in sub-Saharan Africa, South and Southeast Asia, and parts of Latin America. Terrestrial fibre and mobile broadband are uneconomical to deploy in areas with low population density or difficult terrain — the capital cost per subscriber becomes too high for viable business models. Satellite is the only technology that delivers connectivity to these regions with a fixed capital cost independent of subscriber density.</p>
+
+    <p>The economics of targeting this market are challenging: low population density means low aggregate demand even at 100% penetration, and low income levels constrain ARPU. But governments and development organisations have shown willingness to subsidise connectivity to underserved regions, creating a different revenue model — capacity contracts and anchor tenancy arrangements rather than direct consumer subscriptions.</p>
+
+    <h3>The mobility market</h3>
+    <p>Aviation and maritime connectivity are different from the residential market in several important ways. Users are captive (literally, on aircraft or vessels), willing to pay significant premiums for connectivity, and the operator is a business that can structure capacity contracts. GEO has served these markets for years, but with limitations that became progressively more visible.</p>
+
+    <p>The global in-flight connectivity (IFC) market was estimated at around $3–4 billion annually in 2020 and growing. Airlines were paying $100,000–$200,000 per aircraft per year for Ku-band GEO connectivity that delivered 2–10 Mbps per aircraft — bandwidth that was inadequate for an aircraft with 200 passengers expecting Netflix-quality streaming. The economics of LEO connectivity for aviation are fundamentally different: higher throughput, lower latency enabling better TCP performance, and potentially lower per-megabyte cost as constellation capacity scales.</p>
+
+    <p>Maritime is a larger market by revenue. The global fleet of commercial vessels — cargo ships, tankers, cruise ships, offshore platforms — represents tens of thousands of installations. Crew welfare connectivity (internet access for seafarers during voyages), vessel tracking, and operational data links (engine telemetry, voyage optimisation) all benefit from higher bandwidth and lower latency. VSAT maritime connectivity via GEO was a multi-billion-dollar annual market that LEO could address with superior performance.</p>
+
+    <h3>Government and defence</h3>
+    <p>Governments' interest in LEO connectivity operates at two levels. The first is civil: universal service obligations, rural connectivity programmes, emergency response communications. The second is defence and intelligence, where the combination of low latency, global coverage including polar regions, and resilience through constellation redundancy has direct operational value.</p>
+
+    <p>Ukraine's operational experience with Starlink from February 2022 transformed government procurement thinking across NATO and beyond. Starlink terminals enabled encrypted tactical communications, drone video links, and command and control connectivity in areas where terrestrial infrastructure had been destroyed. The US Department of Defense's Starshield programme, a militarised variant of Starlink, formalised a relationship between SpaceX and the defence community. Allied governments began discussing sovereign LEO capability — a constellation operated by or for national defence — as a strategic priority.</p>
+
+    <p>Government revenue is structurally valuable for constellation operators: contracts are long-term, pricing is less competitive than consumer markets, and governments can provide anchor tenancy that de-risks the business case during the early scaling phase.</p>
+
+    <div class="deep-dive">
+        <h4>DEEPER CONTEXT — THE AVIATION MARKET IN DETAIL</h4>
+        <p>Given your GEO/aviation background, this market deserves more granular treatment. The connected aircraft ecosystem has three distinct segments: commercial aviation (airliners), business aviation (private jets, charter), and government/military aviation.</p>
+        <p>Commercial aviation has been served primarily by ViaSat, Inmarsat (now part of Viasat), Panasonic Avionics, and Gogo using Ku-band and L-band GEO capacity. Typical installed capacity per aircraft in 2020 was 10–25 Mbps on Ku-band, adequate for light web browsing by small numbers of passengers but insufficient for the streaming video demand of a full widebody aircraft.</p>
+        <p>The fundamental economics: an A380 carries ~850 passengers, each expecting broadband quality. If average data consumption per passenger is 100 MB per hour and the flight is 10 hours, the aircraft needs 85 GB of data — implying sustained throughput of over 200 Mbps. No GEO IFC system in 2020 delivered anything close to this. LEO constellations, with their higher available capacity and ability to frequency-reuse across a dense constellation, are architecturally better suited to these throughput levels.</p>
+        <p>Aviation-specific terminal constraints drive engineering decisions: the antenna must conform to aircraft aerodynamics (typically flush-mounted or in a low-profile radome), survive DO-160 environmental testing (vibration, temperature, humidity, lightning), stay within SWaP budgets compatible with aircraft electrical systems, and be certifiable by the aviation authorities of every country the aircraft visits. These constraints are more demanding than any other LEO terminal application and will be covered in depth in Q3.</p>
+    </div>
+</div>
+
+<!-- ═══ SECTION 5 ═══ -->
+<div class="content-block" id="s5">
+    <h2>5. The Technology Timeline</h2>
+
+    <p>The convergence of the three enablers with the three demand pillars did not happen simultaneously. Understanding the sequence helps explain why certain architectural choices were made when they were.</p>
+
+    <div class="timeline">
+        <div class="tl-item">
+            <div class="tl-year">2013</div>
+            <div class="tl-body"><strong>EARLY CONSTELLATION CONCEPTS</strong><p>Greg Wyler founds OneWeb (then WorldVu). SpaceX internally begins exploring satellite broadband. Commercial small satellite industry is nascent — Planet Labs, Spire emerge for Earth observation.</p></div>
+        </div>
+        <div class="tl-item">
+            <div class="tl-year">2014</div>
+            <div class="tl-body"><strong>FIRST FCC FILINGS</strong><p>OneWeb files with the FCC for a 648-satellite broadband constellation. SpaceX files separately. The race for spectrum and orbital slots begins. SoftBank invests $1B in OneWeb.</p></div>
+        </div>
+        <div class="tl-item">
+            <div class="tl-year">2015</div>
+            <div class="tl-body"><strong>FALCON 9 LANDS</strong><p>December 21: SpaceX lands a Falcon 9 first stage for the first time. The economics of reusable launch begin to become real rather than theoretical. Amazon announces Project Kuiper concept internally.</p></div>
+        </div>
+        <div class="tl-item">
+            <div class="tl-year">2018</div>
+            <div class="tl-body"><strong>STARLINK PROTOTYPES</strong><p>SpaceX launches two experimental Starlink satellites (Tintin A and B). Flat-panel ESA terminal development accelerates. OneWeb launches its first prototype satellites.</p></div>
+        </div>
+        <div class="tl-item">
+            <div class="tl-year">2019</div>
+            <div class="tl-body"><strong>STARLINK BEGINS DEPLOYMENT</strong><p>May 23: SpaceX launches 60 Starlink satellites on a single Falcon 9. The viability of constellation-scale deployment is demonstrated. Concerns about astronomical interference from satellite trains begin.</p></div>
+        </div>
+        <div class="tl-item">
+            <div class="tl-year">2020</div>
+            <div class="tl-body"><strong>ONEWEB BANKRUPTCY; STARLINK BETA</strong><p>March: OneWeb files for Chapter 11 bankruptcy after SoftBank withdraws funding amid COVID-19. October: Starlink opens public beta ("Better Than Nothing Beta"). Latency measured at 20–40 ms — a dramatic demonstration of LEO's latency advantage.</p></div>
+        </div>
+        <div class="tl-item">
+            <div class="tl-year">2021</div>
+            <div class="tl-body"><strong>ONEWEB RESCUED; KUIPER AUTHORISED</strong><p>OneWeb acquired by UK Government and Bharti Enterprises. Amazon receives FCC authorisation for 3,236 Kuiper satellites. Starlink grows to 100,000 users. Consumer dish price drops to $499.</p></div>
+        </div>
+        <div class="tl-item">
+            <div class="tl-year">2022</div>
+            <div class="tl-body"><strong>UKRAINE DEMONSTRATES OPERATIONAL VALUE</strong><p>Starlink terminals deployed in Ukraine following Russian invasion reshape government thinking globally about LEO strategic value. Starlink reaches 400,000 users. ISL-equipped satellites begin Starlink Gen2 deployment. OneWeb resumes launches.</p></div>
+        </div>
+        <div class="tl-item">
+            <div class="tl-year">2023</div>
+            <div class="tl-body"><strong>AVIATION CERTIFICATIONS BEGIN</strong><p>Multiple airlines begin Starlink IFC installations. OneWeb/Eutelsat merger completes. Kuiper prototype satellites launch. Telesat Lightspeed FCC authorisation confirmed. Starlink surpasses 1.5M subscribers.</p></div>
+        </div>
+        <div class="tl-item">
+            <div class="tl-year">2024–25</div>
+            <div class="tl-body"><strong>CONSOLIDATION AND COMPETITION</strong><p>Starlink aviation service rolls out across major carriers. Kuiper begins phased deployment. OneWeb (now Eutelsat OneWeb) faces financial pressure. SES/Intelsat merger reshapes the GEO/MEO landscape. The competitive dynamics described in this lesson play out in real time.</p></div>
+        </div>
+    </div>
+</div>
+
+<!-- ═══ SECTION 6 ═══ -->
+<div class="content-block" id="s6">
+    <h2>6. The Competitive Landscape Crystallises</h2>
+
+    <p>By 2023, the LEO broadband market had moved from concept to competitive reality. Four major players had made sufficiently large commitments — in capital, satellites, and spectrum — to define the shape of the industry for the decade ahead. Each made distinct architectural choices driven by their funding structures, launch access, target markets, and technical philosophies.</p>
+
+    <table class="compare-table" style="overflow-x:auto; display:block; min-width:600px;">
+        <thead>
+            <tr>
+                <th>Operator</th>
+                <th>Satellites (planned)</th>
+                <th>Altitude</th>
+                <th>ISLs</th>
+                <th>Primary Markets</th>
+                <th>Launch Vehicle</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td>SpaceX Starlink</td>
+                <td>~42,000 (FCC)</td>
+                <td>340–560 km (shells)</td>
+                <td class="hi">Yes (Gen2)</td>
+                <td>Consumer, aviation, maritime, gov</td>
+                <td>Falcon 9 / Starship</td>
+            </tr>
+            <tr>
+                <td>Amazon Kuiper</td>
+                <td>3,236</td>
+                <td>590–630 km</td>
+                <td class="md">Planned</td>
+                <td>Consumer, enterprise, AWS edge</td>
+                <td>ULA Vulcan, Ariane 6, New Glenn</td>
+            </tr>
+            <tr>
+                <td>Eutelsat OneWeb</td>
+                <td>648 (Gen1) + Gen2 TBD</td>
+                <td>1,200 km</td>
+                <td class="lo">No (Gen1)</td>
+                <td>B2B: aviation, maritime, telcos</td>
+                <td>Arianespace, New Glenn</td>
+            </tr>
+            <tr>
+                <td>Telesat Lightspeed</td>
+                <td>298</td>
+                <td>1,000–1,325 km</td>
+                <td class="hi">Yes (full mesh)</td>
+                <td>Aviation, enterprise, gov</td>
+                <td>Falcon 9, Terran R (planned)</td>
+            </tr>
+        </tbody>
+    </table>
+
+    <h3>The Starlink structural position</h3>
+    <p>SpaceX's competitive position is unusual because the same company owns the launch vehicle, builds the satellites, and operates the constellation. The consequences cascade through the entire business model. Launch cost for Starlink satellites is effectively marginal cost — SpaceX is not paying itself a profit margin. Launch cadence is limited only by production and operational capacity, not by launch vehicle availability on the open market. The ability to iterate satellite design and launch improved hardware within months of identifying a flaw gives SpaceX a product development velocity that no competitor can match.</p>
+
+    <p>By end of 2023 Starlink had crossed 2 million subscribers globally and was generating estimated revenues of $6–8 billion annualised. The aviation segment was growing rapidly after regulatory approvals in multiple jurisdictions. The Starlink business was approaching cash-flow breakeven — potentially the first commercial LEO broadband constellation to do so.</p>
+
+    <h3>Kuiper's structural position</h3>
+    <p>Amazon's advantage is different: cloud infrastructure and the world's largest e-commerce and logistics network. Kuiper terminals are designed to integrate with Amazon Web Services edge computing services — a vessel with a Kuiper terminal could run latency-sensitive applications on an AWS edge node rather than routing traffic back to a central data centre. For enterprise and maritime customers with cloud-native workloads, this integration has real value.</p>
+    <p>Kuiper's disadvantage is launch: it has contracted capacity on three different launch vehicles (Vulcan Centaur, Ariane 6, New Glenn) rather than owning its own. This gives flexibility but constrains the rate at which the constellation can be deployed and replenished.</p>
+
+    <h3>OneWeb/Eutelsat's position</h3>
+    <p>OneWeb completed its Gen1 constellation at 648 satellites in 1,200 km circular orbit before financial difficulties halted the programme. After the Bharti/UK Government rescue and subsequent merger with GEO operator Eutelsat, the combined Eutelsat OneWeb entity has a dual-orbit portfolio: OneWeb LEO for low-latency broadband and Eutelsat GEO for broadcast and capacity services. The combination in principle allows hybrid multi-orbit service offerings. In practice, the merged entity faced significant financial pressure through 2024.</p>
+    <p>OneWeb's Gen1 architecture made a deliberate choice not to include inter-satellite links — satellites relay traffic directly to ground gateways, requiring a dense gateway network to cover the service area. This is simpler and cheaper to build initially but limits end-to-end latency performance and creates gateway dependency that ISL-equipped constellations avoid.</p>
+
+    <h3>Telesat Lightspeed's position</h3>
+    <p>Telesat is a Canadian operator with deep experience in GEO satellite operations and a heritage in MEO through its O3b partnership with SES. Lightspeed is architecturally distinctive: a smaller constellation (298 satellites) at higher altitude (1,000–1,325 km) with full-mesh optical inter-satellite links on every satellite. The full-mesh ISL approach means that every satellite can route traffic to any other, enabling very low end-to-end latency without requiring a gateway on the traffic path. Telesat positions this as superior for enterprise and aviation customers who need predictable, low-latency performance across long routes.</p>
+    <p>The Canadian government committed C$1.44 billion in support to Lightspeed, recognising Canadian sovereignty interests in domestic satellite connectivity. This government anchor provides financial stability that purely commercial constellations lack.</p>
+</div>
+
+<!-- ═══ SECTION 7 ═══ -->
+<div class="content-block" id="s7">
+    <h2>7. Architecture Choices Are Business Choices</h2>
+
+    <p>One of the most important lessons for a systems architect transitioning from GEO to LEO is that technical architecture and business strategy are inseparable. Every major architectural decision in a LEO constellation — altitude, inclination, ISL vs bent-pipe, Ka vs Ku vs V-band, consumer vs B2B terminal — is simultaneously a technical choice and a business choice with competitive consequences.</p>
+
+    <h3>Altitude trade</h3>
+    <p>Lower altitude means lower latency but shorter satellite life (more atmospheric drag), smaller coverage footprint per satellite (requiring more satellites for global coverage), and higher radiation exposure variability depending on the orbit. Starlink's multi-shell approach, deploying satellites at 340 km (for the lowest latency shell), 550 km (primary operational shell), and higher altitudes, reflects a deliberate layering of coverage, latency, and lifetime tradeoffs. OneWeb's choice of 1,200 km gives longer satellite lifetime and a larger footprint but higher latency than Starlink.</p>
+
+    <h3>ISL vs bent-pipe</h3>
+    <p>Inter-satellite links eliminate the need for a ground gateway on the traffic path for most connections. A user in the middle of the Pacific Ocean can have their traffic routed through the constellation to a gateway on the nearest continent without routing through an intermediate ground station. This reduces latency on long routes dramatically. But ISLs add cost, mass, and power requirements to the satellite, and the pointing and acquisition system for optical ISLs is technically complex. OneWeb's Gen1 choice of no ISLs reduced satellite cost and complexity, accepting the gateway dependency as a business constraint they could manage by building a dense gateway network.</p>
+
+    <h3>Consumer vs B2B terminal strategy</h3>
+    <p>Starlink's consumer terminal strategy — sell directly to end users, scale volume to drive down terminal cost — required regulatory approval for direct-to-consumer service in every country, created customer acquisition and support cost, and exposed SpaceX to regulatory risk in markets that chose to block direct satellite broadband. OneWeb's B2B-only strategy — sell capacity to telcos, maritime operators, and aviation integrators who aggregate demand — avoided these issues but capped addressable market and required commercial agreements with intermediaries who take margin.</p>
+
+    <p>Neither strategy is objectively correct. They reflect different risk appetites, different capital structures, and different assessments of where the most defensible revenue is. An architect who understands these tradeoffs can evaluate a constellation design for coherence: do the technical choices support the stated business model?</p>
+
+    <div class="callout">
+        <strong>ARCHITECT'S FRAMEWORK</strong>
+        When evaluating any LEO system design — your own or a competitor's — ask four questions: (1) Who is the customer and what do they need? (2) Which orbital parameters serve that customer's physics requirements? (3) Which terminal architecture is compatible with the customer's installation constraints? (4) Do the economics at the proposed scale close? A design that cannot answer all four coherently is not complete.
+    </div>
+</div>
+
+<!-- ═══ SECTION 8 ═══ -->
+<div class="content-block" id="s8">
+    <h2>8. Geopolitics and the Strategic Dimension</h2>
+
+    <p>No treatment of "why LEO now" is complete without addressing the geopolitical dimension. LEO satellite constellations are not merely commercial infrastructure — they are increasingly treated as strategic national assets, and the decisions governments make about spectrum, landing rights, and sovereign capability have direct consequences for architecture.</p>
+
+    <h3>The spectrum sovereignty question</h3>
+    <p>Spectrum for satellite communication is coordinated internationally through the ITU, but licensed nationally. A LEO constellation that wants to operate in a given country must obtain landing rights — permission to provide service in that jurisdiction — from the national regulator. Some countries have used landing rights as a geopolitical instrument: Russia and China have not authorised Starlink service. India delayed Starlink licensing for years amid disputes about local manufacturing requirements. Brazil and others have imposed local gateway requirements, influencing architecture.</p>
+    <p>For an architect, this means that a nominally global constellation may effectively be a patchwork of regional services defined by regulatory permissions. The gateway locations, the frequency bands licensed in each country, and the service level commitments all vary by jurisdiction in ways that must be reflected in the system architecture.</p>
+
+    <h3>The military dimension</h3>
+    <p>Ukraine's use of Starlink is the most visible example of LEO connectivity's military value, but the implications go beyond a single conflict. Military planners now consider commercial LEO constellations as both an asset and a vulnerability. As an asset: resilient, broadband, low-latency connectivity anywhere on Earth, including polar regions GEO cannot serve. As a vulnerability: a commercial system operated by a private company whose priorities may not align with military operational security, and whose satellites are potential targets in a conflict that extends to space.</p>
+    <p>The US Space Force's Commercial Satellite Communications Office (CSCO) manages contracts with commercial LEO operators for military capacity. Several NATO allies have begun investing in national LEO capability or equity stakes in commercial constellations to ensure sovereign access. This government and defence investment is not peripheral to LEO economics — it is a meaningful and growing revenue stream that improves constellation business cases.</p>
+
+    <h3>The industrial policy dimension</h3>
+    <p>The UK Government's decision to acquire OneWeb (now Eutelsat OneWeb) was explicitly framed as industrial policy: maintaining UK capability in satellite manufacturing and operations after Brexit reduced UK access to EU space programmes. Canada's investment in Telesat Lightspeed similarly reflects a sovereign connectivity interest. The European Union's IRIS² programme aims to build a European sovereign LEO/MEO broadband constellation. These government-backed constellations will compete with commercial operators in some segments and complement them in others.</p>
+    <p>For the systems architect, the geopolitical dimension means that constellation design cannot be purely technical. It must be politically viable — capable of obtaining spectrum, landing rights, and regulatory approvals in the jurisdictions that matter — and it must be structured to accommodate the interests of government partners whose involvement may be essential to the business case.</p>
+</div>
+
+<!-- ═══ SECTION 9 ═══ -->
+<div class="content-block" id="s9">
+    <h2>9. Implications for the Systems Architect</h2>
+
+    <p>This lesson has covered the strategic and historical context for LEO. Before you proceed to the technical content of subsequent lessons, internalise the following implications. They inform every design decision you will encounter in this programme.</p>
+
+    <h3>You are designing for a moving network</h3>
+    <p>Every GEO design instinct you have — stationary satellite, fixed pointing antenna, stable link geometry — inverts in LEO. The satellite moves. The coverage area of any given satellite changes every second. The handover between satellites is not a corner case or a failure mode: it is the nominal operating condition. Architecture must be designed around continuous handover, not in spite of it.</p>
+
+    <h3>Terminal cost and form factor determine markets</h3>
+    <p>The history of 1990s LEO failure is a terminal story. The most technically capable constellation in the world generates no revenue if the user terminal costs too much, is too large, consumes too much power, or requires too much installation expertise. For your target market — aviation — the terminal constraints (SWaP, certification, aerodynamic profile) are more demanding than any other application. Terminal engineering is not an afterthought: it drives the link budget, the frequency plan, the beam design, and the business case.</p>
+
+    <h3>Constellation scale creates regulatory complexity</h3>
+    <p>A 4,000-satellite constellation requires ITU coordination for each satellite position and frequency assignment. It requires landing rights in every country it wants to serve. It requires spectrum sharing agreements with other LEO, MEO, and GEO operators. A GEO operator managing a handful of satellites in designated orbital slots has a regulatory posture orders of magnitude simpler than a LEO constellation operator. The regulatory dimension is a technical constraint — it shapes what frequencies you can use, where you can put gateways, and how you must coordinate with other systems.</p>
+
+    <h3>Economics must close at the system level</h3>
+    <p>A LEO constellation is an integrated system: the satellite cost, the launch cost, the ground segment cost, the terminal cost, and the revenue all must balance. Optimising any one component without regard to the others produces an economically incoherent system. An architect who can model constellation economics — not just orbital geometry and link budgets — is substantially more valuable than one who cannot. This is why Q7 covers economics and regulation in depth: it is not separate from the engineering; it is part of it.</p>
+
+    <h3>The competitive landscape is dynamic</h3>
+    <p>When you complete this programme, some of the companies mentioned in this lesson will be larger, some smaller, some may have merged or failed. The specific market share numbers will be different. What will not change is the underlying physics, economics, and architectural tradeoffs. Develop the frameworks, not just the facts.</p>
+
+    <div class="callout green">
+        <strong>LESSON OBJECTIVE MET</strong>
+        You should now be able to articulate — with specific numbers and historical examples — why GEO connectivity has a fundamental latency limitation, what industrial changes enabled LEO constellations in the 2010s, who the main players are and what distinguishes them architecturally, and what the implications are for a systems architect working in this domain. If any section felt unclear, re-read it before proceeding to the Knowledge Check.
+    </div>
+</div>
+
+<!-- ═══ QUIZ ═══ -->
+<div class="quiz-block" id="quiz">
+    <h2>KNOWLEDGE CHECK</h2>
+    <p class="quiz-intro">Ten questions covering the full content of this lesson. Some require recall; others require reasoning from the material. There is always exactly one correct answer. Read each option carefully before selecting.</p>
+
+    <div class="quiz-q">
+        <p><strong>Q1.</strong> At the speed of light (≈299,792 km/s), what is the approximate one-way propagation delay from a ground terminal to a GEO satellite at 35,786 km altitude?</p>
+        <div class="quiz-options">
+            <button class="quiz-opt" data-q="1" data-correct="false">A — Approximately 60 ms</button>
+            <button class="quiz-opt" data-q="1" data-correct="true">B — Approximately 119 ms</button>
+            <button class="quiz-opt" data-q="1" data-correct="false">C — Approximately 240 ms</button>
+            <button class="quiz-opt" data-q="1" data-correct="false">D — Approximately 600 ms</button>
+        </div>
+        <div class="quiz-feedback" id="fb1"></div>
+    </div>
+
+    <div class="quiz-q">
+        <p><strong>Q2.</strong> The widespread adoption of HTTPS from around 2014 hurt GEO operators because:</p>
+        <div class="quiz-options">
+            <button class="quiz-opt" data-q="2" data-correct="false">A — HTTPS requires lower latency than HTTP to function</button>
+            <button class="quiz-opt" data-q="2" data-correct="true">B — HTTPS encryption prevented transparent TCP-spoofing proxies (PEPs) from modifying packet headers, removing GEO operators' primary latency mitigation technique</button>
+            <button class="quiz-opt" data-q="2" data-correct="false">C — HTTPS consumes more bandwidth than HTTP, overloading GEO capacity</button>
+            <button class="quiz-opt" data-q="2" data-correct="false">D — HTTPS is incompatible with the frequency bands used by GEO satellites</button>
+        </div>
+        <div class="quiz-feedback" id="fb2"></div>
+    </div>
+
+    <div class="quiz-q">
+        <p><strong>Q3.</strong> The original Iridium constellation filed for bankruptcy in 1999 after only nine months of commercial operation. The primary cause was:</p>
+        <div class="quiz-options">
+            <button class="quiz-opt" data-q="3" data-correct="false">A — Technical failures in the inter-satellite link system</button>
+            <button class="quiz-opt" data-q="3" data-correct="false">B — Regulatory blocking of service in key markets</button>
+            <button class="quiz-opt" data-q="3" data-correct="true">C — Expensive, bulky handsets and high service fees combined with rapid GSM network expansion that undercut the market</button>
+            <button class="quiz-opt" data-q="3" data-correct="false">D — Interference with GEO satellites that forced service suspension</button>
+        </div>
+        <div class="quiz-feedback" id="fb3"></div>
+    </div>
+
+    <div class="quiz-q">
+        <p><strong>Q4.</strong> SpaceX's first successful Falcon 9 booster landing occurred in December 2015. Why is this date significant for LEO constellation economics specifically?</p>
+        <div class="quiz-options">
+            <button class="quiz-opt" data-q="4" data-correct="false">A — It enabled SpaceX to carry heavier satellites, reducing the number needed per constellation</button>
+            <button class="quiz-opt" data-q="4" data-correct="true">B — It demonstrated the viability of reusable launch, beginning a trajectory of dramatically lower cost-per-kilogram to LEO that makes large constellation deployment economically feasible</button>
+            <button class="quiz-opt" data-q="4" data-correct="false">C — It gave SpaceX enough revenue to begin Starlink satellite manufacturing</button>
+            <button class="quiz-opt" data-q="4" data-correct="false">D — It reduced satellite mass requirements by allowing more delicate launch profiles</button>
+        </div>
+        <div class="quiz-feedback" id="fb4"></div>
+    </div>
+
+    <div class="quiz-q">
+        <p><strong>Q5.</strong> A phased-array antenna steers its beam by:</p>
+        <div class="quiz-options">
+            <button class="quiz-opt" data-q="5" data-correct="false">A — Rotating a reflector dish using a servo motor</button>
+            <button class="quiz-opt" data-q="5" data-correct="false">B — Adjusting the frequency of the transmitted signal</button>
+            <button class="quiz-opt" data-q="5" data-correct="true">C — Controlling the relative phase of signals fed to each element in an array, causing constructive interference in the desired direction</button>
+            <button class="quiz-opt" data-q="5" data-correct="false">D — Switching between multiple fixed antennas pointed in different directions</button>
+        </div>
+        <div class="quiz-feedback" id="fb5"></div>
+    </div>
+
+    <div class="quiz-q">
+        <p><strong>Q6.</strong> GEO satellites cannot provide effective coverage above approximately 75° latitude because:</p>
+        <div class="quiz-options">
+            <button class="quiz-opt" data-q="6" data-correct="false">A — Regulatory rules prohibit GEO service at high latitudes</button>
+            <button class="quiz-opt" data-q="6" data-correct="false">B — The Van Allen belts block signals at high latitudes</button>
+            <button class="quiz-opt" data-q="6" data-correct="true">C — At high latitudes the GEO satellite is very close to the horizon, resulting in high atmospheric signal loss, multipath interference, and impractical antenna elevation angles</button>
+            <button class="quiz-opt" data-q="6" data-correct="false">D — GEO satellites do not have enough power to reach high-latitude ground stations</button>
+        </div>
+        <div class="quiz-feedback" id="fb6"></div>
+    </div>
+
+    <div class="quiz-q">
+        <p><strong>Q7.</strong> OneWeb's Gen1 constellation architecture chose not to include inter-satellite links. The primary consequence of this decision is:</p>
+        <div class="quiz-options">
+            <button class="quiz-opt" data-q="7" data-correct="false">A — OneWeb satellites have lower capacity than ISL-equipped satellites</button>
+            <button class="quiz-opt" data-q="7" data-correct="true">B — All traffic must route through a ground gateway, requiring a dense global gateway network and adding latency on routes where traffic must traverse multiple ground hops</button>
+            <button class="quiz-opt" data-q="7" data-correct="false">C — OneWeb satellites cannot perform handover between each other</button>
+            <button class="quiz-opt" data-q="7" data-correct="false">D — OneWeb is restricted to Ku-band because Ka-band requires ISLs</button>
+        </div>
+        <div class="quiz-feedback" id="fb7"></div>
+    </div>
+
+    <div class="quiz-q">
+        <p><strong>Q8.</strong> Ukraine's operational use of Starlink from February 2022 primarily influenced the LEO industry by:</p>
+        <div class="quiz-options">
+            <button class="quiz-opt" data-q="8" data-correct="false">A — Demonstrating that LEO terminals could survive extreme cold weather</button>
+            <button class="quiz-opt" data-q="8" data-correct="false">B — Proving that LEO satellites could resist cyberattack</button>
+            <button class="quiz-opt" data-q="8" data-correct="true">C — Demonstrating operational military value that reshaped government procurement thinking globally and accelerated defence and government investment in LEO connectivity</button>
+            <button class="quiz-opt" data-q="8" data-correct="false">D — Creating precedent for using commercial satellites under wartime frequency exemptions</button>
+        </div>
+        <div class="quiz-feedback" id="fb8"></div>
+    </div>
+
+    <div class="quiz-q">
+        <p><strong>Q9.</strong> Telesat Lightspeed has a smaller constellation (298 satellites) than Starlink (6,000+) yet targets comparable enterprise and aviation performance. This is primarily because:</p>
+        <div class="quiz-options">
+            <button class="quiz-opt" data-q="9" data-correct="false">A — Telesat's satellites operate at lower altitude, requiring fewer for global coverage</button>
+            <button class="quiz-opt" data-q="9" data-correct="false">B — Telesat uses higher-power transponders that compensate for fewer satellites</button>
+            <button class="quiz-opt" data-q="9" data-correct="true">C — Telesat's higher altitude (1,000–1,325 km) gives each satellite a larger coverage footprint, and full-mesh ISLs enable efficient routing without requiring a satellite overhead every location at all times</button>
+            <button class="quiz-opt" data-q="9" data-correct="false">D — Telesat serves a smaller geographic area, reducing the number of satellites needed</button>
+        </div>
+        <div class="quiz-feedback" id="fb9"></div>
+    </div>
+
+    <div class="quiz-q">
+        <p><strong>Q10.</strong> An architect is evaluating a proposed LEO constellation design for an aviation connectivity operator. The design has excellent link budget, low latency, and a viable constellation topology — but the terminal weighs 18 kg and draws 800W continuously. The correct assessment is:</p>
+        <div class="quiz-options">
+            <button class="quiz-opt" data-q="10" data-correct="false">A — The design is sound; terminal power consumption can be managed with aircraft electrical systems</button>
+            <button class="quiz-opt" data-q="10" data-correct="false">B — The design is marginal; it would work on wide-body aircraft but not narrow-body</button>
+            <button class="quiz-opt" data-q="10" data-correct="true">C — The design is not viable for aviation regardless of RF performance, because the SWaP envelope far exceeds what aviation terminals must meet for structural, aerodynamic, and electrical certification</button>
+            <button class="quiz-opt" data-q="10" data-correct="false">D — The design is acceptable; 800W is within normal avionics power budgets</button>
+        </div>
+        <div class="quiz-feedback" id="fb10"></div>
+    </div>
+
+    <div class="quiz-score" id="quizScore"></div>
+</div>
+
+<!-- ═══ PYTHON EXERCISES ═══ -->
+<div class="py-block" id="python">
+    <h2>PYTHON EXERCISES</h2>
+    <p class="py-intro">Three exercises of escalating depth. Do them in order. The first is a warm-up. The second requires thought. The third requires research and judgement. All use Python 3.8+ standard library except where noted.</p>
+
+    <div class="py-exercise">
+        <h3>Exercise 1 — Propagation Delay Calculator</h3>
+        <p>Calculate and compare one-way propagation delay and round-trip time for different orbital altitudes. Include the effect of elevation angle (a terminal looking at a satellite near the horizon has a longer slant range than one looking straight up).</p>
+```
+
+<pre>
+import math
+
+C_KM_S = 299_792        # speed of light, km/s
+EARTH_RADIUS_KM = 6_371 # mean Earth radius
+
+def slant_range_km(altitude_km, elevation_deg):
+    """
+    Slant range from ground terminal to satellite.
+    Uses the law of cosines on the Earth-centre / terminal / satellite triangle.
+    elevation_deg: terminal elevation angle to satellite (5–90°)
+    """
+    el = math.radians(elevation_deg)
+    Re = EARTH_RADIUS_KM
+    h  = altitude_km
+    # Central angle from terminal to satellite sub-point:
+    # sin(nadir_angle) = Re * cos(el) / (Re + h)
+    nadir = math.asin(Re * math.cos(el) / (Re + h))
+    central = math.pi/2 - el - nadir
+    # Slant range via law of cosines:
+    slant = math.sqrt(Re**2 + (Re+h)**2 - 2*Re*(Re+h)*math.cos(central))
+    return slant
+
+def delay_ms(altitude_km, elevation_deg=90):
+    slant = slant_range_km(altitude_km, elevation_deg)
+    return (slant / C_KM_S) * 1000  # ms
+
+# ── Part A: Comparison table at 90° elevation ──
+orbits = {
+    "VLEO (300 km)":      300,
+    "LEO Starlink (550)": 550,
+    "LEO OneWeb (1200)":  1_200,
+    "MEO O3b (8062)":     8_062,
+    "GEO (35786)":        35_786,
+}
+
+print(f"\n{'Orbit':<24} {'Alt km':>8} {'1-way ms':>10} {'RTT ms':>10}")
+print("─" * 56)
+for name, alt in orbits.items():
+    ow  = delay_ms(alt, 90)
+    rtt = ow * 2
+    print(f"{name:<24} {alt:>8,} {ow:>10.1f} {rtt:>10.1f}")
+
+# ── Part B: Effect of elevation angle on Starlink 550 km ──
+print(f"\nStarlink 550 km — RTT vs elevation angle:")
+print(f"{'Elevation':>12} {'Slant km':>12} {'RTT ms':>10}")
+print("─" * 36)
+for el in [5, 10, 15, 20, 30, 45, 60, 75, 90]:
+    slant = slant_range_km(550, el)
+    rtt   = (slant / C_KM_S) * 1000 * 2
+    print(f"{el:>11}° {slant:>12.0f} {rtt:>10.1f}")
+
+# ── Part C: G.114 compliance check ──
+# ITU-T G.114 recommends max 150 ms one-way delay for voice quality.
+# At what minimum altitude does a LEO satellite violate this limit
+# when the terminal is looking at it at 10° elevation?
+print("\nG.114 analysis (150 ms one-way limit, 10° elevation):")
+for alt in range(100, 40_000, 100):
+    ow = delay_ms(alt, 10)
+    if ow > 150:
+        print(f"  Violation above ~{alt} km at 10° elevation ({ow:.1f} ms)")
+        break
+</pre>
+
+```
+        <p class="py-note">Expected: at 90° elevation, Starlink RTT ≈ 3.7 ms (propagation only). At 5° elevation it rises significantly due to the longer slant range. GEO one-way at zenith ≈ 119 ms, RTT ≈ 238 ms — lower than the common "600 ms" figure, which includes terrestrial legs and network processing.</p>
+        <div class="py-challenge">
+            <strong>EXTENSION</strong>
+            Plot RTT vs elevation angle for all five orbits on a single matplotlib chart. Use a logarithmic y-axis. Add a horizontal dashed line at the G.114 150 ms limit. What does this visualisation tell you about which orbits can support voice calls at low elevation angles?
+        </div>
+    </div>
+
+    <div class="py-exercise">
+        <h3>Exercise 2 — Constellation Coverage Estimator</h3>
+        <p>Estimate the minimum number of satellites required to provide continuous single-coverage of the Earth's surface above a minimum elevation angle, given orbital altitude and inclination. This is a simplified version of the coverage analysis you will do properly in Q2.</p>
+```
+
+<pre>
+import math
+
+def coverage_area_fraction(altitude_km, min_elevation_deg):
+    """
+    Fraction of Earth's surface visible from one satellite
+    above the minimum elevation angle.
+    """
+    Re   = 6_371
+    el   = math.radians(min_elevation_deg)
+    # Half-angle of the coverage cone (Earth central angle):
+    rho  = math.acos(Re * math.cos(el) / (Re + altitude_km)) - el
+    # Spherical cap area fraction:
+    return (1 - math.cos(rho)) / 2
+
+def min_satellites_global(altitude_km, min_elevation_deg, latitude_limit_deg=90):
+    """
+    Rough lower bound on satellites for global coverage.
+    Assumes uniform distribution, ignores inclination gaps.
+    latitude_limit_deg: coverage up to this latitude (90 = poles)
+    """
+    frac = coverage_area_fraction(altitude_km, min_elevation_deg)
+    # Fraction of sphere up to latitude_limit:
+    lat  = math.radians(latitude_limit_deg)
+    zone = (1 - math.cos(lat + math.pi/2)) / 2  # always 1.0 for 90°
+    return math.ceil(1.0 / frac)
+
+# ── Compare constellations ──
+configs = [
+    ("VLEO 300 km",        300,    5),
+    ("Starlink shell 1",   340,    5),
+    ("Starlink shell 2",   550,    5),
+    ("OneWeb",           1_200,    5),
+    ("Telesat LS",       1_100,    5),
+    ("MEO O3b",          8_062,    5),
+    ("GEO (1 satellite)", 35_786, 10),
+]
+
+print(f"\n{'Config':<22} {'Alt km':>8} {'Min el':>7} {'Coverage %':>12} {'Min sats':>10}")
+print("─" * 63)
+for name, alt, el in configs:
+    frac = coverage_area_fraction(alt, el)
+    n    = min_satellites_global(alt, el)
+    print(f"{name:<22} {alt:>8,} {el:>6}° {frac*100:>11.1f}% {n:>10}")
+
+# ── Questions to answer from your output ──
+# 1. Why does GEO need only 3 satellites for near-global coverage?
+# 2. Why does Starlink need thousands despite each satellite
+#    covering a larger percentage than the formula suggests?
+#    (Hint: this formula gives instantaneous single coverage —
+#     what does a real service require?)
+# 3. At what altitude does a single satellite first cover
+#    more than 10% of Earth's surface at 5° min elevation?
+print("\n--- Find altitude for 10% surface coverage at 5° min el ---")
+for alt in range(200, 40_000, 100):
+    if coverage_area_fraction(alt, 5) >= 0.10:
+        pct = coverage_area_fraction(alt, 5) * 100
+        print(f"  {alt} km → {pct:.1f}% coverage per satellite")
+        break
+</pre>
+
+```
+        <div class="py-challenge">
+            <strong>EXTENSION</strong>
+            The formula above gives a geometric lower bound. Real constellations need redundancy, overlap for handover, and consistent coverage — not just instantaneous single coverage. Research the Walker constellation formula for required satellite count given orbital parameters. Implement it and compare your results to the actual planned sizes of Starlink, OneWeb, and Telesat Lightspeed.
+        </div>
+    </div>
+
+    <div class="py-exercise">
+        <h3>Exercise 3 — Business Case Sensitivity Analysis</h3>
+        <p>Build a simplified break-even model for a LEO constellation. This is intentionally incomplete — the goal is to understand which variables dominate the economics and why they drove the architectural choices described in this lesson.</p>
+```
+
+<pre>
+# Simplified LEO constellation break-even model
+# NOT a real financial model — illustrative only.
+
+def break_even_analysis(
+    n_satellites,
+    sat_cost_usd,
+    launch_cost_per_sat_usd,
+    ground_segment_usd,
+    annual_opex_usd,
+    target_arpu_usd_per_month,
+    market_penetration_fraction,
+    addressable_subscribers,
+    years=10
+):
+    """
+    Returns: (capex, annual_revenue_at_penetration, years_to_breakeven)
+    """
+    capex = (n_satellites * (sat_cost_usd + launch_cost_per_sat_usd)
+             + ground_segment_usd)
+    subscribers = addressable_subscribers * market_penetration_fraction
+    annual_revenue = subscribers * target_arpu_usd_per_month * 12
+    annual_profit  = annual_revenue - annual_opex_usd
+    if annual_profit <= 0:
+        return capex, annual_revenue, float('inf')
+    yrs = capex / annual_profit
+    return capex, annual_revenue, yrs
+
+# ── Scenario 1: Starlink-like (2020 assumptions) ──
+capex, rev, yrs = break_even_analysis(
+    n_satellites              = 4_000,
+    sat_cost_usd              = 500_000,
+    launch_cost_per_sat_usd   = 300_000,   # internal, marginal
+    ground_segment_usd        = 2e9,
+    annual_opex_usd           = 1.5e9,
+    target_arpu_usd_per_month = 110,
+    market_penetration_fraction = 0.01,    # 1% of addressable
+    addressable_subscribers   = 50_000_000
+)
+print(f"\nScenario 1 — Starlink-like:")
+print(f"  CapEx:            ${capex/1e9:.1f}B")
+print(f"  Annual Revenue:   ${rev/1e9:.2f}B")
+print(f"  Break-even:       {yrs:.1f} years")
+
+# ── Scenario 2: OneWeb-like (B2B, higher ARPU, smaller market) ──
+capex2, rev2, yrs2 = break_even_analysis(
+    n_satellites              = 648,
+    sat_cost_usd              = 1_200_000,
+    launch_cost_per_sat_usd   = 2_000_000, # market rate launch
+    ground_segment_usd        = 800e6,
+    annual_opex_usd           = 400e6,
+    target_arpu_usd_per_month = 5_000,     # B2B enterprise
+    market_penetration_fraction = 0.05,
+    addressable_subscribers   = 200_000
+)
+print(f"\nScenario 2 — OneWeb-like (B2B):")
+print(f"  CapEx:            ${capex2/1e9:.1f}B")
+print(f"  Annual Revenue:   ${rev2/1e9:.2f}B")
+print(f"  Break-even:       {yrs2:.1f} years")
+
+# ── Sensitivity: what happens to Scenario 1 if launch cost doubles? ──
+_, _, yrs_sens = break_even_analysis(
+    4_000, 500_000, 600_000, 2e9, 1.5e9, 110, 0.01, 50_000_000
+)
+print(f"\nSensitivity — Scenario 1 with launch cost doubled:")
+print(f"  Break-even: {yrs_sens:.1f} years (was {yrs:.1f})")
+
+# ── Your tasks ──
+# 1. What ARPU does Scenario 1 need to break even in under 7 years?
+# 2. What market penetration does Scenario 2 need to break even in 5 years?
+# 3. Add a 'satellite replacement' cost: LEO satellites have ~5 year
+#    design life. At year 5, you replace half the constellation.
+#    How does this affect the economics of each scenario?
+# 4. Research: what is Starlink's actual reported ARPU and subscriber count
+#    as of the most recent available data? How does it compare to your model?
+</pre>
+
+```
+        <div class="py-challenge">
+            <strong>EXTENSION</strong>
+            Build a Monte Carlo simulation that runs this model 10,000 times with randomised inputs (ARPU ±20%, penetration ±50%, launch cost ±30%, satellite cost ±25%). Plot the distribution of break-even years. What does the uncertainty distribution tell you about which assumptions an investor should be most focused on verifying?
+        </div>
+    </div>
+</div>
+
+<!-- ═══ REFLECTION ═══ -->
+<div class="reflection-block" id="reflect">
+    <h2>REFLECTION PROMPTS</h2>
+    <p class="ref-intro">These are not graded. They are designed to force synthesis — the gap between reading comprehension and genuine understanding. Write answers in your own words, as if explaining to a senior GEO satellite engineer who is sceptical about LEO. Aim for 200–400 words per prompt. Return to this section after completing Lesson 2.</p>
+
+    <div class="ref-prompt">
+        <h3>Prompt 1 — The Case for LEO</h3>
+        <p>Write a 300-word brief addressed to the CTO of a GEO satellite operator, explaining why they should take LEO seriously as a competitive threat rather than a complementary technology. Use specific numbers from this lesson. Anticipate and address the objection: "We have 1 Tbps of capacity. LEO constellations cannot match that."</p>
+    </div>
+
+    <div class="ref-prompt">
+        <h3>Prompt 2 — The 1990s vs 2020s</h3>
+        <p>A colleague argues: "Iridium failed for business reasons, not technical ones. The LEO broadband concept was always sound — it just needed better business models." Do you agree or disagree? What would your argument be? What evidence from this lesson supports or contradicts this view?</p>
+    </div>
+
+    <div class="ref-prompt">
+        <h3>Prompt 3 — Architecture and Business Model Coherence</h3>
+        <p>OneWeb chose no ISLs in Gen1. Telesat Lightspeed chose full-mesh optical ISLs in their only generation. Both companies target aviation and enterprise. Are these architecturally consistent choices given their respective business models, or does one make a strategic error? Justify your answer.</p>
+    </div>
+
+    <div class="ref-prompt">
+        <h3>Prompt 4 — Your Domain</h3>
+        <p>Drawing on your background in GEO and aviation: identify one specific application or workflow in the aviation connectivity domain where LEO's latency advantage would produce a qualitatively better outcome than GEO — not just faster, but enabling something that is practically impossible on GEO. Describe the application, quantify the latency requirement, and explain why GEO fails to meet it.</p>
+        <ul>
+            <li>Consider: ATC data link, ADS-B augmentation, live cockpit video, safety-critical software updates, real-time weather data integration, crew communications, passenger VoIP...</li>
+            <li>Be specific about latency numbers, not just directional assertions.</li>
+        </ul>
+    </div>
+</div>
+
+<!-- ═══ MARK COMPLETE ═══ -->
+<div class="complete-wrap">
+    <button class="complete-btn" id="completeBtn">MARK LESSON COMPLETE</button>
+    <div class="complete-msg" id="completeMsg"></div>
+</div>
+
+<div class="lesson-nav">
+    <a href="q1.html">← BACK TO Q1 HUB</a>
+    <a href="q1-2.html">LESSON 02 — ORBITAL REGIMES COMPARED →</a>
+</div>
+```
+
+</div>
+
+<button class="back-to-top" id="backToTop" title="Back to top">↑</button>
+
+<footer>© 2026 LEOAF · Q1 · LESSON 01 OF 15</footer>
+
+<!-- Stars -->
+
+<script>
+const canvas = document.getElementById('starsCanvas');
+const ctx = canvas.getContext('2d');
+let stars = [];
+function initStars() { stars=[]; for(let i=0;i<180;i++) stars.push({x:Math.random()*canvas.width,y:Math.random()*canvas.height,size:Math.random()*1.5+0.4,speed:Math.random()*0.18+0.04,hue:Math.random()*360}); }
+function resizeCanvas() { canvas.width=window.innerWidth; canvas.height=window.innerHeight; }
+resizeCanvas(); initStars(); window.addEventListener('resize', resizeCanvas);
+function animateStars() { ctx.clearRect(0,0,canvas.width,canvas.height); stars.forEach(s=>{s.y-=s.speed;if(s.y<0){s.y=canvas.height;s.x=Math.random()*canvas.width;} ctx.beginPath();ctx.fillStyle=`hsl(${s.hue},80%,80%)`;ctx.arc(s.x,s.y,s.size,0,Math.PI*2);ctx.fill();}); requestAnimationFrame(animateStars); }
+animateStars();
+</script>
+
+<!-- Quiz -->
+
+<script>
+const feedbacks = {
+    1: {
+        correct: "Correct. 35,786 km ÷ 299,792 km/s ≈ 0.1194 s ≈ 119 ms one-way. The commonly cited '600 ms RTT' for GEO includes two propagation legs plus terrestrial and network processing delays — not just the propagation to the satellite.",
+        wrong:   "Incorrect. 35,786 km ÷ 299,792 km/s ≈ 0.119 s = 119 ms one-way. Two-way propagation alone is ~238 ms. Add terrestrial legs and processing and you reach the commonly quoted 600 ms RTT figure."
+    },
+    2: {
+        correct: "Correct. Performance Enhancing Proxies worked by intercepting and spoofing TCP acknowledgements — only possible when they could read the TCP headers. HTTPS end-to-end encryption made this impossible, removing the primary latency mitigation technique.",
+        wrong:   "Incorrect. The HTTPS problem was specifically about TCP-spoofing proxies (PEPs): these worked by modifying TCP headers to pretend the link had lower latency. HTTPS encryption made the TCP headers unreadable to intermediate proxies, breaking this technique entirely."
+    },
+    3: {
+        correct: "Correct. Iridium's technical architecture (including ISLs) was impressive. The failure was commercial: $3,000 handsets, high fees, and the GSM rollout made Iridium's product uncompetitive on cost and usability before it could reach the subscriber base needed for break-even.",
+        wrong:   "Incorrect. Iridium's ISL system worked. The failure was commercial: expensive, bulky handsets combined with rapid GSM expansion that undercut the target market before Iridium could reach break-even subscriber counts."
+    },
+    4: {
+        correct: "Correct. The booster landing demonstrated that reusable first stages were practically achievable, beginning a multi-year trajectory of reducing cost-per-kg to LEO. For SpaceX launching its own constellation at marginal cost, this was the key economic enabler for large-scale deployment.",
+        wrong:   "Incorrect. The significance is economic. The booster landing proved reusable launch was achievable, driving dramatic reductions in cost-per-kg to LEO — from ~$10,000/kg expendable to ~$2,700/kg reusable, with Starship targeting sub-$100/kg. At those costs, 4,000-satellite constellations become economically feasible."
+    },
+    5: {
+        correct: "Correct. A phased array achieves beam steering through constructive and destructive interference: by controlling the relative phase of signals at each element, the combined radiation pattern has a peak in the desired direction. No mechanical movement is required.",
+        wrong:   "Incorrect. A phased array steers its beam electronically by controlling the relative phase delay applied to each antenna element. The signals from all elements combine in space; by adjusting phases, constructive interference occurs in the desired direction, steering the beam without physical movement."
+    },
+    6: {
+        correct: "Correct. At high latitudes the GEO satellite (fixed above the equator) appears very close to or below the horizon. Low elevation angles mean signals pass through a much larger atmospheric path, causing signal loss, and the antenna geometry becomes impractical. Above ~75° latitude, reliable GEO service is not achievable.",
+        wrong:   "Incorrect. The reason is geometric. GEO satellites sit above the equator. From high latitudes, the satellite appears near the horizon. Low elevation angles mean the signal passes through a very long atmospheric path (high atmospheric attenuation) and the antenna must point almost horizontally, making the link impractical."
+    },
+    7: {
+        correct: "Correct. Without ISLs, every OneWeb user packet must travel: terminal → satellite → ground gateway → internet → ground gateway → satellite → terminal. This requires gateways within coverage of every serving satellite, adds latency for long-haul routes, and creates single points of failure at gateways.",
+        wrong:   "Incorrect. The consequence of no ISLs is that all traffic must route through ground gateways. Without ISLs, a satellite cannot forward traffic to a neighbouring satellite — it must send everything down to a gateway. This requires a dense gateway network and adds latency on routes where the traffic must traverse multiple ground hops."
+    },
+    8: {
+        correct: "Correct. Ukraine demonstrated that commercial LEO connectivity could provide operational military value at scale — tactical communications, drone data links, C2 — in a contested environment. This drove accelerated government and defence investment in LEO connectivity globally.",
+        wrong:   "Incorrect. The primary industry significance was strategic: Ukraine demonstrated LEO's operational military value at scale, prompting governments globally to reassess commercial LEO constellations as strategic assets and accelerate defence investment in LEO capacity and sovereign capability."
+    },
+    9: {
+        correct: "Correct. Telesat's higher altitude gives each satellite a significantly larger ground footprint. With full-mesh ISLs, routing is highly efficient — traffic can travel multiple hops through the constellation without returning to the ground. This compensates for fewer satellites while maintaining low end-to-end latency for enterprise users.",
+        wrong:   "Incorrect. The answer is the combination of altitude and ISLs. Higher altitude means larger coverage per satellite. Full-mesh ISLs mean traffic routes efficiently through the constellation without requiring a gateway on the path. These two factors together mean fewer satellites can still deliver the connectivity quality needed for enterprise and aviation."
+    },
+    10: {
+        correct: "Correct. Aviation terminals face strict SWaP (Size, Weight, and Power) constraints driven by structural limits (weight affects fuel burn), aerodynamic limits (antenna height and profile), and aircraft electrical system capacity. An 18 kg, 800W terminal would fail certification regardless of RF performance. The terminal must be redesigned, not the constellation.",
+        wrong:   "Incorrect. 18 kg and 800W are both disqualifying for aviation regardless of aircraft size. Aviation terminal SWaP limits are driven by certification requirements, structural margins, electrical budgets, and aerodynamic profile constraints — not just physical feasibility. A terminal with these characteristics could not be certified for flight operations."
+    }
+};
+
+let answered = {};
+document.querySelectorAll('.quiz-opt').forEach(btn => {
+    btn.addEventListener('click', function() {
+        const q = this.dataset.q;
+        if (answered[q] !== undefined) return;
+        const correct = this.dataset.correct === 'true';
+        answered[q] = correct;
+        document.querySelectorAll(`.quiz-opt[data-q="${q}"]`).forEach(b => {
+            b.disabled = true;
+            if (b.dataset.correct === 'true') b.classList.add('correct');
+        });
+        if (!correct) this.classList.add('wrong');
+        const fb = document.getElementById(`fb${q}`);
+        fb.textContent = (correct ? '✓ ' : '✗ ') + feedbacks[q][correct ? 'correct' : 'wrong'];
+        fb.style.color = correct ? '#39ff14' : '#ff004f';
+        if (Object.keys(answered).length === 10) {
+            const total = Object.values(answered).filter(Boolean).length;
+            const el = document.getElementById('quizScore');
+            el.style.display = 'block';
+            const pct = Math.round(total / 10 * 100);
+            el.textContent = `SCORE: ${total} / 10 (${pct}%) — ${pct===100?'PERFECT.':pct>=80?'STRONG. REVIEW ANY MISSES.':pct>=60?'ADEQUATE. REVISIT WEAK SECTIONS.':'REVISIT THE LESSON BEFORE PROCEEDING.'}`;
+        }
+    });
+});
+</script>
+
+<!-- Supabase -->
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+<script src="supabase.js"></script>
+
+<script src="user_progress.js"></script>
+
+<script>
+const LESSON_ID = 'q1-1';
+document.addEventListener('DOMContentLoaded', async () => {
+    const { data: { session } } = await client.auth.getSession();
+    if (!session) { window.location.href = 'index.html'; return; }
+
+    document.getElementById('logoffBtn').addEventListener('click', async () => {
+        await client.auth.signOut(); window.location.href = 'index.html';
+    });
+
+    const mastered = await getMasteredSections();
+    const btn = document.getElementById('completeBtn');
+    const msg = document.getElementById('completeMsg');
+
+    function setDone(done) {
+        if (done) {
+            btn.textContent = '✓ COMPLETE — CLICK TO UNDO';
+            btn.classList.add('done');
+            btn.style.cssText = 'border-color:#39ff14;color:#39ff14;background:rgba(57,255,20,0.1);cursor:pointer;opacity:1;';
+            msg.style.color = '#39ff14';
+            msg.textContent = 'Lesson marked complete. Click again to undo.';
+        } else {
+            btn.textContent = 'MARK LESSON COMPLETE';
+            btn.classList.remove('done');
+            btn.style.cssText = '';
+            msg.style.color = '#ffffff55';
+            msg.textContent = 'Not yet marked complete.';
+        }
+    }
+
+    setDone(mastered.includes(LESSON_ID));
+
+    btn.addEventListener('click', async () => {
+        const isCurrentlyDone = btn.classList.contains('done');
+        msg.style.color = '#00d9ff';
+        msg.textContent = 'Saving...';
+        const ok = await upsertSection(LESSON_ID, !isCurrentlyDone);
+        if (ok) {
+            setDone(!isCurrentlyDone);
+        } else {
+            msg.style.color = '#ff004f';
+            msg.textContent = 'Error saving. Try again.';
+        }
+    });
+
+    // Back to top
+    const btt = document.getElementById('backToTop');
+    window.addEventListener('scroll', () => {
+        btt.classList.toggle('visible', window.scrollY > 400);
+    });
+    btt.addEventListener('click', () => window.scrollTo({ top: 0, behavior: 'smooth' }));
+});
+</script>
+
+</body>
+</html>
