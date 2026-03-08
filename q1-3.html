@@ -1,0 +1,1481 @@
+<!DOCTYPE html>
+
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, shrink-to-fit=no">
+<title>L03 — The Physics of Latency · LEOAF</title>
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;600;800&family=Share+Tech+Mono&family=Libre+Baskerville:ital,wght@0,400;0,700;1,400&display=swap" rel="stylesheet">
+<link rel="icon" href="favicon.ico" sizes="any" type="image/x-icon">
+<link rel="manifest" href="site.webmanifest">
+<meta name="theme-color" content="#0f0f0f">
+<style>
+* { box-sizing:border-box; margin:0; padding:0; }
+html { height:100%; -webkit-text-size-adjust:100%; overflow-x:hidden; }
+body { font-family:'Share Tech Mono',monospace; background:#000; color:white; overflow-x:hidden; min-height:100vh; }
+#starsCanvas { position:fixed; inset:0; z-index:-1; }
+
+header {
+background:#000; border-bottom:1px solid #ff004f33;
+position:sticky; top:0; z-index:100;
+padding:1rem clamp(1.5rem,5vw,4rem);
+display:flex; justify-content:space-between; align-items:center;
+box-shadow:0 4px 16px #0008;
+}
+.logo { font-family:‘Orbitron’,sans-serif; font-weight:800; font-size:clamp(16px,2vw,22px); letter-spacing:3px; text-decoration:none; }
+.logo span:first-child { color:white; }
+.logo span:last-child { color:#ff004f; }
+.nav-right { display:flex; align-items:center; gap:10px; }
+.nav-btn {
+background:transparent; border:1px solid #ff004f44; color:#ff004f;
+padding:6px 14px; cursor:pointer; transition:0.3s ease;
+font-size:11px; font-family:‘Orbitron’,sans-serif; letter-spacing:1px;
+text-decoration:none; display:inline-block;
+}
+.nav-btn:hover { background:#ff004f; color:black; }
+
+.breadcrumb { padding:14px clamp(1.5rem,5vw,4rem); font-size:11px; color:#ffffff44; letter-spacing:1px; position:relative; z-index:1; }
+.breadcrumb a { color:#00d9ff66; text-decoration:none; }
+.breadcrumb a:hover { color:#00d9ff; }
+.breadcrumb span { margin:0 8px; }
+
+.lesson-wrap { max-width:820px; margin:0 auto; padding:0 clamp(1.5rem,5vw,4rem) 80px; position:relative; z-index:1; }
+
+.lesson-header { padding:30px 0 28px; border-bottom:1px solid #ffffff11; margin-bottom:36px; }
+.lesson-tag { font-family:‘Orbitron’,sans-serif; font-size:10px; color:#ff004f; letter-spacing:3px; margin-bottom:10px; }
+.lesson-header h1 { font-family:‘Orbitron’,sans-serif; font-size:clamp(20px,3.5vw,32px); font-weight:800; line-height:1.2; margin-bottom:12px; }
+.lesson-meta { display:flex; gap:10px; flex-wrap:wrap; margin-bottom:16px; }
+.l-pill { font-family:‘Orbitron’,sans-serif; font-size:10px; padding:3px 10px; border:1px solid; letter-spacing:1px; }
+.l-pill-q { color:#ff004f; border-color:#ff004f44; }
+.l-pill-t { color:#39ff14; border-color:#39ff1444; }
+.lesson-intro { font-size:13px; line-height:1.85; opacity:0.75; }
+
+.toc { background:rgba(0,217,255,0.06); border:1px solid #00d9ff33; padding:24px 28px; margin:30px 0; }
+.toc h4 { font-family:‘Orbitron’,sans-serif; font-size:10px; color:#00d9ff; letter-spacing:2px; margin-bottom:16px; }
+.toc ol { padding-left:20px; }
+.toc li { font-size:13px; line-height:2.1; }
+.toc li a { color:#00d9ffbb; text-decoration:none; transition:0.15s; }
+.toc li a:hover { color:#ffffff; padding-left:4px; }
+.toc li::marker { color:#ff004f; font-family:‘Orbitron’,sans-serif; font-size:10px; }
+
+.content-block { margin-bottom:24px; }
+.content-block h2 {
+font-family:‘Orbitron’,sans-serif; font-size:13px; color:#00d9ff;
+letter-spacing:2px; text-transform:uppercase;
+margin-bottom:18px; padding-bottom:10px;
+border-bottom:1px solid #00d9ff22;
+scroll-margin-top:80px;
+}
+.content-block h3 {
+font-family:‘Orbitron’,sans-serif; font-size:11px; color:#ffffff88;
+letter-spacing:1.5px; text-transform:uppercase; margin:28px 0 12px;
+}
+.content-block p { font-size:13px; line-height:1.9; opacity:0.85; margin-bottom:16px; }
+.content-block ul, .content-block ol { padding-left:0; margin-bottom:16px; }
+.content-block ul li, .content-block ol li { font-size:13px; line-height:1.85; opacity:0.85; padding-left:20px; position:relative; margin-bottom:6px; }
+.content-block ul li::before { content:’›’; position:absolute; left:0; color:#00d9ff; }
+.content-block ol { counter-reset:item; }
+.content-block ol li { counter-increment:item; }
+.content-block ol li::before { content:counter(item)’.’; position:absolute; left:0; color:#ff004f; font-family:‘Orbitron’,sans-serif; font-size:10px; top:2px; }
+
+.callout {
+border-left:3px solid #00d9ff; background:rgba(0,217,255,0.05);
+padding:16px 20px; margin:22px 0; font-size:12px; line-height:1.8;
+}
+.callout.red   { border-left-color:#ff004f; background:rgba(255,0,79,0.05); }
+.callout.green { border-left-color:#39ff14; background:rgba(57,255,20,0.05); }
+.callout.amber { border-left-color:#ffaa00; background:rgba(255,170,0,0.05); }
+.callout strong { font-family:‘Orbitron’,sans-serif; font-size:10px; letter-spacing:1px; display:block; margin-bottom:8px; color:inherit; }
+
+.key-numbers { display:grid; grid-template-columns:repeat(auto-fit,minmax(140px,1fr)); gap:12px; margin:22px 0; }
+.kn-item { background:rgba(255,255,255,0.03); border:1px solid #ffffff11; padding:16px 12px; text-align:center; }
+.kn-val { font-family:‘Orbitron’,sans-serif; font-size:clamp(16px,2.5vw,24px); font-weight:800; color:#00d9ff; display:block; }
+.kn-label { font-size:10px; opacity:0.5; letter-spacing:1px; margin-top:5px; display:block; line-height:1.4; }
+
+.compare-table { width:100%; border-collapse:collapse; margin:22px 0; font-size:12px; }
+.compare-table th { font-family:‘Orbitron’,sans-serif; font-size:10px; letter-spacing:1px; color:#00d9ff; padding:10px 12px; border-bottom:1px solid #00d9ff33; text-align:left; }
+.compare-table td { padding:10px 12px; border-bottom:1px solid #ffffff0a; line-height:1.5; opacity:0.85; vertical-align:top; }
+.compare-table tr:hover td { background:rgba(255,255,255,0.02); }
+.compare-table .hi { color:#39ff14; }
+.compare-table .lo { color:#ff004f; }
+.compare-table .md { color:#ffaa00; }
+
+.diagram-wrap { margin:24px 0; background:rgba(255,255,255,0.02); border:1px solid #ffffff11; padding:20px; overflow-x:auto; }
+.diagram-wrap figcaption { font-size:11px; color:#ffffff44; margin-top:12px; text-align:center; letter-spacing:1px; }
+
+.deep-dive { background:rgba(255,170,0,0.04); border:1px solid #ffaa0022; padding:20px 22px; margin:24px 0; }
+.deep-dive h4 { font-family:‘Orbitron’,sans-serif; font-size:10px; color:#ffaa00; letter-spacing:2px; margin-bottom:12px; }
+.deep-dive p { font-size:12px; line-height:1.8; opacity:0.8; margin-bottom:10px; }
+.deep-dive p:last-child { margin-bottom:0; }
+
+.formula-box {
+background:rgba(0,0,0,0.6); border:1px solid #00d9ff33;
+padding:16px 20px; margin:18px 0; font-family:‘Share Tech Mono’,monospace;
+font-size:12px; line-height:1.9; color:#00d9ff;
+}
+.formula-box .fb-title { font-family:‘Orbitron’,sans-serif; font-size:9px; color:#ffffff55; letter-spacing:2px; margin-bottom:8px; display:block; }
+
+/* QUIZ */
+.quiz-block { background:rgba(17,17,17,0.9); border:1px solid #ff004f33; padding:28px; margin:48px 0 32px; }
+.quiz-block h2 { font-family:‘Orbitron’,sans-serif; font-size:13px; color:#ff004f; letter-spacing:2px; margin-bottom:6px; }
+.quiz-intro { font-size:12px; opacity:0.6; margin-bottom:24px; padding-bottom:16px; border-bottom:1px solid #ff004f22; line-height:1.6; }
+.quiz-q { margin-bottom:28px; }
+.quiz-q p { font-size:13px; opacity:0.9; margin-bottom:12px; line-height:1.65; }
+.quiz-q p strong { color:#00d9ff; }
+.quiz-options { display:flex; flex-direction:column; gap:8px; }
+.quiz-opt {
+background:rgba(255,255,255,0.03); border:1px solid #ffffff1a;
+padding:11px 16px; cursor:pointer; font-size:12px; font-family:‘Share Tech Mono’,monospace;
+transition:0.2s ease; text-align:left; color:white; line-height:1.5;
+}
+.quiz-opt:hover:not(:disabled) { background:rgba(0,217,255,0.08); border-color:#00d9ff44; }
+.quiz-opt.correct  { background:rgba(57,255,20,0.1);  border-color:#39ff14; color:#39ff14; }
+.quiz-opt.wrong    { background:rgba(255,0,79,0.1);   border-color:#ff004f; color:#ff004f; }
+.quiz-opt:disabled { cursor:default; }
+.quiz-feedback { font-size:12px; margin-top:10px; min-height:18px; line-height:1.7; opacity:0.9; padding:0 4px; }
+.quiz-score { font-family:‘Orbitron’,sans-serif; font-size:12px; color:#39ff14; margin-top:20px; letter-spacing:1px; display:none; padding-top:16px; border-top:1px solid #39ff1433; }
+
+/* PYTHON */
+.py-block { background:rgba(10,10,10,0.95); border:1px solid #39ff1422; padding:28px; margin:32px 0; }
+.py-block h2 { font-family:‘Orbitron’,sans-serif; font-size:13px; color:#39ff14; letter-spacing:2px; margin-bottom:8px; }
+.py-block .py-intro { font-size:12px; opacity:0.7; margin-bottom:20px; padding-bottom:16px; border-bottom:1px solid #39ff1422; line-height:1.7; }
+.py-exercise { margin-bottom:32px; }
+.py-exercise:last-child { margin-bottom:0; }
+.py-exercise h3 { font-family:‘Orbitron’,sans-serif; font-size:11px; color:#39ff1499; letter-spacing:1.5px; text-transform:uppercase; margin-bottom:10px; }
+.py-exercise p { font-size:12px; opacity:0.8; margin-bottom:14px; line-height:1.75; }
+.py-block pre {
+background:#050505; border:1px solid #39ff1433; padding:20px;
+font-family:‘Share Tech Mono’,monospace; font-size:11.5px;
+line-height:1.75; overflow-x:auto; color:#39ff14;
+white-space:pre; margin-bottom:12px;
+}
+.py-block .py-note { font-size:11px; color:#ffffff44; line-height:1.75; margin-top:10px; }
+.py-block .py-challenge { background:rgba(57,255,20,0.04); border-left:2px solid #39ff14; padding:12px 16px; margin-top:14px; font-size:12px; line-height:1.75; opacity:0.8; }
+.py-block .py-challenge strong { font-family:‘Orbitron’,sans-serif; font-size:10px; color:#39ff14; display:block; margin-bottom:6px; letter-spacing:1px; }
+
+/* REFLECTION */
+.reflection-block { background:rgba(255,170,0,0.04); border:1px solid #ffaa0033; padding:24px; margin:32px 0; }
+.reflection-block h2 { font-family:‘Orbitron’,sans-serif; font-size:13px; color:#ffaa00; letter-spacing:2px; margin-bottom:8px; }
+.reflection-block .ref-intro { font-size:12px; opacity:0.7; margin-bottom:20px; padding-bottom:14px; border-bottom:1px solid #ffaa0022; line-height:1.7; }
+.ref-prompt { margin-bottom:20px; }
+.ref-prompt h3 { font-family:‘Orbitron’,sans-serif; font-size:11px; color:#ffaa0099; letter-spacing:1px; margin-bottom:8px; }
+.ref-prompt p { font-size:12px; opacity:0.8; line-height:1.75; margin-bottom:10px; }
+.ref-prompt ul li { font-size:12px; }
+
+.back-to-top {
+position:fixed; bottom:28px; right:28px; z-index:200;
+width:44px; height:44px; background:#000;
+border:1px solid #00d9ff55; color:#00d9ff;
+font-size:20px; cursor:pointer;
+display:flex; align-items:center; justify-content:center;
+opacity:0; pointer-events:none;
+transition:opacity 0.3s ease, border-color 0.3s ease;
+}
+.back-to-top.visible { opacity:1; pointer-events:auto; }
+.back-to-top:hover { border-color:#00d9ff; background:#001a2c; }
+
+.complete-wrap { margin-top:56px; padding-top:30px; border-top:1px solid #ffffff11; text-align:center; }
+.complete-btn {
+font-family:‘Orbitron’,sans-serif; font-size:13px; letter-spacing:2px;
+padding:14px 44px; background:transparent;
+border:1px solid #39ff14; color:#39ff14; cursor:pointer; transition:0.3s ease;
+}
+.complete-btn:hover:not(.done) { background:#39ff14; color:black; box-shadow:0 0 20px rgba(57,255,20,0.4); }
+.complete-btn.done { background:rgba(57,255,20,0.1); cursor:default; opacity:0.7; }
+.complete-msg { font-size:12px; color:#ffffff55; margin-top:14px; min-height:18px; letter-spacing:1px; }
+
+.lesson-nav { display:flex; justify-content:space-between; margin-top:30px; flex-wrap:wrap; gap:10px; }
+.lesson-nav a { font-family:‘Orbitron’,sans-serif; font-size:11px; color:#00d9ff66; text-decoration:none; letter-spacing:1px; transition:0.2s; }
+.lesson-nav a:hover { color:#00d9ff; }
+
+footer { text-align:center; padding:30px; opacity:0.3; font-size:11px; position:relative; z-index:1; letter-spacing:1px; }
+
+@media (max-width:600px) {
+.key-numbers { grid-template-columns:1fr 1fr; }
+.compare-table { font-size:11px; }
+.compare-table th, .compare-table td { padding:8px 8px; }
+}
+
+/* LIGHT READING MODE */
+.content-block {
+background: #f5f2ec;
+color: #1a1a1a;
+padding: 36px clamp(24px,4vw,48px);
+margin-bottom: 24px;
+border-left: 4px solid #00d9ff;
+position: relative;
+z-index: 1;
+}
+.content-block h2 {
+font-family:‘Orbitron’,sans-serif; font-size:13px;
+color:#003d66; letter-spacing:2px; text-transform:uppercase;
+margin-bottom:20px; padding-bottom:10px;
+border-bottom:2px solid #00d9ff66;
+scroll-margin-top:80px;
+}
+.content-block h3 {
+font-family:‘Orbitron’,sans-serif; font-size:11px;
+color:#444; letter-spacing:1.5px; text-transform:uppercase;
+margin:32px 0 14px;
+}
+.content-block p {
+font-family:‘Libre Baskerville’, Georgia, serif;
+font-size:15px; line-height:1.9; color:#1a1a1a;
+opacity:1; margin-bottom:18px;
+}
+.content-block ul li, .content-block ol li {
+font-family:‘Libre Baskerville’, Georgia, serif;
+font-size:14px; line-height:1.85; color:#1a1a1a; opacity:1;
+margin-bottom:8px;
+}
+.content-block ul li::before { color:#0077aa; }
+.content-block ol li::before { color:#cc0033; }
+.content-block .callout {
+border-left:3px solid #0088cc; background:#e8f4fb; color:#1a1a1a;
+}
+.content-block .callout.red   { border-left-color:#cc0033; background:#fdecea; }
+.content-block .callout.green { border-left-color:#1a7a1a; background:#eafaea; }
+.content-block .callout.amber { border-left-color:#996600; background:#fef9ec; }
+.content-block .callout strong { color:inherit; }
+.content-block .kn-item { background:#fff; border:1px solid #d0d0d0; }
+.content-block .kn-label { color:#555; opacity:1; }
+.content-block .compare-table th { color:#003d66; border-bottom:2px solid #00d9ff66; }
+.content-block .compare-table td { color:#1a1a1a; opacity:1; border-bottom:1px solid #ddd; }
+.content-block .compare-table tr:hover td { background:#f0f0f0; }
+.content-block .tl-body strong { color:#333; }
+.content-block .tl-body p { font-size:13px; color:#444; }
+.content-block .deep-dive { background:#fffbf0; border:1px solid #e0c060; }
+.content-block .deep-dive p { font-size:13px; color:#333; }
+.content-block .diagram-wrap { background:#0a0a0a; border:1px solid #333; }
+.content-block .diagram-wrap figcaption { color:#ffffff55; }
+.content-block .formula-box { background:#111; border-color:#00d9ff55; color:#00d9ff; }
+.content-block .formula-box .fb-title { color:#ffffff44; }
+</style>
+
+</head>
+<body>
+
+<canvas id="starsCanvas"></canvas>
+
+<header>
+    <a href="dashboard.html" class="logo"><span>LEO</span><span>AF</span></a>
+    <div class="nav-right">
+        <a href="q1.html" class="nav-btn">← Q1 HUB</a>
+        <button id="logoffBtn" class="nav-btn">ABORT</button>
+    </div>
+</header>
+
+<div class="breadcrumb">
+    <a href="dashboard.html">DASHBOARD</a><span>/</span>
+    <a href="q1.html">Q1</a><span>/</span>
+    <span style="color:#ffffff88;">LESSON 03 — THE PHYSICS OF LATENCY</span>
+</div>
+
+<div class="lesson-wrap">
+
+```
+<div class="lesson-header">
+    <div class="lesson-tag">Q1 · LESSON 03 OF 15</div>
+    <h1>The Physics of Latency</h1>
+    <div class="lesson-meta">
+        <div class="l-pill l-pill-q">QUARTER 1</div>
+        <div class="l-pill l-pill-t">FOUNDATIONS</div>
+    </div>
+    <p class="lesson-intro">Latency is the number that defines LEO's commercial case. Every marketing claim about "low latency satellite internet" ultimately rests on physics — the speed of light, the geometry of orbital altitude, and the distance signals must travel. This lesson derives those numbers from first principles, traces how latency propagates through a full end-to-end system, and examines why different applications have different tolerance thresholds. By the end you will be able to calculate propagation delay for any orbit, identify the dominant latency contributor in any architecture, and evaluate whether a given application is genuinely LEO-dependent.</p>
+</div>
+
+<div class="toc">
+    <h4>CONTENTS</h4>
+    <ol>
+        <li><a href="#s1">Speed of light and propagation delay — first principles</a></li>
+        <li><a href="#s2">The full latency budget: every component counted</a></li>
+        <li><a href="#s3">RTT calculations across all orbital regimes</a></li>
+        <li><a href="#s4">TCP, QUIC, and why protocols amplify propagation delay</a></li>
+        <li><a href="#s5">Application latency thresholds: what actually matters and why</a></li>
+        <li><a href="#s6">Fibre versus satellite: when the photon wins underground</a></li>
+        <li><a href="#s7">ISLs and the speed-of-light routing advantage</a></li>
+        <li><a href="#s8">Latency budgeting in practice: the architect's approach</a></li>
+        <li><a href="#s9">The limits of what LEO can promise</a></li>
+        <li><a href="#quiz">Knowledge check</a></li>
+        <li><a href="#python">Python exercises</a></li>
+        <li><a href="#reflect">Reflection prompts</a></li>
+    </ol>
+</div>
+
+<!-- ═══ SECTION 1 ═══ -->
+<div class="content-block" id="s1">
+    <h2>1. Speed of Light and Propagation Delay — First Principles</h2>
+
+    <p>Everything in satellite latency begins with one number: the speed of light in vacuum, <em>c</em> = 299,792,458 metres per second, usually rounded to 300,000 km/s for engineering calculations. This is not a technology parameter. It cannot be improved by better modulation, more powerful transponders, or smarter protocols. It is a fundamental constant of the universe, and it sets an absolute floor on how quickly information can travel between two points.</p>
+
+    <p>The propagation delay between two points separated by distance <em>d</em> is simply:</p>
+
+    <div class="formula-box">
+        <span class="fb-title">PROPAGATION DELAY — ONE WAY</span>
+        t_prop = d / c<br><br>
+        where d = path length (km), c = 299,792 km/s<br><br>
+        Example: d = 35,786 km (GEO altitude)<br>
+        t_prop = 35,786 / 299,792 = 119.4 ms (one way, nadir only)
+    </div>
+
+    <p>That 119.4 ms is the minimum possible delay for a signal travelling from Earth's surface straight up to GEO altitude, in vacuum. It assumes the terminal is directly beneath the satellite — the best-case geometry, which never occurs in practice for all users simultaneously. It also assumes the signal goes only to the satellite. A complete communication path — terminal to satellite, satellite to gateway, gateway to internet, internet back to gateway, gateway to satellite, satellite to terminal — covers much more distance.</p>
+
+    <h3>The two-hop problem</h3>
+
+    <p>Commercial satellite internet services are almost universally two-hop paths: the user terminal talks to the satellite, the satellite talks to a ground gateway, and the gateway connects to the terrestrial internet. Traffic in the opposite direction traverses the same path in reverse. The total propagation path for a single user request — from the user's browser to a web server and back — therefore includes four satellite-link traversals: up to satellite, down to gateway, up to satellite again (return path), down to user. For GEO, this means the propagation delay component of the RTT is at minimum 4 × 119 ms = 476 ms — and that is the best possible case with the user directly below the satellite and the gateway at the sub-satellite point.</p>
+
+    <p>In practice, GEO terminals are not directly beneath the satellite. A GEO satellite sitting at 35,786 km altitude above the equator, serving a terminal at 51° north latitude (London) at a typical elevation angle of 25–30°, has a slant range — the actual diagonal distance between terminal and satellite — of approximately 40,600 km. The one-way propagation delay becomes 40,600 / 299,792 = 135 ms. For a full two-hop internet exchange, the four-traversal RTT propagation component alone is 540 ms. Add network processing time at gateways and internet backbone delay (typically 20–80 ms for content hosted in Europe), and the real-world measured RTT is 580–680 ms.</p>
+
+    <div class="key-numbers">
+        <div class="kn-item"><span class="kn-val">299,792</span><span class="kn-label">Speed of light (km/s)</span></div>
+        <div class="kn-item"><span class="kn-val">119 ms</span><span class="kn-label">GEO nadir one-way prop delay</span></div>
+        <div class="kn-item"><span class="kn-val">~3.3 ms</span><span class="kn-label">Propagation delay per 1,000 km</span></div>
+        <div class="kn-item"><span class="kn-val">~1.8 ms</span><span class="kn-label">LEO 550 km one-way (nadir)</span></div>
+    </div>
+
+    <h3>Slant range geometry</h3>
+
+    <p>The slant range from a ground terminal to a satellite at altitude <em>h</em>, at elevation angle <em>ε</em>, is derived from the law of cosines applied to the triangle formed by Earth's centre, the terminal, and the satellite. The exact formula is:</p>
+
+    <div class="formula-box">
+        <span class="fb-title">SLANT RANGE FORMULA</span>
+        d_slant = √[ (Rₑ + h)² − Rₑ² · cos²(ε) ] − Rₑ · sin(ε)<br><br>
+        where Rₑ = 6,371 km (Earth mean radius)<br>
+        h = satellite altitude (km)<br>
+        ε = elevation angle (degrees → radians for computation)<br><br>
+        At ε = 90° (zenith): d_slant = h  [trivially — straight up]<br>
+        At ε = 25°, h = 35,786 km: d_slant ≈ 40,590 km<br>
+        At ε = 25°, h = 550 km:    d_slant ≈ 935 km<br>
+        At ε = 25°, h = 1,200 km:  d_slant ≈ 1,930 km
+    </div>
+
+    <p>These slant range numbers deserve attention. At 25° elevation angle — a reasonable minimum for a working LEO service — a Starlink satellite at 550 km is 935 km away. A OneWeb satellite at 1,200 km is 1,930 km away. The one-way propagation delays are 3.1 ms and 6.4 ms respectively. These numbers seem almost absurdly small compared to GEO, and that is exactly the point: LEO collapses the propagation delay by a factor of 40–130× compared to GEO.</p>
+
+    <div class="callout amber">
+        <strong>IMPORTANT: SLANT RANGE VS ALTITUDE</strong>
+        The altitude of a satellite is the vertical distance above Earth's surface. The slant range is the actual line-of-sight path length between terminal and satellite, which depends on elevation angle. For latency calculations, use slant range, not altitude. At low elevation angles, slant range can be 2–4× the satellite's altitude for LEO, and 1.1–1.3× for GEO. This distinction matters most for LEO where the factor is larger.
+    </div>
+
+    <h3>The refractive index correction</h3>
+
+    <p>Light travels at <em>c</em> in vacuum. In the real atmosphere, the refractive index is slightly greater than 1, meaning signals slow down slightly as they pass through the troposphere and ionosphere. The tropospheric refractive index correction adds approximately 6–8 metres of effective path length — a propagation delay correction of around 20 nanoseconds — which is entirely negligible for latency budgeting. The ionosphere introduces a frequency-dependent group delay that can reach 5–50 nanoseconds at Ka-band frequencies under normal conditions, and up to several microseconds at L-band during severe ionospheric disturbances. For a latency budget measured in milliseconds, these corrections are at least three orders of magnitude below the propagation term and can be ignored at this level of analysis. For precision timing applications (GNSS, two-way time transfer), they are critical — but that is a different domain.</p>
+</div>
+
+<!-- ═══ SECTION 2 ═══ -->
+<div class="content-block" id="s2">
+    <h2>2. The Full Latency Budget: Every Component Counted</h2>
+
+    <p>Propagation delay is the largest and most fundamental component of satellite link latency, but it is not the only one. A complete end-to-end latency budget for a satellite internet connection includes multiple distinct contributors. Understanding each one matters because they have different magnitudes, different dependencies on system architecture, and different amenability to optimisation. Conflating them leads to unrealistic expectations — both about what LEO can deliver and about what cannot be improved regardless of orbit.</p>
+
+    <h3>Component 1 — Propagation delay</h3>
+
+    <p>As derived above: the time for a signal to travel from terminal to satellite and down to gateway, multiplied by the number of satellite-link hops on the path. For a standard two-hop bent-pipe LEO service (no inter-satellite links), this is 2 × slant_range / c per direction, or 4 × slant_range / c for a full round trip. At a mean Starlink elevation angle of roughly 50–60° during a typical pass, mean slant range is approximately 700–800 km, giving a one-way propagation delay of 2.3–2.7 ms. Round-trip propagation for a two-hop path: approximately 9–11 ms.</p>
+
+    <h3>Component 2 — On-board processing delay</h3>
+
+    <p>A bent-pipe satellite performs no processing: it receives a signal, frequency-converts it, amplifies it, and retransmits it. The on-board delay is dominated by the electrical path through the transponder — amplifiers, filters, and switching. This is typically 0.5–2 ms depending on transponder design and frequency plan. A regenerative satellite (one that demodulates, processes, and re-modulates the signal on board) introduces additional delay: modem demodulation and re-modulation adds another 1–5 ms. Inter-satellite link nodes that include on-board routing add packet switching delay of 0.1–1 ms per hop through the constellation.</p>
+
+    <h3>Component 3 — Ground station and gateway processing</h3>
+
+    <p>At each gateway, the signal is demodulated, the IP packets are extracted, header inspection is performed, and routing decisions are made. A modern high-performance gateway can process packets in under 1 ms. However, gateways also perform scheduling, buffering, and quality-of-service processing. Under load, gateway queuing delay can contribute 1–5 ms. Gateway processing is typically small but not zero — budget 1–3 ms round trip for gateway delay in a well-designed system.</p>
+
+    <h3>Component 4 — Serialisation delay</h3>
+
+    <p>Serialisation delay is the time required to put a packet onto a link — equal to the packet size divided by the link data rate. For a 1,500-byte IP packet (maximum Ethernet frame size) on a 100 Mbps satellite link, serialisation delay is 1,500 × 8 / 100,000,000 = 0.12 ms — negligible. On a 1 Mbps link, the same packet takes 12 ms to serialise. In constrained environments — low-throughput mobility terminals, narrowband IoT links — serialisation delay can dominate over propagation. This is why you cannot directly compare latency numbers across systems without knowing the link data rate and packet size.</p>
+
+    <h3>Component 5 — Queuing and scheduling delay</h3>
+
+    <p>Satellite links are shared resources. Multiple terminals compete for capacity on both the forward link (gateway to terminal) and the return link (terminal to gateway). The scheduler allocates time slots or frequency segments to users. A packet arriving at the gateway for a specific terminal must wait until that terminal's next allocated slot. Under light load, this wait is negligible. Under heavy load or with burst traffic, queuing delay can reach tens of milliseconds — large enough to noticeably degrade latency-sensitive applications. This is why satellite internet latency measured during peak hours is often significantly worse than measured at off-peak times, even when the propagation component is unchanged.</p>
+
+    <h3>Component 6 — Terrestrial network delay</h3>
+
+    <p>Once the signal leaves the satellite gateway and enters the terrestrial internet, it travels through internet exchange points, backbone routers, and content delivery networks to the destination server. This delay depends entirely on the geographic distance between the gateway and the content server, and on the routing policy of the networks traversed. A Starlink user in Australia accessing a content server in the United States via a gateway in Australia incurs: satellite propagation (~10 ms), plus Sydney-to-Los-Angeles internet backbone (~95 ms), plus return. The terrestrial component dominates. Starlink partially addresses this with ISLs that can route traffic across the constellation rather than into the local internet, but only where Starlink has Points of Presence at both ends.</p>
+
+    <div class="compare-table" style="overflow-x:auto;">
+        <table class="compare-table" style="min-width:580px;">
+            <thead>
+                <tr>
+                    <th>Latency Component</th>
+                    <th>GEO (bent-pipe)</th>
+                    <th>LEO 550 km (bent-pipe)</th>
+                    <th>LEO 550 km (ISL)</th>
+                    <th>Reducible?</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr><td>Propagation (4 hops, RTT)</td><td class="lo">480–560 ms</td><td class="hi">9–14 ms</td><td class="hi">9–14 ms</td><td>Only by changing orbit</td></tr>
+                <tr><td>On-board processing</td><td>1–3 ms</td><td>1–3 ms</td><td>2–6 ms (ISL hops)</td><td>Marginal HW improvement</td></tr>
+                <tr><td>Gateway processing</td><td>1–3 ms</td><td>1–3 ms</td><td>1–3 ms</td><td>Yes, engineering effort</td></tr>
+                <tr><td>Serialisation (100 Mbps)</td><td>&lt;1 ms</td><td>&lt;1 ms</td><td>&lt;1 ms</td><td>Yes, with higher data rate</td></tr>
+                <tr><td>Queuing / scheduling</td><td>2–20 ms</td><td>1–10 ms</td><td>1–10 ms</td><td>Yes, traffic management</td></tr>
+                <tr><td>Terrestrial backbone</td><td>10–200 ms</td><td>10–200 ms</td><td>5–50 ms (ISL routing)</td><td>Yes, gateway placement / ISL</td></tr>
+                <tr><td><strong>Typical total RTT</strong></td><td class="lo"><strong>550–750 ms</strong></td><td class="md"><strong>25–50 ms</strong></td><td class="hi"><strong>15–35 ms</strong></td><td></td></tr>
+            </tbody>
+        </table>
+    </div>
+
+    <div class="callout green">
+        <strong>THE ARCHITECT'S INSIGHT</strong>
+        The table above reveals where to focus optimisation effort. For GEO, propagation is 85–90% of total RTT — nothing else matters. For LEO without ISLs, terrestrial routing dominates once propagation is removed. For LEO with ISLs, gateway placement and routing optimisation become the remaining levers. Understanding which component dominates in your specific architecture tells you exactly where engineering investment will yield latency improvements and where it will not.
+    </div>
+
+    <h3>Measuring versus modelling</h3>
+
+    <p>Latency measurements reported by users, press, and regulators often conflate these components in ways that make comparison difficult. A measurement of "20 ms ping to 8.8.8.8 (Google DNS)" captures propagation plus satellite processing plus gateway processing plus the terrestrial path from the gateway to Google's anycast DNS infrastructure. It does not isolate the satellite's contribution. A "25 ms RTT" for Starlink measured from a terminal in rural Texas to a server in Dallas might reflect excellent gateway proximity, not anything unique about Starlink's satellite design. The same terminal pinging a server in Tokyo might show 180–220 ms, with the satellite contributing only 15 ms of that total. Latency numbers are only meaningful when accompanied by the complete path description.</p>
+</div>
+
+<!-- ═══ SECTION 3 ═══ -->
+<div class="content-block" id="s3">
+    <h2>3. RTT Calculations Across All Orbital Regimes</h2>
+
+    <p>With the slant range formula and the latency budget framework established, we can now compute realistic round-trip time estimates for each orbital regime. These are engineering baselines — the numbers a systems architect uses when evaluating whether a given application can be served from a given orbit.</p>
+
+    <h3>Methodology</h3>
+
+    <p>For each regime we compute: (a) minimum RTT — nadir geometry, no queuing, no terrestrial delay; (b) typical RTT — mean elevation angle geometry, moderate load, gateway within 20 ms terrestrial; (c) worst-case RTT — minimum elevation angle, gateway in different region, moderate queuing. The minimum RTT establishes the physical floor; the typical RTT is what a well-designed production system delivers; the worst-case establishes service level agreement boundaries.</p>
+
+    <div class="formula-box">
+        <span class="fb-title">RTT ESTIMATION FORMULA</span>
+        RTT = 2 × (2 × d_slant / c) + t_processing + t_queuing + t_terrestrial<br><br>
+        The factor of 2 outside the brackets accounts for the full round trip.<br>
+        The factor of 2 inside accounts for two satellite-link hops per direction<br>
+        (terminal→satellite→gateway for user traffic in bent-pipe architecture).<br><br>
+        For ISL-routed paths: replace 2×d_slant with sum of all ISL and feeder link hops.
+    </div>
+
+    <h3>VLEO: 250–450 km</h3>
+
+    <p>At 350 km altitude, nadir slant range equals altitude: 350 km. One-way propagation is 350/299,792 = 1.17 ms. Four traversals (RTT): 4.7 ms. Add gateway processing and moderate terrestrial delay: typical RTT of 8–15 ms. This is remarkable — approaching the latency of a transcontinental terrestrial fibre path. VLEO has no commercial constellation today, but these numbers explain why it attracts serious attention. The constraint is propulsion: maintaining orbit against atmospheric drag at 350 km requires continuous or very frequent thrusting, severely limiting satellite lifetime and increasing propellant mass fraction.</p>
+
+    <h3>LEO: 450–2,000 km</h3>
+
+    <p>The Starlink operational shell at 540–560 km has become the reference point for modern LEO latency. At nadir, slant range = 550 km, one-way propagation = 1.83 ms, four-traversal RTT propagation component = 7.3 ms. At mean elevation angle 55° during a typical pass, slant range ≈ 720 km, one-way propagation = 2.4 ms, four-traversal RTT propagation = 9.6 ms. At minimum elevation angle 25°, slant range ≈ 930 km, one-way propagation = 3.1 ms, four-traversal RTT propagation = 12.5 ms.</p>
+
+    <p>Adding gateway processing (~2 ms), scheduling (~3 ms), and a typical terrestrial component to nearby content (~15 ms), the production RTT is in the range 30–45 ms for a typical Starlink user accessing regional content. This is consistent with independently measured Starlink performance data, which shows median RTT of 25–45 ms depending on region and time of day.</p>
+
+    <p>OneWeb at 1,200 km presents a different profile. Nadir slant range = 1,200 km, one-way propagation = 4.0 ms, four-traversal RTT propagation = 16 ms. At 25° elevation, slant range ≈ 1,930 km, RTT propagation = 25.7 ms. OneWeb's total RTT is typically 50–70 ms in production — worse than Starlink, but still dramatically better than GEO and well within the threshold for most interactive applications.</p>
+
+    <div class="key-numbers">
+        <div class="kn-item"><span class="kn-val">~3 ms</span><span class="kn-label">VLEO 350 km propagation RTT (nadir)</span></div>
+        <div class="kn-item"><span class="kn-val">~7 ms</span><span class="kn-label">Starlink 550 km propagation RTT (nadir)</span></div>
+        <div class="kn-item"><span class="kn-val">~16 ms</span><span class="kn-label">OneWeb 1,200 km propagation RTT (nadir)</span></div>
+        <div class="kn-item"><span class="kn-val">~250 ms</span><span class="kn-label">O3b MEO 8,062 km propagation RTT</span></div>
+        <div class="kn-item"><span class="kn-val">~480 ms</span><span class="kn-label">GEO 35,786 km propagation RTT</span></div>
+    </div>
+
+    <h3>MEO: 2,000–35,000 km</h3>
+
+    <p>SES's O3b mPOWER constellation operates at approximately 8,062 km altitude in an equatorial orbit. At nadir, slant range = 8,062 km, one-way propagation = 26.9 ms, four-traversal RTT propagation = 107.5 ms. With gateway processing and terrestrial delay, O3b's production RTT for enterprise services is typically 130–160 ms. This is significantly worse than LEO, but the O3b business case does not depend on matching LEO latency — it depends on being dramatically better than GEO (130 ms vs 650 ms) while providing large capacity to regions where LEO coverage or gateway infrastructure is unavailable. For maritime and enterprise markets in the tropics and mid-latitudes, O3b's latency is adequate for most applications except real-time gaming and voice in some configurations.</p>
+
+    <p>GPS satellites at 20,200 km altitude are the other major MEO population. They are not communications satellites in the conventional sense — they broadcast ranging signals — but the one-way propagation delay of 67 ms is actually a design feature: GNSS receivers use the known propagation delay to compute their position. Any perturbation to this delay — caused by ionospheric effects, multipath, or atmospheric moisture — is a source of positioning error to be corrected, not a service quality metric.</p>
+
+    <h3>GEO: 35,786 km</h3>
+
+    <p>The GEO propagation calculation is well-established but worth doing precisely. At nadir (terminal directly below satellite), slant range = 35,786 km, one-way propagation = 119.4 ms, four-traversal propagation RTT = 477.5 ms. In practice, most GEO terminals in populated regions see elevation angles of 20–45°, yielding slant ranges of 38,000–45,000 km and one-way propagation delays of 127–150 ms. The production four-traversal RTT propagation component is 508–600 ms. With gateway and terrestrial contributions, measured GEO RTT is consistently 550–700 ms.</p>
+
+    <div class="diagram-wrap">
+        <svg viewBox="0 0 700 300" width="100%" xmlns="http://www.w3.org/2000/svg" font-family="Share Tech Mono, monospace">
+            <defs>
+                <pattern id="gridL3" width="35" height="35" patternUnits="userSpaceOnUse">
+                    <path d="M 35 0 L 0 0 0 35" fill="none" stroke="#ffffff05" stroke-width="0.5"/>
+                </pattern>
+            </defs>
+            <rect width="700" height="300" fill="url(#gridL3)"/>
+
+            <!-- Y axis label -->
+            <text x="12" y="150" font-size="9" fill="#ffffff33" text-anchor="middle" transform="rotate(-90,12,150)" letter-spacing="1">ALTITUDE</text>
+
+            <!-- Horizontal guide lines -->
+            <line x1="40" y1="270" x2="680" y2="270" stroke="#ffffff11" stroke-width="1"/>
+
+            <!-- Bars for each regime - logarithmic scale approximation -->
+            <!-- VLEO bar -->
+            <rect x="60" y="252" width="80" height="18" fill="#ff004f33" stroke="#ff004f66" stroke-width="1"/>
+            <text x="100" y="247" font-size="9" fill="#ff004f99" text-anchor="middle">VLEO</text>
+            <text x="100" y="286" font-size="8" fill="#ff004f66" text-anchor="middle">350 km</text>
+
+            <!-- RTT bar for VLEO -->
+            <rect x="60" y="228" width="80" height="24" fill="#ff004f22" stroke="#ff004f44" stroke-width="1" stroke-dasharray="2,2"/>
+            <text x="100" y="222" font-size="9" fill="#ff004fcc" text-anchor="middle" font-weight="bold">~10 ms</text>
+
+            <!-- LEO 550 bar -->
+            <rect x="180" y="243" width="80" height="27" fill="#39ff1433" stroke="#39ff1466" stroke-width="1"/>
+            <text x="220" y="238" font-size="9" fill="#39ff1499" text-anchor="middle">LEO 550</text>
+            <text x="220" y="286" font-size="8" fill="#39ff1466" text-anchor="middle">550 km</text>
+
+            <rect x="180" y="210" width="80" height="33" fill="#39ff1422" stroke="#39ff1444" stroke-width="1" stroke-dasharray="2,2"/>
+            <text x="220" y="204" font-size="9" fill="#39ff14cc" text-anchor="middle" font-weight="bold">~35 ms</text>
+
+            <!-- OneWeb bar -->
+            <rect x="300" y="234" width="80" height="36" fill="#00d9ff22" stroke="#00d9ff55" stroke-width="1"/>
+            <text x="340" y="229" font-size="9" fill="#00d9ff88" text-anchor="middle">LEO 1200</text>
+            <text x="340" y="286" font-size="8" fill="#00d9ff66" text-anchor="middle">1,200 km</text>
+
+            <rect x="300" y="190" width="80" height="44" fill="#00d9ff11" stroke="#00d9ff33" stroke-width="1" stroke-dasharray="2,2"/>
+            <text x="340" y="184" font-size="9" fill="#00d9ffcc" text-anchor="middle" font-weight="bold">~60 ms</text>
+
+            <!-- O3b bar -->
+            <rect x="420" y="210" width="80" height="60" fill="#ffaa0022" stroke="#ffaa0055" stroke-width="1"/>
+            <text x="460" y="205" font-size="9" fill="#ffaa0088" text-anchor="middle">O3b MEO</text>
+            <text x="460" y="286" font-size="8" fill="#ffaa0066" text-anchor="middle">8,062 km</text>
+
+            <rect x="420" y="145" width="80" height="65" fill="#ffaa0011" stroke="#ffaa0033" stroke-width="1" stroke-dasharray="2,2"/>
+            <text x="460" y="139" font-size="9" fill="#ffaa00cc" text-anchor="middle" font-weight="bold">~145 ms</text>
+
+            <!-- GEO bar -->
+            <rect x="540" y="160" width="80" height="110" fill="#ff004f22" stroke="#ff004f44" stroke-width="1"/>
+            <text x="580" y="155" font-size="9" fill="#ff004f88" text-anchor="middle">GEO</text>
+            <text x="580" y="286" font-size="8" fill="#ff004f66" text-anchor="middle">35,786 km</text>
+
+            <rect x="540" y="40" width="80" height="120" fill="#ff004f11" stroke="#ff004f33" stroke-width="1" stroke-dasharray="2,2"/>
+            <text x="580" y="34" font-size="9" fill="#ff004fcc" text-anchor="middle" font-weight="bold">~625 ms</text>
+
+            <!-- Legend -->
+            <rect x="55" y="14" width="12" height="10" fill="#ffffff22" stroke="#ffffff44" stroke-width="1"/>
+            <text x="72" y="23" font-size="9" fill="#ffffff66">ALTITUDE (proportional)</text>
+            <rect x="200" y="14" width="12" height="10" fill="#ffffff11" stroke="#ffffff33" stroke-width="1" stroke-dasharray="2,2"/>
+            <text x="217" y="23" font-size="9" fill="#ffffff66">TYPICAL RTT (incl. terrestrial)</text>
+
+            <text x="350" y="298" font-size="8" fill="#ffffff22" text-anchor="middle" letter-spacing="1">ORBITAL ALTITUDE VS TYPICAL PRODUCTION RTT — SCHEMATIC, NOT TO SCALE</text>
+        </svg>
+        <figcaption>ORBITAL REGIME ALTITUDE COMPARED TO TYPICAL PRODUCTION RTT — BARS NOT TO ALTITUDE SCALE</figcaption>
+    </div>
+
+    <div class="callout">
+        <strong>THE 150 MS THRESHOLD</strong>
+        The ITU G.114 recommendation specifies that one-way delay above 150 ms is "not recommended" for most conversational voice applications, and perceptible degradation begins at 150 ms one-way (300 ms RTT). GEO fails this standard at the propagation level alone — before any other delay source. All current commercial LEO constellations clear this threshold comfortably. For video conferencing (Zoom, Teams), the acceptable RTT threshold is typically 200–300 ms; both LEO and O3b MEO are well within range. For gaming, application-specific thresholds vary from 50 ms (competitive FPS) to 150 ms (casual); most LEO systems meet the 150 ms threshold consistently.
+    </div>
+</div>
+
+<!-- ═══ SECTION 4 ═══ -->
+<div class="content-block" id="s4">
+    <h2>4. TCP, QUIC, and Why Protocols Amplify Propagation Delay</h2>
+
+    <p>Raw propagation delay is the floor, but the protocols that carry internet traffic can multiply its practical impact by factors of 10 or more. Understanding TCP's behaviour under high latency is essential context for why GEO internet is so much worse in practice than its 600 ms propagation delay alone would suggest, and why LEO's 30–40 ms RTT enables applications that 100 ms RTT cannot.</p>
+
+    <h3>TCP connection establishment</h3>
+
+    <p>Before any data flows, TCP requires a three-way handshake: the client sends a SYN, the server responds with SYN-ACK, and the client sends ACK. This requires one full round trip before a single byte of application data can be sent. For HTTPS connections (the majority of all web traffic), TLS negotiation then adds one to two more round trips before the request can be issued. A complete HTTPS connection setup over GEO therefore requires 2–3 RTTs of setup time before the first byte of content arrives: 2 × 625 ms = 1,250 ms minimum. A user requesting a web page over GEO waits at least 1.25 seconds before the first byte of content can arrive — and that is before the server processes the request. Over LEO at 35 ms RTT, the same setup takes 2 × 35 ms = 70 ms. This 18× difference in connection setup time is a major contributor to the perceived difference in responsiveness.</p>
+
+    <h3>The congestion window and throughput ceiling</h3>
+
+    <p>TCP's congestion control algorithm governs how much data a sender can have "in flight" — transmitted but not yet acknowledged — at any time. The congestion window starts small (one or a few maximum segment sizes, or MSS) and grows by one MSS per acknowledged segment in slow start, doubling each round trip until a loss occurs or the slow-start threshold is reached. The maximum achievable throughput is bounded by:</p>
+
+    <div class="formula-box">
+        <span class="fb-title">TCP THROUGHPUT CEILING (SIMPLIFIED)</span>
+        Throughput ≤ CWND / RTT<br><br>
+        where CWND = congestion window size (bytes), RTT = round-trip time (seconds)<br><br>
+        Example: CWND = 65,535 bytes (default max before window scaling)<br>
+        At RTT = 600 ms (GEO): Throughput ≤ 65,535 / 0.6 ≈ 109 kbps<br>
+        At RTT = 35 ms (LEO):  Throughput ≤ 65,535 / 0.035 ≈ 1.87 Mbps<br>
+        With window scaling (CWND = 4 MB):<br>
+        At RTT = 600 ms (GEO): ≤ 53 Mbps<br>
+        At RTT = 35 ms (LEO):  ≤ 914 Mbps
+    </div>
+
+    <p>The numbers above show the fundamental problem: without TCP window scaling, a GEO link with 600 ms RTT and a 65 kB window is throttled to around 109 kbps regardless of how much physical capacity the satellite transponder provides. Modern TCP implementations use window scaling (RFC 1323) to extend the window to megabytes, substantially improving throughput. But the fundamental relationship holds: for the same congestion window, throughput scales inversely with RTT. A LEO link with 17× lower RTT can deliver 17× higher TCP throughput with identical congestion window size.</p>
+
+    <p>There is a more subtle problem: slow start. A new TCP connection begins with a congestion window of 1 MSS (1,460 bytes) and doubles each RTT until the slow-start threshold. Over GEO (600 ms RTT), reaching a 1 MB window requires approximately 10 doubling steps, taking 6 seconds. Over LEO (35 ms RTT), the same window is reached in 0.35 seconds. Small objects — web page assets, API responses, DNS lookups — are often transferred in a few KB and may never leave slow start. For these small transfers, the throughput is not limited by the physical link capacity or even the congestion window ceiling; it is limited by how many RTTs the slow-start algorithm requires to ramp up.</p>
+
+    <h3>Performance Enhancing Proxies and their death</h3>
+
+    <p>The satellite industry's response to TCP's poor performance over high-latency links was the Performance Enhancing Proxy (PEP). A PEP sits at each gateway and intercepts TCP connections in both directions. It spoofs acknowledgements locally — when a packet arrives at the gateway from the internet, the PEP immediately sends a fake ACK back to the server, telling it the packet was received at the terminal. This allows the server's congestion window to grow quickly without waiting for the terminal to actually receive and acknowledge the data. The PEP also manages a separate local TCP connection to the terminal, potentially applying satellite-specific congestion control algorithms. PEPs worked reasonably well for HTTP/1.1 traffic.</p>
+
+    <p>The transition to HTTPS (HTTP over TLS) destroyed transparent PEPs. TLS encrypts the TCP payload end-to-end, including the TCP header content the PEP needed to manipulate. A transparent PEP cannot intercept an encrypted connection without breaking it. By 2018, roughly 85% of web traffic was HTTPS. By 2022, it was over 95%. The satellite industry's primary latency mitigation tool for TCP had been rendered obsolete by a security improvement that had nothing to do with satellites.</p>
+
+    <h3>QUIC and the modern alternative</h3>
+
+    <p>QUIC (RFC 9000, 2021) is a transport protocol designed by Google and standardised by the IETF that runs over UDP rather than TCP. It incorporates TLS 1.3 natively, provides connection establishment in a single RTT (or zero RTT for resumed connections), and implements its own congestion control independent of the operating system. For satellite links, QUIC's key advantages are: fewer round trips to establish an encrypted connection (1 RTT vs 2–3 for TCP+TLS), multiplexed streams without head-of-line blocking (so a lost packet on one stream does not stall all streams as in HTTP/2 over TCP), and a pluggable congestion control framework that allows satellite-aware algorithms to be deployed without changing endpoints.</p>
+
+    <p>HTTP/3 — the current version of the HTTP protocol — runs over QUIC. As of 2024, HTTP/3 accounts for approximately 30% of HTTP traffic and is enabled by default in Chrome, Firefox, Safari, and major content delivery networks. For LEO operators, QUIC is a net positive: its 1-RTT connection setup adds only 35 ms (one Starlink RTT) rather than the 120+ ms added by TCP+TLS setup. For GEO operators, QUIC helps somewhat — 1 RTT × 600 ms = 600 ms vs 2–3 RTTs × 600 ms = 1,200–1,800 ms — but the propagation delay still dominates.</p>
+
+    <div class="deep-dive">
+        <h4>DEEPER CONTEXT — TCP BBR AND SATELLITE CONGESTION CONTROL</h4>
+        <p>Google's BBR (Bottleneck Bandwidth and Round-trip propagation time) congestion control algorithm, available in Linux kernels since 2016, takes a fundamentally different approach to TCP congestion control. Instead of inferring congestion from packet loss (the traditional Reno/CUBIC approach), BBR models the bottleneck bandwidth and RTT directly, maintaining a congestion window sized to the bandwidth-delay product. This makes BBR much more effective on high-bandwidth, high-latency links — including satellite links — because it does not interpret delay variation as congestion. Starlink and other LEO operators have reported significant throughput improvements for users running BBR-compatible configurations. BBR is now being deployed at major CDNs. For a satellite systems architect, knowing that BBR exists and behaves well on satellite links is relevant when specifying congestion control requirements for gateway and terminal software stacks.</p>
+        <p>A related metric is the Bandwidth-Delay Product (BDP): the amount of data that must be in flight to fully utilise a link at a given throughput and RTT. BDP = throughput × RTT. For a 100 Mbps link at 35 ms RTT, BDP = 100 × 10⁶ × 0.035 = 437,500 bytes ≈ 427 KB. For a 100 Mbps link at 600 ms RTT, BDP = 7.5 MB. The TCP window must be at least as large as the BDP to fully utilise the link. GEO requires very large congestion windows to utilise high-throughput capacity; LEO requires modest windows that are well within normal TCP behaviour without window scaling.</p>
+    </div>
+</div>
+
+<!-- ═══ SECTION 5 ═══ -->
+<div class="content-block" id="s5">
+    <h2>5. Application Latency Thresholds: What Actually Matters and Why</h2>
+
+    <p>Not all applications are latency-sensitive. A significant fraction of internet traffic — file downloads, software updates, video streaming buffers, email — is effectively latency-insensitive beyond a broad threshold. The commercial case for LEO is built on the applications that are genuinely latency-sensitive and the markets where those applications matter most. Understanding where the thresholds come from — and why — equips you to evaluate constellation design decisions and market strategies with precision.</p>
+
+    <h3>Voice over IP</h3>
+
+    <p>Human auditory perception of conversational delay has been extensively studied. The ITU-T G.114 standard, which has formed the basis of telecommunications delay specifications since the analogue era, establishes 150 ms one-way delay as the recommended maximum for most applications. Above 150 ms one-way (300 ms RTT), conversational rhythm begins to degrade: speakers start to "talk over" each other because the feedback loop between speech and perceived response is disrupted. Above 300 ms one-way (600 ms RTT) — exactly GEO's propagation delay alone — conversations require explicit "over-and-out" protocol to manage turn-taking, much like radio communications. This is not a matter of user preference or cultural expectation; it reflects the neurological timescales of speech planning and auditory feedback.</p>
+
+    <p>All current commercial LEO constellations deliver production RTTs of 25–70 ms, well within the G.114 recommendation. VoIP over LEO sounds indistinguishable from terrestrial internet VoIP to most users. VoIP over GEO was technically possible with echo cancellation and careful jitter buffering, but the conversational experience was noticeably degraded. This is why satellite phone providers operating via GEO geostationary have always occupied a niche market for users with no terrestrial alternative, never a mainstream communications medium.</p>
+
+    <h3>Video conferencing</h3>
+
+    <p>Video conferencing applications (Zoom, Teams, Google Meet) are more tolerant than pure VoIP because the visual channel provides feedback cues that partially compensate for audio delay. Zoom's published latency target is under 150 ms one-way; its Quality of Experience degrades measurably above 200–250 ms one-way, and most users find conferences over 400 ms one-way (800 ms RTT) uncomfortable for sustained meetings. GEO's 600–650 ms RTT is borderline: some users tolerate it, many do not. LEO's 30–50 ms RTT is comfortably within the acceptable range for all conferencing applications.</p>
+
+    <p>The aviation market presents a specific challenge: at 35,000 feet, passengers' tolerance for poor video conferencing quality is lower than at home, because the alternative in-flight experience is highly valued. A passenger paying $30 for in-flight connectivity and experiencing a degraded Teams meeting is more likely to complain than a home user on a slow rural GEO connection. This asymmetry of user expectation makes latency performance a more commercially sensitive metric in aviation than in residential broadband.</p>
+
+    <h3>Cloud gaming</h3>
+
+    <p>Cloud gaming services (Microsoft xCloud, NVIDIA GeForce Now, Amazon Luna) stream video of a remotely-rendered game to a client device, sending controller inputs back to the server. The round-trip latency from input to rendered output must be below approximately 80 ms to feel responsive for most game genres. Competitive first-person shooters require 20–40 ms for professional-level play. The latency budget is consumed by: input capture (~1 ms), network RTT, server rendering time (~5–10 ms), video encoding (~5–10 ms), network buffer/jitter management (~10–20 ms), and display latency (~8–16 ms at 60 Hz). With a total budget of 80 ms and non-network contributors consuming 30–50 ms, the available network RTT budget is roughly 30–50 ms.</p>
+
+    <p>LEO constellations with RTTs of 30–45 ms are within this window — barely for competitive gaming, comfortably for casual gaming. GEO at 600 ms is entirely excluded. This market is significant: global cloud gaming revenue exceeded $3 billion in 2023 and is growing rapidly. For LEO operators targeting aviation and maritime markets, cloud gaming is a premium service differentiator that requires LEO latency and simply does not work on GEO. Several airlines have cited gaming as a driver of their LEO connectivity procurement decisions.</p>
+
+    <h3>Financial trading and market data</h3>
+
+    <p>Electronic trading latency requirements are the most extreme of any commercial application. High-frequency trading firms in the 2010s spent tens of millions of dollars on microwave links between Chicago and New York because microwave propagation is 30–40% faster than light through fibre-optic cable (fibre's refractive index of ~1.5 means light travels at c/1.5 = ~200,000 km/s, versus ~300,000 km/s through air). The latency difference between a microwave path and a fibre path from Chicago to New York is approximately 4 milliseconds — and that 4 ms was commercially valuable enough to justify the infrastructure investment.</p>
+
+    <p>For this application, even LEO latency is multiple orders of magnitude too slow. The relevant question is not whether satellite can support HFT — it cannot — but whether satellite can support institutional trading where latency requirements are in the range of 10–50 ms rather than microseconds. For institutions operating in remote regions or requiring resilience backup for terrestrial connectivity, LEO can serve as a latency-adequate secondary path for non-HFT activity. Some Starlink Enterprise customers use it exactly this way.</p>
+
+    <h3>Web browsing and interactive applications</h3>
+
+    <p>Human perception of web page load time has been extensively studied by the web performance community. The key thresholds (based on Nielsen's and Google's research) are: under 100 ms feels instantaneous; 100–300 ms is perceptible but not disruptive; 300–1,000 ms is clearly delayed but users remain engaged; above 1 second, users lose focus and abandonment increases. For web applications that require multiple sequential request-response exchanges (each RTT adds latency), GEO's 600 ms RTT means a three-request cascade takes 1,800 ms minimum — well into the abandonment zone. LEO's 35 ms RTT means the same cascade takes 105 ms — comfortably imperceptible.</p>
+
+    <p>The practical impact on web experience is therefore not just "GEO feels slow" but "GEO makes modern web applications functionally broken." Single-page applications, JavaScript-heavy sites, and anything requiring authentication tokens or redirects involve multiple RTTs. HTTP/2 and HTTP/3 partially address this through multiplexing and connection reuse, but the fundamental constraint is unchanged: each sequential dependency in a page load adds one RTT of minimum delay.</p>
+
+    <div class="compare-table" style="overflow-x:auto;">
+        <table class="compare-table" style="min-width:560px;">
+            <thead>
+                <tr>
+                    <th>Application</th>
+                    <th>RTT Threshold</th>
+                    <th>GEO (625 ms)</th>
+                    <th>LEO 550 km (35 ms)</th>
+                    <th>O3b MEO (145 ms)</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr><td>VoIP (G.114 compliant)</td><td>&lt; 300 ms RTT</td><td class="lo">✗ Fails</td><td class="hi">✓ Pass</td><td class="hi">✓ Pass</td></tr>
+                <tr><td>Video conferencing (casual)</td><td>&lt; 500 ms RTT</td><td class="md">~ Marginal</td><td class="hi">✓ Pass</td><td class="hi">✓ Pass</td></tr>
+                <tr><td>Video conferencing (business)</td><td>&lt; 300 ms RTT</td><td class="lo">✗ Fails</td><td class="hi">✓ Pass</td><td class="hi">✓ Pass</td></tr>
+                <tr><td>Web browsing (modern apps)</td><td>&lt; 400 ms RTT</td><td class="lo">✗ Degraded</td><td class="hi">✓ Pass</td><td class="hi">✓ Pass</td></tr>
+                <tr><td>Cloud gaming (casual)</td><td>&lt; 150 ms RTT</td><td class="lo">✗ Fails</td><td class="hi">✓ Pass</td><td class="hi">✓ Pass</td></tr>
+                <tr><td>Cloud gaming (competitive)</td><td>&lt; 50 ms RTT</td><td class="lo">✗ Fails</td><td class="md">~ Marginal</td><td class="lo">✗ Fails</td></tr>
+                <tr><td>Video streaming (buffered)</td><td>&lt; 5,000 ms</td><td class="hi">✓ Pass</td><td class="hi">✓ Pass</td><td class="hi">✓ Pass</td></tr>
+                <tr><td>File/software download</td><td>Insensitive</td><td class="hi">✓ Pass</td><td class="hi">✓ Pass</td><td class="hi">✓ Pass</td></tr>
+                <tr><td>HFT / low-latency trading</td><td>&lt; 1 ms RTT</td><td class="lo">✗ Fails</td><td class="lo">✗ Fails</td><td class="lo">✗ Fails</td></tr>
+                <tr><td>SCADA / industrial control</td><td>&lt; 100–500 ms</td><td class="md">~ Depends</td><td class="hi">✓ Pass</td><td class="hi">✓ Pass</td></tr>
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<!-- ═══ SECTION 6 ═══ -->
+<div class="content-block" id="s6">
+    <h2>6. Fibre Versus Satellite: When the Photon Wins Underground</h2>
+
+    <p>A counterintuitive but important result of latency physics is that for sufficiently long terrestrial distances, LEO satellite can actually beat fibre-optic cable on latency. This is not marketing; it is geometry and physics, and it has concrete commercial implications.</p>
+
+    <h3>The refractive index penalty</h3>
+
+    <p>Light travels at approximately 299,792 km/s in vacuum. In a glass optical fibre, the refractive index is approximately 1.467 for standard single-mode fibre (ITU-T G.652), meaning light travels at c/1.467 ≈ 204,500 km/s. The effective propagation velocity is about 68% of the vacuum speed of light. This refractive index penalty means that for a given geographic distance, the propagation time through fibre is approximately 1.47× longer than through vacuum.</p>
+
+    <p>Additionally, fibre cables do not follow straight-line great-circle paths. They follow coastlines, continental margins, and submarine cable routes that are determined by geography, geopolitics, marine biology (cables are routed away from fishing areas), and the location of landing stations. The actual cable path length between two cities is typically 20–50% longer than the great-circle distance. The combination of the refractive index penalty and the routing inefficiency means the effective propagation latency of undersea fibre is roughly 1.47 × 1.25 ≈ 1.8× what it would be if light could travel in a straight vacuum line between the same endpoints.</p>
+
+    <div class="formula-box">
+        <span class="fb-title">FIBRE vs LEO SATELLITE LATENCY CROSSOVER</span>
+        Fibre one-way latency ≈ d_great_circle × routing_factor / (c / n_fibre)<br>
+        = d_gc × 1.25 / (204,500 km/s)<br><br>
+        LEO satellite one-way latency ≈ 2 × d_slant_mean / c<br>
+        ≈ 2 × 750 km / 299,792 km/s ≈ 5 ms (Starlink, mean path)<br><br>
+        Crossover distance (fibre latency = LEO latency):<br>
+        d_gc × 1.25 / 204,500 = 0.005 s<br>
+        d_gc ≈ 0.005 × 204,500 / 1.25 ≈ 818 km<br><br>
+        For distances greater than ~800 km, LEO satellite has lower propagation<br>
+        latency than conventional fibre cable, before accounting for network hops.
+    </div>
+
+    <p>This result is surprising to most people when they first encounter it. A Starlink terminal in London communicating with a server in New York via satellite has a propagation path of approximately 2 × 750 km (two satellite hops) + terrestrial at both ends ≈ 20 ms of satellite propagation. The London-New York transatlantic fibre distance is approximately 5,570 km great-circle, actual cable route approximately 6,800 km, fibre propagation time 6,800 / 204,500 = 33 ms. The satellite path is faster in propagation terms — before accounting for gateway processing, ISP network hops, and content server location.</p>
+
+    <h3>Where fibre wins: the network effect</h3>
+
+    <p>Despite the propagation advantage on long routes, fibre wins on end-to-end latency for most users for a simple reason: the internet's content and infrastructure is concentrated in terrestrial data centres connected by fibre. A user reaching a server in the same city via fibre experiences sub-millisecond propagation delay. The same user over satellite still incurs two satellite hops (minimum ~7 ms) plus gateway terrestrial connectivity to the content. For local and regional content, fibre always wins. Satellite's latency advantage over fibre only materialises on long international routes — typically over 1,000 km great-circle — where the satellite path's two short hops to a well-placed gateway are genuinely shorter in propagation time than the fibre route.</p>
+
+    <p>This is the basis for one of the genuinely compelling niche applications of LEO satellite with ISLs: replacing or supplementing undersea cable on certain international routes. Starlink's ISL network can potentially route traffic from one continent to another via the constellation at near-vacuum-speed-of-light, potentially beating the latency of undersea cables on routes where the cable is long and the Starlink gateway placement is favourable. This is not yet a commercial product in the traditional sense, but it is a technically real capability that has attracted attention from financial institutions and content delivery networks evaluating premium low-latency international routing.</p>
+
+    <div class="callout amber">
+        <strong>THE HOLLOW-CORE FIBRE DEVELOPMENT</strong>
+        Conventional single-mode fibre has a refractive index of about 1.47. Hollow-core photonic-bandgap fibre, in which light propagates through an air-filled core rather than a glass core, has an effective refractive index approaching 1.0 — nearly the vacuum speed of light. BT and others have demonstrated hollow-core fibre at scale; the technology is advancing toward commercial deployment. If hollow-core fibre achieves widespread submarine cable deployment, the LEO satellite latency advantage on long international routes will narrow significantly. For a satellite architect, this is a technology risk factor in any business case that depends on satellite's latency advantage over fibre on international routes. The crossover distance would shrink from ~800 km to ~1,000+ km due to routing factor alone, but the routing inefficiency penalty would remain. Hollow-core fibre does not eliminate the satellite advantage; it reduces it on the longest routes.
+    </div>
+</div>
+
+<!-- ═══ SECTION 7 ═══ -->
+<div class="content-block" id="s7">
+    <h2>7. ISLs and the Speed-of-Light Routing Advantage</h2>
+
+    <p>Inter-satellite links (ISLs) change the latency calculation in a fundamental way. Without ISLs, a satellite constellation is a collection of independent bent-pipe relays: each satellite receives traffic from a terminal and routes it to the nearest ground gateway. With ISLs, the constellation becomes a distributed network in the sky, capable of routing traffic from terminal to terminal via multiple satellite hops without touching the ground. The latency implications are profound for certain routes.</p>
+
+    <h3>The routing geometry with ISLs</h3>
+
+    <p>Consider a Starlink terminal in Auckland, New Zealand, communicating with a server in London. Without ISLs: Auckland terminal → Starlink satellite → New Zealand gateway → New Zealand internet → transpacific cable → US internet → transatlantic cable → UK internet → London server. Total fibre path: approximately 30,000 km of cable, giving roughly 150 ms of fibre propagation, plus terrestrial routing delays. With ISLs and appropriate gateway placement: Auckland terminal → Starlink satellite → ISL hops across the Pacific → ISL hops across the North Atlantic → Starlink satellite → UK gateway → London server. The satellite-segment path at near-vacuum speed of light covers approximately 30,000 km equivalent great-circle distance (two short feeder links plus ISL path) at c = 30,000 / 299,792 = 100 ms, compared to the fibre path's ~150 ms. The ISL-routed path is faster in propagation terms.</p>
+
+    <p>This is the commercial rationale behind Starlink's ISL network, which was first activated in 2021 with the v1.5 satellite generation. SpaceX has described the ISL network as enabling "global connectivity without touching the ground" — a capability that was impossible for any previous commercial satellite system and provides a genuine physical-layer latency advantage on intercontinental routes.</p>
+
+    <h3>ISL latency contributions</h3>
+
+    <p>Each ISL hop introduces additional latency: the propagation delay across the ISL link plus on-board processing at the intermediate satellite. ISL links between adjacent Starlink satellites in the same orbital plane are approximately 1,500–3,500 km long depending on orbital altitude and inter-satellite spacing. At 3,000 km, one-way ISL propagation is 10 ms. Processing at the satellite router adds approximately 0.5–2 ms. A path requiring 10 ISL hops across a constellation therefore adds approximately 100–120 ms of ISL-specific latency, replacing what would otherwise be much longer undersea cable propagation for the same geographic route.</p>
+
+    <p>The net effect depends strongly on the route. For Auckland-to-London, ISLs help significantly. For New York to Washington DC (350 km by road), ISLs offer no advantage over a direct terrestrial fibre path, and the satellite feeder links add latency relative to fibre. This is why LEO with ISLs has a nuanced competitive position: it is not universally faster than fibre; it is faster on long international routes where the cable latency is high and the constellation routing is efficient.</p>
+
+    <h3>OneWeb's architectural choice</h3>
+
+    <p>OneWeb's constellation, as originally deployed, has no ISLs. All traffic routes through ground gateways. This was a deliberate architectural and economic decision: ISLs add hardware complexity (laser or RF pointing mechanisms, thermal management, additional mass and power), increase satellite cost, and require sophisticated on-board routing software. For OneWeb's target markets — enterprise, government, and aviation — the absence of ISLs is a meaningful capability limitation only on very long international routes. For a maritime terminal in the North Sea communicating with a gateway in the UK, no ISLs are needed. OneWeb's investors decided this tradeoff was acceptable given the cost and schedule pressures of their post-bankruptcy constellation rebuild. Future OneWeb generations (under Eutelsat ownership) have ISLs in their roadmap.</p>
+
+    <div class="callout green">
+        <strong>ISL ROUTING AS COMPETITIVE MOAT</strong>
+        The ISL capability creates a competitive asymmetry that is difficult to replicate quickly. Building a constellation with ISLs requires designing the on-board routing hardware and software from the start, deploying enough satellites for the ISL mesh to be useful, and operating a space-based routing network at scale. Starlink has done this; OneWeb has not. For enterprise customers on international routes where latency matters — financial services, global media, aviation with intercontinental flights — Starlink's ISL capability is a genuine differentiator that OneWeb cannot offer without a new satellite generation.
+    </div>
+</div>
+
+<!-- ═══ SECTION 8 ═══ -->
+<div class="content-block" id="s8">
+    <h2>8. Latency Budgeting in Practice: The Architect's Approach</h2>
+
+    <p>Latency specifications in system design are not single numbers — they are distributions. A service level agreement might specify that 95% of user sessions must achieve RTT below 100 ms, and 99% below 200 ms. Building a system to meet these specifications requires understanding not just the mean latency but the full distribution, including tail latencies driven by scheduling, congestion, handover events, and gateway load.</p>
+
+    <h3>Building the latency budget</h3>
+
+    <p>The structured approach to latency budgeting starts with the allocation: given a total RTT budget from the SLA (e.g., 100 ms 95th-percentile), how much can each component consume? A worked example for a LEO bent-pipe service targeting 100 ms P95 RTT:</p>
+
+    <div class="formula-box">
+        <span class="fb-title">LATENCY BUDGET ALLOCATION — WORKED EXAMPLE</span>
+        Total P95 RTT budget:              100 ms<br>
+        Propagation (2-hop, P95 geometry):  18 ms  [high elevation angle tail]<br>
+        On-board processing (2× satellite):  4 ms<br>
+        Gateway processing (2× gateway):     4 ms<br>
+        Serialisation (1,500B @ 50 Mbps):    1 ms<br>
+        Queuing / scheduling P95:           15 ms  [budget for load peak]<br>
+        Terrestrial (gateway to CDN PoP):   30 ms  [budget for CDN placement]<br>
+        ──────────────────────────────────────────<br>
+        Total allocated:                    72 ms<br>
+        Margin:                             28 ms  [for unmodelled effects]<br><br>
+        Key constraint: terrestrial (30 ms) and queuing (15 ms) are the<br>
+        dominant non-propagation contributors — both are engineering choices.
+    </div>
+
+    <p>This budget reveals that to meet 100 ms P95, gateway placement must ensure the terrestrial path to major CDN Points of Presence is under 30 ms — which constrains where gateways can be located. It also reveals that scheduling delay is the second-largest component under peak load, making the scheduler design and traffic management policy critical to SLA compliance.</p>
+
+    <h3>Handover events and latency spikes</h3>
+
+    <p>LEO satellites are in constant motion relative to ground terminals. A terminal must hand over from one satellite to the next every 4–14 minutes depending on altitude and elevation mask. During handover, there is a brief period of link disruption while the new satellite link is established. Modern LEO systems use predictive handover (the new satellite link is pre-established before the old one is dropped) to minimise disruption, but even predictive handover introduces a latency spike of 20–200 ms during the handover event due to beam acquisition, timing synchronisation, and scheduling re-establishment.</p>
+
+    <p>These handover spikes contribute to the P99 and maximum latency percentiles. A service achieving 35 ms median RTT might experience 150–300 ms RTT during handover events, which occur approximately once every 8 minutes. For applications that are sensitive to latency spikes rather than average latency — real-time gaming, audio conferencing — these spikes are perceptible. They manifest as brief audio glitches, frame drops in video, or micro-stutters in gaming. Reducing handover spike duration is an active area of engineering development in all LEO constellation programmes.</p>
+
+    <h3>The latency floor and how to communicate it honestly</h3>
+
+    <p>A recurring challenge in satellite service marketing is the gap between the headline latency number (often the median or mean, under good conditions) and the latency distribution that users actually experience. A system that delivers 30 ms median RTT but 300 ms P99 RTT due to scheduling tails and handover events is not, in practice, a 30 ms system for latency-sensitive applications. Real-time applications care about percentile latency, not median latency — a VoIP call that experiences a 300 ms spike every 8 minutes is noticeable. A file download that occasionally takes 300 ms longer is not.</p>
+
+    <p>The architect's responsibility is to specify latency requirements in terms of the distribution that the application actually needs — typically P50, P95, and P99 — and to design the system to meet all three. Marketing latency as a single number without specifying the percentile is a standard industry practice that creates expectation mismatches; recognising this allows you to ask the right questions when evaluating vendor claims or writing specifications.</p>
+</div>
+
+<!-- ═══ SECTION 9 ═══ -->
+<div class="content-block" id="s9">
+    <h2>9. The Limits of What LEO Can Promise</h2>
+
+    <p>The enthusiastic narrative around LEO latency is largely accurate — LEO constellations deliver dramatically better latency than GEO for interactive applications, and this enables services that were previously impossible via satellite. But there are real limits to what LEO can promise, and a competent architect understands them.</p>
+
+    <h3>LEO is not fibre</h3>
+
+    <p>For the majority of users in the majority of locations for the majority of use cases, fibre-to-the-premises (FTTP) terrestrial broadband delivers lower latency than LEO satellite. A fibre connection from a home in London to a content server also in London has a round-trip propagation delay of under 1 ms. LEO cannot match this for local content. LEO's addressable market is users and locations where fibre is not economically viable — rural and remote locations, mobility platforms (aircraft, ships, vehicles), and international routes where cable latency is high. LEO competes with GEO and low-quality fixed wireless, not with high-quality urban fibre.</p>
+
+    <h3>Ground segment location matters enormously</h3>
+
+    <p>The terrestrial segment of a satellite connection — from the gateway to the content server — can easily dominate total latency even on a LEO system. A Starlink user in rural Alaska connecting to a gateway in Seattle (1,500 km, ~10 ms terrestrial) accessing a server in Los Angeles (~30 ms from Seattle) experiences a total RTT of approximately 10 ms (propagation) + 10 ms (Seattle gateway terrestrial) + 30 ms (LA server) × 2 = ~80 ms. If the same user's traffic is routed to a gateway in Virginia due to load balancing, the terrestrial component alone becomes ~80 ms one way, pushing total RTT above 200 ms. Gateway placement and traffic routing policy are as important to delivered latency as satellite altitude.</p>
+
+    <h3>Coverage gaps and latency degradation</h3>
+
+    <p>Constellation coverage is not uniform in time and space. At any given moment, some geographic areas are served by satellites at high elevation angles (low slant range, low latency) while others are served by satellites at low elevation angles (high slant range, higher latency). During periods of lower satellite density — as constellations grow toward their target population — coverage quality varies more. Early Starlink deployments in 2020–2021 showed significant latency variability as the constellation was not yet dense enough to guarantee consistent high-elevation service. A mature, fully-deployed constellation at target population shows much lower latency variance. This temporal dimension of constellation maturity is relevant for service planning: latency commitments that are achievable at full deployment may not be consistently met during the deployment phase.</p>
+
+    <h3>The last-mile and terminal limits</h3>
+
+    <p>Finally, the satellite link is only part of the path. In aviation, the signal must traverse the aircraft's onboard network from the roof-mounted terminal to the passenger device — adding 1–5 ms of Wi-Fi and local network latency plus the delays of the onboard traffic management system. In maritime, the signal may traverse a ship's network with dozens of hops. In enterprise deployments, VPN overhead, firewall inspection, and corporate network routing add latency that can dominate over the satellite contribution. The satellite architect cannot control these downstream components, but must account for them in any end-to-end latency claim.</p>
+
+    <div class="callout red">
+        <strong>THE SINGLE MOST IMPORTANT LATENCY TRUTH</strong>
+        LEO satellite latency is not determined by the satellite — it is determined by the full path from application to application. The satellite contributes 10–20 ms to a total budget that includes terrestrial routing, protocol overhead, and application processing. For routes where terrestrial routing is short (local content, nearby gateways), satellite propagation is the dominant term and LEO's advantage is clear. For routes where terrestrial routing is long (remote gateways, international content), the satellite contribution is a small fraction of total latency and optimising the satellite does little. Know your path, know your budget, know where to invest engineering effort.
+    </div>
+</div>
+
+<!-- ═══ QUIZ ═══ -->
+<div class="quiz-block" id="quiz">
+    <h2>KNOWLEDGE CHECK</h2>
+    <p class="quiz-intro">Ten questions covering the physics of latency, propagation calculations, protocol behaviour, and application thresholds. Some questions require arithmetic; do it before selecting an answer.</p>
+
+    <!-- Q1 -->
+    <div class="quiz-q" id="q1">
+        <p><strong>Q1.</strong> A signal travels from a ground terminal to a GEO satellite at 35,786 km altitude and back down to a gateway at the same location as the terminal (nadir geometry). Using c = 300,000 km/s, what is the one-way propagation delay to the nearest millisecond?</p>
+        <div class="quiz-options">
+            <button class="quiz-opt" data-q="1" data-correct="false">A. 60 ms</button>
+            <button class="quiz-opt" data-q="1" data-correct="false">B. 240 ms</button>
+            <button class="quiz-opt" data-q="1" data-correct="true">C. 119 ms</button>
+            <button class="quiz-opt" data-q="1" data-correct="false">D. 480 ms</button>
+        </div>
+        <div class="quiz-feedback" id="fb1"></div>
+    </div>
+
+    <!-- Q2 -->
+    <div class="quiz-q" id="q2">
+        <p><strong>Q2.</strong> A Starlink satellite at 550 km altitude is being tracked by a terminal at 25° elevation angle. Using the slant range formula, the slant range is approximately 930 km. What is the one-way propagation delay to the nearest 0.1 ms?</p>
+        <div class="quiz-options">
+            <button class="quiz-opt" data-q="2" data-correct="false">A. 1.8 ms</button>
+            <button class="quiz-opt" data-q="2" data-correct="true">B. 3.1 ms</button>
+            <button class="quiz-opt" data-q="2" data-correct="false">C. 5.5 ms</button>
+            <button class="quiz-opt" data-q="2" data-correct="false">D. 9.3 ms</button>
+        </div>
+        <div class="quiz-feedback" id="fb2"></div>
+    </div>
+
+    <!-- Q3 -->
+    <div class="quiz-q" id="q3">
+        <p><strong>Q3.</strong> A bent-pipe LEO satellite service has a mean satellite elevation angle of 55° and a slant range of 720 km. What is the minimum RTT propagation component (four traversals, terminal→sat→gateway→sat→terminal, round trip)?</p>
+        <div class="quiz-options">
+            <button class="quiz-opt" data-q="3" data-correct="false">A. 2.4 ms</button>
+            <button class="quiz-opt" data-q="3" data-correct="false">B. 4.8 ms</button>
+            <button class="quiz-opt" data-q="3" data-correct="true">C. 9.6 ms</button>
+            <button class="quiz-opt" data-q="3" data-correct="false">D. 19.2 ms</button>
+        </div>
+        <div class="quiz-feedback" id="fb3"></div>
+    </div>
+
+    <!-- Q4 -->
+    <div class="quiz-q" id="q4">
+        <p><strong>Q4.</strong> TCP has a congestion window of 65,535 bytes and an RTT of 600 ms (GEO). What is the maximum TCP throughput achievable under these conditions?</p>
+        <div class="quiz-options">
+            <button class="quiz-opt" data-q="4" data-correct="false">A. About 875 kbps</button>
+            <button class="quiz-opt" data-q="4" data-correct="true">B. About 875 Kbps — i.e. 65,535 × 8 / 0.6 ≈ 874 kbps</button>
+            <button class="quiz-opt" data-q="4" data-correct="false">C. About 10 Mbps</button>
+            <button class="quiz-opt" data-q="4" data-correct="false">D. The RTT has no effect on TCP throughput if the link has 100 Mbps capacity</button>
+        </div>
+        <div class="quiz-feedback" id="fb4"></div>
+    </div>
+
+    <!-- Q5 -->
+    <div class="quiz-q" id="q5">
+        <p><strong>Q5.</strong> Why did transparent Performance Enhancing Proxies (PEPs) stop working for most web traffic?</p>
+        <div class="quiz-options">
+            <button class="quiz-opt" data-q="5" data-correct="false">A. They were too expensive to deploy at satellite gateways</button>
+            <button class="quiz-opt" data-q="5" data-correct="false">B. QUIC replaced TCP, making PEPs unnecessary</button>
+            <button class="quiz-opt" data-q="5" data-correct="true">C. The widespread adoption of HTTPS/TLS encrypts the TCP headers PEPs need to manipulate</button>
+            <button class="quiz-opt" data-q="5" data-correct="false">D. PEPs were banned by IETF standards</button>
+        </div>
+        <div class="quiz-feedback" id="fb5"></div>
+    </div>
+
+    <!-- Q6 -->
+    <div class="quiz-q" id="q6">
+        <p><strong>Q6.</strong> Light travels at c/1.467 in standard single-mode optical fibre. Approximately what percentage of the vacuum speed of light is this?</p>
+        <div class="quiz-options">
+            <button class="quiz-opt" data-q="6" data-correct="false">A. 95%</button>
+            <button class="quiz-opt" data-q="6" data-correct="false">B. 80%</button>
+            <button class="quiz-opt" data-q="6" data-correct="true">C. 68%</button>
+            <button class="quiz-opt" data-q="6" data-correct="false">D. 50%</button>
+        </div>
+        <div class="quiz-feedback" id="fb6"></div>
+    </div>
+
+    <!-- Q7 -->
+    <div class="quiz-q" id="q7">
+        <p><strong>Q7.</strong> At approximately what great-circle distance does a LEO satellite at 550 km (mean path ~5 ms one-way) have lower propagation latency than standard fibre, assuming a routing factor of 1.25?</p>
+        <div class="quiz-options">
+            <button class="quiz-opt" data-q="7" data-correct="false">A. Any distance — LEO is always faster than fibre</button>
+            <button class="quiz-opt" data-q="7" data-correct="false">B. About 200 km</button>
+            <button class="quiz-opt" data-q="7" data-correct="true">C. About 800 km</button>
+            <button class="quiz-opt" data-q="7" data-correct="false">D. About 5,000 km</button>
+        </div>
+        <div class="quiz-feedback" id="fb7"></div>
+    </div>
+
+    <!-- Q8 -->
+    <div class="quiz-q" id="q8">
+        <p><strong>Q8.</strong> A QUIC connection (HTTP/3) requires how many round trips before the first byte of application data can be received, for a new connection with no prior session?</p>
+        <div class="quiz-options">
+            <button class="quiz-opt" data-q="8" data-correct="true">A. 1 RTT</button>
+            <button class="quiz-opt" data-q="8" data-correct="false">B. 2 RTTs</button>
+            <button class="quiz-opt" data-q="8" data-correct="false">C. 3 RTTs</button>
+            <button class="quiz-opt" data-q="8" data-correct="false">D. Same as TCP — QUIC offers no advantage in connection setup</button>
+        </div>
+        <div class="quiz-feedback" id="fb8"></div>
+    </div>
+
+    <!-- Q9 -->
+    <div class="quiz-q" id="q9">
+        <p><strong>Q9.</strong> An airline is evaluating LEO vs GEO for in-flight connectivity. The primary application is passenger video conferencing. Which statement best describes the latency case?</p>
+        <div class="quiz-options">
+            <button class="quiz-opt" data-q="9" data-correct="false">A. GEO is adequate because video conferencing tolerates up to 2,000 ms RTT</button>
+            <button class="quiz-opt" data-q="9" data-correct="false">B. LEO is marginally better but GEO is acceptable for business conferencing</button>
+            <button class="quiz-opt" data-q="9" data-correct="true">C. GEO at ~625 ms RTT exceeds the ~300 ms threshold for business conferencing quality; LEO at 30–50 ms RTT is clearly within it</button>
+            <button class="quiz-opt" data-q="9" data-correct="false">D. Both GEO and LEO fail for video conferencing due to Doppler effects on aircraft</button>
+        </div>
+        <div class="quiz-feedback" id="fb9"></div>
+    </div>
+
+    <!-- Q10 -->
+    <div class="quiz-q" id="q10">
+        <p><strong>Q10 — Synthesis.</strong> A LEO constellation operator quotes "20 ms latency" in its marketing material. A maritime customer operating a vessel 4,000 km from the nearest gateway finds their measured RTT is 160 ms. The operator insists the system is performing to specification. Who is right, and what is the dominant latency contributor?</p>
+        <div class="quiz-options">
+            <button class="quiz-opt" data-q="10" data-correct="false">A. The operator is wrong — 160 ms indicates a satellite malfunction</button>
+            <button class="quiz-opt" data-q="10" data-correct="false">B. The customer is wrong — maritime applications always experience higher latency due to interference</button>
+            <button class="quiz-opt" data-q="10" data-correct="true">C. Both can be correct — "20 ms" likely refers to propagation delay only; the dominant contributor at 160 ms is the terrestrial path from the gateway to the content server (~4,000 km fibre path adds ~25 ms each way, plus routing through multiple ISPs)</td>
+            <button class="quiz-opt" data-q="10" data-correct="false">D. The vessel's movement introduces enough Doppler to add 140 ms of delay</button>
+        </div>
+        <div class="quiz-feedback" id="fb10"></div>
+    </div>
+
+    <div class="quiz-score" id="quizScore"></div>
+</div>
+
+<!-- ═══ PYTHON ═══ -->
+<div class="py-block" id="python">
+    <h2>PYTHON EXERCISES</h2>
+    <p class="py-intro">Three exercises that build from latency geometry through protocol modelling to a full end-to-end latency budget tool. Each exercise introduces reusable functions you can extend in later lessons.</p>
+
+    <!-- Exercise 1 -->
+    <div class="py-exercise">
+        <h3>Exercise 1 — Slant Range and Propagation Delay Calculator</h3>
+        <p>Build a function that computes slant range and one-way propagation delay for any satellite altitude and elevation angle. Then plot RTT propagation component versus elevation angle for four orbital regimes.</p>
+```
+
+<pre>
+import numpy as np
+import matplotlib.pyplot as plt
+
+# Constants
+c = 299_792  # km/s — speed of light in vacuum
+Re = 6_371   # km  — Earth mean radius
+
+def slant_range(h_km, elev_deg):
+    """
+    Compute slant range from ground terminal to satellite.
+    h_km    : satellite altitude above surface (km)
+    elev_deg: elevation angle of satellite above horizon (degrees)
+    Returns : slant range in km
+    """
+    eps = np.radians(elev_deg)
+    r_sat = Re + h_km
+    # Law of cosines on triangle (Earth centre, terminal, satellite)
+    d = np.sqrt(r_sat**2 - (Re * np.cos(eps))**2) - Re * np.sin(eps)
+    return d
+
+def one_way_prop_delay_ms(h_km, elev_deg):
+    """One-way propagation delay in milliseconds."""
+    return slant_range(h_km, elev_deg) / c * 1000
+
+def rtt_prop_ms(h_km, elev_deg, n_hops=4):
+    """
+    Round-trip propagation delay for n_hops satellite traversals.
+    Default 4 hops: terminal→sat→gw (up+down) × 2 directions.
+    """
+    return one_way_prop_delay_ms(h_km, elev_deg) * n_hops
+
+# --- Compute for a range of elevation angles ---
+elevations = np.linspace(5, 90, 200)
+
+regimes = {
+    'VLEO 350 km':   350,
+    'LEO 550 km':    550,
+    'OneWeb 1200 km': 1200,
+    'O3b MEO 8062 km': 8062,
+    'GEO 35786 km':  35786,
+}
+
+colors = ['#ff004f', '#39ff14', '#00d9ff', '#ffaa00', '#ff6699']
+
+fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(14, 6))
+fig.patch.set_facecolor('#0a0a0a')
+for ax in [ax1, ax2]:
+    ax.set_facecolor('#0d0d0d')
+    ax.tick_params(colors='#888888')
+    ax.spines['bottom'].set_color('#333')
+    ax.spines['left'].set_color('#333')
+    ax.spines['top'].set_color('#333')
+    ax.spines['right'].set_color('#333')
+
+for (label, h), color in zip(regimes.items(), colors):
+    rtts = [rtt_prop_ms(h, e) for e in elevations]
+    ax1.plot(elevations, rtts, label=label, color=color, linewidth=1.8)
+
+ax1.set_xlabel('Elevation Angle (degrees)', color='#aaaaaa')
+ax1.set_ylabel('RTT Propagation Component (ms)', color='#aaaaaa')
+ax1.set_title('RTT Propagation vs Elevation Angle', color='#cccccc')
+ax1.legend(facecolor='#111', edgecolor='#333', labelcolor='white', fontsize=9)
+ax1.set_xlim(5, 90)
+ax1.grid(True, alpha=0.1, color='#444')
+ax1.set_yscale('log')
+ax1.axhline(y=300, color='#ff4444', linestyle='--', linewidth=0.8, alpha=0.5, label='G.114 limit')
+ax1.axhline(y=600, color='#ff8888', linestyle=':', linewidth=0.8, alpha=0.5, label='GEO RTT prop floor')
+
+# Right plot: slant range vs elevation for LEO altitudes
+leo_altitudes = [350, 450, 550, 700, 1000, 1200]
+leo_colors = plt.cm.plasma(np.linspace(0.2, 0.9, len(leo_altitudes)))
+
+for h, c_plot in zip(leo_altitudes, leo_colors):
+    ranges = [slant_range(h, e) for e in elevations]
+    ax2.plot(elevations, ranges, label=f'{h} km', color=c_plot, linewidth=1.6)
+
+ax2.set_xlabel('Elevation Angle (degrees)', color='#aaaaaa')
+ax2.set_ylabel('Slant Range (km)', color='#aaaaaa')
+ax2.set_title('Slant Range vs Elevation for LEO Altitudes', color='#cccccc')
+ax2.legend(facecolor='#111', edgecolor='#333', labelcolor='white', fontsize=9)
+ax2.set_xlim(5, 90)
+ax2.grid(True, alpha=0.1, color='#444')
+
+plt.tight_layout()
+plt.savefig('latency_geometry.png', dpi=150, bbox_inches='tight')
+plt.show()
+
+# --- Key values table ---
+print("\nPROPAGATION DELAY SUMMARY (4-hop RTT)")
+print(f"{'Regime':<20} {'Alt(km)':>8} {'25° elev':>12} {'55° elev':>12} {'90° elev':>12}")
+print("-" * 68)
+for label, h in regimes.items():
+    r25 = rtt_prop_ms(h, 25)
+    r55 = rtt_prop_ms(h, 55)
+    r90 = rtt_prop_ms(h, 90)
+    print(f"{label:<20} {h:>8} {r25:>11.1f}ms {r55:>11.1f}ms {r90:>11.1f}ms")
+</pre>
+
+```
+        <div class="py-note">
+            Run this in Jupyter or a Python environment with numpy and matplotlib. The log-scale left plot reveals the dramatic compression of LEO delays relative to GEO. Notice how the G.114 300 ms line sits well above all LEO regimes at all elevation angles, but GEO fails it at every elevation.
+        </div>
+        <div class="py-challenge">
+            <strong>EXTENSION CHALLENGE</strong>
+            Add a function that computes the mean RTT propagation delay over a complete satellite pass, integrating over the visibility arc from minimum elevation (25°) to maximum and back. How does this mean differ from the nadir value? Which percentile does the nadir represent?
+        </div>
+    </div>
+
+    <!-- Exercise 2 -->
+    <div class="py-exercise">
+        <h3>Exercise 2 — TCP Throughput Ceiling and Bandwidth-Delay Product</h3>
+        <p>Model the TCP throughput ceiling as a function of RTT and congestion window size. Plot throughput vs RTT for several window sizes, and compute the Bandwidth-Delay Product for each orbital regime at a target throughput.</p>
+```
+
+<pre>
+import numpy as np
+import matplotlib.pyplot as plt
+
+# TCP throughput ceiling: Throughput = CWND / RTT
+def tcp_throughput_mbps(cwnd_bytes, rtt_ms):
+    """TCP throughput ceiling in Mbps."""
+    return (cwnd_bytes * 8) / (rtt_ms / 1000) / 1e6
+
+def bdp_bytes(throughput_mbps, rtt_ms):
+    """Bandwidth-Delay Product in bytes (minimum CWND to fill the pipe)."""
+    return (throughput_mbps * 1e6 / 8) * (rtt_ms / 1000)
+
+# RTT values from 1 ms to 800 ms
+rtts = np.logspace(0, 2.9, 300)  # 1 to ~800 ms
+
+window_sizes = {
+    '65 KB (no scaling)': 65_535,
+    '256 KB':             256 * 1024,
+    '1 MB':               1 * 1024**2,
+    '4 MB':               4 * 1024**2,
+    '16 MB':              16 * 1024**2,
+}
+colors = ['#ff004f', '#ffaa00', '#39ff14', '#00d9ff', '#aa88ff']
+
+fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(14, 6))
+fig.patch.set_facecolor('#0a0a0a')
+for ax in [ax1, ax2]:
+    ax.set_facecolor('#0d0d0d')
+    ax.tick_params(colors='#888888')
+    for spine in ax.spines.values():
+        spine.set_color('#333')
+
+# Left: TCP throughput vs RTT
+for (label, cwnd), color in zip(window_sizes.items(), colors):
+    throughputs = [tcp_throughput_mbps(cwnd, r) for r in rtts]
+    ax1.loglog(rtts, throughputs, label=label, color=color, linewidth=1.8)
+
+# Mark operating points
+operating_points = [
+    ('VLEO\n~8ms', 8),
+    ('Starlink\n~35ms', 35),
+    ('OneWeb\n~60ms', 60),
+    ('O3b MEO\n~145ms', 145),
+    ('GEO\n~625ms', 625),
+]
+for name, rtt_val in operating_points:
+    ax1.axvline(x=rtt_val, color='#ffffff', linestyle=':', linewidth=0.6, alpha=0.3)
+    ax1.text(rtt_val, 0.12, name, rotation=90, va='bottom', ha='center',
+             fontsize=6.5, color='#ffffff55')
+
+ax1.set_xlabel('Round-Trip Time (ms)', color='#aaaaaa')
+ax1.set_ylabel('TCP Throughput Ceiling (Mbps)', color='#aaaaaa')
+ax1.set_title('TCP Throughput Ceiling vs RTT', color='#cccccc')
+ax1.legend(facecolor='#111', edgecolor='#333', labelcolor='white', fontsize=8)
+ax1.grid(True, alpha=0.08, color='#444', which='both')
+ax1.set_xlim(1, 800)
+
+# Right: BDP for a 100 Mbps target throughput
+target_mbps = 100
+regime_rtts = {
+    'VLEO 350km': 8,
+    'Starlink 550km': 35,
+    'OneWeb 1200km': 60,
+    'O3b MEO': 145,
+    'GEO': 625,
+}
+regime_colors = ['#ff004f', '#39ff14', '#00d9ff', '#ffaa00', '#ff6699']
+
+bdps = [bdp_bytes(target_mbps, r) / 1024 for r in regime_rtts.values()]
+bars = ax2.bar(range(len(regime_rtts)), bdps,
+               color=regime_colors, edgecolor='#222', linewidth=0.8)
+
+ax2.set_xticks(range(len(regime_rtts)))
+ax2.set_xticklabels(list(regime_rtts.keys()), rotation=30, ha='right',
+                    fontsize=8.5, color='#aaaaaa')
+ax2.set_ylabel('Bandwidth-Delay Product (KB)\nMinimum CWND for 100 Mbps', color='#aaaaaa')
+ax2.set_title('BDP Required for Full 100 Mbps Utilisation', color='#cccccc')
+ax2.grid(True, alpha=0.08, color='#444', axis='y')
+
+# Annotate bars with values
+for bar, val in zip(bars, bdps):
+    ax2.text(bar.get_x() + bar.get_width()/2, bar.get_height() + 5,
+             f'{val:.0f} KB', ha='center', va='bottom',
+             fontsize=8, color='#cccccc')
+
+plt.tight_layout()
+plt.savefig('tcp_latency.png', dpi=150, bbox_inches='tight')
+plt.show()
+
+print("\nBANDWIDTH-DELAY PRODUCT SUMMARY @ 100 Mbps target")
+print(f"{'Regime':<20} {'RTT (ms)':>10} {'BDP (KB)':>12} {'BDP (MB)':>10}")
+print("-" * 55)
+for (regime, rtt_val), color in zip(regime_rtts.items(), regime_colors):
+    bdp_kb = bdp_bytes(target_mbps, rtt_val) / 1024
+    bdp_mb = bdp_kb / 1024
+    print(f"{regime:<20} {rtt_val:>10} {bdp_kb:>12.1f} {bdp_mb:>10.3f}")
+
+print("\nConclusion: GEO requires a 7.5 MB congestion window to fully utilise")
+print("100 Mbps capacity. Starlink requires only 427 KB — within normal TCP")
+print("behaviour without window scaling extensions.")
+</pre>
+
+```
+        <div class="py-note">
+            The right-hand chart makes the BDP argument visually striking. GEO's BDP for 100 Mbps is 7.5 MB — requiring TCP window scaling and aggressive tuning to achieve. Starlink's BDP is 427 KB — achievable with standard RFC 1323 window scaling in any modern OS.
+        </div>
+        <div class="py-challenge">
+            <strong>EXTENSION CHALLENGE</strong>
+            Add a simulation of TCP slow start — plot the instantaneous throughput over time for the first 2 seconds of a connection over each regime, showing how many RTTs it takes to reach 10 Mbps throughput from a cold start. What does this reveal about small-object transfer performance?
+        </div>
+    </div>
+
+    <!-- Exercise 3 -->
+    <div class="py-exercise">
+        <h3>Exercise 3 — End-to-End Latency Budget Tool</h3>
+        <p>Build a configurable latency budget calculator that takes a system architecture description and produces a complete latency breakdown with P50/P95/P99 estimates.</p>
+```
+
+<pre>
+import numpy as np
+
+class LatencyBudget:
+    """
+    End-to-end latency budget calculator for satellite communications.
+    Models each component as a distribution (mean + std dev)
+    and computes percentile estimates via Monte Carlo simulation.
+    """
+
+    def __init__(self, name, n_sim=100_000):
+        self.name = name
+        self.components = []
+        self.n_sim = n_sim
+
+    def add_component(self, label, mean_ms, std_ms, note=""):
+        """Add a latency component with Gaussian distribution."""
+        self.components.append({
+            'label': label,
+            'mean': mean_ms,
+            'std': std_ms,
+            'note': note
+        })
+
+    def simulate(self):
+        """Monte Carlo simulation of total RTT distribution."""
+        total = np.zeros(self.n_sim)
+        for comp in self.components:
+            samples = np.random.normal(comp['mean'], comp['std'], self.n_sim)
+            samples = np.clip(samples, 0, None)  # no negative latency
+            total += samples
+        return total
+
+    def report(self):
+        print(f"\n{'='*65}")
+        print(f"LATENCY BUDGET: {self.name}")
+        print(f"{'='*65}")
+        print(f"{'Component':<32} {'Mean':>8} {'StdDev':>8} {'Note'}")
+        print(f"{'-'*65}")
+        for c in self.components:
+            print(f"{c['label']:<32} {c['mean']:>7.1f}ms {c['std']:>7.1f}ms  {c['note']}")
+        total_mean = sum(c['mean'] for c in self.components)
+        total_std  = np.sqrt(sum(c['std']**2 for c in self.components))
+        print(f"{'-'*65}")
+        print(f"{'Total (deterministic sum)':<32} {total_mean:>7.1f}ms")
+        print(f"\nMonte Carlo simulation ({self.n_sim:,} runs):")
+        samples = self.simulate()
+        for pct in [50, 75, 90, 95, 99]:
+            val = np.percentile(samples, pct)
+            bar = '█' * int(val / 5)
+            print(f"  P{pct:>2}: {val:6.1f} ms  {bar}")
+        print(f"  Max:  {samples.max():6.1f} ms")
+        print()
+
+# ─── SCENARIO 1: LEO 550 km bent-pipe, gateway 500 km away ───
+leo_local = LatencyBudget("LEO 550 km Bent-Pipe — Regional Gateway")
+leo_local.add_component("Propagation (4 hops, mean)",   9.6, 1.2, "720km slant @ 55° mean elev")
+leo_local.add_component("On-board processing (×2)",      2.0, 0.3, "Transponder delay")
+leo_local.add_component("Gateway processing (×2)",       2.5, 0.8, "Demod + routing")
+leo_local.add_component("Scheduling/queuing",            5.0, 4.0, "High variance under load")
+leo_local.add_component("Terrestrial (gw to CDN PoP)",  12.0, 5.0, "500km fibre, local CDN")
+leo_local.add_component("Handover spike (diluted)",      1.5, 3.0, "Avg contribution over time")
+leo_local.report()
+
+# ─── SCENARIO 2: GEO bent-pipe, same gateway ───
+geo = LatencyBudget("GEO 35,786 km Bent-Pipe — Same Gateway")
+geo.add_component("Propagation (4 hops, 30° elev)",  540.0, 20.0, "~40,500km slant range")
+geo.add_component("On-board processing (×2)",           2.0,  0.3, "Transponder delay")
+geo.add_component("Gateway processing (×2)",            2.5,  0.8, "Demod + routing")
+geo.add_component("Scheduling/queuing",                10.0,  8.0, "GEO has larger buffers")
+geo.add_component("Terrestrial (gw to CDN PoP)",       12.0,  5.0, "Same gateway, same CDN")
+geo.report()
+
+# ─── SCENARIO 3: LEO with ISLs, remote gateway (international) ───
+leo_isl = LatencyBudget("LEO 550 km + ISLs — Remote Gateway (3,000 km)")
+leo_isl.add_component("Feeder link propagation (×2)",    5.0,  0.8, "Terminal→sat, sat→gw")
+leo_isl.add_component("ISL hops propagation (10 hops)", 80.0,  8.0, "~3,000km ISL path at c")
+leo_isl.add_component("ISL on-board routing (10 hops)", 10.0,  2.0, "~1ms per satellite node")
+leo_isl.add_component("Gateway processing (×2)",          2.5,  0.8, "")
+leo_isl.add_component("Scheduling (feeder only)",         4.0,  3.0, "")
+leo_isl.add_component("Terrestrial (remote gateway)",    20.0,  8.0, "Remote region gateway")
+leo_isl.report()
+
+# ─── COMPARISON ───
+print("\nSUMMARY COMPARISON (P50 RTT)")
+for budget in [leo_local, geo, leo_isl]:
+    samples = budget.simulate()
+    print(f"  {budget.name:<50} P50: {np.percentile(samples,50):5.0f} ms  "
+          f"P95: {np.percentile(samples,95):5.0f} ms")
+</pre>
+
+```
+        <div class="py-note">
+            The Monte Carlo approach captures the reality that latency is a distribution, not a single number. Notice how the standard deviation of the queuing component dominates the spread of the P95–P99 tail for LEO, while the propagation component dominates the spread for GEO. This has direct implications for SLA design.
+        </div>
+        <div class="py-challenge">
+            <strong>EXTENSION CHALLENGE</strong>
+            Add a "fibre alternative" scenario: a terrestrial fibre path of a given distance (with routing factor 1.25 and refractive index 1.467) and compare against LEO at the same distance. Find the crossover distance at which LEO becomes faster. Verify this matches the ~800 km analytical result from Section 6.
+        </div>
+    </div>
+</div>
+
+<!-- ═══ REFLECTION ═══ -->
+<div class="reflection-block" id="reflect">
+    <h2>REFLECTION PROMPTS</h2>
+    <p class="ref-intro">Four prompts for written reflection. Spending 15–20 minutes on each produces the kind of consolidated understanding that reading alone does not. Write in your own words without referring back to the lesson.</p>
+
+    <div class="ref-prompt">
+        <h3>Prompt 1 — The G.114 Line</h3>
+        <p>The ITU G.114 recommendation (150 ms one-way delay) was written primarily for analogue and early digital telephony networks, not satellite broadband. Is it still the right threshold for evaluating LEO's value proposition, or should different applications have different design thresholds? Write a 200-word argument for how a satellite system architect should operationalise latency requirements when designing for a mixed-use platform (aviation IFE serving both video conferencing business passengers and video-streaming leisure passengers simultaneously).</p>
+    </div>
+
+    <div class="ref-prompt">
+        <h3>Prompt 2 — The Transparent PEP Death and What It Means for Architecture</h3>
+        <p>The death of transparent PEPs due to HTTPS adoption is a case study in how a security change at one layer of the internet stack broke a workaround at a different layer. Reflect on the architectural lesson: what does this episode reveal about the risks of designing satellite systems that depend on being able to inspect or modify traffic in transit? Are there analogous vulnerabilities in current LEO architectures — protocol assumptions that could be broken by future changes in the internet stack?</p>
+    </div>
+
+    <div class="ref-prompt">
+        <h3>Prompt 3 — LEO vs Fibre: When Does the Satellite Win?</h3>
+        <p>Section 6 showed that LEO can beat standard fibre on propagation latency for distances over approximately 800 km. Yet most industry commentary treats terrestrial fibre as always faster than satellite. Write a short market analysis: for which specific routes or user segments does LEO's latency advantage over fibre translate into a real commercial opportunity? Consider: financial services, content delivery networks, video contribution (live broadcast uplinks), and remote resource extraction industries.</p>
+    </div>
+
+    <div class="ref-prompt">
+        <h3>Prompt 4 — The Maritime Latency Complaint</h3>
+        <p>Return to the scenario in Quiz Question 10: a maritime customer is 4,000 km from the nearest gateway and experiencing 160 ms RTT on a LEO system advertised as "20 ms." Beyond this specific scenario, reflect on the broader communication challenge: how should a satellite operator set latency expectations for customers who may not understand the distinction between propagation delay, system RTT, and end-to-end application latency? Draft a one-page "Latency Explained" document aimed at a technically informed but non-specialist enterprise customer who has just signed a maritime LEO connectivity contract.</p>
+        <ul>
+            <li>What numbers should it include?</li>
+            <li>What caveats are essential?</li>
+            <li>How should it address the gateway distance problem?</li>
+            <li>What questions should it prompt the customer to ask their IT team?</li>
+        </ul>
+    </div>
+</div>
+
+<div class="complete-wrap">
+    <button class="complete-btn" id="completeBtn">MARK LESSON COMPLETE</button>
+    <div class="complete-msg" id="completeMsg">Not yet marked complete.</div>
+</div>
+
+<div class="lesson-nav">
+    <a href="q1-2.html">← L02: Orbital Regimes Compared</a>
+    <a href="q1-4.html">L04: Multi-Orbit Hybrid Architectures →</a>
+</div>
+```
+
+</div><!-- end .lesson-wrap -->
+
+<footer>© 2026 LEOAF · Q1 · LESSON 03 OF 15</footer>
+
+<button class="back-to-top" id="backToTop">↑</button>
+
+<script>
+const canvas = document.getElementById('starsCanvas');
+const ctx = canvas.getContext('2d');
+let stars = [];
+function initStars() {
+    stars = [];
+    for (let i = 0; i < 180; i++) {
+        stars.push({ x: Math.random()*canvas.width, y: Math.random()*canvas.height,
+            size: Math.random()*1.4+0.3, speed: Math.random()*0.15+0.03, hue: Math.random()*360 });
+    }
+}
+function resizeCanvas() { canvas.width = window.innerWidth; canvas.height = window.innerHeight; }
+resizeCanvas(); initStars();
+window.addEventListener('resize', resizeCanvas);
+function animateStars() {
+    ctx.clearRect(0,0,canvas.width,canvas.height);
+    stars.forEach(s => {
+        s.y -= s.speed;
+        if (s.y < 0) { s.y = canvas.height; s.x = Math.random()*canvas.width; }
+        ctx.beginPath();
+        ctx.fillStyle = `hsl(${s.hue},70%,80%)`;
+        ctx.arc(s.x, s.y, s.size, 0, Math.PI*2);
+        ctx.fill();
+    });
+    requestAnimationFrame(animateStars);
+}
+animateStars();
+</script>
+
+<script>
+const feedbacks = {
+    1: {
+        correct: "Correct. One-way propagation = 35,786 / 300,000 = 0.1193 s = 119.3 ms. Note: 240 ms is a common misconception — it is the one-way delay to GEO AND back down (two hops), not the one-way delay to the satellite alone.",
+        wrong:   "Incorrect. One-way propagation delay = distance / speed = 35,786 km / 300,000 km/s = 0.1193 s ≈ 119 ms. Option B (240 ms) is the two-hop delay (terminal→satellite→gateway), not the one-hop delay to the satellite. Option D (480 ms) is the four-hop RTT propagation."
+    },
+    2: {
+        correct: "Correct. 930 km / 299,792 km/s = 0.003103 s = 3.1 ms. This is the propagation delay for one traversal of the terminal-to-satellite path at 25° elevation. The nadir one-way delay would be 550/299,792 = 1.83 ms — slant range at low elevation adds a meaningful fraction.",
+        wrong:   "Incorrect. One-way propagation = slant range / c = 930 km / 299,792 km/s = 3.1 ms. Option A (1.8 ms) is the nadir (directly-below) delay, not the 25° elevation slant range delay. Always use slant range, not altitude, for propagation calculations."
+    },
+    3: {
+        correct: "Correct. RTT propagation = 4 × one-way delay = 4 × (720 / 299,792) × 1000 ms = 4 × 2.4 ms = 9.6 ms. The four traversals represent: uplink (terminal→satellite), downlink (satellite→gateway) for the forward path, and the same two hops in reverse for the return path.",
+        wrong:   "Incorrect. For a bent-pipe two-hop service, a complete round trip traverses the satellite link four times: terminal→satellite→gateway (uplink+downlink) in one direction, and gateway→satellite→terminal (uplink+downlink) in the other. RTT propagation = 4 × (720/299,792) × 1000 = 9.6 ms."
+    },
+    4: {
+        correct: "Correct. TCP throughput ceiling = CWND × 8 / RTT = 65,535 × 8 / 0.6 = 874,000 bps ≈ 874 kbps. This is the maximum throughput achievable with a 65 KB window regardless of physical link capacity. It explains why GEO links with many Gbps of transponder capacity can still deliver only hundreds of kbps to a single TCP flow without window scaling.",
+        wrong:   "Incorrect. TCP throughput ≤ CWND / RTT. With CWND = 65,535 bytes and RTT = 0.6 s: throughput ≤ 65,535 × 8 / 0.6 ≈ 874 kbps. The physical link capacity is irrelevant if TCP's congestion window cannot grow fast enough due to high RTT. Option D is the most common misconception."
+    },
+    5: {
+        correct: "Correct. Transparent PEPs work by intercepting and modifying TCP headers at the gateway. When HTTPS (HTTP over TLS) encrypts the connection end-to-end, the PEP cannot see or modify the TCP segment headers inside the TLS record. The PEP could either pass the traffic unmodified (no benefit) or break the connection (unacceptable). By 2022, over 95% of web traffic was HTTPS, effectively ending the usefulness of transparent PEPs for most web browsing.",
+        wrong:   "Incorrect. The reason transparent PEPs failed is encryption: TLS/HTTPS encrypts the TCP payload and headers end-to-end, preventing the PEP from intercepting and modifying TCP segments. QUIC appeared later and is a response to this situation, not its cause. PEPs were never banned — they still exist and still work for unencrypted traffic."
+    },
+    6: {
+        correct: "Correct. c / 1.467 = 299,792 / 1.467 ≈ 204,350 km/s, which is 204,350 / 299,792 = 0.681 = 68.1% of the vacuum speed of light. This is the origin of the rule of thumb that light travels at about 2/3 c in fibre, which leads directly to the latency advantage of vacuum (or near-vacuum) paths on long routes.",
+        wrong:   "Incorrect. For refractive index n, propagation velocity = c/n. With n = 1.467: v = 299,792 / 1.467 ≈ 204,350 km/s = 68% of c. Remember this as the '2/3 rule' — light in fibre travels at roughly 2/3 of the vacuum speed of light, which is the root cause of satellite ISLs being faster than undersea fibre on long international routes."
+    },
+    7: {
+        correct: "Correct. Set fibre one-way latency = LEO one-way latency: d × 1.25 / 204,500 = 0.005 s (5 ms). Solving: d = 0.005 × 204,500 / 1.25 ≈ 818 km. For great-circle distances above approximately 800 km, LEO satellite (Starlink-class) has lower propagation latency than standard single-mode fibre with a typical routing factor of 1.25.",
+        wrong:   "Incorrect. The crossover is computed by equating fibre latency to satellite latency: d_gc × 1.25 / 204,500 km/s = 5 ms (one-way satellite). Solving: d_gc ≈ 818 km. Option A is wrong — LEO has higher propagation latency than local fibre for short distances. The crossover occurs around 800 km great-circle distance."
+    },
+    8: {
+        correct: "Correct. QUIC incorporates TLS 1.3 natively and combines the transport and crypto handshakes into a single round trip. For a new connection (no prior session), this is 1 RTT before application data flows. For resumed connections (0-RTT mode), application data can be included with the first packet, though 0-RTT has replay attack limitations. Compare to TCP+TLS 1.3 which requires 2 RTTs (1 TCP SYN+ACK, 1 TLS handshake), or TCP+TLS 1.2 which required 3 RTTs.",
+        wrong:   "Incorrect. QUIC achieves 1-RTT connection establishment for new connections by integrating TLS 1.3 into the transport handshake. This is one fewer RTT than TCP+TLS 1.3 (2 RTT) and two fewer than TCP+TLS 1.2 (3 RTT). The improvement is most significant over high-latency links like GEO, where each RTT saved is worth 600 ms."
+    },
+    9: {
+        correct: "Correct. Business video conferencing requires RTT below approximately 300 ms for acceptable quality (most practitioners and standards bodies cite 200–300 ms as the practical threshold). GEO's propagation-only RTT is 480–560 ms, and with processing and terrestrial delay the total is 580–700 ms — clearly outside the acceptable range. LEO's 30–50 ms RTT is well within it. Doppler effects on the aircraft affect the RF link design but do not add to end-to-end application latency in any significant way.",
+        wrong:   "Incorrect. GEO's total RTT of 580–700 ms exceeds the 300 ms threshold for business video conferencing. It is not 'marginal' — it reliably fails for sustained business meeting use. Doppler on the aircraft affects antenna design and modem complexity but does not add to application-layer latency."
+    },
+    10: {
+        correct: "Correct. The operator's '20 ms' almost certainly refers to the satellite propagation round-trip, not the end-to-end RTT including terrestrial routing. For a vessel 4,000 km from the gateway, the gateway-to-content-server terrestrial path adds approximately 4,000 km × 1.25 routing factor / 204,500 km/s × 2 directions × 1000 ms ≈ 49 ms of fibre propagation, plus ISP hops and server processing. The total of ~160 ms is entirely consistent with a correctly-performing LEO system with a distant gateway. Neither party is wrong — they are measuring different things.",
+        wrong:   "Incorrect. A vessel 4,000 km from the gateway will experience significant terrestrial routing latency in addition to the satellite propagation delay. 4,000 km of fibre at 204,500 km/s with a 1.25 routing factor ≈ 24 ms one way, 49 ms round trip — but multiple ISP hops, routing through backbone networks, and server-side delay push this to 100+ ms of non-satellite contribution. Doppler on a vessel at typical maritime speeds (0–25 knots) is negligible at satellite frequencies."
+    }
+};
+
+let answered = {};
+document.querySelectorAll('.quiz-opt').forEach(btn => {
+    btn.addEventListener('click', function() {
+        const q = this.dataset.q;
+        if (answered[q] !== undefined) return;
+        const correct = this.dataset.correct === 'true';
+        answered[q] = correct;
+        document.querySelectorAll(`.quiz-opt[data-q="${q}"]`).forEach(b => {
+            b.disabled = true;
+            if (b.dataset.correct === 'true') b.classList.add('correct');
+        });
+        if (!correct) this.classList.add('wrong');
+        const fb = document.getElementById(`fb${q}`);
+        fb.textContent = (correct ? '✓ ' : '✗ ') + feedbacks[q][correct ? 'correct' : 'wrong'];
+        fb.style.color = correct ? '#39ff14' : '#ff004f';
+        if (Object.keys(answered).length === 10) {
+            const total = Object.values(answered).filter(Boolean).length;
+            const el = document.getElementById('quizScore');
+            el.style.display = 'block';
+            const pct = Math.round(total / 10 * 100);
+            el.textContent = `SCORE: ${total} / 10 (${pct}%) — ${pct===100?'PERFECT.':pct>=80?'STRONG. REVIEW ANY MISSES.':pct>=60?'ADEQUATE. REVISIT WEAK SECTIONS.':'REVISIT THE LESSON BEFORE PROCEEDING.'}`;
+        }
+    });
+});
+</script>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+<script src="supabase.js"></script>
+
+<script src="user_progress.js"></script>
+
+<script>
+const LESSON_ID = 'q1-3';
+document.addEventListener('DOMContentLoaded', async () => {
+    const { data: { session } } = await client.auth.getSession();
+    if (!session) { window.location.href = 'index.html'; return; }
+
+    document.getElementById('logoffBtn').addEventListener('click', async () => {
+        await client.auth.signOut(); window.location.href = 'index.html';
+    });
+
+    const mastered = await getMasteredSections();
+    const btn = document.getElementById('completeBtn');
+    const msg = document.getElementById('completeMsg');
+
+    function setDone(done) {
+        if (done) {
+            btn.textContent = '✓ COMPLETE — CLICK TO UNDO';
+            btn.classList.add('done');
+            btn.style.cssText = 'border-color:#39ff14;color:#39ff14;background:rgba(57,255,20,0.1);cursor:pointer;opacity:1;';
+            msg.style.color = '#39ff14';
+            msg.textContent = 'Lesson marked complete. Click again to undo.';
+        } else {
+            btn.textContent = 'MARK LESSON COMPLETE';
+            btn.classList.remove('done');
+            btn.style.cssText = '';
+            msg.style.color = '#ffffff55';
+            msg.textContent = 'Not yet marked complete.';
+        }
+    }
+
+    setDone(mastered.includes(LESSON_ID));
+
+    btn.addEventListener('click', async () => {
+        const isCurrentlyDone = btn.classList.contains('done');
+        msg.style.color = '#00d9ff';
+        msg.textContent = 'Saving...';
+        const ok = await upsertSection(LESSON_ID, !isCurrentlyDone);
+        if (ok) {
+            setDone(!isCurrentlyDone);
+        } else {
+            msg.style.color = '#ff004f';
+            msg.textContent = 'Error saving. Try again.';
+        }
+    });
+
+    const btt = document.getElementById('backToTop');
+    window.addEventListener('scroll', () => {
+        btt.classList.toggle('visible', window.scrollY > 400);
+    });
+    btt.addEventListener('click', () => window.scrollTo({ top: 0, behavior: 'smooth' }));
+});
+</script>
+
+</body>
+</html>
