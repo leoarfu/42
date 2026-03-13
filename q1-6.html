@@ -1,0 +1,1397 @@
+<!DOCTYPE html>
+
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, shrink-to-fit=no">
+<title>L06 — Historical Failures: Teledesic &amp; O3b Gen1 · LEOAF</title>
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;600;800&family=Share+Tech+Mono&family=Libre+Baskerville:ital,wght@0,400;0,700;1,400&display=swap" rel="stylesheet">
+<link rel="icon" href="favicon.ico" sizes="any" type="image/x-icon">
+<link rel="manifest" href="site.webmanifest">
+<meta name="theme-color" content="#0f0f0f">
+<style>
+* { box-sizing:border-box; margin:0; padding:0; }
+html { height:100%; -webkit-text-size-adjust:100%; overflow-x:hidden; }
+body { font-family:'Share Tech Mono',monospace; background:#000; color:white; overflow-x:hidden; min-height:100vh; }
+#starsCanvas { position:fixed; inset:0; z-index:-1; }
+
+header {
+background:#000; border-bottom:1px solid #ff004f33;
+position:sticky; top:0; z-index:100;
+padding:1rem clamp(1.5rem,5vw,4rem);
+display:flex; justify-content:space-between; align-items:center;
+box-shadow:0 4px 16px #0008;
+}
+.logo { font-family:‘Orbitron’,sans-serif; font-weight:800; font-size:clamp(16px,2vw,22px); letter-spacing:3px; text-decoration:none; }
+.logo span:first-child { color:white; }
+.logo span:last-child { color:#ff004f; }
+.nav-right { display:flex; align-items:center; gap:10px; }
+.nav-btn {
+background:transparent; border:1px solid #ff004f44; color:#ff004f;
+padding:6px 14px; cursor:pointer; transition:0.3s ease;
+font-size:11px; font-family:‘Orbitron’,sans-serif; letter-spacing:1px;
+text-decoration:none; display:inline-block;
+}
+.nav-btn:hover { background:#ff004f; color:black; }
+
+.breadcrumb { padding:14px clamp(1.5rem,5vw,4rem); font-size:11px; color:#ffffff44; letter-spacing:1px; position:relative; z-index:1; }
+.breadcrumb a { color:#00d9ff66; text-decoration:none; }
+.breadcrumb a:hover { color:#00d9ff; }
+.breadcrumb span { margin:0 8px; }
+
+.lesson-wrap { max-width:820px; margin:0 auto; padding:0 clamp(1.5rem,5vw,4rem) 80px; position:relative; z-index:1; }
+
+.lesson-header { padding:30px 0 28px; border-bottom:1px solid #ffffff11; margin-bottom:36px; }
+.lesson-tag { font-family:‘Orbitron’,sans-serif; font-size:10px; color:#ff004f; letter-spacing:3px; margin-bottom:10px; }
+.lesson-header h1 { font-family:‘Orbitron’,sans-serif; font-size:clamp(20px,3.5vw,32px); font-weight:800; line-height:1.2; margin-bottom:12px; }
+.lesson-meta { display:flex; gap:10px; flex-wrap:wrap; margin-bottom:16px; }
+.l-pill { font-family:‘Orbitron’,sans-serif; font-size:10px; padding:3px 10px; border:1px solid; letter-spacing:1px; }
+.l-pill-q { color:#ff004f; border-color:#ff004f44; }
+.l-pill-t { color:#39ff14; border-color:#39ff1444; }
+.l-pill-s { color:#ffaa00; border-color:#ffaa0044; }
+.lesson-intro { font-size:13px; line-height:1.85; opacity:0.75; }
+
+/* part divider inside content */
+.part-divider {
+display:flex; align-items:center; gap:16px;
+margin:48px 0 32px; position:relative; z-index:1;
+}
+.part-divider .pd-label {
+font-family:‘Orbitron’,sans-serif; font-size:11px; letter-spacing:3px;
+color:#ff004f; white-space:nowrap;
+padding:6px 16px; border:1px solid #ff004f44;
+}
+.part-divider .pd-line { flex:1; height:1px; background:#ff004f22; }
+
+.toc { background:rgba(0,217,255,0.06); border:1px solid #00d9ff33; padding:24px 28px; margin:30px 0; }
+.toc h4 { font-family:‘Orbitron’,sans-serif; font-size:10px; color:#00d9ff; letter-spacing:2px; margin-bottom:16px; }
+.toc ol { padding-left:20px; }
+.toc li { font-size:13px; line-height:2.1; }
+.toc li a { color:#00d9ffbb; text-decoration:none; transition:0.15s; }
+.toc li a:hover { color:#ffffff; padding-left:4px; }
+.toc li::marker { color:#ff004f; font-family:‘Orbitron’,sans-serif; font-size:10px; }
+
+.content-block { margin-bottom:24px; }
+.content-block h2 {
+font-family:‘Orbitron’,sans-serif; font-size:13px; color:#00d9ff;
+letter-spacing:2px; text-transform:uppercase;
+margin-bottom:18px; padding-bottom:10px;
+border-bottom:1px solid #00d9ff22;
+scroll-margin-top:80px;
+}
+.content-block h3 {
+font-family:‘Orbitron’,sans-serif; font-size:11px; color:#ffffff88;
+letter-spacing:1.5px; text-transform:uppercase; margin:28px 0 12px;
+}
+.content-block p { font-size:13px; line-height:1.9; opacity:0.85; margin-bottom:16px; }
+.content-block ul, .content-block ol { padding-left:0; margin-bottom:16px; }
+.content-block ul li, .content-block ol li { font-size:13px; line-height:1.85; opacity:0.85; padding-left:20px; position:relative; margin-bottom:6px; }
+.content-block ul li::before { content:’›’; position:absolute; left:0; color:#00d9ff; }
+.content-block ol { counter-reset:item; }
+.content-block ol li { counter-increment:item; }
+.content-block ol li::before { content:counter(item)’.’; position:absolute; left:0; color:#ff004f; font-family:‘Orbitron’,sans-serif; font-size:10px; top:2px; }
+
+.callout {
+border-left:3px solid #00d9ff; background:rgba(0,217,255,0.05);
+padding:16px 20px; margin:22px 0; font-size:12px; line-height:1.8;
+}
+.callout.red   { border-left-color:#ff004f; background:rgba(255,0,79,0.05); }
+.callout.green { border-left-color:#39ff14; background:rgba(57,255,20,0.05); }
+.callout.amber { border-left-color:#ffaa00; background:rgba(255,170,0,0.05); }
+.callout strong { font-family:‘Orbitron’,sans-serif; font-size:10px; letter-spacing:1px; display:block; margin-bottom:8px; color:inherit; }
+
+.key-numbers { display:grid; grid-template-columns:repeat(auto-fit,minmax(140px,1fr)); gap:12px; margin:22px 0; }
+.kn-item { background:rgba(255,255,255,0.03); border:1px solid #ffffff11; padding:16px 12px; text-align:center; }
+.kn-val { font-family:‘Orbitron’,sans-serif; font-size:clamp(16px,2.5vw,24px); font-weight:800; color:#00d9ff; display:block; }
+.kn-label { font-size:10px; opacity:0.5; letter-spacing:1px; margin-top:5px; display:block; line-height:1.4; }
+
+.compare-table { width:100%; border-collapse:collapse; margin:22px 0; font-size:12px; }
+.compare-table th { font-family:‘Orbitron’,sans-serif; font-size:10px; letter-spacing:1px; color:#00d9ff; padding:10px 12px; border-bottom:1px solid #00d9ff33; text-align:left; }
+.compare-table td { padding:10px 12px; border-bottom:1px solid #ffffff0a; line-height:1.5; opacity:0.85; vertical-align:top; }
+.compare-table tr:hover td { background:rgba(255,255,255,0.02); }
+.compare-table .hi { color:#39ff14; }
+.compare-table .lo { color:#ff004f; }
+.compare-table .md { color:#ffaa00; }
+
+.diagram-wrap { margin:24px 0; background:rgba(255,255,255,0.02); border:1px solid #ffffff11; padding:20px; overflow-x:auto; }
+.diagram-wrap figcaption { font-size:11px; color:#ffffff44; margin-top:12px; text-align:center; letter-spacing:1px; }
+
+.deep-dive { background:rgba(255,170,0,0.04); border:1px solid #ffaa0022; padding:20px 22px; margin:24px 0; }
+.deep-dive h4 { font-family:‘Orbitron’,sans-serif; font-size:10px; color:#ffaa00; letter-spacing:2px; margin-bottom:12px; }
+.deep-dive p { font-size:12px; line-height:1.8; opacity:0.8; margin-bottom:10px; }
+.deep-dive p:last-child { margin-bottom:0; }
+
+.timeline { margin:22px 0; }
+.tl-item { display:flex; gap:16px; margin-bottom:16px; }
+.tl-year { font-family:‘Orbitron’,sans-serif; font-size:11px; color:#ff004f; min-width:52px; padding-top:2px; }
+.tl-body { flex:1; border-left:1px solid #ff004f33; padding-left:16px; padding-bottom:8px; }
+.tl-body strong { font-family:‘Orbitron’,sans-serif; font-size:11px; color:#ffffff88; letter-spacing:1px; display:block; margin-bottom:4px; }
+.tl-body p { font-size:12px; opacity:0.75; line-height:1.7; margin:0; }
+
+/* QUIZ */
+.quiz-block { background:rgba(17,17,17,0.9); border:1px solid #ff004f33; padding:28px; margin:48px 0 32px; }
+.quiz-block h2 { font-family:‘Orbitron’,sans-serif; font-size:13px; color:#ff004f; letter-spacing:2px; margin-bottom:6px; }
+.quiz-intro { font-size:12px; opacity:0.6; margin-bottom:24px; padding-bottom:16px; border-bottom:1px solid #ff004f22; line-height:1.6; }
+.quiz-q { margin-bottom:28px; }
+.quiz-q p { font-size:13px; opacity:0.9; margin-bottom:12px; line-height:1.65; }
+.quiz-q p strong { color:#00d9ff; }
+.quiz-options { display:flex; flex-direction:column; gap:8px; }
+.quiz-opt {
+background:rgba(255,255,255,0.03); border:1px solid #ffffff1a;
+padding:11px 16px; cursor:pointer; font-size:12px; font-family:‘Share Tech Mono’,monospace;
+transition:0.2s ease; text-align:left; color:white; line-height:1.5;
+}
+.quiz-opt:hover:not(:disabled) { background:rgba(0,217,255,0.08); border-color:#00d9ff44; }
+.quiz-opt.correct  { background:rgba(57,255,20,0.1);  border-color:#39ff14; color:#39ff14; }
+.quiz-opt.wrong    { background:rgba(255,0,79,0.1);   border-color:#ff004f; color:#ff004f; }
+.quiz-opt:disabled { cursor:default; }
+.quiz-feedback { font-size:12px; margin-top:10px; min-height:18px; line-height:1.7; opacity:0.9; padding:0 4px; }
+.quiz-score { font-family:‘Orbitron’,sans-serif; font-size:12px; color:#39ff14; margin-top:20px; letter-spacing:1px; display:none; padding-top:16px; border-top:1px solid #39ff1433; }
+
+/* PYTHON */
+.py-block { background:rgba(10,10,10,0.95); border:1px solid #39ff1422; padding:28px; margin:32px 0; }
+.py-block h2 { font-family:‘Orbitron’,sans-serif; font-size:13px; color:#39ff14; letter-spacing:2px; margin-bottom:8px; }
+.py-block .py-intro { font-size:12px; opacity:0.7; margin-bottom:20px; padding-bottom:16px; border-bottom:1px solid #39ff1422; line-height:1.7; }
+.py-exercise { margin-bottom:32px; }
+.py-exercise:last-child { margin-bottom:0; }
+.py-exercise h3 { font-family:‘Orbitron’,sans-serif; font-size:11px; color:#39ff1499; letter-spacing:1.5px; text-transform:uppercase; margin-bottom:10px; }
+.py-exercise p { font-size:12px; opacity:0.8; margin-bottom:14px; line-height:1.75; }
+.py-block pre {
+background:#050505; border:1px solid #39ff1433; padding:20px;
+font-family:‘Share Tech Mono’,monospace; font-size:11.5px;
+line-height:1.75; overflow-x:auto; color:#39ff14;
+white-space:pre; margin-bottom:12px;
+}
+.py-block .py-note { font-size:11px; color:#ffffff44; line-height:1.75; margin-top:10px; }
+.py-block .py-challenge { background:rgba(57,255,20,0.04); border-left:2px solid #39ff14; padding:12px 16px; margin-top:14px; font-size:12px; line-height:1.75; opacity:0.8; }
+.py-block .py-challenge strong { font-family:‘Orbitron’,sans-serif; font-size:10px; color:#39ff14; display:block; margin-bottom:6px; letter-spacing:1px; }
+
+/* REFLECTION */
+.reflection-block { background:rgba(255,170,0,0.04); border:1px solid #ffaa0033; padding:24px; margin:32px 0; }
+.reflection-block h2 { font-family:‘Orbitron’,sans-serif; font-size:13px; color:#ffaa00; letter-spacing:2px; margin-bottom:8px; }
+.reflection-block .ref-intro { font-size:12px; opacity:0.7; margin-bottom:20px; padding-bottom:14px; border-bottom:1px solid #ffaa0022; line-height:1.7; }
+.ref-prompt { margin-bottom:20px; }
+.ref-prompt h3 { font-family:‘Orbitron’,sans-serif; font-size:11px; color:#ffaa0099; letter-spacing:1px; margin-bottom:8px; }
+.ref-prompt p { font-size:12px; opacity:0.8; line-height:1.75; margin-bottom:10px; }
+.ref-prompt ul li { font-size:12px; }
+
+.back-to-top {
+position:fixed; bottom:28px; right:28px; z-index:200;
+width:44px; height:44px; background:#000;
+border:1px solid #00d9ff55; color:#00d9ff;
+font-size:20px; cursor:pointer;
+display:flex; align-items:center; justify-content:center;
+opacity:0; pointer-events:none;
+transition:opacity 0.3s ease;
+}
+.back-to-top.visible { opacity:1; pointer-events:auto; }
+.back-to-top:hover { border-color:#00d9ff; background:#001a2c; }
+
+.complete-wrap { margin-top:56px; padding-top:30px; border-top:1px solid #ffffff11; text-align:center; }
+.complete-btn {
+font-family:‘Orbitron’,sans-serif; font-size:13px; letter-spacing:2px;
+padding:14px 44px; background:transparent;
+border:1px solid #39ff14; color:#39ff14; cursor:pointer; transition:0.3s ease;
+}
+.complete-btn:hover:not(.done) { background:#39ff14; color:black; box-shadow:0 0 20px rgba(57,255,20,0.4); }
+.complete-btn.done { background:rgba(57,255,20,0.1); cursor:default; opacity:0.7; }
+.complete-msg { font-size:12px; color:#ffffff55; margin-top:14px; min-height:18px; letter-spacing:1px; }
+
+.lesson-nav { display:flex; justify-content:space-between; margin-top:30px; flex-wrap:wrap; gap:10px; }
+.lesson-nav a { font-family:‘Orbitron’,sans-serif; font-size:11px; color:#00d9ff66; text-decoration:none; letter-spacing:1px; transition:0.2s; }
+.lesson-nav a:hover { color:#00d9ff; }
+
+footer { text-align:center; padding:30px; opacity:0.3; font-size:11px; position:relative; z-index:1; letter-spacing:1px; }
+
+@media (max-width:600px) {
+.key-numbers { grid-template-columns:1fr 1fr; }
+.compare-table { font-size:11px; }
+.compare-table th, .compare-table td { padding:8px; }
+}
+
+/* ── LIGHT READING CARDS ── */
+.content-block {
+background:#f5f2ec; color:#1a1a1a;
+padding:36px clamp(24px,4vw,48px);
+margin-bottom:24px;
+border-left:4px solid #00d9ff;
+position:relative; z-index:1;
+}
+.content-block h2 {
+font-family:‘Orbitron’,sans-serif; font-size:13px;
+color:#003d66; letter-spacing:2px; text-transform:uppercase;
+margin-bottom:20px; padding-bottom:10px;
+border-bottom:2px solid #00d9ff66; scroll-margin-top:80px;
+}
+.content-block h3 {
+font-family:‘Orbitron’,sans-serif; font-size:11px;
+color:#444; letter-spacing:1.5px; text-transform:uppercase;
+margin:32px 0 14px;
+}
+.content-block p {
+font-family:‘Libre Baskerville’,Georgia,serif;
+font-size:15px; line-height:1.9; color:#1a1a1a; opacity:1; margin-bottom:18px;
+}
+.content-block ul li, .content-block ol li {
+font-family:‘Libre Baskerville’,Georgia,serif;
+font-size:14px; line-height:1.85; color:#1a1a1a; opacity:1; margin-bottom:8px;
+}
+.content-block ul li::before { color:#0077aa; }
+.content-block ol li::before { color:#cc0033; }
+.content-block .callout            { border-left:3px solid #0088cc; background:#e8f4fb; color:#1a1a1a; }
+.content-block .callout.red        { border-left-color:#cc0033; background:#fdecea; }
+.content-block .callout.green      { border-left-color:#1a7a1a; background:#eafaea; }
+.content-block .callout.amber      { border-left-color:#996600; background:#fef9ec; }
+.content-block .callout strong     { color:inherit; }
+.content-block .kn-item            { background:#fff; border:1px solid #d0d0d0; }
+.content-block .kn-label           { color:#555; opacity:1; }
+.content-block .compare-table th   { color:#003d66; border-bottom:2px solid #00d9ff66; }
+.content-block .compare-table td   { color:#1a1a1a; opacity:1; border-bottom:1px solid #ddd; }
+.content-block .compare-table tr:hover td { background:#f0f0f0; }
+.content-block .deep-dive          { background:#fffbf0; border:1px solid #e0c060; }
+.content-block .deep-dive p        { font-size:13px; color:#333; }
+.content-block .diagram-wrap       { background:#0a0a0a; border:1px solid #333; }
+.content-block .diagram-wrap figcaption { color:#ffffff55; }
+.content-block .tl-year            { color:#cc0033; }
+.content-block .tl-body            { border-left-color:#cc003344; }
+.content-block .tl-body strong     { color:#333; }
+.content-block .tl-body p          { font-size:13px; color:#444; }
+</style>
+
+</head>
+<body>
+<canvas id="starsCanvas"></canvas>
+
+<header>
+    <a href="dashboard.html" class="logo"><span>LEO</span><span>AF</span></a>
+    <div class="nav-right">
+        <a href="q1.html" class="nav-btn">← Q1 HUB</a>
+        <button id="logoffBtn" class="nav-btn">ABORT</button>
+    </div>
+</header>
+
+<div class="breadcrumb">
+    <a href="dashboard.html">DASHBOARD</a><span>/</span>
+    <a href="q1.html">Q1</a><span>/</span>
+    <span style="color:#ffffff88;">LESSON 06 — HISTORICAL FAILURES: TELEDESIC &amp; O3B GEN1</span>
+</div>
+
+<div class="lesson-wrap">
+
+```
+<div class="lesson-header">
+    <div class="lesson-tag">Q1 · LESSON 06 OF 15</div>
+    <h1>Historical Failures —<br>Teledesic &amp; O3b Gen1</h1>
+    <div class="lesson-meta">
+        <div class="l-pill l-pill-q">QUARTER 1</div>
+        <div class="l-pill l-pill-t">HISTORY</div>
+        <div class="l-pill l-pill-s">PART II — LEARNING FROM FAILURE</div>
+    </div>
+    <p class="lesson-intro">Two constellations, two decades apart, two entirely different failure modes — yet both left fingerprints on every major LEO and MEO programme that came after them. Teledesic was the internet broadband satellite of the late 1990s: 840 satellites, Bill Gates and Craig McCaw as backers, a budget that escalated from $9 billion toward $15 billion, and a technical architecture so complex it was eventually dismantled before a single satellite flew. O3b was the opposite: a lean, realistic MEO broadband constellation for the developing world that got the orbit, the technology, and the market exactly right — and still ran out of money in its original corporate form, requiring a full takeover by SES before it could fulfil its potential. Lesson 5 showed you how a market can evaporate under a constellation under construction. This lesson shows you how a design can become too complex to execute, and how a sound technical concept can still fail for purely financial reasons.</p>
+</div>
+
+<div class="toc">
+    <h4>CONTENTS</h4>
+    <ol>
+        <li><a href="#s1">Part I — Teledesic: The Internet-in-the-Sky That Never Was</a></li>
+        <li><a href="#s2">Teledesic's original 840-satellite architecture</a></li>
+        <li><a href="#s3">The redesign spiral: from 840 to 288 to cancellation</a></li>
+        <li><a href="#s4">Why Teledesic failed: complexity, cost, and the dot-com crash</a></li>
+        <li><a href="#s5">Part II — O3b Gen1: The Right Idea, the Wrong Balance Sheet</a></li>
+        <li><a href="#s6">O3b's MEO architecture: why the orbit choice was correct</a></li>
+        <li><a href="#s7">The business model: connecting the unconnected</a></li>
+        <li><a href="#s8">Financial collapse and the SES rescue</a></li>
+        <li><a href="#s9">What both cases teach — a unified failure taxonomy</a></li>
+        <li><a href="#quiz">Knowledge check</a></li>
+        <li><a href="#python">Python exercises</a></li>
+        <li><a href="#reflect">Reflection prompts</a></li>
+    </ol>
+</div>
+
+<!-- ═══════════════════════════════════ TELEDESIC ═══════════════════════════════════ -->
+<div class="part-divider">
+    <div class="pd-label">PART I — TELEDESIC</div>
+    <div class="pd-line"></div>
+</div>
+
+<!-- ═══ SECTION 1 ═══ -->
+<div class="content-block" id="s1">
+    <h2>1. Teledesic: The Internet-in-the-Sky That Never Was</h2>
+
+    <p>In 1994, Bill Gates and Craig McCaw jointly announced a satellite broadband project called Teledesic — a system that would deliver fibre-equivalent broadband speeds to any point on Earth via a massive LEO constellation. The announcement landed in the technology press with a force that reflected the identities of its backers: Gates was the richest man in the world and the mind behind the decade's defining technology company; McCaw had built the largest cellular telephone company in the United States and sold it to AT&amp;T for $11.5 billion in 1994. These were not dreamers or academics. They were the most successful operators in both software and wireless communications. When they announced a $9 billion satellite broadband constellation, the industry took it seriously.</p>
+
+    <p>The timing made the ambition feel plausible. 1994 was the year the World Wide Web became a consumer technology. Netscape Navigator would ship the following year. The explosive demand for internet access that would drive the dot-com boom was just beginning to be visible. Teledesic was conceived as the infrastructure layer for a world in which every device, everywhere, needed broadband connectivity — and in 1994, before terrestrial broadband infrastructure had been built, satellite was a plausible delivery mechanism for that vision.</p>
+
+    <p>The premise Teledesic was built on was not ridiculous. Terrestrial broadband in 1994 reached a small fraction of the global population. DSL was experimental. Cable internet was in its infancy. Fibre to the home was a distant aspiration. If you believed — correctly, as it turned out — that the world would soon demand broadband everywhere, and you did not believe — incorrectly — that terrestrial infrastructure would be built fast enough to serve that demand, then a global LEO satellite broadband constellation was a rational response. The error was not in identifying the demand; it was in underestimating the speed and economics of terrestrial broadband deployment, and in designing a system whose complexity and cost could not be reduced to an executable programme.</p>
+
+    <h3>The backers and the structure</h3>
+
+    <p>Teledesic Corporation was founded by McCaw and Gates with initial funding from their personal fortunes. In 1997, Boeing joined as an equity partner and primary contractor, with an announced investment of $100 million and responsibility for satellite manufacturing. In 2000, Motorola — which had by that point just watched its own Iridium investment collapse — acquired a stake in Teledesic in a deal that combined the McCaw/Gates/Boeing consortium with Motorola's satellite experience. Saudi Prince Alwaleed bin Talal invested $100 million. At its peak capitalization, Teledesic had raised approximately $1 billion in equity with commitments to raise substantially more for full constellation deployment.</p>
+
+    <div class="key-numbers">
+        <div class="kn-item"><span class="kn-val">840</span><span class="kn-label">Original satellite count (1994)</span></div>
+        <div class="kn-item"><span class="kn-val">288</span><span class="kn-label">Revised satellite count (1997)</span></div>
+        <div class="kn-item"><span class="kn-val">$9B+</span><span class="kn-label">Original estimated programme cost</span></div>
+        <div class="kn-item"><span class="kn-val">700 km</span><span class="kn-label">Target orbital altitude</span></div>
+        <div class="kn-item"><span class="kn-val">Ka-band</span><span class="kn-label">User link frequency</span></div>
+        <div class="kn-item"><span class="kn-val">0</span><span class="kn-label">Satellites launched before cancellation</span></div>
+    </div>
+</div>
+
+<!-- ═══ SECTION 2 ═══ -->
+<div class="content-block" id="s2">
+    <h2>2. Teledesic's Original 840-Satellite Architecture</h2>
+
+    <p>The 1994 Teledesic design was extraordinary in its ambition. The proposed constellation comprised 840 satellites (later quoted as 924 including on-orbit spares) in 21 orbital planes at approximately 700 km altitude, with each plane containing 40 satellites. The orbital inclination was 98.2° — a sun-synchronous orbit — chosen to provide consistent illumination geometry for solar power generation and to ensure uniform coverage across all latitudes.</p>
+
+    <h3>The capacity ambition</h3>
+
+    <p>The design specification called for user link data rates of 64 Mbps downlink and 2 Mbps uplink per terminal — numbers that were extraordinary by 1994 standards and would remain impressive by early 2000s standards. The aggregate system capacity was designed to support tens of millions of simultaneous users. The user terminals were to be small, affordable, fixed installations comparable in form factor to a residential satellite TV dish — not handheld devices. This user terminal philosophy was directly informed by the Iridium problem: Teledesic explicitly chose to target fixed and portable broadband rather than mobile voice, avoiding the physics constraint of the handheld satellite phone.</p>
+
+    <p>The Ka-band user link (28.6–29.1 GHz downlink, 18.8–19.3 GHz uplink) was chosen for its large available bandwidth, which was essential for delivering the multi-megabit per second data rates the specification required. Ka-band also offered smaller antenna sizes for a given gain relative to lower frequency bands, enabling the compact terminal form factor that was part of Teledesic's product vision. The trade-off — as L05 noted for any Ka-band system — was increased rain attenuation, which Teledesic planned to manage through link margin and adaptive coding.</p>
+
+    <h3>The switching architecture: the source of complexity</h3>
+
+    <p>The most technically distinctive and ultimately most problematic aspect of Teledesic's original design was its on-board ATM switching architecture. Rather than a simple bent-pipe relay (receive from the ground, amplify, retransmit — the architecture of nearly all GEO satellites and early LEO designs), Teledesic's satellites were designed to be full ATM (Asynchronous Transfer Mode) switches in space. Each satellite would accept ATM cells from user terminals and from adjacent satellites via ISLs, perform routing table lookups, switch cells to the correct output port, and forward them either to the destination user terminal if within the satellite's footprint or to the next satellite in the routing chain via ISL.</p>
+
+    <p>This space-based ATM switching architecture was chosen because ATM was the dominant carrier-grade packet-switching technology of the early 1990s — the protocol that telecommunications engineers in 1993–1994 believed would be the foundation of all future broadband networks, terrestrial and satellite alike. ATM's fixed-size 53-byte cells, strict QoS guarantees, and hardware-switching efficiency made it the technology of choice for synchronous voice and video alongside asynchronous data. Building ATM switches into every satellite would enable a pure packet-switched broadband network in space, with guaranteed QoS for different traffic classes and no dependence on a large terrestrial gateway network for routing.</p>
+
+    <div class="callout red">
+        <strong>THE ATM BET THAT LOST</strong>
+        ATM (Asynchronous Transfer Mode) was the dominant carrier broadband technology from approximately 1990 to 1998, when IP — specifically IP over Ethernet, then IP over SONET/SDH — began displacing it. By 2000, it was clear that the internet would run on IP, not ATM. Teledesic's original architecture was designed around an ATM core at precisely the moment that ATM was being superseded. Redesigning the satellite to use IP switching instead of ATM added further cost, schedule delay, and complexity to a programme that was already strained. The Teledesic case is one of the clearest examples in satellite history of a system designed around a specific network protocol that did not survive long enough to become operational — the satellite architecture was locked in before the protocol wars were resolved.
+    </div>
+
+    <h3>The ISL grid</h3>
+
+    <p>Like Iridium, Teledesic planned an extensive ISL network to route traffic through the constellation without depending on a large ground gateway infrastructure. Each satellite was to have four ISL links: two in-plane (to neighbouring satellites in the same orbital plane) and two cross-plane (to satellites in the nearest adjacent planes). At Ka-band, with the switching and routing load added to the ISL communications burden, the onboard processing requirements were far beyond anything that had been flown in 1994. Space-qualified processors of the mid-1990s were several generations behind commercial-grade equivalents and consumed substantially more power per computation. Meeting Teledesic's ATM switching throughput requirements on space-qualified hardware within a reasonable mass and power budget was an unsolved engineering problem at the time of the original design.</p>
+
+    <div class="diagram-wrap">
+        <svg viewBox="0 0 700 300" width="100%" xmlns="http://www.w3.org/2000/svg" font-family="Share Tech Mono, monospace">
+            <defs>
+                <pattern id="gridL6" width="35" height="35" patternUnits="userSpaceOnUse">
+                    <path d="M 35 0 L 0 0 0 35" fill="none" stroke="#ffffff05" stroke-width="0.5"/>
+                </pattern>
+            </defs>
+            <rect width="700" height="300" fill="url(#gridL6)"/>
+
+            <text x="350" y="20" text-anchor="middle" font-size="9" fill="#00d9ff88" letter-spacing="2">TELEDESIC ORIGINAL DESIGN vs REVISED DESIGN — CONSTELLATION SCALE COMPARISON</text>
+
+            <!-- Left: 840-satellite original — represented as dense dot grid -->
+            <rect x="30" y="35" width="290" height="220" fill="none" stroke="#ff004f22" stroke-width="1"/>
+            <text x="175" y="52" text-anchor="middle" font-size="9" fill="#ff004f88" letter-spacing="1">ORIGINAL (1994): 840 SATELLITES</text>
+            <!-- 21 planes × 40 sats — draw as a 21×40 dot field (subsampled for SVG) -->
+            <!-- Render a representative dot grid -->
+            <g opacity="0.6">
+                <!-- 21 columns (planes), each with 10 visible dots (representing 40) -->
+                <!-- x: 45..305 in steps of ~12.4, y: 65..235 in steps of ~21 -->
+                <script type="text/javascript">/* dots generated inline below */</script>
+                <!-- Plane 1-21 dots, manually laid out as 13×8 compact grid -->
+                <!-- Using 5-row × 21-col layout to represent 840 sats symbolically -->
+                <!-- Each circle = 40 satellites (one plane), circles arranged in a grid of orbital planes -->
+                <!-- Actually: draw 21 small columns, each 5 dots tall to show density -->
+            </g>
+            <!-- Simplified: just render many small dots to convey density -->
+            <!-- 9 rows × 21 cols = 189 dots visible -->
+            <g fill="#ff004f" opacity="0.55">
+                <!-- row 1 -->
+                <circle cx="55"  cy="70"  r="2.5"/><circle cx="68"  cy="70"  r="2.5"/><circle cx="81"  cy="70"  r="2.5"/><circle cx="94"  cy="70"  r="2.5"/><circle cx="107" cy="70"  r="2.5"/><circle cx="120" cy="70"  r="2.5"/><circle cx="133" cy="70"  r="2.5"/><circle cx="146" cy="70"  r="2.5"/><circle cx="159" cy="70"  r="2.5"/><circle cx="172" cy="70"  r="2.5"/><circle cx="185" cy="70"  r="2.5"/><circle cx="198" cy="70"  r="2.5"/><circle cx="211" cy="70"  r="2.5"/><circle cx="224" cy="70"  r="2.5"/><circle cx="237" cy="70"  r="2.5"/><circle cx="250" cy="70"  r="2.5"/><circle cx="263" cy="70"  r="2.5"/><circle cx="276" cy="70"  r="2.5"/><circle cx="289" cy="70"  r="2.5"/><circle cx="302" cy="70"  r="2.5"/>
+                <!-- row 2 -->
+                <circle cx="55"  cy="88"  r="2.5"/><circle cx="68"  cy="88"  r="2.5"/><circle cx="81"  cy="88"  r="2.5"/><circle cx="94"  cy="88"  r="2.5"/><circle cx="107" cy="88"  r="2.5"/><circle cx="120" cy="88"  r="2.5"/><circle cx="133" cy="88"  r="2.5"/><circle cx="146" cy="88"  r="2.5"/><circle cx="159" cy="88"  r="2.5"/><circle cx="172" cy="88"  r="2.5"/><circle cx="185" cy="88"  r="2.5"/><circle cx="198" cy="88"  r="2.5"/><circle cx="211" cy="88"  r="2.5"/><circle cx="224" cy="88"  r="2.5"/><circle cx="237" cy="88"  r="2.5"/><circle cx="250" cy="88"  r="2.5"/><circle cx="263" cy="88"  r="2.5"/><circle cx="276" cy="88"  r="2.5"/><circle cx="289" cy="88"  r="2.5"/><circle cx="302" cy="88"  r="2.5"/>
+                <!-- rows 3-9 -->
+                <circle cx="55"  cy="106" r="2.5"/><circle cx="68"  cy="106" r="2.5"/><circle cx="81"  cy="106" r="2.5"/><circle cx="94"  cy="106" r="2.5"/><circle cx="107" cy="106" r="2.5"/><circle cx="120" cy="106" r="2.5"/><circle cx="133" cy="106" r="2.5"/><circle cx="146" cy="106" r="2.5"/><circle cx="159" cy="106" r="2.5"/><circle cx="172" cy="106" r="2.5"/><circle cx="185" cy="106" r="2.5"/><circle cx="198" cy="106" r="2.5"/><circle cx="211" cy="106" r="2.5"/><circle cx="224" cy="106" r="2.5"/><circle cx="237" cy="106" r="2.5"/><circle cx="250" cy="106" r="2.5"/><circle cx="263" cy="106" r="2.5"/><circle cx="276" cy="106" r="2.5"/><circle cx="289" cy="106" r="2.5"/><circle cx="302" cy="106" r="2.5"/>
+                <circle cx="55"  cy="124" r="2.5"/><circle cx="68"  cy="124" r="2.5"/><circle cx="81"  cy="124" r="2.5"/><circle cx="94"  cy="124" r="2.5"/><circle cx="107" cy="124" r="2.5"/><circle cx="120" cy="124" r="2.5"/><circle cx="133" cy="124" r="2.5"/><circle cx="146" cy="124" r="2.5"/><circle cx="159" cy="124" r="2.5"/><circle cx="172" cy="124" r="2.5"/><circle cx="185" cy="124" r="2.5"/><circle cx="198" cy="124" r="2.5"/><circle cx="211" cy="124" r="2.5"/><circle cx="224" cy="124" r="2.5"/><circle cx="237" cy="124" r="2.5"/><circle cx="250" cy="124" r="2.5"/><circle cx="263" cy="124" r="2.5"/><circle cx="276" cy="124" r="2.5"/><circle cx="289" cy="124" r="2.5"/><circle cx="302" cy="124" r="2.5"/>
+                <circle cx="55"  cy="142" r="2.5"/><circle cx="68"  cy="142" r="2.5"/><circle cx="81"  cy="142" r="2.5"/><circle cx="94"  cy="142" r="2.5"/><circle cx="107" cy="142" r="2.5"/><circle cx="120" cy="142" r="2.5"/><circle cx="133" cy="142" r="2.5"/><circle cx="146" cy="142" r="2.5"/><circle cx="159" cy="142" r="2.5"/><circle cx="172" cy="142" r="2.5"/><circle cx="185" cy="142" r="2.5"/><circle cx="198" cy="142" r="2.5"/><circle cx="211" cy="142" r="2.5"/><circle cx="224" cy="142" r="2.5"/><circle cx="237" cy="142" r="2.5"/><circle cx="250" cy="142" r="2.5"/><circle cx="263" cy="142" r="2.5"/><circle cx="276" cy="142" r="2.5"/><circle cx="289" cy="142" r="2.5"/><circle cx="302" cy="142" r="2.5"/>
+                <circle cx="55"  cy="160" r="2.5"/><circle cx="68"  cy="160" r="2.5"/><circle cx="81"  cy="160" r="2.5"/><circle cx="94"  cy="160" r="2.5"/><circle cx="107" cy="160" r="2.5"/><circle cx="120" cy="160" r="2.5"/><circle cx="133" cy="160" r="2.5"/><circle cx="146" cy="160" r="2.5"/><circle cx="159" cy="160" r="2.5"/><circle cx="172" cy="160" r="2.5"/><circle cx="185" cy="160" r="2.5"/><circle cx="198" cy="160" r="2.5"/><circle cx="211" cy="160" r="2.5"/><circle cx="224" cy="160" r="2.5"/><circle cx="237" cy="160" r="2.5"/><circle cx="250" cy="160" r="2.5"/><circle cx="263" cy="160" r="2.5"/><circle cx="276" cy="160" r="2.5"/><circle cx="289" cy="160" r="2.5"/><circle cx="302" cy="160" r="2.5"/>
+                <circle cx="55"  cy="178" r="2.5"/><circle cx="68"  cy="178" r="2.5"/><circle cx="81"  cy="178" r="2.5"/><circle cx="94"  cy="178" r="2.5"/><circle cx="107" cy="178" r="2.5"/><circle cx="120" cy="178" r="2.5"/><circle cx="133" cy="178" r="2.5"/><circle cx="146" cy="178" r="2.5"/><circle cx="159" cy="178" r="2.5"/><circle cx="172" cy="178" r="2.5"/><circle cx="185" cy="178" r="2.5"/><circle cx="198" cy="178" r="2.5"/><circle cx="211" cy="178" r="2.5"/><circle cx="224" cy="178" r="2.5"/><circle cx="237" cy="178" r="2.5"/><circle cx="250" cy="178" r="2.5"/><circle cx="263" cy="178" r="2.5"/><circle cx="276" cy="178" r="2.5"/><circle cx="289" cy="178" r="2.5"/><circle cx="302" cy="178" r="2.5"/>
+                <circle cx="55"  cy="196" r="2.5"/><circle cx="68"  cy="196" r="2.5"/><circle cx="81"  cy="196" r="2.5"/><circle cx="94"  cy="196" r="2.5"/><circle cx="107" cy="196" r="2.5"/><circle cx="120" cy="196" r="2.5"/><circle cx="133" cy="196" r="2.5"/><circle cx="146" cy="196" r="2.5"/><circle cx="159" cy="196" r="2.5"/><circle cx="172" cy="196" r="2.5"/><circle cx="185" cy="196" r="2.5"/><circle cx="198" cy="196" r="2.5"/><circle cx="211" cy="196" r="2.5"/><circle cx="224" cy="196" r="2.5"/><circle cx="237" cy="196" r="2.5"/><circle cx="250" cy="196" r="2.5"/><circle cx="263" cy="196" r="2.5"/><circle cx="276" cy="196" r="2.5"/><circle cx="289" cy="196" r="2.5"/><circle cx="302" cy="196" r="2.5"/>
+                <circle cx="55"  cy="214" r="2.5"/><circle cx="68"  cy="214" r="2.5"/><circle cx="81"  cy="214" r="2.5"/><circle cx="94"  cy="214" r="2.5"/><circle cx="107" cy="214" r="2.5"/><circle cx="120" cy="214" r="2.5"/><circle cx="133" cy="214" r="2.5"/><circle cx="146" cy="214" r="2.5"/><circle cx="159" cy="214" r="2.5"/><circle cx="172" cy="214" r="2.5"/><circle cx="185" cy="214" r="2.5"/><circle cx="198" cy="214" r="2.5"/><circle cx="211" cy="214" r="2.5"/><circle cx="224" cy="214" r="2.5"/><circle cx="237" cy="214" r="2.5"/><circle cx="250" cy="214" r="2.5"/><circle cx="263" cy="214" r="2.5"/><circle cx="276" cy="214" r="2.5"/><circle cx="289" cy="214" r="2.5"/><circle cx="302" cy="214" r="2.5"/>
+            </g>
+            <text x="175" y="248" text-anchor="middle" font-size="8" fill="#ff004f66">21 planes × 40 sats — never built</text>
+
+            <!-- Divider -->
+            <line x1="340" y1="35" x2="340" y2="255" stroke="#ffffff11" stroke-width="1"/>
+            <text x="340" y="150" text-anchor="middle" font-size="16" fill="#ffffff11" transform="rotate(90,340,150)">→ REDESIGN →</text>
+
+            <!-- Right: 288-satellite revised — sparser grid -->
+            <rect x="360" y="35" width="310" height="220" fill="none" stroke="#39ff1422" stroke-width="1"/>
+            <text x="515" y="52" text-anchor="middle" font-size="9" fill="#39ff1488" letter-spacing="1">REVISED (1997): 288 SATELLITES</text>
+            <!-- 12 planes × 24 sats, rendered as sparser dot grid -->
+            <g fill="#39ff14" opacity="0.6">
+                <circle cx="385" cy="75"  r="3.5"/><circle cx="410" cy="75"  r="3.5"/><circle cx="435" cy="75"  r="3.5"/><circle cx="460" cy="75"  r="3.5"/><circle cx="485" cy="75"  r="3.5"/><circle cx="510" cy="75"  r="3.5"/><circle cx="535" cy="75"  r="3.5"/><circle cx="560" cy="75"  r="3.5"/><circle cx="585" cy="75"  r="3.5"/><circle cx="610" cy="75"  r="3.5"/><circle cx="635" cy="75"  r="3.5"/><circle cx="660" cy="75"  r="3.5"/>
+                <circle cx="385" cy="105" r="3.5"/><circle cx="410" cy="105" r="3.5"/><circle cx="435" cy="105" r="3.5"/><circle cx="460" cy="105" r="3.5"/><circle cx="485" cy="105" r="3.5"/><circle cx="510" cy="105" r="3.5"/><circle cx="535" cy="105" r="3.5"/><circle cx="560" cy="105" r="3.5"/><circle cx="585" cy="105" r="3.5"/><circle cx="610" cy="105" r="3.5"/><circle cx="635" cy="105" r="3.5"/><circle cx="660" cy="105" r="3.5"/>
+                <circle cx="385" cy="135" r="3.5"/><circle cx="410" cy="135" r="3.5"/><circle cx="435" cy="135" r="3.5"/><circle cx="460" cy="135" r="3.5"/><circle cx="485" cy="135" r="3.5"/><circle cx="510" cy="135" r="3.5"/><circle cx="535" cy="135" r="3.5"/><circle cx="560" cy="135" r="3.5"/><circle cx="585" cy="135" r="3.5"/><circle cx="610" cy="135" r="3.5"/><circle cx="635" cy="135" r="3.5"/><circle cx="660" cy="135" r="3.5"/>
+                <circle cx="385" cy="165" r="3.5"/><circle cx="410" cy="165" r="3.5"/><circle cx="435" cy="165" r="3.5"/><circle cx="460" cy="165" r="3.5"/><circle cx="485" cy="165" r="3.5"/><circle cx="510" cy="165" r="3.5"/><circle cx="535" cy="165" r="3.5"/><circle cx="560" cy="165" r="3.5"/><circle cx="585" cy="165" r="3.5"/><circle cx="610" cy="165" r="3.5"/><circle cx="635" cy="165" r="3.5"/><circle cx="660" cy="165" r="3.5"/>
+                <circle cx="385" cy="195" r="3.5"/><circle cx="410" cy="195" r="3.5"/><circle cx="435" cy="195" r="3.5"/><circle cx="460" cy="195" r="3.5"/><circle cx="485" cy="195" r="3.5"/><circle cx="510" cy="195" r="3.5"/><circle cx="535" cy="195" r="3.5"/><circle cx="560" cy="195" r="3.5"/><circle cx="585" cy="195" r="3.5"/><circle cx="610" cy="195" r="3.5"/><circle cx="635" cy="195" r="3.5"/><circle cx="660" cy="195" r="3.5"/>
+                <circle cx="385" cy="225" r="3.5"/><circle cx="410" cy="225" r="3.5"/><circle cx="435" cy="225" r="3.5"/><circle cx="460" cy="225" r="3.5"/><circle cx="485" cy="225" r="3.5"/><circle cx="510" cy="225" r="3.5"/><circle cx="535" cy="225" r="3.5"/><circle cx="560" cy="225" r="3.5"/><circle cx="585" cy="225" r="3.5"/><circle cx="610" cy="225" r="3.5"/><circle cx="635" cy="225" r="3.5"/><circle cx="660" cy="225" r="3.5"/>
+            </g>
+            <text x="515" y="248" text-anchor="middle" font-size="8" fill="#39ff1466">12 planes × 24 sats — also never built</text>
+
+            <text x="350" y="282" text-anchor="middle" font-size="8" fill="#ffffff22" letter-spacing="1">TELEDESIC CONSTELLATION DESIGN EVOLUTION — BOTH VERSIONS CANCELLED BEFORE FIRST LAUNCH</text>
+        </svg>
+        <figcaption>TELEDESIC CONSTELLATION SCALE — 840-SAT ORIGINAL (1994) VS 288-SAT REVISION (1997) · NEITHER FLEW</figcaption>
+    </div>
+</div>
+
+<!-- ═══ SECTION 3 ═══ -->
+<div class="content-block" id="s3">
+    <h2>3. The Redesign Spiral: From 840 to 288 to Cancellation</h2>
+
+    <p>Teledesic's history between 1994 and 2002 is a case study in design spiral: a programme in which each attempt to make the system more executable introduces compromises that reduce capability, which in turn undermine the business case, which leads to further redesign, in a cycle that ends either in a viable simplified system or in cancellation. Teledesic's spiral ended in cancellation.</p>
+
+    <h3>The 1997 redesign: 840 to 288</h3>
+
+    <p>By 1997, Teledesic's engineers and Boeing's satellite team had concluded that the original 840-satellite design was not manufacturable on a reasonable schedule and within a reasonable budget. The primary driver of the redesign was satellite complexity: the ATM switching payload, Ka-band phased array antennas, and ISL terminals required per satellite represented a level of onboard processing that could not be achieved in a space-qualified form within the power and mass budget of a satellite that could be launched in large quantities at affordable cost. The 1994 design had also been specified before the Internet Protocol had clearly won the packet-switching protocol war — by 1997, the decision to redesign around IP rather than ATM was obvious, but it required substantial rework of the satellite architecture.</p>
+
+    <p>The 1997 redesign reduced the constellation to 288 satellites in 12 planes of 24 satellites each, at a slightly higher altitude to compensate for the reduced satellite density. The user link capacity specification was also reduced — 720 kbps download and 200 kbps upload in the revised design, compared to the original 64/2 Mbps. This was still impressive by 1997 standards, but the reduction from the original headline specification eroded the competitive differentiation argument. If Teledesic now offered approximately 720 kbps — a speed that early DSL and cable modem services were beginning to approach — the justification for spending $9–15 billion on a satellite constellation to achieve what a telephone company could provide over copper wire became harder to sustain.</p>
+
+    <h3>The Motorola merger attempt and subsequent collapse</h3>
+
+    <p>In 2000, Teledesic and Motorola announced a merger that would combine Teledesic with Motorola's satellite technology business — the same group that had built Iridium. The merged entity would have combined Teledesic's spectrum licences and backing with Motorola's engineering capability. The merger was announced against the backdrop of the dot-com boom's final months; by the time regulatory approval was obtained, the NASDAQ had collapsed by 70% from its March 2000 peak, the dot-com bubble had burst, and the enthusiasm for large capital-intensive technology infrastructure investments had evaporated. The merger did not proceed to completion in a form that produced a viable path to deployment.</p>
+
+    <div class="timeline">
+        <div class="tl-item">
+            <div class="tl-year">1994</div>
+            <div class="tl-body"><strong>Announcement</strong><p>Gates and McCaw announce Teledesic. 840 satellites, $9B, Ka-band, 64 Mbps/terminal, ATM switching. FCC filing submitted.</p></div>
+        </div>
+        <div class="tl-item">
+            <div class="tl-year">1997</div>
+            <div class="tl-body"><strong>Boeing partnership &amp; redesign</strong><p>Boeing joins as prime contractor with $100M equity. Constellation redesigned to 288 satellites; capacity reduced to 720 kbps/2 Mbps. ATM → IP switch in progress.</p></div>
+        </div>
+        <div class="tl-item">
+            <div class="tl-year">1998</div>
+            <div class="tl-body"><strong>FCC licence granted</strong><p>FCC grants Teledesic the Ka-band spectrum licence for 288 satellites. The spectrum position was valuable; the programme itself remained unfunded for full deployment.</p></div>
+        </div>
+        <div class="tl-item">
+            <div class="tl-year">2000</div>
+            <div class="tl-body"><strong>Motorola merger announced; dot-com crash</strong><p>Motorola investment announced. NASDAQ collapses March–April 2000. Capital markets for large satellite programmes close. Craig McCaw's Eagle River Investments takes control.</p></div>
+        </div>
+        <div class="tl-item">
+            <div class="tl-year">2002</div>
+            <div class="tl-body"><strong>Cancellation</strong><p>Teledesic formally closes down. Zero satellites launched. Spectrum licences eventually reassigned. Approximately $1B in equity consumed with no operational system.</p></div>
+        </div>
+    </div>
+
+    <div class="callout amber">
+        <strong>THE SPECTRUM LEGACY</strong>
+        Teledesic's FCC Ka-band spectrum authorisation did not disappear when the company shut down. Spectrum licences are regulatory assets, and the process of reassigning or maintaining them after a company's collapse is complex. Several of Teledesic's Ka-band spectrum positions were held in reserve or reassigned through regulatory processes that influenced Ka-band satellite planning for years afterward. The lesson — that spectrum filings are durable assets that survive programme cancellation and can be valuable independently of whether the filing company ever launches — is directly relevant to understanding why companies file for large satellite constellations before they have the capital to build them.
+    </div>
+</div>
+
+<!-- ═══ SECTION 4 ═══ -->
+<div class="content-block" id="s4">
+    <h2>4. Why Teledesic Failed: Complexity, Cost, and the Dot-Com Crash</h2>
+
+    <p>Unlike Iridium, which built and launched a fully operational system before failing commercially, Teledesic failed before it built anything. This makes its failure a different category of cautionary tale: not a market misjudgement but a programme execution failure — a system whose complexity could not be reduced to an executable, fundable programme within the available technology and capital market windows.</p>
+
+    <h3>The complexity problem</h3>
+
+    <p>The core technical problem Teledesic could never fully solve was the satellite unit cost and complexity. Building 288 (let alone 840) satellites, each containing Ka-band phased array antennas, Ka-band ISL terminals, IP switching hardware capable of multi-megabit per second routing, and all associated power, attitude control, and propulsion systems, at a per-unit cost that allowed the total programme to be financially viable, required a level of satellite manufacturing industrialisation that the industry had not achieved in the 1990s.</p>
+
+    <p>At the time, a typical communications satellite cost $150–300 million to manufacture and launch. Even assuming significant economies of scale from a large production run, achieving a per-satellite cost of $20–30 million for a sophisticated Ka-band broadband satellite was not credibly demonstrated in any engineering analysis that Boeing or Teledesic produced publicly. The total programme cost estimates of $9 billion (original) escalating toward $15 billion (revised) were driven precisely by this unit cost problem: you cannot design a complex system and then assume the cost will drop to whatever number makes the business case work.</p>
+
+    <p>This is the "complexity tax" in satellite programme design: every feature added to the satellite payload increases unit cost, reduces manufacturing yield (the fraction of built units that pass qualification), and increases launch mass (which increases launch cost). Teledesic's specification was written as a broadband network design — starting from what the user needed and working backward — without adequate constraint from what was manufacturable at satellite scale and cost in 1997. The gap between what the specification required and what was manufacturable never closed.</p>
+
+    <h3>The dot-com crash as timing shock</h3>
+
+    <p>Even if Teledesic's engineering problems had been solved, the capital required to fund full constellation deployment — at minimum $5–10 billion beyond what had been committed — was dependent on investor appetite for large infrastructure bets in technology. The collapse of NASDAQ between March 2000 and October 2002 (peak to trough: approximately 78% decline) destroyed that appetite completely. Teledesic needed to raise multiple billions of dollars in an environment where venture capital and institutional investors had just experienced catastrophic losses on technology infrastructure bets. The timing could not have been worse.</p>
+
+    <p>The dot-com crash also fundamentally changed the competitive landscape. By 2001, DSL and cable broadband were being deployed at significant scale in North America and Europe, with monthly costs falling toward $30–50 per household. The addressable market for satellite broadband was narrowing to exactly the segment where terrestrial infrastructure economics would never be positive — very rural and remote areas — which was a smaller and less commercially attractive market than the broad broadband-everywhere vision that had justified the original Teledesic investment.</p>
+
+    <h3>What Teledesic contributed despite never launching</h3>
+
+    <p>Teledesic's most durable contribution was probably to Ka-band spectrum planning. Its FCC filings established the principle that LEO broadband systems should use Ka-band for user links, and its engineering work on Ka-band satellite phased arrays informed subsequent programmes including ViaSat's GEO HTS systems and the early design work that eventually became Starlink's Ka-band payload. The programme also produced a generation of engineers with detailed knowledge of the challenges involved in high-throughput LEO broadband satellite design — knowledge that went with those engineers when they moved to subsequent programmes. Institutional knowledge from failed programmes often contributes more to subsequent successes than is acknowledged.</p>
+</div>
+
+<!-- ═══════════════════════════════════ O3b ═══════════════════════════════════ -->
+<div class="part-divider">
+    <div class="pd-label">PART II — O3b GEN1</div>
+    <div class="pd-line"></div>
+</div>
+
+<!-- ═══ SECTION 5 ═══ -->
+<div class="content-block" id="s5">
+    <h2>5. O3b Gen1: The Right Idea, the Wrong Balance Sheet</h2>
+
+    <p>O3b is a fundamentally different kind of case study from both Iridium and Teledesic. Where Iridium built the wrong system for the wrong market, and Teledesic built nothing at all, O3b built a technically correct system for a real and underserved market — and still required rescue. The reasons for O3b's financial difficulties illuminate a category of risk distinct from both market failure and technical failure: the risk of being right too early, at a scale too small to sustain the capital structure needed to get there.</p>
+
+    <p>O3b Networks was founded in 2007 by Greg Wyler, a technology entrepreneur whose previous venture had built fibre and wireless broadband infrastructure in Rwanda. Wyler's insight was specific and data-driven: small island nations, remote equatorial communities, and developing-world cities were paying extremely high prices for extremely poor satellite connectivity via GEO — often $1,000–$5,000 per month for 1–2 Mbps of shared C-band or Ku-band capacity. The terrestrial fibre infrastructure that connected these communities to the global internet was thin or nonexistent, and the economics of building it were not positive on any near-term horizon. GEO satellite was the only available option, and GEO's 600 ms latency made real-time applications — VoIP, video conferencing, interactive educational content — unusable.</p>
+
+    <p>O3b's name — "Other 3 Billion" — referred explicitly to the approximately three billion people in 2007 who had no access to affordable broadband. It was a mission-driven framing as much as a commercial one, and it attracted an unusual set of initial investors including Google (which invested approximately $50 million), HSBC, Liberty Global, and a group of development-finance-oriented investors including the African Development Bank and KGNM. The combination of mission framing and credible commercial opportunity was effective for early-stage fundraising in a way that a purely commercial pitch might not have been.</p>
+
+    <div class="key-numbers">
+        <div class="kn-item"><span class="kn-val">2007</span><span class="kn-label">O3b Networks founded</span></div>
+        <div class="kn-item"><span class="kn-val">8,062 km</span><span class="kn-label">MEO orbital altitude</span></div>
+        <div class="kn-item"><span class="kn-val">0°</span><span class="kn-label">Orbital inclination (equatorial)</span></div>
+        <div class="kn-item"><span class="kn-val">8</span><span class="kn-label">Initial satellites (Gen1 fleet)</span></div>
+        <div class="kn-item"><span class="kn-val">~150 ms</span><span class="kn-label">RTT — 4× better than GEO</span></div>
+        <div class="kn-item"><span class="kn-val">$1.2B</span><span class="kn-label">Total investment before SES takeover</span></div>
+    </div>
+</div>
+
+<!-- ═══ SECTION 6 ═══ -->
+<div class="content-block" id="s6">
+    <h2>6. O3b's MEO Architecture: Why the Orbit Choice Was Correct</h2>
+
+    <p>Greg Wyler's choice of Medium Earth Orbit at 8,062 km altitude was not the obvious selection for a broadband satellite constellation in 2007. LEO was theoretically preferred for latency; GEO was the established technology. MEO occupied a middle position that required a specific argument for its selection — and the argument was good.</p>
+
+    <h3>The MEO latency-coverage tradeoff</h3>
+
+    <p>At 8,062 km, O3b satellites experience a one-way propagation delay of approximately 27 ms at nadir, producing an RTT (round-trip time for the user-to-user path via satellite) of approximately 130–160 ms. This is substantially lower than GEO's 550–700 ms RTT and sufficiently below the G.114 recommended 150 ms threshold to enable VoIP, video conferencing, and interactive applications that GEO cannot support. It is higher than LEO's 25–50 ms RTT but, for O3b's target market — fixed broadband trunk capacity to island nations and remote communities — the difference between 150 ms and 40 ms RTT is far less commercially significant than the difference between 150 ms and 600 ms.</p>
+
+    <p>The coverage geometry at 8,062 km gives O3b a footprint diameter of approximately 5,000 km per satellite at the minimum elevation angle O3b's steerable beams can serve. This means that a relatively small constellation — 8 or 12 satellites — can provide continuous coverage of the equatorial band (±45° latitude) where most of O3b's target customers are located. With LEO at 550 km, providing continuous coverage of the same equatorial region would require several hundred satellites. O3b's small initial fleet was directly enabled by its MEO orbit choice: 8 satellites could serve its initial customer base in a way that no LEO constellation could have done at the same scale and cost.</p>
+
+    <h3>The steerable beam architecture</h3>
+
+    <p>Each O3b satellite carries 10–12 steerable Ka-band spot beams, each approximately 0.65° in diameter and capable of providing approximately 1.6 Gbps of aggregate forward capacity. The beams can be steered to point at customer sites within the satellite's footprint, allowing a single satellite to simultaneously serve multiple geographically dispersed clients — a Pacific Island nation, a cruise ship corridor, an African coastal city — with dedicated high-capacity beams. This beam agility was the architectural feature that most differentiated O3b from existing MEO and GEO alternatives. A GEO HTS satellite with fixed spot beams could not dynamically redirect capacity from an undersubscribed beam to an oversubscribed one; O3b's steerable beams could, at the cost of beam-switching time (a few tens of milliseconds to repoint a beam, which was operationally acceptable for the traffic types O3b was carrying).</p>
+
+    <p>The ground terminal required to access O3b services was a 2.4-metre Ka-band dish — physically larger than a typical VSAT terminal, but no larger than many existing enterprise satellite terminals. The dish needed to be capable of tracking the satellite across the sky as it moved (O3b's satellites are not geostationary — they traverse the sky over approximately 40 minutes from horizon to horizon), which required a motor-driven tracking mount. The tracking requirement added cost and complexity to the terminal relative to a GEO fixed-pointing dish, but for the community gateway application O3b was targeting — one dish serving an entire island or remote town — the terminal cost was a small fraction of the total system cost and was easily amortised over the subscriber base.</p>
+
+    <div class="deep-dive">
+        <h4>DEEPER CONTEXT — WHY NOT LEO IN 2007?</h4>
+        <p>A reasonable question is why O3b chose MEO rather than LEO in 2007, given that LEO's latency advantage is clear and Iridium had already demonstrated LEO ISL routing. The answer comes down to the state of technology and capital in 2007. A LEO constellation providing continuous coverage of the equatorial band at sufficient capacity for O3b's trunk applications would have required at minimum several hundred satellites — implying a programme cost in the billions of dollars before a single customer could be served. O3b raised approximately $1.2 billion total before the SES rescue, barely enough to build and launch 8 MEO satellites. That same capital could not have built a functional LEO coverage layer for O3b's use case. The MEO orbit was not the theoretically optimal choice on latency grounds; it was the practically executable choice given O3b's capital position. This is the architectural lesson: optimal theory must be constrained by available capital and manufacturing capability. A MEO system that actually launches and serves customers is superior to a LEO system that is cancelled.</p>
+    </div>
+</div>
+
+<!-- ═══ SECTION 7 ═══ -->
+<div class="content-block" id="s7">
+    <h2>7. The Business Model: Connecting the Unconnected</h2>
+
+    <p>O3b's go-to-market model was carefully designed to avoid the Iridium mistake of targeting a market that would be served by improving terrestrial alternatives. O3b specifically targeted locations and applications where terrestrial connectivity was structurally impossible or economically nonviable for the foreseeable future.</p>
+
+    <h3>The target customer segments</h3>
+
+    <p>O3b's initial customer base was built around three segments. Telecom operators in developing island nations and coastal regions — the Pacific Islands, the Caribbean, equatorial Africa and coastal West Africa — were the primary segment. These operators were paying extremely high prices for very limited GEO satellite capacity to backhaul their terrestrial mobile and broadband networks. O3b could deliver multi-gigabit capacity to a single gateway at a price per bit substantially lower than available GEO alternatives, with the latency advantage that enabled previously impossible applications. The operator would then distribute this capacity across its territory using its own terrestrial network.</p>
+
+    <p>Maritime was the second segment, specifically the cruise industry and high-value shipping. Cruise ships on equatorial and near-equatorial itineraries — Caribbean, Pacific, Indian Ocean — are within O3b's coverage zone and have substantial passenger broadband demand that existing GEO VSAT systems served inadequately. O3b offered the same latency-and-capacity advantage to maritime customers as to telecom operators, with the additional benefit that the satellite's steerable beams could track a moving vessel without requiring the vessel's antenna to repoint its dish (the satellite's beam moves to follow the ship while the ship's fixed dish antenna tracks the satellite across the sky).</p>
+
+    <p>Government and enterprise was the third segment: remote mining operations, oil platforms, military forward operating bases, and government installations in regions within O3b's coverage zone. These customers shared the telecom operator's problem — inadequate existing connectivity at high cost — and had the institutional procurement processes and budget authority to sign multi-year contracts at prices that supported O3b's economics.</p>
+
+    <h3>The price and capacity model</h3>
+
+    <p>O3b sold capacity on a committed information rate basis — a guaranteed data rate per customer, invoiced monthly, regardless of actual usage. A typical 2014 O3b contract provided 100–500 Mbps of committed capacity to a telecom operator gateway for $100,000–$300,000 per month. For an island operator that had previously been buying 10 Mbps of shared GEO capacity for $50,000 per month, this represented a 10–50× improvement in capacity at a 2–6× increase in cost — a dramatically better price per bit, with the latency bonus on top. The value proposition was genuinely compelling for the addressable market.</p>
+
+    <p>The fundamental commercial validation of O3b's model was that its customers did not have improving terrestrial alternatives on any foreseeable horizon. Pacific Island nations that are geographically isolated by thousands of kilometres of ocean are not going to receive submarine fibre cable connections based on market economics alone (though several Pacific nations have received such connections through aid-funded programmes — a risk O3b eventually had to manage). This structural absence of terrestrial alternatives is what O3b's business case required, and it was present in the initial target market in a way that Iridium's business case had assumed — wrongly — for the business traveller market.</p>
+</div>
+
+<!-- ═══ SECTION 8 ═══ -->
+<div class="content-block" id="s8">
+    <h2>8. Financial Collapse and the SES Rescue</h2>
+
+    <p>O3b Networks launched its first four satellites in June 2013, with commercial service beginning in September 2013. Four more satellites launched in December 2013. The service worked as designed: customers in Pacific Island nations, the Caribbean, and equatorial Africa began receiving multi-gigabit, sub-200 ms satellite connectivity for the first time. By the accounts of its early customers, O3b delivered exactly what it had promised technically.</p>
+
+    <h3>The financial problem</h3>
+
+    <p>Despite technical success and genuine customer adoption, O3b Networks was in persistent financial difficulty. The company had raised approximately $1.2 billion by the time of its first launches, through multiple rounds of equity and debt financing. The capital structure included senior secured debt that required debt service payments that O3b's revenue, growing from a standing start in 2013, could not immediately cover. The company had insufficient capital reserves to weather the ramp-up period — the time between launching satellites and building a customer base large enough to cover full operating costs plus debt service.</p>
+
+    <p>Several factors made the ramp-up problem worse than a straightforward financial model would have predicted. Customer procurement cycles in developing-world telecom operators were long: signing a contract, installing the ground terminal infrastructure, and beginning to generate meaningful revenue could take 12–24 months from initial contact. The maritime market required type-approval processes for shipboard terminal installation. Government procurement added further delays. O3b's revenue was growing — but not fast enough to stay ahead of its debt service obligations.</p>
+
+    <p>Greg Wyler himself departed O3b in late 2012, before the first launches, in circumstances that were publicly described as a disagreement with the board over the company's strategic direction. Wyler went on to found WorldVu Satellites Limited — which became OneWeb, the subject of Lesson 8. His departure removed the founder's institutional knowledge and relationships from O3b at a critical juncture, adding management disruption to financial stress.</p>
+
+    <h3>The SES acquisition</h3>
+
+    <p>SES S.A. — the Luxembourg-based GEO satellite operator that is one of the two largest commercial satellite operators in the world — had been an O3b investor since 2010. SES's strategic interest in O3b was clear: O3b's MEO technology complemented SES's GEO fleet, providing latency performance that GEO could not match and coverage of equatorial markets where SES had customers but was constrained by GEO's latency limitations. In 2016, SES acquired majority ownership of O3b Networks in a transaction that effectively rescued O3b from the financial distress that had accumulated since its commercial launch. SES subsequently acquired the remaining O3b equity in 2019, making O3b a wholly owned SES subsidiary.</p>
+
+    <p>Under SES ownership, O3b was rebranded as SES Networks and subsequently as the O3b mPOWER programme — a second-generation constellation of 11 (later expanded to more) MEO satellites with dramatically improved capacity, featuring each satellite's 5,000-beam steerable array described in Lesson 4. The mPOWER programme was funded from SES's balance sheet and credit facility, applying the financial strength of a large, established satellite operator to a technically sound system that had been unable to scale under its original capital structure.</p>
+
+    <div class="timeline">
+        <div class="tl-item">
+            <div class="tl-year">2007</div>
+            <div class="tl-body"><strong>O3b founded</strong><p>Greg Wyler founds O3b Networks. Initial investors include Google ($50M), HSBC, Liberty Global. MEO equatorial orbit concept for developing-world broadband.</p></div>
+        </div>
+        <div class="tl-item">
+            <div class="tl-year">2010</div>
+            <div class="tl-body"><strong>SES strategic investment</strong><p>SES S.A. invests in O3b, recognising MEO's complementarity with its GEO fleet. Total capital raised approaching ~$800M. Satellites under construction at Thales Alenia Space.</p></div>
+        </div>
+        <div class="tl-item">
+            <div class="tl-year">2012</div>
+            <div class="tl-body"><strong>Greg Wyler departs</strong><p>Founder leaves O3b before first launches. Disagreement with board over strategic direction. Goes on to found WorldVu (later: OneWeb).</p></div>
+        </div>
+        <div class="tl-item">
+            <div class="tl-year">2013 Jun</div>
+            <div class="tl-body"><strong>First four satellites launch</strong><p>Soyuz rocket from Kourou. Four more launch December 2013. Commercial service begins September 2013. Technology works as designed.</p></div>
+        </div>
+        <div class="tl-item">
+            <div class="tl-year">2013–15</div>
+            <div class="tl-body"><strong>Revenue ramp vs debt service gap</strong><p>Customers signing but procurement cycles long. Revenue growing but insufficient to cover debt service. Multiple refinancing rounds. Total capital consumed ~$1.2B.</p></div>
+        </div>
+        <div class="tl-item">
+            <div class="tl-year">2016</div>
+            <div class="tl-body"><strong>SES acquires majority ownership</strong><p>SES rescues O3b in financial distress. Technical system validated; financial structure untenable. Full SES acquisition completed 2019.</p></div>
+        </div>
+        <div class="tl-item">
+            <div class="tl-year">2022–23</div>
+            <div class="tl-body"><strong>O3b mPOWER launches</strong><p>Second-generation MEO constellation under SES ownership. 11 satellites, 5,000 steerable beams per satellite. Greg Wyler's original concept validated at commercial scale.</p></div>
+        </div>
+    </div>
+
+    <div class="callout green">
+        <strong>THE WYLER CONSTELLATION THREAD</strong>
+        Greg Wyler's career traces a remarkable thread through 1990s–2020s satellite development. After O3b he founded WorldVu Satellites in 2012, which was reorganised as OneWeb in 2015 with SoftBank, Airbus, and Qualcomm as investors. OneWeb itself went bankrupt in March 2020 (covered in Lesson 8), was purchased by the UK Government and Bharti Global, and subsequently became part of Eutelsat. Each of Wyler's ventures was technically ahead of its time and commercially financially stressed. The pattern — visionary architect, correct technical concept, insufficient or mispriced capital structure — is consistent across both O3b and OneWeb, and is perhaps the defining characteristic of a certain class of satellite entrepreneur.
+    </div>
+</div>
+
+<!-- ═══ SECTION 9 ═══ -->
+<div class="content-block" id="s9">
+    <h2>9. What Both Cases Teach — A Unified Failure Taxonomy</h2>
+
+    <p>Iridium, Teledesic, and O3b Gen1 represent three distinct failure modes in satellite constellation history. Placing them in a structured taxonomy clarifies what each case teaches and how the lessons differ.</p>
+
+    <h3>Failure Mode 1: Market timing (Iridium)</h3>
+
+    <p>Iridium built the right system for the right market — in the wrong decade. The system was technically operational and served its designed function. Its failure was that the market it was designed to exploit (fragmented mobile communications) was unified by a competing technology (GSM) during its construction. The lesson is about market assumption validation over long timescales: any assumption about the competitive landscape that must hold true for 10+ years to make a programme viable is a high-risk assumption that requires explicit monitoring and built-in response mechanisms.</p>
+
+    <h3>Failure Mode 2: Technical complexity (Teledesic)</h3>
+
+    <p>Teledesic could not execute its own design. The architecture was specified top-down from user requirements without adequate bottom-up validation of what was manufacturable at an acceptable unit cost. The redesign spiral — each iteration reducing capability to approach manufacturability, each reduction eroding the business case — ended in cancellation before a single satellite flew. The lesson is about design-to-cost discipline: the satellite count, mass budget, and onboard capability must be constrained from the beginning by achievable manufacturing economics, not specified as requirements to be met and then costed.</p>
+
+    <h3>Failure Mode 3: Financial structure (O3b Gen1)</h3>
+
+    <p>O3b built the right system for the right market at the right time — and still required rescue because its capital structure could not survive the revenue ramp-up period. The system was technically validated; the customers were real; the market was exactly as the business plan described. The failure was in the balance between debt obligations (which were fixed and front-loaded) and revenue growth (which was real but slower than required to service the debt). The lesson is about capital structure design: the financing structure must be tolerant of slower-than-planned revenue ramp-up, particularly for systems serving new markets with long customer procurement cycles.</p>
+
+    <div class="compare-table" style="overflow-x:auto;">
+        <table class="compare-table" style="min-width:620px;">
+            <thead>
+                <tr>
+                    <th>Programme</th>
+                    <th>Technical Execution</th>
+                    <th>Market Validity</th>
+                    <th>Financial Structure</th>
+                    <th>Primary Failure Mode</th>
+                    <th>Outcome</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>Iridium Original</td>
+                    <td class="hi">Excellent — full constellation deployed</td>
+                    <td class="lo">Wrong — GSM eliminated target market</td>
+                    <td class="lo">Fragile — high leverage, 500K subs needed</td>
+                    <td>Market timing</td>
+                    <td>Bankruptcy; $25M rescue; rebuilt as niche</td>
+                </tr>
+                <tr>
+                    <td>Teledesic</td>
+                    <td class="lo">Never achieved — design-to-cost gap</td>
+                    <td class="md">Partially valid — rural broadband was real</td>
+                    <td class="md">Not stress-tested — dot-com crash ended access</td>
+                    <td>Technical complexity + capital timing</td>
+                    <td>Cancelled; zero satellites; ~$1B consumed</td>
+                </tr>
+                <tr>
+                    <td>O3b Gen1</td>
+                    <td class="hi">Correct — system worked as designed</td>
+                    <td class="hi">Correct — developing world underserved</td>
+                    <td class="lo">Fragile — debt service vs slow revenue ramp</td>
+                    <td>Financial structure</td>
+                    <td>SES rescue; mPOWER follow-on successful</td>
+                </tr>
+                <tr>
+                    <td>Iridium NEXT</td>
+                    <td class="hi">Correct — niche-focused design</td>
+                    <td class="hi">Correct — DoD/gov/IoT/maritime</td>
+                    <td class="hi">Resilient — debt-free start, SPAC funding</td>
+                    <td>None — profitable by 2015</td>
+                    <td>Profitable public company (IRDM)</td>
+                </tr>
+                <tr>
+                    <td>O3b mPOWER</td>
+                    <td class="hi">State-of-art — 5K beams/satellite</td>
+                    <td class="hi">Correct — proven market, scaled</td>
+                    <td class="hi">SES balance sheet backstop</td>
+                    <td>None — operational 2022–23</td>
+                    <td>Operational; enterprise market leader</td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+
+    <h3>The meta-lesson: resilience requires all three to be correct simultaneously</h3>
+
+    <p>A satellite constellation programme survives only when all three dimensions are sound simultaneously: the technical architecture must be executable within available manufacturing and launch economics; the market must be sufficiently defensible against competing technologies over the deployment timeline; and the financial structure must be tolerant of the inevitable variance between plan and reality in both cost and revenue. Iridium failed on market. Teledesic failed on technical execution and capital timing. O3b Gen1 failed on financial structure. All three had at least one dimension wrong. Iridium NEXT and O3b mPOWER succeeded because the survivors had corrected the relevant dimension of failure from their predecessor.</p>
+
+    <p>Modern LEO broadband constellations — Starlink, Kuiper, OneWeb, Telesat Lightspeed — are all operating in the shadow of these three failures, and their designs reflect explicit responses to each failure mode. Starlink's vertical integration of launch and satellite manufacturing directly addresses the Teledesic cost problem. SpaceX's self-funding model addresses the Iridium and O3b financial structure problem. The targeting of rural residential broadband — a market with no terrestrial alternative — addresses the Iridium market problem. Whether these responses are sufficient to make the modern programmes succeed is the question that the rest of this curriculum explores.</p>
+</div>
+
+<!-- ═══ QUIZ ═══ -->
+<div class="quiz-block" id="quiz">
+    <h2>KNOWLEDGE CHECK</h2>
+    <p class="quiz-intro">Ten questions covering Teledesic's architecture and failure modes, O3b's technical design, its financial collapse and rescue, and the comparative failure taxonomy. Questions 8–10 require synthesis across this lesson and Lesson 5.</p>
+
+    <!-- Q1 -->
+    <div class="quiz-q" id="q1">
+        <p><strong>Q1.</strong> Teledesic's original 1994 design specified onboard ATM switching for every satellite. Why was ATM chosen, and what made this choice problematic by 1998?</p>
+        <div class="quiz-options">
+            <button class="quiz-opt" data-q="1" data-correct="false">A. ATM was chosen for its low latency; it became problematic when Ka-band proved to add too much propagation delay for ATM's timing requirements</button>
+            <button class="quiz-opt" data-q="1" data-correct="true">B. ATM was the dominant carrier broadband protocol in 1993–94, expected to underlie all future networks; by 1997–98 IP had clearly won the protocol war, requiring an expensive redesign of the satellite switching architecture</button>
+            <button class="quiz-opt" data-q="1" data-correct="false">C. ATM was mandated by the FCC for all Ka-band satellite systems; it became problematic when the mandate was removed</button>
+            <button class="quiz-opt" data-q="1" data-correct="false">D. ATM was chosen because it was compatible with Motorola's Iridium ISL protocol; the Motorola partnership collapse made ATM untenable</button>
+        </div>
+        <div class="quiz-feedback" id="fb1"></div>
+    </div>
+
+    <!-- Q2 -->
+    <div class="quiz-q" id="q2">
+        <p><strong>Q2.</strong> Teledesic redesigned from 840 satellites to 288 satellites in 1997. The capacity specification also changed from 64 Mbps / 2 Mbps to approximately 720 kbps / 200 kbps per terminal. What was the commercial consequence of this capacity reduction?</p>
+        <div class="quiz-options">
+            <button class="quiz-opt" data-q="2" data-correct="false">A. It made Teledesic's user link faster than any terrestrial broadband available in 1997, strengthening the business case</button>
+            <button class="quiz-opt" data-q="2" data-correct="true">B. It brought Teledesic's headline speeds closer to what early DSL and cable modems were beginning to offer, eroding the unique value proposition that justified the programme's cost</button>
+            <button class="quiz-opt" data-q="2" data-correct="false">C. The capacity reduction had no commercial impact because the target market (rural areas) had no terrestrial broadband anyway</button>
+            <button class="quiz-opt" data-q="2" data-correct="false">D. It made the FCC spectrum licence application easier to approve, which was the primary motivation</button>
+        </div>
+        <div class="quiz-feedback" id="fb2"></div>
+    </div>
+
+    <!-- Q3 -->
+    <div class="quiz-q" id="q3">
+        <p><strong>Q3.</strong> What is the "design-to-cost" discipline lesson from Teledesic, and how does it differ from specifying requirements top-down from user needs?</p>
+        <div class="quiz-options">
+            <button class="quiz-opt" data-q="3" data-correct="false">A. Design-to-cost means specifying the cheapest possible system regardless of user needs; Teledesic failed because it spent too much on user features</button>
+            <button class="quiz-opt" data-q="3" data-correct="true">B. Design-to-cost means constraining the architecture from the outset by achievable manufacturing economics, so that the system specification and the production cost are consistent; Teledesic specified capabilities that required manufacturing costs that never closed with the business case</button>
+            <button class="quiz-opt" data-q="3" data-correct="false">C. Design-to-cost is a NASA procurement methodology that Teledesic failed to adopt, which would have controlled scope creep</button>
+            <button class="quiz-opt" data-q="3" data-correct="false">D. Design-to-cost requires competitive bidding for each satellite component; Teledesic's single-source Boeing contract prevented this</button>
+        </div>
+        <div class="quiz-feedback" id="fb3"></div>
+    </div>
+
+    <!-- Q4 -->
+    <div class="quiz-q" id="q4">
+        <p><strong>Q4.</strong> O3b chose an equatorial MEO orbit at 8,062 km rather than LEO. What was the primary practical reason for this choice in 2007–2008?</p>
+        <div class="quiz-options">
+            <button class="quiz-opt" data-q="4" data-correct="false">A. MEO avoids the atmospheric drag that would have caused a LEO constellation to deorbit quickly</button>
+            <button class="quiz-opt" data-q="4" data-correct="false">B. MEO's radiation environment is less severe than LEO, reducing satellite hardening costs</button>
+            <button class="quiz-opt" data-q="4" data-correct="true">C. A small MEO fleet (8–12 satellites) could provide continuous equatorial coverage with O3b's available capital; achieving equivalent LEO coverage would have required hundreds of satellites and billions more in investment</button>
+            <button class="quiz-opt" data-q="4" data-correct="false">D. MEO is the only orbit where steerable spot beams can track moving ships effectively</button>
+        </div>
+        <div class="quiz-feedback" id="fb4"></div>
+    </div>
+
+    <!-- Q5 -->
+    <div class="quiz-q" id="q5">
+        <p><strong>Q5.</strong> O3b's RTT of approximately 150 ms was central to its value proposition over GEO. Which specific application class did this latency improvement most directly enable?</p>
+        <div class="quiz-options">
+            <button class="quiz-opt" data-q="5" data-correct="false">A. Bulk file download and video streaming, which are insensitive to latency</button>
+            <button class="quiz-opt" data-q="5" data-correct="true">B. VoIP telephone calls, video conferencing, and interactive applications — classes that GEO's 600 ms RTT rendered unusable and that O3b's sub-150 ms RTT made viable</button>
+            <button class="quiz-opt" data-q="5" data-correct="false">C. TCP throughput, since lower RTT allows a larger congestion window at the same bandwidth-delay product</button>
+            <button class="quiz-opt" data-q="5" data-correct="false">D. Satellite news gathering (SNG) uplinks, which require very low latency for live broadcast</button>
+        </div>
+        <div class="quiz-feedback" id="fb5"></div>
+    </div>
+
+    <!-- Q6 -->
+    <div class="quiz-q" id="q6">
+        <p><strong>Q6.</strong> O3b's business model sold capacity at committed information rates to telecom operators in island nations. Why was this customer segment structurally defensible against the Iridium-style risk of terrestrial alternatives improving?</p>
+        <div class="quiz-options">
+            <button class="quiz-opt" data-q="6" data-correct="false">A. Telecom operators in island nations had contractual lock-in clauses preventing them from switching to terrestrial infrastructure</button>
+            <button class="quiz-opt" data-q="6" data-correct="true">B. Submarine fibre cable connections to small Pacific Island nations are economically nonviable on market economics alone — the structural isolation means satellite remains the only option for the foreseeable future, regardless of terrestrial technology improvements elsewhere</button>
+            <button class="quiz-opt" data-q="6" data-correct="false">C. O3b's pricing was low enough that terrestrial alternatives would never be cheaper</button>
+            <button class="quiz-opt" data-q="6" data-correct="false">D. Island nation regulators prohibited foreign fibre companies from connecting, protecting O3b's market position</button>
+        </div>
+        <div class="quiz-feedback" id="fb6"></div>
+    </div>
+
+    <!-- Q7 -->
+    <div class="quiz-q" id="q7">
+        <p><strong>Q7.</strong> Despite technical success after its 2013 launches, O3b Gen1 required rescue by SES. What was the primary mechanism of financial stress?</p>
+        <div class="quiz-options">
+            <button class="quiz-opt" data-q="7" data-correct="false">A. Satellite failures reduced available capacity below what customers had contracted for, triggering service level penalties</button>
+            <button class="quiz-opt" data-q="7" data-correct="false">B. Ka-band rain fade in tropical regions caused frequent service outages, reducing customer satisfaction and revenue</button>
+            <button class="quiz-opt" data-q="7" data-correct="true">C. Revenue grew from a standing start with long customer procurement cycles while debt service obligations were fixed — the gap between growing revenue and fixed debt obligations consumed the company's cash reserves before the business reached financial self-sufficiency</button>
+            <button class="quiz-opt" data-q="7" data-correct="false">D. A competing constellation (Starlink) captured O3b's target customers before O3b could sign them</button>
+        </div>
+        <div class="quiz-feedback" id="fb7"></div>
+    </div>
+
+    <!-- Q8 -->
+    <div class="quiz-q" id="q8">
+        <p><strong>Q8.</strong> Greg Wyler's name is connected to both O3b and OneWeb. What is the common pattern across his two satellite ventures, and what does it suggest about his strengths and weaknesses as a satellite programme leader?</p>
+        <div class="quiz-options">
+            <button class="quiz-opt" data-q="8" data-correct="false">A. Both ventures used ISL-equipped LEO constellations at 550 km altitude, and the common failure was the ISL technology not maturing in time</button>
+            <button class="quiz-opt" data-q="8" data-correct="true">B. Both ventures were technically ahead of their time and addressed real unserved markets, yet both ran into severe financial difficulty — suggesting exceptional technical and market vision combined with persistent difficulty constructing capital structures resilient to slow ramp-up</button>
+            <button class="quiz-opt" data-q="8" data-correct="false">C. Both ventures targeted the US defence market, and both were blocked by regulatory barriers to foreign participation in US government contracts</button>
+            <button class="quiz-opt" data-q="8" data-correct="false">D. Both ventures were executed successfully and sold at a profit; the "failure" label is a mischaracterisation of deliberate strategic exits</button>
+        </div>
+        <div class="quiz-feedback" id="fb8"></div>
+    </div>
+
+    <!-- Q9 — cross-lesson synthesis -->
+    <div class="quiz-q" id="q9">
+        <p><strong>Q9 — Synthesis (L05 + L06).</strong> Iridium (L05), Teledesic, and O3b Gen1 (L06) all failed despite having genuine technical achievements or valid market insights. The failure taxonomy identifies three distinct failure modes. Which statement correctly maps each programme to its primary failure mode?</p>
+        <div class="quiz-options">
+            <button class="quiz-opt" data-q="9" data-correct="false">A. Iridium: technical complexity. Teledesic: market timing. O3b: financial structure.</button>
+            <button class="quiz-opt" data-q="9" data-correct="true">B. Iridium: market timing (GSM eliminated target market). Teledesic: technical complexity and capital timing (design-to-cost gap, dot-com crash). O3b Gen1: financial structure (debt service vs slow revenue ramp).</button>
+            <button class="quiz-opt" data-q="9" data-correct="false">C. All three failed primarily due to financial structure — insufficient equity relative to programme cost.</button>
+            <button class="quiz-opt" data-q="9" data-correct="false">D. Iridium: financial structure. Teledesic: market timing. O3b: technical complexity.</button>
+        </div>
+        <div class="quiz-feedback" id="fb9"></div>
+    </div>
+
+    <!-- Q10 — architect application -->
+    <div class="quiz-q" id="q10">
+        <p><strong>Q10 — Application.</strong> A new Ka-band LEO broadband constellation is proposed with 600 satellites, targeting remote rural households in Latin America, sub-Saharan Africa, and Southeast Asia. The programme will take 8 years to fully deploy and requires $8 billion in total investment. Which combination of risks from the historical failure taxonomy is most critical to assess before committing to this programme?</p>
+        <div class="quiz-options">
+            <button class="quiz-opt" data-q="10" data-correct="false">A. Only technical risk matters — if the satellites work, the business will follow</button>
+            <button class="quiz-opt" data-q="10" data-correct="false">B. Only market risk matters — if the addressable market is large enough, financing and technology will solve themselves</button>
+            <button class="quiz-opt" data-q="10" data-correct="true">C. All three: (1) will fibre/5G reach the target rural markets within the 8-year deployment window, eroding addressable market? (2) can 600 Ka-band LEO satellites be manufactured and launched within the $8B budget? (3) can the financial structure survive if revenue ramp is 50% below projection for two years?</button>
+            <button class="quiz-opt" data-q="10" data-correct="false">D. Only financial structure matters — the historical cases all show that good technology and markets always succeed given adequate capital</button>
+        </div>
+        <div class="quiz-feedback" id="fb10"></div>
+    </div>
+
+    <div class="quiz-score" id="quizScore"></div>
+</div>
+
+<!-- ═══ PYTHON ═══ -->
+<div class="py-block" id="python">
+    <h2>PYTHON EXERCISES</h2>
+    <p class="py-intro">Three exercises: modelling the design-to-cost constraint that doomed Teledesic; comparing O3b MEO vs LEO coverage economics at O3b's 2007 capital level; and a constellation programme risk matrix tool that applies the three-axis failure taxonomy.</p>
+
+    <!-- Exercise 1 -->
+    <div class="py-exercise">
+        <h3>Exercise 1 — Teledesic Design-to-Cost Analysis</h3>
+        <p>Model the unit cost problem that made Teledesic unexecutable. Compute the required per-satellite cost as a function of constellation size and total programme budget, then compare against historically achievable unit costs for complex communications satellites.</p>
+```
+
+<pre>
+import numpy as np
+import matplotlib.pyplot as plt
+
+# --- Programme cost model ---
+# Total programme cost = N_sats * cost_per_sat + launch_cost + ground_segment + ops_reserve
+# We want to find: what per-satellite cost is needed to hit a total budget?
+
+# Historical reference points for satellite manufacturing cost
+# (all approx, USD, at time of construction)
+HISTORICAL_SAT_COSTS = {
+    "Iridium original (1997, complex LEO)":      70e6,
+    "GEO comsat (mid-1990s, simple)":           120e6,
+    "GEO HTS (2000s, complex)":                 200e6,
+    "Globalstar (1998, simple bent-pipe LEO)":   30e6,
+    "Starlink v1.0 (2019, mass-produced LEO)":    0.5e6,
+    "OneWeb gen1 (2019, series production)":       1.0e6,
+}
+
+# Teledesic programme parameters
+TOTAL_BUDGET_SCENARIOS = [5e9, 9e9, 15e9]  # billion USD
+LAUNCH_COST_PER_SAT    = 5e6   # USD, approximate for late 1990s
+GROUND_SEGMENT         = 500e6 # USD
+OPS_RESERVE            = 300e6 # USD
+
+def required_sat_cost(n_sats, total_budget,
+                      launch_per_sat=LAUNCH_COST_PER_SAT,
+                      ground=GROUND_SEGMENT, reserve=OPS_RESERVE):
+    non_sat_costs = n_sats * launch_per_sat + ground + reserve
+    return (total_budget - non_sat_costs) / n_sats
+
+# Print table
+print("TELEDESIC REQUIRED SATELLITE MANUFACTURING COST TO HIT BUDGET")
+print(f"(Assumptions: ${LAUNCH_COST_PER_SAT/1e6:.0f}M launch/sat, "
+      f"${GROUND_SEGMENT/1e6:.0f}M ground, ${OPS_RESERVE/1e6:.0f}M reserve)\n")
+
+for budget in TOTAL_BUDGET_SCENARIOS:
+    print(f"Budget = ${budget/1e9:.0f}B:")
+    for n_sats in [288, 480, 840]:
+        req = required_sat_cost(n_sats, budget)
+        feasible = "FEASIBLE (cf. Globalstar)" if req > 25e6 else (
+                   "CHALLENGING" if req > 5e6 else "IMPOSSIBLE in 1997")
+        print(f"  {n_sats:>4} sats: need ${req/1e6:>6.1f}M/sat  → {feasible}")
+    print()
+
+print("HISTORICAL SATELLITE MANUFACTURING COST CONTEXT:")
+for prog, cost in HISTORICAL_SAT_COSTS.items():
+    print(f"  {prog:<50} ${cost/1e6:>8.2f}M/sat")
+
+# --- Visualisation: cost feasibility map ---
+n_range  = np.arange(100, 900, 10)
+fig, axes = plt.subplots(1, 2, figsize=(13, 5))
+fig.patch.set_facecolor('#0a0a0a')
+for ax in axes:
+    ax.set_facecolor('#0d0d0d')
+    ax.tick_params(colors='#888')
+    for sp in ax.spines.values(): sp.set_color('#333')
+
+colors = ['#00d9ff', '#ffaa00', '#ff004f']
+for budget, c in zip(TOTAL_BUDGET_SCENARIOS, colors):
+    req_costs = [required_sat_cost(n, budget) / 1e6 for n in n_range]
+    axes[0].plot(n_range, req_costs, color=c, linewidth=2,
+                 label=f'Budget ${budget/1e9:.0f}B')
+
+# Reference lines for historical costs
+ref_costs = {'Globalstar\n(simple, $30M)': 30, 'Iridium\n(complex, $70M)': 70}
+ref_colors = ['#39ff1488', '#ffaa0088']
+for (label, cost), rc in zip(ref_costs.items(), ref_colors):
+    axes[0].axhline(y=cost, color=rc, linewidth=1, linestyle='--')
+    axes[0].text(870, cost + 1.5, label, fontsize=7, color=rc, ha='right')
+
+axes[0].set_xlabel('Constellation size (satellites)', color='#aaa')
+axes[0].set_ylabel('Required manufacturing cost per satellite ($M)', color='#aaa')
+axes[0].set_title('Teledesic: Required Per-Sat Cost to Hit Budget', color='#ccc')
+axes[0].legend(facecolor='#111', edgecolor='#333', labelcolor='white', fontsize=8)
+axes[0].grid(True, alpha=0.07, color='#444')
+axes[0].set_ylim(0, 90)
+
+# Annotate Teledesic's two designs
+for n, label, yoff in [(288, 'Revised\n288-sat', 5), (840, 'Original\n840-sat', 5)]:
+    for budget, c in zip(TOTAL_BUDGET_SCENARIOS, colors):
+        val = required_sat_cost(n, budget) / 1e6
+        axes[0].scatter([n], [val], color=c, s=40, zorder=5)
+
+# Right plot: total programme cost breakdown
+labels = ['Satellite mfg\n(288 @ $30M)', 'Launch\n(288 @ $5M)',
+          'Ground\nsegment', 'Ops\nreserve']
+sizes_feasible  = [288*30e6, 288*5e6, 500e6, 300e6]
+sizes_actual_iridium = [66*70e6, 66*40e6, 800e6, 400e6]  # Iridium for comparison
+bar_w = 0.35
+x = np.arange(len(labels))
+b1 = axes[1].bar(x - bar_w/2, [s/1e9 for s in sizes_feasible], bar_w,
+                 label='Teledesic (if $30M/sat)', color='#39ff14', alpha=0.8, edgecolor='#111')
+b2 = axes[1].bar(x + bar_w/2, [s/1e9 for s in sizes_actual_iridium], bar_w,
+                 label='Iridium (actual, 66 sats)', color='#ff004f', alpha=0.8, edgecolor='#111')
+axes[1].set_xticks(x)
+axes[1].set_xticklabels(labels, color='#aaa', fontsize=8)
+axes[1].set_ylabel('Cost ($B)', color='#aaa')
+axes[1].set_title('Programme Cost Breakdown Comparison\n(if Teledesic achieved Globalstar-level unit cost)', color='#ccc')
+axes[1].legend(facecolor='#111', edgecolor='#333', labelcolor='white', fontsize=8)
+axes[1].grid(True, alpha=0.07, color='#444', axis='y')
+
+total_tel = sum(sizes_feasible)
+total_ir  = sum(sizes_actual_iridium)
+axes[1].text(len(labels)-0.5, max(s/1e9 for s in sizes_feasible) + 0.2,
+             f'Teledesic total: ${total_tel/1e9:.1f}B', fontsize=8, color='#39ff14')
+axes[1].text(len(labels)-0.5+bar_w, max(s/1e9 for s in sizes_actual_iridium) + 0.1,
+             f'Iridium total: ${total_ir/1e9:.1f}B', fontsize=8, color='#ff004f')
+
+plt.tight_layout()
+plt.savefig('teledesic_cost.png', dpi=150, bbox_inches='tight')
+plt.show()
+</pre>
+
+```
+        <div class="py-note">
+            The key finding: even with a $9B budget and 288 satellites, Teledesic needed a manufacturing cost of roughly $22–25M per satellite to be financially viable — barely achievable with Globalstar's simple bent-pipe design, but not achievable with Teledesic's complex ATM-then-IP switching payload. At Iridium's actual $70M per satellite, 288 Teledesic-class satellites would have cost ~$20B in manufacturing alone. The design-to-cost gap was not a rounding error; it was a factor of 2–3×.
+        </div>
+        <div class="py-challenge">
+            <strong>EXTENSION CHALLENGE</strong>
+            Update the model for Starlink economics: 4,408 satellites at ~$500,000 each plus ~$3,000/kg launch cost on Falcon 9 (each satellite ~260 kg). What is SpaceX's total manufacturing + launch cost for the initial constellation, and how does it compare to Teledesic's $9B original budget? What unit cost reduction (relative to 1997 Iridium/Teledesic assumptions) made the modern LEO broadband era possible?
+        </div>
+    </div>
+
+    <!-- Exercise 2 -->
+    <div class="py-exercise">
+        <h3>Exercise 2 — O3b MEO vs LEO Coverage Economics</h3>
+        <p>Quantify why O3b chose MEO over LEO: compute the minimum number of satellites for continuous equatorial coverage at both altitudes, and the capital required to build and launch each option, showing the MEO advantage at O3b's constrained capital level.</p>
+```
+
+<pre>
+import numpy as np
+import matplotlib.pyplot as plt
+
+Re = 6_371  # km
+
+def nadir_half_angle_deg(h_km, elev_min_deg=10):
+    eps  = np.radians(elev_min_deg)
+    rho  = np.arcsin(Re / (Re + h_km) * np.cos(eps))
+    lam  = np.pi/2 - eps - rho
+    return np.degrees(lam)
+
+def equatorial_coverage_min_sats(h_km, lat_band_deg=45, elev_min=10):
+    """
+    Minimum satellites for continuous coverage of ±lat_band_deg using
+    a Walker constellation at inclination ~ lat_band_deg.
+    Simplified: uses footprint area vs band area.
+    """
+    lam     = nadir_half_angle_deg(h_km, elev_min)
+    # footprint circle radius on surface
+    fp_rad  = np.radians(lam)
+    # area of one footprint
+    fp_area = 2 * np.pi * Re**2 * (1 - np.cos(fp_rad))
+    # area of the equatorial band ±lat_band_deg (both hemispheres)
+    lat_r   = np.radians(lat_band_deg)
+    band_area = 4 * np.pi * Re**2 * np.sin(lat_r)
+    # apply 1.5× for coverage continuity (overlapping footprints needed)
+    return max(4, int(np.ceil(band_area / fp_area * 1.5)))
+
+# Satellite cost assumptions (2007–2010 era)
+SAT_COST_MEO = 60e6   # USD — O3b Thales Alenia, radiation-hardened
+SAT_COST_LEO = 15e6   # USD — simpler LEO (optimistic for 2007)
+LAUNCH_COST_MEO = 60e6  # Soyuz/Arianespace, ~4 sats per launch
+LAUNCH_COST_LEO = 25e6  # per satellite (shared launch, e.g. Dnepr multi-sat)
+
+O3B_CAPITAL = 1.2e9   # USD — total available capital
+
+altitudes = {
+    "VLEO 350 km":      350,
+    "LEO 550 km":       550,
+    "LEO 800 km":       800,
+    "LEO 1200 km":     1200,
+    "O3b MEO 8062 km": 8062,
+}
+
+print(f"{'Regime':<22} {'Alt km':>7} {'Min sats':>10} "
+      f"{'Sat cost $M':>12} {'Launch $M':>10} {'Total $B':>10} {'Feasible w/ $1.2B?':>20}")
+print("-" * 95)
+
+for name, h in altitudes.items():
+    if h < 2000:
+        n_sats = equatorial_coverage_min_sats(h, lat_band_deg=45, elev_min=10)
+        sc, lc = SAT_COST_LEO, LAUNCH_COST_LEO
+    else:
+        n_sats = equatorial_coverage_min_sats(h, lat_band_deg=45, elev_min=10)
+        sc, lc = SAT_COST_MEO, LAUNCH_COST_MEO
+
+    total_cost = n_sats * (sc + lc)
+    feasible   = "YES" if total_cost <= O3B_CAPITAL else "NO"
+    flag       = " ← O3b choice" if "8062" in name else ""
+    print(f"{name:<22} {h:>7,} {n_sats:>10,} "
+          f"${sc/1e6:>10.0f}M ${lc/1e6:>8.0f}M ${total_cost/1e9:>9.2f}B "
+          f"{feasible:>20}{flag}")
+
+# --- Sweep: total cost vs altitude ---
+alts = np.logspace(np.log10(300), np.log10(15000), 300)
+costs_leo = []
+costs_meo = []
+for h in alts:
+    n   = equatorial_coverage_min_sats(h, 45, 10)
+    if h < 2000:
+        costs_leo.append(n * (SAT_COST_LEO + LAUNCH_COST_LEO) / 1e9)
+        costs_meo.append(np.nan)
+    else:
+        costs_leo.append(np.nan)
+        costs_meo.append(n * (SAT_COST_MEO + LAUNCH_COST_MEO) / 1e9)
+
+fig, ax = plt.subplots(figsize=(11, 6))
+fig.patch.set_facecolor('#0a0a0a')
+ax.set_facecolor('#0d0d0d')
+ax.tick_params(colors='#888')
+for sp in ax.spines.values(): sp.set_color('#333')
+
+ax.semilogy(alts, costs_leo, color='#39ff14', linewidth=2, label='LEO (simple sat, $15M+$25M/sat)')
+ax.semilogy(alts, costs_meo, color='#00d9ff', linewidth=2, label='MEO (hardened sat, $60M+$60M/sat)')
+
+ax.axhline(y=O3B_CAPITAL/1e9, color='#ff004f', linewidth=1.5, linestyle='--',
+           label=f"O3b available capital (~${O3B_CAPITAL/1e9:.1f}B)")
+
+# Mark O3b actual
+n_o3b = equatorial_coverage_min_sats(8062, 45, 10)
+cost_o3b = n_o3b * (SAT_COST_MEO + LAUNCH_COST_MEO) / 1e9
+ax.scatter([8062], [cost_o3b], color='#ffaa00', s=120, zorder=7,
+           label=f'O3b MEO 8,062 km ({n_o3b} sats, ${cost_o3b:.2f}B)')
+
+ax.set_xlabel('Orbital altitude (km)', color='#aaa')
+ax.set_ylabel('Total constellation cost ($ billions, log scale)', color='#aaa')
+ax.set_title('Minimum-Coverage Constellation Cost vs Altitude\n(equatorial ±45° band, 2007-era costs)', color='#ccc')
+ax.legend(facecolor='#111', edgecolor='#333', labelcolor='white', fontsize=8)
+ax.grid(True, alpha=0.07, color='#444', which='both')
+ax.set_xlim(300, 15000)
+
+plt.tight_layout()
+plt.savefig('o3b_meo_vs_leo.png', dpi=150, bbox_inches='tight')
+plt.show()
+print(f"\nO3b MEO minimum satellites needed (±45° band): {n_o3b}")
+print(f"Estimated cost at MEO economics: ${cost_o3b:.2f}B")
+print(f"Within O3b capital of ${O3B_CAPITAL/1e9:.1f}B: {'YES' if cost_o3b <= O3B_CAPITAL/1e9 else 'NO'}")
+</pre>
+
+```
+        <div class="py-note">
+            The result should show clearly why O3b chose MEO: a small number of MEO satellites (typically 8–12 for equatorial coverage) could be built and launched within O3b's capital envelope, while the hundreds of LEO satellites needed for equivalent coverage would have cost several times more. The orbit choice was not a technical preference but a financial constraint transformed into an architecture decision.
+        </div>
+        <div class="py-challenge">
+            <strong>EXTENSION CHALLENGE</strong>
+            Extend the analysis to 2022-era costs: LEO satellite at $500,000 + $3,000/kg launch (260 kg = $780,000 launch). MEO satellite at $30M + $20M launch. Replot the cost-vs-altitude chart with 2022 economics. Does MEO still dominate at limited capital, or does the LEO unit cost revolution flip the answer? What does this suggest about whether Greg Wyler's 2012 decision to found a LEO constellation (OneWeb) was rational given 2022 economics?
+        </div>
+    </div>
+
+    <!-- Exercise 3 -->
+    <div class="py-exercise">
+        <h3>Exercise 3 — Three-Axis Programme Risk Scoring Tool</h3>
+        <p>Build a structured risk assessment tool that scores any satellite constellation programme against the three-axis failure taxonomy (market risk, technical risk, financial structure risk) and visualises the result as a radar chart with historical case study benchmarks.</p>
+```
+
+<pre>
+import numpy as np
+import matplotlib.pyplot as plt
+import matplotlib.patches as mpatches
+
+# --- Risk scoring model ---
+# Each axis scored 1 (high risk) to 5 (low risk / well-mitigated)
+# Market risk:    1 = terrestrial alternative likely to close gap in deployment window
+#                 5 = structural isolation, no terrestrial alternative foreseeable
+# Technical risk: 1 = unproven technology at required unit cost and complexity
+#                 5 = proven tech, design-to-cost validated, manufacturing path clear
+# Financial risk: 1 = high leverage, break-even requires optimistic subscriber ramp
+#                 5 = self-funded or large-balance-sheet backer, tolerant of slow ramp
+
+PROGRAMMES = {
+    "Iridium\nOriginal":  {"market": 2, "technical": 5, "financial": 2,
+                           "color": "#ff004f", "outcome": "Bankruptcy"},
+    "Teledesic":          {"market": 3, "technical": 1, "financial": 2,
+                           "color": "#ff6633", "outcome": "Cancelled"},
+    "O3b Gen1":           {"market": 5, "technical": 5, "financial": 2,
+                           "color": "#ffaa00", "outcome": "SES rescue"},
+    "Iridium\nNEXT":      {"market": 5, "technical": 5, "financial": 5,
+                           "color": "#39ff14", "outcome": "Profitable"},
+    "O3b\nmPOWER":        {"market": 5, "technical": 5, "financial": 5,
+                           "color": "#00d9ff", "outcome": "Operational"},
+    # Hypothetical modern programme — edit these scores to assess your own scenario
+    "Modern\nLEO BBand":  {"market": 3, "technical": 4, "financial": 3,
+                           "color": "#aa88ff", "outcome": "TBD"},
+}
+
+AXES = ["Market\nRisk", "Technical\nRisk", "Financial\nRisk"]
+N_AXES = len(AXES)
+angles = np.linspace(0, 2 * np.pi, N_AXES, endpoint=False).tolist()
+angles += angles[:1]  # close polygon
+
+fig, axes_grid = plt.subplots(2, 3, figsize=(14, 9),
+                              subplot_kw=dict(polar=True))
+fig.patch.set_facecolor('#0a0a0a')
+fig.suptitle('Satellite Constellation Programme Risk Assessment\n'
+             'Score: 5 = low risk / well-mitigated,  1 = high risk / poorly addressed',
+             color='#ccc', fontsize=10, y=0.98)
+
+for ax_flat, (prog_name, data) in zip(axes_grid.flat, PROGRAMMES.items()):
+    ax_flat.set_facecolor('#0d0d0d')
+    ax_flat.tick_params(colors='#555')
+    ax_flat.spines['polar'].set_color('#333')
+
+    scores = [data["market"], data["technical"], data["financial"]]
+    values = scores + scores[:1]
+
+    # Risk zones background
+    for r, alpha, c in [(5, 0.04, '#39ff14'), (3, 0.04, '#ffaa00'), (1, 0.04, '#ff004f')]:
+        ax_flat.fill([0, 2*np.pi], [0, r], color=c, alpha=alpha)
+
+    # Plot
+    ax_flat.plot(angles, values, color=data["color"], linewidth=2)
+    ax_flat.fill(angles, values, color=data["color"], alpha=0.18)
+
+    ax_flat.set_xticks(angles[:-1])
+    ax_flat.set_xticklabels(AXES, size=8, color='#aaa')
+    ax_flat.set_yticks([1, 2, 3, 4, 5])
+    ax_flat.set_yticklabels(['1', '2', '3', '4', '5'], size=6, color='#555')
+    ax_flat.set_ylim(0, 5)
+
+    # Composite score
+    composite = np.mean(scores)
+    status_color = '#39ff14' if composite >= 4 else '#ffaa00' if composite >= 3 else '#ff004f'
+    ax_flat.set_title(
+        f"{prog_name}\n{data['outcome']} — avg {composite:.1f}",
+        size=8.5, color=status_color, pad=12, linespacing=1.4
+    )
+
+# Hide unused subplots (if any)
+for ax_extra in axes_grid.flat[len(PROGRAMMES):]:
+    ax_extra.set_visible(False)
+
+plt.tight_layout()
+plt.savefig('programme_risk_radar.png', dpi=150, bbox_inches='tight')
+plt.show()
+
+# Summary table
+print(f"\n{'Programme':<20} {'Market':>7} {'Technical':>10} {'Financial':>10} "
+      f"{'Composite':>11} {'Outcome'}")
+print("-" * 70)
+for name, d in PROGRAMMES.items():
+    composite = np.mean([d["market"], d["technical"], d["financial"]])
+    clean_name = name.replace('\n', ' ')
+    print(f"{clean_name:<20} {d['market']:>7} {d['technical']:>10} {d['financial']:>10} "
+          f"{composite:>11.1f}   {d['outcome']}")
+</pre>
+
+```
+        <div class="py-note">
+            The radar chart makes the failure taxonomy visual: Iridium Original has a large collapse on the market axis. Teledesic collapses on technical risk. O3b Gen1 has strong market and technical scores but a weak financial score. Iridium NEXT and O3b mPOWER both score well across all three axes. The "Modern LEO BBand" programme starts with editable scores — adjust them to represent any current programme and evaluate where the risk is concentrated.
+        </div>
+        <div class="py-challenge">
+            <strong>EXTENSION CHALLENGE</strong>
+            Add a fourth axis to the radar: "Regulatory Risk" (spectrum filing security, landing rights completeness, ITU coordination status). Score each historical and modern programme on this axis. Does regulatory risk change the ranking of any historical programme's vulnerabilities? Which modern constellations are most exposed on this axis, based on your knowledge of their spectrum and landing-rights situation?
+        </div>
+    </div>
+</div>
+
+<!-- ═══ REFLECTION ═══ -->
+<div class="reflection-block" id="reflect">
+    <h2>REFLECTION PROMPTS</h2>
+    <p class="ref-intro">Four prompts drawing on both lessons in Part II. Aim for 200–300 words each. The goal is to extract durable principles, not to re-narrate events.</p>
+
+    <div class="ref-prompt">
+        <h3>Prompt 1 — The Protocol Bet</h3>
+        <p>Teledesic built its switching architecture around ATM in 1993–94, at the moment when ATM appeared to be the obvious future of broadband networking — and was displaced by IP before the satellites flew. This type of error — committing a long-lead system design to a near-term technology standard that does not survive — recurs in satellite programmes. Identify one current technology choice in a major LEO constellation programme (protocol, frequency band, terminal technology, or ground system architecture) that could be the "ATM bet" of the 2020s — a choice that appears safe today but could be superseded by a competing technology within the programme's operational lifetime. Defend your choice with technical reasoning.</p>
+    </div>
+
+    <div class="ref-prompt">
+        <h3>Prompt 2 — The Capital Structure and the Ramp-Up Window</h3>
+        <p>O3b Gen1's core financial problem was that its debt obligations were front-loaded while its revenue was back-loaded — an inherent characteristic of any programme serving a new market with long procurement cycles. This mismatch is not unique to satellite; it characterises infrastructure programmes broadly (railways, electricity grids, broadband networks). Describe two structural changes to O3b Gen1's capital structure that, had they been in place from the start, would have made the company resilient enough to survive its actual revenue ramp without SES rescue. Be specific about the financial instruments, terms, or investor types that would have provided this resilience. Why do you think these structures were not in place?</p>
+    </div>
+
+    <div class="ref-prompt">
+        <h3>Prompt 3 — Greg Wyler and the Repeat Founder Pattern</h3>
+        <p>Greg Wyler founded O3b (MEO broadband for the developing world), then OneWeb (LEO broadband for global coverage). Both were technically ahead of their time and both encountered severe financial difficulty. There is a class of technology entrepreneur who identifies markets and architectures correctly but whose projects require rescue or restructuring before achieving their intended scale. Is this pattern a failure, or is it a necessary feature of how radical infrastructure innovation progresses? Compare Wyler's trajectory to other infrastructure pioneers (railways, undersea cables, early internet backbones) and form a view on whether a different founder behaviour could have avoided the financial difficulties, or whether the financial difficulties were inherent in the market timing.</p>
+    </div>
+
+    <div class="ref-prompt">
+        <h3>Prompt 4 — Applying the Three-Axis Framework</h3>
+        <p>Apply the three-axis failure taxonomy (market risk, technical risk, financial structure risk) to Amazon Kuiper as of 2024–2025. For each axis: state your assessment (low, medium, or high risk), identify the specific evidence or reasoning that supports it, and identify what development or event would most significantly change your assessment in either direction. Then give an overall judgement: is Kuiper more resilient to the historical failure modes than any of the three cases studied in this lesson? What is its single most important vulnerability?</p>
+    </div>
+</div>
+
+<div class="complete-wrap">
+    <button class="complete-btn" id="completeBtn">MARK LESSON COMPLETE</button>
+    <div class="complete-msg" id="completeMsg">Not yet marked complete.</div>
+</div>
+
+<div class="lesson-nav">
+    <a href="q1-5.html">← L05: Iridium Original</a>
+    <a href="q1-7.html">L07: Starlink Deep Dive →</a>
+</div>
+```
+
+</div><!-- end .lesson-wrap -->
+
+<footer>© 2026 LEOAF · Q1 · LESSON 06 OF 15</footer>
+<button class="back-to-top" id="backToTop">↑</button>
+
+<script>
+const canvas = document.getElementById('starsCanvas');
+const ctx    = canvas.getContext('2d');
+let stars    = [];
+function initStars() {
+    stars = [];
+    for (let i = 0; i < 180; i++)
+        stars.push({ x:Math.random()*canvas.width, y:Math.random()*canvas.height,
+            size:Math.random()*1.4+0.3, speed:Math.random()*0.15+0.03, hue:Math.random()*360 });
+}
+function resizeCanvas() { canvas.width=window.innerWidth; canvas.height=window.innerHeight; }
+resizeCanvas(); initStars();
+window.addEventListener('resize', resizeCanvas);
+function animateStars() {
+    ctx.clearRect(0,0,canvas.width,canvas.height);
+    stars.forEach(s => {
+        s.y -= s.speed;
+        if (s.y < 0) { s.y=canvas.height; s.x=Math.random()*canvas.width; }
+        ctx.beginPath(); ctx.fillStyle=`hsl(${s.hue},70%,80%)`;
+        ctx.arc(s.x,s.y,s.size,0,Math.PI*2); ctx.fill();
+    });
+    requestAnimationFrame(animateStars);
+}
+animateStars();
+</script>
+
+<script>
+const feedbacks = {
+    1:{
+        correct:"Correct. ATM (Asynchronous Transfer Mode) was the dominant carrier-grade packet-switching technology in 1993–94 and was genuinely expected to underlie all future broadband networks. Teledesic's engineers were being rational in designing around the presumed future of networking. The problem was that IP — initially slower and less QoS-capable than ATM — won the protocol war comprehensively by 1997–1998. Redesigning Teledesic's satellite switching payload from ATM to IP added cost, schedule delay, and further engineering complexity to a programme already under severe technical stress.",
+        wrong:"Incorrect. ATM was chosen because it was the dominant carrier broadband protocol in 1993–94 — the technology that telecommunications engineers confidently expected to underlie all future broadband infrastructure. The fatal error was not a technical limitation of ATM for satellite use, nor a regulatory mandate. It was a protocol-war bet that ATM would win, placed at exactly the moment when IP was beginning its decisive competitive challenge."
+    },
+    2:{
+        correct:"Correct. The headline capacity reduction from 64 Mbps/2 Mbps to 720 kbps/200 kbps per terminal eroded Teledesic's competitive differentiation at precisely the moment that early DSL (ADSL1) and cable broadband were beginning to offer 500 kbps–1.5 Mbps download speeds. If satellite broadband at $15B programme cost could only deliver what a $30/month DSL line was beginning to offer, the economic case for the programme was severely weakened. The redesign reduced cost but simultaneously reduced the performance advantage that had originally justified the investment.",
+        wrong:"Incorrect. 720 kbps was not faster than all terrestrial broadband in 1997 — ADSL was beginning to offer comparable speeds in early rollouts, and cable modem services were doing the same. The capacity reduction actually brought Teledesic's performance into competition with early terrestrial broadband rather than above it. Option C is wrong because the target market included not just isolated rural areas but global broadband everywhere — and for urban/suburban areas, terrestrial alternatives were rapidly improving."
+    },
+    3:{
+        correct:"Correct. Design-to-cost is the discipline of beginning the architecture process with manufacturing cost as a constraint, not a result. It means: given a total programme budget, what is the maximum per-satellite cost the business case can sustain, and what satellite capability can be achieved at that cost? Teledesic went in the opposite direction: specifying what users needed (64 Mbps, ATM switching, global coverage), then trying to engineer a satellite that delivered it, without adequately constraining the design to achievable manufacturing economics. The satellite specification and the production cost never converged within the programme's lifetime.",
+        wrong:"Incorrect. Design-to-cost is not about minimising features at the expense of user needs, nor is it a specific NASA methodology (though NASA uses cost-constrained design principles). It is the engineering practice of defining the architecture within manufacturing cost constraints from the beginning — treating cost as a design input, not an output. Teledesic failed because it treated cost as an output: it specified capability first and hoped manufacturing would somehow deliver it at a commercially viable price."
+    },
+    4:{
+        correct:"Correct. O3b's available capital in 2007–2010 was approximately $1.2 billion. A LEO constellation providing continuous coverage of the equatorial band (±45° latitude) would require hundreds of satellites — at 2007 satellite manufacturing and launch costs, this would have required several billion dollars before serving a single customer. O3b's small MEO fleet (8–12 satellites) could be built and launched within the available capital. The MEO orbit was not chosen because it was theoretically optimal on latency grounds — it was chosen because it was the only orbit at which O3b's programme was executable within its capital constraints.",
+        wrong:"Incorrect. The MEO radiation environment is actually more challenging than LEO (the inner Van Allen belt overlaps some MEO altitudes), which is one reason MEO satellites require radiation hardening that LEO satellites at 550 km can avoid. Atmospheric drag is not a practical issue for LEO satellites at operational altitudes within their design lifetimes. Steerable beams can track ships from any orbit. The correct answer is about capital constraint: at 2007 economics, equatorial MEO coverage was achievable with 8 satellites within O3b's budget; equatorial LEO coverage required hundreds of satellites at a cost several times larger."
+    },
+    5:{
+        correct:"Correct. O3b's RTT of approximately 130–160 ms falls below the ITU G.114 recommendation of 150 ms for voice quality. This means VoIP calls — unintelligible or unpleasant over GEO's 600 ms RTT — are perfectly acceptable over O3b. Video conferencing, which requires sub-300 ms RTT for comfortable interaction, is also enabled. These application classes are what differentiated O3b from existing GEO satellite services for O3b's target customers — island telecom operators whose subscribers previously could not use satellite connections for voice calls because of the GEO delay. Option C (TCP throughput) is also technically correct but was not the primary value proposition for O3b's target market of trunk capacity buyers.",
+        wrong:"Incorrect. Bulk file download and streaming are indeed insensitive to the difference between 150 ms and 600 ms RTT (both are fine). Satellite news gathering uplinks are a niche application, and the difference between 150 ms and 600 ms is less critical than other SNG constraints. The primary applications that O3b's latency improvement enabled were VoIP (voice calls were previously unusable over GEO for interactive conversation), video conferencing, and interactive internet applications including educational platforms — the applications most important to the communities O3b was connecting."
+    },
+    6:{
+        correct:"Correct. Pacific Island nations, Caribbean islands, and remote equatorial communities are geographically isolated by ocean distances that make submarine fibre cable connections economically nonviable without external subsidy (aid funding, development bank financing). The commercial economics of laying and maintaining a submarine cable to a small island with a small total addressable market do not support private investment. This structural isolation — not regulatory protection or pricing — is what makes satellite the only option for these communities on any foreseeable market timeline. It is precisely the property that was absent in Iridium's business case (where GSM filled the gap) and present in O3b's (where submarine fibre was economically impossible).",
+        wrong:"Incorrect. Contract lock-in clauses, pricing protection, and regulatory exclusion are not the structural reasons for O3b's market defensibility. The structural reason is geographic and economic: building submarine fibre cable to an isolated Pacific Island or Caribbean nation is not commercially viable without external subsidy, because the total addressable market is too small to justify the capital cost. This makes satellite the only connectivity option for these communities on a foreseeable market timeline, regardless of technological improvements in terrestrial systems elsewhere."
+    },
+    7:{
+        correct:"Correct. O3b's technology worked and its customers were real — the problem was timing. Revenue from new customers took 12–24 months to materialise from initial contact (procurement cycles, terminal installation, integration with local networks). During this ramp-up period, O3b had fixed debt service obligations that its growing but still-small revenue base could not cover. The company consumed its capital reserves before the revenue reached break-even. This is a classic infrastructure ramp-up problem: the cost of the infrastructure is paid upfront, while the revenue from using it accumulates gradually. If the capital structure cannot bridge this gap, the company fails even with a technically and commercially valid product.",
+        wrong:"Incorrect. No significant satellite failures affected O3b's early operations. Ka-band rain fade was managed by link margin design and is an expected characteristic of the system, not a cause of financial failure. Starlink was not operational as a commercial competitor in O3b's market in 2013–2015. The correct mechanism is purely financial: fixed debt service against a growing-from-zero revenue base, with a gap too large for O3b's capital reserves to bridge until break-even was reached."
+    },
+    8:{
+        correct:"Correct. O3b addressed the correct market (developing world without affordable broadband) with the correct architecture (MEO, small initial fleet, committed capacity model). OneWeb addressed the correct market (global LEO broadband coverage) with a technically sound architecture. Both ran into financial difficulty — O3b requiring SES rescue, OneWeb going bankrupt and being acquired by Bharti/UK Government. The consistent pattern is strong technical-market vision combined with capital structures that could not survive slower-than-projected ramp-up. Whether this is a founder weakness or an inherent property of radical infrastructure innovation (the 'right but early' problem) is a question the reflection prompts explore.",
+        wrong:"Incorrect. Neither O3b nor OneWeb (in its original form) used ISL-equipped LEO constellations; O3b is MEO and the original OneWeb design did not include ISLs. Neither targeted exclusively the US defence market. And both required financial rescue — O3b by SES, OneWeb through bankruptcy proceedings — which is inconsistent with a characterisation of deliberate profitable exit."
+    },
+    9:{
+        correct:"Correct. This is the direct mapping from the failure taxonomy developed in Section 9: Iridium's primary failure was market timing — the system worked, the market evaporated because GSM unified global mobile communications faster than Iridium could deploy. Teledesic's primary failures were technical complexity (the satellite design could not be reduced to an executable, affordable programme) compounded by capital timing (the dot-com crash eliminated access to the large capital raise needed to fund deployment). O3b Gen1's primary failure was financial structure — the system worked and the market was real, but the debt-service-to-revenue-ramp mismatch consumed the company before it reached financial self-sufficiency.",
+        wrong:"Incorrect. The failure taxonomy assigns distinct primary modes to each programme: Iridium failed on market (market assumption was wrong), Teledesic failed on technical complexity and capital timing (architecture was not manufacturable at viable cost, and the dot-com crash closed capital markets), and O3b failed on financial structure (correct technology and market, wrong capital structure for the revenue ramp-up period). Options A and D swap some of these incorrectly. Option C incorrectly collapses all three to a single cause."
+    },
+    10:{
+        correct:"Correct. A new Ka-band LEO broadband constellation programme faces all three failure modes simultaneously and must assess each explicitly. Market risk: will 5G NR-NTN integration, fixed wireless access expansion, and rural fibre programmes in Latin America, sub-Saharan Africa, and Southeast Asia reach O3b-style structural isolation within the 8-year deployment window? Technical risk: is the $8B budget consistent with manufacturing and launching 600 Ka-band LEO broadband satellites including ground segment and operations reserves — i.e. has the design-to-cost analysis been done honestly? Financial risk: if revenue in Year 3 is half the plan, does the capital structure have enough runway to reach break-even, or does it face the same ramp-up crisis as O3b Gen1? A programme that correctly addresses only one or two of these three axes is still vulnerable to the axis it ignored.",
+        wrong:"Incorrect. The historical case studies conclusively demonstrate that technical success alone (O3b Gen1), market validity alone (Iridium if we focus on its technical achievement), or sufficient capital alone (Teledesic had $1B but misallocated it) are each insufficient for programme success. All three axes — market defensibility, technical executability, and financial structure resilience — must be addressed simultaneously. The correct answer is the one that recognises all three as equally critical."
+    }
+};
+
+let answered = {};
+document.querySelectorAll('.quiz-opt').forEach(btn => {
+    btn.addEventListener('click', function() {
+        const q = this.dataset.q;
+        if (answered[q] !== undefined) return;
+        const correct = this.dataset.correct === 'true';
+        answered[q] = correct;
+        document.querySelectorAll(`.quiz-opt[data-q="${q}"]`).forEach(b => {
+            b.disabled = true;
+            if (b.dataset.correct === 'true') b.classList.add('correct');
+        });
+        if (!correct) this.classList.add('wrong');
+        const fb = document.getElementById(`fb${q}`);
+        fb.textContent = (correct ? '✓ ' : '✗ ') + feedbacks[q][correct ? 'correct' : 'wrong'];
+        fb.style.color = correct ? '#39ff14' : '#ff004f';
+        if (Object.keys(answered).length === 10) {
+            const total = Object.values(answered).filter(Boolean).length;
+            const el = document.getElementById('quizScore');
+            el.style.display = 'block';
+            const pct = Math.round(total / 10 * 100);
+            el.textContent = `SCORE: ${total} / 10 (${pct}%) — ${pct===100?'PERFECT.':pct>=80?'STRONG. REVIEW ANY MISSES.':pct>=60?'ADEQUATE. REVISIT WEAK SECTIONS.':'REVISIT THE LESSON BEFORE PROCEEDING.'}`;
+        }
+    });
+});
+</script>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+<script src="supabase.js"></script>
+
+<script src="user_progress.js"></script>
+
+<script>
+const LESSON_ID = 'q1-6';
+document.addEventListener('DOMContentLoaded', async () => {
+    const { data:{ session } } = await client.auth.getSession();
+    if (!session) { window.location.href = 'index.html'; return; }
+    document.getElementById('logoffBtn').addEventListener('click', async () => {
+        await client.auth.signOut(); window.location.href = 'index.html';
+    });
+    const mastered = await getMasteredSections();
+    const btn = document.getElementById('completeBtn');
+    const msg = document.getElementById('completeMsg');
+    function setDone(done) {
+        if (done) {
+            btn.textContent = '✓ COMPLETE — CLICK TO UNDO';
+            btn.classList.add('done');
+            btn.style.cssText = 'border-color:#39ff14;color:#39ff14;background:rgba(57,255,20,0.1);cursor:pointer;opacity:1;';
+            msg.style.color = '#39ff14';
+            msg.textContent = 'Lesson marked complete. Click again to undo.';
+        } else {
+            btn.textContent = 'MARK LESSON COMPLETE';
+            btn.classList.remove('done');
+            btn.style.cssText = '';
+            msg.style.color = '#ffffff55';
+            msg.textContent = 'Not yet marked complete.';
+        }
+    }
+    setDone(mastered.includes(LESSON_ID));
+    btn.addEventListener('click', async () => {
+        const isDone = btn.classList.contains('done');
+        msg.style.color = '#00d9ff'; msg.textContent = 'Saving...';
+        const ok = await upsertSection(LESSON_ID, !isDone);
+        if (ok) { setDone(!isDone); }
+        else { msg.style.color = '#ff004f'; msg.textContent = 'Error saving. Try again.'; }
+    });
+    const btt = document.getElementById('backToTop');
+    window.addEventListener('scroll', () => btt.classList.toggle('visible', window.scrollY > 400));
+    btt.addEventListener('click', () => window.scrollTo({ top:0, behavior:'smooth' }));
+});
+</script>
+
+</body>
+</html>
