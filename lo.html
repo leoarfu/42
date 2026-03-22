@@ -1,0 +1,778 @@
+<!DOCTYPE html>
+
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+<title>Loft Orbital — Customer Delivery Engineer · Round 2 Prep</title>
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;600;800&family=Share+Tech+Mono&family=Libre+Baskerville:ital,wght@0,400;0,700;1,400&display=swap" rel="stylesheet">
+<style>
+*{box-sizing:border-box;margin:0;padding:0;}
+html{height:100%;-webkit-text-size-adjust:100%;overflow-x:hidden;}
+body{font-family:'Share Tech Mono',monospace;background:#000;color:#fff;overflow-x:hidden;min-height:100vh;}
+#starsCanvas{position:fixed;inset:0;z-index:-1;}
+
+header{
+background:#000;border-bottom:1px solid #39ff1433;
+position:sticky;top:0;z-index:100;
+padding:1rem clamp(1.5rem,5vw,4rem);
+display:flex;justify-content:space-between;align-items:center;
+box-shadow:0 4px 24px #000c;
+}
+.logo{font-family:‘Orbitron’,sans-serif;font-weight:800;font-size:clamp(14px,1.8vw,20px);letter-spacing:3px;color:#fff;text-decoration:none;}
+.logo em{color:#39ff14;font-style:normal;}
+.logo-sub{font-size:9px;color:#ffffff44;letter-spacing:2px;display:block;margin-top:2px;}
+.round-tag{font-family:‘Orbitron’,sans-serif;font-size:10px;color:#39ff14;letter-spacing:2px;border:1px solid #39ff1444;padding:4px 12px;}
+
+.hero{
+padding:clamp(40px,6vw,80px) clamp(1.5rem,5vw,4rem) 30px;
+max-width:980px;margin:0 auto;position:relative;z-index:1;
+}
+.hero-eyebrow{font-family:‘Orbitron’,sans-serif;font-size:10px;color:#39ff14;letter-spacing:3px;margin-bottom:12px;}
+.hero h1{font-family:‘Orbitron’,sans-serif;font-size:clamp(22px,4vw,40px);font-weight:800;line-height:1.15;margin-bottom:16px;}
+.hero h1 span{color:#39ff14;}
+.hero p{font-size:13px;line-height:1.85;opacity:.7;max-width:720px;margin-bottom:28px;}
+.hero-pills{display:flex;flex-wrap:wrap;gap:8px;}
+.pill{font-family:‘Orbitron’,sans-serif;font-size:9px;padding:4px 12px;letter-spacing:1.5px;border:1px solid;}
+.pill-g{color:#39ff14;border-color:#39ff1444;}
+.pill-b{color:#00d9ff;border-color:#00d9ff44;}
+.pill-a{color:#ffaa00;border-color:#ffaa0044;}
+.pill-r{color:#ff004f;border-color:#ff004f44;}
+
+/* ── TIMER STRIP ── */
+.timer-strip{
+background:linear-gradient(90deg,#001a00,#002200,#001a00);
+border:1px solid #39ff1422;
+padding:14px clamp(1.5rem,5vw,4rem);
+display:flex;flex-wrap:wrap;gap:20px;
+align-items:center;
+position:relative;z-index:1;
+max-width:980px;margin:0 auto 8px;
+}
+.ts-item{display:flex;flex-direction:column;align-items:center;}
+.ts-val{font-family:‘Orbitron’,sans-serif;font-size:18px;font-weight:800;color:#39ff14;line-height:1;}
+.ts-lbl{font-size:9px;color:#39ff1466;letter-spacing:2px;margin-top:3px;}
+.ts-divider{width:1px;height:36px;background:#39ff1422;}
+.ts-note{font-size:11px;color:#ffffff55;flex:1;line-height:1.6;}
+
+.wrap{max-width:980px;margin:0 auto;padding:0 clamp(1.5rem,5vw,4rem) 100px;position:relative;z-index:1;}
+
+.section-hdr{
+display:flex;align-items:center;gap:14px;
+margin:52px 0 24px;
+}
+.section-hdr .sh-num{font-family:‘Orbitron’,sans-serif;font-size:10px;color:#39ff14;opacity:.7;}
+.section-hdr h2{font-family:‘Orbitron’,sans-serif;font-size:13px;color:#fff;letter-spacing:2px;text-transform:uppercase;}
+.section-hdr .sh-line{flex:1;height:1px;background:#ffffff11;}
+
+/* ── LIGHT CARDS ── */
+.card{
+background:#f5f2ec;color:#1a1a1a;
+padding:28px clamp(20px,3vw,40px);
+margin-bottom:18px;
+border-left:4px solid #39ff14;
+}
+.card.blue{border-left-color:#00d9ff;}
+.card.amber{border-left-color:#996600;}
+.card.red{border-left-color:#cc0033;}
+.card h3{font-family:‘Orbitron’,sans-serif;font-size:11px;color:#003d66;letter-spacing:1.5px;text-transform:uppercase;margin-bottom:14px;}
+.card.blue h3{color:#003d66;}
+.card.amber h3{color:#5a3a00;}
+.card p,.card li{font-family:‘Libre Baskerville’,Georgia,serif;font-size:14px;line-height:1.85;color:#1a1a1a;margin-bottom:10px;}
+.card ul{padding-left:0;margin-bottom:6px;}
+.card li{padding-left:18px;position:relative;margin-bottom:7px;}
+.card li::before{content:’›’;position:absolute;left:0;color:#0077aa;}
+.card .tag{display:inline-block;font-family:‘Orbitron’,sans-serif;font-size:9px;letter-spacing:1px;padding:2px 8px;border:1px solid;margin-right:6px;margin-bottom:5px;vertical-align:middle;}
+.card .tg{color:#1a7a1a;border-color:#1a7a1a55;background:#eafaea;}
+.card .ta{color:#996600;border-color:#99660055;background:#fffbec;}
+.card .tr{color:#cc0033;border-color:#cc003355;background:#fdecea;}
+.card .tb{color:#003d66;border-color:#003d6655;background:#e8f4fb;}
+
+.kn{display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:10px;margin:18px 0;}
+.kn-i{background:#fff;border:1px solid #d0d0d0;padding:14px 10px;text-align:center;}
+.kn-v{font-family:‘Orbitron’,sans-serif;font-size:clamp(15px,2vw,22px);font-weight:800;color:#003d66;display:block;}
+.kn-l{font-size:9px;color:#555;letter-spacing:1px;margin-top:4px;display:block;line-height:1.4;}
+
+.callout{border-left:3px solid #39ff14;background:#f0fff0;color:#1a2a1a;padding:14px 18px;margin:16px 0;font-size:13px;line-height:1.8;}
+.callout strong{font-family:‘Orbitron’,sans-serif;font-size:9px;letter-spacing:1.5px;display:block;margin-bottom:6px;color:#1a7a1a;}
+.callout.blue{border-left-color:#003d66;background:#e8f4fb;color:#1a1a2a;}
+.callout.blue strong{color:#003d66;}
+.callout.amber{border-left-color:#996600;background:#fef9ec;color:#2a1a00;}
+.callout.amber strong{color:#996600;}
+.callout.red{border-left-color:#cc0033;background:#fdecea;color:#2a0010;}
+.callout.red strong{color:#cc0033;}
+
+.score-table{width:100%;border-collapse:collapse;font-size:12.5px;margin:14px 0;}
+.score-table th{font-family:‘Orbitron’,sans-serif;font-size:9px;letter-spacing:1px;color:#003d66;padding:9px 12px;border-bottom:2px solid #39ff1466;text-align:left;background:#eafaea;}
+.score-table td{padding:9px 12px;border-bottom:1px solid #ddd;color:#1a1a1a;font-family:‘Libre Baskerville’,Georgia,serif;vertical-align:top;}
+.score-table tr:hover td{background:#f8f8f8;}
+.s-hi{color:#1a7a1a;font-weight:bold;}
+.s-md{color:#996600;}
+.s-lo{color:#cc0033;}
+
+/* ── CONCEPT GRID ── */
+.concept-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:14px;}
+.concept{background:#f5f2ec;border-left:4px solid #003d66;padding:20px 22px;}
+.concept.green{border-left-color:#1a7a1a;}
+.concept h4{font-family:‘Orbitron’,sans-serif;font-size:10px;color:#003d66;letter-spacing:1.5px;margin-bottom:10px;}
+.concept.green h4{color:#1a7a1a;}
+.concept p,.concept li{font-family:‘Libre Baskerville’,Georgia,serif;font-size:13px;color:#1a1a1a;line-height:1.75;margin-bottom:7px;}
+.concept ul{padding-left:0;}
+.concept li{padding-left:16px;position:relative;margin-bottom:5px;}
+.concept li::before{content:’·’;position:absolute;left:0;color:#003d66;}
+.concept.green li::before{color:#1a7a1a;}
+
+/* ── QA ACCORDION ── */
+.qa-block{margin-bottom:12px;border:1px solid #ffffff08;}
+.qa-q{
+background:#0d1a0d;padding:14px 20px;
+font-family:‘Orbitron’,sans-serif;font-size:11px;color:#39ff14;
+letter-spacing:1px;cursor:pointer;
+display:flex;justify-content:space-between;align-items:flex-start;gap:12px;
+user-select:none;
+}
+.qa-q:hover{background:#142014;}
+.qa-arrow{transition:.2s;font-size:14px;opacity:.6;flex-shrink:0;margin-top:1px;}
+.qa-body{
+background:#f5f2ec;color:#1a1a1a;
+padding:0 24px;max-height:0;overflow:hidden;
+transition:max-height .35s ease,padding .2s ease;
+}
+.qa-body.open{max-height:1000px;padding:22px 24px;}
+.qa-body p,.qa-body li{font-family:‘Libre Baskerville’,Georgia,serif;font-size:14px;line-height:1.85;color:#1a1a1a;margin-bottom:10px;}
+.qa-body ul{padding-left:0;}
+.qa-body li{padding-left:18px;position:relative;margin-bottom:6px;}
+.qa-body li::before{content:’›’;position:absolute;left:0;color:#0077aa;}
+.qa-body .model-label{font-family:‘Orbitron’,sans-serif;font-size:9px;color:#1a7a1a;letter-spacing:1.5px;display:block;margin-bottom:8px;}
+.qa-body .warn-label{font-family:‘Orbitron’,sans-serif;font-size:9px;color:#cc0033;letter-spacing:1.5px;display:block;margin-bottom:8px;}
+.qa-arrow-open{transform:rotate(180deg);}
+
+/* ── SCENARIO BLOCK ── */
+.scenario{background:#0a0a0a;border:1px solid #39ff1422;padding:22px 26px;margin-bottom:16px;}
+.scenario h4{font-family:‘Orbitron’,sans-serif;font-size:11px;color:#39ff14;letter-spacing:2px;margin-bottom:12px;}
+.scenario .s-setup{font-size:12px;color:#aaa;line-height:1.75;margin-bottom:14px;font-style:italic;}
+.scenario .s-what{font-family:‘Orbitron’,sans-serif;font-size:9px;color:#ffaa00;letter-spacing:1.5px;margin-bottom:8px;}
+.scenario .s-answer{font-size:12px;color:#ccc;line-height:1.75;}
+.scenario .s-answer li{padding-left:16px;position:relative;margin-bottom:5px;color:#ccc;}
+.scenario .s-answer li::before{content:‘→’;position:absolute;left:0;color:#39ff1466;}
+.scenario ul{padding-left:0;}
+
+/* ── GAP GRID ── */
+.gap-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:12px;}
+.gap-item{background:#fff;border:1px solid #d0d0d0;padding:16px;}
+.gap-item h4{font-family:‘Orbitron’,sans-serif;font-size:10px;letter-spacing:1px;margin-bottom:9px;}
+.gap-item p{font-family:‘Libre Baskerville’,Georgia,serif;font-size:12px;color:#333;line-height:1.7;margin:0;}
+.gap-item.strong h4{color:#1a7a1a;}
+.gap-item.gap h4{color:#996600;}
+.gap-item.risk h4{color:#cc0033;}
+
+.btt{position:fixed;bottom:28px;right:28px;z-index:200;width:44px;height:44px;background:#000;border:1px solid #39ff1455;color:#39ff14;font-size:20px;cursor:pointer;display:flex;align-items:center;justify-content:center;opacity:0;pointer-events:none;transition:opacity .3s;}
+.btt.vis{opacity:1;pointer-events:auto;}
+.btt:hover{background:#001a00;}
+
+footer{text-align:center;padding:30px;opacity:.3;font-size:11px;position:relative;z-index:1;letter-spacing:1px;}
+
+@media(max-width:600px){
+.kn{grid-template-columns:1fr 1fr;}
+.concept-grid{grid-template-columns:1fr;}
+.gap-grid{grid-template-columns:1fr;}
+.timer-strip{gap:12px;}
+}
+</style>
+
+</head>
+<body>
+<canvas id="starsCanvas"></canvas>
+
+<header>
+  <div>
+    <div class="logo">LEO<em>AF</em> <span style="color:#39ff14;font-size:10px;vertical-align:middle;letter-spacing:2px;">× INTERVIEW PREP</span></div>
+    <div class="logo-sub">ROUND 2 — 3-HOUR VIRTUAL PANEL · NOT PART OF CURRICULUM</div>
+  </div>
+  <div class="round-tag">ROUND 2 · CDE</div>
+</header>
+
+<!-- timer strip -->
+
+<div class="timer-strip">
+  <div class="ts-item"><span class="ts-val">3 HRS</span><span class="ts-lbl">Panel duration</span></div>
+  <div class="ts-divider"></div>
+  <div class="ts-item"><span class="ts-val">30+</span><span class="ts-lbl">Missions flown</span></div>
+  <div class="ts-divider"></div>
+  <div class="ts-item"><span class="ts-val">€170M</span><span class="ts-lbl">Series C (Mar 2025)</span></div>
+  <div class="ts-divider"></div>
+  <div class="ts-item"><span class="ts-val">30 sats</span><span class="ts-lbl">Fleet target 2027</span></div>
+  <div class="ts-divider"></div>
+  <div class="ts-item"><span class="ts-val">3 offices</span><span class="ts-lbl">SF · Golden CO · Toulouse</span></div>
+  <div class="ts-divider"></div>
+  <p class="ts-note">Pierre-Damien Vaujour (CEO) · Alex Greenberg (COO, co-founder) · Antoine de Chassy (co-founder) · Founded 2017 · $500M+ bookings on $160M raised prior to Series C</p>
+</div>
+
+<div class="hero">
+  <div class="hero-eyebrow">ROUND 2 — THREE-HOUR VIRTUAL PANEL PREP</div>
+  <h1>Loft Orbital —<br><span>Customer Delivery Engineer</span></h1>
+  <p>You passed Round 1. Round 2 is three hours in front of a multi-person panel spanning ops, engineering, and possibly leadership. They already know you're technically credible — now they're evaluating whether you think in the Loft way: operational ownership, software-first, customer-obsessed, speed without sloppiness. This page covers the company model in depth, the CDE role specifically, your gap analysis, likely technical and behavioural scenarios, and what a three-hour panel format usually looks like.</p>
+  <div class="hero-pills">
+    <div class="pill pill-g">TOULOUSE · CDI</div>
+    <div class="pill pill-b">SATELLITE OPS + SOFTWARE</div>
+    <div class="pill pill-b">CUSTOMER INTERFACE</div>
+    <div class="pill pill-a">3-HOUR VIRTUAL PANEL</div>
+    <div class="pill pill-r">HIGH STAKES</div>
+  </div>
+</div>
+
+<div class="wrap">
+
+  <!-- ═══ 01 LOFT MODEL ═══ -->
+
+  <div class="section-hdr">
+    <div class="sh-num">01</div>
+    <h2>The Loft Model — Know It Deeper Than They Expect</h2>
+    <div class="sh-line"></div>
+  </div>
+
+  <div class="card">
+    <h3>The "Space as a Service" Architecture — Three Layers</h3>
+    <p>Loft's business model is not a satellite operator in the traditional sense. The analogy they use internally is cloud computing: AWS doesn't build custom servers for each customer, it provides standardised infrastructure that any application can run on. Loft does the same for space. The architecture has three distinct layers:</p>
+    <ul>
+      <li><strong>The Hub</strong> — hardware abstraction layer. A universal payload adapter that sits between any customer payload and any satellite bus. Standardises power, data, command/control interfaces. Means Loft can fly any payload on any bus without bus-level NRE (Non-Recurring Engineering). This is the key to speed: no custom integration work means satellite buses can be pre-built on the shelf in Golden, CO, waiting for customer payloads.</li>
+      <li><strong>Cockpit</strong> — software abstraction layer. Mission control software that abstracts away the spacecraft. Customers task their payload via a web UI or API — they never deal with TM/TC packets, orbital mechanics, or ground station scheduling. Advanced customers integrate Cockpit into their own tools via the API. The CDE role lives at the interface between the customer and Cockpit.</li>
+      <li><strong>Ultimate Edge (UE)</strong> — the virtual missions layer. Customers deploy software apps (not hardware) to Loft's satellites via a containerised runtime environment backed by Microsoft Azure. The satellite becomes an edge compute node. Apps access onboard imagers, SDRs, CPUs, GPUs. This is YAM-6's primary feature and the direction the whole product is moving.</li>
+    </ul>
+    <div class="callout blue">
+      <strong>WHY THIS MATTERS FOR YOUR INTERVIEW</strong>
+      A CDE who only knows the satellite ops side is only half-useful at Loft. The role requires you to help customers build on top of the API and operational infrastructure — that means understanding Cockpit deeply, being comfortable with REST APIs, and being able to debug why a customer's automated workflow isn't producing the data they expect. Frame everything through both the satellite ops lens AND the software/API lens.
+    </div>
+  </div>
+
+  <div class="card blue">
+    <h3>Mission Types — Physical, Virtual, On-Demand</h3>
+    <ul>
+      <li><strong>Physical missions:</strong> customer brings a hardware payload (sensor, instrument, antenna), Loft integrates it via the Hub onto a YAM or Longbow satellite bus, launches it, commissions it, and operates it. Customer gets Cockpit access for tasking. Examples: NASA MURI infrared radiometer on YAM-5, EarthDaily hyperspectral constellation, Honeywell/CSA quantum encryption sat.</li>
+      <li><strong>Virtual missions:</strong> customer writes a software app, deploys it to the Ultimate Edge runtime already running on a Loft satellite. No hardware shipped. SDK + Docker-like container environment. Validated in a flight-representative dev environment, then deployed on-orbit. Examples: Helsing RF SIGINT AI on YAM-6, Agenium Space object detection, wildfire detection for SmartSat.</li>
+      <li><strong>On-demand missions:</strong> customers task pre-existing Loft-owned sensors across the fleet — data as a service without a long-term contract. Newer product, less mature.</li>
+    </ul>
+    <p>As a CDE you'll own all three types. The virtual mission side is increasingly central — YAM-6 was described as "the world's first satellite dedicated to running AI in space" and Loft is investing heavily in this direction.</p>
+  </div>
+
+  <div class="card">
+    <h3>The Satellite Platform — YAM Series and Longbow</h3>
+    <ul>
+      <li><strong>YAM (Yet Another Mission)</strong>: the workhorse multi-payload rideshare platform. YAM-2 and YAM-3 launched in 2021, YAM-5 carries NASA MURI, YAM-6 is the AI/virtual mission flagship (launched Transporter-10, early 2024). Fleet uses proven satellite buses — Loft quotes "600+ copies of our bus in orbit today" from their standard bus supplier.</li>
+      <li><strong>Longbow</strong>: dedicated single-customer platform for larger missions. More capable, higher power, configurable for specific mission requirements. YAM-8 launched in early 2025 on SpaceX Transporter-13 as the debut of the Longbow platform (ESA GSTP co-funded). The French sovereign SAR satellite programme (DGA/CNES contract, ~€50M, Thales Alenia Space + TEKEVER as co-designers) uses Longbow, targeted launch 2029.</li>
+      <li><strong>Loft Federal</strong>: the US government and defence subsidiary. First SDA (Space Development Agency) satellites launching 2025. Cleared for classified programmes. Partners include Ball Aerospace and Microsoft Azure Orbital for SDA NExT programme.</li>
+    </ul>
+    <div class="kn">
+      <div class="kn-i"><span class="kn-v">YAM-6</span><span class="kn-l">First dedicated AI-in-space satellite</span></div>
+      <div class="kn-i"><span class="kn-v">Longbow</span><span class="kn-l">Dedicated platform, debut Mar 2025</span></div>
+      <div class="kn-i"><span class="kn-v">6 months</span><span class="kn-l">Payload delivery → launch (target)</span></div>
+      <div class="kn-i"><span class="kn-v">30/month</span><span class="kn-l">Bus production capacity (Golden CO)</span></div>
+      <div class="kn-i"><span class="kn-v">€50M</span><span class="kn-l">French SAR DGA/CNES contract</span></div>
+      <div class="kn-i"><span class="kn-v">$500M+</span><span class="kn-l">Bookings on $160M prior capital</span></div>
+    </div>
+  </div>
+
+  <!-- ═══ 02 CDE ROLE ═══ -->
+
+  <div class="section-hdr">
+    <div class="sh-num">02</div>
+    <h2>The CDE Role — What It Actually Means Day to Day</h2>
+    <div class="sh-line"></div>
+  </div>
+
+  <div class="card blue">
+    <h3>The CDE Is Not a Classic Satellite Operator</h3>
+    <p>This is the single most important thing to internalise before the panel. The CDE role sits at the intersection of four functions that traditional aerospace keeps separate: satellite operations, customer success, software engineering, and systems engineering. A classic "satellite operator" at a traditional OEM focuses on TM/TC, anomaly response, and keeping the spacecraft alive. That's roughly 25% of what a CDE does at Loft.</p>
+    <p>The other 75% is: translating customer mission objectives into executable ConOps and configurations on Cockpit; building Python automation that makes the customer's mission run reliably at scale; debugging why a customer's API integration isn't working; helping a startup that has never operated a satellite understand what they need to do to achieve their science objective. The customer-facing and software dimensions are at least as important as the spacecraft operations dimension — probably more so, since Loft's competitive advantage is abstraction and simplicity, and the CDE is the person who delivers that experience.</p>
+    <div class="callout">
+      <strong>THE ANALOGY TO USE IN THE INTERVIEW</strong>
+      Think of a CDE as a DevOps engineer crossed with a forward-deployed customer engineer, operating in a real-time space environment. The spacecraft is the production system. The customer's mission is the application running on it. Your job is to keep the production system healthy, help the customer deploy and run their application successfully, and automate everything that doesn't need a human decision.
+    </div>
+  </div>
+
+  <div class="card">
+    <h3>The Full Mission Lifecycle a CDE Owns</h3>
+    <ul>
+      <li><strong>Requirements and ConOps:</strong> Before a satellite is built, the CDE works with the customer to define what success looks like — data volumes, latency, availability, interfaces. This feeds into the Mission SLA. At Loft, mission requirements are deliberately kept simple because the platform is standardised — the customer works within Loft's envelope rather than Loft building to the customer's spec.</li>
+      <li><strong>Integration and test support:</strong> While hardware missions go through AIT in Golden, the CDE is involved in verifying that the Hub interfaces to the payload work correctly and that the Cockpit commands produce the expected payload responses. For virtual missions, the CDE helps the customer validate their app in the dev environment before deployment.</li>
+      <li><strong>Launch campaign:</strong> Loft handles launch logistics, but the CDE ensures Cockpit is configured and the customer is ready to begin commissioning immediately after deployment.</li>
+      <li><strong>Commissioning:</strong> First contact, initial health checks, payload bring-up sequence, first data collection, customer acceptance. CDE runs this with the customer present — they watch it live via Cockpit.</li>
+      <li><strong>Nominal operations:</strong> Day-to-day health monitoring, scheduled pass execution, data delivery confirmation, performance trending, customer reporting. Python automation handles as much of this as possible — the CDE builds and maintains the automation.</li>
+      <li><strong>Anomaly triage:</strong> When something goes wrong — payload not responding, data gap, unexpected telemetry — the CDE leads the investigation, coordinates with engineering, and communicates status to the customer. Speed and clarity under pressure is critical.</li>
+      <li><strong>Continuous improvement:</strong> Feedback from operations and customers becomes roadmap input. The CDE is the voice of the customer inside the product org.</li>
+    </ul>
+  </div>
+
+  <!-- ═══ 03 GAP ANALYSIS ═══ -->
+
+  <div class="section-hdr">
+    <div class="sh-num">03</div>
+    <h2>JD vs Your Profile — Gap Analysis</h2>
+    <div class="sh-line"></div>
+  </div>
+
+  <div class="card" style="overflow-x:auto;">
+    <h3>Full Requirement Mapping</h3>
+    <table class="score-table">
+      <thead><tr><th>JD Requirement</th><th>Your Position</th><th>Status</th><th>How to Frame It</th></tr></thead>
+      <tbody>
+        <tr><td>3+ years operational engineering, mission-critical systems</td><td>iDirect CSE (live SATCOM networks) + Airbus DS (HBC+ architecture lead)</td><td class="s-hi">STRONG</td><td>Lead with iDirect: real-time ops, live customer-facing, multi-site. 20+ years total. Over-qualified on experience depth.</td></tr>
+        <tr><td>Production systems in real-world mission-critical environments</td><td>iDirect network ops — live VSAT networks for paying customers across RF/DVB-S2/IP</td><td class="s-hi">STRONG</td><td>iDirect networks are exactly "production systems in mission-critical environments." Make this explicit.</td></tr>
+        <tr><td>Diagnosing failures across multi-layer systems</td><td>iDirect RF→modulation→IP fault isolation methodology</td><td class="s-hi">STRONG</td><td>This is your strongest card. Be specific about the isolation methodology: physical → link → network layer.</td></tr>
+        <tr><td>Strong Python scripting + operational automation</td><td>Active — evidenced by LEOAF Python exercises (link budget tools, Monte Carlo models, financial models)</td><td class="s-md">SOLID, BUT PREPARE EXAMPLES</td><td>LEOAF is evidence of current practice. Prepare 1-2 specific examples: "I wrote a tool that does X in Y lines." They will probe for specifics.</td></tr>
+        <tr><td>Software systems, APIs, Docker / DevOps</td><td>Weaker area — Airbus DS is heavy aerospace, not DevOps-native</td><td class="s-lo">GAP — CRITICAL</td><td>See Section 4. This is the gap most likely to be probed in depth. Prepare Docker basics, REST API concepts, and a bridging narrative from your network management tool experience.</td></tr>
+        <tr><td>Customer-facing technical communication</td><td>iDirect CSE — direct customer support, fault resolution with operators</td><td class="s-hi">STRONG</td><td>Direct match. iDirect CSE = customer-facing technical interface. Loft CDE = same dynamic, space side.</td></tr>
+        <tr><td>Cross-functional stakeholder work</td><td>Airbus DS HBC+ — cross-divisional (Airbus Commercial + Airbus DS) programme coordination</td><td class="s-hi">STRONG</td><td>HBC+ is a clear example of navigating complex stakeholder environments.</td></tr>
+        <tr><td>Satellite ops / spacecraft commissioning / AIT (nice to have)</td><td>Partial — no direct LEOP experience; payload-level commissioning at Airbus DS</td><td class="s-md">PARTIAL</td><td>Frame Airbus DS payload commissioning interface work; acknowledge LEOP is new but the adjacent skills are solid.</td></tr>
+        <tr><td>Spacecraft subsystems (G&C, power, comms) (nice to have)</td><td>SATCOM comms via iDirect; HBC+ platform integration gives systems awareness</td><td class="s-md">PARTIAL</td><td>Comms subsystem is well-covered. G&C and power: describe awareness from architecture work without overclaiming.</td></tr>
+        <tr><td>CUE configuration language (nice to have)</td><td>Not known</td><td class="s-lo">GAP</td><td>Look up CUE (cuelang.org) before the interview — 20 minutes of reading. It's a JSON/YAML superset for configuration validation. Say "I haven't used CUE specifically but I understand it's in the JSON/YAML family and I'm comfortable picking up new config tooling."</td></tr>
+        <tr><td>International / cross-cultural teams (nice to have)</td><td>US/Europe career spanning Herndon VA, Toulouse, global Airbus programmes</td><td class="s-hi">STRONG</td><td>Your entire career is cross-cultural. Mention this naturally.</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="card amber">
+    <h3>The Critical Gap — DevOps / API Fluency</h3>
+    <p>The JD's "must have" list includes Docker and software/API/DevOps environment experience. Loft's product IS software — Cockpit is a web app with an API, virtual missions run in container environments, and the CDE is expected to build operational automation in Python that integrates with these systems. This is the gap that a traditional aerospace candidate most commonly fails on at Loft.</p>
+    <p>You don't need to be a software engineer. But you need to be able to:</p>
+    <ul>
+      <li>Explain what a REST API is, make a call with requests in Python, and parse a JSON response</li>
+      <li>Understand what Docker is and why you'd containerise an application (isolation, reproducibility, deployment portability)</li>
+      <li>Talk about a CI/CD pipeline concept even if you haven't run one — the idea that code is tested and deployed automatically rather than manually</li>
+      <li>Reference specific Python automation you've built — even if the LEOAF exercises are your best examples, use them</li>
+    </ul>
+    <div class="callout red">
+      <strong>PREPARE THIS BEFORE THE INTERVIEW</strong>
+      Write a 15-line Python script that calls a dummy REST API (use httpbin.org), parses the JSON response, and prints a formatted report. Know every line. Be able to explain it fluently. This is table stakes for this role and the panel will probe it.
+    </div>
+  </div>
+
+  <!-- ═══ 04 TECH CONCEPTS ═══ -->
+
+  <div class="section-hdr">
+    <div class="sh-num">04</div>
+    <h2>Technical Concepts to Own in the Panel</h2>
+    <div class="sh-line"></div>
+  </div>
+
+  <div class="concept-grid">
+
+```
+<div class="concept green">
+  <h4>ConOps — What Loft Means by It</h4>
+  <p>Concept of Operations at Loft is not a 200-page document. It's the operational design for a mission: what does the satellite do each orbit, how does the payload get commanded, how is data delivered, what are the failure modes and their responses? For a CDE, writing ConOps means:</p>
+  <ul>
+    <li>Understanding the customer's data product requirement and working backward to pass schedules</li>
+    <li>Defining Cockpit scheduling templates — which commands execute in what order, with what timing</li>
+    <li>Documenting the nominal day-in-the-life, the commissioning sequence, and the anomaly response logic</li>
+    <li>Keeping it simple enough that the customer can execute it without Loft hand-holding every pass</li>
+  </ul>
+</div>
+
+<div class="concept">
+  <h4>REST API Basics for Cockpit Integration</h4>
+  <p>Loft's Cockpit has an API. Customers integrate it into their own tools. As CDE you help them do this and debug it when it breaks. Know:</p>
+  <ul>
+    <li>HTTP verbs: GET (retrieve), POST (create/submit), PUT/PATCH (update), DELETE</li>
+    <li>Authentication: API key in header (most common for satellite APIs), OAuth2 for more complex cases</li>
+    <li>JSON request/response format — parsing with Python's <code>json</code> module or <code>requests</code> library</li>
+    <li>Rate limiting and retries — a customer whose automation hammers the API during a pass window will get throttled</li>
+    <li>Webhooks — instead of polling for data, the API pushes a notification when data is ready. Important for latency-sensitive operations.</li>
+  </ul>
+</div>
+
+<div class="concept">
+  <h4>Docker and Containerisation — The Virtual Mission Context</h4>
+  <p>Virtual missions deploy containerised apps to Loft's Ultimate Edge runtime. You don't need to write Dockerfiles but you need to understand the model:</p>
+  <ul>
+    <li>A container packages an application and its dependencies so it runs identically everywhere — dev laptop, ground test environment, on-orbit runtime</li>
+    <li>Docker image = the blueprint. Container = the running instance.</li>
+    <li>Dockerfile defines what goes in the image: base OS, dependencies, app code, entry point</li>
+    <li>At Loft: customer writes app → packages as container → deploys to UE runtime → Loft manages the on-orbit execution environment</li>
+    <li>CDE debug role: if the app works on the ground but fails on-orbit, is it an environment difference, a resource constraint (CPU/RAM limit on the satellite), or a data interface issue?</li>
+  </ul>
+</div>
+
+<div class="concept green">
+  <h4>Python Automation for Ops — What They're Looking For</h4>
+  <p>The JD says "strong Python scripting skills." At Loft this means:</p>
+  <ul>
+    <li>Automating pass execution: scripting a sequence of Cockpit API calls for each satellite contact window</li>
+    <li>Telemetry parsing: reading spacecraft TM data, flagging out-of-limit values, sending alerts</li>
+    <li>Data pipeline: moving payload data from Cockpit's delivery endpoint to the customer's storage (S3, GCS, Azure Blob), reformatting if needed</li>
+    <li>Health monitoring: scheduled scripts that query satellite status, compute uptime metrics, generate customer-facing reports</li>
+    <li>Anomaly detection: comparing current telemetry against baseline to flag drift before it becomes a failure</li>
+  </ul>
+  <p>Prepare: one specific Python tool you've built that does any of the above, even if it's from LEOAF or a side project.</p>
+</div>
+
+<div class="concept">
+  <h4>Multi-Mission Fleet Operations</h4>
+  <p>Loft is scaling toward 30 satellites by 2027 with heterogeneous payloads. The ops challenge is different from operating a single mission:</p>
+  <ul>
+    <li>Pass scheduling across a fleet requires prioritisation — whose data gets the first downlink window?</li>
+    <li>Ground station scheduling: Loft uses a global network; a CDE may need to request additional contact time if a customer's mission requires more than the standard allocation</li>
+    <li>Anomaly isolation in a fleet: if telemetry anomaly X appears on YAM-5 and YAM-6 but not YAM-3, it might be a bus-level issue, a ground system issue, or a payload-specific issue — the fleet comparison helps isolate</li>
+    <li>Configuration management: keeping track of which software version is running on which satellite, which customers have which payload configurations active</li>
+  </ul>
+</div>
+
+<div class="concept">
+  <h4>Mission SLA and Customer Expectations</h4>
+  <p>Loft defines a Mission SLA with each customer upfront. As CDE you own delivery against it. Key dimensions:</p>
+  <ul>
+    <li>Data latency: how long from collection to delivery at the customer endpoint? (GEO relay via Viasat RTSR can reduce this to near-real-time for some missions)</li>
+    <li>Availability: what fraction of scheduled passes actually produce usable data?</li>
+    <li>Data volume: bytes/day delivered vs contracted</li>
+    <li>Command response: how quickly does the payload respond to a customer command?</li>
+  </ul>
+  <p>When SLA is not being met, the CDE must triage root cause (spacecraft, ground station, customer config, Cockpit), drive resolution, and communicate status clearly — without blaming the customer even if the issue is their config.</p>
+</div>
+
+<div class="concept green">
+  <h4>Anomaly Triage — The Loft Mental Model</h4>
+  <p>Unlike a traditional ops centre with a tier-1/tier-2/tier-3 escalation structure, Loft CDEs own the triage end-to-end. When something goes wrong:</p>
+  <ul>
+    <li><strong>Is it the spacecraft?</strong> Check bus TM — power, thermal, ADCS, comms.</li>
+    <li><strong>Is it the Hub interface?</strong> Did the command reach the payload? What did the Hub acknowledge?</li>
+    <li><strong>Is it the payload?</strong> Is payload TM nominal? Is the payload in the expected mode?</li>
+    <li><strong>Is it the ground station?</strong> Was the pass contact established? Was the uplink successful?</li>
+    <li><strong>Is it Cockpit?</strong> Did the scheduling engine execute the command? Is there a log entry?</li>
+    <li><strong>Is it the customer's config?</strong> Does the command sequence make sense? Is the payload in the right pre-condition state?</li>
+  </ul>
+  <p>Work through this tree out loud in interview scenarios. It shows systematic thinking.</p>
+</div>
+
+<div class="concept">
+  <h4>The Toulouse Office Role Specifically</h4>
+  <p>Toulouse is Loft's European engineering and ops hub. What this means for the CDE role:</p>
+  <ul>
+    <li>European customer base (EarthDaily, Helsing, Wyvern, DGA/CNES sovereign programmes, ESA-funded missions)</li>
+    <li>Close to the Airbus, Thales Alenia, and CNES ecosystem — useful for government mission interfaces</li>
+    <li>Time zone overlap with SF and Golden CO requires async-first communication — good written documentation of decisions is essential</li>
+    <li>Cross-office travel is a benefit listed — expect to spend time in Golden CO (integration and test centre) for hardware mission AIT phases</li>
+    <li>English is the working language across offices — your bilingual ability is a genuine asset, not just a box-tick</li>
+  </ul>
+</div>
+```
+
+  </div>
+
+  <!-- ═══ 05 QUESTIONS ═══ -->
+
+  <div class="section-hdr">
+    <div class="sh-num">05</div>
+    <h2>Likely Panel Questions — Round 2 Depth</h2>
+    <div class="sh-line"></div>
+  </div>
+
+  <div class="card" style="margin-bottom:14px;">
+    <h3>What Round 2 Will Feel Like</h3>
+    <p>A three-hour virtual panel at a company like Loft typically includes 3–5 panellists across different functions — an ops lead, a software or platform engineer, a CDE peer, and possibly a senior leader. Each person has a specific domain they're probing. Expect one section to be technical depth (fault isolation scenarios, Python, API), one to be behavioural (customer situations, working under pressure, owning failure), and one to be mission design (walk me through how you'd approach a new customer's mission). There will likely be a practical exercise or scenario-based section. Three hours is long enough to cover all of this plus time for your questions.</p>
+  </div>
+
+  <div class="qa-block">
+    <div class="qa-q" onclick="toggleQA(this)">
+      <span><span class="tag tg" style="display:inline-block;font-family:'Orbitron',sans-serif;font-size:9px;letter-spacing:1px;padding:2px 8px;border:1px solid;margin-right:8px;color:#1a7a1a;border-color:#1a7a1a55;background:#eafaea;">STRONG</span> Walk me through a time you diagnosed a problem in a live system where multiple layers could be the cause. How did you approach it?</span>
+      <span class="qa-arrow">▼</span>
+    </div>
+    <div class="qa-body">
+      <span class="model-label">THIS IS YOUR SHOWCASE ANSWER — SPEND THE MOST TIME HERE</span>
+      <p>Use a specific iDirect incident. Structure it using the isolation methodology they'll expect a CDE to use. Don't summarise — go into the detail because detail is what demonstrates real experience.</p>
+      <ul>
+        <li><strong>Set the scene:</strong> What was the symptom? (e.g., customer reporting throughput degradation on a remote site, no alarm in NMS). What was at stake? (SLA breach, revenue at risk, customer operations affected.)</li>
+        <li><strong>Your first check:</strong> Physical layer — is the satellite in view? Is EIRP nominal? Is C/N0 at expected level? This rules in or out the RF/space segment.</li>
+        <li><strong>Second layer:</strong> DVB-S2 — what's the ACM modulation step? Is it lower than expected for the current link conditions? This could indicate rain fade, interference, or antenna alignment.</li>
+        <li><strong>Third layer:</strong> IP/routing — is the remote's IP stack healthy? Ping responses? Routing table correct? Could be a customer-side config change.</li>
+        <li><strong>Resolution and communication:</strong> What did you find, how did you fix it, and — critically — how did you communicate status to the customer throughout? At Loft the customer communication part is as important as the technical resolution.</li>
+      </ul>
+      <p><em>Close with:</em> "At Loft, the same isolation tree applies but with the Hub and Cockpit layers added. I'd approach a CDE anomaly the same way — exhaust each layer systematically before escalating to engineering."</p>
+    </div>
+  </div>
+
+  <div class="qa-block">
+    <div class="qa-q" onclick="toggleQA(this)">
+      <span><span class="tag ta" style="display:inline-block;font-family:'Orbitron',sans-serif;font-size:9px;letter-spacing:1px;padding:2px 8px;border:1px solid;margin-right:8px;color:#996600;border-color:#99660055;background:#fffbec;">PROBE</span> Show me a Python script you've written for an operational automation use case. Walk me through it line by line.</span>
+      <span class="qa-arrow">▼</span>
+    </div>
+    <div class="qa-body">
+      <span class="model-label">PREPARE AN ACTUAL SCRIPT BEFORE THE INTERVIEW</span>
+      <p>This question may come as a live coding exercise or a walkthrough of something you've already written. Either way, have something concrete ready. The simplest credible example:</p>
+      <ul>
+        <li>A script that reads telemetry from a CSV (or JSON), checks values against limit files, flags out-of-limit parameters, and outputs a formatted report — this is exactly what a CDE would build for fleet health monitoring.</li>
+        <li>Or: a script that calls a REST API endpoint, parses the JSON response, and stores results — directly applicable to Cockpit integration work.</li>
+        <li>From LEOAF: any of the Python exercises (link budget calculator, Monte Carlo latency model, TCO model) are legitimate examples of operational tooling. Reference them explicitly: "I've been building a self-directed LEO curriculum and the tooling I've written includes a Monte Carlo latency budget tool and a satellite financial model — here's the structure…"</li>
+      </ul>
+      <p><strong>Key things to demonstrate:</strong> error handling (try/except), logging (not just print statements), configuration via config file rather than hardcoded values, and at least one class or function that's reusable. These signal engineering discipline, not just scripting.</p>
+    </div>
+  </div>
+
+  <div class="qa-block">
+    <div class="qa-q" onclick="toggleQA(this)">
+      <span><span class="tag ta" style="display:inline-block;font-family:'Orbitron',sans-serif;font-size:9px;letter-spacing:1px;padding:2px 8px;border:1px solid;margin-right:8px;color:#996600;border-color:#99660055;background:#fffbec;">PROBE</span> A customer's payload stopped responding three days after commissioning. You have telemetry access. Walk me through your triage.</span>
+      <span class="qa-arrow">▼</span>
+    </div>
+    <div class="qa-body">
+      <span class="model-label">SCENARIO — DEMONSTRATE SYSTEMATIC THINKING OUT LOUD</span>
+      <ul>
+        <li><strong>First: characterise the failure.</strong> "Stopped responding" — does that mean no TM from the payload, or TM looks healthy but the payload isn't executing commands, or the data product is absent? The answer changes the diagnosis completely.</li>
+        <li><strong>Bus-level check:</strong> Is the satellite bus healthy? Power subsystem nominal (payload voltage rail live)? ADCS in nominal pointing mode? Comms link healthy (good TM received from bus)?</li>
+        <li><strong>Hub-level check:</strong> Is the Hub acknowledging commands sent to the payload? Did the last command reach the payload interface? Any Hub fault flags?</li>
+        <li><strong>Payload TM:</strong> What does the payload's own housekeeping telemetry show? Is it in safe mode? Did it transition to a watchdog-triggered reset? Is the payload processor running (heartbeat telemetry)?</li>
+        <li><strong>Timeline correlation:</strong> What happened three days ago? Did Cockpit schedule any new commands? Any radiation event (SPE) in the space weather data? Any other payload on the same satellite show anomalous behaviour?</li>
+        <li><strong>Recovery options:</strong> Power cycle the payload via Hub. Send a reset command. If safe mode: determine what triggered it, clear the fault, and re-commission.</li>
+        <li><strong>Customer communication:</strong> What do you tell the customer and when? "We are aware of an anomaly, initial triage underway, estimated update in X hours" — immediately. Then structured status updates with facts, not speculation.</li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="qa-block">
+    <div class="qa-q" onclick="toggleQA(this)">
+      <span><span class="tag tg" style="display:inline-block;font-family:'Orbitron',sans-serif;font-size:9px;letter-spacing:1px;padding:2px 8px;border:1px solid;margin-right:8px;color:#1a7a1a;border-color:#1a7a1a55;background:#eafaea;">STRONG</span> Tell me about a time you had to manage a customer's expectations when something wasn't going to plan. How did you handle it?</span>
+      <span class="qa-arrow">▼</span>
+    </div>
+    <div class="qa-body">
+      <span class="model-label">DRAW FROM IDIRECT CSE OR AIRBUS DS HBC+</span>
+      <p>This tests whether you can be honest with a customer under pressure without losing their confidence. Key elements:</p>
+      <ul>
+        <li><strong>Be direct about what was wrong</strong> — don't bury the bad news. Customers lose trust when they sense they're being managed rather than told the truth.</li>
+        <li><strong>Own what's in your control</strong> — if it was a Loft/your-company issue, say so. If it was outside your control (launch vehicle issue, upstream vendor), explain that clearly but don't pass blame.</li>
+        <li><strong>Give a concrete recovery plan</strong> — not "we're working on it" but "here's specifically what we're doing, here's what we'll know by when, here's the earliest possible resolution."</li>
+        <li><strong>Follow through exactly as promised</strong> — if you said you'd update them in 4 hours, update them in 4 hours even if the answer is "no change."</li>
+      </ul>
+      <p>Have a specific story ready. From iDirect: a customer whose link was degraded for longer than acceptable. From HBC+: a delivery date slip or integration issue in the HBC+ programme. Either works.</p>
+    </div>
+  </div>
+
+  <div class="qa-block">
+    <div class="qa-q" onclick="toggleQA(this)">
+      <span><span class="tag tr" style="display:inline-block;font-family:'Orbitron',sans-serif;font-size:9px;letter-spacing:1px;padding:2px 8px;border:1px solid;margin-right:8px;color:#cc0033;border-color:#cc003355;background:#fdecea;">HARD</span> A new customer wants to deploy a virtual mission on YAM-6 to detect maritime vessel activity using the onboard SDR. How would you help them design this mission?</span>
+      <span class="qa-arrow">▼</span>
+    </div>
+    <div class="qa-body">
+      <span class="model-label">MISSION DESIGN — SHOW SYSTEMS THINKING AND LOFT PRODUCT KNOWLEDGE</span>
+      <p>This tests whether you understand Loft's product stack and can translate a customer objective into an executable mission design. Walk through:</p>
+      <ul>
+        <li><strong>Understand the requirement first:</strong> What vessels? AIS (Automatic Identification System, VHF 161–162 MHz) or dark vessels (no AIS, detect by RF emissions or other signatures)? What geographic area? What revisit rate needed? What output format (raw I/Q, decoded AIS messages, processed vessel detections)?</li>
+        <li><strong>Platform match:</strong> YAM-6 has an SDR payload. AIS detection is a well-proven SDR use case from LEO — standard maritime domain awareness application. The onboard GPU can run signal processing and detection algorithms. This is a natural fit for a virtual mission: deploy an AIS decoder or RF fingerprinting app to the Ultimate Edge runtime.</li>
+        <li><strong>Orbit and coverage:</strong> YAM-6 is in a mid-inclination LEO — it passes over a given point roughly every 90 minutes. For broad ocean coverage, revisit is adequate for AIS traffic monitoring. For near-real-time vessel tracking, the customer needs to understand the coverage cadence and plan their analytics pipeline accordingly.</li>
+        <li><strong>Data pipeline:</strong> Processed detections (JSON records per vessel) are lower volume than raw I/Q — strongly prefer edge-processing the detections on-orbit and downlinking just the results. This reduces data volume and latency to customer.</li>
+        <li><strong>ConOps:</strong> SDR activated on schedule during each pass over the area of interest. App processes I/Q, outputs detections, Cockpit delivers JSON to customer endpoint. Customer needs to integrate this endpoint into their maritime analytics platform.</li>
+        <li><strong>SLA discussion:</strong> What availability (% of scheduled passes with successful data) is acceptable? What latency (time from collection to delivery) does their application require?</li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="qa-block">
+    <div class="qa-q" onclick="toggleQA(this)">
+      <span><span class="tag ta" style="display:inline-block;font-family:'Orbitron',sans-serif;font-size:9px;letter-spacing:1px;padding:2px 8px;border:1px solid;margin-right:8px;color:#996600;border-color:#99660055;background:#fffbec;">PROBE</span> How do you think about translating operational experience into product improvements? Give an example.</span>
+      <span class="qa-arrow">▼</span>
+    </div>
+    <div class="qa-body">
+      <span class="model-label">THIS IS A CULTURAL FIT QUESTION — LOFT WANTS A PRODUCT-MINDED OPS ENGINEER</span>
+      <p>The JD explicitly says "translate operational experience and customer feedback into concrete product improvements and roadmap input." This is a differentiator from a classic ops engineer who just keeps the lights on.</p>
+      <ul>
+        <li><strong>The underlying question:</strong> Are you the kind of person who sees a workaround and writes a ticket, or someone who just builds the workaround and moves on? At Loft, the expectation is the former.</li>
+        <li><strong>From iDirect:</strong> A recurring fault isolation pattern that required manual steps every time → you scripted it and then proposed it as a feature request to the product team. Or: a customer-facing report that was generated manually every week → you automated it and showed the product team how to embed it in the NMS.</li>
+        <li><strong>From Airbus DS:</strong> A process gap in the HBC+ programme that caused repeated coordination delays → you documented it, proposed a process change, and it was adopted.</li>
+        <li><strong>Frame the Loft version:</strong> "My expectation would be that every recurring manual task in the CDE workflow is either automated or escalated as a product gap. The CDE is in the best position to know what Cockpit is missing because they use it every day for real customer missions — that feedback loop is valuable and I'd want to close it actively."</li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="qa-block">
+    <div class="qa-q" onclick="toggleQA(this)">
+      <span><span class="tag tg" style="display:inline-block;font-family:'Orbitron',sans-serif;font-size:9px;letter-spacing:1px;padding:2px 8px;border:1px solid;margin-right:8px;color:#1a7a1a;border-color:#1a7a1a55;background:#eafaea;">STRONG</span> Why Loft, and why this role specifically?</span>
+      <span class="qa-arrow">▼</span>
+    </div>
+    <div class="qa-body">
+      <span class="model-label">DO NOT GIVE A GENERIC ANSWER — USE SPECIFIC LOFT KNOWLEDGE</span>
+      <p>This is where doing your research pays off. A panel will know immediately if you've actually studied the company versus giving a polished but generic "I want to work in NewSpace" answer.</p>
+      <ul>
+        <li><strong>The product model resonates:</strong> "The Hub/Cockpit abstraction model is the right bet for making space accessible at scale. The analogy to cloud infrastructure is not just a marketing line — it's actually how the product works, and it solves the right problem. The traditional OEM model delivers bespoke, slowly. Loft delivers standardised, fast."</li>
+        <li><strong>The CDE role specifically:</strong> "What attracts me is that the CDE role doesn't separate the operational from the engineering from the customer. At Airbus DS I'm in a role where those functions are distributed across teams and a lot of value is lost in the handoffs. The CDE owns the full lifecycle, and that's how I actually prefer to work."</li>
+        <li><strong>The programme trajectory:</strong> "The Series C in March 2025, the SDA launches, the French sovereign SAR contract — Loft is at the inflection point between proving the model and scaling it. That's the most interesting place to join. The hard problems of fleet operations at 30+ satellites are still being figured out."</li>
+        <li><strong>Toulouse specifically:</strong> "The Toulouse office sits at the intersection of Loft's European growth and the French sovereign space investment wave. The DGA/CNES SAR contract is exactly the kind of programme where my background at Airbus DS adds direct value."</li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="qa-block">
+    <div class="qa-q" onclick="toggleQA(this)">
+      <span><span class="tag ta" style="display:inline-block;font-family:'Orbitron',sans-serif;font-size:9px;letter-spacing:1px;padding:2px 8px;border:1px solid;margin-right:8px;color:#996600;border-color:#99660055;background:#fffbec;">PROBE</span> What questions do you have for us?</span>
+      <span class="qa-arrow">▼</span>
+    </div>
+    <div class="qa-body">
+      <span class="model-label">IN A THREE-HOUR PANEL YOU'LL HAVE MULTIPLE OPPORTUNITIES — PREPARE 8-10 QUESTIONS</span>
+      <p>Ask different questions to different panellists based on their role. Some that demonstrate genuine intelligence about Loft:</p>
+      <ul>
+        <li><em>To the ops lead:</em> "YAM-6 introduced virtual missions alongside physical payloads on the same bus. How has that changed the CDE workflow operationally — are there scheduling or priority conflicts between the physical and virtual mission tenants?"</li>
+        <li><em>To the engineering lead:</em> "The Cockpit API — how stable is it currently? When a CDE builds automation on top of it, what's the breaking-change policy, and how far ahead are API deprecations communicated?"</li>
+        <li><em>To a CDE peer:</em> "What does a typical week look like for a CDE in Toulouse? How much time is customer-facing vs heads-down in ops vs building tooling?"</li>
+        <li><em>To the senior leader:</em> "With the fleet scaling toward 30 satellites by 2027, how is the CDE team expected to scale? Does the automation tooling stay ahead of the fleet growth, or is there a headcount scaling plan alongside it?"</li>
+        <li><em>On the role:</em> "What does success look like for a CDE in the first six months? What would distinguish someone who hit the ground running from someone who took longer to be effective?"</li>
+        <li><em>On the French sovereign angle:</em> "The DGA/CNES SAR contract is a significant programme for the Toulouse office. Will CDEs in Toulouse be involved in that mission, or is it managed separately through Loft Federal?"</li>
+      </ul>
+    </div>
+  </div>
+
+  <!-- ═══ 06 SCENARIOS ═══ -->
+
+  <div class="section-hdr">
+    <div class="sh-num">06</div>
+    <h2>Technical Scenario Exercises — Prepare for Live Problem-Solving</h2>
+    <div class="sh-line"></div>
+  </div>
+
+  <div class="card blue" style="margin-bottom:14px;">
+    <h3>What to Expect</h3>
+    <p>A three-hour panel often includes a live or take-home technical exercise. At Loft this typically means either: a Python coding task (write a script that does X), a system design question (design the operational architecture for a new customer mission), or an anomaly scenario (here's a telemetry dump, what's wrong). Think out loud — they're evaluating your reasoning process, not just whether you get the right answer.</p>
+  </div>
+
+  <div class="scenario">
+    <h4>SCENARIO A — TELEMETRY ANALYSIS</h4>
+    <p class="s-setup">You receive a daily telemetry summary showing that a physical payload's data volume delivered to the customer is 40% below the contracted SLA for the past three days. The payload TM shows it is in nominal mode and executing commands. What do you do?</p>
+    <p class="s-what">WHAT THEY'RE TESTING: structured triage, SLA accountability, customer communication</p>
+    <div class="s-answer">
+      <ul>
+        <li>Step 1 — Characterise the gap: 40% shortfall over 3 days. Is it every pass, or specific passes? Does it correlate with specific ground stations, specific times of day, or specific orbit geometry?</li>
+        <li>Step 2 — Ground station check: did all scheduled passes make contact? How many passes were executed vs scheduled? A pass-success rate drop would explain the volume shortfall without any spacecraft issue.</li>
+        <li>Step 3 — Pass-level data: for the passes that did execute, is data volume per pass at expected levels? If yes, it's a pass count problem. If no, it's a data rate problem.</li>
+        <li>Step 4 — If data rate per pass is down: is the downlink modulation nominal? Is the link being used efficiently (e.g., is the payload in the right data mode)? Did a recent Cockpit configuration change affect the scheduling window duration?</li>
+        <li>Step 5 — Customer notification: regardless of root cause, notify the customer now. "We've identified a data volume shortfall over the past 3 days and are actively investigating. We will provide a root cause update within [X hours]." Do not wait until you have the answer — the customer needs to know you're on it.</li>
+        <li>Step 6 — Recovery plan: if it's fixable (add pass windows, correct configuration), commit to a specific recovery date. If it's a structural issue (reduced pass availability due to ground station maintenance), renegotiate SLA for the affected period and provide a credit if applicable.</li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="scenario">
+    <h4>SCENARIO B — PYTHON CODING (LIKELY LIVE OR TAKE-HOME)</h4>
+    <p class="s-setup">Write a Python script that reads a JSON file containing satellite telemetry samples (timestamp, parameter name, value, unit, limit_low, limit_high), checks each value against its limits, and outputs a summary report of out-of-limit conditions grouped by parameter.</p>
+    <p class="s-what">WHAT THEY'RE TESTING: Python fluency, data handling, clean readable code, error handling</p>
+    <div class="s-answer">
+      <ul>
+        <li>Read JSON with <code>json.load()</code>, handle FileNotFoundError and JSONDecodeError</li>
+        <li>Iterate over samples, compare value to limit_low and limit_high</li>
+        <li>Group violations by parameter name using a defaultdict(list)</li>
+        <li>Output: for each parameter with violations, print count, min/max observed values, and the timestamps of violations</li>
+        <li>Make the limit file path configurable (argparse or config file), not hardcoded</li>
+        <li>Add a summary line: "X of Y parameters have limit violations" — gives the ops shift a quick health indicator</li>
+        <li>Optional enhancement: severity classification (warning = &lt;10% outside limits, critical = &gt;10%) to enable alerting logic</li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="scenario">
+    <h4>SCENARIO C — NEW CUSTOMER ONBOARDING DESIGN</h4>
+    <p class="s-setup">A startup wants to deploy an Earth observation payload on a Loft YAM rideshare. They've never operated a satellite before. It's their first mission. Walk through the end-to-end mission design process as their CDE.</p>
+    <p class="s-what">WHAT THEY'RE TESTING: lifecycle ownership, customer education, ConOps thinking, Cockpit product knowledge</p>
+    <div class="s-answer">
+      <ul>
+        <li>Mission requirements workshop: what data product, what ground resolution, what geographic area, what revisit rate, what data latency is acceptable, what's the delivery endpoint (S3 bucket, API, SFTP)?</li>
+        <li>Platform feasibility check: does the payload fit the Hub interface spec? Power draw within budget? Mass/volume accommodation? If not — negotiate payload scope or recommend Longbow dedicated mission.</li>
+        <li>ConOps design: image collection schedule per orbit, downlink priority, on-orbit storage management (payload buffer fill rate vs downlink rate), ground processing pipeline.</li>
+        <li>Cockpit configuration: set up scheduling templates, configure data delivery endpoint, set alert thresholds for payload health parameters.</li>
+        <li>Customer training: walk them through the Cockpit UI and API. Help them build their first automated tasking workflow. Make sure they can monitor their payload independently before commissioning is complete.</li>
+        <li>Commissioning plan: first contact checklist, payload power-on sequence, first image collection, image quality assessment, customer acceptance sign-off.</li>
+        <li>Ongoing: monthly performance report against SLA, any anomaly within 2 hours notification. Quarterly review to identify optimisation opportunities.</li>
+      </ul>
+    </div>
+  </div>
+
+  <!-- ═══ 07 CHECKLIST ═══ -->
+
+  <div class="section-hdr">
+    <div class="sh-num">07</div>
+    <h2>Day-Before Checklist</h2>
+    <div class="sh-line"></div>
+  </div>
+
+  <div class="gap-grid">
+    <div class="gap-item strong">
+      <h4>✓ KNOW COLD</h4>
+      <p>Hub + Cockpit + Ultimate Edge — explain each in 30 seconds. YAM series vs Longbow. Physical vs virtual vs on-demand missions. Series C €170M March 2025. CEO Pierre-Damien Vaujour. 30 satellites by 2027. SatDevOps culture.</p>
+    </div>
+    <div class="gap-item strong">
+      <h4>✓ HAVE READY</h4>
+      <p>One iDirect live fault isolation story with layers. One customer expectations management story. One Python script you can walk through line by line. Your ConOps design instinct (requirements → schedule → command → data delivery). Your answer to "why Loft" with specific programme references.</p>
+    </div>
+    <div class="gap-item gap">
+      <h4>⚠ PREPARE TODAY</h4>
+      <p>Write the telemetry limit-checker script (Scenario B). Read cuelang.org for 20 minutes. Review REST API basics with Python requests library. Skim Loft's technology page and virtual missions page one more time. Prepare 8 questions for different panel members.</p>
+    </div>
+    <div class="gap-item gap">
+      <h4>⚠ BRIDGE NARRATIVE</h4>
+      <p>Docker: "I haven't built Dockerfiles but I understand the containerisation model and have deployed containerised apps in development environments. Happy to ramp on this specifically." DevOps/CI-CD: same. CUE language: "New to me but it's in the JSON/YAML family and I pick up config tooling quickly."</p>
+    </div>
+    <div class="gap-item strong">
+      <h4>✓ LEAD WITH</h4>
+      <p>iDirect real-time ops depth + customer-facing experience. Multi-layer fault isolation methodology. Python automation — LEOAF as live evidence. Cross-functional interface work (HBC+ at Airbus DS). European / French market understanding. LEOAF self-directed learning as signal of initiative and technical curiosity.</p>
+    </div>
+    <div class="gap-item risk">
+      <h4>✗ AVOID</h4>
+      <p>Generic "I want to work in NewSpace" motivation answers. Claiming Docker or DevOps depth you don't have — they will probe it. Describing the CDE role as primarily spacecraft operations. Under-selling the Python/automation side. Forgetting that this is also a customer success role — technical alone isn't enough.</p>
+    </div>
+  </div>
+
+  <div class="card" style="margin-top:20px;border-left-color:#39ff14;">
+    <h3>The Three Hours — How to Pace Yourself</h3>
+    <p>Three hours is a long time. Energy management matters. A few practical notes:</p>
+    <ul>
+      <li><strong>The first 15 minutes set the tone.</strong> Have your "who I am in 90 seconds" ready — concise, specific, confident. Don't ramble through your career chronologically.</li>
+      <li><strong>Think out loud in technical sections.</strong> If you're given a scenario or a live coding problem, narrate your reasoning. A wrong answer with good reasoning is better than a correct answer with no explanation.</li>
+      <li><strong>Ask clarifying questions before diving in.</strong> On every scenario question, spend 30–60 seconds understanding what they're actually asking. This signals professional discipline and avoids wasted effort.</li>
+      <li><strong>Keep notes during the panel.</strong> If a panellist mentions something — a programme name, a technical detail about Cockpit — write it down and reference it in your questions. Shows you're actually listening, not just waiting to talk.</li>
+      <li><strong>It's okay to say "I don't know, but here's how I'd find out."</strong> At Loft, intellectual honesty is valued. An ops engineer who admits uncertainty and describes their approach to resolving it is more trustworthy than one who confabulates.</li>
+    </ul>
+    <div class="callout">
+      <strong>FINAL NOTE</strong>
+      You passed Round 1. They already know you're credible. Round 2 is about whether you think like a Loft CDE — owning the mission end-to-end, comfortable at the intersection of ops and software and customers, building automation rather than just running checklists. That's a mindset shift from traditional aerospace ops, and the panel will be probing for evidence that you've already made it. The LEOAF project — building operational tooling independently, writing Python exercises for real satellite problems — is actually strong evidence of exactly that mindset. Use it.
+    </div>
+  </div>
+
+</div>
+
+<footer>LEOAF × INTERVIEW PREP · LOFT ORBITAL CDE · ROUND 2 · TOULOUSE · NOT PART OF CURRICULUM</footer>
+<button class="btt" id="btt">↑</button>
+
+<script>
+const canvas = document.getElementById('starsCanvas');
+const ctx    = canvas.getContext('2d');
+let stars    = [];
+function initStars(){
+  stars=[];
+  for(let i=0;i<160;i++)
+    stars.push({x:Math.random()*canvas.width,y:Math.random()*canvas.height,
+      size:Math.random()*1.3+0.3,speed:Math.random()*0.12+0.03,hue:Math.random()*360});
+}
+function resize(){canvas.width=window.innerWidth;canvas.height=window.innerHeight;}
+resize();initStars();
+window.addEventListener('resize',resize);
+function anim(){
+  ctx.clearRect(0,0,canvas.width,canvas.height);
+  stars.forEach(s=>{
+    s.y-=s.speed;
+    if(s.y<0){s.y=canvas.height;s.x=Math.random()*canvas.width;}
+    ctx.beginPath();ctx.fillStyle=`hsl(${s.hue},60%,80%)`;
+    ctx.arc(s.x,s.y,s.size,0,Math.PI*2);ctx.fill();
+  });
+  requestAnimationFrame(anim);
+}
+anim();
+
+function toggleQA(el){
+  const body  = el.nextElementSibling;
+  const arrow = el.querySelector('.qa-arrow');
+  const isOpen = body.classList.contains('open');
+  document.querySelectorAll('.qa-body').forEach(b=>b.classList.remove('open'));
+  document.querySelectorAll('.qa-arrow').forEach(a=>a.classList.remove('qa-arrow-open'));
+  if(!isOpen){ body.classList.add('open'); arrow.classList.add('qa-arrow-open'); }
+}
+
+const btt = document.getElementById('btt');
+window.addEventListener('scroll',()=>btt.classList.toggle('vis',window.scrollY>400));
+btt.addEventListener('click',()=>window.scrollTo({top:0,behavior:'smooth'}));
+</script>
+
+</body>
+</html>
