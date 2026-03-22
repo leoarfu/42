@@ -1,0 +1,698 @@
+<!DOCTYPE html>
+
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+<title>UNIVITY — Mission Operations Engineer · Interview Prep</title>
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;600;800&family=Share+Tech+Mono&family=Libre+Baskerville:ital,wght@0,400;0,700;1,400&display=swap" rel="stylesheet">
+<style>
+*{box-sizing:border-box;margin:0;padding:0;}
+html{height:100%;-webkit-text-size-adjust:100%;overflow-x:hidden;}
+body{font-family:'Share Tech Mono',monospace;background:#000;color:#fff;overflow-x:hidden;min-height:100vh;}
+#starsCanvas{position:fixed;inset:0;z-index:-1;}
+
+/* ── HEADER ── */
+header{
+background:#000;border-bottom:1px solid #00d9ff33;
+position:sticky;top:0;z-index:100;
+padding:1rem clamp(1.5rem,5vw,4rem);
+display:flex;justify-content:space-between;align-items:center;
+box-shadow:0 4px 24px #000c;
+}
+.logo{font-family:‘Orbitron’,sans-serif;font-weight:800;font-size:clamp(14px,1.8vw,20px);letter-spacing:3px;color:#fff;text-decoration:none;}
+.logo em{color:#00d9ff;font-style:normal;}
+.logo-sub{font-size:9px;color:#ffffff44;letter-spacing:2px;display:block;margin-top:2px;}
+.role-tag{font-family:‘Orbitron’,sans-serif;font-size:10px;color:#ffaa00;letter-spacing:2px;border:1px solid #ffaa0044;padding:4px 12px;}
+
+/* ── HERO ── */
+.hero{
+padding:clamp(40px,6vw,80px) clamp(1.5rem,5vw,4rem) 30px;
+max-width:960px;margin:0 auto;position:relative;z-index:1;
+}
+.hero-eyebrow{font-family:‘Orbitron’,sans-serif;font-size:10px;color:#00d9ff;letter-spacing:3px;margin-bottom:12px;}
+.hero h1{font-family:‘Orbitron’,sans-serif;font-size:clamp(22px,4vw,40px);font-weight:800;line-height:1.15;margin-bottom:16px;}
+.hero h1 span{color:#00d9ff;}
+.hero p{font-size:13px;line-height:1.85;opacity:.7;max-width:700px;margin-bottom:28px;}
+.hero-pills{display:flex;flex-wrap:wrap;gap:8px;}
+.pill{font-family:‘Orbitron’,sans-serif;font-size:9px;padding:4px 12px;letter-spacing:1.5px;border:1px solid;}
+.pill-blue{color:#00d9ff;border-color:#00d9ff44;}
+.pill-green{color:#39ff14;border-color:#39ff1444;}
+.pill-amber{color:#ffaa00;border-color:#ffaa0044;}
+.pill-red{color:#ff004f;border-color:#ff004f44;}
+
+/* ── WRAP ── */
+.wrap{max-width:960px;margin:0 auto;padding:0 clamp(1.5rem,5vw,4rem) 100px;position:relative;z-index:1;}
+
+/* ── SECTION HEADER ── */
+.section-hdr{
+display:flex;align-items:center;gap:14px;
+margin:52px 0 24px;
+}
+.section-hdr .sh-num{font-family:‘Orbitron’,sans-serif;font-size:10px;color:#ff004f;opacity:.7;}
+.section-hdr h2{font-family:‘Orbitron’,sans-serif;font-size:13px;color:#fff;letter-spacing:2px;text-transform:uppercase;}
+.section-hdr .sh-line{flex:1;height:1px;background:#ffffff11;}
+
+/* ── LIGHT CARDS ── */
+.card{
+background:#f5f2ec;color:#1a1a1a;
+padding:30px clamp(22px,3vw,40px);
+margin-bottom:20px;
+border-left:4px solid #00d9ff;
+}
+.card h3{font-family:‘Orbitron’,sans-serif;font-size:11px;color:#003d66;letter-spacing:1.5px;text-transform:uppercase;margin-bottom:14px;}
+.card p,.card li{font-family:‘Libre Baskerville’,Georgia,serif;font-size:14px;line-height:1.85;color:#1a1a1a;margin-bottom:10px;}
+.card ul{padding-left:0;margin-bottom:0;}
+.card li{padding-left:18px;position:relative;margin-bottom:7px;}
+.card li::before{content:’›’;position:absolute;left:0;color:#0077aa;}
+.card .tag{display:inline-block;font-family:‘Orbitron’,sans-serif;font-size:9px;letter-spacing:1px;padding:2px 8px;border:1px solid;margin-right:6px;margin-bottom:6px;vertical-align:middle;}
+.card .tag-green{color:#1a7a1a;border-color:#1a7a1a44;background:#eafaea;}
+.card .tag-amber{color:#996600;border-color:#99660044;background:#fffbec;}
+.card .tag-red{color:#cc0033;border-color:#cc003344;background:#fdecea;}
+.card .tag-blue{color:#003d66;border-color:#003d6644;background:#e8f4fb;}
+.card.border-green{border-left-color:#1a7a1a;}
+.card.border-amber{border-left-color:#996600;}
+.card.border-red{border-left-color:#cc0033;}
+
+/* ── GAP RADAR ── */
+.gap-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:12px;margin-bottom:0;}
+.gap-item{background:#fff;border:1px solid #d0d0d0;padding:16px;}
+.gap-item h4{font-family:‘Orbitron’,sans-serif;font-size:10px;letter-spacing:1px;margin-bottom:10px;}
+.gap-item p{font-family:‘Libre Baskerville’,Georgia,serif;font-size:12px;color:#333;line-height:1.7;margin:0;}
+.gap-item.strong h4{color:#1a7a1a;}
+.gap-item.gap h4{color:#996600;}
+.gap-item.risk h4{color:#cc0033;}
+
+/* ── Q&A BLOCK ── */
+.qa-block{margin-bottom:16px;border:1px solid #ffffff0a;}
+.qa-q{
+background:#111;padding:14px 20px;
+font-family:‘Orbitron’,sans-serif;font-size:11px;color:#00d9ff;
+letter-spacing:1px;cursor:pointer;
+display:flex;justify-content:space-between;align-items:center;
+user-select:none;
+}
+.qa-q:hover{background:#1a1a1a;}
+.qa-arrow{transition:.2s;font-size:14px;opacity:.6;}
+.qa-body{
+background:#f5f2ec;color:#1a1a1a;
+padding:0 24px;max-height:0;overflow:hidden;
+transition:max-height .35s ease,padding .2s ease;
+}
+.qa-body.open{max-height:800px;padding:22px 24px;}
+.qa-body p,.qa-body li{font-family:‘Libre Baskerville’,Georgia,serif;font-size:14px;line-height:1.85;color:#1a1a1a;margin-bottom:10px;}
+.qa-body ul{padding-left:0;}
+.qa-body li{padding-left:18px;position:relative;margin-bottom:6px;}
+.qa-body li::before{content:’›’;position:absolute;left:0;color:#0077aa;}
+.qa-body .model-label{font-family:‘Orbitron’,sans-serif;font-size:9px;color:#996600;letter-spacing:1.5px;display:block;margin-bottom:8px;}
+.qa-arrow-open{transform:rotate(180deg);}
+
+/* ── TECH CONCEPT BLOCKS ── */
+.concept-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:14px;}
+.concept{background:#f5f2ec;border-left:4px solid #003d66;padding:20px 22px;}
+.concept h4{font-family:‘Orbitron’,sans-serif;font-size:10px;color:#003d66;letter-spacing:1.5px;margin-bottom:10px;}
+.concept p,.concept li{font-family:‘Libre Baskerville’,Georgia,serif;font-size:13px;color:#1a1a1a;line-height:1.75;margin-bottom:7px;}
+.concept ul{padding-left:0;}
+.concept li{padding-left:16px;position:relative;}
+.concept li::before{content:’·’;position:absolute;left:0;color:#003d66;}
+
+/* ── TIMELINE ── */
+.timeline{margin:4px 0;}
+.tl{display:flex;gap:14px;margin-bottom:14px;}
+.tl-yr{font-family:‘Orbitron’,sans-serif;font-size:10px;color:#cc0033;min-width:60px;padding-top:2px;}
+.tl-bd{flex:1;border-left:1px solid #cc003344;padding-left:14px;padding-bottom:6px;}
+.tl-bd strong{font-family:‘Orbitron’,sans-serif;font-size:10px;color:#333;letter-spacing:1px;display:block;margin-bottom:4px;}
+.tl-bd p{font-family:‘Libre Baskerville’,Georgia,serif;font-size:13px;color:#444;line-height:1.65;margin:0;}
+
+/* ── CALLOUT ── */
+.callout{border-left:3px solid #996600;background:#fef9ec;color:#333;padding:14px 18px;margin:18px 0;font-size:13px;line-height:1.8;}
+.callout strong{font-family:‘Orbitron’,sans-serif;font-size:9px;letter-spacing:1.5px;display:block;margin-bottom:6px;color:#996600;}
+.callout.blue{border-left-color:#003d66;background:#e8f4fb;}
+.callout.blue strong{color:#003d66;}
+.callout.green{border-left-color:#1a7a1a;background:#eafaea;}
+.callout.green strong{color:#1a7a1a;}
+
+/* ── KEY NUMBERS ── */
+.kn{display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:10px;margin:18px 0;}
+.kn-i{background:#fff;border:1px solid #d0d0d0;padding:14px 10px;text-align:center;}
+.kn-v{font-family:‘Orbitron’,sans-serif;font-size:clamp(15px,2vw,22px);font-weight:800;color:#003d66;display:block;}
+.kn-l{font-size:10px;color:#555;letter-spacing:1px;margin-top:4px;display:block;line-height:1.4;}
+
+/* ── SCORE TABLE ── */
+.score-table{width:100%;border-collapse:collapse;font-size:13px;margin:14px 0;}
+.score-table th{font-family:‘Orbitron’,sans-serif;font-size:9px;letter-spacing:1px;color:#003d66;padding:9px 12px;border-bottom:2px solid #00d9ff66;text-align:left;background:#e8f4fb;}
+.score-table td{padding:9px 12px;border-bottom:1px solid #ddd;color:#1a1a1a;font-family:‘Libre Baskerville’,Georgia,serif;vertical-align:top;}
+.score-table tr:hover td{background:#f5f5f5;}
+.s-hi{color:#1a7a1a;font-weight:bold;}
+.s-md{color:#996600;}
+.s-lo{color:#cc0033;}
+
+/* ── BACK TO TOP ── */
+.btt{
+position:fixed;bottom:28px;right:28px;z-index:200;
+width:44px;height:44px;background:#000;
+border:1px solid #00d9ff55;color:#00d9ff;
+font-size:20px;cursor:pointer;
+display:flex;align-items:center;justify-content:center;
+opacity:0;pointer-events:none;transition:opacity .3s;
+}
+.btt.vis{opacity:1;pointer-events:auto;}
+.btt:hover{background:#001a2c;}
+
+footer{text-align:center;padding:30px;opacity:.3;font-size:11px;position:relative;z-index:1;letter-spacing:1px;}
+
+@media(max-width:600px){
+.kn{grid-template-columns:1fr 1fr;}
+.concept-grid{grid-template-columns:1fr;}
+.gap-grid{grid-template-columns:1fr;}
+}
+</style>
+
+</head>
+<body>
+<canvas id="starsCanvas"></canvas>
+
+<header>
+  <div>
+    <div class="logo">LEO<em>AF</em> <span style="color:#ffaa00;font-size:10px;vertical-align:middle;letter-spacing:2px;">× INTERVIEW PREP</span></div>
+    <div class="logo-sub">TEMPORARY SESSION FILE — NOT PART OF CURRICULUM</div>
+  </div>
+  <div class="role-tag">CDI2025021</div>
+</header>
+
+<div class="hero">
+  <div class="hero-eyebrow">COMPANY INTELLIGENCE & INTERVIEW READINESS</div>
+  <h1>UNIVITY — <span>Mission Operations</span><br>Engineer</h1>
+  <p>Everything you need to walk into this interview knowing the company, owning the technical territory, and landing the questions. This page covers UNIVITY's actual programme status as of late 2025, a gap analysis of the JD against your profile, the technical concepts you need to articulate, and model answers to the most likely questions.</p>
+  <div class="hero-pills">
+    <div class="pill pill-blue">TOULOUSE · CDI</div>
+    <div class="pill pill-blue">5G NTN · VLEO</div>
+    <div class="pill pill-blue">GROUND SEGMENT</div>
+    <div class="pill pill-green">JOB REF CDI2025021</div>
+    <div class="pill pill-amber">ASAP START</div>
+  </div>
+</div>
+
+<div class="wrap">
+
+  <!-- ══════════════════ 1 — WHO IS UNIVITY ══════════════════ -->
+
+  <div class="section-hdr">
+    <div class="sh-num">01</div>
+    <h2>Who Is UNIVITY — What You Must Know Cold</h2>
+    <div class="sh-line"></div>
+  </div>
+
+  <div class="card">
+    <h3>Company Fast Facts</h3>
+    <div class="kn">
+      <div class="kn-i"><span class="kn-v">2022</span><span class="kn-l">Founded (formerly Constellation Technologies & Operations)</span></div>
+      <div class="kn-i"><span class="kn-v">Toulouse + Paris</span><span class="kn-l">Offices</span></div>
+      <div class="kn-i"><span class="kn-v">€9.3M</span><span class="kn-l">Raised (seed, 2025)</span></div>
+      <div class="kn-i"><span class="kn-v">€44M</span><span class="kn-l">Total programme budget (CNES €31M + industry)</span></div>
+      <div class="kn-i"><span class="kn-v">June 2025</span><span class="kn-l">First 5G mmWave regenerative payload launched</span></div>
+      <div class="kn-i"><span class="kn-v">2027</span><span class="kn-l">Two prototype VLEO satellites target</span></div>
+    </div>
+  </div>
+
+  <div class="card">
+    <h3>The Mission in One Paragraph</h3>
+    <p>UNIVITY is building a VLEO (Very Low Earth Orbit) constellation — branded <strong>uniSky</strong> — that uses 5G NR (New Radio) mmWave spectrum to let terrestrial telecom operators extend their 5G networks from space. The proposition is B2B: UNIVITY doesn't sell to end users, it sells capacity to MNOs (Mobile Network Operators) who use it to extend 5G coverage where terrestrial cells don't exist. The in-orbit demonstration programme is called <strong>uniShape</strong>, backed by CNES under France 2030. The strategic partners are <strong>TDF</strong> (operating three gateway stations — two in metropolitan France, one overseas) and <strong>ESA</strong>. Charles Delfieux is President; Véronique Bonnet is Programme Director.</p>
+    <div class="callout blue">
+      <strong>WHY THIS MATTERS IN THE INTERVIEW</strong>
+      Every answer you give should reference this B2B model. You're not operating a consumer service — you're operating infrastructure that feeds into MNO networks. Think in terms of SLAs to operators, not end-user experience. The CNES/France 2030 backing also means French sovereign connectivity and national security angles are relevant — say the words "souveraineté numérique" if they come up.
+    </div>
+  </div>
+
+  <div class="card">
+    <h3>Programme Timeline — Know This Cold</h3>
+    <div class="timeline">
+      <div class="tl"><div class="tl-yr">Jun 2025</div><div class="tl-bd"><strong>First payload launch</strong><p>First regenerative 5G mmWave payload successfully launched — the key technical proof point for the entire constellation architecture.</p></div></div>
+      <div class="tl"><div class="tl-yr">Jul 2025–Apr 2026</div><div class="tl-bd"><strong>uniShape Phase 1</strong><p>Technical specification and use case studies. The role you are interviewing for is likely embedded in this phase right now — procedures, tool deployment, ground station review.</p></div></div>
+      <div class="tl"><div class="tl-yr">Apr 2026–Feb 2028</div><div class="tl-bd"><strong>uniShape Phase 2</strong><p>Assembly, integration, testing, launch, and in-orbit operation of two VLEO 5G satellites with gateways and ground terminals. This is the LEOP and IOD campaign you'll be running procedures for.</p></div></div>
+      <div class="tl"><div class="tl-yr">2027</div><div class="tl-bd"><strong>Two prototype satellites launch</strong><p>The IOD milestone — two complete satellites demonstrating end-to-end 5G NTN service including feeder links, user terminal access, and 5G core integration.</p></div></div>
+      <div class="tl"><div class="tl-yr">2028–2030</div><div class="tl-td"><strong>Full constellation deployment</strong><p>Progressive uniSky deployment. By this point the role evolves from IOD support to nominal ops and constellation management.</p></div></div>
+    </div>
+  </div>
+
+  <div class="card border-green">
+    <h3>What Makes UNIVITY Technically Different</h3>
+    <ul>
+      <li><strong>Regenerative payload.</strong> Unlike bent-pipe satellites that simply relay signals, UNIVITY's payload processes the 5G baseband onboard. The satellite contains a full 5G gNB (base station) — it understands 5G NR protocols natively. This is the "regenerative" part of the June 2025 launch.</li>
+      <li><strong>mmWave spectrum.</strong> UNIVITY uses 5G millimetre-wave frequencies (26 GHz range) — the same spectrum bands that terrestrial 5G mmWave uses. This is the architectural bet: operators already own mmWave spectrum licences; UNIVITY delivers the space segment using those same bands, so there is no new spectrum allocation from the operator's perspective.</li>
+      <li><strong>VLEO orbit.</strong> Very Low Earth Orbit (~300–450 km) means lower path loss, lower latency, and passive drag deorbit for debris compliance — the same logic described in Starlink's Gen2 VLEO shell.</li>
+      <li><strong>B2B wholesale model.</strong> UNIVITY is not a consumer ISP. It sells capacity to MNOs. The gateways connect the space segment to existing terrestrial 5G core networks. TDF operates the ground gateway infrastructure.</li>
+    </ul>
+  </div>
+
+  <!-- ══════════════════ 2 — GAP ANALYSIS ══════════════════ -->
+
+  <div class="section-hdr">
+    <div class="sh-num">02</div>
+    <h2>JD vs Your Profile — Gap Analysis</h2>
+    <div class="sh-line"></div>
+  </div>
+
+  <div class="card">
+    <p style="font-family:'Libre Baskerville',Georgia,serif;font-size:14px;line-height:1.8;margin-bottom:18px;">This maps the JD requirements against your background at Airbus DS and iDirect. Green = strong match you should lead with. Amber = partial match, frame carefully. Red = genuine gap, have a mitigation narrative ready.</p>
+    <div style="overflow-x:auto;">
+      <table class="score-table">
+        <thead><tr><th>JD Requirement</th><th>Your Position</th><th>Status</th><th>What to Say</th></tr></thead>
+        <tbody>
+          <tr><td>Satellite operations experience</td><td>iDirect CSE — SATCOM fault isolation, RF/DVB-S2/IP; Airbus DS HBC+ architecture</td><td class="s-hi">STRONG</td><td>Lead with iDirect real-time ops experience and Airbus DS payload integration work</td></tr>
+          <tr><td>RF systems: link budgets, modulation, Ka-band, feeder/user links</td><td>iDirect RF/DVB-S2 fault isolation; HBC+ connectivity platform includes Ka-band</td><td class="s-hi">STRONG</td><td>Be specific: DVB-S2 Adaptive Coding & Modulation, Ka-band link margin, feeder link vs user link budget trade-offs</td></tr>
+          <tr><td>Mission Control Systems (MCS) and ground segment architecture</td><td>HBC+ ground segment architecture; iDirect network management</td><td class="s-md">PARTIAL</td><td>Emphasise HBC+ ground segment design; acknowledge MCS tools (SCOS-2000, GSOC-style) as area of active learning</td></tr>
+          <tr><td>LEOP / commissioning / nominal ops / EOL procedure definition</td><td>Closest: iDirect commissioning procedures; Airbus payload ops interface</td><td class="s-md">PARTIAL</td><td>Map your iDirect network commissioning experience to satellite commissioning logic; be clear you haven't run a LEOP but you've designed operational procedures</td></tr>
+          <tr><td>Ground station deployment & first-level HW/SW support</td><td>iDirect ground equipment support; HBC+ gateway coordination</td><td class="s-hi">STRONG</td><td>Direct match — iDirect included gateway hardware troubleshooting and terminal commissioning</td></tr>
+          <tr><td>Telecommand execution & telemetry analysis</td><td>Not explicit in profile</td><td class="s-lo">GAP</td><td>"My TM/TC experience is at the payload-interface level via HBC+; I'm actively bridging to classical MCS TM/TC through my LEOAF programme and am familiar with the concepts from Airbus DS engineering team interactions"</td></tr>
+          <tr><td>5G NTN knowledge</td><td>Limited explicit experience — HBC+ involves airborne connectivity but not 5G NTN specifically</td><td class="s-lo">GAP</td><td>See Section 3 below — this is the most important gap to address. Study the technical concepts and have a confident narrative.</td></tr>
+          <tr><td>Python scripting for automation/analysis</td><td>Competent — evidenced by LEOAF Python exercises</td><td class="s-hi">STRONG</td><td>Reference LEOAF Python exercises (link budget tools, latency models) as evidence of active scripting practice</td></tr>
+          <tr><td>IP network configuration and troubleshooting</td><td>iDirect — IP layer fault isolation across DVB-S2/IP networks</td><td class="s-hi">STRONG</td><td>Direct match. Be specific about L2/L3 isolation procedures at iDirect.</td></tr>
+          <tr><td>Beam management</td><td>HBC+ involves multi-beam satellite; some beam management concepts</td><td class="s-md">PARTIAL</td><td>Frame HBC+ beam coordination work; acknowledge 5G NR beam management (3GPP procedures) as technical study area</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <div class="card border-amber">
+    <h3>Your Opening Statement — Suggested Framing</h3>
+    <p>Don't wait to be asked why you're a fit. Open with something like:</p>
+    <div class="callout">
+      <strong>SUGGESTED OPENING (adapt to your voice)</strong>
+      "My background combines two things that are directly relevant to what UNIVITY is building: at iDirect I operated and troubleshot live SATCOM networks in real time — managing RF links, DVB-S2 ACM, IP routing across distributed ground infrastructure. At Airbus DS I moved up to the system architecture layer, leading the ground and space segment design for HBC+, an airborne connectivity programme with Ka-band satellite integration. What draws me specifically to UNIVITY is the regenerative payload approach and the B2B MNO model — I've spent years on the interface between satellite and IP networks, and this role sits exactly at that boundary, at a point in the programme where the procedures and tools are still being shaped. That's where I do my best work."
+    </div>
+  </div>
+
+  <!-- ══════════════════ 3 — TECHNICAL CONCEPTS ══════════════════ -->
+
+  <div class="section-hdr">
+    <div class="sh-num">03</div>
+    <h2>Technical Concepts to Own in the Interview</h2>
+    <div class="sh-line"></div>
+  </div>
+
+  <div class="concept-grid">
+
+```
+<div class="concept">
+  <h4>5G NTN — What It Actually Is</h4>
+  <p>Non-Terrestrial Networks (NTN) is 3GPP's formal integration of satellite and HAPS into the 5G NR standard. Key Release 17 additions:</p>
+  <ul>
+    <li>Extended Timing Advance (TA) for satellite propagation delays</li>
+    <li>Doppler pre-compensation at terminal or satellite</li>
+    <li>Service link (gNB↔UE) and feeder link (gNB↔5G core) defined</li>
+    <li>Transparent mode (bent-pipe) vs regenerative mode (gNB on satellite)</li>
+  </ul>
+  <p><strong>UNIVITY uses regenerative mode</strong> — the satellite IS the gNB. The 5G NR stack runs onboard. This is architecturally more complex but removes latency added by ground-based baseband processing.</p>
+</div>
+
+<div class="concept">
+  <h4>mmWave in NTN — The UNIVITY Bet</h4>
+  <p>UNIVITY uses 5G mmWave bands (FR2, ~26 GHz — n258/n257/n260 range). This is unusual — most NTN systems use sub-6 GHz for wide coverage. The mmWave choice means:</p>
+  <ul>
+    <li>Very high bandwidth available (400–800 MHz channels)</li>
+    <li>Operators already hold mmWave spectrum licences — no new allocation</li>
+    <li>Narrow beams required (high gain to compensate path loss)</li>
+    <li>Rain attenuation is significant at 26 GHz — link margin is a design challenge</li>
+    <li>Small cell coverage areas — concentrated capacity over populated zones</li>
+  </ul>
+</div>
+
+<div class="concept">
+  <h4>VLEO — Why the Orbit Matters Here</h4>
+  <p>UNIVITY's satellites operate at Very Low Earth Orbit (~300–450 km). Key implications for your ops role:</p>
+  <ul>
+    <li>Path loss ~4–6 dB lower than 550 km — critical for closing mmWave link budgets</li>
+    <li>RTT approximately 4–10 ms one-way — enables 5G latency targets (&lt;10 ms for URLLC)</li>
+    <li>Atmospheric drag is significant — daily/weekly orbit maintenance manoeuvres are part of nominal ops</li>
+    <li>Short orbital lifetime if propulsion fails — passive deorbit compliance</li>
+    <li>Higher radiation flux than ISS orbit but below Van Allen — radiation hardening is still required</li>
+  </ul>
+</div>
+
+<div class="concept">
+  <h4>Regenerative Payload vs Bent-Pipe</h4>
+  <p>This is UNIVITY's core technical differentiator — make sure you can explain it fluently.</p>
+  <ul>
+    <li><strong>Bent-pipe:</strong> satellite receives signal, frequency-converts, amplifies, retransmits. No onboard processing. Simple, proven. Latency = 2× propagation delay + processing on ground.</li>
+    <li><strong>Regenerative:</strong> satellite demodulates the signal, processes the baseband (in UNIVITY's case: a full 5G NR gNB stack), re-modulates and retransmits. More complex, higher power, but enables onboard routing, scheduling, and direct 5G protocol compliance.</li>
+    <li>Operationally: you're monitoring a flying base station, not just a transponder. Telecommands affect 5G RRC/MAC layer configurations, not just RF parameters.</li>
+  </ul>
+</div>
+
+<div class="concept">
+  <h4>Mission Phases — LEOP to EOL</h4>
+  <p>The JD explicitly mentions all four phases. Know what each means:</p>
+  <ul>
+    <li><strong>LEOP</strong> (Launch and Early Orbit Phase): first days after separation, safe mode, initial acquisition, first TM/TC contact, attitude determination, solar array deployment, initial RF checks. Most critical and highest-risk phase.</li>
+    <li><strong>Commissioning</strong>: functional checkout of all subsystems, payload activation, link budget validation, beam calibration, interface with 5G core. UNIVITY-specific: 5G gNB bring-up and operator integration testing.</li>
+    <li><strong>Nominal Operations</strong>: routine health monitoring, orbit maintenance, beam scheduling, performance reporting, anomaly response.</li>
+    <li><strong>EOL</strong> (End of Life): de-orbit manoeuvres, passivation (battery/propellant venting), controlled reentry or graveyard orbit.</li>
+  </ul>
+</div>
+
+<div class="concept">
+  <h4>Ground Segment — Key Components</h4>
+  <p>For a small constellation like UNIVITY's IOD:</p>
+  <ul>
+    <li><strong>TT&C station</strong>: Tracking, Telemetry & Commanding — the safety-critical link. Usually S-band. Used in LEOP and for housekeeping.</li>
+    <li><strong>Mission (payload) gateway</strong>: Ka/mm-wave feeder link carrying 5G NR payload traffic. TDF operates three of these for UNIVITY.</li>
+    <li><strong>MCS</strong> (Mission Control System): operator console for TM/TC, orbit planning, event scheduling. Common platforms: SCOS-2000, GMV's HIFLY, or custom.</li>
+    <li><strong>5G Core (5GC)</strong>: the terrestrial network side — AMF, SMF, UPF. UNIVITY interfaces to MNO 5G cores via the gateway.</li>
+    <li><strong>Network slice management</strong>: each MNO customer gets a logical slice of the 5G NR capacity.</li>
+  </ul>
+</div>
+
+<div class="concept">
+  <h4>Link Budget Basics — 5G NTN Flavour</h4>
+  <p>You'll be asked about end-to-end link performance. Key parameters for the UNIVITY scenario:</p>
+  <ul>
+    <li>FSPL at 26 GHz from 400 km: ≈ 185–190 dB (very high — narrow beams required)</li>
+    <li>Satellite EIRP must be very high: phased array with high gain essential</li>
+    <li>UE antenna: 5G mmWave phones have phased array modules (~20 dBi) but need clear sky view</li>
+    <li>Rain fade at 26 GHz: 5–15 dB/km in heavy rain — link margin ≥ 15 dB needed for tropical zones</li>
+    <li>Doppler at VLEO: up to ±80 kHz at 26 GHz — pre-compensation required per 3GPP NTN spec</li>
+  </ul>
+</div>
+
+<div class="concept">
+  <h4>Anomaly Resolution — What They'll Probe</h4>
+  <p>The JD asks for anomaly resolution and mission review board participation. Expect scenario questions:</p>
+  <ul>
+    <li>Degraded telemetry: is it the spacecraft, the TT&C link, or MCS processing? Isolation approach.</li>
+    <li>Payload performance drop: RF chain fault vs beam management vs 5G gNB software issue?</li>
+    <li>Orbit drift: propulsion anomaly vs atmospheric density prediction error?</li>
+    <li>Gateway link degradation: rain fade vs equipment fault vs link budget margin exhausted?</li>
+  </ul>
+  <p>Structure all answers using an isolation methodology: parameter → symptom → likely cause tree.</p>
+</div>
+```
+
+  </div>
+
+  <!-- ══════════════════ 4 — LIKELY QUESTIONS ══════════════════ -->
+
+  <div class="section-hdr">
+    <div class="sh-num">04</div>
+    <h2>Likely Interview Questions — With Model Answers</h2>
+    <div class="sh-line"></div>
+  </div>
+
+  <div class="card" style="margin-bottom:12px;">
+    <h3>How to Use This Section</h3>
+    <p>Click each question to reveal a model answer framework. These are not scripts — they are structured talking points. Adapt them to your own voice and insert your specific examples. Questions marked <span class="tag tag-red">HARD</span> are gap areas requiring preparation. Questions marked <span class="tag tag-green">STRONG</span> should be natural for you.</p>
+  </div>
+
+  <!-- Q1 -->
+
+  <div class="qa-block">
+    <div class="qa-q" onclick="toggleQA(this)">
+      <span><span class="tag tag-green">STRONG</span> Tell me about a time you had to diagnose a live satellite link problem under time pressure.</span>
+      <span class="qa-arrow">▼</span>
+    </div>
+    <div class="qa-body">
+      <span class="model-label">MODEL ANSWER FRAMEWORK — DRAW FROM IDIRECT</span>
+      <p>This is your home territory. Use a specific iDirect incident. Structure: <em>situation → what you observed → your isolation methodology → what you found → resolution → what you changed to prevent recurrence.</em></p>
+      <ul>
+        <li>Lead with the symptom you saw in the network management system (degraded Eb/N0, packet loss, ACM modulation step-down).</li>
+        <li>Describe the logical isolation: RF layer first (EIRP, C/N0), then modulation/coding, then IP layer.</li>
+        <li>Mention that you coordinated with the teleport/gateway team in parallel — this demonstrates the cross-team interface skill the JD asks for.</li>
+        <li>Close with the outcome and the procedural update you made.</li>
+      </ul>
+      <p><em>Bridge to UNIVITY:</em> "At UNIVITY the same isolation logic applies but the additional layer is the 5G NR stack — a degraded beam could be a physical layer issue, a 5G RRM (Radio Resource Management) issue, or an interface to the 5G core. The diagnostic tree is deeper but the discipline is the same."</p>
+    </div>
+  </div>
+
+  <!-- Q2 -->
+
+  <div class="qa-block">
+    <div class="qa-q" onclick="toggleQA(this)">
+      <span><span class="tag tag-red">HARD</span> Explain the difference between a transparent and a regenerative satellite payload, and why UNIVITY chose regenerative for 5G NTN.</span>
+      <span class="qa-arrow">▼</span>
+    </div>
+    <div class="qa-body">
+      <span class="model-label">MODEL ANSWER FRAMEWORK — TECHNICAL DIFFERENTIATION</span>
+      <p><strong>Transparent:</strong> The satellite acts as a frequency converter and amplifier — it doesn't understand the signal content. Simple, low-risk, proven in most VSAT and GEO systems including the systems you worked with at iDirect. Ground processes all the baseband.</p>
+      <p><strong>Regenerative:</strong> The satellite demodulates the uplink, processes the baseband (in UNIVITY's case, runs a full 5G NR gNB stack), and re-modulates for the downlink. More complex but fundamental advantages:</p>
+      <ul>
+        <li>Latency: no round-trip to the ground gateway for baseband processing. Critical for 5G latency targets.</li>
+        <li>The satellite can make scheduling decisions independently — beam management, resource allocation — without ground intervention every slot.</li>
+        <li>Operators see a standard 5G gNB interface; the satellite's space location is abstracted away.</li>
+        <li>The June 2025 launch proved UNIVITY can fly this architecture — it's not theoretical.</li>
+      </ul>
+      <p><em>Why it matters operationally for your role:</em> "As the Mission Ops Engineer, I'm not just monitoring RF parameters — I'm monitoring a flying base station. If there's a 5G RRC issue, I need to be able to distinguish it from a platform anomaly. That's a more complex diagnostic space, which is part of what makes this programme interesting."</p>
+    </div>
+  </div>
+
+  <!-- Q3 -->
+
+  <div class="qa-block">
+    <div class="qa-q" onclick="toggleQA(this)">
+      <span><span class="tag tag-red">HARD</span> What specific challenges does VLEO orbit pose for mission operations compared to a standard LEO constellation?</span>
+      <span class="qa-arrow">▼</span>
+    </div>
+    <div class="qa-body">
+      <span class="model-label">MODEL ANSWER FRAMEWORK — SHOW VLEO DEPTH</span>
+      <ul>
+        <li><strong>Atmospheric drag:</strong> At 350–400 km, the residual atmosphere causes measurable orbital decay. Nominal ops includes regular drag-compensation manoeuvres — you need accurate atmospheric density modelling (NRLMSISE-00 or similar) and a propulsion budget that accounts for solar activity cycles (solar flux raises atmospheric density at VLEO).</li>
+        <li><strong>Contact windows:</strong> Each satellite pass is short — approximately 4–6 minutes at VLEO for a typical ground station. LEOP TM/TC windows are extremely tight; you need multiple ground stations or a relay strategy.</li>
+        <li><strong>Collision avoidance frequency:</strong> VLEO has a higher debris flux per square kilometre than 550 km. Conjunction analysis and avoidance manoeuvres are more frequent.</li>
+        <li><strong>Radiation:</strong> Below the inner Van Allen belt, radiation is lower than MEO — but energetic particle events (SPEs) can still cause single-event upsets in the payload processor.</li>
+        <li><strong>Link geometry:</strong> High angular rate means beam steering must be very fast — beam handover between satellites happens every few minutes. Your monitoring of beam performance needs to account for the geometry changing continuously.</li>
+      </ul>
+    </div>
+  </div>
+
+  <!-- Q4 -->
+
+  <div class="qa-block">
+    <div class="qa-q" onclick="toggleQA(this)">
+      <span><span class="tag tag-green">STRONG</span> How would you approach writing the commissioning procedure for the 5G payload on the first UNIVITY satellite?</span>
+      <span class="qa-arrow">▼</span>
+    </div>
+    <div class="qa-body">
+      <span class="model-label">MODEL ANSWER FRAMEWORK — PROCEDURE DESIGN</span>
+      <p>This maps to your Airbus DS procedure/interface work. Structure your answer around the commissioning sequence logic:</p>
+      <ul>
+        <li><strong>Platform first, payload second.</strong> Confirm ADCS is stable, power subsystem is nominal, thermal is within range, propulsion is ready. Only then activate the payload.</li>
+        <li><strong>RF calibration before 5G stack bring-up.</strong> Verify feeder link margins (gateway to satellite), check EIRP and G/T against link budget predictions. A 2 dB shortfall here needs to be understood before you activate the gNB stack.</li>
+        <li><strong>5G gNB bring-up in stages.</strong> Physical layer first (check 5G NR synchronisation signals are transmitted correctly), then RRC, then data plane. Each stage has pass/fail criteria defined against the payload spec.</li>
+        <li><strong>End-to-end test with MNO test UE.</strong> A real 5G device camps on the satellite gNB and runs a data session through to the 5G core. This validates the full chain including TDF gateway infrastructure.</li>
+        <li><strong>Documentation of delta from predictions.</strong> Every parameter that deviates from the pre-launch budget goes into the commissioning report — this feeds back into the operations manual for nominal ops.</li>
+      </ul>
+      <p><em>Bridge from iDirect experience:</em> "At iDirect, satellite commissioning followed a similar staged logic — RF first, then modem configuration, then IP connectivity. The principle is identical; the 5G NR layer adds complexity but the commissioning discipline is the same."</p>
+    </div>
+  </div>
+
+  <!-- Q5 -->
+
+  <div class="qa-block">
+    <div class="qa-q" onclick="toggleQA(this)">
+      <span><span class="tag tag-amber">PARTIAL</span> What do you know about 5G NTN as defined in 3GPP, and how does it differ from previous satellite communication standards?</span>
+      <span class="qa-arrow">▼</span>
+    </div>
+    <div class="qa-body">
+      <span class="model-label">MODEL ANSWER FRAMEWORK — SHOW LEARNING, NOT BLUFFING</span>
+      <p>Be honest that your primary background is in SATCOM/IP networking, not 3GPP standards, and then demonstrate you've done the work:</p>
+      <p>"My deep background is in satellite RF systems and IP networking — 3GPP NTN is the area I've been building on specifically for this role, and I can give you my current understanding. 3GPP Release 17 introduced formal NTN support in 5G NR, solving the main challenges that make satellite use hard in a cellular standard:"</p>
+      <ul>
+        <li><strong>Timing Advance (TA):</strong> In terrestrial 5G, TA is up to ~0.67 ms. From VLEO at 400 km, one-way propagation is ~1.3 ms — so R17 extended TA to handle satellite delays. Terminals must pre-compensate based on their GNSS position and the satellite ephemeris.</li>
+        <li><strong>Doppler pre-compensation:</strong> A VLEO satellite at 400 km moves at ~7.7 km/s — at 26 GHz this generates Doppler shifts of tens of kHz. R17 requires terminals or the satellite to pre-compensate this so the gNB's receiver sees a stable frequency.</li>
+        <li><strong>HARQ (Hybrid ARQ) timing:</strong> Standard 5G NR HARQ assumes short round-trips. For NTN, HARQ processes are either disabled or extended to account for propagation delays.</li>
+        <li>Before NTN, satellite communications used proprietary standards (DVB-S2, DVB-RCS2, iDirect's SCPC). NTN integrates satellite into the same 3GPP ecosystem as terrestrial 5G — same protocol stack, same device chipsets eventually.</li>
+      </ul>
+    </div>
+  </div>
+
+  <!-- Q6 -->
+
+  <div class="qa-block">
+    <div class="qa-q" onclick="toggleQA(this)">
+      <span><span class="tag tag-green">STRONG</span> This is a small team at an early stage. How do you handle situations where procedures don't exist yet and you have to improvise?</span>
+      <span class="qa-arrow">▼</span>
+    </div>
+    <div class="qa-body">
+      <span class="model-label">MODEL ANSWER FRAMEWORK — STARTUP CULTURE FIT</span>
+      <p>UNIVITY has ~30–50 people and is pre-IOD. They need someone who builds, not just follows. Make this about your Airbus DS cross-divisional work:</p>
+      <ul>
+        <li>Reference HBC+: a cross-divisional programme where procedures between Airbus Commercial and Airbus DS didn't pre-exist — you had to build interfaces from scratch.</li>
+        <li>Talk about working ambiguity: when requirements weren't fully defined, your approach was to prototype a procedure, test it against the engineering team's knowledge, iterate.</li>
+        <li>Mention your personal practice of documenting as you go — a startup that doesn't document its procedures during IOD will struggle during nominal ops. You understand this and build documentation into the work rather than after it.</li>
+        <li>Close with the LEOAF project as evidence of autonomous learning and building: "I'm also running a self-directed 620-hour LEO architecture curriculum — building tools and content independently. That's the kind of initiative I'd bring to UNIVITY."</li>
+      </ul>
+    </div>
+  </div>
+
+  <!-- Q7 -->
+
+  <div class="qa-block">
+    <div class="qa-q" onclick="toggleQA(this)">
+      <span><span class="tag tag-amber">PARTIAL</span> We need to assess end-to-end 5G NTN link performance. Walk me through how you'd approach this.</span>
+      <span class="qa-arrow">▼</span>
+    </div>
+    <div class="qa-body">
+      <span class="model-label">MODEL ANSWER FRAMEWORK — LINK BUDGET APPLIED TO 5G NTN</span>
+      <p>This bridges your RF link budget experience with the 5G NTN context. Structure as a chain:</p>
+      <ul>
+        <li><strong>Define the path segments:</strong> UE (user terminal) → service link uplink → satellite → feeder link downlink → TDF gateway → 5G core → internet.</li>
+        <li><strong>Service link:</strong> Compute C/N₀ at the satellite receiver. Inputs: UE EIRP (mmWave phone array, ~20–25 dBm EIRP), FSPL at 26 GHz from 400 km (~187 dB), satellite G/T. Required C/N₀ for target throughput (e.g., 100 Mbps per beam needs ~30 dB·Hz).</li>
+        <li><strong>Feeder link:</strong> Same calculation from TDF gateway (~5 m Ka-band dish, high EIRP) to satellite. Typically the easier link to close because the gateway is a high-power, large-aperture fixed installation.</li>
+        <li><strong>Rain/atmospheric margin:</strong> At 26 GHz, budget 10–15 dB for rain fade in continental Europe. This is the dominant impairment at mmWave.</li>
+        <li><strong>End-to-end metrics:</strong> Throughput, latency (should be &lt;10 ms one-way at VLEO for URLLC), packet loss. Report against SLA thresholds agreed with MNO partners.</li>
+        <li><strong>Optimisation levers:</strong> Beam dwell time allocation, AMC (Adaptive Modulation and Coding) thresholds, resource block allocation per operator slice.</li>
+      </ul>
+    </div>
+  </div>
+
+  <!-- Q8 -->
+
+  <div class="qa-block">
+    <div class="qa-q" onclick="toggleQA(this)">
+      <span><span class="tag tag-green">STRONG</span> Why do you want to leave Airbus DS for a startup at this stage of your career?</span>
+      <span class="qa-arrow">▼</span>
+    </div>
+    <div class="qa-body">
+      <span class="model-label">MODEL ANSWER FRAMEWORK — MOTIVATION</span>
+      <p>This will definitely be asked. Be direct and authentic — don't be defensive:</p>
+      <ul>
+        <li><strong>The programme timing is compelling.</strong> "UNIVITY is at the exact inflection point I find most interesting — between first launch and IOD. The procedures, tools, and operational frameworks are still being built. At Airbus DS I contribute to large programmes where most of the architectural decisions are already made. Here I'd be making them."</li>
+        <li><strong>The technology is the frontier.</strong> "5G NTN with a regenerative VLEO payload is the most technically ambitious civilian satellite connectivity programme in France right now. It's exactly the convergence of satellite operations and IP/5G networking that I've been building toward."</li>
+        <li><strong>Scale and impact.</strong> "In a team of this size, my decisions have direct programme impact. That's a different career development curve than a large OEM."</li>
+        <li><strong>Don't criticise Airbus.</strong> Frame it as a pull to UNIVITY, not a push from Airbus. Something like "Airbus DS has given me an excellent foundation and I'm proud of what we've built with HBC+ — this is about where I want to direct that foundation."</li>
+      </ul>
+    </div>
+  </div>
+
+  <!-- Q9 -->
+
+  <div class="qa-block">
+    <div class="qa-q" onclick="toggleQA(this)">
+      <span><span class="tag tag-red">HARD</span> What experience do you have with Mission Control Systems — SCOS-2000, EGOS, or similar?</span>
+      <span class="qa-arrow">▼</span>
+    </div>
+    <div class="qa-body">
+      <span class="model-label">MODEL ANSWER FRAMEWORK — OWN THE GAP HONESTLY</span>
+      <p>Don't bluff. SCOS-2000 is the ESA standard MCS; if you haven't used it, say so clearly and then bridge:</p>
+      <p>"My direct MCS experience is through the network management and ground control interfaces at iDirect and the ground segment architecture I designed at Airbus DS for HBC+, rather than classical spacecraft MCS platforms like SCOS-2000. I'm familiar with the architecture — TM/TC packet formats (CCSDS PUS), display pages, procedure automation — from the engineering team interface side at Airbus DS and from my own study. I'd expect a learning curve on whichever specific platform UNIVITY uses, but the underlying spacecraft data system concepts are clear to me and I pick up new tools quickly — the LEOAF project is partly built around teaching myself the tooling ecosystem for this exact class of work."</p>
+      <p>Then ask: "Which MCS platform is UNIVITY planning to use for the IOD campaign? That would help me target any pre-joining preparation."</p>
+    </div>
+  </div>
+
+  <!-- Q10 -->
+
+  <div class="qa-block">
+    <div class="qa-q" onclick="toggleQA(this)">
+      <span><span class="tag tag-amber">PARTIAL</span> What questions do you have for us?</span>
+      <span class="qa-arrow">▼</span>
+    </div>
+    <div class="qa-body">
+      <span class="model-label">MODEL ANSWER FRAMEWORK — YOUR QUESTIONS</span>
+      <p>Ask questions that demonstrate you've done your research and that position you as someone thinking about execution, not just getting the job:</p>
+      <ul>
+        <li>"The June 2025 payload launch validated the regenerative architecture. What were the key learnings that are feeding into the two-satellite IOD design for 2027?"</li>
+        <li>"For the uniShape Phase 2 ground stations — TDF is operating the payload gateways, but who owns the TT&C ground station? Is UNIVITY building its own or using a third-party network like SSC or KSAT?"</li>
+        <li>"What MCS platform have you selected for the IOD campaign, and how far along is the operational procedure library?"</li>
+        <li>"How is the operations team structured between Toulouse and Paris — is real-time ops expected to be run from Toulouse?"</li>
+        <li>"The JD mentions interfacing with the 5G SW team. Is the gNB software developed in-house or is it a COTS 5G stack adapted for space?"</li>
+      </ul>
+    </div>
+  </div>
+
+  <!-- ══════════════════ 5 — FINAL CHECKLIST ══════════════════ -->
+
+  <div class="section-hdr">
+    <div class="sh-num">05</div>
+    <h2>Day-Before Checklist</h2>
+    <div class="sh-line"></div>
+  </div>
+
+  <div class="gap-grid">
+    <div class="gap-item strong">
+      <h4>✓ KNOW COLD</h4>
+      <p>June 2025 first payload launch. uniShape/uniSky programme names. CNES €31M + France 2030. TDF as gateway operator (3 sites). Charles Delfieux (President), Véronique Bonnet (Programme Director).</p>
+    </div>
+    <div class="gap-item strong">
+      <h4>✓ HAVE READY</h4>
+      <p>One specific iDirect incident (live RF/IP fault isolation). One HBC+ example of cross-team procedure work. LEOAF reference as evidence of self-directed 5G NTN and LEO learning.</p>
+    </div>
+    <div class="gap-item gap">
+      <h4>⚠ BRUSH UP</h4>
+      <p>3GPP R17 NTN timing advance and Doppler pre-compensation basics. LEOP phase sequence. Difference between TT&C S-band and payload gateway link. CCSDS Packet Utilisation Standard (PUS) concept.</p>
+    </div>
+    <div class="gap-item gap">
+      <h4>⚠ PREPARE NARRATIVE</h4>
+      <p>Your TM/TC gap: honest, specific bridge from payload-interface experience. Your 5G NTN gap: frame as active learning with named concepts. Why leave Airbus DS: pull narrative, not push.</p>
+    </div>
+    <div class="gap-item strong">
+      <h4>✓ LEAD WITH</h4>
+      <p>iDirect real-time operations depth. Ka-band link budget experience. IP/RF fault isolation methodology. Cross-team interface work at Airbus DS HBC+. Python scripting (LEOAF exercises as concrete evidence).</p>
+    </div>
+    <div class="gap-item risk">
+      <h4>✗ DO NOT</h4>
+      <p>Pretend deep 5G NTN or SCOS-2000 experience you don't have. Talk down Airbus DS. Give generic answers — this team is technical, they will probe specifics. Under-sell LEOAF — it's a strong differentiator.</p>
+    </div>
+  </div>
+
+  <div class="card border-green" style="margin-top:20px;">
+    <h3>One Last Thing</h3>
+    <p>UNIVITY is a 3-year-old startup with a first successful launch and €44M in programme funding, hiring someone to help run their first real in-orbit demonstration. They're not looking for someone who has done this exact job before — they're looking for someone with enough technical foundation to learn fast, enough operational discipline to write procedures that actually work under pressure, and enough intellectual engagement with 5G NTN and VLEO to become a genuine technical contributor within months.</p>
+    <p>That's a profile you can make a strong case for. The gaps in 3GPP and MCS tooling are real, but they're learnable — and you're demonstrably learning them. Go into the room as someone who has done the research, knows the programme, and is genuinely excited by the technical challenge. That combination is rare in a pool of more classically-credentialled satellite ops candidates.</p>
+    <div class="callout green">
+      <strong>BONNE CHANCE</strong>
+      This page self-destructs at interview end. The real prep is in your head.
+    </div>
+  </div>
+
+</div><!-- .wrap -->
+
+<footer>LEOAF × INTERVIEW PREP · CDI2025021 · UNIVITY MISSION OPERATIONS ENGINEER · NOT PART OF CURRICULUM</footer>
+<button class="btt" id="btt">↑</button>
+
+<script>
+// Stars
+const canvas = document.getElementById('starsCanvas');
+const ctx    = canvas.getContext('2d');
+let stars    = [];
+function initStars(){
+  stars=[];
+  for(let i=0;i<160;i++)
+    stars.push({x:Math.random()*canvas.width,y:Math.random()*canvas.height,
+      size:Math.random()*1.3+0.3,speed:Math.random()*0.12+0.03,hue:Math.random()*360});
+}
+function resize(){canvas.width=window.innerWidth;canvas.height=window.innerHeight;}
+resize();initStars();
+window.addEventListener('resize',resize);
+function anim(){
+  ctx.clearRect(0,0,canvas.width,canvas.height);
+  stars.forEach(s=>{
+    s.y-=s.speed;
+    if(s.y<0){s.y=canvas.height;s.x=Math.random()*canvas.width;}
+    ctx.beginPath();ctx.fillStyle=`hsl(${s.hue},60%,80%)`;
+    ctx.arc(s.x,s.y,s.size,0,Math.PI*2);ctx.fill();
+  });
+  requestAnimationFrame(anim);
+}
+anim();
+
+// Q&A accordion
+function toggleQA(el){
+  const body = el.nextElementSibling;
+  const arrow = el.querySelector('.qa-arrow');
+  const isOpen = body.classList.contains('open');
+  // close all
+  document.querySelectorAll('.qa-body').forEach(b=>b.classList.remove('open'));
+  document.querySelectorAll('.qa-arrow').forEach(a=>a.classList.remove('qa-arrow-open'));
+  if(!isOpen){
+    body.classList.add('open');
+    arrow.classList.add('qa-arrow-open');
+  }
+}
+
+// Back to top
+const btt = document.getElementById('btt');
+window.addEventListener('scroll',()=>btt.classList.toggle('vis',window.scrollY>400));
+btt.addEventListener('click',()=>window.scrollTo({top:0,behavior:'smooth'}));
+</script>
+
+</body>
+</html>
