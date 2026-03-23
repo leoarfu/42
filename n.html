@@ -1,0 +1,880 @@
+<!DOCTYPE html>
+
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>BRIEFING // NOVASPACE — Senior Ground Segment Engineer</title>
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;600;700;900&family=Share+Tech+Mono&family=Libre+Baskerville:ital,wght@0,400;0,700;1,400&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0a0c10;
+    --bg2: #0f1218;
+    --panel: #12161e;
+    --border: #1e2535;
+    --accent: #00d4ff;
+    --accent2: #ff6b35;
+    --accent3: #7fff6b;
+    --text: #c8d4e8;
+    --dim: #5a6a82;
+    --warn: #ffd166;
+    --red: #ff4757;
+  }
+
+- { margin: 0; padding: 0; box-sizing: border-box; }
+
+body {
+background: var(–bg);
+color: var(–text);
+font-family: ‘Libre Baskerville’, Georgia, serif;
+min-height: 100vh;
+overflow-x: hidden;
+}
+
+/* Scanline overlay */
+body::before {
+content: ‘’;
+position: fixed;
+top: 0; left: 0; right: 0; bottom: 0;
+background: repeating-linear-gradient(
+0deg,
+transparent,
+transparent 2px,
+rgba(0,212,255,0.015) 2px,
+rgba(0,212,255,0.015) 4px
+);
+pointer-events: none;
+z-index: 999;
+}
+
+/* Header */
+.header {
+border-bottom: 1px solid var(–border);
+padding: 2rem 3rem 1.5rem;
+position: relative;
+background: linear-gradient(180deg, rgba(0,212,255,0.04) 0%, transparent 100%);
+}
+
+.header-top {
+display: flex;
+align-items: flex-start;
+justify-content: space-between;
+gap: 2rem;
+flex-wrap: wrap;
+}
+
+.mission-tag {
+font-family: ‘Share Tech Mono’, monospace;
+font-size: 0.65rem;
+color: var(–accent);
+letter-spacing: 0.2em;
+text-transform: uppercase;
+margin-bottom: 0.5rem;
+opacity: 0.8;
+}
+
+h1 {
+font-family: ‘Orbitron’, sans-serif;
+font-size: clamp(1.2rem, 3vw, 1.9rem);
+font-weight: 700;
+color: #fff;
+letter-spacing: 0.05em;
+line-height: 1.2;
+}
+
+h1 span {
+color: var(–accent);
+}
+
+.status-block {
+text-align: right;
+font-family: ‘Share Tech Mono’, monospace;
+font-size: 0.7rem;
+color: var(–dim);
+line-height: 1.8;
+}
+
+.status-live {
+color: var(–accent3);
+animation: blink 2s infinite;
+}
+
+@keyframes blink {
+0%, 100% { opacity: 1; }
+50% { opacity: 0.3; }
+}
+
+/* Nav tabs */
+.nav {
+display: flex;
+gap: 0;
+border-bottom: 1px solid var(–border);
+padding: 0 3rem;
+overflow-x: auto;
+scrollbar-width: none;
+}
+.nav::-webkit-scrollbar { display: none; }
+
+.nav-tab {
+font-family: ‘Share Tech Mono’, monospace;
+font-size: 0.7rem;
+letter-spacing: 0.15em;
+text-transform: uppercase;
+padding: 0.9rem 1.5rem;
+cursor: pointer;
+color: var(–dim);
+border-bottom: 2px solid transparent;
+white-space: nowrap;
+transition: all 0.2s;
+background: none;
+border-top: none;
+border-left: none;
+border-right: none;
+}
+
+.nav-tab:hover { color: var(–accent); }
+.nav-tab.active {
+color: var(–accent);
+border-bottom-color: var(–accent);
+}
+
+/* Main layout */
+.main {
+padding: 2.5rem 3rem;
+max-width: 1400px;
+margin: 0 auto;
+}
+
+/* Sections */
+.section { display: none; }
+.section.active { display: block; }
+
+/* Panel components */
+.panel {
+background: var(–panel);
+border: 1px solid var(–border);
+padding: 1.8rem;
+margin-bottom: 1.5rem;
+position: relative;
+}
+
+.panel::before {
+content: ‘’;
+position: absolute;
+top: 0; left: 0;
+width: 3px; height: 100%;
+background: var(–accent);
+}
+
+.panel.warn::before { background: var(–warn); }
+.panel.success::before { background: var(–accent3); }
+.panel.danger::before { background: var(–red); }
+
+.panel-title {
+font-family: ‘Orbitron’, sans-serif;
+font-size: 0.72rem;
+font-weight: 600;
+letter-spacing: 0.2em;
+text-transform: uppercase;
+color: var(–accent);
+margin-bottom: 1.2rem;
+padding-bottom: 0.7rem;
+border-bottom: 1px solid var(–border);
+}
+
+.panel.warn .panel-title { color: var(–warn); }
+.panel.success .panel-title { color: var(–accent3); }
+.panel.danger .panel-title { color: var(–red); }
+
+/* Grid */
+.grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; }
+.grid-3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1.5rem; }
+
+@media (max-width: 900px) {
+.grid-2, .grid-3 { grid-template-columns: 1fr; }
+.header, .main, .nav { padding-left: 1.5rem; padding-right: 1.5rem; }
+}
+
+/* Tags */
+.tags { display: flex; flex-wrap: wrap; gap: 0.5rem; margin-top: 0.8rem; }
+.tag {
+font-family: ‘Share Tech Mono’, monospace;
+font-size: 0.65rem;
+letter-spacing: 0.1em;
+padding: 0.3rem 0.7rem;
+border: 1px solid;
+text-transform: uppercase;
+}
+.tag-blue { border-color: rgba(0,212,255,0.4); color: var(–accent); background: rgba(0,212,255,0.06); }
+.tag-orange { border-color: rgba(255,107,53,0.4); color: var(–accent2); background: rgba(255,107,53,0.06); }
+.tag-green { border-color: rgba(127,255,107,0.4); color: var(–accent3); background: rgba(127,255,107,0.06); }
+.tag-yellow { border-color: rgba(255,209,102,0.4); color: var(–warn); background: rgba(255,209,102,0.06); }
+
+/* Text */
+p { line-height: 1.75; margin-bottom: 0.8rem; font-size: 0.92rem; }
+p:last-child { margin-bottom: 0; }
+
+.mono { font-family: ‘Share Tech Mono’, monospace; font-size: 0.8rem; color: var(–dim); }
+
+ul.styled { list-style: none; padding: 0; }
+ul.styled li {
+padding: 0.5rem 0 0.5rem 1.5rem;
+position: relative;
+font-size: 0.9rem;
+line-height: 1.6;
+border-bottom: 1px solid rgba(30,37,53,0.6);
+}
+ul.styled li:last-child { border-bottom: none; }
+ul.styled li::before {
+content: ‘▸’;
+position: absolute;
+left: 0;
+color: var(–accent);
+font-size: 0.7rem;
+top: 0.55rem;
+}
+
+/* Score badge */
+.score-row {
+display: flex;
+align-items: center;
+justify-content: space-between;
+padding: 0.7rem 0;
+border-bottom: 1px solid var(–border);
+font-size: 0.88rem;
+}
+.score-row:last-child { border-bottom: none; }
+.score-label { flex: 1; }
+.score-bar-wrap { flex: 2; margin: 0 1rem; }
+.score-bar {
+height: 4px;
+background: var(–border);
+position: relative;
+overflow: hidden;
+}
+.score-fill {
+height: 100%;
+background: var(–accent);
+transition: width 1s ease;
+}
+.score-fill.warn { background: var(–warn); }
+.score-fill.green { background: var(–accent3); }
+.score-num {
+font-family: ‘Share Tech Mono’, monospace;
+font-size: 0.75rem;
+color: var(–accent);
+width: 3rem;
+text-align: right;
+}
+
+/* Q&A cards */
+.qa-card {
+background: var(–panel);
+border: 1px solid var(–border);
+margin-bottom: 1rem;
+overflow: hidden;
+transition: border-color 0.2s;
+}
+.qa-card:hover { border-color: rgba(0,212,255,0.3); }
+
+.qa-q {
+padding: 1rem 1.5rem;
+cursor: pointer;
+display: flex;
+align-items: flex-start;
+gap: 1rem;
+font-size: 0.9rem;
+font-weight: 700;
+font-family: ‘Libre Baskerville’, serif;
+font-style: italic;
+}
+
+.qa-icon {
+font-family: ‘Share Tech Mono’, monospace;
+font-size: 0.65rem;
+color: var(–accent);
+border: 1px solid var(–accent);
+padding: 0.15rem 0.4rem;
+flex-shrink: 0;
+margin-top: 0.15rem;
+letter-spacing: 0.1em;
+}
+
+.qa-a {
+display: none;
+padding: 0 1.5rem 1.2rem 3.5rem;
+font-size: 0.88rem;
+line-height: 1.75;
+color: #9aabb8;
+border-top: 1px solid var(–border);
+padding-top: 1rem;
+}
+.qa-a.open { display: block; }
+
+.qa-a strong { color: var(–accent); font-family: ‘Share Tech Mono’, monospace; font-size: 0.75rem; letter-spacing: 0.1em; }
+
+/* Highlight callout */
+.callout {
+background: rgba(0,212,255,0.05);
+border: 1px solid rgba(0,212,255,0.2);
+border-left: 3px solid var(–accent);
+padding: 1rem 1.2rem;
+margin: 1rem 0;
+font-size: 0.88rem;
+line-height: 1.7;
+font-style: italic;
+}
+.callout.warn {
+background: rgba(255,209,102,0.05);
+border-color: rgba(255,209,102,0.2);
+border-left-color: var(–warn);
+}
+
+/* Table */
+.data-table { width: 100%; border-collapse: collapse; font-size: 0.85rem; }
+.data-table th {
+font-family: ‘Share Tech Mono’, monospace;
+font-size: 0.65rem;
+letter-spacing: 0.15em;
+text-transform: uppercase;
+color: var(–dim);
+padding: 0.6rem 1rem;
+text-align: left;
+border-bottom: 1px solid var(–border);
+}
+.data-table td {
+padding: 0.8rem 1rem;
+border-bottom: 1px solid rgba(30,37,53,0.6);
+line-height: 1.5;
+vertical-align: top;
+}
+.data-table tr:last-child td { border-bottom: none; }
+.data-table tr:hover td { background: rgba(0,212,255,0.03); }
+
+/* Checklist */
+.checklist { list-style: none; padding: 0; }
+.checklist li {
+display: flex;
+align-items: flex-start;
+gap: 0.8rem;
+padding: 0.6rem 0;
+border-bottom: 1px solid rgba(30,37,53,0.5);
+font-size: 0.88rem;
+line-height: 1.6;
+cursor: pointer;
+user-select: none;
+}
+.checklist li:last-child { border-bottom: none; }
+.check-box {
+width: 16px;
+height: 16px;
+border: 1px solid var(–dim);
+flex-shrink: 0;
+margin-top: 0.15rem;
+display: flex;
+align-items: center;
+justify-content: center;
+font-size: 0.6rem;
+color: var(–accent3);
+transition: all 0.15s;
+}
+.checklist li.done .check-box {
+border-color: var(–accent3);
+background: rgba(127,255,107,0.1);
+}
+.checklist li.done span { opacity: 0.5; text-decoration: line-through; }
+
+/* Divider */
+.divider {
+border: none;
+border-top: 1px solid var(–border);
+margin: 1.5rem 0;
+}
+
+/* Section header */
+.sec-head {
+font-family: ‘Orbitron’, sans-serif;
+font-size: 0.8rem;
+letter-spacing: 0.25em;
+text-transform: uppercase;
+color: var(–dim);
+margin-bottom: 1.5rem;
+padding-bottom: 0.5rem;
+border-bottom: 1px solid var(–border);
+}
+
+/* Salary range vis */
+.salary-range {
+position: relative;
+height: 40px;
+margin: 1.2rem 0 0.5rem;
+}
+.salary-track {
+position: absolute;
+top: 50%; transform: translateY(-50%);
+left: 0; right: 0;
+height: 2px;
+background: var(–border);
+}
+.salary-fill {
+position: absolute;
+top: 0; left: 0;
+height: 100%;
+background: linear-gradient(90deg, var(–accent2), var(–accent));
+width: 100%;
+}
+.salary-marker {
+position: absolute;
+top: 50%;
+transform: translate(-50%, -50%);
+font-family: ‘Share Tech Mono’, monospace;
+font-size: 0.65rem;
+}
+.salary-marker::before {
+content: ‘’;
+display: block;
+width: 8px; height: 8px;
+background: var(–accent);
+border-radius: 50%;
+margin: 0 auto 4px;
+}
+.salary-marker.start::before { background: var(–accent2); }
+.salary-marker.mid { color: var(–warn); }
+.salary-marker.mid::before { background: var(–warn); width: 10px; height: 10px; }
+
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div class="header-top">
+    <div>
+      <div class="mission-tag">⬡ Interview Prep Briefing — Hamilton Barnes / Novaspace</div>
+      <h1>SENIOR GROUND SEGMENT <span>ENGINEER</span></h1>
+      <div style="margin-top:0.6rem;">
+        <span class="tag tag-blue">Toulouse / Munich</span>
+        <span class="tag tag-orange" style="margin-left:0.4rem;">€70k – €110k + Bonus</span>
+        <span class="tag tag-yellow" style="margin-left:0.4rem;">EU27 Clearance</span>
+      </div>
+    </div>
+    <div class="status-block">
+      <div class="status-live">● LIVE BRIEF</div>
+      <div>CALL: Jack Humphries</div>
+      <div>Hamilton Barnes</div>
+      <div style="margin-top:0.4rem;">TARGET CO: <span style="color:var(--accent)">NOVASPACE</span></div>
+    </div>
+  </div>
+</div>
+
+<nav class="nav">
+  <button class="nav-tab active" onclick="showSection('intel')">01 // Intel</button>
+  <button class="nav-tab" onclick="showSection('fit')">02 // Fit Analysis</button>
+  <button class="nav-tab" onclick="showSection('qa')">03 // Q&A Prep</button>
+  <button class="nav-tab" onclick="showSection('questions')">04 // Your Questions</button>
+  <button class="nav-tab" onclick="showSection('pitch')">05 // Opening Pitch</button>
+  <button class="nav-tab" onclick="showSection('checklist')">06 // Checklist</button>
+</nav>
+
+<div class="main">
+
+  <!-- SECTION 1: INTEL -->
+
+  <div id="section-intel" class="section active">
+    <p class="sec-head">Target Company Intelligence</p>
+
+```
+<div class="grid-2">
+  <div>
+    <div class="panel">
+      <div class="panel-title">Why Novaspace?</div>
+      <p>The job description maps almost perfectly onto <strong>Novaspace Technology</strong> (formerly Satconsult), the engineering arm of Novaspace Group. The combination of management consulting + technology consulting for government agencies, private companies and investors — with feasibility studies and project development — is their exact positioning. They have offices in both Toulouse and Munich, and are actively hiring ground segment engineers.</p>
+      <div class="callout">Novaspace was formed in 2024 from the merger of <strong>Euroconsult</strong> (40-year legacy in strategy advisory) and <strong>SpaceTec Partners</strong> (management consulting). The technology arm handles the engineering side of client engagements.</div>
+    </div>
+
+    <div class="panel warn">
+      <div class="panel-title">Confidence Note</div>
+      <p>This is an educated inference — Jack hasn't named the company. Treat Novaspace as the primary hypothesis but don't name-drop it unless he confirms. Other possibilities include <strong>Analysys Mason</strong> (space consulting, Munich-based) or smaller boutiques, but Novaspace is the strongest match on all criteria simultaneously.</p>
+    </div>
+  </div>
+
+  <div>
+    <div class="panel">
+      <div class="panel-title">Novaspace Technology — Profile</div>
+      <table class="data-table">
+        <tr><th>Attribute</th><th>Detail</th></tr>
+        <tr><td>Full name</td><td>Novaspace Technology (formerly Satconsult)</td></tr>
+        <tr><td>Parent</td><td>Novaspace Group (Euroconsult + SpaceTec merger, 2024)</td></tr>
+        <tr><td>Staff</td><td>~130 professionals, 25 nationalities</td></tr>
+        <tr><td>Clients</td><td>1,200+ in 60+ countries; operators, agencies, investors</td></tr>
+        <tr><td>Offices</td><td>Toulouse, Munich, Paris, Brussels, Montreal, Singapore, Sydney, Tokyo, D.C.</td></tr>
+        <tr><td>Focus</td><td>Full lifecycle: feasibility → project dev → ops → training</td></tr>
+        <tr><td>Gov/Mil angle</td><td>Defense agencies, space agencies, regulatory bodies</td></tr>
+      </table>
+    </div>
+
+    <div class="panel success">
+      <div class="panel-title">Salary Range</div>
+      <div class="salary-range">
+        <div class="salary-track"><div class="salary-fill"></div></div>
+        <div class="salary-marker start" style="left:0%">€70k</div>
+        <div class="salary-marker mid" style="left:50%">~€90k</div>
+        <div class="salary-marker" style="left:100%">€110k</div>
+      </div>
+      <p class="mono" style="margin-top:1rem;">Wide band = they flex for profile strength. Your 20+ yr arc and cross-domain breadth (RF/IP/software/architecture) should push toward upper-mid. Ask early.</p>
+    </div>
+  </div>
+</div>
+
+<div class="panel">
+  <div class="panel-title">Role Breakdown — What This Actually Means Day-to-Day</div>
+  <table class="data-table">
+    <tr>
+      <th>Responsibility</th>
+      <th>What They Mean</th>
+      <th>Your Angle</th>
+    </tr>
+    <tr>
+      <td>Architectural Design</td>
+      <td>Lead E2E ground segment design for client constellations — TT&C, NOC, gateways, teleports</td>
+      <td>HBC+ platform: cross-domain architecture spanning MSP, airborne terminals, ground infra</td>
+    </tr>
+    <tr>
+      <td>Requirements Management</td>
+      <td>Translate customer needs → technical specs for procurement</td>
+      <td>Daily at Airbus DS — coordinating between Commercial and DS teams, writing specs for vendors</td>
+    </tr>
+    <tr>
+      <td>Procurement & Construction</td>
+      <td>Technical lead during procurement; monitoring during build</td>
+      <td>Ask Jack: is this Phase A/B heavy or do engineers stay through IOT?</td>
+    </tr>
+    <tr>
+      <td>Client Advisory</td>
+      <td>C-suite presentations, on-site client engagement, autonomous delivery</td>
+      <td>Weakest differentiator to prove on paper — have a story ready of solo stakeholder ownership</td>
+    </tr>
+  </table>
+</div>
+```
+
+  </div>
+
+  <!-- SECTION 2: FIT ANALYSIS -->
+
+  <div id="section-fit" class="section">
+    <p class="sec-head">Profile Fit Analysis</p>
+
+```
+<div class="grid-2">
+  <div class="panel success">
+    <div class="panel-title">Strong Alignments</div>
+    <div class="score-row">
+      <div class="score-label">Ground segment architecture (E2E)</div>
+      <div class="score-bar-wrap"><div class="score-bar"><div class="score-fill green" style="width:95%"></div></div></div>
+      <div class="score-num" style="color:var(--accent3)">95%</div>
+    </div>
+    <div class="score-row">
+      <div class="score-label">Toulouse location / EU27</div>
+      <div class="score-bar-wrap"><div class="score-bar"><div class="score-fill green" style="width:100%"></div></div></div>
+      <div class="score-num" style="color:var(--accent3)">✓</div>
+    </div>
+    <div class="score-row">
+      <div class="score-label">Multi-domain breadth (RF/IP/SW)</div>
+      <div class="score-bar-wrap"><div class="score-bar"><div class="score-fill green" style="width:90%"></div></div></div>
+      <div class="score-num" style="color:var(--accent3)">90%</div>
+    </div>
+    <div class="score-row">
+      <div class="score-label">Requirements & specs writing</div>
+      <div class="score-bar-wrap"><div class="score-bar"><div class="score-fill green" style="width:88%"></div></div></div>
+      <div class="score-num" style="color:var(--accent3)">88%</div>
+    </div>
+    <div class="score-row">
+      <div class="score-label">Cross-org coordination</div>
+      <div class="score-bar-wrap"><div class="score-bar"><div class="score-fill green" style="width:85%"></div></div></div>
+      <div class="score-num" style="color:var(--accent3)">85%</div>
+    </div>
+  </div>
+
+  <div class="panel warn">
+    <div class="panel-title">Gaps to Address</div>
+    <div class="score-row">
+      <div class="score-label">Formal consulting track record</div>
+      <div class="score-bar-wrap"><div class="score-bar"><div class="score-fill warn" style="width:40%"></div></div></div>
+      <div class="score-num" style="color:var(--warn)">~40%</div>
+    </div>
+    <div class="score-row">
+      <div class="score-label">Sole C-suite client ownership</div>
+      <div class="score-bar-wrap"><div class="score-bar"><div class="score-fill warn" style="width:50%"></div></div></div>
+      <div class="score-num" style="color:var(--warn)">~50%</div>
+    </div>
+    <div class="score-row">
+      <div class="score-label">Gov/Mil security clearance history</div>
+      <div class="score-bar-wrap"><div class="score-bar"><div class="score-fill warn" style="width:55%"></div></div></div>
+      <div class="score-num" style="color:var(--warn)">~55%</div>
+    </div>
+    <div class="score-row">
+      <div class="score-label">Procurement leadership (external)</div>
+      <div class="score-bar-wrap"><div class="score-bar"><div class="score-fill warn" style="width:60%"></div></div></div>
+      <div class="score-num" style="color:var(--warn)">~60%</div>
+    </div>
+  </div>
+</div>
+
+<div class="panel">
+  <div class="panel-title">Reframe Your Story for This Role</div>
+  <p>This is a consulting role, not an engineering role. The company values your technical depth, but the differentiator they're hiring for is the ability to <em>translate</em> that depth into client value — independently, at a senior level. Your pitch must lead with impact framing, not task framing.</p>
+  <div class="grid-2" style="margin-top:1rem;">
+    <div>
+      <p class="mono" style="color:var(--red); margin-bottom:0.5rem;">❌ TASK FRAMING</p>
+      <ul class="styled">
+        <li>"Led architecture for HBC+ connectivity platform"</li>
+        <li>"Coordinated between Airbus Commercial and Airbus DS"</li>
+        <li>"Wrote technical requirements for MSP onboarding"</li>
+      </ul>
+    </div>
+    <div>
+      <p class="mono" style="color:var(--accent3); margin-bottom:0.5rem;">✓ IMPACT FRAMING</p>
+      <ul class="styled">
+        <li>"Defined end-to-end architecture for a multi-operator airborne connectivity program — from satellite MSP selection through to terminal integration — across two Airbus divisions"</li>
+        <li>"Sole technical interface for cross-organizational alignment on a €Xm program"</li>
+        <li>"Translated operator SLA requirements into ground segment specs for vendor procurement"</li>
+      </ul>
+    </div>
+  </div>
+</div>
+
+<div class="panel">
+  <div class="panel-title">The "Consultant Mindset" Test — What They Actually Want</div>
+  <p>The posting says <em>"exceptional communication skills, working autonomously, leading high-stakes client meetings."</em> In a consulting context, this means:</p>
+  <ul class="styled">
+    <li><strong>You walk into a client meeting with no safety net</strong> — no manager behind you to correct course. Can you hold your own with a satellite operator CTO?</li>
+    <li><strong>You manage the relationship, not just the deliverable</strong> — sensing when the client is nervous, adjusting the pitch, knowing when to push back.</li>
+    <li><strong>You produce structured, polished outputs</strong> — reports, presentations, specs that look like they came from McKinsey, not an internal team memo.</li>
+  </ul>
+  <div class="callout warn">Prepare a specific story: a time you led a high-stakes external or cross-organizational meeting solo, managed a difficult stakeholder dynamic, or produced a client-facing deliverable that influenced a major decision.</div>
+</div>
+```
+
+  </div>
+
+  <!-- SECTION 3: Q&A PREP -->
+
+  <div id="section-qa" class="section">
+    <p class="sec-head">Anticipated Questions & Suggested Answers</p>
+
+```
+<div class="qa-card">
+  <div class="qa-q" onclick="toggleQA(this)">
+    <span class="qa-icon">Q01</span>
+    Walk me through your background in ground segment architecture.
+  </div>
+  <div class="qa-a">
+    <strong>STRUCTURE:</strong> Anchor in iDirect → Airbus DS → synthesize the arc<br><br>
+    Open with breadth: "My background spans the full ground segment stack — from RF link budgets and DVB-S2 waveforms at iDirect, where I was doing live fault isolation on customer SATCOM networks, through to system-level architecture at Airbus DS, where I currently lead the ground segment design for the HBC+ airborne connectivity platform." <br><br>
+    Then go to depth: "On HBC+, my scope runs from satellite MSP onboarding — defining the interface requirements to the space segment — through to the gateway and teleport architecture, and down to the airborne terminal integration. It's a cross-divisional program involving Airbus Commercial and Airbus DS, so I'm the architectural bridge between two organizations with different operational cultures." <br><br>
+    Close with consulting relevance: "What I find is that the most critical skill in architecture work at this scale isn't the technical decisions themselves — it's the ability to translate ambiguous operator requirements into structured specs that procurement and engineering teams can actually execute on. That's exactly where I've been operating."
+  </div>
+</div>
+
+<div class="qa-card">
+  <div class="qa-q" onclick="toggleQA(this)">
+    <span class="qa-icon">Q02</span>
+    What does "end-to-end" mean to you in a ground segment context?
+  </div>
+  <div class="qa-a">
+    <strong>TRAP:</strong> Don't just list components. Show systems thinking.<br><br>
+    "End-to-end for me means the ability to reason coherently from the customer use case all the way to the physical infrastructure — and to trace the design decisions back to requirements at each layer. Concretely: starting from operator SLAs and service definitions, through network and link architecture, into the TT&C and mission control subsystems, the NOC infrastructure, gateway/teleport selection, and finally the user terminal interface. The end-to-end view matters because failures in ground segment programs almost always originate at the interface between these layers — a requirement that was clear at the service level becomes ambiguous at the procurement spec level, and then costs you six months in integration."
+  </div>
+</div>
+
+<div class="qa-card">
+  <div class="qa-q" onclick="toggleQA(this)">
+    <span class="qa-icon">Q03</span>
+    Tell me about a time you had to manage a complex stakeholder situation independently.
+  </div>
+  <div class="qa-a">
+    <strong>FORMAT:</strong> Situation → Your role → What was hard → How you navigated it → Outcome<br><br>
+    Use HBC+ cross-divisional dynamic: "On HBC+, I operate as the technical interface between Airbus Commercial Aircraft and Airbus Defence & Space — two organizations with different cultures, priorities, and contract structures. On one occasion, [describe specific conflict or alignment challenge]. My approach was [describe the action — listening first, identifying the actual underlying interest vs stated position, proposing a framing that let both sides move forward]. The outcome was [concrete result — decision reached, program unblocked, spec agreed]. What I learned is that in these situations the technical answer is often the easier part; the harder work is creating a shared language between stakeholders who aren't used to talking to each other."
+  </div>
+</div>
+
+<div class="qa-card">
+  <div class="qa-q" onclick="toggleQA(this)">
+    <span class="qa-icon">Q04</span>
+    You've been in large industry roles. Why consulting, and why now?
+  </div>
+  <div class="qa-a">
+    <strong>KEY:</strong> Don't sound like you're escaping Airbus. Sound like you're drawn to the consulting model.<br><br>
+    "I've spent my career building and operating within programs — which gives me a strong foundation in what actually works when you're executing at scale. What consulting offers that internal roles don't is range: the ability to apply that experience across multiple programs, operators, and system types in a compressed timeframe, and to shape decisions before they become constraints rather than after. I find that the most valuable engineering work I do at Airbus is often the early architecture framing — when the requirements are still fluid and the right question matters more than the right answer. A consulting model puts me at that stage systematically, rather than once every few years."
+  </div>
+</div>
+
+<div class="qa-card">
+  <div class="qa-q" onclick="toggleQA(this)">
+    <span class="qa-icon">Q05</span>
+    How do you approach translating customer requirements into a technical specification?
+  </div>
+  <div class="qa-a">
+    <strong>SHOW PROCESS:</strong> This is a core consulting deliverable — structured thinking matters<br><br>
+    "The first step is separating what the customer asks for from what they actually need — those are often different. I spend time understanding the operational context: what failure modes they're most afraid of, what their existing infrastructure constraints are, and what their internal capability to operate the end system looks like. From there I work top-down: service requirements → system-level functional requirements → subsystem specs → interface requirements. I flag assumptions explicitly and validate them before they become embedded in the spec. In my experience, the most expensive errors in procurement happen when an assumption made at the requirements stage is never challenged — so I try to make the dependency chain visible to the customer, not just internally."
+  </div>
+</div>
+
+<div class="qa-card">
+  <div class="qa-q" onclick="toggleQA(this)">
+    <span class="qa-icon">Q06</span>
+    Where do you see yourself in 3–5 years?
+  </div>
+  <div class="qa-a">
+    <strong>ALIGN WITH THEIR MODEL:</strong> Show you want to grow within consulting, not through it<br><br>
+    "Within a consulting environment, I'd want to have moved from being the technical lead on individual engagements to shaping the portfolio — being the person who defines how we approach a new class of program, whether that's LEO constellation ground segments, government dual-use architectures, or whatever the next inflection point is. I'm also interested in building client relationships over time — the kind where you're called at the problem definition stage, not just the RFP stage. That's the consulting value I find most compelling: being close enough to the client's thinking to influence the question, not just answer it."
+  </div>
+</div>
+```
+
+  </div>
+
+  <!-- SECTION 4: YOUR QUESTIONS FOR JACK -->
+
+  <div id="section-questions" class="section">
+    <p class="sec-head">Questions to Ask Jack During the Call</p>
+
+```
+<div class="panel">
+  <div class="panel-title">Tier 1 — Must Ask (Understanding the Role)</div>
+  <ul class="styled">
+    <li><strong>What's the engagement model?</strong> — "Are engineers typically embedded with a single client for the duration, or is it more project-to-project with multiple clients running in parallel?" This affects work style significantly.</li>
+    <li><strong>Phase weighting</strong> — "What's the typical balance between early-phase architecture definition versus monitoring and advisory during construction and IOT? I want to understand where the role spends most of its energy."</li>
+    <li><strong>Program pipeline</strong> — "What types of constellation programs are in the pipeline right now — government, commercial, GEO/LEO, or mixed? And are there specific sectors like defence or broadband that are most active?"</li>
+    <li><strong>Team structure</strong> — "Is this a new hire or a backfill, and what does the immediate team look like? Who would I be working alongside day-to-day?"</li>
+  </ul>
+</div>
+
+<div class="panel warn">
+  <div class="panel-title">Tier 2 — Strategic (Calibrating the Opportunity)</div>
+  <ul class="styled">
+    <li><strong>Salary positioning</strong> — "The band is fairly wide — €70k to €110k. Where does a profile like mine typically land within that range, and what factors move someone toward the top?" Ask this early, not at the end.</li>
+    <li><strong>Profit share mechanics</strong> — "The posting mentions significant bonus/profit share — can you give me a sense of what that looks like in practice? Is it tied to individual billings, team performance, or firm-wide P&L?"</li>
+    <li><strong>Travel expectations</strong> — "The posting mentions international travel for deployment monitoring. What's a realistic average — weeks per year, or something more?"</li>
+    <li><strong>Security clearance pathway</strong> — "The EU27 requirement is clear, but is there an existing clearance level expected, or is it more about eligibility for clearance processes down the line?"</li>
+  </ul>
+</div>
+
+<div class="panel">
+  <div class="panel-title">Tier 3 — Closing (If You're Interested)</div>
+  <ul class="styled">
+    <li>"What does the process look like from here — is there a formal interview with the company, and what are they typically evaluating at that stage?"</li>
+    <li>"Is there a preferred timeline on their side for filling this role?"</li>
+    <li>"Is there anything in my profile that you'd expect them to want to probe further, or gaps I should be prepared to address?"</li>
+  </ul>
+</div>
+```
+
+  </div>
+
+  <!-- SECTION 5: OPENING PITCH -->
+
+  <div id="section-pitch" class="section">
+    <p class="sec-head">Opening Pitch — First 90 Seconds on the Call</p>
+
+```
+<div class="panel">
+  <div class="panel-title">Suggested Opening (Adapt as Needed)</div>
+  <div class="callout">
+    "Thanks for reaching out, Jack. I had a good look at the posting — it's an interesting one. The combination of architecture authority with direct client exposure is exactly the kind of role I've been looking for as a next step. My current work at Airbus DS is at the intersection of those two things — I lead the ground segment architecture for our HBC+ airborne connectivity platform, which involves satellite MSP interfaces, gateway and network design, and cross-divisional alignment between Airbus Commercial and Airbus DS. It's a senior technical position, but the value I add is really in the translation work: taking ambiguous operator requirements and turning them into specs that procurement and engineering can execute. That's what looks compelling about this role — doing that systematically, across multiple client programs, rather than within a single internal program. I wanted to understand more about the company and the specific pipeline before committing either way — can you give me a sense of who the client is and what the current program mix looks like?"
+  </div>
+  <p class="mono" style="margin-top:1rem;">~90 seconds. Ends with a question that opens the conversation without tipping your hand too much.</p>
+</div>
+
+<div class="panel warn">
+  <div class="panel-title">Things to Avoid on This Call</div>
+  <ul class="styled">
+    <li>Don't undersell by framing yourself as "internal" — frame everything as client-impact language</li>
+    <li>Don't ask about work-life balance, remote work, or holidays on a first call with a recruiter</li>
+    <li>Don't ask "what company is it?" directly — let him volunteer it, or probe gently: "Can you tell me more about the client?"</li>
+    <li>Don't agree to the process without getting a sense of salary positioning — you're a senior profile, ask early and confidently</li>
+    <li>Don't close by saying you're "very interested" unless you mean it — leave yourself room to reflect</li>
+  </ul>
+</div>
+```
+
+  </div>
+
+  <!-- SECTION 6: CHECKLIST -->
+
+  <div id="section-checklist" class="section">
+    <p class="sec-head">Pre-Call Checklist</p>
+
+```
+<div class="grid-2">
+  <div class="panel">
+    <div class="panel-title">Research Done</div>
+    <ul class="checklist" id="checklist1">
+      <li onclick="toggleCheck(this)"><div class="check-box"></div><span>Read Novaspace Technology service offering (nova.space)</span></li>
+      <li onclick="toggleCheck(this)"><div class="check-box"></div><span>Review Novaspace active job postings for context</span></li>
+      <li onclick="toggleCheck(this)"><div class="check-box"></div><span>Look up Jack Humphries on LinkedIn — understand his placement history</span></li>
+      <li onclick="toggleCheck(this)"><div class="check-box"></div><span>Review Hamilton Barnes space sector track record</span></li>
+      <li onclick="toggleCheck(this)"><div class="check-box"></div><span>Check Novaspace / Satconsult recent projects publicly referenced</span></li>
+    </ul>
+  </div>
+
+  <div class="panel">
+    <div class="panel-title">Stories Prepared</div>
+    <ul class="checklist" id="checklist2">
+      <li onclick="toggleCheck(this)"><div class="check-box"></div><span>E2E architecture story — HBC+ scoped and timed to ~90 sec</span></li>
+      <li onclick="toggleCheck(this)"><div class="check-box"></div><span>Solo stakeholder management story — specific and outcome-focused</span></li>
+      <li onclick="toggleCheck(this)"><div class="check-box"></div><span>Requirements → spec translation example ready</span></li>
+      <li onclick="toggleCheck(this)"><div class="check-box"></div><span>"Why consulting now?" answer rehearsed</span></li>
+      <li onclick="toggleCheck(this)"><div class="check-box"></div><span>iDirect SATCOM operations angle positioned as differentiator</span></li>
+    </ul>
+  </div>
+
+  <div class="panel">
+    <div class="panel-title">Logistics</div>
+    <ul class="checklist" id="checklist3">
+      <li onclick="toggleCheck(this)"><div class="check-box"></div><span>Confirmed call time and format (phone / video)</span></li>
+      <li onclick="toggleCheck(this)"><div class="check-box"></div><span>CV open and current version confirmed</span></li>
+      <li onclick="toggleCheck(this)"><div class="check-box"></div><span>Quiet space secured for the call</span></li>
+      <li onclick="toggleCheck(this)"><div class="check-box"></div><span>Questions list printed / on screen</span></li>
+    </ul>
+  </div>
+
+  <div class="panel">
+    <div class="panel-title">Mindset Reminders</div>
+    <ul class="checklist" id="checklist4">
+      <li onclick="toggleCheck(this)"><div class="check-box"></div><span>You are evaluating them as much as they are evaluating you</span></li>
+      <li onclick="toggleCheck(this)"><div class="check-box"></div><span>Lead with architecture authority, not task history</span></li>
+      <li onclick="toggleCheck(this)"><div class="check-box"></div><span>Breadth across RF/IP/SW is your differentiator — use it</span></li>
+      <li onclick="toggleCheck(this)"><div class="check-box"></div><span>Ask about salary in the first half of the call</span></li>
+      <li onclick="toggleCheck(this)"><div class="check-box"></div><span>End the call knowing the next step, not just "we'll be in touch"</span></li>
+    </ul>
+  </div>
+</div>
+```
+
+  </div>
+
+</div><!-- /main -->
+
+<script>
+  function showSection(id) {
+    document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+    document.querySelectorAll('.nav-tab').forEach(t => t.classList.remove('active'));
+    document.getElementById('section-' + id).classList.add('active');
+    event.target.classList.add('active');
+  }
+
+  function toggleQA(el) {
+    const answer = el.nextElementSibling;
+    answer.classList.toggle('open');
+  }
+
+  function toggleCheck(li) {
+    li.classList.toggle('done');
+    const box = li.querySelector('.check-box');
+    box.textContent = li.classList.contains('done') ? '✓' : '';
+  }
+</script>
+
+</body>
+</html>
