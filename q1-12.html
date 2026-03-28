@@ -1,0 +1,1579 @@
+<!DOCTYPE html>
+
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Q1-12 · User Terminals: Technology Overview | LEOAF</title>
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Share+Tech+Mono&family=Libre+Baskerville:ital,wght@0,400;0,700;1,400&display=swap" rel="stylesheet"/>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<style>
+:root {
+  --bg: #0a0c10;
+  --bg2: #0f1218;
+  --bg3: #141820;
+  --panel: #0c0f14;
+  --accent: #00d4ff;
+  --accent2: #ff6b35;
+  --accent3: #7fff6b;
+  --text: #c8cdd6;
+  --text-dim: #4a5060;
+  --text-bright: #e8ecf4;
+  --border: #1e2530;
+  --border-lit: rgba(0,212,255,0.25);
+  --red: #ff4455;
+  --yellow: #ffd060;
+  --purple: #b07fff;
+}
+
+- { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+background: var(–bg);
+color: var(–text);
+font-family: ‘Libre Baskerville’, serif;
+font-size: 15px;
+line-height: 1.85;
+}
+
+body::before {
+content: ‘’;
+position: fixed;
+inset: 0;
+background: repeating-linear-gradient(0deg, transparent, transparent 2px, rgba(0,212,255,0.012) 2px, rgba(0,212,255,0.012) 4px);
+pointer-events: none;
+z-index: 9999;
+}
+
+/* ── TOPBAR ── */
+.topbar {
+position: sticky;
+top: 0;
+z-index: 200;
+height: 50px;
+background: var(–panel);
+border-bottom: 1px solid var(–border);
+display: flex;
+align-items: center;
+justify-content: space-between;
+padding: 0 2rem;
+}
+.logo {
+font-family: ‘Orbitron’, sans-serif;
+font-size: 0.82rem;
+font-weight: 900;
+color: var(–accent);
+letter-spacing: 0.18em;
+text-decoration: none;
+}
+.breadcrumb {
+font-family: ‘Share Tech Mono’, monospace;
+font-size: 0.68rem;
+color: var(–text-dim);
+letter-spacing: 0.06em;
+}
+.breadcrumb span { color: var(–accent); }
+.topbar-right {
+font-family: ‘Share Tech Mono’, monospace;
+font-size: 0.62rem;
+color: var(–text-dim);
+letter-spacing: 0.1em;
+}
+
+/* ── HERO ── */
+.hero {
+padding: 3rem 2rem 2.5rem;
+border-bottom: 1px solid var(–border);
+background: linear-gradient(160deg, #0d1520 0%, var(–bg) 100%);
+position: relative;
+overflow: hidden;
+}
+.hero::after {
+content: ‘’;
+position: absolute;
+right: -60px; top: -60px;
+width: 380px; height: 380px;
+background: radial-gradient(circle, rgba(0,212,255,0.05) 0%, transparent 70%);
+pointer-events: none;
+}
+.lesson-eyebrow {
+font-family: ‘Share Tech Mono’, monospace;
+font-size: 0.65rem;
+letter-spacing: 0.22em;
+color: var(–accent);
+text-transform: uppercase;
+margin-bottom: 0.8rem;
+display: flex;
+align-items: center;
+gap: 0.6rem;
+}
+.lesson-eyebrow::before {
+content: ‘’;
+display: inline-block;
+width: 22px;
+height: 1px;
+background: var(–accent);
+}
+.hero h1 {
+font-family: ‘Orbitron’, sans-serif;
+font-size: clamp(1.35rem, 3vw, 2.1rem);
+font-weight: 700;
+color: var(–text-bright);
+line-height: 1.2;
+margin-bottom: 1rem;
+letter-spacing: 0.03em;
+}
+.hero-meta {
+display: flex;
+flex-wrap: wrap;
+gap: 1.5rem;
+margin-top: 0.5rem;
+}
+.meta-pill {
+font-family: ‘Share Tech Mono’, monospace;
+font-size: 0.66rem;
+color: var(–text-dim);
+letter-spacing: 0.08em;
+}
+.meta-pill strong { color: var(–text); font-weight: normal; }
+.badge {
+display: inline-block;
+font-family: ‘Share Tech Mono’, monospace;
+font-size: 0.62rem;
+letter-spacing: 0.12em;
+padding: 0.18rem 0.55rem;
+border: 1px solid var(–accent2);
+color: var(–accent2);
+text-transform: uppercase;
+}
+
+/* ── LAYOUT ── */
+.page-body {
+display: grid;
+grid-template-columns: 220px 1fr;
+min-height: calc(100vh - 50px);
+}
+
+/* ── SIDEBAR NAV ── */
+.sidebar {
+background: var(–panel);
+border-right: 1px solid var(–border);
+padding: 1.5rem 0;
+position: sticky;
+top: 50px;
+height: calc(100vh - 50px);
+overflow-y: auto;
+}
+.sidebar-section {
+font-family: ‘Share Tech Mono’, monospace;
+font-size: 0.58rem;
+letter-spacing: 0.2em;
+color: var(–text-dim);
+text-transform: uppercase;
+padding: 0.4rem 1.2rem 0.3rem;
+margin-top: 0.8rem;
+}
+.sidebar a {
+display: block;
+font-family: ‘Share Tech Mono’, monospace;
+font-size: 0.68rem;
+color: var(–text-dim);
+text-decoration: none;
+padding: 0.4rem 1.2rem;
+letter-spacing: 0.04em;
+border-left: 2px solid transparent;
+transition: all 0.15s;
+}
+.sidebar a:hover { color: var(–text-bright); border-left-color: var(–border-lit); background: rgba(0,212,255,0.03); }
+.sidebar a.active { color: var(–accent); border-left-color: var(–accent); }
+
+/* ── MAIN CONTENT ── */
+.main {
+padding: 2.5rem 3rem 4rem;
+max-width: 860px;
+}
+
+/* ── PROGRESS BAR ── */
+.progress-bar-wrap {
+margin-bottom: 2.5rem;
+}
+.progress-label {
+font-family: ‘Share Tech Mono’, monospace;
+font-size: 0.65rem;
+color: var(–text-dim);
+letter-spacing: 0.1em;
+margin-bottom: 0.4rem;
+display: flex;
+justify-content: space-between;
+}
+.progress-label span { color: var(–accent); }
+.progress-track {
+height: 3px;
+background: var(–border);
+position: relative;
+}
+.progress-fill {
+height: 100%;
+background: linear-gradient(90deg, var(–accent), rgba(0,212,255,0.4));
+width: 0%;
+transition: width 0.6s ease;
+}
+
+/* ── SECTION HEADERS ── */
+.section {
+margin-bottom: 3rem;
+scroll-margin-top: 70px;
+}
+.section-header {
+display: flex;
+align-items: center;
+gap: 0.8rem;
+margin-bottom: 1.2rem;
+padding-bottom: 0.6rem;
+border-bottom: 1px solid var(–border);
+}
+.section-num {
+font-family: ‘Share Tech Mono’, monospace;
+font-size: 0.62rem;
+color: var(–accent);
+letter-spacing: 0.15em;
+min-width: 3rem;
+}
+.section h2 {
+font-family: ‘Orbitron’, sans-serif;
+font-size: 0.95rem;
+font-weight: 700;
+color: var(–text-bright);
+letter-spacing: 0.06em;
+text-transform: uppercase;
+}
+
+/* ── PROSE ── */
+p { margin-bottom: 1rem; color: var(–text); }
+p:last-child { margin-bottom: 0; }
+
+em { color: var(–text-bright); font-style: italic; }
+strong { color: var(–text-bright); font-weight: 700; font-style: normal; }
+
+/* ── INFO BOXES ── */
+.callout {
+border-left: 3px solid var(–accent);
+background: rgba(0,212,255,0.04);
+padding: 1rem 1.2rem;
+margin: 1.5rem 0;
+font-size: 0.9rem;
+}
+.callout.warn { border-left-color: var(–yellow); background: rgba(255,208,96,0.04); }
+.callout.note { border-left-color: var(–purple); background: rgba(176,127,255,0.04); }
+.callout-label {
+font-family: ‘Share Tech Mono’, monospace;
+font-size: 0.6rem;
+letter-spacing: 0.2em;
+color: var(–accent);
+text-transform: uppercase;
+margin-bottom: 0.4rem;
+}
+.callout.warn .callout-label { color: var(–yellow); }
+.callout.note .callout-label { color: var(–purple); }
+
+/* ── COMPARISON TABLE ── */
+.data-table {
+width: 100%;
+border-collapse: collapse;
+margin: 1.5rem 0;
+font-family: ‘Share Tech Mono’, monospace;
+font-size: 0.72rem;
+}
+.data-table th {
+background: var(–bg3);
+color: var(–accent);
+font-weight: normal;
+letter-spacing: 0.1em;
+text-align: left;
+padding: 0.6rem 0.8rem;
+border: 1px solid var(–border);
+text-transform: uppercase;
+font-size: 0.62rem;
+}
+.data-table td {
+padding: 0.55rem 0.8rem;
+border: 1px solid var(–border);
+color: var(–text);
+vertical-align: top;
+line-height: 1.5;
+}
+.data-table tr:nth-child(even) td { background: rgba(255,255,255,0.015); }
+.data-table td.hl { color: var(–text-bright); }
+.data-table td.pos { color: var(–accent3); }
+.data-table td.neg { color: var(–red); }
+.data-table td.neu { color: var(–yellow); }
+
+/* ── SPEC GRID ── */
+.spec-grid {
+display: grid;
+grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+gap: 1px;
+background: var(–border);
+border: 1px solid var(–border);
+margin: 1.5rem 0;
+}
+.spec-cell {
+background: var(–bg2);
+padding: 1rem;
+}
+.spec-label {
+font-family: ‘Share Tech Mono’, monospace;
+font-size: 0.6rem;
+letter-spacing: 0.15em;
+color: var(–text-dim);
+text-transform: uppercase;
+margin-bottom: 0.3rem;
+}
+.spec-value {
+font-family: ‘Share Tech Mono’, monospace;
+font-size: 0.88rem;
+color: var(–accent);
+}
+.spec-sub {
+font-family: ‘Share Tech Mono’, monospace;
+font-size: 0.6rem;
+color: var(–text-dim);
+margin-top: 0.2rem;
+}
+
+/* ── DIAGRAM ── */
+.diagram {
+background: var(–panel);
+border: 1px solid var(–border);
+padding: 1.5rem;
+margin: 1.5rem 0;
+font-family: ‘Share Tech Mono’, monospace;
+font-size: 0.72rem;
+color: var(–text-dim);
+line-height: 1.6;
+overflow-x: auto;
+}
+.diagram .hi { color: var(–accent); }
+.diagram .hi2 { color: var(–accent2); }
+.diagram .hi3 { color: var(–accent3); }
+
+/* ── ACCORDION (Quiz & Exercises) ── */
+.accordion-group { margin: 1.5rem 0; }
+.accordion-item {
+border: 1px solid var(–border);
+margin-bottom: 2px;
+}
+.accordion-trigger {
+width: 100%;
+background: var(–bg3);
+border: none;
+padding: 0.9rem 1.1rem;
+display: flex;
+align-items: center;
+justify-content: space-between;
+cursor: pointer;
+text-align: left;
+gap: 1rem;
+}
+.accordion-trigger:hover { background: rgba(0,212,255,0.05); }
+.acc-label {
+font-family: ‘Share Tech Mono’, monospace;
+font-size: 0.7rem;
+color: var(–text);
+letter-spacing: 0.04em;
+}
+.acc-arrow {
+font-family: ‘Share Tech Mono’, monospace;
+font-size: 0.65rem;
+color: var(–accent);
+transition: transform 0.2s;
+flex-shrink: 0;
+}
+.accordion-item.open .acc-arrow { transform: rotate(90deg); }
+.accordion-body {
+display: none;
+padding: 1.2rem 1.2rem 1.2rem;
+border-top: 1px solid var(–border);
+background: var(–bg2);
+font-size: 0.88rem;
+}
+.accordion-item.open .accordion-body { display: block; }
+
+/* ── QUIZ ── */
+.quiz-q {
+font-family: ‘Libre Baskerville’, serif;
+font-size: 0.9rem;
+color: var(–text-bright);
+margin-bottom: 0.9rem;
+}
+.quiz-options { list-style: none; display: flex; flex-direction: column; gap: 0.4rem; }
+.quiz-options li {
+display: flex;
+align-items: flex-start;
+gap: 0.6rem;
+}
+.quiz-options label {
+font-size: 0.85rem;
+color: var(–text);
+cursor: pointer;
+line-height: 1.5;
+}
+.quiz-options input[type=radio] { accent-color: var(–accent); margin-top: 0.2rem; flex-shrink: 0; }
+.quiz-submit {
+margin-top: 0.9rem;
+font-family: ‘Share Tech Mono’, monospace;
+font-size: 0.68rem;
+letter-spacing: 0.12em;
+color: var(–accent);
+background: transparent;
+border: 1px solid var(–accent);
+padding: 0.4rem 1rem;
+cursor: pointer;
+text-transform: uppercase;
+}
+.quiz-submit:hover { background: rgba(0,212,255,0.08); }
+.quiz-feedback {
+margin-top: 0.7rem;
+font-family: ‘Share Tech Mono’, monospace;
+font-size: 0.72rem;
+padding: 0.5rem 0.8rem;
+display: none;
+}
+.quiz-feedback.correct { background: rgba(127,255,107,0.08); color: var(–accent3); border-left: 2px solid var(–accent3); }
+.quiz-feedback.wrong { background: rgba(255,68,85,0.08); color: var(–red); border-left: 2px solid var(–red); }
+
+/* ── PYTHON EXERCISE ── */
+.exercise-block { margin-top: 0.5rem; }
+.exercise-title {
+font-family: ‘Share Tech Mono’, monospace;
+font-size: 0.65rem;
+letter-spacing: 0.15em;
+color: var(–accent2);
+text-transform: uppercase;
+margin-bottom: 0.5rem;
+}
+.code-block {
+background: #07090d;
+border: 1px solid var(–border);
+padding: 1rem 1.1rem;
+font-family: ‘Share Tech Mono’, monospace;
+font-size: 0.73rem;
+color: #a8b4c8;
+line-height: 1.65;
+overflow-x: auto;
+white-space: pre;
+margin: 0.6rem 0;
+}
+.code-block .kw { color: #cc99ff; }
+.code-block .fn { color: #6bc5ff; }
+.code-block .st { color: #98d982; }
+.code-block .cm { color: #4a5568; font-style: italic; }
+.code-block .nm { color: var(–accent2); }
+
+/* ── REFLECTION ── */
+.reflection-prompt {
+background: rgba(176,127,255,0.05);
+border-left: 2px solid var(–purple);
+padding: 0.9rem 1.1rem;
+margin-bottom: 0.6rem;
+font-size: 0.88rem;
+font-style: italic;
+color: var(–text);
+}
+.reflection-prompt span {
+display: block;
+font-family: ‘Share Tech Mono’, monospace;
+font-size: 0.6rem;
+letter-spacing: 0.15em;
+color: var(–purple);
+text-transform: uppercase;
+margin-bottom: 0.35rem;
+font-style: normal;
+}
+
+/* ── COMPLETION ── */
+.completion-zone {
+margin-top: 3rem;
+border: 1px solid var(–border);
+padding: 2rem;
+background: var(–panel);
+text-align: center;
+}
+.completion-zone h3 {
+font-family: ‘Orbitron’, sans-serif;
+font-size: 0.85rem;
+color: var(–text-bright);
+letter-spacing: 0.12em;
+margin-bottom: 0.5rem;
+}
+.completion-zone p {
+font-family: ‘Share Tech Mono’, monospace;
+font-size: 0.7rem;
+color: var(–text-dim);
+margin-bottom: 1.2rem;
+}
+#complete-btn {
+font-family: ‘Share Tech Mono’, monospace;
+font-size: 0.72rem;
+letter-spacing: 0.18em;
+text-transform: uppercase;
+background: transparent;
+border: 1px solid var(–accent);
+color: var(–accent);
+padding: 0.65rem 2rem;
+cursor: pointer;
+transition: all 0.2s;
+}
+#complete-btn:hover { background: rgba(0,212,255,0.1); }
+#complete-btn:disabled { opacity: 0.4; cursor: default; }
+#complete-msg {
+margin-top: 1rem;
+font-family: ‘Share Tech Mono’, monospace;
+font-size: 0.68rem;
+color: var(–accent3);
+display: none;
+letter-spacing: 0.1em;
+}
+
+/* ── RESPONSIVE ── */
+@media (max-width: 768px) {
+.page-body { grid-template-columns: 1fr; }
+.sidebar { display: none; }
+.main { padding: 1.5rem 1.2rem 3rem; }
+.hero { padding: 2rem 1.2rem 1.8rem; }
+.topbar { padding: 0 1rem; }
+.topbar-right { display: none; }
+.spec-grid { grid-template-columns: 1fr 1fr; }
+.data-table { font-size: 0.64rem; }
+}
+</style>
+
+</head>
+<body>
+
+<!-- TOPBAR -->
+
+<header class="topbar">
+  <div class="topbar-left" style="display:flex;align-items:center;gap:1.5rem;">
+    <a href="../../index.html" class="logo">LEOAF</a>
+    <div class="breadcrumb">Q1 / <span>LESSON 12</span> / USER TERMINALS</div>
+  </div>
+  <div class="topbar-right">SYS::CURRICULUM · Q1-12 OF 15</div>
+</header>
+
+<!-- HERO -->
+
+<div class="hero">
+  <div class="lesson-eyebrow">Quarter 1 · Lesson 12</div>
+  <h1>User Terminals:<br>Technology Overview</h1>
+  <div class="hero-meta">
+    <div class="meta-pill">⏱ <strong>~65 min</strong></div>
+    <div class="meta-pill">📡 <strong>9 reading sections</strong></div>
+    <div class="meta-pill">🧩 <strong>10 quiz questions</strong></div>
+    <div class="meta-pill">🐍 <strong>3 exercises</strong></div>
+    <div class="meta-pill"><span class="badge">Advanced</span></div>
+  </div>
+</div>
+
+<!-- PAGE BODY -->
+
+<div class="page-body">
+
+  <!-- SIDEBAR -->
+
+  <nav class="sidebar">
+    <div class="sidebar-section">Reading</div>
+    <a href="#s1" class="active">1 · Introduction</a>
+    <a href="#s2">2 · Phased Array Fundamentals</a>
+    <a href="#s3">3 · VSAT vs LEO Terminals</a>
+    <a href="#s4">4 · Starlink Dish Architecture</a>
+    <a href="#s5">5 · OneWeb / Eutelsat UT</a>
+    <a href="#s6">6 · Flat Panel & AESA Design</a>
+    <a href="#s7">7 · Link Budget at the Terminal</a>
+    <a href="#s8">8 · Mobility & Handover</a>
+    <a href="#s9">9 · Form Factors & Markets</a>
+    <div class="sidebar-section">Assessment</div>
+    <a href="#quiz">Quiz (10 Q)</a>
+    <a href="#exercises">Python Exercises</a>
+    <a href="#reflection">Reflection</a>
+  </nav>
+
+  <!-- MAIN -->
+
+  <main class="main">
+
+```
+<!-- PROGRESS -->
+<div class="progress-bar-wrap">
+  <div class="progress-label">
+    <span>LESSON PROGRESS</span>
+    <span id="progress-pct">0%</span>
+  </div>
+  <div class="progress-track"><div class="progress-fill" id="progress-fill"></div></div>
+</div>
+
+<!-- S1: INTRODUCTION -->
+<section class="section" id="s1">
+  <div class="section-header">
+    <div class="section-num">01 / 09</div>
+    <h2>Introduction</h2>
+  </div>
+  <p>The satellite constellation is only half the system. Every beam reaching the ground must terminate in a device that a person, an aircraft, a ship, or a cell tower can actually use. <em>User terminals</em> — also called ground terminals, subscriber units, or dishes — are where the link budget meets reality, and their evolution over the past decade has been as dramatic as the spacecraft above them.</p>
+  <p>For most of SATCOM's history, the user terminal was a large, heavy, mechanically-steered parabolic dish: a GEO VSAT that pointed at a fixed spot in the sky and stayed there. LEO constellations broke this model entirely. A LEO satellite moves at ~7 km/s relative to the ground, crossing the entire visible sky in minutes. No mechanical gimbal is fast enough — or cheap enough — to track that motion at consumer scale.</p>
+  <p>The answer was the <strong>electronically-steered flat-panel antenna</strong>, sometimes called an AESA (Active Electronically Scanned Array) or phased array. By adjusting the phase of hundreds or thousands of small antenna elements electrically — not mechanically — these terminals can steer their beam from horizon to horizon in milliseconds, with no moving parts. The cost, mass, and power consumption of this technology have dropped precipitously since 2018, enabling terminals that sit on a rooftop, a car roof, or a boat deck and look unremarkable to a casual observer.</p>
+  <div class="callout">
+    <div class="callout-label">Key Framing</div>
+    The user terminal defines the commercial viability of a LEO constellation. A $50,000 terminal that requires professional installation serves only enterprise customers. A $499 self-install terminal opens consumer, maritime, and aero markets. Terminal economics are often the binding constraint on a constellation's business case.
+  </div>
+  <p>This lesson covers the physics and engineering behind modern LEO user terminals, compares the major technology approaches in use today, walks through the link budget from the terminal's perspective, and introduces the mobility and handover challenges unique to LEO tracking.</p>
+</section>
+
+<!-- S2: PHASED ARRAY FUNDAMENTALS -->
+<section class="section" id="s2">
+  <div class="section-header">
+    <div class="section-num">02 / 09</div>
+    <h2>Phased Array Fundamentals</h2>
+  </div>
+  <p>A phased array is a collection of individual antenna elements whose signals are combined with controlled phase offsets. When the phase differences are chosen correctly, the individual wavefronts add constructively in the desired look direction and cancel destructively elsewhere — forming a beam.</p>
+
+  <div class="diagram">
+```
+
+<span class="hi">ELEMENT PHASE STEERING — SIMPLIFIED VIEW</span>
+
+Element 1 ──[φ₀]──┐
+Element 2 ──[φ₁]──┤
+Element 3 ──[φ₂]──┤─── Σ combiner ──► <span class="hi3">Beam toward θ</span>
+Element 4 ──[φ₃]──┤
+…          │
+Element N ──[φₙ]──┘
+
+Phase shift:  <span class="hi2">φₙ = (2π/λ) · d · n · sin(θ)</span>
+where d = element spacing, θ = steering angle from boresight
+
+<span class="cm">// Typical spacing: d = λ/2  (avoids grating lobes)</span>
+<span class="cm">// Ku-band λ ≈ 25 mm  → element pitch ≈ 12.5 mm</span>
+</div>
+
+```
+  <p>The key advantage for LEO tracking is <strong>beam agility</strong>. Phase shifts are applied by phase shifters — analog or digital circuits — that switch in nanoseconds. The beam can jump from one satellite to another with no inertia, no motor, no settling time. In practice, modern terminals interleave tracking across multiple simultaneous satellites, enabling seamless handover.</p>
+  <p>Gain is proportional to the number of elements: doubling the array doubles the aperture area and increases gain by ~3 dB (in a simplified model). A flat panel with 1,000 elements at Ku-band can achieve ~34–38 dBi of gain, competitive with a 60 cm GEO dish.</p>
+  <div class="callout warn">
+    <div class="callout-label">Scan Loss</div>
+    Phased arrays lose gain as the beam steers away from boresight (normal to the panel surface). At 60° off-boresight, gain drops by roughly 3–6 dB depending on element pattern. This limits the practical operational scan range and means terminal placement (tilt, orientation) matters for link margin, especially at low satellite elevations.
+  </div>
+  <p>Phase shifters can be implemented in analog RF (traditional approach, lower cost per element), digital (full digital beamforming — highest flexibility, high power/cost), or hybrid architectures that split the array into subarrays, each with analog phase shifting feeding a digital combiner. Most commercial LEO terminals in 2024 use <strong>hybrid beamforming</strong> as the cost-performance sweet spot.</p>
+</section>
+
+<!-- S3: VSAT vs LEO TERMINALS -->
+<section class="section" id="s3">
+  <div class="section-header">
+    <div class="section-num">03 / 09</div>
+    <h2>VSAT vs. LEO Terminals</h2>
+  </div>
+  <p>Understanding modern LEO terminals is easier when contrasted with the GEO VSAT terminals they are progressively displacing in certain markets.</p>
+
+  <table class="data-table">
+    <tr>
+      <th>Parameter</th>
+      <th>GEO VSAT (Ku/Ka)</th>
+      <th>LEO Terminal (Ku/Ka)</th>
+    </tr>
+    <tr>
+      <td class="hl">Antenna type</td>
+      <td>Mechanically steered parabolic dish</td>
+      <td>Electronically steered flat panel (phased array)</td>
+    </tr>
+    <tr>
+      <td class="hl">Pointing</td>
+      <td>Fixed — no tracking required</td>
+      <td>Continuous tracking, multiple simultaneous beams</td>
+    </tr>
+    <tr>
+      <td class="hl">Typical aperture</td>
+      <td>60–120 cm diameter</td>
+      <td>20–50 cm (square or circular)</td>
+    </tr>
+    <tr>
+      <td class="hl">TX power</td>
+      <td>1–4 W (BUC, can be higher)</td>
+      <td>0.5–5 W (distributed across elements)</td>
+    </tr>
+    <tr>
+      <td class="hl">Installation</td>
+      <td>Professional alignment required</td>
+      <td>Self-install, auto-points on startup</td>
+    </tr>
+    <tr>
+      <td class="hl">Latency (system)</td>
+      <td>600–700 ms RTT</td>
+      <td>20–60 ms RTT</td>
+    </tr>
+    <tr>
+      <td class="hl">Cost (terminal)</td>
+      <td>$800–$5,000+</td>
+      <td>$300–$2,500 (rapidly falling)</td>
+    </tr>
+    <tr>
+      <td class="hl">Obstruction sensitivity</td>
+      <td>Low (fixed beam, avoidable at install)</td>
+      <td>Higher — satellite arc sweeps sky, any obstruction matters</td>
+    </tr>
+    <tr>
+      <td class="hl">Moving platforms</td>
+      <td class="neg">Poor (requires stabilized pedestal, costly)</td>
+      <td class="pos">Native — designed for mobility</td>
+    </tr>
+    <tr>
+      <td class="hl">Rain fade resilience</td>
+      <td class="neu">Moderate (Ka worse than Ku)</td>
+      <td class="neu">Similar physics; shorter path at high elevation helps</td>
+    </tr>
+  </table>
+
+  <p>The GEO VSAT's simplicity remains a genuine advantage in fixed deployments where reliability and predictability matter more than latency or setup speed. For mobility — maritime, aviation, vehicle-mounted — the LEO terminal's native tracking capability is transformative.</p>
+</section>
+
+<!-- S4: STARLINK DISH ARCHITECTURE -->
+<section class="section" id="s4">
+  <div class="section-header">
+    <div class="section-num">04 / 09</div>
+    <h2>Starlink Dish Architecture</h2>
+  </div>
+  <p>SpaceX's Starlink terminal — marketed as "Dishy McFlatface" internally during development — represents the most widely deployed LEO user terminal to date, with millions of units in the field as of 2024. It has gone through three major hardware generations since 2020, each smaller, cheaper, and more capable than the last.</p>
+
+  <div class="spec-grid">
+    <div class="spec-cell">
+      <div class="spec-label">Generation</div>
+      <div class="spec-value">Gen 3 (2023+)</div>
+      <div class="spec-sub">Standard / High Performance</div>
+    </div>
+    <div class="spec-cell">
+      <div class="spec-label">Aperture</div>
+      <div class="spec-value">~29 cm</div>
+      <div class="spec-sub">Standard; HP is larger</div>
+    </div>
+    <div class="spec-cell">
+      <div class="spec-label">Frequency</div>
+      <div class="spec-value">Ku-band</div>
+      <div class="spec-sub">10.7–12.7 GHz DL / 14.0–14.5 GHz UL</div>
+    </div>
+    <div class="spec-cell">
+      <div class="spec-label">Elements</div>
+      <div class="spec-value">~1,500+</div>
+      <div class="spec-sub">Custom SpaceX RFIC (BFM chip)</div>
+    </div>
+    <div class="spec-cell">
+      <div class="spec-label">Power (idle/peak)</div>
+      <div class="spec-value">~25 / ~75 W</div>
+      <div class="spec-sub">Standard residential</div>
+    </div>
+    <div class="spec-cell">
+      <div class="spec-label">Simultaneous beams</div>
+      <div class="spec-value">2 (TX+RX)</div>
+      <div class="spec-sub">Enables seamless handover</div>
+    </div>
+    <div class="spec-cell">
+      <div class="spec-label">Waveform</div>
+      <div class="spec-value">OFDM, TDD</div>
+      <div class="spec-sub">SpaceX proprietary air interface</div>
+    </div>
+    <div class="spec-cell">
+      <div class="spec-label">Obstruction map</div>
+      <div class="spec-value">Built-in</div>
+      <div class="spec-sub">LiDAR + camera on Gen 2+</div>
+    </div>
+    <div class="spec-cell">
+      <div class="spec-label">Tilt range</div>
+      <div class="spec-value">±75° from zenith</div>
+      <div class="spec-sub">Electronic scan only — no motor on Gen 2+</div>
+    </div>
+  </div>
+
+  <p>The pivotal engineering decision in Starlink's terminal is vertical integration. SpaceX designed its own beamformer ASIC (the "BFM" chip), which integrates phase shifters, amplifiers, and ADC/DAC functions for many elements onto a single die. This integration drove down the per-element cost by roughly two orders of magnitude compared to discrete component approaches, enabling the sub-$500 retail price point.</p>
+  <div class="callout note">
+    <div class="callout-label">No Moving Parts</div>
+    Gen 1 Starlink included a small motor to tilt the dish toward the satellite-dense portion of the sky on startup. Gen 2 eliminated it entirely — the electronic scan range is sufficient to acquire satellites from any flat mounting without adjustment. This reduced failure modes and simplified manufacturing.
+  </div>
+  <p>The terminal's obstruction detection software, activated during first use, creates a sky map identifying trees, eaves, and other blockage sources. It uses this map to predict outage windows and reports them to the user app. This "self-survey" approach is unique to the LEO context — a GEO dish needs obstruction assessment only once at installation.</p>
+</section>
+
+<!-- S5: ONEWEB / EUTELSAT UT -->
+<section class="section" id="s5">
+  <div class="section-header">
+    <div class="section-num">05 / 09</div>
+    <h2>OneWeb / Eutelsat Terminal</h2>
+  </div>
+  <p>OneWeb (now merged with Eutelsat to form Eutelsat OneWeb) targets a different market segment from Starlink: government, enterprise, and wholesale rather than direct-to-consumer. This distinction shapes the terminal design philosophy significantly.</p>
+  <p>OneWeb operates in Ku-band for user links. Its user terminals are supplied by third-party manufacturers (including Hughes, Satixfy, and others) under certification rather than by the operator itself. This partner model differs from Starlink's captive terminal approach and creates a more heterogeneous terminal ecosystem.</p>
+
+  <table class="data-table">
+    <tr>
+      <th>Feature</th>
+      <th>OneWeb Partner Terminal</th>
+      <th>Starlink Standard</th>
+    </tr>
+    <tr>
+      <td class="hl">Market segment</td>
+      <td>Enterprise / Gov / B2B2C</td>
+      <td>Consumer / SMB / mobility</td>
+    </tr>
+    <tr>
+      <td class="hl">Terminal supply model</td>
+      <td>Third-party certified</td>
+      <td>Operator-captive</td>
+    </tr>
+    <tr>
+      <td class="hl">Typical aperture</td>
+      <td>32–50 cm</td>
+      <td>~29 cm (standard)</td>
+    </tr>
+    <tr>
+      <td class="hl">SLA / QoS support</td>
+      <td class="pos">Yes — enterprise-grade</td>
+      <td class="neu">Limited (Priority tier)</td>
+    </tr>
+    <tr>
+      <td class="hl">Regulatory acceptance</td>
+      <td class="pos">Broader — ITU-aligned, easier to certify in regulated markets</td>
+      <td class="neg">FCC / Ofcom / limited, expanding</td>
+    </tr>
+    <tr>
+      <td class="hl">Retail price</td>
+      <td>$1,500–$5,000+</td>
+      <td>$299–$2,500</td>
+    </tr>
+  </table>
+
+  <p>Satixfy's SX-3000 chipset, used in several OneWeb-compatible terminals, supports digital beamforming across 1,024+ elements with dual-beam capability and on-chip modem integration. It represents a different philosophy from SpaceX's approach: rather than one company owning the full stack, Satixfy provides silicon IP that terminal manufacturers integrate.</p>
+  <div class="callout>
+    <div class="callout-label">Airbus Link</div>
+    For the HBC+ airborne connectivity program, terminal selection and certification is a critical architectural decision. Airbus DS evaluates terminals not just on RF performance but on DO-160 environmental qualification, DO-254/178 software assurance, EASA STC compatibility, and MSP integration. These constraints significantly narrow the eligible terminal pool compared to the consumer market.
+  </div>
+</section>
+
+<!-- S6: FLAT PANEL & AESA DESIGN -->
+<section class="section" id="s6">
+  <div class="section-header">
+    <div class="section-num">06 / 09</div>
+    <h2>Flat Panel &amp; AESA Design Considerations</h2>
+  </div>
+  <p>The term "flat panel antenna" encompasses several distinct implementations. Understanding the differences is essential for evaluating terminal claims and comparing competitor products.</p>
+
+  <div class="accordion-group">
+    <div class="accordion-item open">
+      <button class="accordion-trigger" onclick="toggleAcc(this)">
+        <span class="acc-label">Analog Beamforming</span>
+        <span class="acc-arrow">▶</span>
+      </button>
+      <div class="accordion-body">
+        <p>Phase shifting is performed in the RF domain before digitization. Each element (or subarray) has an analog phase shifter, typically implemented as a switched-delay line or varactor-based circuit. A single data stream is formed. <strong>Advantage:</strong> low cost, low power per element. <strong>Limitation:</strong> single simultaneous beam per aperture; limited ability to null interference.</p>
+      </div>
+    </div>
+    <div class="accordion-item">
+      <button class="accordion-trigger" onclick="toggleAcc(this)">
+        <span class="acc-label">Digital Beamforming (DBF)</span>
+        <span class="acc-arrow">▶</span>
+      </button>
+      <div class="accordion-body">
+        <p>Each element is connected to its own ADC/DAC and DSP chain. Beams are formed digitally in software. <strong>Advantage:</strong> unlimited simultaneous beams, adaptive nulling, full spatial multiplexing. <strong>Limitation:</strong> high power consumption and cost — digitizing thousands of elements requires enormous baseband processing. Used in high-end military and SIGINT applications; increasingly viable for commercial terminals as silicon prices fall.</p>
+      </div>
+    </div>
+    <div class="accordion-item">
+      <button class="accordion-trigger" onclick="toggleAcc(this)">
+        <span class="acc-label">Hybrid Beamforming</span>
+        <span class="acc-arrow">▶</span>
+      </button>
+      <div class="accordion-body">
+        <p>The dominant commercial LEO terminal architecture. The aperture is divided into subarrays (e.g., 64 elements each). Each subarray uses analog phase shifting internally to form a subarray beam. The subarray outputs are then digitally combined. <strong>Result:</strong> a limited number of simultaneous beams (typically 2–8) with moderate cost and power. Starlink's BFM chip is a highly integrated hybrid beamformer.</p>
+      </div>
+    </div>
+    <div class="accordion-item">
+      <button class="accordion-trigger" onclick="toggleAcc(this)">
+        <span class="acc-label">Liquid Crystal Antenna (LCA)</span>
+        <span class="acc-arrow">▶</span>
+      </button>
+      <div class="accordion-body">
+        <p>An alternative to RFIC-based phased arrays. Liquid crystal (LC) material fills the radiating layer; varying voltage across LC pixels changes the local refractive index, steering the beam. <strong>Advantage:</strong> extremely low power (LC is a passive material), potentially very low cost in high volume, thin form factor. <strong>Limitation:</strong> slow steering speed (milliseconds vs. nanoseconds for RFIC), temperature sensitivity, limited scan range. Developed by companies including Kymeta and Isotropic Systems. Better suited for slow tracking GEO/MEO than fast LEO tracking in most current implementations.</p>
+      </div>
+    </div>
+  </div>
+
+  <p>The thermal management of flat panel terminals is a non-trivial challenge. A 1,500-element Ku-band array dissipating 75 W in a panel ~30 cm square generates significant surface heat. SpaceX uses snow-melt as a feature: the Gen 2 standard dish melts snow automatically, reducing outages in northern climates. The thermal design that enables this is also the thermal design that keeps the electronics within specification.</p>
+</section>
+
+<!-- S7: LINK BUDGET AT THE TERMINAL -->
+<section class="section" id="s7">
+  <div class="section-header">
+    <div class="section-num">07 / 09</div>
+    <h2>Link Budget at the Terminal</h2>
+  </div>
+  <p>In any satellite link, the terminal's contribution to the link budget comes down to two figures: its receive <strong>G/T</strong> (gain-to-noise temperature ratio, dB/K) on the downlink, and its transmit <strong>EIRP</strong> (Effective Isotropic Radiated Power, dBW) on the uplink.</p>
+
+  <div class="diagram">
+```
+
+<span class="hi">TERMINAL DOWNLINK (RX) BUDGET — SIMPLIFIED</span>
+
+Satellite TX EIRP (dBW)
+− Free Space Path Loss (dB)           <span class="cm">// FSPL = 20·log(4πd/λ)</span>
+− Atmospheric & Rain Attenuation (dB)
++ Terminal Receive Gain (dBi)          <span class="cm">// = array gain − scan loss</span>
+− Terminal Noise Figure contribution
+────────────────────────────────────
+= Received C/N₀  (dBHz)
+
+<span class="hi">TERMINAL UPLINK (TX) BUDGET</span>
+
+Terminal TX EIRP (dBW)                  <span class="cm">// = Tx Power (dBW) + Antenna Gain (dBi)</span>
+− FSPL
+− Atmo loss
++ Satellite G/T
+────────────────────────────────────
+= Uplink C/N₀ at satellite (dBHz)
+
+<span class="hi2">Regulatory constraint on UL:</span>
+EIRP density must stay below ITU/FCC PFD limits
+<span class="cm">// Prevents interference with adjacent GEO satellites</span>
+</div>
+
+```
+  <p>For a LEO terminal, the free-space path loss (FSPL) is dramatically lower than GEO. At 550 km altitude (Starlink shell), Ku-band FSPL is approximately 166 dB. A GEO at 35,786 km gives ~205 dB — a 39 dB difference. This means a LEO terminal can close the link with a much smaller aperture and lower TX power than a GEO VSAT.</p>
+  <div class="callout">
+    <div class="callout-label">Scan Loss in the Budget</div>
+    When the terminal steers to low elevation angles (e.g., 25°), scan loss of 4–6 dB directly degrades the link margin. Constellation architects set minimum service elevation angles partly to keep terminals operating in their high-gain scan regime. Starlink's minimum service elevation is approximately 25°; below this, service degrades. This is why dense constellations (fewer coverage gaps) matter operationally, not just for latency.
+  </div>
+
+  <p>The <strong>G/T</strong> figure for a well-designed LEO terminal at boresight is approximately +12 to +16 dB/K for a standard residential unit. For comparison, a 90 cm GEO dish at Ku-band achieves roughly +18 to +22 dB/K — the larger aperture compensates for GEO's higher FSPL. When GEO's higher path loss is accounted for, the LEO system can still close the link with a smaller terminal — the math works in LEO's favour at equivalent throughput targets.</p>
+</section>
+
+<!-- S8: MOBILITY & HANDOVER -->
+<section class="section" id="s8">
+  <div class="section-header">
+    <div class="section-num">08 / 09</div>
+    <h2>Mobility &amp; Handover</h2>
+  </div>
+  <p>The defining operational challenge of a LEO user terminal is <strong>satellite handover</strong>: as one satellite passes below the minimum service elevation, the terminal must switch to a new satellite — without dropping packets, increasing latency visibly, or requiring user action.</p>
+  <p>Modern flat panel terminals handle handover through <em>make-before-break</em> dual beam operation. While the primary beam tracks the serving satellite to the horizon, a second beam acquires the next satellite and establishes sync. The modem layer performs a soft handover: traffic is shifted to the new beam once the link quality is confirmed, and the old beam is released. The visible effect on the user connection is typically a latency spike of 10–30 ms and no packet loss in well-implemented systems.</p>
+
+  <table class="data-table">
+    <tr>
+      <th>Handover Scenario</th>
+      <th>Typical Duration</th>
+      <th>User Impact</th>
+    </tr>
+    <tr>
+      <td class="hl">Routine satellite transition</td>
+      <td>~2–5 min between events</td>
+      <td class="pos">Invisible with make-before-break</td>
+    </tr>
+    <tr>
+      <td class="hl">Obstruction passage</td>
+      <td>1–30 sec</td>
+      <td class="neu">Outage if no adjacent satellite visible</td>
+    </tr>
+    <tr>
+      <td class="hl">Beam edge crossing (in-beam handover)</td>
+      <td>Milliseconds</td>
+      <td class="pos">Handled within constellation, transparent to terminal</td>
+    </tr>
+    <tr>
+      <td class="hl">Gateway handover (ground network)</td>
+      <td>~50–200 ms</td>
+      <td class="neu">Latency spike; depends on ISL availability</td>
+    </tr>
+    <tr>
+      <td class="hl">Polar / high-latitude gap (low-density coverage)</td>
+      <td>Seconds to minutes</td>
+      <td class="neg">Service outage until next visible satellite</td>
+    </tr>
+  </table>
+
+  <p>For aero and maritime terminals, the mobility challenge compounds. The terminal itself is moving — potentially at 900 km/h for commercial aviation — adding a large Doppler contribution on top of the satellite's own orbital velocity. LEO terminals must compensate for relative Doppler shifts of up to ±100 kHz at Ku-band, which is handled in the waveform's frequency tracking loops rather than mechanically.</p>
+  <div class="callout warn">
+    <div class="callout-label">Airborne Certification Complexity</div>
+    Aero LEO terminals must hold an STC (Supplemental Type Certificate) covering not just RF performance but vibration, temperature, EMI, and depressurization. The fuselage-mounted flat panels used on commercial aircraft (e.g., the Starlink Aviation kit or Intelsat / SES aero units) are engineered products distinct from the residential dish — different mechanical design, higher environmental ratings, and lower profile to reduce drag.
+  </div>
+</section>
+
+<!-- S9: FORM FACTORS & MARKETS -->
+<section class="section" id="s9">
+  <div class="section-header">
+    <div class="section-num">09 / 09</div>
+    <h2>Form Factors &amp; Market Segments</h2>
+  </div>
+  <p>User terminals are not one product — they are a family differentiated by form factor, environmental rating, and target market. Understanding this segmentation matters for both commercial analysis and system architecture.</p>
+
+  <table class="data-table">
+    <tr>
+      <th>Segment</th>
+      <th>Key Requirements</th>
+      <th>Representative Products</th>
+    </tr>
+    <tr>
+      <td class="hl">Residential (fixed)</td>
+      <td>Self-install, low cost, 25–150 Mbps DL</td>
+      <td>Starlink Standard, Starlink Mini</td>
+    </tr>
+    <tr>
+      <td class="hl">Enterprise (fixed)</td>
+      <td>Higher throughput, SLA, managed service</td>
+      <td>Starlink Business, OneWeb partner terminals</td>
+    </tr>
+    <tr>
+      <td class="hl">Maritime (vessel)</td>
+      <td>IP67+, stabilized or electronically scanned, 24/7 ops</td>
+      <td>Starlink Maritime, Intellian H60L, Kymeta u8</td>
+    </tr>
+    <tr>
+      <td class="hl">Aviation (commercial)</td>
+      <td>DO-160, low profile, Doppler resilience, STC</td>
+      <td>Starlink Aviation, Honeywell GX, Collins HBB</td>
+    </tr>
+    <tr>
+      <td class="hl">Government / Tactical</td>
+      <td>SIGINT isolation, INFOSEC, anti-jam, manpack</td>
+      <td>L3Harris, ViaSat Link-16, MORPHEUS</td>
+    </tr>
+    <tr>
+      <td class="hl">IoT / Backhaul</td>
+      <td>Low power, small aperture, asymmetric traffic</td>
+      <td>Starlink Mini, Swarm SpaceBEE (DTE), custom</td>
+    </tr>
+    <tr>
+      <td class="hl">Cell Backhaul (NTN)</td>
+      <td>High-gain, high-throughput, tower mount</td>
+      <td>AST SpaceMobile (direct-to-cell, no terminal), Starlink Fixed Wireless</td>
+    </tr>
+  </table>
+
+  <p>The <strong>Starlink Mini</strong>, launched in 2024, deserves mention as a form-factor inflection point: a terminal roughly the size of a laptop that can be carried in a backpack and powered from a USB-C power bank. At 110×220 mm and under 1.2 kg, it represents the minimum viable LEO terminal for portable use — not yet a handheld phone, but a significant step toward making satellite connectivity truly portable without dedicated professional equipment.</p>
+  <p>The longer-term trajectory of LEO terminals points toward <strong>direct-to-device (D2D)</strong> service — where the "terminal" is the user's existing smartphone, using its existing antenna. AST SpaceMobile is the most prominent attempt at this model, using very large satellite apertures (up to 64 m²) to compensate for the smartphone's negligible antenna gain. This would effectively eliminate the user terminal entirely as a distinct product category for basic broadband access.</p>
+  <div class="callout">
+    <div class="callout-label">Architectural Implication</div>
+    From a constellation architecture perspective, terminal capability is an independent variable that shapes the space segment design. A constellation designed around high-gain enterprise terminals can use less satellite TX power per user. A constellation targeting smartphones must compensate in space — larger apertures, higher satellite EIRP, more sophisticated interference management. Terminal and spacecraft designs are co-optimised, not independent.
+  </div>
+</section>
+
+<!-- QUIZ -->
+<section class="section" id="quiz">
+  <div class="section-header">
+    <div class="section-num">ASSESSMENT</div>
+    <h2>Quiz — 10 Questions</h2>
+  </div>
+  <div class="accordion-group" id="quiz-container">
+
+    <!-- Q1 -->
+    <div class="accordion-item open" id="qi-1">
+      <button class="accordion-trigger" onclick="toggleAcc(this)">
+        <span class="acc-label">Q1 · What is the primary advantage of electronic beam steering over mechanical steering for LEO terminals?</span>
+        <span class="acc-arrow">▶</span>
+      </button>
+      <div class="accordion-body">
+        <div class="quiz-q">What is the primary advantage of electronic beam steering over mechanical steering for LEO terminals?</div>
+        <ul class="quiz-options">
+          <li><label><input type="radio" name="q1" value="a"> Higher gain at boresight</label></li>
+          <li><label><input type="radio" name="q1" value="b"> Millisecond beam agility with no moving parts</label></li>
+          <li><label><input type="radio" name="q1" value="c"> Lower cost per element</label></li>
+          <li><label><input type="radio" name="q1" value="d"> Better rain fade resistance</label></li>
+        </ul>
+        <button class="quiz-submit" onclick="checkQuiz('q1','b',this)">SUBMIT</button>
+        <div class="quiz-feedback" id="fb-q1"></div>
+      </div>
+    </div>
+
+    <!-- Q2 -->
+    <div class="accordion-item" id="qi-2">
+      <button class="accordion-trigger" onclick="toggleAcc(this)">
+        <span class="acc-label">Q2 · In a phased array, what parameter controls the direction of the formed beam?</span>
+        <span class="acc-arrow">▶</span>
+      </button>
+      <div class="accordion-body">
+        <div class="quiz-q">In a phased array, what parameter controls the direction of the formed beam?</div>
+        <ul class="quiz-options">
+          <li><label><input type="radio" name="q2" value="a"> Amplitude of each element's signal</label></li>
+          <li><label><input type="radio" name="q2" value="b"> Relative phase offset between elements</label></li>
+          <li><label><input type="radio" name="q2" value="c"> Polarisation of the radiating elements</label></li>
+          <li><label><input type="radio" name="q2" value="d"> Frequency of the carrier signal</label></li>
+        </ul>
+        <button class="quiz-submit" onclick="checkQuiz('q2','b',this)">SUBMIT</button>
+        <div class="quiz-feedback" id="fb-q2"></div>
+      </div>
+    </div>
+
+    <!-- Q3 -->
+    <div class="accordion-item" id="qi-3">
+      <button class="accordion-trigger" onclick="toggleAcc(this)">
+        <span class="acc-label">Q3 · "Scan loss" refers to which phenomenon?</span>
+        <span class="acc-arrow">▶</span>
+      </button>
+      <div class="accordion-body">
+        <div class="quiz-q">"Scan loss" in a phased array terminal refers to which phenomenon?</div>
+        <ul class="quiz-options">
+          <li><label><input type="radio" name="q3" value="a"> Signal loss during satellite handover</label></li>
+          <li><label><input type="radio" name="q3" value="b"> Gain degradation as the beam steers away from boresight</label></li>
+          <li><label><input type="radio" name="q3" value="c"> Attenuation caused by rain in the beam path</label></li>
+          <li><label><input type="radio" name="q3" value="d"> Noise introduced by the phase shifters</label></li>
+        </ul>
+        <button class="quiz-submit" onclick="checkQuiz('q3','b',this)">SUBMIT</button>
+        <div class="quiz-feedback" id="fb-q3"></div>
+      </div>
+    </div>
+
+    <!-- Q4 -->
+    <div class="accordion-item" id="qi-4">
+      <button class="accordion-trigger" onclick="toggleAcc(this)">
+        <span class="acc-label">Q4 · Approximately how much lower is the Ku-band free-space path loss from a 550 km LEO vs. GEO?</span>
+        <span class="acc-arrow">▶</span>
+      </button>
+      <div class="accordion-body">
+        <div class="quiz-q">Approximately how much lower is the Ku-band free-space path loss from a 550 km LEO orbit compared to GEO at 35,786 km?</div>
+        <ul class="quiz-options">
+          <li><label><input type="radio" name="q4" value="a"> ~10 dB</label></li>
+          <li><label><input type="radio" name="q4" value="b"> ~20 dB</label></li>
+          <li><label><input type="radio" name="q4" value="c"> ~39 dB</label></li>
+          <li><label><input type="radio" name="q4" value="d"> ~55 dB</label></li>
+        </ul>
+        <button class="quiz-submit" onclick="checkQuiz('q4','c',this)">SUBMIT</button>
+        <div class="quiz-feedback" id="fb-q4"></div>
+      </div>
+    </div>
+
+    <!-- Q5 -->
+    <div class="accordion-item" id="qi-5">
+      <button class="accordion-trigger" onclick="toggleAcc(this)">
+        <span class="acc-label">Q5 · What does "make-before-break" handover mean in practice?</span>
+        <span class="acc-arrow">▶</span>
+      </button>
+      <div class="accordion-body">
+        <div class="quiz-q">What does "make-before-break" handover mean in the context of LEO terminal operation?</div>
+        <ul class="quiz-options">
+          <li><label><input type="radio" name="q5" value="a"> The old satellite link is terminated before the new one is acquired</label></li>
+          <li><label><input type="radio" name="q5" value="b"> The new satellite link is established before releasing the old one, enabling seamless transition</label></li>
+          <li><label><input type="radio" name="q5" value="c"> The modem reboots between handovers to clear buffer state</label></li>
+          <li><label><input type="radio" name="q5" value="d"> The terminal physically reorients before locking the new beam</label></li>
+        </ul>
+        <button class="quiz-submit" onclick="checkQuiz('q5','b',this)">SUBMIT</button>
+        <div class="quiz-feedback" id="fb-q5"></div>
+      </div>
+    </div>
+
+    <!-- Q6 -->
+    <div class="accordion-item" id="qi-6">
+      <button class="accordion-trigger" onclick="toggleAcc(this)">
+        <span class="acc-label">Q6 · Which beamforming architecture is dominant in commercial LEO terminals today?</span>
+        <span class="acc-arrow">▶</span>
+      </button>
+      <div class="accordion-body">
+        <div class="quiz-q">Which beamforming architecture is dominant in current commercial LEO user terminals as a cost-performance compromise?</div>
+        <ul class="quiz-options">
+          <li><label><input type="radio" name="q6" value="a"> Pure analog beamforming</label></li>
+          <li><label><input type="radio" name="q6" value="b"> Full digital beamforming</label></li>
+          <li><label><input type="radio" name="q6" value="c"> Hybrid beamforming</label></li>
+          <li><label><input type="radio" name="q6" value="d"> Liquid crystal antenna</label></li>
+        </ul>
+        <button class="quiz-submit" onclick="checkQuiz('q6','c',this)">SUBMIT</button>
+        <div class="quiz-feedback" id="fb-q6"></div>
+      </div>
+    </div>
+
+    <!-- Q7 -->
+    <div class="accordion-item" id="qi-7">
+      <button class="accordion-trigger" onclick="toggleAcc(this)">
+        <span class="acc-label">Q7 · Why did SpaceX remove the tilt motor from Gen 2 of the Starlink dish?</span>
+        <span class="acc-arrow">▶</span>
+      </button>
+      <div class="accordion-body">
+        <div class="quiz-q">Why did SpaceX remove the motorised tilt mechanism from the Gen 2 Starlink dish?</div>
+        <ul class="quiz-options">
+          <li><label><input type="radio" name="q7" value="a"> The electronic scan range was sufficient and removing the motor reduced cost and failure modes</label></li>
+          <li><label><input type="radio" name="q7" value="b"> Motors interfered with the phased array calibration</label></li>
+          <li><label><input type="radio" name="q7" value="c"> FCC regulations prohibited motorised antennas at consumer premises</label></li>
+          <li><label><input type="radio" name="q7" value="d"> Snow loading made the motor unreliable in northern markets</label></li>
+        </ul>
+        <button class="quiz-submit" onclick="checkQuiz('q7','a',this)">SUBMIT</button>
+        <div class="quiz-feedback" id="fb-q7"></div>
+      </div>
+    </div>
+
+    <!-- Q8 -->
+    <div class="accordion-item" id="qi-8">
+      <button class="accordion-trigger" onclick="toggleAcc(this)">
+        <span class="acc-label">Q8 · What two metrics define a terminal's link budget contribution?</span>
+        <span class="acc-arrow">▶</span>
+      </button>
+      <div class="accordion-body">
+        <div class="quiz-q">Which two metrics most directly characterise a user terminal's contribution to the satellite link budget?</div>
+        <ul class="quiz-options">
+          <li><label><input type="radio" name="q8" value="a"> Aperture size and operating frequency</label></li>
+          <li><label><input type="radio" name="q8" value="b"> G/T (receive) and EIRP (transmit)</label></li>
+          <li><label><input type="radio" name="q8" value="c"> Noise figure and output power</label></li>
+          <li><label><input type="radio" name="q8" value="d"> Bit rate and latency</label></li>
+        </ul>
+        <button class="quiz-submit" onclick="checkQuiz('q8','b',this)">SUBMIT</button>
+        <div class="quiz-feedback" id="fb-q8"></div>
+      </div>
+    </div>
+
+    <!-- Q9 -->
+    <div class="accordion-item" id="qi-9">
+      <button class="accordion-trigger" onclick="toggleAcc(this)">
+        <span class="acc-label">Q9 · What additional Doppler challenge does an aero terminal face vs. a fixed LEO terminal?</span>
+        <span class="acc-arrow">▶</span>
+      </button>
+      <div class="accordion-body">
+        <div class="quiz-q">What additional Doppler challenge does an airborne LEO terminal face that a fixed residential terminal does not?</div>
+        <ul class="quiz-options">
+          <li><label><input type="radio" name="q9" value="a"> Higher altitude increases path loss, requiring more Doppler compensation</label></li>
+          <li><label><input type="radio" name="q9" value="b"> The aircraft's own velocity adds to the satellite's orbital Doppler, increasing the total frequency offset to compensate</label></li>
+          <li><label><input type="radio" name="q9" value="c"> Aviation terminals use a different frequency band that is more Doppler-sensitive</label></li>
+          <li><label><input type="radio" name="q9" value="d"> Aircraft vibration causes phase noise in the phase shifters</label></li>
+        </ul>
+        <button class="quiz-submit" onclick="checkQuiz('q9','b',this)">SUBMIT</button>
+        <div class="quiz-feedback" id="fb-q9"></div>
+      </div>
+    </div>
+
+    <!-- Q10 -->
+    <div class="accordion-item" id="qi-10">
+      <button class="accordion-trigger" onclick="toggleAcc(this)">
+        <span class="acc-label">Q10 · What is the key technical premise behind AST SpaceMobile's direct-to-device service?</span>
+        <span class="acc-arrow">▶</span>
+      </button>
+      <div class="accordion-body">
+        <div class="quiz-q">What is the core technical premise of AST SpaceMobile's direct-to-device approach that allows smartphone connectivity without a dedicated terminal?</div>
+        <ul class="quiz-options">
+          <li><label><input type="radio" name="q10" value="a"> Smartphones are upgraded with a built-in phased array module</label></li>
+          <li><label><input type="radio" name="q10" value="b"> Very large satellite apertures (~64 m²) compensate for the smartphone's negligible antenna gain</label></li>
+          <li><label><input type="radio" name="q10" value="c"> LEO proximity eliminates the need for high antenna gain on either end</label></li>
+          <li><label><input type="radio" name="q10" value="d"> Optical / laser links are used instead of RF to avoid the gain limitation</label></li>
+        </ul>
+        <button class="quiz-submit" onclick="checkQuiz('q10','b',this)">SUBMIT</button>
+        <div class="quiz-feedback" id="fb-q10"></div>
+      </div>
+    </div>
+
+  </div><!-- /quiz-container -->
+
+  <div style="margin-top:1.5rem; font-family:'Share Tech Mono',monospace; font-size:0.72rem; color:var(--text-dim);">
+    SCORE: <span id="quiz-score" style="color:var(--accent);">0</span> / 10
+  </div>
+</section>
+
+<!-- PYTHON EXERCISES -->
+<section class="section" id="exercises">
+  <div class="section-header">
+    <div class="section-num">PYTHON</div>
+    <h2>Exercises</h2>
+  </div>
+
+  <div class="accordion-group">
+
+    <!-- EX 1 -->
+    <div class="accordion-item open">
+      <button class="accordion-trigger" onclick="toggleAcc(this)">
+        <span class="acc-label">Exercise 1 · Free-Space Path Loss Calculator</span>
+        <span class="acc-arrow">▶</span>
+      </button>
+      <div class="accordion-body">
+        <div class="exercise-block">
+          <div class="exercise-title">Objective</div>
+          <p style="font-size:0.88rem;margin-bottom:0.8rem;">Implement a function that computes FSPL in dB given orbital altitude, elevation angle, and frequency. Compare LEO (550 km) vs. GEO (35,786 km) and print the delta.</p>
+          <div class="code-block"><span class="kw">import</span> math
+```
+
+<span class="kw">def</span> <span class="fn">slant_range_km</span>(altitude_km: <span class="fn">float</span>, elevation_deg: <span class="fn">float</span>) -> <span class="fn">float</span>:
+<span class="st">”””
+Compute slant range from ground station to satellite.
+Uses spherical Earth approximation (R_E = 6371 km).
+“””</span>
+R_E = <span class="nm">6371.0</span>
+elev_rad = math.radians(elevation_deg)
+<span class="cm"># Law of cosines / standard formula:</span>
+<span class="cm"># d = -R_E*sin(elev) + sqrt((R_E*sin(elev))^2 + 2*R_E*h + h^2)</span>
+d = (-R_E * math.sin(elev_rad) +
+math.sqrt((R_E * math.sin(elev_rad))**<span class="nm">2</span> +
+<span class="nm">2</span> * R_E * altitude_km + altitude_km**<span class="nm">2</span>))
+<span class="kw">return</span> d
+
+<span class="kw">def</span> <span class="fn">fspl_db</span>(slant_range_km: <span class="fn">float</span>, freq_ghz: <span class="fn">float</span>) -> <span class="fn">float</span>:
+<span class="st">””“Free-Space Path Loss in dB.”””</span>
+d_m = slant_range_km * <span class="nm">1e3</span>
+f_hz = freq_ghz * <span class="nm">1e9</span>
+<span class="kw">return</span> <span class="nm">20</span> * math.log10(<span class="nm">4</span> * math.pi * d_m * f_hz / <span class="nm">3e8</span>)
+
+<span class="cm"># — Task: fill in the loop and print results —</span>
+scenarios = {
+<span class="st">“LEO 550 km (Starlink)”</span>: <span class="nm">550</span>,
+<span class="st">“MEO 8000 km (O3b)”</span>:    <span class="nm">8000</span>,
+<span class="st">“GEO 35786 km”</span>:          <span class="nm">35786</span>,
+}
+freq_ghz = <span class="nm">12.0</span>   <span class="cm"># Ku-band downlink</span>
+elevation = <span class="nm">45.0</span>  <span class="cm"># degrees above horizon</span>
+
+<span class="kw">for</span> name, alt <span class="kw">in</span> scenarios.items():
+slant = <span class="fn">slant_range_km</span>(alt, elevation)
+fspl  = <span class="fn">fspl_db</span>(slant, freq_ghz)
+<span class="cm"># TODO: print name, slant range (km), and FSPL (dB)</span>
+<span class="fn">print</span>(<span class="st">f”{name:30s}  slant={slant:8.0f} km  FSPL={fspl:.1f} dB”</span>)</div>
+<p style="font-size:0.82rem;color:var(--text-dim);margin-top:0.6rem;font-family:'Share Tech Mono',monospace;">Expected: LEO FSPL ≈ 166 dB · GEO FSPL ≈ 205 dB · Delta ≈ 39 dB</p>
+</div>
+</div>
+</div>
+
+```
+    <!-- EX 2 -->
+    <div class="accordion-item">
+      <button class="accordion-trigger" onclick="toggleAcc(this)">
+        <span class="acc-label">Exercise 2 · Phased Array Gain Model</span>
+        <span class="acc-arrow">▶</span>
+      </button>
+      <div class="accordion-body">
+        <div class="exercise-block">
+          <div class="exercise-title">Objective</div>
+          <p style="font-size:0.88rem;margin-bottom:0.8rem;">Model array gain as a function of element count and scan angle. Apply a cos(θ) scan loss approximation and plot gain vs. elevation angle from 10° to 90°.</p>
+          <div class="code-block"><span class="kw">import</span> math
+```
+
+<span class="kw">def</span> <span class="fn">array_gain_dbi</span>(n_elements: <span class="fn">int</span>,
+element_gain_dbi: <span class="fn">float</span>,
+scan_angle_deg: <span class="fn">float</span>,
+scan_loss_exp: <span class="fn">float</span> = <span class="nm">1.5</span>) -> <span class="fn">float</span>:
+<span class="st">”””
+Approximate array gain with cosine scan loss.
+
+```
+Params:
+    n_elements      : number of radiating elements
+    element_gain_dbi: gain of a single isotropic-ish element (dBi)
+    scan_angle_deg  : angle from boresight (0 = pointing straight up)
+    scan_loss_exp   : exponent in cos^n model (1.0–2.0 typical)
+
+Returns: Effective gain in dBi
+"""</span>
+theta = math.radians(scan_angle_deg)
+array_gain_linear = (<span class="nm">10</span> ** (element_gain_dbi / <span class="nm">10</span>)) * n_elements
+scan_factor = math.cos(theta) ** scan_loss_exp
+effective_gain = array_gain_linear * scan_factor
+<span class="kw">return</span> <span class="nm">10</span> * math.log10(effective_gain)
+```
+
+<span class="cm"># Starlink-like terminal: ~1500 elements, element gain ~5 dBi</span>
+n = <span class="nm">1500</span>
+eg = <span class="nm">5.0</span>
+
+<span class="fn">print</span>(<span class="st">f”{‘Elev (°)’:>10}  {‘Scan from boresight (°)’:>24}  {‘Gain (dBi)’:>12}”</span>)
+<span class="fn">print</span>(<span class="st">”-”</span> * <span class="nm">52</span>)
+
+<span class="kw">for</span> elev <span class="kw">in</span> range(<span class="nm">10</span>, <span class="nm">91</span>, <span class="nm">10</span>):
+<span class="cm"># Boresight is zenith (90°), so scan angle = 90 - elevation</span>
+scan = <span class="nm">90</span> - elev
+gain = <span class="fn">array_gain_dbi</span>(n, eg, scan)
+<span class="fn">print</span>(<span class="st">f”{elev:>10}  {scan:>24}  {gain:>12.1f}”</span>)
+
+<span class="cm"># Extension: what elevation gives 3 dB below boresight gain?</span></div>
+</div>
+</div>
+</div>
+
+```
+    <!-- EX 3 -->
+    <div class="accordion-item">
+      <button class="accordion-trigger" onclick="toggleAcc(this)">
+        <span class="acc-label">Exercise 3 · Handover Frequency Estimator</span>
+        <span class="acc-arrow">▶</span>
+      </button>
+      <div class="accordion-body">
+        <div class="exercise-block">
+          <div class="exercise-title">Objective</div>
+          <p style="font-size:0.88rem;margin-bottom:0.8rem;">Estimate how often a Starlink terminal at a fixed location experiences satellite handovers per hour, given orbital altitude, inclination, and minimum elevation angle. Model the visible arc duration geometrically.</p>
+          <div class="code-block"><span class="kw">import</span> math
+```
+
+<span class="nm">MU</span> = <span class="nm">3.986e14</span>    <span class="cm"># Earth gravitational parameter (m³/s²)</span>
+<span class="nm">R_E</span> = <span class="nm">6.371e6</span>   <span class="cm"># Earth radius (m)</span>
+
+<span class="kw">def</span> <span class="fn">orbital_period_s</span>(altitude_m: <span class="fn">float</span>) -> <span class="fn">float</span>:
+r = <span class="nm">R_E</span> + altitude_m
+<span class="kw">return</span> <span class="nm">2</span> * math.pi * math.sqrt(r**<span class="nm">3</span> / <span class="nm">MU</span>)
+
+<span class="kw">def</span> <span class="fn">visible_arc_fraction</span>(altitude_m: <span class="fn">float</span>,
+min_elevation_deg: <span class="fn">float</span>) -> <span class="fn">float</span>:
+<span class="st">”””
+Fraction of orbit during which satellite is above min_elevation
+for a ground observer (simplified: equatorial pass, spherical Earth).
+“””</span>
+elev_rad = math.radians(min_elevation_deg)
+r = <span class="nm">R_E</span> + altitude_m
+<span class="cm"># Half-angle of visible arc from satellite nadir</span>
+rho = math.acos((<span class="nm">R_E</span> / r) * math.cos(elev_rad)) - elev_rad
+<span class="kw">return</span> (<span class="nm">2</span> * rho) / (<span class="nm">2</span> * math.pi)
+
+altitude_m   = <span class="nm">550e3</span>   <span class="cm"># Starlink shell 1</span>
+min_elev_deg = <span class="nm">25.0</span>    <span class="cm"># Starlink minimum service elevation</span>
+
+T  = <span class="fn">orbital_period_s</span>(altitude_m)
+fv = <span class="fn">visible_arc_fraction</span>(altitude_m, min_elev_deg)
+t_visible = T * fv
+
+handovers_per_hour = <span class="nm">3600</span> / t_visible
+
+<span class="fn">print</span>(<span class="st">f”Orbital period:         {T/60:.1f} min”</span>)
+<span class="fn">print</span>(<span class="st">f”Visible arc fraction:   {fv*100:.1f}%”</span>)
+<span class="fn">print</span>(<span class="st">f”Visible pass duration:  {t_visible/60:.1f} min”</span>)
+<span class="fn">print</span>(<span class="st">f”Handovers / hour:       {handovers_per_hour:.1f}”</span>)
+<span class="cm"># Expected: ~3–5 handovers/hour for a single satellite pass model</span>
+<span class="cm"># Real Starlink: higher due to dense constellation, but similar per-satellite dwell</span></div>
+</div>
+</div>
+</div>
+
+```
+  </div>
+</section>
+
+<!-- REFLECTION -->
+<section class="section" id="reflection">
+  <div class="section-header">
+    <div class="section-num">REFLECTION</div>
+    <h2>Reflection Prompts</h2>
+  </div>
+
+  <div class="reflection-prompt">
+    <span>Prompt 1</span>
+    SpaceX chose vertical integration — designing its own beamformer ASIC — while OneWeb uses certified third-party terminals. What are the strategic trade-offs of each model for the constellation operator, and which approach do you believe creates a more defensible long-term position?
+  </div>
+  <div class="reflection-prompt">
+    <span>Prompt 2</span>
+    Scan loss means a LEO terminal's effective gain is lower at low elevation angles. How should constellation architects account for this in coverage design, and what does it imply about minimum satellite elevation angle requirements versus orbital shell altitude choices?
+  </div>
+  <div class="reflection-prompt">
+    <span>Prompt 3</span>
+    For the HBC+ aero connectivity program, you are evaluating two Ku-band terminal options: a larger-aperture (50 cm) third-party flat panel with higher G/T but requiring a 6-month STC process, and a smaller (30 cm) operator-certified terminal with lower G/T but immediate STC coverage. What factors would drive your recommendation?
+  </div>
+  <div class="reflection-prompt">
+    <span>Prompt 4</span>
+    AST SpaceMobile's direct-to-device model promises to eliminate the user terminal entirely for basic broadband. If this model succeeds at scale, what happens to the terminal supply chain, the constellation economics of operators like Starlink, and the regulatory frameworks currently built around distinct terminal certification requirements?
+  </div>
+</section>
+
+<!-- COMPLETION -->
+<div class="completion-zone">
+  <h3>MARK LESSON COMPLETE</h3>
+  <p>Log your progress — Q1-12 / 15</p>
+  <button id="complete-btn" onclick="markComplete()">[ MARK COMPLETE ]</button>
+  <div id="complete-msg">✓ LOGGED — Q1-12 COMPLETE</div>
+</div>
+```
+
+  </main>
+</div><!-- /page-body -->
+
+<script>
+// ── SUPABASE CONFIG ──
+const SUPABASE_URL = 'YOUR_SUPABASE_URL';
+const SUPABASE_KEY = 'YOUR_SUPABASE_ANON_KEY';
+const LESSON_ID = 'q1-12';
+
+// ── ACCORDION ──
+function toggleAcc(btn) {
+  const item = btn.closest('.accordion-item');
+  item.classList.toggle('open');
+}
+
+// ── QUIZ ──
+let quizScore = 0;
+const answered = {};
+
+function checkQuiz(name, correct, btn) {
+  if (answered[name]) return;
+  const selected = document.querySelector(`input[name="${name}"]:checked`);
+  if (!selected) return;
+
+  answered[name] = true;
+  btn.disabled = true;
+
+  const fb = document.getElementById('fb-' + name);
+  fb.style.display = 'block';
+
+  if (selected.value === correct) {
+    quizScore++;
+    fb.textContent = '✓ CORRECT';
+    fb.className = 'quiz-feedback correct';
+  } else {
+    const labels = { a: 'A', b: 'B', c: 'C', d: 'D' };
+    fb.textContent = `✗ INCORRECT — correct answer: ${labels[correct]}`;
+    fb.className = 'quiz-feedback wrong';
+  }
+
+  document.getElementById('quiz-score').textContent = quizScore;
+  updateProgress();
+}
+
+// ── PROGRESS ──
+function updateProgress() {
+  const totalItems = 9 + 10 + 3 + 4; // sections + quiz + exercises + reflection (approx)
+  const done = Object.keys(answered).length;
+  const pct = Math.round((done / 10) * 60 + (isComplete ? 40 : 0));
+  const clamped = Math.min(pct, 100);
+  document.getElementById('progress-fill').style.width = clamped + '%';
+  document.getElementById('progress-pct').textContent = clamped + '%';
+}
+
+let isComplete = false;
+
+// ── MARK COMPLETE ──
+async function markComplete() {
+  isComplete = true;
+  const btn = document.getElementById('complete-btn');
+  btn.disabled = true;
+  document.getElementById('complete-msg').style.display = 'block';
+  document.getElementById('progress-fill').style.width = '100%';
+  document.getElementById('progress-pct').textContent = '100%';
+
+  // Supabase logging (if configured)
+  if (SUPABASE_URL !== 'YOUR_SUPABASE_URL') {
+    try {
+      const { createClient } = supabase;
+      const db = createClient(SUPABASE_URL, SUPABASE_KEY);
+      const { data: { user } } = await db.auth.getUser();
+      if (user) {
+        await db.from('lesson_progress').upsert({
+          user_id: user.id,
+          lesson_id: LESSON_ID,
+          completed: true,
+          score: quizScore,
+          completed_at: new Date().toISOString()
+        }, { onConflict: 'user_id,lesson_id' });
+      }
+    } catch (e) {
+      console.warn('Supabase logging skipped:', e.message);
+    }
+  }
+}
+
+// ── SCROLL SPY ──
+const sectionIds = ['s1','s2','s3','s4','s5','s6','s7','s8','s9','quiz','exercises','reflection'];
+const navLinks = {};
+sectionIds.forEach(id => {
+  const a = document.querySelector(`.sidebar a[href="#${id}"]`);
+  if (a) navLinks[id] = a;
+});
+
+const observer = new IntersectionObserver(entries => {
+  entries.forEach(e => {
+    if (e.isIntersecting && navLinks[e.target.id]) {
+      Object.values(navLinks).forEach(a => a.classList.remove('active'));
+      navLinks[e.target.id].classList.add('active');
+    }
+  });
+}, { rootMargin: '-40% 0px -50% 0px' });
+
+sectionIds.forEach(id => {
+  const el = document.getElementById(id);
+  if (el) observer.observe(el);
+});
+</script>
+
+</body>
+</html>
