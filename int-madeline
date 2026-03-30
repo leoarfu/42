@@ -1,0 +1,813 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>INT-02 — Madeline · Python & Commissioning · LEOAF</title>
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;600;800&family=Share+Tech+Mono&family=Libre+Baskerville:ital,wght@0,400;0,700;1,400&display=swap" rel="stylesheet">
+<style>
+* { box-sizing:border-box; margin:0; padding:0; }
+html { height:100%; -webkit-text-size-adjust:100%; overflow-x:hidden; }
+body { font-family:'Share Tech Mono',monospace; background:#000; color:white; overflow-x:hidden; min-height:100vh; }
+#starsCanvas { position:fixed; inset:0; z-index:-1; }
+header { background:#000; border-bottom:1px solid #39ff1433; position:sticky; top:0; z-index:100; padding:1rem clamp(1.5rem,5vw,4rem); display:flex; justify-content:space-between; align-items:center; box-shadow:0 4px 16px #0008; }
+.logo { font-family:'Orbitron',sans-serif; font-weight:800; font-size:clamp(16px,2vw,22px); letter-spacing:3px; text-decoration:none; }
+.logo span:first-child { color:white; } .logo span:last-child { color:#ff004f; }
+.nav-right { display:flex; align-items:center; gap:10px; }
+.nav-btn { background:transparent; border:1px solid #39ff1444; color:#39ff14; padding:6px 14px; cursor:pointer; transition:0.3s ease; font-size:11px; font-family:'Orbitron',sans-serif; letter-spacing:1px; text-decoration:none; display:inline-block; }
+.nav-btn:hover { background:#39ff14; color:black; }
+.nav-btn.red { border-color:#ff004f44; color:#ff004f; } .nav-btn.red:hover { background:#ff004f; color:black; }
+.breadcrumb { padding:14px clamp(1.5rem,5vw,4rem); font-size:11px; color:#ffffff44; letter-spacing:1px; position:relative; z-index:1; }
+.breadcrumb a { color:#00d9ff66; text-decoration:none; } .breadcrumb a:hover { color:#00d9ff; } .breadcrumb span { margin:0 8px; }
+.lesson-wrap { max-width:820px; margin:0 auto; padding:0 clamp(1.5rem,5vw,4rem) 80px; position:relative; z-index:1; }
+.lesson-header { padding:30px 0 28px; border-bottom:1px solid #ffffff11; margin-bottom:36px; }
+.lesson-tag { font-family:'Orbitron',sans-serif; font-size:10px; color:#39ff14; letter-spacing:3px; margin-bottom:10px; }
+.lesson-header h1 { font-family:'Orbitron',sans-serif; font-size:clamp(20px,3.5vw,32px); font-weight:800; line-height:1.2; margin-bottom:12px; }
+.lesson-meta { display:flex; gap:10px; flex-wrap:wrap; margin-bottom:16px; }
+.l-pill { font-family:'Orbitron',sans-serif; font-size:10px; padding:3px 10px; border:1px solid; letter-spacing:1px; }
+.l-pill-q { color:#39ff14; border-color:#39ff1444; } .l-pill-t { color:#00d9ff; border-color:#00d9ff44; } .l-pill-g { color:#ffaa00; border-color:#ffaa0044; }
+.lesson-intro { font-size:13px; line-height:1.85; opacity:0.75; }
+.interviewer-card { background:rgba(57,255,20,0.04); border:1px solid #39ff1433; padding:20px 24px; margin:0 0 32px; display:flex; gap:20px; align-items:flex-start; }
+.ic-avatar { width:52px; height:52px; background:#39ff1411; border:1px solid #39ff1455; display:flex; align-items:center; justify-content:center; font-family:'Orbitron',sans-serif; font-size:18px; font-weight:800; color:#39ff14; flex-shrink:0; }
+.ic-body h3 { font-family:'Orbitron',sans-serif; font-size:12px; color:#39ff14; letter-spacing:2px; margin-bottom:4px; }
+.ic-body .ic-role { font-size:11px; color:#ffffff66; margin-bottom:8px; letter-spacing:1px; }
+.ic-body p { font-size:12px; line-height:1.75; opacity:0.8; }
+.ic-time { font-family:'Orbitron',sans-serif; font-size:10px; color:#ffaa00; letter-spacing:1px; margin-top:6px; }
+.toc { background:rgba(0,217,255,0.06); border:1px solid #00d9ff33; padding:24px 28px; margin:30px 0; }
+.toc h4 { font-family:'Orbitron',sans-serif; font-size:10px; color:#00d9ff; letter-spacing:2px; margin-bottom:16px; }
+.toc ol { padding-left:20px; } .toc li { font-size:13px; line-height:2.1; }
+.toc li a { color:#00d9ffbb; text-decoration:none; transition:0.15s; } .toc li a:hover { color:#ffffff; padding-left:4px; }
+.toc li::marker { color:#39ff14; font-family:'Orbitron',sans-serif; font-size:10px; }
+.content-block { background:#f5f2ec; color:#1a1a1a; padding:36px clamp(24px,4vw,48px); margin-bottom:24px; border-left:4px solid #39ff14; position:relative; z-index:1; }
+.content-block h2 { font-family:'Orbitron',sans-serif; font-size:13px; color:#1a4a00; letter-spacing:2px; text-transform:uppercase; margin-bottom:20px; padding-bottom:10px; border-bottom:2px solid #39ff1466; scroll-margin-top:80px; }
+.content-block h3 { font-family:'Orbitron',sans-serif; font-size:11px; color:#444; letter-spacing:1.5px; text-transform:uppercase; margin:28px 0 12px; }
+.content-block p { font-family:'Libre Baskerville',Georgia,serif; font-size:15px; line-height:1.9; color:#1a1a1a; margin-bottom:16px; }
+.content-block ul, .content-block ol { padding-left:0; margin-bottom:16px; }
+.content-block ul li, .content-block ol li { font-family:'Libre Baskerville',Georgia,serif; font-size:14px; line-height:1.85; color:#1a1a1a; padding-left:20px; position:relative; margin-bottom:6px; }
+.content-block ul li::before { content:'›'; position:absolute; left:0; color:#1a7a1a; }
+.content-block ol { counter-reset:item; } .content-block ol li { counter-increment:item; }
+.content-block ol li::before { content:counter(item)'.'; position:absolute; left:0; color:#cc0033; font-family:'Orbitron',sans-serif; font-size:10px; top:2px; }
+.callout { border-left:3px solid #1a7a1a; background:#eafaea; padding:16px 20px; margin:22px 0; font-size:12px; line-height:1.8; color:#1a1a1a; }
+.callout.amber { border-left-color:#996600; background:#fef9ec; }
+.callout.red { border-left-color:#cc0033; background:#fdecea; }
+.callout.blue { border-left-color:#0088cc; background:#e8f4fb; }
+.callout strong { font-family:'Orbitron',sans-serif; font-size:10px; letter-spacing:1px; display:block; margin-bottom:8px; }
+.code-block { background:#0a0a0a; border:1px solid #39ff1433; padding:16px 20px; margin:18px 0; font-family:'Share Tech Mono',monospace; font-size:12px; line-height:1.8; color:#39ff14; overflow-x:auto; }
+.code-block .cb-title { font-family:'Orbitron',sans-serif; font-size:9px; color:#ffffff55; letter-spacing:2px; margin-bottom:8px; display:block; }
+.quiz-block { background:rgba(17,17,17,0.9); border:1px solid #39ff1433; padding:28px; margin:48px 0 32px; }
+.quiz-block h2 { font-family:'Orbitron',sans-serif; font-size:13px; color:#39ff14; letter-spacing:2px; margin-bottom:6px; }
+.quiz-intro { font-size:12px; opacity:0.6; margin-bottom:24px; padding-bottom:16px; border-bottom:1px solid #39ff1422; line-height:1.6; }
+.quiz-q { margin-bottom:28px; } .quiz-q p { font-size:13px; opacity:0.9; margin-bottom:12px; line-height:1.65; } .quiz-q p strong { color:#39ff14; }
+.quiz-options { display:flex; flex-direction:column; gap:8px; }
+.quiz-opt { background:rgba(255,255,255,0.03); border:1px solid #ffffff1a; padding:11px 16px; cursor:pointer; font-size:12px; font-family:'Share Tech Mono',monospace; transition:0.2s ease; text-align:left; color:white; line-height:1.5; }
+.quiz-opt:hover:not(:disabled) { background:rgba(57,255,20,0.08); border-color:#39ff1444; }
+.quiz-opt.correct { background:rgba(57,255,20,0.1); border-color:#39ff14; color:#39ff14; }
+.quiz-opt.wrong { background:rgba(255,0,79,0.1); border-color:#ff004f; color:#ff004f; }
+.quiz-opt:disabled { cursor:default; }
+.quiz-feedback { font-size:12px; margin-top:10px; min-height:18px; line-height:1.7; opacity:0.9; padding:0 4px; }
+.quiz-score { font-family:'Orbitron',sans-serif; font-size:12px; color:#39ff14; margin-top:20px; letter-spacing:1px; display:none; padding-top:16px; border-top:1px solid #39ff1433; }
+.py-block { background:rgba(10,10,10,0.95); border:1px solid #39ff1422; padding:28px; margin:32px 0; }
+.py-block h2 { font-family:'Orbitron',sans-serif; font-size:13px; color:#39ff14; letter-spacing:2px; margin-bottom:8px; }
+.py-block .py-intro { font-size:12px; opacity:0.7; margin-bottom:20px; padding-bottom:16px; border-bottom:1px solid #39ff1422; line-height:1.7; }
+.py-exercise { margin-bottom:32px; } .py-exercise:last-child { margin-bottom:0; }
+.py-exercise h3 { font-family:'Orbitron',sans-serif; font-size:11px; color:#39ff1499; letter-spacing:1.5px; text-transform:uppercase; margin-bottom:10px; }
+.py-exercise p { font-size:12px; opacity:0.8; margin-bottom:14px; line-height:1.75; }
+.py-block pre { background:#050505; border:1px solid #39ff1433; padding:20px; font-family:'Share Tech Mono',monospace; font-size:11.5px; line-height:1.75; overflow-x:auto; color:#39ff14; white-space:pre; margin-bottom:12px; }
+.py-block .py-note { font-size:11px; color:#ffffff44; line-height:1.75; margin-top:10px; }
+.py-block .py-challenge { background:rgba(57,255,20,0.04); border-left:2px solid #39ff14; padding:12px 16px; margin-top:14px; font-size:12px; line-height:1.75; opacity:0.8; }
+.py-block .py-challenge strong { font-family:'Orbitron',sans-serif; font-size:10px; color:#39ff14; display:block; margin-bottom:6px; letter-spacing:1px; }
+.reflection-block { background:rgba(255,170,0,0.04); border:1px solid #ffaa0033; padding:24px; margin:32px 0; }
+.reflection-block h2 { font-family:'Orbitron',sans-serif; font-size:13px; color:#ffaa00; letter-spacing:2px; margin-bottom:8px; }
+.reflection-block .ref-intro { font-size:12px; opacity:0.7; margin-bottom:20px; padding-bottom:14px; border-bottom:1px solid #ffaa0022; line-height:1.7; }
+.ref-prompt { margin-bottom:20px; } .ref-prompt h3 { font-family:'Orbitron',sans-serif; font-size:11px; color:#ffaa0099; letter-spacing:1px; margin-bottom:8px; }
+.ref-prompt p { font-size:12px; opacity:0.8; line-height:1.75; margin-bottom:10px; }
+.back-to-top { position:fixed; bottom:28px; right:28px; z-index:200; width:44px; height:44px; background:#000; border:1px solid #39ff1455; color:#39ff14; font-size:20px; cursor:pointer; display:flex; align-items:center; justify-content:center; opacity:0; pointer-events:none; transition:opacity 0.3s ease; }
+.back-to-top.visible { opacity:1; pointer-events:auto; }
+.lesson-nav { display:flex; justify-content:space-between; margin-top:30px; flex-wrap:wrap; gap:10px; }
+.lesson-nav a { font-family:'Orbitron',sans-serif; font-size:11px; color:#39ff1466; text-decoration:none; letter-spacing:1px; transition:0.2s; }
+.lesson-nav a:hover { color:#39ff14; }
+footer { text-align:center; padding:30px; opacity:0.3; font-size:11px; position:relative; z-index:1; letter-spacing:1px; }
+</style>
+</head>
+<body>
+<canvas id="starsCanvas"></canvas>
+<header>
+  <a href="index.html" class="logo"><span>LEO</span><span>AF</span></a>
+  <div class="nav-right">
+    <a href="int-bella.html" class="nav-btn red">← INT-01: BELLA</a>
+    <a href="int-xavier.html" class="nav-btn">NEXT: XAVIER →</a>
+  </div>
+</header>
+<div class="breadcrumb">
+  <a href="index.html">DASHBOARD</a><span>/</span>
+  <a href="int-index.html">INTERVIEW PREP</a><span>/</span>
+  <span style="color:#ffffff88;">INT-02 — MADELINE · PYTHON & COMMISSIONING</span>
+</div>
+
+<div class="lesson-wrap">
+
+<div class="lesson-header">
+  <div class="lesson-tag">LOFT ORBITAL PANEL · INTERVIEW 02 OF 05 · 13:15–14:00 CEST</div>
+  <h1>Madeline Fleury<br><span style="color:#39ff14;font-size:0.6em;letter-spacing:4px;">CUSTOMER OPERATIONS ENGINEER</span></h1>
+  <div class="lesson-meta">
+    <div class="l-pill l-pill-q">TECHNICAL DEPTH</div>
+    <div class="l-pill l-pill-t">PYTHON & AUTOMATION</div>
+    <div class="l-pill l-pill-g">45 MINUTES</div>
+  </div>
+  <p class="lesson-intro">Madeline is mathematically rigorous — École des Ponts ParisTech, Operational Research master's — and she was YAM-9 payload commissioning lead before serving as EU flight director. She thinks quantitatively, writes code purposefully, and will notice sloppy reasoning. The right register is precise and technical. Don't hand-wave. If she asks how you'd automate something, give her the actual structure.</p>
+</div>
+
+<div class="interviewer-card">
+  <div class="ic-avatar">MF</div>
+  <div class="ic-body">
+    <h3>MADELINE FLEURY</h3>
+    <div class="ic-role">CUSTOMER OPERATIONS ENGINEER · LOFT ORBITAL TOULOUSE</div>
+    <p>École des Ponts ParisTech (Mathematical Engineering & Computer Science) + MPRO master's at CNAM. YAM-9 payload commissioning lead, then EU flight director for first commissioning crew. Her LinkedIn post on YAM-9 first contact: "I'm very proud of this mission." She has been inside the actual satellite commissioning process end-to-end.</p>
+    <div class="ic-time">⏱ 13:15–14:00 CEST · BACK-TO-BACK AFTER BELLA · STAY SHARP</div>
+  </div>
+</div>
+
+<div class="toc">
+  <h4>CONTENTS</h4>
+  <ol>
+    <li><a href="#s1">What Madeline is actually evaluating</a></li>
+    <li><a href="#s2">Payload commissioning — what a COE/CDE does</a></li>
+    <li><a href="#s3">Python automation patterns for ops — what she writes</a></li>
+    <li><a href="#s4">REST API interaction — the Cockpit API model</a></li>
+    <li><a href="#s5">Customer communication during commissioning anomalies</a></li>
+    <li><a href="#quiz">Knowledge check</a></li>
+    <li><a href="#python">Python exercises</a></li>
+    <li><a href="#reflect">Reflection prompts</a></li>
+  </ol>
+</div>
+
+<!-- S1 -->
+<div class="content-block" id="s1">
+  <h2>1. What Madeline Is Actually Evaluating</h2>
+  <p>Madeline's role (Customer Operations Engineer) sits adjacent to CDE: she is frontline with customers on Cockpit usage and she improves Cockpit's functionality through automation and implementation. She will be assessing whether you think like a software engineer about operational problems — not just whether you can write Python, but whether you design reliable, observable systems.</p>
+  <h3>Her three signals</h3>
+  <p><strong>Code quality instincts:</strong> Does your Python have error handling? Do you think about edge cases before being asked? A COE who writes brittle scripts creates operational risk. She wants to know that when you build something, it runs reliably in production — not just in the demo.</p>
+  <p><strong>Commissioning mindset:</strong> She led YAM-9 commissioning. She knows what it feels like when something doesn't behave as the ConOps said it would. She will ask scenario questions about anomalies during commissioning — a different context than on-orbit steady-state. Commissioning anomalies are more ambiguous: is the payload hardware broken, or is the test procedure wrong?</p>
+  <p><strong>Quantitative precision:</strong> She has an ops research background. She will appreciate answers that have numbers. "Latency went up" is weak. "RTT increased from 42ms to 890ms over a 90-minute window, correlated with the second pass over AWS-Punta-Arenas" is strong.</p>
+  <div class="callout">
+    <strong>REGISTER CALIBRATION FOR MADELINE</strong>
+    She is technically your peer in a different role. Treat her as an engineering colleague, not as a gatekeeper. If she asks a technical question you're uncertain about, say so precisely: "I'm confident about X; I'd want to verify Y before acting on it." Mathematical honesty is more credible to her than projected confidence.
+  </div>
+</div>
+
+<!-- S2 -->
+<div class="content-block" id="s2">
+  <h2>2. Payload Commissioning — What a COE/CDE Does</h2>
+  <p>Commissioning is the period between launch and the start of normal operations during which the satellite, Hub, and customer payloads are brought up and validated. The CDE/COE leads the payload side of this process.</p>
+  <h3>The commissioning sequence</h3>
+  <ol>
+    <li><strong>Bus and Hub commissioning</strong> — Done by Loft's flight ops team. Verifies satellite attitude, power, thermal, and comms. The CDE monitors but does not lead this phase.</li>
+    <li><strong>Hub-payload interface checkout</strong> — First power-on of the payload through the Hub. Verify the Hub sees the payload, the electrical interface is nominal, and the commanding chain works. This is the first CDE-led step.</li>
+    <li><strong>Payload functional test</strong> — Execute the pre-defined commissioning test sequence from the ConOps. Each test has a pass/fail criterion. The CDE executes the commands, records the responses, and compares against expected values.</li>
+    <li><strong>First light / mission data collection</strong> — The payload performs its first operational task. For an imager: first image capture and downlink. For an SDR: first spectrum observation. The CDE and customer evaluate quality against mission acceptance criteria.</li>
+    <li><strong>Mission acceptance</strong> — Customer formally accepts the mission as commissioned. The CDE documents findings, deviations from the ConOps, and any constraints on operations. Mission transitions to on-orbit steady-state.</li>
+  </ol>
+  <h3>What goes wrong during commissioning</h3>
+  <p>The most common commissioning anomalies are: unexpected payload behaviour on first power-on (usually a firmware or configuration issue rather than hardware damage), interface mismatches between the Hub and the payload that were not caught during ground integration, and discrepancies between the ground-tested ConOps and the actual on-orbit environment (e.g., thermal behaviour that differs from thermal vacuum test).</p>
+  <div class="callout amber">
+    <strong>THE KEY COMMISSIONING QUESTION MADELINE MIGHT ASK</strong>
+    "During commissioning, your payload test sequence produces a result that doesn't match the expected value in the ConOps — but the payload appears otherwise healthy. What do you do?" Answer: Do not immediately conclude the hardware is faulty. First, check: (1) is the test procedure itself correct — were the commands sent in the right order, at the right timing? (2) Is the expected value in the ConOps definitely right — was it set from ground test data under equivalent conditions? (3) Is the observed value within any acceptable tolerance? Only after these checks do you escalate to a hardware investigation.
+  </div>
+</div>
+
+<!-- S3 -->
+<div class="content-block" id="s3">
+  <h2>3. Python Automation Patterns for Ops — What She Writes</h2>
+  <p>Madeline's role explicitly involves improving Cockpit functionality through automation. She writes Python that runs in production. The patterns she uses — and will probe you on — are operational automation patterns, not data science or web development patterns.</p>
+  <h3>Pattern 1: The robust API poller</h3>
+  <p>Poll an endpoint at intervals, handle transient failures gracefully, log everything, and alert on persistent failure. This is the most common pattern in satellite ops tooling.</p>
+  <div class="code-block">
+    <span class="cb-title">PATTERN — ROBUST POLLER WITH EXPONENTIAL BACKOFF</span>
+import time, logging, requests
+from functools import wraps
+
+def retry(max_attempts=3, base_delay=1.0, backoff=2.0, exceptions=(Exception,)):
+    def decorator(func):
+        @wraps(func)
+        def wrapper(*args, **kwargs):
+            delay = base_delay
+            for attempt in range(max_attempts):
+                try:
+                    return func(*args, **kwargs)
+                except exceptions as e:
+                    if attempt == max_attempts - 1:
+                        raise
+                    logging.warning(f"{func.__name__} failed (attempt {attempt+1}): {e}. Retry in {delay}s")
+                    time.sleep(delay)
+                    delay *= backoff
+        return wrapper
+    return decorator
+
+@retry(max_attempts=3, base_delay=2.0, exceptions=(requests.RequestException,))
+def fetch_telemetry(endpoint: str, token: str) -> dict:
+    r = requests.get(endpoint, headers={"Authorization": f"Bearer {token}"}, timeout=10)
+    r.raise_for_status()
+    return r.json()
+  </div>
+  <h3>Pattern 2: Stateful alert suppression</h3>
+  <p>Fire an alert when a condition first appears. Suppress repeated alerts while the condition persists. Re-arm when the condition clears. This prevents alert storms from a single persistent issue.</p>
+  <div class="code-block">
+    <span class="cb-title">PATTERN — STATEFUL ALERTING</span>
+from dataclasses import dataclass, field
+from datetime import datetime
+
+@dataclass
+class AlertState:
+    fired_conditions: set = field(default_factory=set)
+
+    def check(self, condition_id: str, active: bool) -> str | None:
+        """Returns 'FIRE', 'CLEAR', or None."""
+        was_active = condition_id in self.fired_conditions
+        if active and not was_active:
+            self.fired_conditions.add(condition_id)
+            return 'FIRE'
+        elif not active and was_active:
+            self.fired_conditions.discard(condition_id)
+            return 'CLEAR'
+        return None
+  </div>
+  <h3>Pattern 3: Structured logging for ops</h3>
+  <p>Madeline will care that your code produces logs that are actually useful during an incident. Structured logging (JSON lines) is searchable and parseable; print statements are not.</p>
+  <div class="code-block">
+    <span class="cb-title">PATTERN — STRUCTURED JSON LOGGING</span>
+import logging, json, sys
+
+class JSONFormatter(logging.Formatter):
+    def format(self, record):
+        return json.dumps({
+            "ts": self.formatTime(record), "level": record.levelname,
+            "msg": record.getMessage(), "module": record.module,
+            **(record.__dict__.get('extra', {}))
+        })
+
+handler = logging.StreamHandler(sys.stdout)
+handler.setFormatter(JSONFormatter())
+logger = logging.getLogger("mission_ops")
+logger.addHandler(handler)
+logger.setLevel(logging.INFO)
+
+# Usage:
+logger.info("Pass completed", extra={"extra": {"pass_id": "PASS-042", "frames_rx": 98, "station": "Toulouse-GS"}})
+  </div>
+</div>
+
+<!-- S4 -->
+<div class="content-block" id="s4">
+  <h2>4. REST API Interaction — The Cockpit API Model</h2>
+  <p>The Cockpit platform exposes a REST API for advanced customers and for CDEs building tooling on top of it. A CDE who understands API design can write better integration scripts, file better bug reports to Xavier's team, and help customers integrate Cockpit into their own tools.</p>
+  <h3>HTTP verbs and their satellite ops semantics</h3>
+  <ul>
+    <li><strong>GET /missions/{id}/telemetry</strong> — Read current telemetry. Safe (no side effect). Cache-friendly. Use for monitoring loops.</li>
+    <li><strong>POST /missions/{id}/commands</strong> — Submit a command to the spacecraft. Not idempotent — two identical POSTs send two commands. Always check for duplicate-command guards in your client code.</li>
+    <li><strong>PUT /missions/{id}/schedule</strong> — Replace the mission schedule. Idempotent — sending the same schedule twice has the same result as once. Use for configuration updates.</li>
+    <li><strong>PATCH /missions/{id}/config</strong> — Partial update. More efficient than PUT when changing one field of a large configuration object.</li>
+  </ul>
+  <h3>Authentication patterns</h3>
+  <p>Cockpit uses bearer token authentication. The token is obtained via a credentials exchange (POST to /auth/token) and has an expiry. Your client code must: handle token expiry gracefully (re-authenticate transparently rather than crashing), never log the token, and store it in memory or a secrets manager rather than in code or on disk.</p>
+  <h3>Pagination and large telemetry datasets</h3>
+  <p>A mission with months of telemetry history cannot return all records in one response. Cockpit's API (like most production APIs) uses cursor-based or offset-based pagination. Your client must handle pagination — if you only read the first page, you'll miss data and build incorrect analyses.</p>
+  <div class="callout blue">
+    <strong>WHAT MADELINE WANTS TO HEAR ABOUT APIS</strong>
+    Not "I've used REST APIs." She wants: "I understand idempotency — I'm careful about POST vs PUT especially for commanding. I handle token expiry transparently. I paginate. I handle 429 rate limit responses with backoff. I never trust that a 200 response means what I expect without checking the response body." That level of specificity is what separates operational Python from casual scripting.
+  </div>
+</div>
+
+<!-- S5 -->
+<div class="content-block" id="s5">
+  <h2>5. Customer Communication During Commissioning Anomalies</h2>
+  <p>Commissioning anomalies are harder to communicate than on-orbit anomalies because there is more uncertainty. You don't yet have a baseline for "normal" on this specific mission. The customer is anxious — they've been waiting months for launch and commissioning. The last thing they want to hear is "we're not sure what's happening."</p>
+  <h3>The principle: factual honesty over false reassurance</h3>
+  <p>Madeline's mathematical background makes her particularly sensitive to imprecise communication. If the telemetry shows a payload temperature 8°C above the expected value but within limits, say exactly that — don't say "temperatures look a bit high but we're watching it." Give the number. State the limit. State the margin. State whether you're concerned or not and why.</p>
+  <h3>Separating known from unknown</h3>
+  <p>In any customer commissioning update, be explicit about what is known vs unknown. "We know: the Hub-payload interface is healthy and all commanding is responding nominally. We don't yet know: whether the first-light data quality meets your acceptance threshold — we need the next pass downlink to assess. We expect to have that data by [specific time]."</p>
+  <div class="callout">
+    <strong>MADELINE'S LIKELY SCENARIO QUESTION</strong>
+    "You're commissioning a customer's imaging payload. First light produces images, but the resolution is noticeably worse than the ground test. The customer is on a call with you. What do you say and do?" Answer structure: (1) Describe what you observe precisely — quantify the degradation. (2) List the possible causes without jumping to conclusions: thermal settling, focus shift, contamination, calibration difference. (3) State what data you need to distinguish between causes and when you'll have it. (4) Do not promise a fix you cannot deliver. Do commit to a timeline for your next diagnostic step.
+  </div>
+</div>
+
+<!-- QUIZ -->
+<div class="quiz-block" id="quiz">
+  <h2>KNOWLEDGE CHECK — MADELINE'S INTERVIEW</h2>
+  <p class="quiz-intro">Eight questions covering commissioning, Python patterns, API design, and quantitative communication.</p>
+
+  <div class="quiz-q" id="q1">
+    <p><strong>Q1.</strong> During commissioning, your payload functional test produces an unexpected result. What is your first step?</p>
+    <div class="quiz-options">
+      <button class="quiz-opt" data-q="1" data-correct="false">A. Immediately flag a hardware anomaly to the spacecraft bus team</button>
+      <button class="quiz-opt" data-q="1" data-correct="true">B. Verify the test procedure was executed correctly and the expected value in the ConOps is valid before concluding hardware is at fault</button>
+      <button class="quiz-opt" data-q="1" data-correct="false">C. Notify the customer immediately so they can investigate their payload documentation</button>
+      <button class="quiz-opt" data-q="1" data-correct="false">D. Repeat the test three times and report the average</button>
+    </div>
+    <div class="quiz-feedback" id="fb1"></div>
+  </div>
+
+  <div class="quiz-q" id="q2">
+    <p><strong>Q2.</strong> Your Python script sends a command to a satellite payload and receives a 200 OK response. Can you confirm the command was executed?</p>
+    <div class="quiz-options">
+      <button class="quiz-opt" data-q="2" data-correct="false">A. Yes — a 200 response means the command was accepted and executed</button>
+      <button class="quiz-opt" data-q="2" data-correct="true">B. No — a 200 confirms the API accepted the request; you must check subsequent telemetry to confirm the payload actually executed the command</button>
+      <button class="quiz-opt" data-q="2" data-correct="false">C. Only if the response body contains a transaction ID</button>
+      <button class="quiz-opt" data-q="2" data-correct="false">D. Yes, if the HTTP method was POST</button>
+    </div>
+    <div class="quiz-feedback" id="fb2"></div>
+  </div>
+
+  <div class="quiz-q" id="q3">
+    <p><strong>Q3.</strong> Why should a commanding script use idempotency checks before sending a POST command?</p>
+    <div class="quiz-options">
+      <button class="quiz-opt" data-q="3" data-correct="false">A. POST is slower than PUT and idempotency checks improve performance</button>
+      <button class="quiz-opt" data-q="3" data-correct="true">B. POST is not idempotent — sending the same command twice could execute the payload operation twice, which may cause unintended effects on orbit</button>
+      <button class="quiz-opt" data-q="3" data-correct="false">C. The API requires a unique idempotency key for all requests</button>
+      <button class="quiz-opt" data-q="3" data-correct="false">D. Idempotency checks are only needed for financial transactions</button>
+    </div>
+    <div class="quiz-feedback" id="fb3"></div>
+  </div>
+
+  <div class="quiz-q" id="q4">
+    <p><strong>Q4.</strong> You receive a 429 Too Many Requests response from the Cockpit API. What does your client code do?</p>
+    <div class="quiz-options">
+      <button class="quiz-opt" data-q="4" data-correct="false">A. Immediately retry the request</button>
+      <button class="quiz-opt" data-q="4" data-correct="false">B. Log an error and exit the script</button>
+      <button class="quiz-opt" data-q="4" data-correct="true">C. Read the Retry-After header if present, wait that duration (or apply exponential backoff), then retry</button>
+      <button class="quiz-opt" data-q="4" data-correct="false">D. Switch to a different API endpoint to bypass rate limiting</button>
+    </div>
+    <div class="quiz-feedback" id="fb4"></div>
+  </div>
+
+  <div class="quiz-q" id="q5">
+    <p><strong>Q5.</strong> Madeline asks you to describe your Python code's error handling philosophy. What is the strongest answer?</p>
+    <div class="quiz-options">
+      <button class="quiz-opt" data-q="5" data-correct="false">A. "I use try/except around everything to prevent crashes."</button>
+      <button class="quiz-opt" data-q="5" data-correct="false">B. "I rely on the API to return meaningful error codes and handle those."</button>
+      <button class="quiz-opt" data-q="5" data-correct="true">C. "I distinguish transient failures (retry with backoff) from permanent failures (raise with context). I log structured details on every failure path. I never silently swallow exceptions."</button>
+      <button class="quiz-opt" data-q="5" data-correct="false">D. "I test my code thoroughly so errors don't occur in production."</button>
+    </div>
+    <div class="quiz-feedback" id="fb5"></div>
+  </div>
+
+  <div class="quiz-q" id="q6">
+    <p><strong>Q6.</strong> A customer's first-light image has noticeably lower resolution than expected from ground tests. What are the three most likely causes to investigate first?</p>
+    <div class="quiz-options">
+      <button class="quiz-opt" data-q="6" data-correct="false">A. Hardware damage during launch; downlink compression artefacts; Cockpit software bug</button>
+      <button class="quiz-opt" data-q="6" data-correct="true">B. Thermal settling causing focus shift; calibration differences between ground and space environment; contamination on the optical path during launch</button>
+      <button class="quiz-opt" data-q="6" data-correct="false">C. Wrong orbit altitude; atmospheric interference; incorrect ground station pointing</button>
+      <button class="quiz-opt" data-q="6" data-correct="false">D. Hub firmware version mismatch; incorrect VLAN configuration; DNS resolution failure</button>
+    </div>
+    <div class="quiz-feedback" id="fb6"></div>
+  </div>
+
+  <div class="quiz-q" id="q7">
+    <p><strong>Q7.</strong> A customer asks why their API query returned only 50 telemetry records when they expected 2,000. What is the most likely explanation?</p>
+    <div class="quiz-options">
+      <button class="quiz-opt" data-q="7" data-correct="false">A. The telemetry system dropped 97.5% of records due to a downlink issue</button>
+      <button class="quiz-opt" data-q="7" data-correct="true">B. The API response is paginated and their client code only fetched the first page</button>
+      <button class="quiz-opt" data-q="7" data-correct="false">C. Their API token has a data limit of 50 records per request</button>
+      <button class="quiz-opt" data-q="7" data-correct="false">D. The mission only generated 50 telemetry points in that window</button>
+    </div>
+    <div class="quiz-feedback" id="fb7"></div>
+  </div>
+
+  <div class="quiz-q" id="q8">
+    <p><strong>Q8.</strong> You're building a script that monitors telemetry and sends a Slack alert when a threshold is exceeded. A channel goes above threshold for 45 minutes. How many alerts should a well-designed script send?</p>
+    <div class="quiz-options">
+      <button class="quiz-opt" data-q="8" data-correct="false">A. One per polling cycle — as many as the polling interval allows in 45 minutes</button>
+      <button class="quiz-opt" data-q="8" data-correct="true">B. Two — one when the condition first fires, one when it clears</button>
+      <button class="quiz-opt" data-q="8" data-correct="false">C. One — only when it first fires; no clear notification needed</button>
+      <button class="quiz-opt" data-q="8" data-correct="false">D. Zero — alerts should only go to a ticketing system, not Slack</button>
+    </div>
+    <div class="quiz-feedback" id="fb8"></div>
+  </div>
+
+  <div class="quiz-score" id="quizScore"></div>
+</div>
+
+<!-- PYTHON -->
+<div class="py-block" id="python">
+  <h2>PYTHON EXERCISES</h2>
+  <p class="py-intro">Two exercises that demonstrate operational Python thinking — the kind Madeline writes for real. Focus on structure, error handling, and production-readiness, not just getting the right output.</p>
+
+  <div class="py-exercise">
+    <h3>Exercise 1 — Cockpit API Client with Retry and Pagination</h3>
+    <p>Build a production-grade API client class that handles authentication, token refresh, rate limiting, and paginated telemetry fetching. This is what a CDE actually submits to Madeline's team as a tooling contribution.</p>
+<pre>
+import time, logging, json
+from typing import Generator, Any
+from dataclasses import dataclass
+from unittest.mock import MagicMock, patch
+import requests
+
+logger = logging.getLogger("cockpit_client")
+
+@dataclass
+class CockpitConfig:
+    base_url: str
+    client_id: str
+    client_secret: str
+    timeout_s: int = 10
+    max_retries: int = 3
+    page_size: int = 100
+
+class CockpitAPIError(Exception):
+    def __init__(self, status_code: int, message: str):
+        self.status_code = status_code
+        super().__init__(f"HTTP {status_code}: {message}")
+
+class CockpitClient:
+    """Production-grade client for Loft Orbital Cockpit API."""
+
+    def __init__(self, config: CockpitConfig):
+        self.config = config
+        self._token: str | None = None
+        self._token_expires_at: float = 0
+        self._session = requests.Session()
+
+    # --- Auth ---
+    def _authenticate(self) -> None:
+        """Obtain or refresh bearer token."""
+        resp = self._session.post(
+            f"{self.config.base_url}/auth/token",
+            json={"client_id": self.config.client_id,
+                  "client_secret": self.config.client_secret},
+            timeout=self.config.timeout_s
+        )
+        resp.raise_for_status()
+        data = resp.json()
+        self._token = data["access_token"]
+        self._token_expires_at = time.time() + data.get("expires_in", 3600) - 60
+        logger.info("Authenticated successfully, token valid for ~%ds",
+                    data.get("expires_in", 3600))
+
+    def _get_token(self) -> str:
+        """Return valid token, re-authenticating if expired."""
+        if not self._token or time.time() >= self._token_expires_at:
+            self._authenticate()
+        return self._token
+
+    # --- Request with retry ---
+    def _request(self, method: str, path: str, **kwargs) -> dict:
+        url = f"{self.config.base_url}{path}"
+        headers = {"Authorization": f"Bearer {self._get_token()}",
+                   "Content-Type": "application/json"}
+        delay = 1.0
+        last_error = None
+
+        for attempt in range(self.config.max_retries):
+            try:
+                resp = self._session.request(
+                    method, url, headers=headers,
+                    timeout=self.config.timeout_s, **kwargs
+                )
+                # Handle rate limiting
+                if resp.status_code == 429:
+                    wait = int(resp.headers.get("Retry-After", delay * 2))
+                    logger.warning("Rate limited. Waiting %ds (attempt %d)", wait, attempt + 1)
+                    time.sleep(wait)
+                    delay *= 2
+                    continue
+                # Handle auth expiry mid-session
+                if resp.status_code == 401:
+                    logger.info("Token rejected, re-authenticating...")
+                    self._token = None
+                    headers["Authorization"] = f"Bearer {self._get_token()}"
+                    continue
+                # Permanent errors — don't retry
+                if 400 <= resp.status_code < 500 and resp.status_code not in (429, 401):
+                    raise CockpitAPIError(resp.status_code, resp.text[:200])
+                # Server errors — retry
+                if resp.status_code >= 500:
+                    raise requests.HTTPError(f"Server error {resp.status_code}")
+
+                resp.raise_for_status()
+                return resp.json()
+
+            except (requests.ConnectionError, requests.Timeout, requests.HTTPError) as e:
+                last_error = e
+                if attempt < self.config.max_retries - 1:
+                    logger.warning("Request failed (attempt %d/%d): %s. Retry in %.1fs",
+                                   attempt + 1, self.config.max_retries, e, delay)
+                    time.sleep(delay)
+                    delay *= 2
+
+        raise last_error or RuntimeError("Request failed after all retries")
+
+    # --- Paginated telemetry fetch ---
+    def get_telemetry(self, mission_id: str,
+                      start_iso: str, end_iso: str,
+                      channels: list[str] | None = None) -> Generator[dict, None, None]:
+        """
+        Yield all telemetry records for a mission in a time window.
+        Handles pagination transparently.
+        """
+        params = {"start": start_iso, "end": end_iso,
+                  "page_size": self.config.page_size}
+        if channels:
+            params["channels"] = ",".join(channels)
+
+        cursor = None
+        page_num = 0
+        total_yielded = 0
+
+        while True:
+            if cursor:
+                params["cursor"] = cursor
+            data = self._request("GET", f"/missions/{mission_id}/telemetry",
+                                 params=params)
+            records = data.get("records", [])
+            for record in records:
+                yield record
+                total_yielded += 1
+            page_num += 1
+            cursor = data.get("next_cursor")
+            logger.debug("Page %d: %d records (total so far: %d)",
+                         page_num, len(records), total_yielded)
+            if not cursor:
+                logger.info("Telemetry fetch complete: %d records in %d pages",
+                            total_yielded, page_num)
+                break
+
+    # --- Command with verification ---
+    def send_command(self, mission_id: str, command: dict,
+                     verify_channel: str | None = None,
+                     verify_timeout_s: int = 120) -> dict:
+        """
+        Send a command and optionally wait for telemetry confirmation.
+        Returns the command submission receipt.
+        """
+        logger.info("Sending command to %s: %s", mission_id, command.get("command_id"))
+        receipt = self._request("POST", f"/missions/{mission_id}/commands",
+                                json=command)
+        cmd_id = receipt.get("submission_id")
+        logger.info("Command submitted: %s", cmd_id)
+
+        if verify_channel:
+            logger.info("Waiting up to %ds for telemetry confirmation on %s...",
+                        verify_timeout_s, verify_channel)
+            # In practice: poll telemetry until the expected value appears or timeout
+            # This is left as an exercise — see py-challenge below
+            pass
+
+        return receipt
+
+# --- Demo with mock (no real API needed) ---
+def demo():
+    config = CockpitConfig(
+        base_url="https://api.cockpit.loftorbital.example",
+        client_id="did-cde-test",
+        client_secret="s3cr3t",
+    )
+    client = CockpitClient(config)
+
+    # Mock the session to avoid real HTTP calls
+    mock_responses = [
+        # Auth token response
+        {"access_token": "eyJ.mock.token", "expires_in": 3600},
+        # First telemetry page
+        {"records": [{"ts": f"2026-04-02T10:{i:02d}:00Z",
+                      "channel": "EPS_BATT_SOC", "value": 85.0 + i}
+                     for i in range(50)],
+         "next_cursor": "cursor-page-2"},
+        # Second telemetry page (last)
+        {"records": [{"ts": f"2026-04-02T11:{i:02d}:00Z",
+                      "channel": "EPS_BATT_SOC", "value": 87.0 + i}
+                     for i in range(30)],
+         "next_cursor": None},
+    ]
+
+    call_idx = [0]
+    def mock_request(method, url, **kwargs):
+        resp = MagicMock()
+        resp.status_code = 200
+        resp.json.return_value = mock_responses[call_idx[0] % len(mock_responses)]
+        call_idx[0] += 1
+        return resp
+
+    client._session.request = mock_request
+    client._session.post = mock_request
+
+    print("Fetching telemetry (paginated)...")
+    records = list(client.get_telemetry(
+        "YAM9-PAYLOAD-A",
+        "2026-04-02T10:00:00Z",
+        "2026-04-02T12:00:00Z",
+        channels=["EPS_BATT_SOC"]
+    ))
+    print(f"Total records fetched: {len(records)}")
+    print(f"First record: {records[0]}")
+    print(f"Last record:  {records[-1]}")
+
+demo()
+</pre>
+    <div class="py-challenge">
+      <strong>EXTENSION CHALLENGE</strong>
+      Implement the <code>verify_channel</code> logic in <code>send_command()</code>: after submitting a command, poll the telemetry endpoint every 5 seconds until a specific channel shows an expected value, or until the timeout expires. Raise a <code>CommandVerificationTimeout</code> exception if not confirmed. This pattern is what makes commanding scripts safe for on-orbit use.
+    </div>
+  </div>
+
+  <div class="py-exercise">
+    <h3>Exercise 2 — Commissioning Test Runner</h3>
+    <p>Execute a sequence of commissioning tests defined in a YAML-like structure, record pass/fail against expected values, and generate an acceptance report. Models the kind of tooling a CDE builds to automate commissioning procedures.</p>
+<pre>
+from dataclasses import dataclass, field
+from typing import Callable, Any
+from datetime import datetime
+import json, random
+
+@dataclass
+class CommissioningTest:
+    test_id: str
+    description: str
+    command: dict               # What to send
+    expected_channel: str       # Telemetry channel to check
+    expected_value: Any         # Expected telemetry value
+    tolerance: float = 0.0      # Acceptable deviation (for floats)
+    critical: bool = False      # If True, failure halts sequence
+
+@dataclass
+class TestResult:
+    test_id: str
+    description: str
+    status: str           # PASS | FAIL | SKIP
+    actual_value: Any
+    expected_value: Any
+    timestamp: str
+    notes: str = ""
+
+def run_commissioning_sequence(
+    tests: list[CommissioningTest],
+    send_command_fn: Callable,
+    read_telemetry_fn: Callable,
+    mission_id: str
+) -> list[TestResult]:
+    """Execute commissioning test sequence, returning results."""
+    results = []
+    halted = False
+
+    for test in tests:
+        if halted:
+            results.append(TestResult(
+                test_id=test.test_id, description=test.description,
+                status="SKIP", actual_value=None,
+                expected_value=test.expected_value,
+                timestamp=datetime.utcnow().isoformat()+"Z",
+                notes="Skipped — previous critical test failed"
+            ))
+            continue
+
+        print(f"  Running {test.test_id}: {test.description}...")
+        send_command_fn(mission_id, test.command)
+        actual = read_telemetry_fn(mission_id, test.expected_channel)
+
+        # Evaluate pass/fail
+        if isinstance(test.expected_value, float) and test.tolerance > 0:
+            passed = abs(actual - test.expected_value) <= test.tolerance
+        else:
+            passed = actual == test.expected_value
+
+        status = "PASS" if passed else "FAIL"
+        notes = "" if passed else f"Expected {test.expected_value}, got {actual}"
+
+        result = TestResult(
+            test_id=test.test_id, description=test.description,
+            status=status, actual_value=actual,
+            expected_value=test.expected_value,
+            timestamp=datetime.utcnow().isoformat()+"Z",
+            notes=notes
+        )
+        results.append(result)
+        print(f"    → {status}" + (f": {notes}" if notes else ""))
+
+        if not passed and test.critical:
+            print(f"  ⚠ CRITICAL test failed — halting sequence.")
+            halted = True
+
+    return results
+
+def generate_acceptance_report(mission_id: str, results: list[TestResult]) -> str:
+    passed = sum(1 for r in results if r.status == "PASS")
+    failed = sum(1 for r in results if r.status == "FAIL")
+    skipped = sum(1 for r in results if r.status == "SKIP")
+    lines = [
+        f"COMMISSIONING ACCEPTANCE REPORT",
+        f"Mission: {mission_id}",
+        f"Generated: {datetime.utcnow().isoformat()}Z",
+        f"{'='*55}",
+        f"Results: {passed} PASS  |  {failed} FAIL  |  {skipped} SKIP",
+        f"Verdict: {'ACCEPTED' if failed == 0 else 'NOT ACCEPTED — SEE FAILURES'}",
+        "",
+    ]
+    for r in results:
+        icon = {'PASS':'✓','FAIL':'✗','SKIP':'○'}[r.status]
+        lines.append(f"  {icon} [{r.status:4s}] {r.test_id}: {r.description}")
+        if r.notes:
+            lines.append(f"         ↳ {r.notes}")
+    return "\n".join(lines)
+
+# --- Mock mission infra ---
+def mock_send(mission_id, command):
+    pass  # would call CockpitClient.send_command in production
+
+MOCK_TELEM = {
+    "HUB_PAYLOAD_HB": 1, "PAYLOAD_TEMP": 22.4, "PAYLOAD_POWER_W": 14.2,
+    "PAYLOAD_MODE": "IMAGING", "PAYLOAD_IMG_COUNT": 1
+}
+def mock_telem(mission_id, channel):
+    return MOCK_TELEM.get(channel, random.uniform(0, 100))
+
+# --- Test sequence ---
+tests = [
+    CommissioningTest("TC-01", "Hub-Payload heartbeat present",
+                      {"command_id": "HUB_PAYLOAD_POWER_ON", "params": {}},
+                      "HUB_PAYLOAD_HB", 1, critical=True),
+    CommissioningTest("TC-02", "Payload temperature within nominal range",
+                      {"command_id": "PAYLOAD_STATUS_REQ", "params": {}},
+                      "PAYLOAD_TEMP", 23.0, tolerance=5.0),
+    CommissioningTest("TC-03", "Payload power draw within budget",
+                      {"command_id": "PAYLOAD_STATUS_REQ", "params": {}},
+                      "PAYLOAD_POWER_W", 14.0, tolerance=3.0),
+    CommissioningTest("TC-04", "Payload transitions to IMAGING mode",
+                      {"command_id": "PAYLOAD_SET_MODE", "params": {"mode": "IMAGING"}},
+                      "PAYLOAD_MODE", "IMAGING", critical=True),
+    CommissioningTest("TC-05", "First light image captured",
+                      {"command_id": "PAYLOAD_CAPTURE", "params": {"frames": 1}},
+                      "PAYLOAD_IMG_COUNT", 1),
+]
+
+print("COMMISSIONING SEQUENCE — YAM9-PAYLOAD-A")
+print("="*55)
+results = run_commissioning_sequence(tests, mock_send, mock_telem, "YAM9-PAYLOAD-A")
+print()
+print(generate_acceptance_report("YAM9-PAYLOAD-A", results))
+</pre>
+    <div class="py-note">In production, <code>send_command_fn</code> and <code>read_telemetry_fn</code> are the <code>CockpitClient</code> methods from Exercise 1. The separation of the test runner from the API client makes both independently testable — a design principle Madeline will recognise.</div>
+  </div>
+</div>
+
+<!-- REFLECTION -->
+<div class="reflection-block" id="reflect">
+  <h2>REFLECTION PROMPTS</h2>
+  <p class="ref-intro">200–300 words each. Madeline will expect precision — numbers, specifics, reasoning.</p>
+  <div class="ref-prompt">
+    <h3>Prompt 1 — Your Most Complex Python Automation</h3>
+    <p>Describe the most operationally significant Python or Ansible automation you built at iDirect. Be specific: what was the manual process before, what did you automate, what was the quantitative before/after (time saved, error rate reduced, MTTR improved). Then explain how you would design the same solution differently knowing what you now know about production-grade error handling and observability.</p>
+  </div>
+  <div class="ref-prompt">
+    <h3>Prompt 2 — Quantitative Communication</h3>
+    <p>Write a sample customer update for the scenario: a commissioning payload temperature is 28°C against an expected 23°C, still within the 35°C operating limit. The customer is anxious. Your update must include: the actual number, the expected number, the limit, the margin, your assessment of risk, your next diagnostic step, and the time of your next update. Keep it under 100 words. This is the kind of communication Madeline values.</p>
+  </div>
+</div>
+
+<div class="lesson-nav">
+  <a href="int-bella.html">← INT-01: BELLA</a>
+  <a href="int-xavier.html">INT-03: XAVIER →</a>
+</div>
+
+</div>
+<footer>© 2026 LEOAF · LOFT ORBITAL INTERVIEW PREP · PANEL DAY: THURSDAY 2 APRIL</footer>
+<button class="back-to-top" id="backToTop">↑</button>
+
+<script>
+const canvas=document.getElementById('starsCanvas'),ctx=canvas.getContext('2d');let stars=[];
+function initStars(){stars=[];for(let i=0;i<180;i++)stars.push({x:Math.random()*canvas.width,y:Math.random()*canvas.height,size:Math.random()*1.4+0.3,speed:Math.random()*0.15+0.03,hue:Math.random()*360});}
+function resizeCanvas(){canvas.width=window.innerWidth;canvas.height=window.innerHeight;}
+resizeCanvas();initStars();window.addEventListener('resize',resizeCanvas);
+function animateStars(){ctx.clearRect(0,0,canvas.width,canvas.height);stars.forEach(s=>{s.y-=s.speed;if(s.y<0){s.y=canvas.height;s.x=Math.random()*canvas.width;}ctx.beginPath();ctx.fillStyle=`hsl(${s.hue},70%,80%)`;ctx.arc(s.x,s.y,s.size,0,Math.PI*2);ctx.fill();});requestAnimationFrame(animateStars);}
+animateStars();
+const feedbacks={
+  1:{correct:"Correct. Procedure first, hardware second. Most commissioning anomalies are procedure or expected-value errors, not hardware failures. Don't create a hardware investigation before ruling out a simpler explanation.",wrong:"Incorrect. The most common commissioning anomaly cause is procedure or expected-value error. Verify the test was correctly executed and the ConOps expected value is valid before concluding hardware is at fault."},
+  2:{correct:"Correct. HTTP 200 confirms the API accepted the request — it says nothing about whether the spacecraft actually executed the command. Always verify via subsequent telemetry.",wrong:"Incorrect. A 200 response from the API means the request was accepted by the ground system. You must check subsequent telemetry to confirm the payload itself executed the command on orbit."},
+  3:{correct:"Correct. POST creates a new resource/action on each call. Sending a spacecraft command twice could execute the payload operation twice. For commanding, always check for prior submissions before POSTing.",wrong:"Incorrect. POST is not idempotent — it creates a new action on each call. For spacecraft commanding this matters: a duplicate POST could send the same command twice to the payload, with potentially unintended effects."},
+  4:{correct:"Correct. Read Retry-After if present, otherwise use exponential backoff. Never immediately retry a 429 — that makes the rate limit problem worse.",wrong:"Incorrect. Immediately retrying a 429 will cause more 429s. Read the Retry-After header and wait that duration. If no header, use exponential backoff. The goal is to respect the server's capacity limit."},
+  5:{correct:"Correct. This demonstrates production-grade error handling philosophy: distinguish transient vs permanent failures, log with structure, never silently discard exceptions. Exactly what Madeline wants to hear.",wrong:"Incorrect. Wrapping everything in try/except and suppressing errors is worse than letting errors propagate — you lose diagnostic information. The correct philosophy distinguishes failure types and handles each appropriately with full logging."},
+  6:{correct:"Correct. These are the three most common causes of imaging performance degradation post-launch that are not hardware failures: thermal focus shift as the satellite reaches thermal equilibrium, calibration differences, and contamination from launch environment outgassing.",wrong:"Incorrect. Hardware damage is a last resort explanation. The three most likely causes of image quality degradation post-launch are thermal focus shift (the satellite wasn't at thermal equilibrium during ground test), calibration differences, and optical contamination from launch outgassing."},
+  7:{correct:"Correct. Pagination is the most common reason a client receives fewer records than expected. The first page was fetched; the remaining pages were not. Always implement full pagination traversal.",wrong:"Incorrect. A 50-record result from a 2,000-record dataset almost certainly means the client only fetched the first page of a paginated response. Check whether the response contains a next_cursor or next_page field that was ignored."},
+  8:{correct:"Correct. Stateful alerting: fire once when the condition appears (FIRE), suppress during persistence, fire once when it clears (CLEAR). Two alerts total for a single incident, regardless of duration.",wrong:"Incorrect. A well-designed alert system is stateful — it tracks whether an alert is active. It fires once when the condition first appears and once when it clears. Sending one alert per polling cycle during a 45-minute incident generates alert fatigue and is a sign of poor system design."}
+};
+let answered={};
+document.querySelectorAll('.quiz-opt').forEach(btn=>{
+  btn.addEventListener('click',function(){
+    const q=this.dataset.q;if(answered[q]!==undefined)return;
+    const correct=this.dataset.correct==='true';answered[q]=correct;
+    document.querySelectorAll(`.quiz-opt[data-q="${q}"]`).forEach(b=>{b.disabled=true;if(b.dataset.correct==='true')b.classList.add('correct');});
+    if(!correct)this.classList.add('wrong');
+    const fb=document.getElementById(`fb${q}`);
+    fb.textContent=(correct?'✓ ':'✗ ')+feedbacks[q][correct?'correct':'wrong'];
+    fb.style.color=correct?'#39ff14':'#ff004f';
+    if(Object.keys(answered).length===8){
+      const total=Object.values(answered).filter(Boolean).length;
+      const el=document.getElementById('quizScore');el.style.display='block';
+      el.textContent=`SCORE: ${total}/8 — ${total>=7?'STRONG. SHE WILL NOTICE.':total>=5?'SOLID. REVIEW MISSED PATTERNS.':'REVISIT SECTIONS 3–4 BEFORE THURSDAY.'}`;
+    }
+  });
+});
+const btt=document.getElementById('backToTop');
+window.addEventListener('scroll',()=>btt.classList.toggle('visible',window.scrollY>400));
+btt.addEventListener('click',()=>window.scrollTo({top:0,behavior:'smooth'}));
+</script>
+</body>
+</html>
