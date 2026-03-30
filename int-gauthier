@@ -1,0 +1,1107 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, shrink-to-fit=no">
+<title>GAUTHIER DAMIEN — Mission Ops Software · Loft Orbital Interview Prep · LEOAF</title>
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;600;800&family=Share+Tech+Mono&family=Libre+Baskerville:ital,wght@0,400;0,700;1,400&display=swap" rel="stylesheet">
+<style>
+* { box-sizing:border-box; margin:0; padding:0; }
+html { height:100%; -webkit-text-size-adjust:100%; overflow-x:hidden; }
+body { font-family:'Share Tech Mono',monospace; background:#000; color:white; overflow-x:hidden; min-height:100vh; }
+#starsCanvas { position:fixed; inset:0; z-index:-1; }
+
+header {
+background:#000; border-bottom:1px solid #aa66ff33;
+position:sticky; top:0; z-index:100;
+padding:1rem clamp(1.5rem,5vw,4rem);
+display:flex; justify-content:space-between; align-items:center;
+box-shadow:0 4px 16px #0008;
+}
+.logo { font-family:'Orbitron',sans-serif; font-weight:800; font-size:clamp(16px,2vw,22px); letter-spacing:3px; text-decoration:none; }
+.logo span:first-child { color:white; }
+.logo span:last-child { color:#aa66ff; }
+.nav-right { display:flex; align-items:center; gap:10px; }
+.nav-btn {
+background:transparent; border:1px solid #aa66ff44; color:#aa66ff;
+padding:6px 14px; cursor:pointer; transition:0.3s ease;
+font-size:11px; font-family:'Orbitron',sans-serif; letter-spacing:1px;
+text-decoration:none; display:inline-block;
+}
+.nav-btn:hover { background:#aa66ff; color:black; }
+
+.breadcrumb { padding:14px clamp(1.5rem,5vw,4rem); font-size:11px; color:#ffffff44; letter-spacing:1px; position:relative; z-index:1; }
+.breadcrumb a { color:#aa66ff66; text-decoration:none; }
+.breadcrumb a:hover { color:#aa66ff; }
+.breadcrumb span { margin:0 8px; }
+
+.lesson-wrap { max-width:820px; margin:0 auto; padding:0 clamp(1.5rem,5vw,4rem) 80px; position:relative; z-index:1; }
+
+.lesson-header { padding:30px 0 28px; border-bottom:1px solid #ffffff11; margin-bottom:36px; }
+.lesson-tag { font-family:'Orbitron',sans-serif; font-size:10px; color:#aa66ff; letter-spacing:3px; margin-bottom:10px; }
+.lesson-header h1 { font-family:'Orbitron',sans-serif; font-size:clamp(20px,3.5vw,30px); font-weight:800; line-height:1.2; margin-bottom:12px; }
+.lesson-meta { display:flex; gap:10px; flex-wrap:wrap; margin-bottom:16px; }
+.l-pill { font-family:'Orbitron',sans-serif; font-size:10px; padding:3px 10px; border:1px solid; letter-spacing:1px; }
+.l-pill-q { color:#aa66ff; border-color:#aa66ff44; }
+.l-pill-t { color:#39ff14; border-color:#39ff1444; }
+.l-pill-s { color:#00d9ff; border-color:#00d9ff44; }
+.lesson-intro { font-size:13px; line-height:1.85; opacity:0.75; }
+
+.toc { background:rgba(170,102,255,0.06); border:1px solid #aa66ff33; padding:24px 28px; margin:30px 0; }
+.toc h4 { font-family:'Orbitron',sans-serif; font-size:10px; color:#aa66ff; letter-spacing:2px; margin-bottom:16px; }
+.toc ol { padding-left:20px; }
+.toc li { font-size:13px; line-height:2.1; }
+.toc li a { color:#aa66ffbb; text-decoration:none; transition:0.15s; }
+.toc li a:hover { color:#ffffff; padding-left:4px; }
+.toc li::marker { color:#ff004f; font-family:'Orbitron',sans-serif; font-size:10px; }
+
+.content-block { background:#f5f2ec; color:#1a1a1a; padding:36px clamp(24px,4vw,48px); margin-bottom:24px; border-left:4px solid #aa66ff; position:relative; z-index:1; }
+.content-block h2 { font-family:'Orbitron',sans-serif; font-size:13px; color:#5500aa; letter-spacing:2px; text-transform:uppercase; margin-bottom:20px; padding-bottom:10px; border-bottom:2px solid #aa66ff66; scroll-margin-top:80px; }
+.content-block h3 { font-family:'Orbitron',sans-serif; font-size:11px; color:#444; letter-spacing:1.5px; text-transform:uppercase; margin:32px 0 14px; }
+.content-block p { font-family:'Libre Baskerville',Georgia,serif; font-size:15px; line-height:1.9; color:#1a1a1a; margin-bottom:18px; }
+.content-block ul, .content-block ol { padding-left:0; margin-bottom:16px; }
+.content-block ul li, .content-block ol li { font-family:'Libre Baskerville',Georgia,serif; font-size:14px; line-height:1.85; color:#1a1a1a; margin-bottom:8px; padding-left:20px; position:relative; }
+.content-block ul li::before { content:'›'; position:absolute; left:0; color:#8833cc; }
+.content-block ol { counter-reset:item; }
+.content-block ol li { counter-increment:item; }
+.content-block ol li::before { content:counter(item)'.'; position:absolute; left:0; color:#cc0033; font-family:'Orbitron',sans-serif; font-size:10px; top:2px; }
+
+.callout { border-left:3px solid #aa66ff; background:#f5f0ff; padding:16px 20px; margin:22px 0; font-size:13px; line-height:1.8; }
+.callout.red   { border-left-color:#cc0033; background:#fdecea; }
+.callout.green { border-left-color:#1a7a1a; background:#eafaea; }
+.callout.amber { border-left-color:#996600; background:#fffbf0; }
+.callout strong { font-family:'Orbitron',sans-serif; font-size:10px; letter-spacing:1px; display:block; margin-bottom:8px; color:inherit; }
+.callout p { font-family:'Libre Baskerville',Georgia,serif; font-size:14px; line-height:1.8; color:#1a1a1a; margin-bottom:0; }
+
+.profile-box { background:#f8f0ff; border:1px solid #aa66ff33; padding:20px 24px; margin:24px 0; }
+.profile-box h4 { font-family:'Orbitron',sans-serif; font-size:11px; color:#8833cc; letter-spacing:2px; margin-bottom:14px; }
+
+.concept-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(200px,1fr)); gap:12px; margin:22px 0; }
+.concept-card { background:#f8f0ff; border:1px solid #aa66ff33; padding:16px; }
+.concept-card h4 { font-family:'Orbitron',sans-serif; font-size:10px; color:#8833cc; letter-spacing:1.5px; margin-bottom:8px; }
+.concept-card p { font-family:'Libre Baskerville',Georgia,serif; font-size:13px; line-height:1.7; color:#333; margin:0; }
+
+.formula-box { background:#111; border:1px solid #aa66ff33; padding:16px 20px; margin:18px 0; font-family:'Share Tech Mono',monospace; font-size:12px; line-height:1.9; color:#aa66ff; }
+.formula-box .fb-title { font-family:'Orbitron',sans-serif; font-size:9px; color:#ffffff55; letter-spacing:2px; margin-bottom:8px; display:block; }
+
+.compare-table { width:100%; border-collapse:collapse; margin:22px 0; font-size:12px; }
+.compare-table th { font-family:'Orbitron',sans-serif; font-size:10px; letter-spacing:1px; color:#5500aa; padding:10px 12px; border-bottom:2px solid #aa66ff66; text-align:left; }
+.compare-table td { padding:10px 12px; border-bottom:1px solid #ddd; line-height:1.5; color:#1a1a1a; vertical-align:top; }
+.compare-table tr:hover td { background:#f8f0ff; }
+.compare-table .hi { color:#1a7a1a; font-weight:bold; }
+.compare-table .lo { color:#cc0033; }
+
+/* QUIZ */
+.quiz-block { background:rgba(17,17,17,0.9); border:1px solid #aa66ff33; padding:28px; margin:48px 0 32px; }
+.quiz-block h2 { font-family:'Orbitron',sans-serif; font-size:13px; color:#aa66ff; letter-spacing:2px; margin-bottom:6px; }
+.quiz-intro { font-size:12px; opacity:0.6; margin-bottom:24px; padding-bottom:16px; border-bottom:1px solid #aa66ff22; line-height:1.6; }
+.quiz-q { margin-bottom:28px; }
+.quiz-q p { font-size:13px; opacity:0.9; margin-bottom:12px; line-height:1.65; }
+.quiz-q p strong { color:#aa66ff; }
+.quiz-options { display:flex; flex-direction:column; gap:8px; }
+.quiz-opt { background:rgba(255,255,255,0.03); border:1px solid #ffffff1a; padding:11px 16px; cursor:pointer; font-size:12px; font-family:'Share Tech Mono',monospace; transition:0.2s ease; text-align:left; color:white; line-height:1.5; }
+.quiz-opt:hover:not(:disabled) { background:rgba(170,102,255,0.08); border-color:#aa66ff44; }
+.quiz-opt.correct { background:rgba(57,255,20,0.1); border-color:#39ff14; color:#39ff14; }
+.quiz-opt.wrong   { background:rgba(255,0,79,0.1); border-color:#ff004f; color:#ff004f; }
+.quiz-opt:disabled { cursor:default; }
+.quiz-feedback { font-size:12px; margin-top:10px; min-height:18px; line-height:1.7; opacity:0.9; padding:0 4px; }
+.quiz-score { font-family:'Orbitron',sans-serif; font-size:12px; color:#39ff14; margin-top:20px; letter-spacing:1px; display:none; padding-top:16px; border-top:1px solid #39ff1433; }
+
+/* PYTHON */
+.py-block { background:rgba(10,10,10,0.95); border:1px solid #aa66ff22; padding:28px; margin:32px 0; }
+.py-block h2 { font-family:'Orbitron',sans-serif; font-size:13px; color:#aa66ff; letter-spacing:2px; margin-bottom:8px; }
+.py-block .py-intro { font-size:12px; opacity:0.7; margin-bottom:20px; padding-bottom:16px; border-bottom:1px solid #aa66ff22; line-height:1.7; }
+.py-exercise { margin-bottom:32px; }
+.py-exercise:last-child { margin-bottom:0; }
+.py-exercise h3 { font-family:'Orbitron',sans-serif; font-size:11px; color:#aa66ff99; letter-spacing:1.5px; text-transform:uppercase; margin-bottom:10px; }
+.py-exercise p { font-size:12px; opacity:0.8; margin-bottom:14px; line-height:1.75; }
+.py-block pre { background:#050505; border:1px solid #aa66ff33; padding:20px; font-family:'Share Tech Mono',monospace; font-size:11.5px; line-height:1.75; overflow-x:auto; color:#aa66ff; white-space:pre; margin-bottom:12px; }
+.py-block .py-note { font-size:11px; color:#ffffff44; line-height:1.75; margin-top:10px; }
+.py-block .py-challenge { background:rgba(170,102,255,0.04); border-left:2px solid #aa66ff; padding:12px 16px; margin-top:14px; font-size:12px; line-height:1.75; opacity:0.8; }
+.py-block .py-challenge strong { font-family:'Orbitron',sans-serif; font-size:10px; color:#aa66ff; display:block; margin-bottom:6px; letter-spacing:1px; }
+
+/* REFLECTION */
+.reflection-block { background:rgba(170,102,255,0.04); border:1px solid #aa66ff33; padding:24px; margin:32px 0; }
+.reflection-block h2 { font-family:'Orbitron',sans-serif; font-size:13px; color:#aa66ff; letter-spacing:2px; margin-bottom:8px; }
+.reflection-block .ref-intro { font-size:12px; opacity:0.7; margin-bottom:20px; padding-bottom:14px; border-bottom:1px solid #aa66ff22; line-height:1.7; }
+.ref-prompt { margin-bottom:20px; }
+.ref-prompt h3 { font-family:'Orbitron',sans-serif; font-size:11px; color:#aa66ff99; letter-spacing:1px; margin-bottom:8px; }
+.ref-prompt p { font-size:12px; opacity:0.8; line-height:1.75; margin-bottom:10px; }
+.ref-prompt ul li { font-size:12px; opacity:0.8; line-height:1.75; padding-left:16px; position:relative; margin-bottom:6px; }
+.ref-prompt ul li::before { content:'›'; position:absolute; left:0; color:#aa66ff; }
+
+.back-to-top { position:fixed; bottom:28px; right:28px; z-index:200; width:44px; height:44px; background:#000; border:1px solid #aa66ff55; color:#aa66ff; font-size:20px; cursor:pointer; display:flex; align-items:center; justify-content:center; opacity:0; pointer-events:none; transition:opacity 0.3s ease; }
+.back-to-top.visible { opacity:1; pointer-events:auto; }
+.back-to-top:hover { border-color:#aa66ff; background:#110022; }
+
+.complete-wrap { margin-top:56px; padding-top:30px; border-top:1px solid #ffffff11; text-align:center; }
+.complete-btn { font-family:'Orbitron',sans-serif; font-size:13px; letter-spacing:2px; padding:14px 44px; background:transparent; border:1px solid #aa66ff; color:#aa66ff; cursor:pointer; transition:0.3s ease; }
+.complete-btn:hover:not(.done) { background:#aa66ff; color:black; box-shadow:0 0 20px rgba(170,102,255,0.4); }
+.complete-btn.done { background:rgba(170,102,255,0.1); cursor:default; opacity:0.7; }
+.complete-msg { font-size:12px; color:#ffffff55; margin-top:14px; min-height:18px; letter-spacing:1px; }
+
+.lesson-nav { display:flex; justify-content:space-between; margin-top:30px; flex-wrap:wrap; gap:10px; }
+.lesson-nav a { font-family:'Orbitron',sans-serif; font-size:11px; color:#aa66ff66; text-decoration:none; letter-spacing:1px; transition:0.2s; }
+.lesson-nav a:hover { color:#aa66ff; }
+
+footer { text-align:center; padding:30px; opacity:0.3; font-size:11px; position:relative; z-index:1; letter-spacing:1px; }
+</style>
+</head>
+<body>
+
+<canvas id="starsCanvas"></canvas>
+
+<header>
+  <a href="int-index.html" class="logo"><span>LOFT</span><span>PREP</span></a>
+  <div class="nav-right">
+    <a href="int-index.html" class="nav-btn">← ALL PANELS</a>
+  </div>
+</header>
+
+<div class="breadcrumb">
+  <a href="int-index.html">INTERVIEW HUB</a><span>/</span>
+  <span style="color:#ffffff88;">GAUTHIER DAMIEN — MISSION OPERATIONS SOFTWARE</span>
+</div>
+
+<div class="lesson-wrap">
+
+  <div class="lesson-header">
+    <div class="lesson-tag">PANEL INTERVIEW · SLOT 5 OF 5 · 21:45–22:30 CEST</div>
+    <h1>Gauthier Damien<br>Lead, Mission Operation Services</h1>
+    <div class="lesson-meta">
+      <div class="l-pill l-pill-q">TOULOUSE</div>
+      <div class="l-pill l-pill-t">SATDEVOPS</div>
+      <div class="l-pill l-pill-s">AUTOMATION SYSTEMS</div>
+    </div>
+    <p class="lesson-intro">Gauthier is the most technically distinctive interviewer on the panel. His background — first ML engineer at GlobalEnglish, ML engineer at Feedly — means he thinks in data pipelines, model-driven decisions, system observability, and emergent behaviour from distributed agents. At Loft, his team (Mission Operation Services) owns the software that makes the fleet run: commanding infrastructure, monitoring systems, automation, constellation management tooling. He thinks about satellite operations as a software problem. His question is whether you do too. After 4 hours with the Toulouse team and a break, this is your closing session — arrive with energy and your sharpest systems thinking.</p>
+  </div>
+
+  <div class="toc">
+    <h4>CONTENTS</h4>
+    <ol>
+      <li><a href="#s1">Interviewer profile — ML engineer turned satellite ops lead</a></li>
+      <li><a href="#s2">SatDevOps: what Loft means by it and why it matters</a></li>
+      <li><a href="#s3">Automation as system design — not scripts, systems</a></li>
+      <li><a href="#s4">Observability: the infrastructure of trust</a></li>
+      <li><a href="#s5">State machines and mission workflow design</a></li>
+      <li><a href="#s6">AI and ML in satellite operations — Gauthier's lens</a></li>
+      <li><a href="#s7">LEOAF as direct evidence — what to say and how</a></li>
+      <li><a href="#s8">Bridging iDirect and Airbus — the software systems translation</a></li>
+      <li><a href="#quiz">Knowledge check</a></li>
+      <li><a href="#python">Python exercises</a></li>
+      <li><a href="#reflect">Reflection prompts</a></li>
+    </ol>
+  </div>
+
+  <!-- S1 -->
+  <div class="content-block" id="s1">
+    <h2>1. Interviewer Profile — ML Engineer Turned Satellite Ops Lead</h2>
+
+    <div class="profile-box">
+      <h4>GAUTHIER DAMIEN — CAREER TRACE</h4>
+      <p style="font-family:'Share Tech Mono',monospace;font-size:12px;line-height:1.8;color:#555;">
+        GlobalEnglish → First ML Engineer → Built Automatic English Lesson Generator and Automatic English Pronunciation Scorer. First ML hire: designed the data pipeline, trained the models, shipped the product.<br><br>
+        Feedly → ML Engineer → Developed AI research assistant. Worked on content classification, relevance ranking, NLP pipeline infrastructure in a production SaaS environment.<br><br>
+        Loft Orbital → Lead, Mission Operation Services → Develops satellite operations software. Applies software engineering methodology to constellation management. Supports satellite commissioning and daily operations. Recently leading Loft's AI-for-Space initiative — thinking about autonomous agents at constellation scale.
+      </p>
+    </div>
+
+    <h3>The frame that matters</h3>
+    <p>Gauthier has written publicly about the intersection of large-scale autonomous AI systems and space infrastructure. He thinks about what happens when you network capable autonomous agents at scale — emergent coordination, shared context, second-order effects. He sees satellite operations as a domain ripe for this approach: instead of a team of humans operating each satellite manually, systems of software agents managing the fleet autonomously, with humans supervising at the policy level rather than the command level.</p>
+
+    <p>This means his question is not "can you write Python?" — it's "do you think about automated systems the way a software engineer who has shipped production ML pipelines thinks about them?" Does your automation have error handling, retry logic, idempotency guarantees, monitoring hooks? Do you think about failure modes before you think about happy paths? Do you design for observability so that when something goes wrong at 2am you can see exactly what happened and why?</p>
+
+    <h3>The opportunity this creates for you</h3>
+    <p>Your LEOAF platform is directly relevant here. You didn't just write lessons — you designed and built a full-stack web application: GitHub Pages frontend, Supabase (PostgreSQL) backend, authentication, progress tracking, a curriculum state machine (quarters, lessons, completion states). That is exactly the kind of software thinking Gauthier respects. Use it. Not as "I have a side project" but as "I designed the data model, I implemented the auth flow, I debugged the async state management issues when the HAL modal wasn't triggering correctly." The specifics matter because they signal the mindset.</p>
+  </div>
+
+  <!-- S2 -->
+  <div class="content-block" id="s2">
+    <h2>2. SatDevOps: What Loft Means by It and Why It Matters</h2>
+
+    <p>"SatDevOps" — satellite operations run like a software DevOps organisation — is not just a branding phrase at Loft. It represents a genuine architectural philosophy: the team that builds the operations software is the same team that runs the operations. This collapses the traditional gap between "the people who write the tools" and "the people who use the tools" that characterises legacy satellite operations.</p>
+
+    <h3>Traditional satellite ops vs SatDevOps</h3>
+
+    <table class="compare-table">
+      <thead>
+        <tr><th>Traditional Satellite Ops</th><th>Loft SatDevOps Model</th></tr>
+      </thead>
+      <tbody>
+        <tr><td>Operations team runs procedures written by others</td><td>Operations team writes and owns the procedures as code</td></tr>
+        <tr><td>Tool requests go to a separate engineering team</td><td>Ops engineers build and deploy the tools they need</td></tr>
+        <tr><td>Runbooks are Word documents updated annually</td><td>Runbooks are code — version-controlled, tested, automated</td></tr>
+        <tr><td>Anomaly response is manual and operator-driven</td><td>Anomaly response is automated where safe, supervised where not</td></tr>
+        <tr><td>One operator per mission, high workload</td><td>Software manages the fleet; humans supervise exceptions</td></tr>
+        <tr><td>Scaling from 5 to 50 satellites requires 10× ops headcount</td><td>Scaling from 5 to 50 satellites requires better software, not 10× headcount</td></tr>
+      </tbody>
+    </table>
+
+    <p>The business case for SatDevOps is constellation economics: as Loft scales from tens to hundreds of satellites, manual per-satellite operations don't scale linearly. Software that automates routine operations (health checks, pass scheduling, telemetry trend monitoring, nominal commanding sequences) allows the same operations team to manage a much larger fleet. CDEs in this model are not data-entry operators executing fixed procedures — they are software-aware engineers who can read, contribute to, and critically evaluate the automation layer.</p>
+
+    <h3>What this means for you as a CDE candidate</h3>
+    <p>Gauthier is evaluating whether you will be a consumer of the automation (running other people's tools passively) or a contributor (identifying gaps, writing small automation pieces, providing high-quality feedback that improves the system). Your automation background — Ansible at iDirect, Python scripting, the SNMP/REST integration work at Airbus HBC+ — demonstrates the contributor instinct. Frame it that way.</p>
+
+    <div class="callout">
+      <strong>THE KEY DISTINCTION TO MAKE IN THE INTERVIEW</strong>
+      <p>There is a difference between running automated tools and having the engineering discipline that makes automated tools trustworthy. Anyone can schedule a cron job. The question is whether you write the cron job with idempotency so it can safely retry, with logging so you can reconstruct what happened, with error handling that distinguishes transient failures from hard failures, and with alerting that wakes the right person at the right severity. Gauthier cares about the second thing.</p>
+    </div>
+  </div>
+
+  <!-- S3 -->
+  <div class="content-block" id="s3">
+    <h2>3. Automation as System Design — Not Scripts, Systems</h2>
+
+    <p>The most important conceptual distinction for this interview is between a script and a system. Scripts execute a task. Systems manage tasks over time, handle failures, maintain state, and provide visibility into what they're doing. Gauthier has built ML systems in production — he knows the difference viscerally.</p>
+
+    <div class="concept-grid">
+      <div class="concept-card">
+        <h4>IDEMPOTENCY</h4>
+        <p>Running the same operation N times produces the same result as running it once. Critical for satellite commanding: if a command is sent and you don't receive an ACK, can you safely resend? Only if the operation is idempotent (e.g. "set payload power to ON") vs non-idempotent (e.g. "toggle payload power").</p>
+      </div>
+      <div class="concept-card">
+        <h4>RETRY LOGIC</h4>
+        <p>Transient failures (network timeout, temporary API error) should be retried with exponential backoff + jitter. Permanent failures (4xx errors, invalid state) should not be retried — they require human intervention. Distinguishing the two is the difference between a resilient system and one that amplifies problems.</p>
+      </div>
+      <div class="concept-card">
+        <h4>OBSERVABILITY</h4>
+        <p>A system is observable if its internal state can be inferred from its external outputs — logs, metrics, traces. Gauthier's ML background makes him especially attuned to this: a model that performs well in dev but fails silently in prod is the canonical observability failure. Same principle applies to ops automation.</p>
+      </div>
+      <div class="concept-card">
+        <h4>GRACEFUL DEGRADATION</h4>
+        <p>When one component fails, the system should degrade in a controlled way, not collapse entirely. Satellite ops automation that falls back to manual intervention on failure is better than automation that cascades a partial failure into a full outage. Design for degradation explicitly.</p>
+      </div>
+      <div class="concept-card">
+        <h4>SEPARATION OF CONCERNS</h4>
+        <p>A commanding module shouldn't also do telemetry parsing. A scheduler shouldn't also do anomaly detection. Clean separation makes each component independently testable, replaceable, and debuggable. In microservices terms: each service owns its domain and exposes a well-defined interface.</p>
+      </div>
+      <div class="concept-card">
+        <h4>HUMAN-IN-THE-LOOP DESIGN</h4>
+        <p>Autonomous systems should be designed with explicit points where human oversight is required — not bolted on as an afterthought. For satellite ops: automated nominal operations, human approval required for anything that changes the spacecraft's operating mode or power state significantly. Design the boundary explicitly.</p>
+      </div>
+    </div>
+
+    <h3>Applying this to a satellite operations context</h3>
+    <p>Consider a daily health check automation: a script that polls each satellite's telemetry every 15 minutes and flags anomalies. As a script: it polls, prints results, exits. As a system: it maintains a state model of each satellite (what's normal for this satellite at this orbital position, this time of day, this mission phase), detects deviations from the state model rather than from fixed thresholds, logs every evaluation with structured output, emits alerts to the right channel at the right severity, tracks alert history to suppress duplicate notifications, and exposes a dashboard showing current fleet health at a glance. The system is dramatically more useful — and dramatically more complex to build correctly. Gauthier wants evidence that you think at the system level, not the script level.</p>
+  </div>
+
+  <!-- S4 -->
+  <div class="content-block" id="s4">
+    <h2>4. Observability: The Infrastructure of Trust</h2>
+
+    <p>Observability is the property that allows you to understand a system's internal state from its external outputs without modifying the system to get that understanding. It is the answer to "what is happening right now, and why?" when something unexpected occurs. Gauthier, as someone who has debugged ML models in production, has strong opinions about observability.</p>
+
+    <h3>The three pillars</h3>
+    <p>Logs provide a chronological record of events. Good logs are structured (JSON, not free text), include context (satellite ID, mission phase, command reference), and are queryable. Bad logs are printf statements that tell you something happened but not what state the system was in when it happened. Metrics provide quantitative measurements over time — SoC trend, command success rate, data downlink volume per pass, API response latency. Traces connect a user action (a CDE sends a command via Cockpit) through the entire software stack (Cockpit API → ground station controller → uplink scheduler → RF transmission → command ACK receipt) to the outcome. For satellite ops, traces help diagnose "why did this command not reach the satellite" when the failure could be at any layer of the software stack.</p>
+
+    <h3>Why this connects to your background</h3>
+    <p>Your iDirect NMS experience is an observability system. iDirect's Network Management System provides exactly these three pillars for the VSAT network: event logs, time-series metrics (SNR, throughput, remotes online), and the ability to trace a connectivity failure from the remote terminal through the hub to the network. You've used it diagnostically every day for five years. You understand what good observability enables and what missing observability costs — in time, in customer impact, in the cognitive load of debugging without sufficient data.</p>
+
+    <p>Your Airbus HBC+ work also connects: designing SNMP monitoring interfaces for the MSP onboarding is explicitly building the metrics layer for a distributed system. You defined what gets measured, at what granularity, and how it flows to the NMS. That is an observability design decision.</p>
+
+    <div class="callout green">
+      <strong>THE LEOAF OBSERVABILITY ANGLE</strong>
+      <p>Your LEOAF platform has a Supabase backend tracking user progress — completion states, lesson IDs, timestamps. You designed a data model (what to store), an API layer (how the frontend reads and writes), and implicitly an observability layer (you can query Supabase to see how users progress through the curriculum, which lessons have the highest drop-off, how completion rates vary). That is a production observability decision, even if small-scale. Mentioning it to Gauthier as "I designed the data model with queryability in mind — not just to store state but to answer questions about how the system is used" will resonate strongly.</p>
+    </div>
+  </div>
+
+  <!-- S5 -->
+  <div class="content-block" id="s5">
+    <h2>5. State Machines and Mission Workflow Design</h2>
+
+    <p>Satellite mission operations are fundamentally state machine problems. A satellite transitions between defined states (commissioning, nominal operations, payload active, payload idle, safe mode, end of life), and valid transitions between states are defined by operational rules and safety constraints. A CDE who understands state machines can design workflows that are safe, auditable, and automatable.</p>
+
+    <h3>The satellite as a state machine</h3>
+    <p>Consider the mission lifecycle as a state machine: LEOP → Commissioning → Nominal → Payload Active → (anomaly) → Safe Mode → (recovery) → Nominal. Each state has a set of valid transitions, guard conditions (conditions that must be true before a transition is allowed), and actions triggered by the transition. "Activate payload" is only a valid transition from Nominal, not from Safe Mode. "Safe mode" is always a valid transition from any state — it is the invariant recovery path.</p>
+
+    <p>When you design automation for satellite operations, you are implementing this state machine in code. The commanding sequences are transitions. The telemetry checks before each command are guard conditions. The logging on transition is the audit trail. A CDE who can articulate this explicitly is demonstrating SatDevOps thinking — they understand that the ops workflow is a software artifact, not just a procedure document.</p>
+
+    <h3>Workflow design principles for satellite ops</h3>
+    <p>Atomic operations: each commanding step should be atomic — it either completes fully or it fails cleanly, never leaving the spacecraft in an intermediate state that's hard to reason about. Before proceeding to the next step, verify the previous step's success condition. Checkpoint and resume: for long commanding sequences (payload commissioning, firmware updates), design checkpoints where the current state is recorded and the sequence can be safely resumed from if interrupted by a contact loss. Roll-forward not rollback: on orbit, rolling back a state change is often impossible. Design commanding sequences where every intermediate state is safe, so that stopping at any point leaves the spacecraft in a known, manageable state.</p>
+
+    <div class="callout amber">
+      <strong>THE LEOAF CURRICULUM AS A STATE MACHINE</strong>
+      <p>Your curriculum platform is itself a state machine: each lesson is a node, completion is a transition, quarters are aggregated states. The Supabase backend stores the state. The frontend renders the current state. User actions (clicking "Mark Complete") trigger transitions. The progress bars and completion indicators are state visualisations. If Gauthier asks about your experience with state management, you can describe LEOAF in exactly these terms — it is not just a "website," it is a state management system for a learner's progress through a 620-hour curriculum. Frame it with that precision.</p>
+    </div>
+  </div>
+
+  <!-- S6 -->
+  <div class="content-block" id="s6">
+    <h2>6. AI and ML in Satellite Operations — Gauthier's Lens</h2>
+
+    <p>Gauthier's public writing shows he is thinking about AI-enabled satellite operations as more than a buzzword — he sees it as a fundamental architectural shift. Understanding his perspective prepares you to engage authentically with this topic if he raises it, and to ask a genuinely interesting question if you want to.</p>
+
+    <h3>His framing: autonomous agents at scale</h3>
+    <p>Gauthier's LinkedIn posts reference the emergence of AI agent networks — systems where many capable autonomous agents coordinate through shared infrastructure and context, producing emergent behaviours that exceed the sum of their parts. His insight is that this architecture, developed in the internet context, maps directly onto satellite constellations: a network of AI-enabled satellites that process data, make decisions, and deliver insights in real time, sharing context through ground infrastructure.</p>
+
+    <p>This is not science fiction at Loft — Loft has a dedicated AI-for-Space business unit. The practical near-term applications are: automated anomaly detection (ML models trained on historical telemetry detect anomalies before they cascade), automated pass scheduling (optimisation algorithms allocate ground station contacts across the fleet), predictive maintenance (degradation models predict component failures before they occur), and adaptive payload scheduling (ML-driven allocation of payload operating time to maximise customer mission objectives given the power and thermal constraints).</p>
+
+    <h3>Your honest position on this topic</h3>
+    <p>You have genuine adjacent experience: you understand the data layer (Supabase/PostgreSQL), you've implemented algorithmic logic in Python, you understand the importance of observability in production systems. You are not an ML engineer. The honest and effective position is: you understand the system design requirements for ML integration (data pipeline quality, feature engineering, model serving infrastructure, monitoring for drift), you find this direction genuinely compelling, and you see the CDE role as one that provides the domain-specific knowledge that makes ML in satellite ops work — because a model trained on bad telemetry labels is worse than no model.</p>
+
+    <div class="callout">
+      <strong>A QUESTION WORTH ASKING GAUTHIER</strong>
+      <p>If the conversation opens up: "Your posts about AI agents at constellation scale are genuinely interesting to me — especially the part about emergent coordination. What's the limiting factor right now: is it the onboard compute, the data pipeline quality, or the absence of good ground truth labels for anomaly training?" This question demonstrates you've read his thinking, you understand the ML system design challenges, and you're genuinely curious about his answer — not just demonstrating awareness.</p>
+    </div>
+  </div>
+
+  <!-- S7 -->
+  <div class="content-block" id="s7">
+    <h2>7. LEOAF as Direct Evidence — What to Say and How</h2>
+
+    <p>LEOAF is your strongest differentiating credential for Gauthier — more so than for any other interviewer on the panel. He is a software person who has shipped production systems. Showing him that you have too, in your own time, on a topic that proves genuine domain passion, is a more compelling signal than any amount of resume language about "software architecture experience."</p>
+
+    <h3>What LEOAF actually demonstrates</h3>
+    <p>You designed and built a full-stack web application from scratch: frontend architecture (HTML/CSS/JS with a custom retro-futuristic design system), backend (Supabase, which is a PostgreSQL-based BaaS — relational schema, row-level security, real-time subscriptions), authentication (Supabase Auth, session management, protected routes), state management (user progress tracking across 620 hours of curriculum content), deployment pipeline (GitHub Pages, static site, no build step). The platform serves real users and has evolved through multiple iterations based on how it was being used.</p>
+
+    <p>The curriculum itself is a knowledge engineering artifact: you decomposed a 620-hour domain (LEO satellite architecture) into a structured learning graph, sequenced for dependencies, with estimated effort per node. That is not trivially different from designing a data ontology or a knowledge base — it requires understanding which concepts are prerequisites for which others, how much cognitive load each node should carry, and how to sequence for retention.</p>
+
+    <h3>How to describe it to Gauthier</h3>
+    <p>Lead with the system design decisions, not the content. Say: "I built a progress-tracking web platform for a 620-hour self-study curriculum I designed. The interesting engineering decisions were in the state management layer — I needed a data model that could represent a learner's position in a directed graph of lessons and quarters, with completion state at multiple granularities (lesson, quarter, year), query efficiently for the dashboard view, and support undo (marking complete and then reverting). The Supabase/PostgreSQL backend handles that; I designed the schema with that query pattern in mind."</p>
+
+    <p>Then mention the observability dimension: "I can also see how people actually use it — which lessons have low completion rates, where people drop off in a quarter, which content generates the most time-on-page. That feedback loop has shaped how I write subsequent lessons."</p>
+  </div>
+
+  <!-- S8 -->
+  <div class="content-block" id="s8">
+    <h2>8. Bridging iDirect and Airbus — The Software Systems Translation</h2>
+
+    <p>Gauthier will be less interested in your SATCOM RF background than in any other interviewer on the panel. He cares about whether you think like a software engineer. Make the translation explicit.</p>
+
+    <table class="compare-table">
+      <thead>
+        <tr><th>Your Past Work</th><th>Software Systems Concept</th><th>Relevance to Gauthier</th></tr>
+      </thead>
+      <tbody>
+        <tr><td>iDirect NMS monitoring — polling remotes every 60s, alerting on thresholds</td><td>Metrics pipeline + alerting system</td><td>Observability infrastructure design</td></tr>
+        <tr><td>Ansible playbooks for network device configuration at iDirect</td><td>Infrastructure as code, idempotent provisioning</td><td>Automation discipline — declarative, repeatable, version-controlled</td></tr>
+        <tr><td>HBC+ REST/SNMP interface design for MSP onboarding</td><td>API design, service contract definition</td><td>You've designed the interface layer between systems — not just consumed it</td></tr>
+        <tr><td>LEOAF Supabase backend — schema design, auth, RLS policies</td><td>Relational data modeling, access control, backend-as-service</td><td>You've shipped a production backend, you understand the data layer</td></tr>
+        <tr><td>Fault isolation runbooks at iDirect — layered diagnosis, documented steps</td><td>Incident response playbooks, runbook automation</td><td>Ops-as-code mindset — procedures as executable artifacts</td></tr>
+        <tr><td>HBC+ cross-divisional architecture coordination</td><td>Distributed systems design with multiple stakeholders</td><td>You understand that complex systems have ownership boundaries that affect design decisions</td></tr>
+      </tbody>
+    </table>
+
+    <h3>The framing sentence</h3>
+    <p>If Gauthier asks why you'd be effective in a SatDevOps environment: <em>"My entire operational career has been about building software infrastructure around complex hardware systems — monitoring pipelines, automation scripts, API integrations — because that's the only way to operate them at any scale without burning out your team. The substrate at Loft is different. The discipline is the same."</em></p>
+  </div>
+
+  <!-- QUIZ -->
+  <div class="quiz-block" id="quiz">
+    <h2>KNOWLEDGE CHECK — GAUTHIER DAMIEN</h2>
+    <p class="quiz-intro">Eight questions covering SatDevOps philosophy, automation design, observability, state machines, and the software systems translation from your background. Last quiz before Thursday — make it count.</p>
+
+    <div class="quiz-q" id="q1">
+      <p><strong>Q1.</strong> Gauthier asks: "What's the difference between writing a script to automate a task and building a reliable automated system?" What is the most complete answer?</p>
+      <div class="quiz-options">
+        <button class="quiz-opt" data-q="1" data-correct="false">A. A system is just a collection of scripts — there's no fundamental difference, only scale</button>
+        <button class="quiz-opt" data-q="1" data-correct="false">B. A system has a user interface; a script runs from the command line</button>
+        <button class="quiz-opt" data-q="1" data-correct="true">C. A reliable automated system adds idempotency, retry logic with backoff, structured logging, error differentiation (transient vs permanent), alerting at appropriate severity, and a way to understand its internal state from external outputs — a script executes a happy path, a system handles the full failure space</button>
+        <button class="quiz-opt" data-q="1" data-correct="false">D. A system is tested; a script is not</button>
+      </div>
+      <div class="quiz-feedback" id="fb1"></div>
+    </div>
+
+    <div class="quiz-q" id="q2">
+      <p><strong>Q2.</strong> You are designing an automation that sends a daily health-check command to each satellite in the fleet. Why is idempotency important for this automation, and what specifically should you verify?</p>
+      <div class="quiz-options">
+        <button class="quiz-opt" data-q="2" data-correct="false">A. Idempotency doesn't matter for read-only health checks — only for commands that change satellite state</button>
+        <button class="quiz-opt" data-q="2" data-correct="true">B. If a pass is missed or a command times out, the system will retry. You must verify that resending the health-check command produces the same result as sending it once — that it doesn't trigger unintended state changes in the satellite's FSW or increment counters that affect downstream logic</button>
+        <button class="quiz-opt" data-q="2" data-correct="false">C. Idempotency means the command completes within a single pass window without retrying</button>
+        <button class="quiz-opt" data-q="2" data-correct="false">D. Idempotency is handled automatically by the Cockpit API — it's not a concern at the automation layer</button>
+      </div>
+      <div class="quiz-feedback" id="fb2"></div>
+    </div>
+
+    <div class="quiz-q" id="q3">
+      <p><strong>Q3.</strong> Gauthier describes Loft's SatDevOps model: "We don't have a separate operations team and engineering team — the people who build the tools run the operations." What is the primary business rationale for this?</p>
+      <div class="quiz-options">
+        <button class="quiz-opt" data-q="3" data-correct="false">A. It reduces headcount costs by having engineers do two jobs</button>
+        <button class="quiz-opt" data-q="3" data-correct="false">B. It ensures that all engineers have hands-on operations experience for career development</button>
+        <button class="quiz-opt" data-q="3" data-correct="true">C. Constellation scaling economics: as the fleet grows from tens to hundreds of satellites, manual per-satellite operations don't scale linearly — software automation is the only path to fleet scale without proportional headcount growth, and the people who run operations are best positioned to identify what should be automated</td>
+        <button class="quiz-opt" data-q="3" data-correct="false">D. It eliminates the communication overhead between separate ops and engineering teams</button>
+      </div>
+      <div class="quiz-feedback" id="fb3"></div>
+    </div>
+
+    <div class="quiz-q" id="q4">
+      <p><strong>Q4.</strong> You are building an automated pass scheduling system. It needs to allocate ground station contacts across 20 satellites over the next 24 hours. A new high-priority anomaly occurs — one satellite needs an emergency contact in the next 2 hours. How should a well-designed system handle this?</p>
+      <div class="quiz-options">
+        <button class="quiz-opt" data-q="4" data-correct="false">A. The emergency should be handled manually — automated schedulers should never be interrupted by external events</button>
+        <button class="quiz-opt" data-q="4" data-correct="false">B. Restart the scheduler with the emergency satellite as a hard constraint and recompute the full schedule from scratch</button>
+        <button class="quiz-opt" data-q="4" data-correct="true">C. The system should support priority injection — an interface that accepts high-priority requests, inserts them with the required time constraint, and re-optimises the affected portion of the schedule while keeping stable allocations intact; it should alert the operator with the revised schedule for approval before executing changes</button>
+        <button class="quiz-opt" data-q="4" data-correct="false">D. Alert the operator and pause all automation until the emergency is resolved manually</button>
+      </div>
+      <div class="quiz-feedback" id="fb4"></div>
+    </div>
+
+    <div class="quiz-q" id="q5">
+      <p><strong>Q5.</strong> Gauthier asks about observability. Which of the following best describes the difference between monitoring and observability?</p>
+      <div class="quiz-options">
+        <button class="quiz-opt" data-q="5" data-correct="false">A. Monitoring is for production systems; observability is for development and testing</button>
+        <button class="quiz-opt" data-q="5" data-correct="false">B. Monitoring measures performance metrics; observability measures business outcomes</button>
+        <button class="quiz-opt" data-q="5" data-correct="true">C. Monitoring tells you when something is wrong (alert on threshold); observability tells you why — you can ask arbitrary questions about the system's internal state from its external outputs without needing to modify or instrument the system after the fact</button>
+        <button class="quiz-opt" data-q="5" data-correct="false">D. Monitoring is passive; observability requires active probing of the system</button>
+      </div>
+      <div class="quiz-feedback" id="fb5"></div>
+    </div>
+
+    <div class="quiz-q" id="q6">
+      <p><strong>Q6.</strong> You describe LEOAF to Gauthier. He asks: "What's the most interesting data model decision you made in the Supabase backend?" What is the best answer?</p>
+      <div class="quiz-options">
+        <button class="quiz-opt" data-q="6" data-correct="false">A. "I used UUID primary keys for all tables for globally unique identification."</button>
+        <button class="quiz-opt" data-q="6" data-correct="false">B. "I implemented row-level security so each user can only see their own progress."</button>
+        <button class="quiz-opt" data-q="6" data-correct="true">C. "The core challenge was representing completion state at multiple granularities — individual lessons, quarters, and the whole curriculum — without either denormalising the data or making the dashboard query expensive. I used a single lesson_completions table with a lesson_id string (e.g. 'q1-4') keyed to the user, and compute quarter and overall completion percentages at query time from that table rather than storing them separately. That kept the write path simple (one upsert per lesson completion) while keeping the read path correct by definition."</button>
+        <button class="quiz-opt" data-q="6" data-correct="false">D. "I chose Supabase over Firebase because it uses PostgreSQL, which I find more familiar for relational data."</button>
+      </div>
+      <div class="quiz-feedback" id="fb6"></div>
+    </div>
+
+    <div class="quiz-q" id="q7">
+      <p><strong>Q7.</strong> Gauthier discusses ML in satellite operations — specifically anomaly detection on telemetry streams. He asks what you think the hardest problem is. What is the strongest answer?</p>
+      <div class="quiz-options">
+        <button class="quiz-opt" data-q="7" data-correct="false">A. "Training the ML model — satellite telemetry data is complex and requires sophisticated architectures like LSTMs or transformers."</button>
+        <button class="quiz-opt" data-q="7" data-correct="false">B. "Compute constraints — deploying ML models on onboard satellite computers is challenging given the radiation environment."</button>
+        <button class="quiz-opt" data-q="7" data-correct="true">C. "Ground truth labelling. Anomaly detection models need examples of anomalies to train on, but in satellite operations, true anomalies are rare and often ambiguous — was that a real anomaly or a known operational artefact? Without high-quality labels, the model learns to predict whatever the ops team's past behaviour was, including their mistakes. Getting that label quality right, and continuously updating ground truth as the fleet's behaviour evolves, is harder than the model architecture."</button>
+        <button class="quiz-opt" data-q="7" data-correct="false">D. "Data volume — satellite telemetry streams produce too much data to process in real time for an ML pipeline."</button>
+      </div>
+      <div class="quiz-feedback" id="fb7"></div>
+    </div>
+
+    <div class="quiz-q" id="q8">
+      <p><strong>Q8 — Synthesis.</strong> Gauthier asks: "In your experience, what's the most important thing you've learned about building software that operates reliably at scale?" This is an open-ended closing question. What answer will resonate most with his background?</p>
+      <div class="quiz-options">
+        <button class="quiz-opt" data-q="8" data-correct="false">A. "Testing — I've learned that comprehensive automated testing is the only way to maintain reliability as systems grow."</button>
+        <button class="quiz-opt" data-q="8" data-correct="false">B. "Simplicity — the most reliable systems are the ones with the fewest moving parts."</button>
+        <button class="quiz-opt" data-q="8" data-correct="true">C. "That the failure you didn't design for is the one that will happen at 2am. The discipline that prevents that isn't writing perfect code — it's building systems where, when something unexpected happens, you can reconstruct exactly what occurred from the logs, understand exactly what state the system was in, and know exactly what to change. Observability isn't an afterthought; it's the feature that makes everything else debuggable."</button>
+        <button class="quiz-opt" data-q="8" data-correct="false">D. "Documentation — I've learned that systems fail when the people operating them don't understand how they work, so documentation is the most important reliability investment."</button>
+      </div>
+      <div class="quiz-feedback" id="fb8"></div>
+    </div>
+
+    <div class="quiz-score" id="quizScore"></div>
+  </div>
+
+  <!-- PYTHON -->
+  <div class="py-block" id="python">
+    <h2>PYTHON EXERCISES — SATDEVOPS SYSTEMS</h2>
+    <p class="py-intro">Two exercises that demonstrate SatDevOps thinking: a state machine framework for mission workflow management, and a telemetry-driven decision engine with observability instrumentation built in from the start.</p>
+
+    <div class="py-exercise">
+      <h3>Exercise 1 — Mission Workflow State Machine</h3>
+      <p>Build a declarative state machine that models a satellite mission workflow. States, valid transitions, guard conditions, and actions on transition — all defined as data, not scattered across imperative code. This is what runbook-as-code looks like.</p>
+<pre>
+from dataclasses import dataclass, field
+from typing import Callable, Optional, Any
+from enum import Enum
+import logging
+import json
+from datetime import datetime, timezone
+
+# ── Structured logging setup ─────────────────────────────────────────────
+logging.basicConfig(level=logging.INFO, format='%(message)s')
+logger = logging.getLogger("mission_fsm")
+
+def log_event(event: str, **kwargs):
+    """Emit a structured JSON log event — observable by any log aggregator."""
+    record = {
+        "timestamp": datetime.now(timezone.utc).isoformat(),
+        "event": event,
+        **kwargs
+    }
+    logger.info(json.dumps(record))
+
+# ── State definitions ────────────────────────────────────────────────────
+class MissionState(Enum):
+    LEOP                = "LEOP"               # Launch & Early Orbit Phase
+    COMMISSIONING       = "COMMISSIONING"      # Subsystem checkout
+    NOMINAL_PAYLOAD_OFF = "NOMINAL_PAYLOAD_OFF"
+    NOMINAL_PAYLOAD_ON  = "NOMINAL_PAYLOAD_ON"
+    ANOMALY_RESPONSE    = "ANOMALY_RESPONSE"
+    SAFE_MODE           = "SAFE_MODE"
+    END_OF_LIFE         = "END_OF_LIFE"
+
+# ── Transition definition ────────────────────────────────────────────────
+@dataclass
+class Transition:
+    from_state: MissionState
+    to_state:   MissionState
+    trigger:    str                          # human-readable trigger name
+    guard:      Optional[Callable] = None    # returns (bool, reason_str)
+    action:     Optional[Callable] = None    # side effect on transition
+
+# ── Spacecraft context (mock telemetry) ──────────────────────────────────
+@dataclass
+class SpacecraftContext:
+    satellite_id: str
+    battery_soc_pct: float = 85.0
+    bus_nominal: bool = True
+    payload_power_on: bool = False
+    anomaly_resolved: bool = False
+    deorbit_approved: bool = False
+    commissioning_complete: bool = False
+
+    def to_dict(self):
+        return {
+            "satellite_id": self.satellite_id,
+            "battery_soc_pct": self.battery_soc_pct,
+            "bus_nominal": self.bus_nominal,
+            "payload_power_on": self.payload_power_on,
+            "anomaly_resolved": self.anomaly_resolved,
+            "commissioning_complete": self.commissioning_complete,
+        }
+
+# ── Guard functions ──────────────────────────────────────────────────────
+def guard_bus_nominal(ctx: SpacecraftContext):
+    ok = ctx.bus_nominal and ctx.battery_soc_pct >= 40
+    reason = "OK" if ok else f"bus={ctx.bus_nominal}, SoC={ctx.battery_soc_pct:.1f}%"
+    return ok, reason
+
+def guard_commissioning_complete(ctx: SpacecraftContext):
+    ok = ctx.commissioning_complete
+    return ok, "commissioning complete" if ok else "commissioning still in progress"
+
+def guard_payload_safe_to_activate(ctx: SpacecraftContext):
+    ok = ctx.battery_soc_pct >= 60 and ctx.bus_nominal
+    reason = "power sufficient" if ok else f"insufficient power (SoC={ctx.battery_soc_pct:.1f}%)"
+    return ok, reason
+
+def guard_anomaly_resolved(ctx: SpacecraftContext):
+    return ctx.anomaly_resolved, "anomaly resolved" if ctx.anomaly_resolved else "anomaly still active"
+
+def guard_deorbit_approved(ctx: SpacecraftContext):
+    return ctx.deorbit_approved, "deorbit approved" if ctx.deorbit_approved else "deorbit approval pending"
+
+# ── Action functions ─────────────────────────────────────────────────────
+def action_power_on_payload(ctx: SpacecraftContext):
+    ctx.payload_power_on = True
+    log_event("payload_activated", satellite=ctx.satellite_id, soc=ctx.battery_soc_pct)
+
+def action_power_off_payload(ctx: SpacecraftContext):
+    ctx.payload_power_on = False
+    log_event("payload_deactivated", satellite=ctx.satellite_id)
+
+def action_enter_safe_mode(ctx: SpacecraftContext):
+    ctx.payload_power_on = False
+    log_event("safe_mode_entered", satellite=ctx.satellite_id,
+              soc=ctx.battery_soc_pct, bus_nominal=ctx.bus_nominal)
+
+def action_resume_from_safe(ctx: SpacecraftContext):
+    ctx.anomaly_resolved = False  # reset for next potential anomaly
+    log_event("nominal_resumed", satellite=ctx.satellite_id)
+
+# ── State machine class ──────────────────────────────────────────────────
+class MissionStateMachine:
+    def __init__(self, satellite_id: str, initial_state: MissionState = MissionState.LEOP):
+        self.ctx = SpacecraftContext(satellite_id=satellite_id)
+        self.state = initial_state
+        self.history: list[dict] = []
+        self._transitions = self._build_transition_table()
+        log_event("fsm_initialised", satellite=satellite_id, initial_state=initial_state.value)
+
+    def _build_transition_table(self) -> list[Transition]:
+        return [
+            Transition(MissionState.LEOP, MissionState.COMMISSIONING,
+                       "first_contact_confirmed", guard=guard_bus_nominal),
+
+            Transition(MissionState.COMMISSIONING, MissionState.NOMINAL_PAYLOAD_OFF,
+                       "commissioning_complete", guard=guard_commissioning_complete),
+
+            Transition(MissionState.NOMINAL_PAYLOAD_OFF, MissionState.NOMINAL_PAYLOAD_ON,
+                       "activate_payload", guard=guard_payload_safe_to_activate,
+                       action=action_power_on_payload),
+
+            Transition(MissionState.NOMINAL_PAYLOAD_ON, MissionState.NOMINAL_PAYLOAD_OFF,
+                       "deactivate_payload", action=action_power_off_payload),
+
+            # Safe mode reachable from any nominal state
+            Transition(MissionState.NOMINAL_PAYLOAD_ON, MissionState.SAFE_MODE,
+                       "safe_mode_command", action=action_enter_safe_mode),
+            Transition(MissionState.NOMINAL_PAYLOAD_OFF, MissionState.SAFE_MODE,
+                       "safe_mode_command", action=action_enter_safe_mode),
+            Transition(MissionState.ANOMALY_RESPONSE, MissionState.SAFE_MODE,
+                       "safe_mode_command", action=action_enter_safe_mode),
+
+            # Anomaly transitions
+            Transition(MissionState.NOMINAL_PAYLOAD_ON, MissionState.ANOMALY_RESPONSE,
+                       "anomaly_detected", action=action_power_off_payload),
+            Transition(MissionState.NOMINAL_PAYLOAD_OFF, MissionState.ANOMALY_RESPONSE,
+                       "anomaly_detected"),
+
+            Transition(MissionState.ANOMALY_RESPONSE, MissionState.NOMINAL_PAYLOAD_OFF,
+                       "anomaly_resolved", guard=guard_anomaly_resolved,
+                       action=action_resume_from_safe),
+
+            Transition(MissionState.SAFE_MODE, MissionState.NOMINAL_PAYLOAD_OFF,
+                       "safe_mode_exit", guard=guard_bus_nominal,
+                       action=action_resume_from_safe),
+
+            # End of life
+            Transition(MissionState.NOMINAL_PAYLOAD_OFF, MissionState.END_OF_LIFE,
+                       "deorbit_command", guard=guard_deorbit_approved),
+        ]
+
+    def trigger(self, trigger_name: str) -> tuple[bool, str]:
+        """Attempt a state transition by trigger name. Returns (success, message)."""
+        candidates = [t for t in self._transitions
+                      if t.from_state == self.state and t.trigger == trigger_name]
+
+        if not candidates:
+            msg = f"No transition '{trigger_name}' from state '{self.state.value}'"
+            log_event("transition_invalid", satellite=self.ctx.satellite_id,
+                      trigger=trigger_name, current_state=self.state.value)
+            return False, msg
+
+        t = candidates[0]
+
+        # Evaluate guard
+        if t.guard:
+            allowed, reason = t.guard(self.ctx)
+            if not allowed:
+                msg = f"Guard blocked '{trigger_name}': {reason}"
+                log_event("transition_blocked", satellite=self.ctx.satellite_id,
+                          trigger=trigger_name, reason=reason)
+                return False, msg
+
+        # Execute transition
+        prev_state = self.state
+        self.state = t.to_state
+        if t.action:
+            t.action(self.ctx)
+
+        self.history.append({
+            "timestamp": datetime.now(timezone.utc).isoformat(),
+            "trigger": trigger_name,
+            "from": prev_state.value,
+            "to": self.state.value,
+            "context_snapshot": self.ctx.to_dict()
+        })
+
+        log_event("transition_executed", satellite=self.ctx.satellite_id,
+                  trigger=trigger_name, from_state=prev_state.value,
+                  to_state=self.state.value)
+        return True, f"{prev_state.value} → {self.state.value}"
+
+    def current_valid_triggers(self) -> list[str]:
+        return [t.trigger for t in self._transitions if t.from_state == self.state]
+
+# ── Run a mission lifecycle simulation ───────────────────────────────────
+print("\n" + "="*60)
+print("  MISSION STATE MACHINE SIMULATION — YAM-10")
+print("="*60 + "\n")
+
+fsm = MissionStateMachine("YAM-10")
+
+def step(fsm, trigger, description="", **ctx_updates):
+    for k, v in ctx_updates.items():
+        setattr(fsm.ctx, k, v)
+    ok, msg = fsm.trigger(trigger)
+    prefix = "✓" if ok else "✗"
+    print(f"  {prefix}  [{trigger}]  {msg}")
+    if description:
+        print(f"     → {description}")
+    print(f"     State: {fsm.state.value} | Valid next: {fsm.current_valid_triggers()}")
+    print()
+
+# Mission lifecycle
+step(fsm, "first_contact_confirmed", "First pass — bus health confirmed")
+
+step(fsm, "commissioning_complete",
+     "Commissioning still in progress",
+     commissioning_complete=False)
+
+step(fsm, "commissioning_complete",
+     "All subsystems checked out",
+     commissioning_complete=True)
+
+step(fsm, "activate_payload",
+     "Customer payload powered on",
+     battery_soc_pct=75.0)
+
+# Anomaly scenario
+print("  --- ANOMALY SCENARIO ---\n")
+step(fsm, "anomaly_detected", "Unexpected payload current spike — investigate")
+step(fsm, "anomaly_resolved",
+     "Root cause identified and corrected",
+     anomaly_resolved=True)
+
+step(fsm, "activate_payload", "Resuming customer mission")
+
+# Safe mode scenario
+print("  --- SAFE MODE SCENARIO ---\n")
+step(fsm, "safe_mode_command",
+     "Battery SoC trending low — operator-initiated safe mode",
+     battery_soc_pct=35.0)
+
+# Try to exit safe mode before power recovers
+step(fsm, "safe_mode_exit", "Attempting exit while SoC still low")
+
+# Power recovers
+step(fsm, "safe_mode_exit",
+     "Power recovered — resuming nominal",
+     battery_soc_pct=72.0, bus_nominal=True)
+
+print("\n  MISSION HISTORY SUMMARY")
+print(f"  {len(fsm.history)} transitions recorded")
+for h in fsm.history:
+    print(f"    {h['from']:25} → {h['to']:25}  [{h['trigger']}]")
+</pre>
+      <div class="py-note">
+        This pattern — states as enum, transitions as data, guards and actions as pure functions, structured logging on every event — is directly applicable to satellite mission ops automation. The history list is an audit trail. Every transition is reconstructable. If Gauthier asks how you'd build a reliable automated workflow, this is the framework you'd describe.
+      </div>
+      <div class="py-challenge">
+        <strong>EXTENSION CHALLENGE</strong>
+        Add a persistence layer: after each transition, write the current state and context to a JSON file (the "checkpoint"). On startup, if a checkpoint file exists, restore the state machine from it rather than starting at LEOP. This enables the "checkpoint and resume" pattern — if the automation process crashes mid-sequence, it can restart from the last known safe state rather than from scratch.
+      </div>
+    </div>
+
+    <div class="py-exercise">
+      <h3>Exercise 2 — Fleet Telemetry Monitor with Observability Instrumentation</h3>
+      <p>Build a fleet-level telemetry monitoring pipeline that ingests telemetry from multiple satellites, evaluates health with context-aware logic (different thresholds for eclipse vs sunlight), emits structured events for each anomaly, and maintains a queryable history. This is the observability-first design pattern Gauthier applies to all ops software.</p>
+<pre>
+from dataclasses import dataclass, field
+from typing import Optional
+from collections import defaultdict, deque
+from datetime import datetime, timezone, timedelta
+import json
+import math
+
+# ── Telemetry data model ──────────────────────────────────────────────────
+@dataclass
+class TelemetrySnapshot:
+    satellite_id: str
+    timestamp: str
+    battery_soc_pct: float
+    bus_voltage_v: float
+    solar_power_w: float
+    payload_active: bool
+    adcs_mode: int      # 0=off, 1=detumble, 2=coarse, 3=fine pointing
+    orbit_fraction: float  # 0.0–1.0, position in orbit (0.33–0.67 ≈ eclipse for 550km SSO)
+
+    @property
+    def in_eclipse(self) -> bool:
+        return 0.33 <= self.orbit_fraction <= 0.67
+
+# ── Observable event ─────────────────────────────────────────────────────
+@dataclass
+class MonitorEvent:
+    satellite_id: str
+    timestamp: str
+    severity: str           # INFO, CAUTION, WARNING, CRITICAL
+    category: str           # EPS, ADCS, THERMAL, etc.
+    parameter: str
+    value: float
+    threshold: float
+    message: str
+    context: dict = field(default_factory=dict)
+
+    def to_dict(self):
+        return {
+            "satellite_id":  self.satellite_id,
+            "timestamp":     self.timestamp,
+            "severity":      self.severity,
+            "category":      self.category,
+            "parameter":     self.parameter,
+            "value":         self.value,
+            "threshold":     self.threshold,
+            "message":       self.message,
+            "context":       self.context,
+        }
+
+# ── Fleet monitor ─────────────────────────────────────────────────────────
+class FleetMonitor:
+    """
+    Context-aware fleet telemetry monitor.
+    Thresholds vary by operational context (eclipse, payload active, etc.).
+    Maintains a rolling window of events per satellite for trend analysis.
+    """
+    EVENT_WINDOW = 20   # events per satellite to keep in memory
+
+    def __init__(self):
+        self.event_log: list[MonitorEvent] = []
+        self.history: dict[str, deque] = defaultdict(
+            lambda: deque(maxlen=self.EVENT_WINDOW)
+        )
+        self.last_states: dict[str, TelemetrySnapshot] = {}
+
+    def _emit(self, event: MonitorEvent):
+        self.event_log.append(event)
+        self.history[event.satellite_id].append(event)
+        # In production: push to metrics pipeline (Prometheus, Datadog, etc.)
+        # Here: print structured JSON
+        icons = {"INFO": "ℹ", "CAUTION": "⚠", "WARNING": "⚡", "CRITICAL": "🔴"}
+        icon = icons.get(event.severity, "?")
+        print(f"  {icon}  [{event.satellite_id}]  {event.severity:<8}  "
+              f"{event.category}/{event.parameter}: {event.message}")
+
+    def evaluate(self, tm: TelemetrySnapshot):
+        """Evaluate a telemetry snapshot with context-aware thresholds."""
+        ctx = {
+            "in_eclipse": tm.in_eclipse,
+            "payload_active": tm.payload_active,
+            "orbit_fraction": tm.orbit_fraction,
+        }
+
+        # ── EPS: Battery SoC — tighter limits in eclipse ────────────────
+        soc_warning  = 35 if tm.in_eclipse else 40
+        soc_critical = 20 if tm.in_eclipse else 25
+
+        if tm.battery_soc_pct <= soc_critical:
+            self._emit(MonitorEvent(tm.satellite_id, tm.timestamp, "CRITICAL", "EPS",
+                "battery_soc", tm.battery_soc_pct, soc_critical,
+                f"SoC {tm.battery_soc_pct:.1f}% at or below critical limit", ctx))
+        elif tm.battery_soc_pct <= soc_warning:
+            self._emit(MonitorEvent(tm.satellite_id, tm.timestamp, "WARNING", "EPS",
+                "battery_soc", tm.battery_soc_pct, soc_warning,
+                f"SoC {tm.battery_soc_pct:.1f}% below warning limit", ctx))
+
+        # ── EPS: Solar power — context-aware (zero in eclipse is expected) ──
+        if not tm.in_eclipse and tm.solar_power_w < 5.0:
+            self._emit(MonitorEvent(tm.satellite_id, tm.timestamp, "WARNING", "EPS",
+                "solar_power", tm.solar_power_w, 5.0,
+                f"Solar power {tm.solar_power_w:.1f}W unexpectedly low in sunlight", ctx))
+
+        # ── ADCS: Mode sanity check ──────────────────────────────────────
+        if tm.adcs_mode == 0:
+            self._emit(MonitorEvent(tm.satellite_id, tm.timestamp, "CRITICAL", "ADCS",
+                "adcs_mode", tm.adcs_mode, 1.0, "ADCS powered off", ctx))
+        elif tm.adcs_mode == 1 and tm.payload_active:
+            self._emit(MonitorEvent(tm.satellite_id, tm.timestamp, "WARNING", "ADCS",
+                "adcs_mode", tm.adcs_mode, 2.0,
+                "Payload active but ADCS still in detumble — pointing not established", ctx))
+
+        # ── Trending: SoC declining across last N snapshots ─────────────
+        self._check_soc_trend(tm)
+
+        # Store for next evaluation
+        self.last_states[tm.satellite_id] = tm
+
+    def _check_soc_trend(self, tm: TelemetrySnapshot):
+        """Flag if SoC has declined more than 15% without payload being activated."""
+        prev = self.last_states.get(tm.satellite_id)
+        if prev and not tm.in_eclipse:
+            delta = tm.battery_soc_pct - prev.battery_soc_pct
+            if delta < -15 and not tm.payload_active:
+                self._emit(MonitorEvent(tm.satellite_id, tm.timestamp, "WARNING", "EPS",
+                    "soc_trend", delta, -15.0,
+                    f"SoC dropped {abs(delta):.1f}% in one step without payload active — investigate solar input",
+                    {"prev_soc": prev.battery_soc_pct, "current_soc": tm.battery_soc_pct}))
+
+    def fleet_summary(self):
+        """Print a concise fleet health summary."""
+        print(f"\n{'─'*55}")
+        print(f"  FLEET HEALTH SUMMARY  ·  {len(self.last_states)} satellites monitored")
+        print(f"{'─'*55}")
+        sev_counts = defaultdict(int)
+        for e in self.event_log:
+            sev_counts[e.severity] += 1
+        for sev in ["CRITICAL", "WARNING", "CAUTION", "INFO"]:
+            count = sev_counts.get(sev, 0)
+            if count:
+                print(f"  {sev:<10} {count} event(s)")
+        print(f"  Total events: {len(self.event_log)}")
+
+        # Per-satellite summary
+        print(f"\n  Per-satellite recent events:")
+        for sat_id, events in self.history.items():
+            worst = max((e.severity for e in events),
+                        key=lambda s: ["INFO","CAUTION","WARNING","CRITICAL"].index(s),
+                        default="NOMINAL")
+            print(f"    {sat_id:<12}  worst: {worst}  ({len(events)} events)")
+
+# ── Simulate a fleet pass ─────────────────────────────────────────────────
+monitor = FleetMonitor()
+
+print("\n" + "="*55)
+print("  FLEET TELEMETRY EVALUATION — SIMULATED PASS BATCH")
+print("="*55 + "\n")
+
+now = datetime.now(timezone.utc)
+
+telemetry_batch = [
+    # YAM-8: nominal, in sunlight
+    TelemetrySnapshot("YAM-8",  now.isoformat(), 82.0, 7.9, 320.0, True,  3, 0.15),
+    # YAM-9: in eclipse, SoC nominal for eclipse
+    TelemetrySnapshot("YAM-9",  now.isoformat(), 68.0, 7.7, 0.0,   False, 3, 0.45),
+    # YAM-10: low SoC with payload active — concern
+    TelemetrySnapshot("YAM-10", now.isoformat(), 37.0, 7.5, 180.0, True,  3, 0.20),
+    # YAM-11: ADCS in detumble with payload on
+    TelemetrySnapshot("YAM-11", now.isoformat(), 74.0, 7.8, 295.0, True,  1, 0.05),
+    # YAM-12: critical — ADCS off, low SoC
+    TelemetrySnapshot("YAM-12", now.isoformat(), 19.0, 6.3, 12.0,  False, 0, 0.25),
+]
+
+for tm in telemetry_batch:
+    ctx_str = "ECLIPSE" if tm.in_eclipse else "SUNLIGHT"
+    print(f"  Evaluating {tm.satellite_id} [{ctx_str}, SoC={tm.battery_soc_pct:.0f}%, ADCS={tm.adcs_mode}]")
+    monitor.evaluate(tm)
+
+# Simulate second pass — YAM-10 SoC dropped further
+print("\n  --- SECOND PASS BATCH ---\n")
+second_batch = [
+    TelemetrySnapshot("YAM-10", (now + timedelta(minutes=92)).isoformat(),
+                      18.0, 7.5, 40.0, True,  3, 0.30),  # SoC dropped 19 points!
+]
+for tm in second_batch:
+    ctx_str = "ECLIPSE" if tm.in_eclipse else "SUNLIGHT"
+    print(f"  Evaluating {tm.satellite_id} [{ctx_str}, SoC={tm.battery_soc_pct:.0f}%]")
+    monitor.evaluate(tm)
+
+monitor.fleet_summary()
+</pre>
+      <div class="py-note">
+        The context-awareness (different SoC thresholds for eclipse vs sunlight, solar power checks only in sunlight) is what separates a useful monitoring system from one that generates constant false positives. The trend detection catches degradation that threshold monitoring alone misses. And the structured output makes every event queryable — you can filter by satellite, severity, category, or time window. This is observability-first design.
+      </div>
+      <div class="py-challenge">
+        <strong>EXTENSION CHALLENGE</strong>
+        Add an alert deduplication layer: if the same satellite emits the same severity event on the same parameter in consecutive evaluations, suppress the duplicate and instead emit a single "sustained anomaly" event with a count. This prevents alert fatigue — a common failure mode in monitoring systems that cry wolf too often. How does this change the event schema? What information might you lose with naive deduplication?
+      </div>
+    </div>
+  </div>
+
+  <!-- REFLECTION -->
+  <div class="reflection-block" id="reflect">
+    <h2>REFLECTION PROMPTS</h2>
+    <p class="ref-intro">Three prompts for the final pre-interview session. This is your last panel of the day — clarity of thought matters more than volume of preparation.</p>
+
+    <div class="ref-prompt">
+      <h3>Prompt 1 — The Automation You Wish You'd Built</h3>
+      <p>Think about a specific, recurring operational task from your iDirect or Airbus work that you performed manually many times that could have been automated. Describe the task, why you didn't automate it (time, access, scope), and then design the automation: what would it do, what are the guard conditions, how does it handle failure, how does it report its work? Write the system design, not the script. This answer is directly usable if Gauthier asks "tell me about a time you identified an automation opportunity."</p>
+    </div>
+
+    <div class="ref-prompt">
+      <h3>Prompt 2 — LEOAF as a Production System</h3>
+      <p>Gauthier has shipped production ML systems. He will recognise the gap between "I built a hobby project" and "I built a system I understand at the level of a production engineer." Write 200 words describing LEOAF in the register of a production system: data model decisions, failure modes you handled, observability you have, the operational experience of maintaining it. Avoid the hobbyist register ("I wanted to learn...") — use the engineer register ("I designed the schema to support...").</p>
+    </div>
+
+    <div class="ref-prompt">
+      <h3>Prompt 3 — Closing Energy</h3>
+      <p>Gauthier's slot is 21:45–22:30 CEST. You've been through four 45-minute panels since 12:30. This is the last one. What is your plan to arrive at 21:45 with genuine energy and curiosity rather than exhaustion? Specifically: what is the one thing about Gauthier's work at Loft (his AI-for-space posts, the constellation management challenge, the SatDevOps philosophy) that you find genuinely interesting — not strategically interesting, but actually curious about? Write it down. That curiosity is what carries the last panel.</p>
+    </div>
+  </div>
+
+  <div class="complete-wrap">
+    <button class="complete-btn" id="completeBtn">MARK SESSION COMPLETE</button>
+    <div class="complete-msg" id="completeMsg">Prep session not yet marked complete.</div>
+  </div>
+
+  <div class="lesson-nav">
+    <a href="int-matt.html">← MATT — SPACECRAFT SYSTEMS</a>
+    <a href="int-index.html">INTERVIEW HUB →</a>
+  </div>
+
+</div>
+
+<footer>© 2026 LEOAF · LOFT ORBITAL INTERVIEW PREP · PANEL 5 OF 5 — GAUTHIER DAMIEN</footer>
+<button class="back-to-top" id="backToTop">↑</button>
+
+<script>
+const canvas = document.getElementById('starsCanvas');
+const ctx = canvas.getContext('2d');
+let stars = [];
+function resizeCanvas() { canvas.width = window.innerWidth; canvas.height = window.innerHeight; }
+function initStars() {
+  stars = [];
+  for (let i = 0; i < 180; i++) {
+    stars.push({ x: Math.random()*canvas.width, y: Math.random()*canvas.height, size: Math.random()*1.4+0.3, speed: Math.random()*0.15+0.03, hue: Math.random()*360 });
+  }
+}
+resizeCanvas(); initStars();
+window.addEventListener('resize', resizeCanvas);
+function animateStars() {
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
+  stars.forEach(s => {
+    s.y -= s.speed;
+    if (s.y < 0) { s.y = canvas.height; s.x = Math.random()*canvas.width; }
+    ctx.beginPath(); ctx.fillStyle = `hsl(${s.hue},70%,80%)`; ctx.arc(s.x, s.y, s.size, 0, Math.PI*2); ctx.fill();
+  });
+  requestAnimationFrame(animateStars);
+}
+animateStars();
+</script>
+
+<script>
+const feedbacks = {
+  1: {
+    correct: "Correct. The complete answer covers the full set of properties that distinguish a system from a script: idempotency (safe to retry), retry logic (with failure classification), structured logging (observable), error differentiation (transient vs permanent), alerting, and observability. Gauthier's ML background means he has built exactly these systems in production and will recognise the answer as coming from someone who has thought carefully about production reliability, not just happy-path execution.",
+    wrong:   "Incorrect. The core distinction is not scale, UI, or testing alone — it's the failure space. A script handles the happy path. A system handles the full failure space: what happens when the API is down, when a command times out, when a partial state was written before the crash, when the same task gets triggered twice. Idempotency, retry logic, structured logging, and observability are the four pillars that make automated systems trustworthy in production."
+  },
+  2: {
+    correct: "Correct. Idempotency matters for any command that might be retried — which in satellite ops means any command sent over an unreliable link or in an automated system that detects timeouts. The specific verification is that the command doesn't have unintended side effects on retry: it shouldn't toggle state, double-increment a counter, or trigger a mode transition twice. Read-only telemetry requests are naturally idempotent; state-changing commands must be designed to be safe to retry.",
+    wrong:   "Incorrect. Idempotency matters precisely because automated systems retry on timeout or failure. The question is whether the satellite's behaviour after receiving the command twice is identical to receiving it once. A health check that reads a register is idempotent. A command that toggles payload power is not — sending it twice turns the payload off when you meant to turn it on. The automation layer must know which commands are safe to retry and which require confirmation of the previous attempt's result."
+  },
+  3: {
+    correct: "Correct. The fundamental driver is constellation economics. Manual per-satellite operations have linear headcount cost: 2× satellites → 2× ops personnel. Software automation has much lower marginal cost: the same automation handles 100 satellites as 10, requiring better software rather than proportional headcount growth. Loft's business model — Payload-as-a-Service at scale — only works if operations costs don't scale linearly with fleet size. SatDevOps is the operational philosophy that enables this.",
+    wrong:   "Incorrect. The primary rationale is economic, not organisational or developmental. Constellation economics demand that operations costs scale sublinearly with fleet size. Manual satellite-by-satellite operations scale linearly — that is not a viable business model at 50+ satellites. Automation driven by the people who understand operations is the solution. The knowledge transfer benefit (engineers who do ops build better tools) is real but secondary."
+  },
+  4: {
+    correct: "Correct. A well-designed scheduling system supports priority injection without requiring a full restart. The emergency creates a hard constraint; the optimiser adjusts affected allocations while keeping stable assignments intact. Critically, the revised schedule should require operator approval before execution — this is the human-in-the-loop design principle: automation proposes, human approves, especially for changes to previously-confirmed plans. This answer demonstrates systems thinking about the interface between automation and human oversight.",
+    wrong:   "Incorrect. Option A treats automation as too rigid — a system that can't handle priority exceptions provides false safety. Option B is wasteful (full recompute) and potentially destabilising (all previously stable allocations become uncertain). Option D is too passive — pausing all automation during an emergency increases workload rather than reducing it. The right design supports priority injection as a first-class feature with human approval for changes."
+  },
+  5: {
+    correct: "Correct. The monitoring/observability distinction is well-established in production systems engineering: monitoring is threshold-based alerting (you know what questions to ask in advance). Observability is the property of being able to ask arbitrary questions about the system's internal state from its external outputs — including questions you didn't anticipate when you built the system. Gauthier's ML background makes this distinction particularly salient: a model that works in dev but fails silently in prod is the canonical observability failure, and his reaction is to instrument more richly.",
+    wrong:   "Incorrect. The key distinction is about the questions you can answer, not the environment or the passivity of the approach. Monitoring answers predetermined questions (is SoC above threshold?). Observability allows you to answer new questions that arise after an incident (why did the SoC drop at exactly 14:32 on Tuesday, and which other satellites showed similar behaviour in the preceding hour?). You can answer the second class of questions only if the system was designed to be observable from the start."
+  },
+  6: {
+    correct: "Correct. This answer demonstrates genuine data modeling thinking: you identified the competing concerns (multi-granularity completion state vs storage simplicity vs query correctness), chose a design (single source of truth at the leaf level, computed aggregates), and can explain the tradeoffs (simple writes, correct reads by construction). This is exactly the level of design reasoning Gauthier expects from someone who claims backend engineering credibility. The specifics of LEOAF's data model matter here — speaking from actual design decisions rather than generic principles.",
+    wrong:   "Incorrect. Options A and B describe correct but shallow decisions that don't demonstrate design thinking. Option D describes a technology choice rationale, not a data modeling decision. The answer Gauthier is looking for demonstrates that you understood the query requirements before designing the schema — not that you made technically correct default choices. The lesson_completions design (single table, derived aggregates) is a specific decision that trades write simplicity for query correctness-by-construction."
+  },
+  7: {
+    correct: "Correct. Ground truth labelling is the often-neglected bottleneck in ML-for-ops applications. Model architecture is rarely the binding constraint — the data quality is. In satellite operations, anomalies are rare (which makes training datasets small), ambiguous (was that a real anomaly or a scheduled test?), and historically documented inconsistently (different operators label the same event differently). Without high-quality labels, supervised anomaly detection models learn the ops team's historical decisions, including mistakes. This answer demonstrates ML systems thinking beyond the algorithm level.",
+    wrong:   "Incorrect. Model architecture and onboard compute are real challenges but not the hardest problem. Ground truth labelling is the answer a production ML engineer gives — because they've experienced the gap between a model that performs well on clean academic datasets and one that needs to operate on messy, sparsely-labelled, slowly-drifting production data. Gauthier's ML background makes him especially attuned to this: his first ML engineering job required building from scratch with limited labelled data."
+  },
+  8: {
+    correct: "Correct. This answer directly addresses Gauthier's deepest professional instinct: that systems fail in ways you didn't design for, and the property that saves you is observability — the ability to reconstruct what happened and why. It avoids the generic answers (testing, simplicity, documentation) that are true but don't demonstrate depth. It frames observability not as a feature to add but as the foundational property that makes everything else maintainable. Coming from someone with iDirect NMS experience — 5 years of using exactly this property to diagnose satellite network faults — it's earned, not theoretical.",
+    wrong:   "Incorrect. Testing, simplicity, and documentation are all valid engineering values, but none of them is the deepest answer for an ML engineer who has operated production systems. Observability is the answer — the property that allows you to understand what went wrong after the fact, ask questions you didn't anticipate, and build institutional knowledge from incidents. The other options describe properties of good code; observability is the property of a good system."
+  }
+};
+
+let answered = {};
+document.querySelectorAll('.quiz-opt').forEach(btn => {
+  btn.addEventListener('click', function() {
+    const q = this.dataset.q;
+    if (answered[q] !== undefined) return;
+    const correct = this.dataset.correct === 'true';
+    answered[q] = correct;
+    document.querySelectorAll(`.quiz-opt[data-q="${q}"]`).forEach(b => {
+      b.disabled = true;
+      if (b.dataset.correct === 'true') b.classList.add('correct');
+    });
+    if (!correct) this.classList.add('wrong');
+    const fb = document.getElementById(`fb${q}`);
+    fb.textContent = (correct ? '✓ ' : '✗ ') + feedbacks[q][correct ? 'correct' : 'wrong'];
+    fb.style.color = correct ? '#39ff14' : '#ff004f';
+
+    if (Object.keys(answered).length === 8) {
+      const total = Object.values(answered).filter(Boolean).length;
+      const el = document.getElementById('quizScore');
+      el.style.display = 'block';
+      const pct = Math.round(total / 8 * 100);
+      el.textContent = `SCORE: ${total} / 8 (${pct}%) — ${pct === 100 ? 'CLEAN SWEEP. GAUTHIER WILL NOTICE.' : pct >= 75 ? 'STRONG. STAY SHARP FOR THE 21:45 SLOT.' : 'REVISIT SECTIONS 3 AND 4 — THESE ARE GAUTHIER\'S CORE TOPICS.'}`;
+    }
+  });
+});
+
+const btn = document.getElementById('completeBtn');
+const msg = document.getElementById('completeMsg');
+btn.addEventListener('click', () => {
+  const done = btn.classList.contains('done');
+  if (!done) {
+    btn.textContent = '✓ COMPLETE — CLICK TO UNDO';
+    btn.classList.add('done');
+    msg.style.color = '#aa66ff';
+    msg.textContent = 'Session marked complete. Panel 5 ready.';
+  } else {
+    btn.textContent = 'MARK SESSION COMPLETE';
+    btn.classList.remove('done');
+    msg.style.color = '#ffffff55';
+    msg.textContent = 'Prep session not yet marked complete.';
+  }
+});
+
+const btt = document.getElementById('backToTop');
+window.addEventListener('scroll', () => btt.classList.toggle('visible', window.scrollY > 400));
+btt.addEventListener('click', () => window.scrollTo({ top: 0, behavior: 'smooth' }));
+</script>
+</body>
+</html>
