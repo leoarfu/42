@@ -1,0 +1,669 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>INT-03 — Xavier · Ground Software Architecture · LEOAF</title>
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;600;800&family=Share+Tech+Mono&family=Libre+Baskerville:ital,wght@0,400;0,700;1,400&display=swap" rel="stylesheet">
+<style>
+* { box-sizing:border-box; margin:0; padding:0; }
+html { height:100%; -webkit-text-size-adjust:100%; overflow-x:hidden; }
+body { font-family:'Share Tech Mono',monospace; background:#000; color:white; overflow-x:hidden; min-height:100vh; }
+#starsCanvas { position:fixed; inset:0; z-index:-1; }
+header { background:#000; border-bottom:1px solid #00d9ff33; position:sticky; top:0; z-index:100; padding:1rem clamp(1.5rem,5vw,4rem); display:flex; justify-content:space-between; align-items:center; box-shadow:0 4px 16px #0008; }
+.logo { font-family:'Orbitron',sans-serif; font-weight:800; font-size:clamp(16px,2vw,22px); letter-spacing:3px; text-decoration:none; }
+.logo span:first-child { color:white; } .logo span:last-child { color:#ff004f; }
+.nav-right { display:flex; align-items:center; gap:10px; }
+.nav-btn { background:transparent; border:1px solid #00d9ff44; color:#00d9ff; padding:6px 14px; cursor:pointer; transition:0.3s ease; font-size:11px; font-family:'Orbitron',sans-serif; letter-spacing:1px; text-decoration:none; display:inline-block; }
+.nav-btn:hover { background:#00d9ff; color:black; }
+.nav-btn.green { border-color:#39ff1444; color:#39ff14; } .nav-btn.green:hover { background:#39ff14; color:black; }
+.breadcrumb { padding:14px clamp(1.5rem,5vw,4rem); font-size:11px; color:#ffffff44; letter-spacing:1px; position:relative; z-index:1; }
+.breadcrumb a { color:#00d9ff66; text-decoration:none; } .breadcrumb a:hover { color:#00d9ff; } .breadcrumb span { margin:0 8px; }
+.lesson-wrap { max-width:820px; margin:0 auto; padding:0 clamp(1.5rem,5vw,4rem) 80px; position:relative; z-index:1; }
+.lesson-header { padding:30px 0 28px; border-bottom:1px solid #ffffff11; margin-bottom:36px; }
+.lesson-tag { font-family:'Orbitron',sans-serif; font-size:10px; color:#00d9ff; letter-spacing:3px; margin-bottom:10px; }
+.lesson-header h1 { font-family:'Orbitron',sans-serif; font-size:clamp(20px,3.5vw,32px); font-weight:800; line-height:1.2; margin-bottom:12px; }
+.lesson-meta { display:flex; gap:10px; flex-wrap:wrap; margin-bottom:16px; }
+.l-pill { font-family:'Orbitron',sans-serif; font-size:10px; padding:3px 10px; border:1px solid; letter-spacing:1px; }
+.l-pill-q { color:#00d9ff; border-color:#00d9ff44; } .l-pill-t { color:#ff004f; border-color:#ff004f44; } .l-pill-g { color:#39ff14; border-color:#39ff1444; }
+.lesson-intro { font-size:13px; line-height:1.85; opacity:0.75; }
+.interviewer-card { background:rgba(0,217,255,0.04); border:1px solid #00d9ff33; padding:20px 24px; margin:0 0 32px; display:flex; gap:20px; align-items:flex-start; }
+.ic-avatar { width:52px; height:52px; background:#00d9ff11; border:1px solid #00d9ff55; display:flex; align-items:center; justify-content:center; font-family:'Orbitron',sans-serif; font-size:18px; font-weight:800; color:#00d9ff; flex-shrink:0; }
+.ic-body h3 { font-family:'Orbitron',sans-serif; font-size:12px; color:#00d9ff; letter-spacing:2px; margin-bottom:4px; }
+.ic-body .ic-role { font-size:11px; color:#ffffff66; margin-bottom:8px; letter-spacing:1px; }
+.ic-body p { font-size:12px; line-height:1.75; opacity:0.8; }
+.ic-time { font-family:'Orbitron',sans-serif; font-size:10px; color:#ffaa00; letter-spacing:1px; margin-top:6px; }
+.toc { background:rgba(0,217,255,0.06); border:1px solid #00d9ff33; padding:24px 28px; margin:30px 0; }
+.toc h4 { font-family:'Orbitron',sans-serif; font-size:10px; color:#00d9ff; letter-spacing:2px; margin-bottom:16px; }
+.toc ol { padding-left:20px; } .toc li { font-size:13px; line-height:2.1; }
+.toc li a { color:#00d9ffbb; text-decoration:none; transition:0.15s; } .toc li a:hover { color:#ffffff; padding-left:4px; }
+.toc li::marker { color:#00d9ff; font-family:'Orbitron',sans-serif; font-size:10px; }
+.content-block { background:#f5f2ec; color:#1a1a1a; padding:36px clamp(24px,4vw,48px); margin-bottom:24px; border-left:4px solid #00d9ff; position:relative; z-index:1; }
+.content-block h2 { font-family:'Orbitron',sans-serif; font-size:13px; color:#003d66; letter-spacing:2px; text-transform:uppercase; margin-bottom:20px; padding-bottom:10px; border-bottom:2px solid #00d9ff66; scroll-margin-top:80px; }
+.content-block h3 { font-family:'Orbitron',sans-serif; font-size:11px; color:#444; letter-spacing:1.5px; text-transform:uppercase; margin:28px 0 12px; }
+.content-block p { font-family:'Libre Baskerville',Georgia,serif; font-size:15px; line-height:1.9; color:#1a1a1a; margin-bottom:16px; }
+.content-block ul, .content-block ol { padding-left:0; margin-bottom:16px; }
+.content-block ul li, .content-block ol li { font-family:'Libre Baskerville',Georgia,serif; font-size:14px; line-height:1.85; color:#1a1a1a; padding-left:20px; position:relative; margin-bottom:6px; }
+.content-block ul li::before { content:'›'; position:absolute; left:0; color:#0077aa; }
+.content-block ol { counter-reset:item; } .content-block ol li { counter-increment:item; }
+.content-block ol li::before { content:counter(item)'.'; position:absolute; left:0; color:#cc0033; font-family:'Orbitron',sans-serif; font-size:10px; top:2px; }
+.callout { border-left:3px solid #0088cc; background:#e8f4fb; padding:16px 20px; margin:22px 0; font-size:12px; line-height:1.8; color:#1a1a1a; }
+.callout.amber { border-left-color:#996600; background:#fef9ec; }
+.callout.green { border-left-color:#1a7a1a; background:#eafaea; }
+.callout strong { font-family:'Orbitron',sans-serif; font-size:10px; letter-spacing:1px; display:block; margin-bottom:8px; }
+.arch-diagram { background:#0a0a0a; border:1px solid #00d9ff22; padding:20px; margin:18px 0; font-family:'Share Tech Mono',monospace; font-size:11px; line-height:1.9; color:#00d9ff; overflow-x:auto; }
+.arch-diagram .ad-title { font-family:'Orbitron',sans-serif; font-size:9px; color:#ffffff44; letter-spacing:2px; margin-bottom:10px; display:block; }
+.quiz-block { background:rgba(17,17,17,0.9); border:1px solid #00d9ff33; padding:28px; margin:48px 0 32px; }
+.quiz-block h2 { font-family:'Orbitron',sans-serif; font-size:13px; color:#00d9ff; letter-spacing:2px; margin-bottom:6px; }
+.quiz-intro { font-size:12px; opacity:0.6; margin-bottom:24px; padding-bottom:16px; border-bottom:1px solid #00d9ff22; line-height:1.6; }
+.quiz-q { margin-bottom:28px; } .quiz-q p { font-size:13px; opacity:0.9; margin-bottom:12px; line-height:1.65; } .quiz-q p strong { color:#00d9ff; }
+.quiz-options { display:flex; flex-direction:column; gap:8px; }
+.quiz-opt { background:rgba(255,255,255,0.03); border:1px solid #ffffff1a; padding:11px 16px; cursor:pointer; font-size:12px; font-family:'Share Tech Mono',monospace; transition:0.2s ease; text-align:left; color:white; line-height:1.5; }
+.quiz-opt:hover:not(:disabled) { background:rgba(0,217,255,0.08); border-color:#00d9ff44; }
+.quiz-opt.correct { background:rgba(57,255,20,0.1); border-color:#39ff14; color:#39ff14; }
+.quiz-opt.wrong { background:rgba(255,0,79,0.1); border-color:#ff004f; color:#ff004f; }
+.quiz-opt:disabled { cursor:default; }
+.quiz-feedback { font-size:12px; margin-top:10px; min-height:18px; line-height:1.7; opacity:0.9; padding:0 4px; }
+.quiz-score { font-family:'Orbitron',sans-serif; font-size:12px; color:#39ff14; margin-top:20px; letter-spacing:1px; display:none; padding-top:16px; border-top:1px solid #39ff1433; }
+.py-block { background:rgba(10,10,10,0.95); border:1px solid #39ff1422; padding:28px; margin:32px 0; }
+.py-block h2 { font-family:'Orbitron',sans-serif; font-size:13px; color:#39ff14; letter-spacing:2px; margin-bottom:8px; }
+.py-block .py-intro { font-size:12px; opacity:0.7; margin-bottom:20px; padding-bottom:16px; border-bottom:1px solid #39ff1422; line-height:1.7; }
+.py-exercise { margin-bottom:32px; } .py-exercise:last-child { margin-bottom:0; }
+.py-exercise h3 { font-family:'Orbitron',sans-serif; font-size:11px; color:#39ff1499; letter-spacing:1.5px; text-transform:uppercase; margin-bottom:10px; }
+.py-exercise p { font-size:12px; opacity:0.8; margin-bottom:14px; line-height:1.75; }
+.py-block pre { background:#050505; border:1px solid #39ff1433; padding:20px; font-family:'Share Tech Mono',monospace; font-size:11.5px; line-height:1.75; overflow-x:auto; color:#39ff14; white-space:pre; margin-bottom:12px; }
+.py-block .py-note { font-size:11px; color:#ffffff44; line-height:1.75; margin-top:10px; }
+.py-block .py-challenge { background:rgba(57,255,20,0.04); border-left:2px solid #39ff14; padding:12px 16px; margin-top:14px; font-size:12px; line-height:1.75; opacity:0.8; }
+.py-block .py-challenge strong { font-family:'Orbitron',sans-serif; font-size:10px; color:#39ff14; display:block; margin-bottom:6px; letter-spacing:1px; }
+.reflection-block { background:rgba(255,170,0,0.04); border:1px solid #ffaa0033; padding:24px; margin:32px 0; }
+.reflection-block h2 { font-family:'Orbitron',sans-serif; font-size:13px; color:#ffaa00; letter-spacing:2px; margin-bottom:8px; }
+.reflection-block .ref-intro { font-size:12px; opacity:0.7; margin-bottom:20px; padding-bottom:14px; border-bottom:1px solid #ffaa0022; line-height:1.7; }
+.ref-prompt { margin-bottom:20px; } .ref-prompt h3 { font-family:'Orbitron',sans-serif; font-size:11px; color:#ffaa0099; letter-spacing:1px; margin-bottom:8px; }
+.ref-prompt p { font-size:12px; opacity:0.8; line-height:1.75; margin-bottom:10px; }
+.back-to-top { position:fixed; bottom:28px; right:28px; z-index:200; width:44px; height:44px; background:#000; border:1px solid #00d9ff55; color:#00d9ff; font-size:20px; cursor:pointer; display:flex; align-items:center; justify-content:center; opacity:0; pointer-events:none; transition:opacity 0.3s ease; }
+.back-to-top.visible { opacity:1; pointer-events:auto; }
+.lesson-nav { display:flex; justify-content:space-between; margin-top:30px; flex-wrap:wrap; gap:10px; }
+.lesson-nav a { font-family:'Orbitron',sans-serif; font-size:11px; color:#00d9ff66; text-decoration:none; letter-spacing:1px; transition:0.2s; }
+.lesson-nav a:hover { color:#00d9ff; }
+footer { text-align:center; padding:30px; opacity:0.3; font-size:11px; position:relative; z-index:1; letter-spacing:1px; }
+</style>
+</head>
+<body>
+<canvas id="starsCanvas"></canvas>
+<header>
+  <a href="index.html" class="logo"><span>LEO</span><span>AF</span></a>
+  <div class="nav-right">
+    <a href="int-madeline.html" class="nav-btn green">← INT-02: MADELINE</a>
+    <a href="int-matt.html" class="nav-btn">BREAK → INT-04: MATT</a>
+  </div>
+</header>
+<div class="breadcrumb">
+  <a href="index.html">DASHBOARD</a><span>/</span>
+  <a href="int-index.html">INTERVIEW PREP</a><span>/</span>
+  <span style="color:#ffffff88;">INT-03 — XAVIER · GROUND SOFTWARE ARCHITECTURE</span>
+</div>
+
+<div class="lesson-wrap">
+
+<div class="lesson-header">
+  <div class="lesson-tag">LOFT ORBITAL PANEL · INTERVIEW 03 OF 05 · 14:00–14:45 CEST · LAST BEFORE BREAK</div>
+  <h1>Xavier Almenar Cerdán<br><span style="color:#00d9ff;font-size:0.6em;letter-spacing:4px;">LEAD, GROUND SOFTWARE SOLUTIONS</span></h1>
+  <div class="lesson-meta">
+    <div class="l-pill l-pill-q">SOFTWARE ARCHITECTURE</div>
+    <div class="l-pill l-pill-t">API DESIGN</div>
+    <div class="l-pill l-pill-g">45 MINUTES</div>
+  </div>
+  <p class="lesson-intro">Xavier leads the team that builds and maintains Cockpit — the ground software stack that CDEs use every day. He was at British Airways for 3.5 years (which means he understands operational software in a safety-critical environment) and has been involved with OneWeb launches. He is your internal dependency: when tools you need don't exist, his team builds them. He wants to know: will this CDE be a good API citizen — writing good specs, understanding why systems behave as they do, filing useful bug reports?</p>
+</div>
+
+<div class="interviewer-card">
+  <div class="ic-avatar">XA</div>
+  <div class="ic-body">
+    <h3>XAVIER ALMENAR CERDÁN</h3>
+    <div class="ic-role">LEAD, GROUND SOFTWARE SOLUTIONS · LOFT ORBITAL TOULOUSE</div>
+    <p>Background in GPS/navigation systems (AOS/GPS conference presentations). 3.5 years at British Airways — "a continuous learning experience and an acceleration of my career." Now leads ground software at Loft. Has been involved in OneWeb launch milestones. Technically deep, operationally experienced. His posts suggest pride in Loft's software-centric ops philosophy.</p>
+    <div class="ic-time">⏱ 14:00–14:45 CEST · THIRD INTERVIEW · STAY FOCUSED THEN TAKE YOUR BREAK</div>
+  </div>
+</div>
+
+<div class="toc">
+  <h4>CONTENTS</h4>
+  <ol>
+    <li><a href="#s1">What Xavier is actually evaluating</a></li>
+    <li><a href="#s2">Loft's ground software stack — what his team builds</a></li>
+    <li><a href="#s3">Being a good API citizen — what Xavier needs from CDEs</a></li>
+    <li><a href="#s4">Software architecture concepts to be fluent in</a></li>
+    <li><a href="#s5">Your Airbus HBC+ and LEOAF experience as software credentials</a></li>
+    <li><a href="#quiz">Knowledge check</a></li>
+    <li><a href="#python">Python exercises</a></li>
+    <li><a href="#reflect">Reflection prompts</a></li>
+  </ol>
+</div>
+
+<!-- S1 -->
+<div class="content-block" id="s1">
+  <h2>1. What Xavier Is Actually Evaluating</h2>
+  <p>Xavier's team serves the CDEs. He needs CDEs who make his team's life efficient — not CDEs who create tickets like "Cockpit is broken" with no diagnostic detail. He wants to know whether you think about software systems the way his team does.</p>
+  <h3>His three evaluation axes</h3>
+  <p><strong>Systems thinking:</strong> Do you understand why software behaves the way it does, or do you just observe that it behaved unexpectedly? A CDE who can say "I observed a 503 on /missions/{id}/commands at 14:32 UTC, it resolved after 90 seconds, and I notice the same pattern twice this week between 14:00–15:00 which coincides with scheduled batch processing" is vastly more useful than one who says "Cockpit broke this afternoon."</p>
+  <p><strong>Architecture literacy:</strong> Do you understand what a service boundary is, what containerisation does, what a message queue is for? You don't need to be able to build these — but you need to understand them well enough to reason about failures that cross them.</p>
+  <p><strong>Feedback quality:</strong> The CDE is the most important source of product feedback because they are closest to actual customer use. Xavier wants a CDE who can articulate: what the customer was trying to do, what Cockpit actually did, what the expected behaviour should be, and what the business impact is. That is a useful bug report. "It didn't work" is not.</p>
+  <div class="callout">
+    <strong>THE POSITIONING STATEMENT FOR XAVIER</strong>
+    "I'm the customer who writes good specifications and understands why your API behaves as it does. I don't need you to build the Cockpit backend — but I want to be the CDE who doesn't waste your team's time with vague bug reports. My Airbus HBC+ work involved defining software architecture standards across distributed teams and external providers — I know what a well-specified interface looks like from both sides."
+  </div>
+</div>
+
+<!-- S2 -->
+<div class="content-block" id="s2">
+  <h2>2. Loft's Ground Software Stack — What His Team Builds</h2>
+  <p>Understanding what Xavier's team actually does makes you a more credible interviewee and a better CDE. His team builds the software infrastructure that makes Loft's operations work.</p>
+
+  <div class="arch-diagram">
+    <span class="ad-title">LOFT GROUND SOFTWARE STACK — SIMPLIFIED</span>
+┌──────────────────────────────────────────────────┐
+│           CUSTOMER LAYER                         │
+│   Cockpit Web UI  │  Cockpit API  │  Customer Tools│
+└──────────┬─────────────────────────┬─────────────┘
+           │                         │
+┌──────────▼─────────────────────────▼─────────────┐
+│         MISSION OPERATIONS SERVICES (MOS)         │
+│  Command routing │ Telemetry ingestion │ Scheduling │
+│  State management │ Event streaming (Kafka)        │
+└──────────┬─────────────────────────┬─────────────┘
+           │                         │
+┌──────────▼───────────┐  ┌──────────▼─────────────┐
+│   GROUND STATION NET  │  │    DATA MANAGEMENT      │
+│ Pass scheduling       │  │ Telemetry store (PG)    │
+│ RF link management    │  │ Command audit log       │
+│ Frame processing      │  │ Mission config store    │
+└──────────┬───────────┘  └────────────────────────┘
+           │
+┌──────────▼───────────────────────────────────────┐
+│              ON-ORBIT                             │
+│   Satellite Bus │ Loft Hub │ Customer Payload      │
+└──────────────────────────────────────────────────┘
+  </div>
+
+  <h3>Mission Operations Services (MOS) — Gauthier's domain</h3>
+  <p>MOS owns the backend services that let Loft operators and customers command, monitor, and automate satellites. Xavier's Ground Software Solutions team builds the interfaces CDEs use — the Cockpit UI, the Cockpit API, and the tooling CDEs build on top of it. The distinction matters: if there's a commanding issue, it could be in the Cockpit layer (Xavier's) or the MOS layer (Gauthier's).</p>
+
+  <h3>Key technologies in the stack</h3>
+  <ul>
+    <li><strong>Kafka</strong> — Event streaming for telemetry. High-volume satellite telemetry arrives continuously; Kafka decouples ingestion from processing. Consumers (dashboards, alert systems, CDE tools) subscribe to topics and process in their own time.</li>
+    <li><strong>PostgreSQL</strong> — Persistent store for mission configurations, telemetry history, command audit logs. ACID compliance matters for commanding — you need to know a command was accepted exactly once.</li>
+    <li><strong>Docker/Kubernetes</strong> — Services are containerised and orchestrated. A CDE deploying a custom tool into Loft's infrastructure needs to know how to containerise it.</li>
+    <li><strong>REST API + WebSocket</strong> — Cockpit exposes REST for CRUD operations and WebSocket for real-time telemetry streaming to the UI.</li>
+  </ul>
+</div>
+
+<!-- S3 -->
+<div class="content-block" id="s3">
+  <h2>3. Being a Good API Citizen — What Xavier Needs From CDEs</h2>
+  <p>Xavier's team maintains the Cockpit API. CDEs are its primary internal users. A CDE who misuses the API creates support burden. A CDE who uses it correctly — and provides useful feedback — helps Xavier's team improve it.</p>
+  <h3>What good API use looks like</h3>
+  <ul>
+    <li>Always check the API documentation for the intended use of each endpoint before building a client</li>
+    <li>Respect rate limits — build clients with backoff, not blind retry loops</li>
+    <li>Use the right HTTP verb for the right operation — don't use GET for operations that have side effects</li>
+    <li>Handle all documented error codes, including 4xx (client errors you should fix) and 5xx (server errors you should retry)</li>
+    <li>Version your API calls — if the Cockpit API releases v2 of an endpoint, don't silently keep calling v1 until it breaks</li>
+  </ul>
+  <h3>What good bug reports look like</h3>
+  <p>Xavier's team cannot fix bugs they cannot reproduce. A useful bug report contains: the exact endpoint and HTTP method called, the request body/params, the response status and body, the timestamp (so Xavier can check server logs), whether it's reproducible or intermittent, and the business impact (what was the customer trying to do, what could they not do).</p>
+  <div class="callout amber">
+    <strong>THE SCENARIO XAVIER MIGHT POSE</strong>
+    "A CDE tells you: 'The Cockpit API is returning wrong data for my customer's mission.' What information do you gather before escalating to my team?" Expected answer: endpoint and params, response body, timestamp, whether it's consistent or intermittent, comparison against what the data should be (and how you know), whether it affects all customers or just this one.
+  </div>
+  <h3>Contributing tooling back to the team</h3>
+  <p>Xavier wants CDEs who contribute tooling improvements back to the product. This means: when you write a useful Python script for one mission, thinking about whether it could be generalised and contributed to the shared tooling library. This is the kind of initiative that makes CDEs visible to software leads and accelerates career development within Loft.</p>
+</div>
+
+<!-- S4 -->
+<div class="content-block" id="s4">
+  <h2>4. Software Architecture Concepts to Be Fluent In</h2>
+  <p>Xavier will not quiz you on implementing a B-tree or designing a distributed system. But he will probe whether you understand how the systems around you work. These are the concepts where gaps will show.</p>
+
+  <h3>Service boundaries and microservices</h3>
+  <p>Loft's ground software is a set of services — Cockpit, MOS, ground station management, data management — each with a defined API boundary. A failure in one service does not necessarily propagate to others (this is the point of the boundaries). When you diagnose a system problem, you need to determine which service is the source: is the issue in the API gateway, in the service that processes the command, or in the downstream service it calls?</p>
+
+  <h3>Containers and Docker basics</h3>
+  <p>A container packages an application with all its dependencies so it runs identically in any environment. Key concepts: an image is the template; a container is a running instance; a Dockerfile defines how to build the image. Kubernetes orchestrates containers — it decides which host runs which container, restarts failed containers, and scales up replicas when load increases. A CDE deploying a custom monitoring script to Loft's infrastructure needs to be able to write a basic Dockerfile.</p>
+
+  <div class="arch-diagram">
+    <span class="ad-title">MINIMAL DOCKERFILE — CDE MONITORING TOOL</span>
+FROM python:3.12-slim
+WORKDIR /app
+COPY requirements.txt .
+RUN pip install --no-cache-dir -r requirements.txt
+COPY mission_monitor.py .
+# Non-root user for security
+RUN useradd -m monitoruser
+USER monitoruser
+CMD ["python", "mission_monitor.py"]
+  </div>
+
+  <h3>Message queues — why Kafka matters</h3>
+  <p>Satellite telemetry arrives at high frequency and must be processed by multiple consumers: the Cockpit dashboard, the alert system, the telemetry database writer, CDE custom tools. A message queue (Kafka) decouples producers (ground station receivers) from consumers. Each consumer processes at its own rate; if one consumer is slow, it doesn't slow the others. For a CDE building a tool that processes telemetry, this means: subscribe to the relevant Kafka topic, consume at your own rate, commit offsets when you've processed each message.</p>
+
+  <h3>WebSockets for real-time telemetry</h3>
+  <p>Cockpit's real-time dashboard uses WebSocket to push telemetry updates to the browser as they arrive. REST (request/response) is insufficient for real-time: polling every 500ms creates unnecessary load. WebSocket maintains a persistent connection and the server pushes updates when data changes. A CDE building a custom real-time dashboard should use WebSocket, not a REST polling loop.</p>
+</div>
+
+<!-- S5 -->
+<div class="content-block" id="s5">
+  <h2>5. Your Airbus HBC+ and LEOAF Experience as Software Credentials</h2>
+  <p>You are not applying as a software engineer. But you have legitimate software architecture experience that Xavier will recognise — if you frame it correctly.</p>
+  <h3>Airbus HBC+ — architecture at Xavier's level</h3>
+  <p>At Airbus you defined software architecture standards across distributed engineering teams and external MSP providers. You designed interoperable services using REST APIs and SNMP protocols. You captured and formalised system requirements in architecture deliverables. This is the same domain Xavier works in — distributed services, defined interfaces, external integrations. Use the language: "service interface," "architecture standards," "interoperability requirements," "provider onboarding."</p>
+  <h3>LEOAF — evidence you can ship software</h3>
+  <p>Xavier leads a software team. A candidate who has independently shipped a full-stack web platform (your LEOAF site on GitHub Pages with a Supabase backend, Postgres data model, auth system, and progress tracking) demonstrates software delivery capability that goes beyond "I know Python." Name it specifically: "I built and maintain a web platform at leoarfu.github.io/42 — it has a Supabase PostgreSQL backend, bearer token auth, a progress tracking data model, and a custom UI. I've been maintaining it solo for over a year."</p>
+  <div class="callout green">
+    <strong>THE QUESTION TO ASK XAVIER</strong>
+    "What's the biggest bottleneck between what CDEs need from the ground software and what your team can deliver right now? I want to understand where the interface friction is so I can be the kind of CDE who reduces it rather than adds to it." This shows systems thinking, customer service orientation, and respect for his team's work — all in one question.
+  </div>
+</div>
+
+<!-- QUIZ -->
+<div class="quiz-block" id="quiz">
+  <h2>KNOWLEDGE CHECK — XAVIER'S INTERVIEW</h2>
+  <p class="quiz-intro">Seven questions covering ground software architecture, API design, containers, and the CDE-software team interface.</p>
+
+  <div class="quiz-q" id="q1">
+    <p><strong>Q1.</strong> A CDE tells Xavier: "Cockpit broke this afternoon." What is wrong with this bug report?</p>
+    <div class="quiz-options">
+      <button class="quiz-opt" data-q="1" data-correct="false">A. Nothing — Xavier's team should be able to reproduce it from logs</button>
+      <button class="quiz-opt" data-q="1" data-correct="true">B. It contains no diagnostic information: no endpoint, no error code, no timestamp, no reproducibility data, no business impact — it cannot be actioned</button>
+      <button class="quiz-opt" data-q="1" data-correct="false">C. CDEs should not report bugs directly to the software team</button>
+      <button class="quiz-opt" data-q="1" data-correct="false">D. The CDE should first check if it's a Gauthier/MOS issue</button>
+    </div>
+    <div class="quiz-feedback" id="fb1"></div>
+  </div>
+
+  <div class="quiz-q" id="q2">
+    <p><strong>Q2.</strong> Why does Loft use Kafka for telemetry ingestion rather than writing telemetry directly to PostgreSQL from the ground station?</p>
+    <div class="quiz-options">
+      <button class="quiz-opt" data-q="2" data-correct="false">A. PostgreSQL cannot handle high-frequency time-series data</button>
+      <button class="quiz-opt" data-q="2" data-correct="true">B. Kafka decouples producers from consumers — multiple downstream systems (dashboard, alerts, database writer, CDE tools) can consume telemetry independently at their own rates without coupling to the ingestion pipeline</button>
+      <button class="quiz-opt" data-q="2" data-correct="false">C. Kafka encrypts telemetry data in transit; PostgreSQL does not</button>
+      <button class="quiz-opt" data-q="2" data-correct="false">D. Kafka is open-source; PostgreSQL requires a licence</button>
+    </div>
+    <div class="quiz-feedback" id="fb2"></div>
+  </div>
+
+  <div class="quiz-q" id="q3">
+    <p><strong>Q3.</strong> A CDE's custom monitoring script needs to receive telemetry updates as soon as they arrive. Should they use REST polling or WebSocket?</p>
+    <div class="quiz-options">
+      <button class="quiz-opt" data-q="3" data-correct="false">A. REST polling every 500ms — it's simpler and more reliable</button>
+      <button class="quiz-opt" data-q="3" data-correct="true">B. WebSocket — it maintains a persistent connection and the server pushes updates immediately, reducing latency and server load compared to polling</button>
+      <button class="quiz-opt" data-q="3" data-correct="false">C. Either — they are functionally equivalent for this use case</button>
+      <button class="quiz-opt" data-q="3" data-correct="false">D. Kafka consumer directly — bypass the Cockpit API entirely</button>
+    </div>
+    <div class="quiz-feedback" id="fb3"></div>
+  </div>
+
+  <div class="quiz-q" id="q4">
+    <p><strong>Q4.</strong> What is the purpose of containerising a CDE's custom tool with Docker?</p>
+    <div class="quiz-options">
+      <button class="quiz-opt" data-q="4" data-correct="false">A. To encrypt the tool's source code and protect intellectual property</button>
+      <button class="quiz-opt" data-q="4" data-correct="true">B. To package the tool with all its dependencies so it runs identically in any environment — development, staging, production — regardless of what's installed on the host</button>
+      <button class="quiz-opt" data-q="4" data-correct="false">C. To make the tool run faster by using hardware virtualisation</button>
+      <button class="quiz-opt" data-q="4" data-correct="false">D. Docker is required for Kubernetes deployment; containerisation has no other benefit</button>
+    </div>
+    <div class="quiz-feedback" id="fb4"></div>
+  </div>
+
+  <div class="quiz-q" id="q5">
+    <p><strong>Q5.</strong> Xavier asks: "When you built the REST/SNMP integration at Airbus HBC+, what was the hardest interface problem you had to solve?" What makes a strong answer?</p>
+    <div class="quiz-options">
+      <button class="quiz-opt" data-q="5" data-correct="false">A. Describe the SNMP OID structure in detail to show technical depth</button>
+      <button class="quiz-opt" data-q="5" data-correct="true">B. Describe a specific interoperability challenge between two systems, the interface specification work you did to resolve it, and what you learned about distributed system design from the experience</button>
+      <button class="quiz-opt" data-q="5" data-correct="false">C. Explain that SNMP and REST are very different protocols and it was complex to integrate them</button>
+      <button class="quiz-opt" data-q="5" data-correct="false">D. Acknowledge that you relied on the vendor's documentation and followed their recommendations</button>
+    </div>
+    <div class="quiz-feedback" id="fb5"></div>
+  </div>
+
+  <div class="quiz-q" id="q6">
+    <p><strong>Q6.</strong> A service returns HTTP 503. What does this mean and what should a client do?</p>
+    <div class="quiz-options">
+      <button class="quiz-opt" data-q="6" data-correct="false">A. The client sent an invalid request — fix the request parameters</button>
+      <button class="quiz-opt" data-q="6" data-correct="true">B. The server is temporarily unavailable (overloaded or in maintenance) — the client should wait and retry with backoff; this is a transient error</button>
+      <button class="quiz-opt" data-q="6" data-correct="false">C. Authentication failed — the client must re-authenticate</button>
+      <button class="quiz-opt" data-q="6" data-correct="false">D. The resource was not found — the endpoint URL is wrong</button>
+    </div>
+    <div class="quiz-feedback" id="fb6"></div>
+  </div>
+
+  <div class="quiz-q" id="q7">
+    <p><strong>Q7.</strong> Xavier asks what you'd change about the Cockpit API to make CDE tooling easier. You haven't used it yet. What's the right way to answer?</p>
+    <div class="quiz-options">
+      <button class="quiz-opt" data-q="7" data-correct="false">A. Say you can't answer because you haven't used it yet</button>
+      <button class="quiz-opt" data-q="7" data-correct="false">B. Make up specific API improvements to show initiative</button>
+      <button class="quiz-opt" data-q="7" data-correct="true">C. Describe general API design principles you value — clear error messages, consistent pagination, event webhooks alongside polling, comprehensive documentation — then say you'd learn Cockpit's specific friction points from CDEs in the first weeks</button>
+      <button class="quiz-opt" data-q="7" data-correct="false">D. Say the API sounds great and you have no suggestions</button>
+    </div>
+    <div class="quiz-feedback" id="fb7"></div>
+  </div>
+
+  <div class="quiz-score" id="quizScore"></div>
+</div>
+
+<!-- PYTHON -->
+<div class="py-block" id="python">
+  <h2>PYTHON EXERCISES</h2>
+  <p class="py-intro">Two exercises focused on the software architecture skills Xavier cares about: a Kafka telemetry consumer and a useful bug report generator.</p>
+
+  <div class="py-exercise">
+    <h3>Exercise 1 — Kafka Telemetry Consumer</h3>
+    <p>Consume telemetry from a Kafka topic, process records in a sliding window, and detect anomalies. This is the pattern for a CDE tool that subscribes to Loft's telemetry stream without polling the REST API.</p>
+<pre>
+# pip install kafka-python (or confluent-kafka for production)
+# This exercise uses a mock consumer for portability
+
+from collections import deque
+from dataclasses import dataclass, field
+from datetime import datetime
+from typing import Iterator
+import json, time, random
+
+# --- Mock Kafka infrastructure ---
+@dataclass
+class KafkaMessage:
+    topic: str
+    partition: int
+    offset: int
+    key: bytes
+    value: bytes
+    timestamp: float
+
+def mock_kafka_consumer(topic: str, n_messages: int = 100) -> Iterator[KafkaMessage]:
+    """Simulate consuming from a Kafka topic."""
+    channels = {
+        'EPS_BATT_SOC':   (80, 95, 0.5),     # (mean, max, std)
+        'THERM_PAYLOAD':  (24, 55, 1.0),
+        'ADCS_ANGLE_ERR': (0.3, 2.0, 0.1),
+        'COMMS_RSSI':     (-72, -50, 3.0),
+    }
+    # Inject an anomaly window
+    anomaly_start, anomaly_end = 60, 80
+    for i in range(n_messages):
+        ch = list(channels.keys())[i % len(channels)]
+        mean, max_val, std = channels[ch]
+        if ch == 'EPS_BATT_SOC' and anomaly_start <= i < anomaly_end:
+            val = random.gauss(18, 2)  # Battery drain anomaly
+        else:
+            val = min(max_val, random.gauss(mean, std))
+        payload = json.dumps({
+            "mission_id": "YAM9-PAYLOAD-A",
+            "channel": ch,
+            "value": round(val, 3),
+            "unit": {"EPS_BATT_SOC":"%","THERM_PAYLOAD":"degC","ADCS_ANGLE_ERR":"deg","COMMS_RSSI":"dBm"}[ch],
+            "ts": datetime.utcnow().isoformat() + "Z"
+        }).encode()
+        yield KafkaMessage(
+            topic=topic, partition=0, offset=i,
+            key=ch.encode(), value=payload,
+            timestamp=time.time()
+        )
+        time.sleep(0.01)  # 10ms between messages = 100 msgs/sec
+
+# --- Sliding window anomaly detector ---
+@dataclass
+class ChannelMonitor:
+    channel: str
+    window_size: int = 20         # number of samples in sliding window
+    warn_threshold: float = 2.5   # std deviations for warning
+    crit_threshold: float = 4.0   # std deviations for critical
+    values: deque = field(default_factory=lambda: deque(maxlen=20))
+    alerts: list = field(default_factory=list)
+
+    def ingest(self, value: float, timestamp: str) -> dict | None:
+        self.values.append(value)
+        if len(self.values) < self.window_size // 2:
+            return None  # Not enough data to assess
+        mean = sum(self.values) / len(self.values)
+        variance = sum((v - mean)**2 for v in self.values) / len(self.values)
+        std = variance ** 0.5
+        if std < 1e-6:
+            return None  # Zero variance — constant signal
+        z_score = abs(value - mean) / std
+        if z_score >= self.crit_threshold:
+            return {"severity":"CRITICAL","channel":self.channel,
+                    "value":value,"mean":round(mean,2),"z":round(z_score,1),
+                    "ts":timestamp}
+        if z_score >= self.warn_threshold:
+            return {"severity":"WARNING","channel":self.channel,
+                    "value":value,"mean":round(mean,2),"z":round(z_score,1),
+                    "ts":timestamp}
+        return None
+
+def run_telemetry_consumer(topic: str = "loft.telemetry.yam9"):
+    """Main consumer loop."""
+    monitors: dict[str, ChannelMonitor] = {}
+    all_alerts = []
+    processed = 0
+
+    print(f"Consuming from topic: {topic}")
+    print(f"{'='*55}")
+
+    for msg in mock_kafka_consumer(topic, n_messages=100):
+        payload = json.loads(msg.value.decode())
+        ch = payload["channel"]
+        val = payload["value"]
+        ts  = payload["ts"]
+
+        # Get or create monitor for this channel
+        if ch not in monitors:
+            monitors[ch] = ChannelMonitor(channel=ch)
+
+        alert = monitors[ch].ingest(val, ts)
+        if alert:
+            all_alerts.append(alert)
+            icon = "🔴" if alert["severity"] == "CRITICAL" else "🟡"
+            print(f"{icon} [{alert['severity']:8s}] {ch}: {val:.2f} "
+                  f"(mean={alert['mean']:.2f}, z={alert['z']:.1f}σ) @ {ts}")
+
+        processed += 1
+
+    print(f"\n{'='*55}")
+    print(f"Processed: {processed} messages")
+    print(f"Alerts: {len(all_alerts)} "
+          f"({sum(1 for a in all_alerts if a['severity']=='CRITICAL')} CRITICAL, "
+          f"{sum(1 for a in all_alerts if a['severity']=='WARNING')} WARNING)")
+    return all_alerts
+
+alerts = run_telemetry_consumer()
+</pre>
+    <div class="py-challenge">
+      <strong>EXTENSION CHALLENGE</strong>
+      Add offset commit tracking: maintain a JSON file that records the last successfully processed offset per partition. On restart, seek to the committed offset rather than the beginning of the topic. This is the pattern that makes consumers resilient to restarts — exactly what Xavier's team expects in production tooling.
+    </div>
+  </div>
+
+  <div class="py-exercise">
+    <h3>Exercise 2 — Structured Bug Report Generator</h3>
+    <p>Build a tool that captures an API interaction and automatically formats a structured bug report in the format Xavier's team needs. Shows you understand what makes a useful bug report.</p>
+<pre>
+import json, time
+from datetime import datetime
+from dataclasses import dataclass, field
+from typing import Any
+
+@dataclass
+class APIInteraction:
+    """Captures a complete API interaction for bug reporting."""
+    method: str
+    endpoint: str
+    request_headers: dict
+    request_body: Any
+    response_status: int
+    response_body: Any
+    response_headers: dict
+    duration_ms: float
+    timestamp: str
+    mission_id: str | None = None
+    customer_id: str | None = None
+
+@dataclass
+class BugReport:
+    title: str
+    interaction: APIInteraction
+    expected_behaviour: str
+    actual_behaviour: str
+    business_impact: str
+    reproducible: bool
+    reproduction_steps: list[str]
+    reporter: str = "CDE"
+    priority: str = "P2"  # P1=blocking, P2=high, P3=medium, P4=low
+
+    def format(self) -> str:
+        lines = [
+            f"BUG REPORT — {self.title}",
+            f"Reporter: {self.reporter} | Priority: {self.priority}",
+            f"{'='*60}",
+            "",
+            "SUMMARY",
+            f"  {self.title}",
+            "",
+            "API INTERACTION",
+            f"  Timestamp:  {self.interaction.timestamp}",
+            f"  Method:     {self.interaction.method}",
+            f"  Endpoint:   {self.interaction.endpoint}",
+            f"  Mission:    {self.interaction.mission_id or 'N/A'}",
+            f"  Customer:   {self.interaction.customer_id or 'N/A'}",
+            f"  Duration:   {self.interaction.duration_ms:.0f}ms",
+            "",
+            "REQUEST",
+            f"  Headers (sanitised):",
+        ]
+        # Sanitise auth headers
+        safe_headers = {k: ("***" if "auth" in k.lower() else v)
+                        for k, v in self.interaction.request_headers.items()}
+        for k, v in safe_headers.items():
+            lines.append(f"    {k}: {v}")
+        if self.interaction.request_body:
+            lines += ["  Body:", f"    {json.dumps(self.interaction.request_body, indent=4)}"]
+        lines += [
+            "",
+            "RESPONSE",
+            f"  Status: {self.interaction.response_status}",
+            f"  Body:   {json.dumps(self.interaction.response_body, indent=4)}",
+            "",
+            "EXPECTED VS ACTUAL",
+            f"  Expected: {self.expected_behaviour}",
+            f"  Actual:   {self.actual_behaviour}",
+            "",
+            "BUSINESS IMPACT",
+            f"  {self.business_impact}",
+            "",
+            f"REPRODUCIBLE: {'YES' if self.reproducible else 'NO — INTERMITTENT'}",
+            "",
+            "REPRODUCTION STEPS",
+        ]
+        for i, step in enumerate(self.reproduction_steps, 1):
+            lines.append(f"  {i}. {step}")
+        return "\n".join(lines)
+
+# --- Example: a real bug scenario ---
+interaction = APIInteraction(
+    method="POST",
+    endpoint="/v1/missions/YAM9-PAYLOAD-A/commands",
+    request_headers={"Authorization": "Bearer eyJ.token.here", "Content-Type": "application/json"},
+    request_body={"command_id": "PAYLOAD_SET_MODE", "params": {"mode": "IMAGING"}, "scheduled_at": "2026-04-02T14:32:00Z"},
+    response_status=200,
+    response_body={"submission_id": "cmd-9947", "status": "accepted"},
+    response_headers={"Content-Type": "application/json", "X-Request-Id": "req-abc123"},
+    duration_ms=342,
+    timestamp="2026-04-02T14:32:15.441Z",
+    mission_id="YAM9-PAYLOAD-A",
+    customer_id="customer-eod-42"
+)
+
+report = BugReport(
+    title="Command accepted (200 OK) but payload mode not updated in subsequent telemetry",
+    interaction=interaction,
+    expected_behaviour="After PAYLOAD_SET_MODE command accepted, PAYLOAD_MODE telemetry channel shows 'IMAGING' within the next downlink pass (~15 min)",
+    actual_behaviour="Telemetry shows PAYLOAD_MODE remains 'STANDBY' for 3 consecutive passes after command acceptance. Customer verified command was not executed on their payload side.",
+    business_impact="Customer (EarthDaily) cannot initiate imaging operations. Blocking mission revenue generation. Escalation risk if not resolved within 24h.",
+    reproducible=True,
+    reproduction_steps=[
+        "Authenticate to Cockpit API and obtain bearer token",
+        "POST /v1/missions/YAM9-PAYLOAD-A/commands with body as above",
+        "Observe 200 OK response with submission_id cmd-9947",
+        "Wait for next ground station pass (Toulouse-GS at 15:47 UTC)",
+        "GET /v1/missions/YAM9-PAYLOAD-A/telemetry?channels=PAYLOAD_MODE",
+        "Observe PAYLOAD_MODE = 'STANDBY' despite accepted command"
+    ],
+    priority="P1",
+    reporter="Did Delattre (CDE)"
+)
+
+print(report.format())
+</pre>
+    <div class="py-note">The sanitisation of auth headers (<code>"***"</code>) and the structured request/response capture are what makes this tool safe to use and useful to Xavier's team. Never log raw auth tokens. Always capture enough context to reproduce.</div>
+  </div>
+</div>
+
+<!-- REFLECTION -->
+<div class="reflection-block" id="reflect">
+  <h2>REFLECTION PROMPTS</h2>
+  <p class="ref-intro">200–300 words each. Xavier appreciates architectural thinking — go beyond "what" to "why."</p>
+  <div class="ref-prompt">
+    <h3>Prompt 1 — The Interface You Defined at Airbus</h3>
+    <p>Describe the most technically complex interface specification you produced at Airbus HBC+ — specifically where two teams or two systems had to interoperate and you were responsible for defining how. What was ambiguous? How did you resolve it? What would you do differently? Frame this as an architecture problem, not a process problem.</p>
+  </div>
+  <div class="ref-prompt">
+    <h3>Prompt 2 — LEOAF as a Software Project</h3>
+    <p>Describe your LEOAF platform as if Xavier asked you about it: what's the architecture, what does the Supabase backend do, how did you design the progress tracking data model, what would you change if you rebuilt it today knowing what you know now about production software? This positions LEOAF as engineering evidence, not just a curriculum project.</p>
+  </div>
+</div>
+
+<div class="lesson-nav">
+  <a href="int-madeline.html">← INT-02: MADELINE</a>
+  <a href="int-matt.html">BREAK THEN INT-04: MATT →</a>
+</div>
+
+</div>
+<footer>© 2026 LEOAF · LOFT ORBITAL INTERVIEW PREP · PANEL DAY: THURSDAY 2 APRIL</footer>
+<button class="back-to-top" id="backToTop">↑</button>
+
+<script>
+const canvas=document.getElementById('starsCanvas'),ctx=canvas.getContext('2d');let stars=[];
+function initStars(){stars=[];for(let i=0;i<180;i++)stars.push({x:Math.random()*canvas.width,y:Math.random()*canvas.height,size:Math.random()*1.4+0.3,speed:Math.random()*0.15+0.03,hue:Math.random()*360});}
+function resizeCanvas(){canvas.width=window.innerWidth;canvas.height=window.innerHeight;}
+resizeCanvas();initStars();window.addEventListener('resize',resizeCanvas);
+function animateStars(){ctx.clearRect(0,0,canvas.width,canvas.height);stars.forEach(s=>{s.y-=s.speed;if(s.y<0){s.y=canvas.height;s.x=Math.random()*canvas.width;}ctx.beginPath();ctx.fillStyle=`hsl(${s.hue},70%,80%)`;ctx.arc(s.x,s.y,s.size,0,Math.PI*2);ctx.fill();});requestAnimationFrame(animateStars);}
+animateStars();
+const feedbacks={
+  1:{correct:"Correct. A bug report without diagnostic information cannot be actioned. No endpoint, no error code, no timestamp, no reproducibility data — Xavier's team cannot reproduce or investigate it.",wrong:"Incorrect. 'Cockpit broke' is useless. A useful bug report needs: endpoint, HTTP method, request body, response status and body, timestamp, reproducibility, and business impact. Without these Xavier's team cannot reproduce or prioritise the issue."},
+  2:{correct:"Correct. Kafka's value is decoupling: producers write to a topic; multiple consumers read independently at their own rates. A slow consumer (like a CDE's analysis script) doesn't slow the fast consumer (the real-time dashboard). This is architectural separation of concerns.",wrong:"Incorrect. Kafka's primary benefit is producer-consumer decoupling. Multiple downstream systems need telemetry independently and at different rates. Kafka lets each consumer process at its own pace without affecting others. PostgreSQL can handle time-series, but can't decouple consumers the way Kafka does."},
+  3:{correct:"Correct. WebSocket maintains a persistent connection with server-push delivery. For real-time telemetry, polling creates latency and unnecessary load. WebSocket delivers each update immediately as it arrives.",wrong:"Incorrect. REST polling every 500ms introduces latency (up to 500ms before the next check) and generates 120 API calls per minute regardless of whether data has changed. WebSocket maintains a persistent connection and delivers updates immediately upon arrival — lower latency, lower server load."},
+  4:{correct:"Correct. Container portability — 'works on my machine' becomes 'works everywhere the container runs.' Consistent environments across development, CI, staging, and production eliminate the entire class of environment-specific bugs.",wrong:"Incorrect. Docker's primary benefit is environment consistency. By packaging the application with all its dependencies, the container runs identically in any environment. This eliminates 'works on my machine' problems and makes deployment to Loft's infrastructure reliable."},
+  5:{correct:"Correct. Xavier wants to understand your architecture thinking — what was the specific interoperability challenge, what did you design to solve it, what did you learn. Generic answers ('SNMP and REST are different') show no architectural depth.",wrong:"Incorrect. Xavier wants specific architectural reasoning, not a description of the protocols. Describe the actual interoperability problem (mismatched data models, timing differences, authentication incompatibilities), the interface design you produced, and the lesson learned."},
+  6:{correct:"Correct. 503 Service Unavailable is a transient server-side error — the server is overloaded or in maintenance. The client should wait (check Retry-After header if present) and retry with exponential backoff.",wrong:"Incorrect. 503 is a server-side transient error (overloaded or in maintenance), not a client error. The client should not fix its request (that's for 4xx errors) — it should wait and retry with backoff. 401 means auth failure; 404 means not found."},
+  7:{correct:"Correct. Demonstrating principled API design thinking while honestly acknowledging you haven't used Cockpit yet is the right balance. Inventing specific suggestions you can't back up with experience would be transparent.",wrong:"Incorrect. Saying you can't answer wastes the opportunity. Inventing specifics you don't have experience with is risky. The right answer demonstrates API design principles (error clarity, pagination, webhooks, docs) and commits to learning Cockpit's specific friction from colleagues quickly."}
+};
+let answered={};
+document.querySelectorAll('.quiz-opt').forEach(btn=>{
+  btn.addEventListener('click',function(){
+    const q=this.dataset.q;if(answered[q]!==undefined)return;
+    const correct=this.dataset.correct==='true';answered[q]=correct;
+    document.querySelectorAll(`.quiz-opt[data-q="${q}"]`).forEach(b=>{b.disabled=true;if(b.dataset.correct==='true')b.classList.add('correct');});
+    if(!correct)this.classList.add('wrong');
+    const fb=document.getElementById(`fb${q}`);
+    fb.textContent=(correct?'✓ ':'✗ ')+feedbacks[q][correct?'correct':'wrong'];
+    fb.style.color=correct?'#39ff14':'#ff004f';
+    if(Object.keys(answered).length===7){
+      const total=Object.values(answered).filter(Boolean).length;
+      const el=document.getElementById('quizScore');el.style.display='block';
+      el.textContent=`SCORE: ${total}/7 — ${total>=6?'STRONG.':total>=4?'SOLID. REVISIT KAFKA AND DOCKER.':'REVISIT SECTION 4 — XAVIER WILL GO THERE.'}`;
+    }
+  });
+});
+const btt=document.getElementById('backToTop');
+window.addEventListener('scroll',()=>btt.classList.toggle('visible',window.scrollY>400));
+btt.addEventListener('click',()=>window.scrollTo({top:0,behavior:'smooth'}));
+</script>
+</body>
+</html>
