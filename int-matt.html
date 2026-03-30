@@ -1,0 +1,1180 @@
+<!DOCTYPE html>
+
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, shrink-to-fit=no">
+<title>MATT ZEIGLER — Spacecraft Systems · Loft Orbital Interview Prep · LEOAF</title>
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;600;800&family=Share+Tech+Mono&family=Libre+Baskerville:ital,wght@0,400;0,700;1,400&display=swap" rel="stylesheet">
+<style>
+* { box-sizing:border-box; margin:0; padding:0; }
+html { height:100%; -webkit-text-size-adjust:100%; overflow-x:hidden; }
+body { font-family:'Share Tech Mono',monospace; background:#000; color:white; overflow-x:hidden; min-height:100vh; }
+#starsCanvas { position:fixed; inset:0; z-index:-1; }
+
+header {
+background:#000; border-bottom:1px solid #ffaa0033;
+position:sticky; top:0; z-index:100;
+padding:1rem clamp(1.5rem,5vw,4rem);
+display:flex; justify-content:space-between; align-items:center;
+box-shadow:0 4px 16px #0008;
+}
+.logo { font-family:‘Orbitron’,sans-serif; font-weight:800; font-size:clamp(16px,2vw,22px); letter-spacing:3px; text-decoration:none; }
+.logo span:first-child { color:white; }
+.logo span:last-child { color:#ffaa00; }
+.nav-right { display:flex; align-items:center; gap:10px; }
+.nav-btn {
+background:transparent; border:1px solid #ffaa0044; color:#ffaa00;
+padding:6px 14px; cursor:pointer; transition:0.3s ease;
+font-size:11px; font-family:‘Orbitron’,sans-serif; letter-spacing:1px;
+text-decoration:none; display:inline-block;
+}
+.nav-btn:hover { background:#ffaa00; color:black; }
+
+.breadcrumb { padding:14px clamp(1.5rem,5vw,4rem); font-size:11px; color:#ffffff44; letter-spacing:1px; position:relative; z-index:1; }
+.breadcrumb a { color:#ffaa0066; text-decoration:none; }
+.breadcrumb a:hover { color:#ffaa00; }
+.breadcrumb span { margin:0 8px; }
+
+.lesson-wrap { max-width:820px; margin:0 auto; padding:0 clamp(1.5rem,5vw,4rem) 80px; position:relative; z-index:1; }
+
+.lesson-header { padding:30px 0 28px; border-bottom:1px solid #ffffff11; margin-bottom:36px; }
+.lesson-tag { font-family:‘Orbitron’,sans-serif; font-size:10px; color:#ffaa00; letter-spacing:3px; margin-bottom:10px; }
+.lesson-header h1 { font-family:‘Orbitron’,sans-serif; font-size:clamp(20px,3.5vw,30px); font-weight:800; line-height:1.2; margin-bottom:12px; }
+.lesson-meta { display:flex; gap:10px; flex-wrap:wrap; margin-bottom:16px; }
+.l-pill { font-family:‘Orbitron’,sans-serif; font-size:10px; padding:3px 10px; border:1px solid; letter-spacing:1px; }
+.l-pill-q { color:#ffaa00; border-color:#ffaa0044; }
+.l-pill-t { color:#00d9ff; border-color:#00d9ff44; }
+.l-pill-s { color:#ff6699; border-color:#ff669944; }
+.lesson-intro { font-size:13px; line-height:1.85; opacity:0.75; }
+
+.toc { background:rgba(255,170,0,0.06); border:1px solid #ffaa0033; padding:24px 28px; margin:30px 0; }
+.toc h4 { font-family:‘Orbitron’,sans-serif; font-size:10px; color:#ffaa00; letter-spacing:2px; margin-bottom:16px; }
+.toc ol { padding-left:20px; }
+.toc li { font-size:13px; line-height:2.1; }
+.toc li a { color:#ffaa00bb; text-decoration:none; transition:0.15s; }
+.toc li a:hover { color:#ffffff; padding-left:4px; }
+.toc li::marker { color:#ff004f; font-family:‘Orbitron’,sans-serif; font-size:10px; }
+
+.content-block { background:#f5f2ec; color:#1a1a1a; padding:36px clamp(24px,4vw,48px); margin-bottom:24px; border-left:4px solid #ffaa00; position:relative; z-index:1; }
+.content-block h2 { font-family:‘Orbitron’,sans-serif; font-size:13px; color:#664400; letter-spacing:2px; text-transform:uppercase; margin-bottom:20px; padding-bottom:10px; border-bottom:2px solid #ffaa0066; scroll-margin-top:80px; }
+.content-block h3 { font-family:‘Orbitron’,sans-serif; font-size:11px; color:#444; letter-spacing:1.5px; text-transform:uppercase; margin:32px 0 14px; }
+.content-block p { font-family:‘Libre Baskerville’,Georgia,serif; font-size:15px; line-height:1.9; color:#1a1a1a; margin-bottom:18px; }
+.content-block ul, .content-block ol { padding-left:0; margin-bottom:16px; }
+.content-block ul li, .content-block ol li { font-family:‘Libre Baskerville’,Georgia,serif; font-size:14px; line-height:1.85; color:#1a1a1a; margin-bottom:8px; padding-left:20px; position:relative; }
+.content-block ul li::before { content:’›’; position:absolute; left:0; color:#cc7700; }
+.content-block ol { counter-reset:item; }
+.content-block ol li { counter-increment:item; }
+.content-block ol li::before { content:counter(item)’.’; position:absolute; left:0; color:#cc0033; font-family:‘Orbitron’,sans-serif; font-size:10px; top:2px; }
+
+.callout { border-left:3px solid #ffaa00; background:#fffbf0; padding:16px 20px; margin:22px 0; font-size:13px; line-height:1.8; }
+.callout.red   { border-left-color:#cc0033; background:#fdecea; }
+.callout.green { border-left-color:#1a7a1a; background:#eafaea; }
+.callout.blue  { border-left-color:#0088cc; background:#e8f4fb; }
+.callout strong { font-family:‘Orbitron’,sans-serif; font-size:10px; letter-spacing:1px; display:block; margin-bottom:8px; color:inherit; }
+.callout p { font-family:‘Libre Baskerville’,Georgia,serif; font-size:14px; line-height:1.8; color:#1a1a1a; margin-bottom:0; }
+
+.subsystem-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(180px,1fr)); gap:12px; margin:22px 0; }
+.ss-card { background:#fff8ee; border:1px solid #ffaa0044; padding:16px; }
+.ss-card h4 { font-family:‘Orbitron’,sans-serif; font-size:10px; color:#cc7700; letter-spacing:1.5px; margin-bottom:8px; }
+.ss-card ul { list-style:none; padding:0; margin:0; }
+.ss-card ul li { font-size:11px; color:#333; line-height:1.7; padding-left:12px; position:relative; }
+.ss-card ul li::before { content:’·’; position:absolute; left:0; color:#ffaa00; }
+
+.formula-box { background:#111; border:1px solid #ffaa0033; padding:16px 20px; margin:18px 0; font-family:‘Share Tech Mono’,monospace; font-size:12px; line-height:1.9; color:#ffaa00; }
+.formula-box .fb-title { font-family:‘Orbitron’,sans-serif; font-size:9px; color:#ffffff55; letter-spacing:2px; margin-bottom:8px; display:block; }
+
+.key-numbers { display:grid; grid-template-columns:repeat(auto-fit,minmax(140px,1fr)); gap:12px; margin:22px 0; }
+.kn-item { background:#fff8ee; border:1px solid #ffaa0033; padding:16px 12px; text-align:center; }
+.kn-val { font-family:‘Orbitron’,sans-serif; font-size:clamp(16px,2.5vw,22px); font-weight:800; color:#cc7700; display:block; }
+.kn-label { font-size:10px; color:#666; letter-spacing:1px; margin-top:5px; display:block; line-height:1.4; }
+
+.compare-table { width:100%; border-collapse:collapse; margin:22px 0; font-size:12px; }
+.compare-table th { font-family:‘Orbitron’,sans-serif; font-size:10px; letter-spacing:1px; color:#664400; padding:10px 12px; border-bottom:2px solid #ffaa0066; text-align:left; }
+.compare-table td { padding:10px 12px; border-bottom:1px solid #ddd; line-height:1.5; color:#1a1a1a; vertical-align:top; }
+.compare-table tr:hover td { background:#fff8ee; }
+.compare-table .hi { color:#1a7a1a; font-weight:bold; }
+.compare-table .lo { color:#cc0033; }
+.compare-table .md { color:#996600; }
+
+.profile-box { background:#fff8ee; border:1px solid #ffaa0033; padding:20px 24px; margin:24px 0; }
+.profile-box h4 { font-family:‘Orbitron’,sans-serif; font-size:11px; color:#cc7700; letter-spacing:2px; margin-bottom:14px; }
+
+/* QUIZ */
+.quiz-block { background:rgba(17,17,17,0.9); border:1px solid #ffaa0033; padding:28px; margin:48px 0 32px; }
+.quiz-block h2 { font-family:‘Orbitron’,sans-serif; font-size:13px; color:#ffaa00; letter-spacing:2px; margin-bottom:6px; }
+.quiz-intro { font-size:12px; opacity:0.6; margin-bottom:24px; padding-bottom:16px; border-bottom:1px solid #ffaa0022; line-height:1.6; }
+.quiz-q { margin-bottom:28px; }
+.quiz-q p { font-size:13px; opacity:0.9; margin-bottom:12px; line-height:1.65; }
+.quiz-q p strong { color:#ffaa00; }
+.quiz-options { display:flex; flex-direction:column; gap:8px; }
+.quiz-opt { background:rgba(255,255,255,0.03); border:1px solid #ffffff1a; padding:11px 16px; cursor:pointer; font-size:12px; font-family:‘Share Tech Mono’,monospace; transition:0.2s ease; text-align:left; color:white; line-height:1.5; }
+.quiz-opt:hover:not(:disabled) { background:rgba(255,170,0,0.08); border-color:#ffaa0044; }
+.quiz-opt.correct { background:rgba(57,255,20,0.1); border-color:#39ff14; color:#39ff14; }
+.quiz-opt.wrong   { background:rgba(255,0,79,0.1); border-color:#ff004f; color:#ff004f; }
+.quiz-opt:disabled { cursor:default; }
+.quiz-feedback { font-size:12px; margin-top:10px; min-height:18px; line-height:1.7; opacity:0.9; padding:0 4px; }
+.quiz-score { font-family:‘Orbitron’,sans-serif; font-size:12px; color:#39ff14; margin-top:20px; letter-spacing:1px; display:none; padding-top:16px; border-top:1px solid #39ff1433; }
+
+/* PYTHON */
+.py-block { background:rgba(10,10,10,0.95); border:1px solid #ffaa0022; padding:28px; margin:32px 0; }
+.py-block h2 { font-family:‘Orbitron’,sans-serif; font-size:13px; color:#ffaa00; letter-spacing:2px; margin-bottom:8px; }
+.py-block .py-intro { font-size:12px; opacity:0.7; margin-bottom:20px; padding-bottom:16px; border-bottom:1px solid #ffaa0022; line-height:1.7; }
+.py-exercise { margin-bottom:32px; }
+.py-exercise:last-child { margin-bottom:0; }
+.py-exercise h3 { font-family:‘Orbitron’,sans-serif; font-size:11px; color:#ffaa0099; letter-spacing:1.5px; text-transform:uppercase; margin-bottom:10px; }
+.py-exercise p { font-size:12px; opacity:0.8; margin-bottom:14px; line-height:1.75; }
+.py-block pre { background:#050505; border:1px solid #ffaa0033; padding:20px; font-family:‘Share Tech Mono’,monospace; font-size:11.5px; line-height:1.75; overflow-x:auto; color:#ffaa00; white-space:pre; margin-bottom:12px; }
+.py-block .py-note { font-size:11px; color:#ffffff44; line-height:1.75; margin-top:10px; }
+.py-block .py-challenge { background:rgba(255,170,0,0.04); border-left:2px solid #ffaa00; padding:12px 16px; margin-top:14px; font-size:12px; line-height:1.75; opacity:0.8; }
+.py-block .py-challenge strong { font-family:‘Orbitron’,sans-serif; font-size:10px; color:#ffaa00; display:block; margin-bottom:6px; letter-spacing:1px; }
+
+/* REFLECTION */
+.reflection-block { background:rgba(255,170,0,0.04); border:1px solid #ffaa0033; padding:24px; margin:32px 0; }
+.reflection-block h2 { font-family:‘Orbitron’,sans-serif; font-size:13px; color:#ffaa00; letter-spacing:2px; margin-bottom:8px; }
+.reflection-block .ref-intro { font-size:12px; opacity:0.7; margin-bottom:20px; padding-bottom:14px; border-bottom:1px solid #ffaa0022; line-height:1.7; }
+.ref-prompt { margin-bottom:20px; }
+.ref-prompt h3 { font-family:‘Orbitron’,sans-serif; font-size:11px; color:#ffaa0099; letter-spacing:1px; margin-bottom:8px; }
+.ref-prompt p { font-size:12px; opacity:0.8; line-height:1.75; margin-bottom:10px; }
+.ref-prompt ul li { font-size:12px; opacity:0.8; line-height:1.75; padding-left:16px; position:relative; margin-bottom:6px; }
+.ref-prompt ul li::before { content:’›’; position:absolute; left:0; color:#ffaa00; }
+
+.back-to-top { position:fixed; bottom:28px; right:28px; z-index:200; width:44px; height:44px; background:#000; border:1px solid #ffaa0055; color:#ffaa00; font-size:20px; cursor:pointer; display:flex; align-items:center; justify-content:center; opacity:0; pointer-events:none; transition:opacity 0.3s ease; }
+.back-to-top.visible { opacity:1; pointer-events:auto; }
+.back-to-top:hover { border-color:#ffaa00; background:#1a0e00; }
+
+.complete-wrap { margin-top:56px; padding-top:30px; border-top:1px solid #ffffff11; text-align:center; }
+.complete-btn { font-family:‘Orbitron’,sans-serif; font-size:13px; letter-spacing:2px; padding:14px 44px; background:transparent; border:1px solid #ffaa00; color:#ffaa00; cursor:pointer; transition:0.3s ease; }
+.complete-btn:hover:not(.done) { background:#ffaa00; color:black; box-shadow:0 0 20px rgba(255,170,0,0.4); }
+.complete-btn.done { background:rgba(255,170,0,0.1); cursor:default; opacity:0.7; }
+.complete-msg { font-size:12px; color:#ffffff55; margin-top:14px; min-height:18px; letter-spacing:1px; }
+
+.lesson-nav { display:flex; justify-content:space-between; margin-top:30px; flex-wrap:wrap; gap:10px; }
+.lesson-nav a { font-family:‘Orbitron’,sans-serif; font-size:11px; color:#ffaa0066; text-decoration:none; letter-spacing:1px; transition:0.2s; }
+.lesson-nav a:hover { color:#ffaa00; }
+
+footer { text-align:center; padding:30px; opacity:0.3; font-size:11px; position:relative; z-index:1; letter-spacing:1px; }
+
+@media (max-width:600px) {
+.subsystem-grid { grid-template-columns:1fr 1fr; }
+.key-numbers { grid-template-columns:1fr 1fr; }
+}
+</style>
+
+</head>
+<body>
+
+<canvas id="starsCanvas"></canvas>
+
+<header>
+  <a href="int-index.html" class="logo"><span>LOFT</span><span>PREP</span></a>
+  <div class="nav-right">
+    <a href="int-index.html" class="nav-btn">← ALL PANELS</a>
+  </div>
+</header>
+
+<div class="breadcrumb">
+  <a href="int-index.html">INTERVIEW HUB</a><span>/</span>
+  <span style="color:#ffffff88;">MATT ZEIGLER — SPACECRAFT SYSTEMS</span>
+</div>
+
+<div class="lesson-wrap">
+
+  <div class="lesson-header">
+    <div class="lesson-tag">PANEL INTERVIEW · SLOT 4 OF 5 · 21:00–21:45 CEST</div>
+    <h1>Matt Zeigler<br>Senior Satellite Systems Engineer</h1>
+    <div class="lesson-meta">
+      <div class="l-pill l-pill-q">GOLDEN, CO · US OFFICE</div>
+      <div class="l-pill l-pill-t">SPACECRAFT SYSTEMS</div>
+      <div class="l-pill l-pill-s">LINK BUDGETS</div>
+    </div>
+    <p class="lesson-intro">Matt is your hardest technical evaluator on spacecraft credibility. He's the one who will sense immediately if you overclaim experience you don't have. His pedigree — Lockheed Martin Orion TPS, Blue Canyon Technologies small-sat systems, now Loft SSE — is all hardware-grounded. His question is not "do you know satellite operations" but "do you understand the spacecraft well enough not to hurt it." Your iDirect background gives you a genuine entry point: RF/link budgets are your strongest card, and the layered fault-isolation methodology translates cleanly across domains. Respect the expertise gap, map what you know, show how you learn.</p>
+  </div>
+
+  <div class="toc">
+    <h4>CONTENTS</h4>
+    <ol>
+      <li><a href="#s1">Interviewer profile and what he's actually testing</a></li>
+      <li><a href="#s2">Spacecraft subsystems: the five you must know cold</a></li>
+      <li><a href="#s3">The Loft Orbital platform — Longbow, Hub, Cockpit</a></li>
+      <li><a href="#s4">Link budgets and RF — your home territory</a></li>
+      <li><a href="#s5">Pass geometry and ground contact windows</a></li>
+      <li><a href="#s6">Safe mode: what it is, when to trigger it, what not to do</a></li>
+      <li><a href="#s7">ConOps: what it captures and your role writing it</a></li>
+      <li><a href="#s8">Bridging iDirect to spacecraft ops — the translation map</a></li>
+      <li><a href="#quiz">Knowledge check</a></li>
+      <li><a href="#python">Python exercises</a></li>
+      <li><a href="#reflect">Reflection prompts</a></li>
+    </ol>
+  </div>
+
+  <!-- S1 -->
+
+  <div class="content-block" id="s1">
+    <h2>1. Interviewer Profile and What He's Actually Testing</h2>
+
+```
+<div class="profile-box">
+  <h4>MATT ZEIGLER — CAREER TRACE</h4>
+  <p style="font-family:'Share Tech Mono',monospace;font-size:12px;line-height:1.8;color:#555;">
+    Lockheed Martin → Mechanical Engineer → Designed thermal protection system for NASA Orion spacecraft (Backshell + Forward Bay Cover). Hard physical engineering: material behaviour, reentry heat loads, structural margins.<br><br>
+    Blue Canyon Technologies (RTX) → Systems Engineer → BCT builds small satellites (3U to 6U to ESPA-class) for DoD, NASA, commercial. Portfolio work across diverse mission types. Full spacecraft lifecycle: design, AIT, launch, on-orbit.<br><br>
+    Loft Orbital → Senior Satellite Systems Engineer → Works across ADCS, Mechanical, Thermal, Power, Avionics. Develops ConOps with flight operations. Supports LEOP (Launch and Early Orbit Phase) and commissioning. Golden, CO office.
+  </p>
+</div>
+
+<h3>His actual question</h3>
+<p>Matt is not asking "have you operated satellites before?" He knows you haven't. What he's asking is closer to: <em>If something goes wrong on orbit at 2am and the CDE calls you, will your first instinct make things better or worse?</em> He wants to know if you understand causality in spacecraft systems — that decisions at the command level have physical consequences, and that some commands are irreversible.</p>
+
+<p>He will also be calibrating your intellectual honesty. A candidate who claims more spacecraft experience than they have will reveal it under specific technical questioning within minutes. A candidate who says "I don't have direct on-orbit ops experience, but here's how I reason through an analogous problem from SATCOM" earns trust. Matt has worked in new space — he knows good engineers who come from adjacent domains and ramp fast.</p>
+
+<h3>Your two genuine advantages</h3>
+<p>First: link budgets. You know FSPL, Eb/N0, G/T, EIRP, rain fade, antenna gain, noise temperature — at a working level, not just definitional. Matt knows link budgets but from the spacecraft side (uplink margin at low elevation, power budget tradeoffs). You'll be speaking the same language from different sides of the link. That is a conversation, not an interrogation.</p>
+
+<p>Second: layered fault isolation. The iDirect methodology — isolate by layer, eliminate before escalating, never assume, document everything — maps directly onto spacecraft anomaly triage. The layers are different (RF→IF→modem→IP vs ADCS→power→thermal→comms→OBC), but the discipline is identical. Make this explicit when he asks how you'd approach a spacecraft anomaly.</p>
+
+<h3>What to avoid</h3>
+<p>Do not hand-wave on subsystem questions. If you don't know how a reaction wheel works, say so and offer what you do know (angular momentum conservation, the general principle). Do not confuse the bus with the Hub — in Loft's architecture, the "Hub" is Loft's proprietary hardware abstraction layer sitting between payload and bus, not the satellite bus itself. Do not conflate the satellite with the transponder: Loft's model is payload-as-a-service, meaning the bus and payload are the customer's content, not the bus provider's.</p>
+```
+
+  </div>
+
+  <!-- S2 -->
+
+  <div class="content-block" id="s2">
+    <h2>2. Spacecraft Subsystems: The Five You Must Know Cold</h2>
+
+```
+<p>A Loft Orbital satellite (YAM-series, Longbow platform) is a small satellite with five subsystems you'll encounter in every mission lifecycle conversation. You don't need to design any of them — but you need to know what they do, what telemetry indicates health, and what anomalies look like.</p>
+
+<div class="subsystem-grid">
+  <div class="ss-card">
+    <h4>ADCS</h4>
+    <ul>
+      <li>Attitude Determination & Control</li>
+      <li>Sensors: star trackers, IMUs, magnetometers, sun sensors</li>
+      <li>Actuators: reaction wheels, magnetorquers</li>
+      <li>Modes: detumbling → coarse pointing → fine pointing</li>
+      <li>Anomaly sign: unexpected attitude drift, wheel saturation, desaturation burns</li>
+    </ul>
+  </div>
+  <div class="ss-card">
+    <h4>EPS</h4>
+    <ul>
+      <li>Electrical Power System</li>
+      <li>Sources: solar panels → battery</li>
+      <li>Key metric: State of Charge (SoC), voltage, current per rail</li>
+      <li>Eclipse: battery-only operation, thermal and power budget tightens</li>
+      <li>Anomaly: low SoC trend, overcurrent trip on a rail → load shedding</li>
+    </ul>
+  </div>
+  <div class="ss-card">
+    <h4>TT&C / COMMS</h4>
+    <ul>
+      <li>Telemetry, Tracking & Commanding</li>
+      <li>S-band (uplink command, downlink housekeeping TM)</li>
+      <li>X-band or Ka-band for payload data downlink</li>
+      <li>UHF as emergency backup on many small sats</li>
+      <li>Anomaly: missed pass, no ack on command, anomalous RSSI</li>
+    </ul>
+  </div>
+  <div class="ss-card">
+    <h4>THERMAL</h4>
+    <ul>
+      <li>Passive: MLI blankets, coatings, radiators</li>
+      <li>Active: heaters (thermostatically controlled)</li>
+      <li>Key zones: battery (narrowest temp range), payload, propulsion</li>
+      <li>Eclipse is the coldest; sun-facing nadir is hottest</li>
+      <li>Anomaly: heater stuck ON/OFF, out-of-range component temp</li>
+    </ul>
+  </div>
+  <div class="ss-card">
+    <h4>OBC / AVIONICS</h4>
+    <ul>
+      <li>On-Board Computer: runs FSW, manages telemetry</li>
+      <li>Flight Software (FSW): handles modes, anomaly responses</li>
+      <li>Memory: SDRAM (volatile) + flash (non-volatile)</li>
+      <li>Watchdog timers: reset OBC if FSW hangs</li>
+      <li>Anomaly: unexpected reboot, memory corruption, watchdog trip</li>
+    </ul>
+  </div>
+  <div class="ss-card">
+    <h4>PAYLOAD</h4>
+    <ul>
+      <li>Customer's hardware — Loft is payload-agnostic</li>
+      <li>Interfaced via Hub (Loft's abstraction layer)</li>
+      <li>Power, data, and thermal interfaces standardised</li>
+      <li>CDE responsibility: customer payload health and mission objectives</li>
+      <li>Anomaly: unexpected power draw, no data output, thermal exceedance</li>
+    </ul>
+  </div>
+</div>
+
+<h3>Reading telemetry like a systems engineer</h3>
+<p>Telemetry is the only window into the spacecraft after launch. A CDE reading housekeeping telemetry is doing the same thing a network engineer does reading SNMP counters — pattern recognition against a known baseline, trending for degradation, alerting on threshold crossings. The vocabulary is different; the discipline is the same.</p>
+
+<p>Key housekeeping parameters you'll encounter in Cockpit: battery SoC (%), bus voltage (V), individual rail currents (mA), component temperatures (°C), ADCS mode (integer state machine), wheel speeds (rpm), uplink RSSI (dBm), command counter (increments on successful command), error register (bitfield of active faults). When a customer reports "the payload isn't responding," the first thing you check is: is the satellite healthy? Power nominal? OBC alive? Comms nominal? Then narrow to the payload interface.</p>
+
+<div class="callout blue">
+  <strong>THE LAYER ZERO PRINCIPLE</strong>
+  <p>Before diagnosing any payload or customer-facing anomaly, verify the spacecraft bus is healthy. A payload that "isn't responding" might be a payload hardware fault, a Hub interface fault, a power rail brown-out, an OBC crash, or simply a missed command due to a bad pass. Jumping to the payload-level explanation without clearing the lower layers wastes time and can lead to incorrect commanding. Matt will respect the engineer who says "first I verify the bus is nominal" before speculating about the payload.</p>
+</div>
+
+<div class="key-numbers">
+  <div class="kn-item"><span class="kn-val">-20°C to +40°C</span><span class="kn-label">Typical Li-ion battery operating range (narrow = priority monitor)</span></div>
+  <div class="kn-item"><span class="kn-val">~90 min</span><span class="kn-label">LEO orbital period at 550 km altitude</span></div>
+  <div class="kn-item"><span class="kn-val">~35 min</span><span class="kn-label">Typical eclipse duration per orbit at 550 km (sun-sync)</span></div>
+  <div class="kn-item"><span class="kn-val">5–20 min</span><span class="kn-label">Typical ground station contact window per pass</span></div>
+</div>
+```
+
+  </div>
+
+  <!-- S3 -->
+
+  <div class="content-block" id="s3">
+    <h2>3. The Loft Orbital Platform — Longbow, Hub, Cockpit</h2>
+
+```
+<p>Understanding Loft's specific architecture matters because Matt helped build it operationally. Mixing up what the Hub does versus what the bus does, or confusing Cockpit with a generic ground system, will signal that you haven't done your homework.</p>
+
+<h3>The Longbow platform</h3>
+<p>Loft's current satellite bus is the Longbow — an evolution of the Airbus Arrow 150 platform, developed under an ESA Pioneer Partnership Project (IODA). It is a mid-size small satellite (~150 kg class) designed for multi-payload hosting. The bus upgrade from Arrow to Longbow increased SWaP margins, enabling larger, more power-hungry payloads such as the onboard AI computing hardware for the Altair constellation. The Longbow platform is the physical foundation that Loft holds in inventory, pre-qualified and ready for customer payloads.</p>
+
+<h3>The Hub</h3>
+<p>The Hub is Loft's proprietary hardware abstraction layer — a universal payload adapter that sits between the customer payload and the satellite bus. Its purpose is to standardise the interface: regardless of what the customer's payload hardware looks like, it connects to the Hub, which provides standardised interfaces for power, command, computing, and communications. This is what enables Loft to be payload-agnostic. The Hub eliminates bus-level non-recurring engineering (NRE) for each new customer — instead of custom integration every time, the Hub provides a repeatable, qualified interface. For a CDE, the Hub is the boundary layer: issues on the bus side are Loft internal; issues on the payload side are customer-facing. Understanding which side a symptom originates from is a core CDE competency.</p>
+
+<h3>Cockpit</h3>
+<p>Cockpit is Loft's mission control software — the ground system through which CDEs and customers interact with the spacecraft. It exposes an API (REST-based) through which commanding, telemetry retrieval, scheduling, and mission planning operations are performed. Customers interact with Cockpit to operate their payloads; CDEs use it to monitor spacecraft health, manage passes, and diagnose anomalies. Cockpit is not just a UI — it has a backend that orchestrates commanding through ground stations, manages the telemetry pipeline, and provides access control separating customer payload operations from bus health operations.</p>
+
+<div class="callout">
+  <strong>BUS vs HUB vs PAYLOAD — THE THREE-LAYER MODEL</strong>
+  <p>Bus: the physical spacecraft (structure, power, ADCS, thermal, OBC, comms) — Loft's responsibility. Hub: Loft's abstraction hardware connecting bus to payload — Loft's design, customer-facing interface. Payload: customer's hardware running the mission — customer's responsibility, operated via Cockpit. When something goes wrong, the first diagnostic question is: which layer is the symptom in? A CDE who can answer this cleanly impresses Matt.</p>
+</div>
+```
+
+  </div>
+
+  <!-- S4 -->
+
+  <div class="content-block" id="s4">
+    <h2>4. Link Budgets and RF — Your Home Territory</h2>
+
+```
+<p>This is where you have genuine depth that Matt respects. You've done end-to-end link budget analysis at iDirect across DVB-S2 systems, Ku/Ka-band transponders, and LNBFs. The satellite side of the link is the same physics — just from the spacecraft looking down rather than the hub looking up.</p>
+
+<h3>The link budget equation</h3>
+
+<div class="formula-box">
+  <span class="fb-title">FREE-SPACE PATH LOSS</span>
+  FSPL (dB) = 20·log₁₀(d) + 20·log₁₀(f) + 20·log₁₀(4π/c)
+           = 20·log₁₀(d_km) + 20·log₁₀(f_GHz) + 92.45
+
+  <span class="fb-title" style="margin-top:12px;">RECEIVED POWER</span>
+  C (dBW) = EIRP_tx (dBW) - FSPL (dB) + G/T_rx (dB/K) - k (dBW/K/Hz) - BW (dBHz)
+
+  <span class="fb-title" style="margin-top:12px;">LINK MARGIN</span>
+  Margin (dB) = C/N₀_received - C/N₀_required
+  Required C/N₀ = Eb/N₀_required + 10·log₁₀(data_rate_bps)
+
+  <span class="fb-title" style="margin-top:12px;">ELEVATION EFFECT</span>
+  At low elevation (θ < 15°): FSPL increases, atmospheric attenuation increases,
+  effective G/T drops due to higher antenna noise temperature from ground noise.
+  Rule of thumb: 3 dB link margin reduction per 10° drop below 20° elevation.
+</div>
+
+<h3>How this maps to Loft operations</h3>
+<p>In a Loft CDE role, link budget awareness manifests in pass planning: a pass at 5° max elevation may not close the TT&C link reliably — plan commanding for passes above 15° minimum elevation. Payload downlink scheduling needs to account for elevation, weather (Ka-band rain fade), and available ground station contacts. When a customer reports low throughput or missed commands, checking whether the anomaly correlates with low-elevation passes is a first-order diagnostic step.</p>
+
+<p>For Matt: the translation from "iDirect link budget" to "Loft satellite link budget" is direct. Swap "hub EIRP" for "ground station uplink EIRP," swap "remote EIRP" for "satellite downlink EIRP," and the same Eb/N0 arithmetic applies. You understand why margin exists, what consumes it, and how to troubleshoot when it disappears. That's the value.</p>
+
+<div class="compare-table" style="overflow-x:auto;">
+  <table class="compare-table" style="min-width:560px;">
+    <thead>
+      <tr><th>Parameter</th><th>iDirect / VSAT context</th><th>Loft / small-sat context</th></tr>
+    </thead>
+    <tbody>
+      <tr><td>Transmit side</td><td>Hub uplink (high power, fixed)</td><td>Ground station uplink (high power, fixed)</td></tr>
+      <tr><td>Receive side</td><td>Remote terminal (low G/T)</td><td>Satellite receiver (constrained aperture)</td></tr>
+      <tr><td>Link frequency</td><td>Ku/Ka downlink 10.7–18 GHz</td><td>S-band TT&C ≈2 GHz, X/Ka payload downlink</td></tr>
+      <tr><td>Eb/N0 target</td><td>DVB-S2 MODCOD dependent (e.g. 16APSK 5/6 ≈ 12 dB)</td><td>BPSK/QPSK command uplink ≈ 10–14 dB</td></tr>
+      <tr><td>Rain fade margin</td><td>3–10 dB depending on region and band</td><td>Same physics; S-band more tolerant than Ka</td></tr>
+      <tr><td>Elevation effect</td><td>Low elevation = higher FSPL = lower SNR</td><td>Identical — pass planning accounts for this</td></tr>
+      <tr><td>Your diagnostic tool</td><td>iDirect NMS SNR/BER plots</td><td>Cockpit RSSI + command ack tracking</td></tr>
+    </tbody>
+  </table>
+</div>
+```
+
+  </div>
+
+  <!-- S5 -->
+
+  <div class="content-block" id="s5">
+    <h2>5. Pass Geometry and Ground Contact Windows</h2>
+
+```
+<p>A LEO satellite at 550 km altitude completes an orbit in approximately 90 minutes, moving at ~7.6 km/s. From any given ground station, the satellite is above the horizon (and therefore contactable) for only a fraction of each orbit — typically 5–20 minutes per pass depending on the maximum elevation angle.</p>
+
+<h3>What determines a contact window</h3>
+<p>The contact window is bounded by the satellite rising above the minimum usable elevation angle at the ground station (typically 5–10° for S-band, higher for Ka-band where atmospheric losses at low elevation are significant) and setting below it at the end of the pass. Maximum elevation (the "max el" of the pass) determines the available link margin at the peak — a pass that barely scrapes 10° max elevation will have much lower peak SNR and much shorter usable window than a 70°+ overhead pass.</p>
+
+<p>For a network of multiple ground stations geographically distributed, a LEO satellite at 550 km in a sun-synchronous orbit will typically have 5–15 contact opportunities per day with any given ground station, each lasting 5–12 minutes. With a global network (AWS ground stations, Loft's partner network), contact frequency is much higher — in principle, you can achieve near-continuous contact with sufficient station density.</p>
+
+<h3>Why this matters for CDE work</h3>
+<p>Pass scheduling is one of the foundational CDE operational activities. Commanding windows, telemetry download sessions, payload data offload, software patch uploads — all must be scheduled into available contact windows. When planning a complex operation (firmware update, payload mode change, anomaly recovery sequence), you need to know: how many passes are available in the next 24 hours, what their max elevations are, which ground stations are healthy, and whether the required command set fits within a single pass or requires multiple.</p>
+
+<p>The constraint is asymmetric: a satellite with no contact window for the next 6 hours is effectively uncontrollable for that period. Any onboard autonomous response (safe mode, FDIR — Fault Detection, Isolation, and Recovery) must carry the satellite safely through the gap. This is why onboard autonomy and safe mode design matter: the spacecraft must be designed to self-protect during periods when no operator can intervene.</p>
+
+<div class="callout">
+  <strong>PASS PLANNING RULE OF THUMB</strong>
+  <p>For a time-critical operation (anomaly recovery, firmware update), schedule it in the first available high-elevation pass (max el > 40°), not the next available pass regardless of geometry. A 70° pass gives you 3–4× the usable window and much higher link margin than a 15° pass. Always verify the command was received and acknowledged before the pass ends — if you lose contact mid-sequence, you need to know where the spacecraft's state machine stopped before the next contact.</p>
+</div>
+```
+
+  </div>
+
+  <!-- S6 -->
+
+  <div class="content-block" id="s6">
+    <h2>6. Safe Mode: What It Is, When to Trigger It, What Not to Do</h2>
+
+```
+<p>Safe mode is the spacecraft's self-preservation state — a minimal-power, maximum-safety configuration the OBC enters either autonomously (via FDIR) or by operator command when the satellite's health cannot be guaranteed in nominal operations mode. Understanding safe mode is the most important safety-relevant topic in this interview.</p>
+
+<h3>What safe mode does</h3>
+<p>In safe mode, the satellite sheds non-essential loads (payloads off, non-critical subsystems powered down), aligns to a power-positive attitude (solar panels facing the sun to maximise charging), activates the beacon (continuous TT&C broadcast so ground can find it), and awaits operator contact. The OBC runs minimal FSW. Battery is conserved. The satellite is in a known, recoverable state.</p>
+
+<p>Safe mode is not a failure state — it is a designed, intentional recovery state. A satellite in safe mode that is healthy and communicating is under control. A satellite in nominal mode with degrading power budget and a payload drawing excess current is the more dangerous situation. Operators sometimes resist triggering safe mode because it interrupts the customer mission; the correct risk posture is that a brief planned safe mode is always preferable to an unplanned one triggered by FDIR after a worse anomaly.</p>
+
+<h3>When a CDE would command safe mode</h3>
+<p>You would command safe mode (or recommend it to the spacecraft systems team) when: battery SoC is trending below safe threshold with no recovery trajectory visible; a subsystem is exhibiting behaviour that is not understood and could cascade; a commanding sequence has partially executed and the satellite's state is uncertain; you are about to lose contact for an extended period and nominal mode is not stable.</p>
+
+<p>The principle: when in doubt, the safest spacecraft is a boring spacecraft. Matt will respect a candidate who says "I'd always lean toward safe mode when the state is uncertain rather than try to recover in nominal mode" more than one who says "I'd keep the customer payload running as long as possible."</p>
+
+<h3>What never to do in an anomaly</h3>
+
+<div class="callout red">
+  <strong>THE THREE RULES OF SPACECRAFT COMMANDING UNDER ANOMALY</strong>
+  <p><strong>1. Never send a command you don't understand the consequence of.</strong> On orbit, commands cannot be untaken. A wrong power-off command that kills a critical subsystem may not be recoverable in the next pass. If you don't know what a command does, you don't send it. You wait for the subject matter expert.<br><br>
+  <strong>2. Never assume the spacecraft's state — verify it from telemetry.</strong> A satellite that was in Mode A at the last pass may have transitioned autonomously since then. Before any commanding sequence, verify current state.<br><br>
+  <strong>3. Never prioritise customer mission continuity over spacecraft health.</strong> The customer's payload data is important. The spacecraft is more important. If the bus is at risk, the payload goes off. Every time.</p>
+</div>
+```
+
+  </div>
+
+  <!-- S7 -->
+
+  <div class="content-block" id="s7">
+    <h2>7. ConOps: What It Captures and Your Role Writing It</h2>
+
+```
+<p>A ConOps (Concept of Operations) document describes how a mission will be operated — not what the spacecraft does physically, but how the operators, ground systems, and spacecraft work together to achieve mission objectives. Matt develops ConOps with flight operations at Loft; CDEs contribute the customer-facing operational perspective.</p>
+
+<h3>What a ConOps document covers</h3>
+<p>Mission phases: from pre-launch (satellite commissioning environment testing, ground system readiness) through LEOP (Launch and Early Orbit Phase — first contact, initial health check, safe mode confirmation, preliminary commissioning) through routine operations (nominal commanding cadence, telemetry monitoring, data downlink scheduling) through anomaly response (decision trees, escalation paths, contingency procedures) through end of life (deorbit planning, payload shutdown sequence, passivation).</p>
+
+<p>For each phase: who does what, when, using which tools, with what authority levels, and what constitutes success or failure. A ConOps also captures constraints: minimum battery SoC before payload activation, maximum time between telemetry checks, required ground station contacts per day, thermal limits that must not be exceeded during extended payload operations.</p>
+
+<h3>Your CDE contribution to ConOps</h3>
+<p>As a CDE, you contribute the customer operational requirements: when the customer needs the payload operational, at what duty cycle, with what data latency, and with what notification in case of anomaly. You translate customer requirements into operational constraints for the spacecraft team. If the customer needs payload operations for 14 consecutive orbits each day, you need to verify that the power budget and thermal budget support it, and work with Matt's team to establish the operational envelope. The ConOps is the contract between what the customer needs and what the spacecraft can provide.</p>
+
+<div class="callout green">
+  <strong>CONOPS IN YOUR IDIRECT EXPERIENCE</strong>
+  <p>You've effectively been doing ConOps work at iDirect without calling it that. Every time you documented a customer's bandwidth allocation, failover procedure, modem configuration baseline, and escalation path for RF anomalies — that was a ConOps. The artifacts may have been called SLAs, network design documents, or runbooks, but the function was identical: capturing how a complex system is operated, by whom, under what conditions. Make this translation explicit if Matt asks about your ConOps experience.</p>
+</div>
+```
+
+  </div>
+
+  <!-- S8 -->
+
+  <div class="content-block" id="s8">
+    <h2>8. Bridging iDirect to Spacecraft Ops — The Translation Map</h2>
+
+```
+<p>Your most important task in this interview is making the domain translation concrete and credible. Below is an explicit mapping that you can use to demonstrate how your experience applies — not as a claim of equivalence, but as evidence of transferable methodology.</p>
+
+<table class="compare-table">
+  <thead>
+    <tr><th>iDirect / SATCOM Context</th><th>Loft / Spacecraft Ops Context</th><th>Your Transferable Skill</th></tr>
+  </thead>
+  <tbody>
+    <tr><td>End-to-end fault isolation: RF → IF → modem → IP</td><td>Bus → Hub → payload layer isolation</td><td>Layered diagnostic methodology, never skip a layer</td></tr>
+    <tr><td>iDirect NMS: SNR trending, BER counters, remotes offline</td><td>Cockpit: SoC trending, RSSI, command ack, component temps</td><td>Telemetry-driven operations, pattern recognition</td></tr>
+    <tr><td>Link budget: EIRP, G/T, Eb/N0, rain fade margin</td><td>Pass planning: elevation, FSPL, link margin, command window sizing</td><td>Quantitative link analysis from first principles</td></tr>
+    <tr><td>Customer primary contact: SLA owner, first call on any fault</td><td>CDE: customer primary, owns the mission relationship</td><td>High-stakes customer communication under pressure</td></tr>
+    <tr><td>Runbook creation: step-by-step fault recovery procedures</td><td>ConOps anomaly response sections, commanding procedures</td><td>Procedural documentation, state machine thinking</td></tr>
+    <tr><td>iDirect network: 100s of remotes, multiple transponders, 24/7</td><td>Loft fleet: multiple satellites, multiple customer payloads, continuous ops</td><td>Scale, complexity, multi-customer parallel management</td></tr>
+    <tr><td>Firmware update planning: maintenance window, rollback plan</td><td>FSW patch upload: pass planning, verification, state confirmation</td><td>Change management on live systems with limited rollback</td></tr>
+  </tbody>
+</table>
+
+<h3>The one sentence that frames all of it</h3>
+<p>If Matt asks directly about the gap between your background and spacecraft ops, here is the framing: <em>"My entire career has been operating complex RF and IP systems where the fault space is large, the consequences of wrong commands are real, and the customer is waiting on the other side. The substrate is different — satellites instead of VSAT remotes — but the methodology for reasoning across system boundaries under operational pressure is the same. I know what I don't know about spacecraft, and I know how to learn it fast."</em></p>
+```
+
+  </div>
+
+  <!-- QUIZ -->
+
+  <div class="quiz-block" id="quiz">
+    <h2>KNOWLEDGE CHECK — MATT ZEIGLER</h2>
+    <p class="quiz-intro">Eight questions covering spacecraft subsystems, link budget application, pass geometry, safe mode, ConOps, and the iDirect-to-spacecraft translation. If you miss one, read the feedback and revisit the relevant section before Thursday.</p>
+
+```
+<div class="quiz-q" id="q1">
+  <p><strong>Q1.</strong> During a pass review, you notice the satellite's battery SoC has been trending from 85% down to 65% over the past 3 orbits with no recovery. The customer payload is active and drawing normal current. What is your first action?</p>
+  <div class="quiz-options">
+    <button class="quiz-opt" data-q="1" data-correct="false">A. Continue monitoring — 65% SoC is within safe limits, no action needed yet</button>
+    <button class="quiz-opt" data-q="1" data-correct="false">B. Immediately send a safe mode command to preserve battery</button>
+    <button class="quiz-opt" data-q="1" data-correct="true">C. Check EPS telemetry to understand the trend's cause — verify solar panel output vs total load, confirm whether the spacecraft is in eclipse, and assess trajectory before deciding on action</button>
+    <button class="quiz-opt" data-q="1" data-correct="false">D. Ask the customer to reduce their payload duty cycle</button>
+  </div>
+  <div class="quiz-feedback" id="fb1"></div>
+</div>
+
+<div class="quiz-q" id="q2">
+  <p><strong>Q2.</strong> A customer reports their payload has not produced any data in the last 6 hours. What is the correct first diagnostic step?</p>
+  <div class="quiz-options">
+    <button class="quiz-opt" data-q="2" data-correct="false">A. Check the payload's data interface configuration — it may have been misconfigured</button>
+    <button class="quiz-opt" data-q="2" data-correct="false">B. Check whether any commanding was performed in the last 6 hours that might have affected the payload</button>
+    <button class="quiz-opt" data-q="2" data-correct="true">C. Verify bus health first — confirm OBC is nominal, power rails are healthy, and TT&C comms are working before investigating the payload layer</button>
+    <button class="quiz-opt" data-q="2" data-correct="false">D. Escalate to the spacecraft engineering team immediately — this is beyond CDE scope</button>
+  </div>
+  <div class="quiz-feedback" id="fb2"></div>
+</div>
+
+<div class="quiz-q" id="q3">
+  <p><strong>Q3.</strong> In Loft's satellite architecture, what is the Hub's primary function?</p>
+  <div class="quiz-options">
+    <button class="quiz-opt" data-q="3" data-correct="false">A. The primary OBC that runs the satellite's flight software</button>
+    <button class="quiz-opt" data-q="3" data-correct="false">B. The satellite bus platform (equivalent to the Arrow/Longbow structure)</button>
+    <button class="quiz-opt" data-q="3" data-correct="true">C. A proprietary hardware abstraction layer that provides standardised interfaces between the customer payload and the satellite bus</button>
+    <button class="quiz-opt" data-q="3" data-correct="false">D. The ground station software that manages the uplink command pipeline</button>
+  </div>
+  <div class="quiz-feedback" id="fb3"></div>
+</div>
+
+<div class="quiz-q" id="q4">
+  <p><strong>Q4.</strong> You need to upload a critical FSW patch to a satellite. Two passes are available: Pass A at 08:00 with 12° max elevation (7 min window), Pass B at 09:30 with 68° max elevation (14 min window). The patch upload requires an estimated 10 minutes. Which pass do you choose and why?</p>
+  <div class="quiz-options">
+    <button class="quiz-opt" data-q="4" data-correct="false">A. Pass A — it's earlier, which reduces risk of further anomaly development</button>
+    <button class="quiz-opt" data-q="4" data-correct="true">B. Pass B — the 14-minute window and higher link margin at 68° max elevation are necessary to complete the upload and verify success within a single contact</button>
+    <button class="quiz-opt" data-q="4" data-correct="false">C. Either pass — link budget is always adequate for S-band below 800 km altitude</button>
+    <button class="quiz-opt" data-q="4" data-correct="false">D. Neither — a 10-minute operation should never be planned for a single pass; always split across two</button>
+  </div>
+  <div class="quiz-feedback" id="fb4"></div>
+</div>
+
+<div class="quiz-q" id="q5">
+  <p><strong>Q5.</strong> The ADCS telemetry shows the satellite is in "detumble mode." What does this indicate, and should you be concerned?</p>
+  <div class="quiz-options">
+    <button class="quiz-opt" data-q="5" data-correct="false">A. Critical anomaly — the satellite is tumbling uncontrollably and requires immediate safe mode command</button>
+    <button class="quiz-opt" data-q="5" data-correct="true">B. Normal state after a launch or attitude anomaly — the magnetorquers are actively reducing rotation rate; monitor progress toward coarse pointing mode but this is an expected ADCS mode</button>
+    <button class="quiz-opt" data-q="5" data-correct="false">C. The attitude sensors have failed — the satellite has no attitude knowledge</button>
+    <button class="quiz-opt" data-q="5" data-correct="false">D. The reaction wheels have saturated and need to be desaturated via thruster burn</button>
+  </div>
+  <div class="quiz-feedback" id="fb5"></div>
+</div>
+
+<div class="quiz-q" id="q6">
+  <p><strong>Q6.</strong> A customer asks you to keep their payload powered on continuously for 7 days straight — no interruption — to complete a critical science campaign. How do you respond?</p>
+  <div class="quiz-options">
+    <button class="quiz-opt" data-q="6" data-correct="false">A. Agree — the customer's mission objectives are the CDE's primary responsibility</button>
+    <button class="quiz-opt" data-q="6" data-correct="false">B. Refuse — Loft policy limits continuous payload operation to 72 hours maximum</button>
+    <button class="quiz-opt" data-q="6" data-correct="true">C. Review the power budget, thermal budget, and operational envelope with the spacecraft team; provide the customer a clear assessment of what is feasible and what constraints apply, then work toward the maximum supportable operation period</button>
+    <button class="quiz-opt" data-q="6" data-correct="false">D. Ask the customer to submit a formal change request — this is outside normal CDE scope</button>
+  </div>
+  <div class="quiz-feedback" id="fb6"></div>
+</div>
+
+<div class="quiz-q" id="q7">
+  <p><strong>Q7.</strong> Matt asks: "Walk me through how you'd document a ConOps for a new customer payload." What is the most impressive response?</p>
+  <div class="quiz-options">
+    <button class="quiz-opt" data-q="7" data-correct="false">A. "I'd start by filling in Loft's standard ConOps template with the customer's requirements."</button>
+    <button class="quiz-opt" data-q="7" data-correct="false">B. "ConOps is really the spacecraft team's document — I'd provide the customer requirements section and let the engineers fill in the rest."</button>
+    <button class="quiz-opt" data-q="7" data-correct="true">C. "I'd structure it around mission phases — from commissioning through nominal ops through anomaly response — documenting for each phase: what the spacecraft needs to do, what the customer needs from their payload, what the operational constraints are, who is responsible for each action, and what the success criteria are. I've done equivalent documentation in SATCOM for customer network designs and runbooks — different vocabulary, same discipline."</button>
+    <button class="quiz-opt" data-q="7" data-correct="false">D. "I'd focus primarily on the anomaly response section since that's the highest-risk part of any operation."</button>
+  </div>
+  <div class="quiz-feedback" id="fb7"></div>
+</div>
+
+<div class="quiz-q" id="q8">
+  <p><strong>Q8 — Synthesis.</strong> Matt asks: "You don't have spacecraft operations experience. Why should we trust you to operate a satellite?" What's the right answer?</p>
+  <div class="quiz-options">
+    <button class="quiz-opt" data-q="8" data-correct="false">A. "I've been studying spacecraft systems intensively for months and am confident I have the knowledge equivalent to entry-level spacecraft ops."</button>
+    <button class="quiz-opt" data-q="8" data-correct="false">B. "I've operated very complex SATCOM systems — the jump to spacecraft ops is smaller than it appears."</button>
+    <button class="quiz-opt" data-q="8" data-correct="true">C. "You trust me because I know what I don't know. I won't send a command I haven't verified. I won't prioritise the customer payload over the bus. I reason in layers, I document my state, and I escalate before I guess. That discipline — not spacecraft knowledge specifically — is what keeps satellites safe. The spacecraft knowledge I will build, and I'll build it fast."</button>
+    <button class="quiz-opt" data-q="8" data-correct="false">D. "I would start in a shadow role under an experienced CDE and not take independent actions until fully trained."</button>
+  </div>
+  <div class="quiz-feedback" id="fb8"></div>
+</div>
+
+<div class="quiz-score" id="quizScore"></div>
+```
+
+  </div>
+
+  <!-- PYTHON -->
+
+  <div class="py-block" id="python">
+    <h2>PYTHON EXERCISES — SPACECRAFT SYSTEMS</h2>
+    <p class="py-intro">Two exercises that build quantitative tools directly relevant to spacecraft operations: a link budget calculator with elevation-dependent analysis, and a subsystem health monitor that mimics the kind of telemetry triage you'll do in Cockpit.</p>
+
+```
+<div class="py-exercise">
+  <h3>Exercise 1 — Satellite Link Budget Calculator</h3>
+  <p>Compute a complete downlink and uplink budget for a small satellite, including free-space path loss, rain fade, elevation-dependent atmospheric losses, and link margin. Show how margin changes across a pass as elevation varies.</p>
+```
+
+<pre>
+import numpy as np
+import matplotlib.pyplot as plt
+
+# ── Constants ──────────────────────────────────────────────────────────────
+c = 3e8          # speed of light m/s
+k_B = 1.38e-23   # Boltzmann constant J/K
+k_dB = 10 * np.log10(k_B)  # ≈ -228.6 dBW/K/Hz
+
+# ── Free-space path loss (dB) ───────────────────────────────────────────────
+def fspl_db(freq_ghz: float, dist_km: float) -> float:
+    """FSPL = 20log(d) + 20log(f) + 92.45  (d in km, f in GHz)"""
+    return 20*np.log10(dist_km) + 20*np.log10(freq_ghz) + 92.45
+
+# ── Slant range from elevation angle ───────────────────────────────────────
+Re = 6371.0  # km
+
+def slant_range_km(alt_km: float, elev_deg: float) -> float:
+    """
+    Slant range from ground station to satellite at altitude alt_km,
+    given ground station elevation angle elev_deg.
+    """
+    eps = np.radians(elev_deg)
+    rho = np.arcsin((Re / (Re + alt_km)) * np.cos(eps))
+    lam = np.pi/2 - eps - rho
+    return Re * np.sin(lam) / np.cos(eps)  # law of sines on Earth triangle
+
+# ── Atmospheric attenuation (simplified ITU-R P.676) ──────────────────────
+def atmo_loss_db(freq_ghz: float, elev_deg: float) -> float:
+    """
+    Approximate atmospheric loss vs elevation and frequency.
+    Based on ITU-R P.676 simplified model for clear-sky gas absorption.
+    """
+    # Zenith attenuation (rough model)
+    if freq_ghz < 3:
+        zenith_loss = 0.05   # S-band, very low
+    elif freq_ghz < 10:
+        zenith_loss = 0.10   # X-band
+    elif freq_ghz < 20:
+        zenith_loss = 0.20   # Ku-band
+    else:
+        zenith_loss = 0.50   # Ka-band
+
+    # Scale by sin(elevation) — low elevation = more atmosphere traversed
+    elev_rad = np.radians(max(elev_deg, 2.0))
+    return zenith_loss / np.sin(elev_rad)
+
+# ── Rain fade (simplified CDF-based model) ────────────────────────────────
+def rain_fade_margin_db(freq_ghz: float, rain_rate_mm_hr: float = 5.0) -> float:
+    """
+    Approximate rain fade for 99.5% availability design.
+    Scales with frequency and rain rate.
+    """
+    if freq_ghz < 4:
+        return 0.0   # L/S-band: negligible rain fade
+    # Simplified power-law approximation
+    alpha = 0.0001 * (freq_ghz ** 1.8) * (rain_rate_mm_hr ** 0.6)
+    return alpha * 5.0  # dB over 5 km effective rain path
+
+# ── Complete link budget ────────────────────────────────────────────────────
+def link_budget(
+    freq_ghz: float,
+    sat_alt_km: float,
+    elev_deg: float,
+    tx_eirp_dbw: float,
+    rx_gt_db_k: float,
+    data_rate_bps: float,
+    req_eb_n0_db: float,
+    rain_rate_mm_hr: float = 5.0,
+) -> dict:
+    """
+    Full downlink budget.
+    Returns a dict with all intermediate values and final margin.
+    """
+    d_km = slant_range_km(sat_alt_km, elev_deg)
+    fspl = fspl_db(freq_ghz, d_km)
+    atmo = atmo_loss_db(freq_ghz, elev_deg)
+    rain = rain_fade_margin_db(freq_ghz, rain_rate_mm_hr)
+
+    # Received C/N0 (dBHz)
+    c_n0 = tx_eirp_dbw - fspl - atmo - rain - k_dB + rx_gt_db_k
+
+    # Required C/N0 for the data rate
+    req_c_n0 = req_eb_n0_db + 10*np.log10(data_rate_bps)
+
+    margin = c_n0 - req_c_n0
+
+    return {
+        "freq_ghz":        freq_ghz,
+        "elevation_deg":   elev_deg,
+        "slant_range_km":  d_km,
+        "fspl_db":         fspl,
+        "atmo_loss_db":    atmo,
+        "rain_fade_db":    rain,
+        "tx_eirp_dbw":     tx_eirp_dbw,
+        "rx_gt_db_k":      rx_gt_db_k,
+        "c_n0_dbhz":       c_n0,
+        "req_c_n0_dbhz":   req_c_n0,
+        "link_margin_db":  margin,
+    }
+
+# ── Scenario: Loft-style S-band TT&C downlink ──────────────────────────────
+# Ground station uplink TO satellite (commanding)
+# Satellite: S-band receiver, omnidirectional antenna ~ -5 dB/K G/T
+# Ground station: 5m dish, 2kW EIRP ≈ +62 dBW at S-band
+# Data rate: 9600 bps command uplink, BPSK, req Eb/N0 = 10.5 dB
+
+scenario_ttc = {
+    "freq_ghz":       2.2,
+    "sat_alt_km":     550,
+    "tx_eirp_dbw":    62.0,     # large ground station
+    "rx_gt_db_k":    -5.0,      # satellite omni receive antenna
+    "data_rate_bps":  9600,
+    "req_eb_n0_db":   10.5,
+    "rain_rate_mm_hr": 3.0,
+}
+
+elevations = np.linspace(5, 85, 80)
+
+# Compute margin across full pass
+margins_ttc = [
+    link_budget(**scenario_ttc, elev_deg=e)["link_margin_db"]
+    for e in elevations
+]
+
+# Print snapshot at key elevations
+print("S-BAND TT&C UPLINK (GND→SAT COMMAND) — MARGIN vs ELEVATION")
+print(f"{'Elev (°)':>10} {'Range (km)':>12} {'FSPL (dB)':>10} {'Atmo (dB)':>10} {'Margin (dB)':>12}")
+print("-" * 60)
+for e in [5, 10, 15, 20, 30, 45, 60, 75]:
+    lb = link_budget(**scenario_ttc, elev_deg=e)
+    print(f"{e:>10.0f} {lb['slant_range_km']:>12.0f} {lb['fspl_db']:>10.1f} "
+          f"{lb['atmo_loss_db']:>10.2f} {lb['link_margin_db']:>12.1f}")
+
+# ── Add Ka-band payload downlink scenario for comparison ──────────────────
+scenario_ka = {
+    "freq_ghz":       26.5,
+    "sat_alt_km":     550,
+    "tx_eirp_dbw":    18.0,     # small-sat Ka transmitter
+    "rx_gt_db_k":     22.0,     # 1.2m dish ground station
+    "data_rate_bps":  100e6,    # 100 Mbps payload data
+    "req_eb_n0_db":   13.5,     # 16APSK 2/3 approx
+    "rain_rate_mm_hr": 5.0,
+}
+
+margins_ka = [
+    link_budget(**scenario_ka, elev_deg=e)["link_margin_db"]
+    for e in elevations
+]
+
+# ── Plot ───────────────────────────────────────────────────────────────────
+fig, ax = plt.subplots(figsize=(10, 5))
+fig.patch.set_facecolor('#0a0a0a')
+ax.set_facecolor('#0d0d0d')
+ax.tick_params(colors='#888')
+for sp in ax.spines.values(): sp.set_color('#333')
+
+ax.plot(elevations, margins_ttc, color='#00d9ff', linewidth=2, label='S-band TT&C (2.2 GHz, cmd)')
+ax.plot(elevations, margins_ka,  color='#ffaa00', linewidth=2, label='Ka-band payload DL (26.5 GHz, 100 Mbps)')
+ax.axhline(0, color='#ff004f', linewidth=1, linestyle='--', label='0 dB margin (link closure threshold)')
+ax.axhline(3, color='#39ff14', linewidth=0.8, linestyle=':', alpha=0.6, label='3 dB margin (design target)')
+ax.axvline(10, color='#ffffff22', linewidth=1, linestyle=':')
+ax.axvline(20, color='#ffffff22', linewidth=1, linestyle=':')
+
+ax.fill_between(elevations, margins_ttc, 0,
+                where=[m > 0 for m in margins_ttc],
+                alpha=0.07, color='#00d9ff')
+ax.fill_between(elevations, margins_ka, 0,
+                where=[m > 0 for m in margins_ka],
+                alpha=0.07, color='#ffaa00')
+
+ax.set_xlabel('Elevation Angle (°)', color='#aaa')
+ax.set_ylabel('Link Margin (dB)', color='#aaa')
+ax.set_title('Link Margin vs Elevation — 550 km LEO', color='#ccc', fontsize=12)
+ax.legend(facecolor='#111', edgecolor='#333', labelcolor='white', fontsize=9)
+ax.grid(True, alpha=0.08, color='#444')
+ax.set_xlim(5, 85)
+
+plt.tight_layout()
+plt.savefig('link_budget_elevation.png', dpi=150, bbox_inches='tight')
+plt.show()
+
+# Minimum usable elevation
+min_el_ttc = next((e for e, m in zip(elevations, margins_ttc) if m >= 3), None)
+min_el_ka  = next((e for e, m in zip(elevations, margins_ka)  if m >= 3), None)
+print(f"\nMinimum elevation for 3 dB margin:")
+print(f"  S-band TT&C:        {min_el_ttc:.1f}°" if min_el_ttc else "  S-band: always < 3 dB")
+print(f"  Ka-band payload DL: {min_el_ka:.1f}°"  if min_el_ka  else "  Ka-band: never achieves 3 dB margin")
+</pre>
+
+```
+  <div class="py-note">
+    The plot illustrates why pass planning matters: the Ka-band payload downlink has a much steeper margin curve at low elevations — both because of higher FSPL at higher frequency and because rain fade and atmospheric loss are worse at Ka-band. S-band TT&C is far more robust at low elevations, which is why it's used for commanding even when payload data uses Ka-band.
+  </div>
+  <div class="py-challenge">
+    <strong>EXTENSION CHALLENGE</strong>
+    Add a function that computes the total data volume downloadable in a pass (integral of throughput over time, where throughput = min(link_capacity, scheduled_rate) for the portion of the pass above minimum elevation). Compare Ka-band data volume for a 12° max elevation pass vs a 65° max elevation pass. How many low-elevation passes would be needed to match the data volume of one overhead pass?
+  </div>
+</div>
+
+<div class="py-exercise">
+  <h3>Exercise 2 — Spacecraft Telemetry Health Monitor</h3>
+  <p>Build a subsystem health triage tool that takes a dictionary of telemetry values and evaluates each subsystem against its nominal ranges, producing a structured health report with alert levels. This is the logic you'd write to automate Cockpit telemetry monitoring.</p>
+```
+
+<pre>
+from dataclasses import dataclass, field
+from enum import Enum
+from typing import Any
+import json
+from datetime import datetime
+
+class AlertLevel(Enum):
+    NOMINAL  = "NOMINAL"
+    CAUTION  = "CAUTION"   # out of yellow limits — monitor
+    WARNING  = "WARNING"   # out of red limits — act soon
+    CRITICAL = "CRITICAL"  # safety threshold — act now
+
+@dataclass
+class TelemetryLimit:
+    name: str
+    unit: str
+    green_lo: float
+    green_hi: float
+    yellow_lo: float   # caution below this
+    yellow_hi: float   # caution above this
+    red_lo: float      # warning below this
+    red_hi: float      # warning above this
+
+    def evaluate(self, value: float) -> tuple[AlertLevel, str]:
+        if value < self.red_lo or value > self.red_hi:
+            return AlertLevel.CRITICAL, f"{value:.2f} {self.unit} — OUTSIDE RED LIMITS [{self.red_lo}, {self.red_hi}]"
+        elif value < self.yellow_lo or value > self.yellow_hi:
+            return AlertLevel.WARNING, f"{value:.2f} {self.unit} — outside yellow limits [{self.yellow_lo}, {self.yellow_hi}]"
+        elif value < self.green_lo or value > self.green_hi:
+            return AlertLevel.CAUTION, f"{value:.2f} {self.unit} — outside green limits [{self.green_lo}, {self.green_hi}]"
+        else:
+            return AlertLevel.NOMINAL, f"{value:.2f} {self.unit} ✓"
+
+# ── Define subsystem limit tables ──────────────────────────────────────────
+LIMITS = {
+    # EPS
+    "battery_soc_pct":     TelemetryLimit("Battery SoC", "%",  60, 100, 40, 100, 20, 100),
+    "bus_voltage_v":       TelemetryLimit("Bus Voltage",  "V",  7.0, 8.4, 6.8, 8.5, 6.5, 8.7),
+    "solar_current_ma":    TelemetryLimit("Solar Current","mA", 200, 1500, 100, 1600, 50, 1800),
+    "payload_current_ma":  TelemetryLimit("Payload Rail", "mA", 0, 800, 0, 900, 0, 1000),
+
+    # THERMAL
+    "battery_temp_c":      TelemetryLimit("Battery Temp", "°C", -10, 30, -15, 35, -20, 40),
+    "payload_temp_c":      TelemetryLimit("Payload Temp", "°C", -20, 50, -25, 55, -30, 65),
+    "obc_temp_c":          TelemetryLimit("OBC Temp",     "°C", -20, 60, -25, 65, -30, 70),
+
+    # ADCS
+    "wheel_speed_rpm":     TelemetryLimit("Wheel Speed",  "rpm", -3000, 3000, -4500, 4500, -5000, 5000),
+    "adcs_mode":           TelemetryLimit("ADCS Mode",    "int",  2, 5, 1, 6, 0, 7),  # 0=off, 1=detumble, 2=coarse, 3=fine, etc.
+
+    # COMMS
+    "uplink_rssi_dbm":     TelemetryLimit("Uplink RSSI",  "dBm", -80, -20, -90, -20, -100, -20),
+    "cmd_counter":         TelemetryLimit("Cmd Counter",  "count", 0, 1e6, 0, 1e6, 0, 1e6),  # just tracks
+
+    # OBC
+    "obc_uptime_hrs":      TelemetryLimit("OBC Uptime",   "hrs",  0, 1e6, 0, 1e6, 0, 1e6),  # info only
+    "mem_usage_pct":       TelemetryLimit("Memory Usage", "%",    0, 70, 70, 85, 85, 95),
+}
+
+@dataclass
+class SubsystemReport:
+    name: str
+    parameters: dict[str, tuple[AlertLevel, str]] = field(default_factory=dict)
+
+    @property
+    def worst_level(self) -> AlertLevel:
+        levels = [lvl for lvl, _ in self.parameters.values()]
+        priority = [AlertLevel.CRITICAL, AlertLevel.WARNING, AlertLevel.CAUTION, AlertLevel.NOMINAL]
+        for p in priority:
+            if p in levels:
+                return p
+        return AlertLevel.NOMINAL
+
+def evaluate_telemetry(telemetry: dict[str, float]) -> dict[str, SubsystemReport]:
+    """
+    Evaluate a telemetry snapshot against all defined limits.
+    Returns a dict of subsystem reports.
+    """
+    subsystems = {
+        "EPS":    ["battery_soc_pct", "bus_voltage_v", "solar_current_ma", "payload_current_ma"],
+        "THERMAL":["battery_temp_c", "payload_temp_c", "obc_temp_c"],
+        "ADCS":   ["wheel_speed_rpm", "adcs_mode"],
+        "COMMS":  ["uplink_rssi_dbm", "cmd_counter"],
+        "OBC":    ["obc_uptime_hrs", "mem_usage_pct"],
+    }
+
+    reports = {}
+    for sys_name, params in subsystems.items():
+        report = SubsystemReport(name=sys_name)
+        for p in params:
+            if p in telemetry and p in LIMITS:
+                level, msg = LIMITS[p].evaluate(telemetry[p])
+                report.parameters[p] = (level, msg)
+        reports[sys_name] = report
+    return reports
+
+def print_health_report(telemetry: dict, timestamp: str = None):
+    timestamp = timestamp or datetime.utcnow().isoformat()
+    reports = evaluate_telemetry(telemetry)
+
+    icons = {
+        AlertLevel.NOMINAL:  "✓",
+        AlertLevel.CAUTION:  "⚠",
+        AlertLevel.WARNING:  "⚡",
+        AlertLevel.CRITICAL: "🔴",
+    }
+
+    print(f"\n{'='*62}")
+    print(f"  SPACECRAFT HEALTH REPORT  ·  {timestamp}")
+    print(f"{'='*62}")
+
+    for sys_name, report in reports.items():
+        icon = icons[report.worst_level]
+        print(f"\n  {icon}  {sys_name} — {report.worst_level.value}")
+        for param, (level, msg) in report.parameters.items():
+            p_icon = icons[level]
+            limit = LIMITS[param]
+            print(f"      {p_icon}  {limit.name:<20} {msg}")
+
+    # Overall status
+    all_levels = [r.worst_level for r in reports.values()]
+    priority = [AlertLevel.CRITICAL, AlertLevel.WARNING, AlertLevel.CAUTION, AlertLevel.NOMINAL]
+    overall = next((p for p in priority if p in all_levels), AlertLevel.NOMINAL)
+    print(f"\n{'='*62}")
+    print(f"  OVERALL: {overall.value}  {icons[overall]}")
+    print(f"{'='*62}\n")
+
+    return overall
+
+# ── Simulate three telemetry snapshots ────────────────────────────────────
+
+# Scenario 1: Nominal operations
+nominal_tm = {
+    "battery_soc_pct":    82.0,
+    "bus_voltage_v":       7.8,
+    "solar_current_ma":  650.0,
+    "payload_current_ma":420.0,
+    "battery_temp_c":     18.0,
+    "payload_temp_c":     28.0,
+    "obc_temp_c":         32.0,
+    "wheel_speed_rpm":   800.0,
+    "adcs_mode":           3.0,   # fine pointing
+    "uplink_rssi_dbm":   -62.0,
+    "cmd_counter":       1240.0,
+    "obc_uptime_hrs":    1823.0,
+    "mem_usage_pct":      54.0,
+}
+
+# Scenario 2: Degraded — battery trending low, payload overcurrent
+degraded_tm = {**nominal_tm,
+    "battery_soc_pct":    38.0,   # CAUTION — below green
+    "payload_current_ma":920.0,   # WARNING — above yellow limit
+    "battery_temp_c":     -12.0,  # CAUTION — near yellow limit
+}
+
+# Scenario 3: Critical — low power, OBC anomaly
+critical_tm = {**nominal_tm,
+    "battery_soc_pct":    19.0,   # CRITICAL — below red
+    "bus_voltage_v":       6.4,   # CRITICAL
+    "solar_current_ma":   45.0,   # CRITICAL — near-zero (eclipse or panel failure?)
+    "obc_temp_c":         68.0,   # WARNING
+    "mem_usage_pct":      88.0,   # WARNING
+}
+
+print("SCENARIO 1: NOMINAL OPERATIONS")
+print_health_report(nominal_tm, "2026-04-02T06:00:00Z")
+
+print("SCENARIO 2: DEGRADED — POWER AND PAYLOAD ANOMALY")
+print_health_report(degraded_tm, "2026-04-02T08:15:00Z")
+
+print("SCENARIO 3: CRITICAL — LOW POWER / POSSIBLE ECLIPSE ANOMALY")
+overall = print_health_report(critical_tm, "2026-04-02T10:30:00Z")
+
+if overall == AlertLevel.CRITICAL:
+    print("  → RECOMMENDED ACTION: Verify eclipse status. If in sunlight with low solar current,")
+    print("    suspect solar panel anomaly. Consider safe mode if SoC continues to decline.")
+    print("    Do NOT activate payload until power situation is resolved.")
+</pre>
+
+```
+  <div class="py-note">
+    This pattern — limit tables, structured evaluation, alert levels, recommended actions — is the foundation of any production telemetry monitoring system. In a real Cockpit integration you'd be consuming these values via WebSocket or polling the REST API, feeding them into this kind of evaluation pipeline, and surfacing alerts to the CDE or customer. SNMP-based monitoring at iDirect works on exactly the same principle: threshold comparisons against baselines, alert escalation by severity.
+  </div>
+  <div class="py-challenge">
+    <strong>EXTENSION CHALLENGE</strong>
+    Add a trending function: given a list of (timestamp, telemetry_dict) snapshots, compute the rate of change per parameter and flag any parameter that is trending toward a limit violation within the next 2 orbits (180 min). This is the difference between reactive monitoring (alert when it happens) and predictive monitoring (alert before it happens). Which parameters is trending most critical to monitor on the SoC anomaly scenario?
+  </div>
+</div>
+```
+
+  </div>
+
+  <!-- REFLECTION -->
+
+  <div class="reflection-block" id="reflect">
+    <h2>REFLECTION PROMPTS</h2>
+    <p class="ref-intro">Three prompts for written synthesis before Thursday. 150–250 words each. Writing the answer is harder than thinking it — that's why it works.</p>
+
+```
+<div class="ref-prompt">
+  <h3>Prompt 1 — The Safe Mode Decision</h3>
+  <p>Describe a scenario from your iDirect experience where you had to make a call under uncertainty — to act or not to act — with incomplete information and real consequences either way. How does the discipline of that decision (not the specific outcome) apply to the spacecraft safe mode question: "when does the cost of triggering safe mode outweigh the cost of not triggering it?"</p>
+</div>
+
+<div class="ref-prompt">
+  <h3>Prompt 2 — The Knowledge Gap as an Asset</h3>
+  <p>Matt will know your spacecraft knowledge has limits. The question is whether your limits make you dangerous (overconfident) or an asset (systematically cautious). Write a short paragraph you could actually say to Matt that acknowledges the gap directly but reframes it as a reason to trust your judgment — specifically the judgment not to act when you're uncertain. Reference a specific discipline or habit from your SATCOM background that trained that instinct.</p>
+</div>
+
+<div class="ref-prompt">
+  <h3>Prompt 3 — ConOps Translation</h3>
+  <p>Think of the most complex network design document you've written at iDirect or Airbus — the one that described how a system would be operated, by whom, under what conditions, and what would happen when things went wrong. Now describe that document's structure in ConOps terms: what was the equivalent of mission phases? What was the equivalent of nominal operations vs anomaly response? What was missing that a spacecraft ConOps would include? This translation exercise prepares you to answer "have you contributed to ConOps?" in a way that's both honest and credible.</p>
+</div>
+```
+
+  </div>
+
+  <div class="complete-wrap">
+    <button class="complete-btn" id="completeBtn">MARK SESSION COMPLETE</button>
+    <div class="complete-msg" id="completeMsg">Prep session not yet marked complete.</div>
+  </div>
+
+  <div class="lesson-nav">
+    <a href="int-xavier.html">← XAVIER — GROUND SOFTWARE</a>
+    <a href="int-gauthier.html">GAUTHIER — MISSION OPS →</a>
+  </div>
+
+</div>
+
+<footer>© 2026 LEOAF · LOFT ORBITAL INTERVIEW PREP · PANEL 4 OF 5 — MATT ZEIGLER</footer>
+<button class="back-to-top" id="backToTop">↑</button>
+
+<script>
+const canvas = document.getElementById('starsCanvas');
+const ctx = canvas.getContext('2d');
+let stars = [];
+function resizeCanvas() { canvas.width = window.innerWidth; canvas.height = window.innerHeight; }
+function initStars() {
+  stars = [];
+  for (let i = 0; i < 180; i++) {
+    stars.push({ x: Math.random()*canvas.width, y: Math.random()*canvas.height, size: Math.random()*1.4+0.3, speed: Math.random()*0.15+0.03, hue: Math.random()*360 });
+  }
+}
+resizeCanvas(); initStars();
+window.addEventListener('resize', resizeCanvas);
+function animateStars() {
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
+  stars.forEach(s => {
+    s.y -= s.speed;
+    if (s.y < 0) { s.y = canvas.height; s.x = Math.random()*canvas.width; }
+    ctx.beginPath(); ctx.fillStyle = `hsl(${s.hue},70%,80%)`; ctx.arc(s.x, s.y, s.size, 0, Math.PI*2); ctx.fill();
+  });
+  requestAnimationFrame(animateStars);
+}
+animateStars();
+</script>
+
+<script>
+const feedbacks = {
+  1: {
+    correct: "Correct. A downward SoC trend must be understood before acting on it. 65% may be fine if the spacecraft is in eclipse and recovering on the next sun pass — or it may signal a solar panel anomaly. The first step is always diagnosis: is solar panel output nominal? What is the current load? Is the trend stable or accelerating? Only after understanding the cause can you decide between 'monitor,' 'shed non-essential loads,' or 'safe mode.'",
+    wrong:   "Incorrect. The right first action is to understand the trend, not act on a number in isolation. 65% SoC during eclipse with a recovering trend is nominal. 65% SoC in full sun with declining solar output is a serious anomaly. The correct response is to analyse the cause before prescribing an action. Jumping straight to safe mode without understanding the cause is not good ops discipline."
+  },
+  2: {
+    correct: "Correct. This is the Layer Zero Principle in action: before investigating the payload layer, verify the spacecraft bus is healthy. An OBC crash, a power rail trip, or a communications loss would all prevent payload data from reaching the ground, and none of those are payload faults. Only after confirming the bus is nominal do you investigate the Hub interface and then the payload itself. This disciplined approach avoids mis-diagnosing bus-level issues as payload failures.",
+    wrong:   "Incorrect. The first diagnostic step must be verifying bus health — OBC, power, TT&C — before looking at the payload. If the OBC has rebooted or a power rail has tripped, no payload investigation will find the issue because the problem is at a lower layer. This is identical to the iDirect fault isolation principle: verify the RF layer before diagnosing the modem layer."
+  },
+  3: {
+    correct: "Correct. Loft's Hub is a proprietary hardware abstraction layer — a universal payload adapter that standardises the interface between the customer's payload and the satellite bus. It provides power, command, computing, and communications interfaces in a repeatable, pre-qualified form, eliminating bus-level NRE for each new customer mission. It is not the OBC, not the bus structure, and not the ground system.",
+    wrong:   "Incorrect. The Hub is Loft's hardware abstraction layer — the interface between payload and bus. It standardises payload integration, eliminating per-customer bus-level NRE. The OBC runs flight software independently of the Hub. The bus is the Longbow/Arrow platform. Cockpit is the ground-side mission control software. Keeping these three layers (bus, Hub, payload) distinct is important for correct anomaly triage."
+  },
+  4: {
+    correct: "Correct. A 10-minute upload in a 7-minute window (Pass A) is not feasible — the pass closes before the operation completes. Pass B's 14-minute window accommodates the upload plus time for verification commands and confirmation of success. High elevation also provides much better link margin, which matters for a data-intensive upload operation where bit errors could corrupt the patch. Always choose the pass geometry that fits the operation, not just the nearest available pass.",
+    wrong:   "Incorrect. Pass A's 7-minute window cannot accommodate a 10-minute operation. A critical FSW patch must complete within a single pass (splitting across two passes creates an uncertain intermediate state). Pass B's 14-minute window at 68° provides sufficient time plus substantial link margin. At 12° elevation, the link margin is significantly reduced compared to 68° — rain fade and atmospheric losses at low elevation add further risk."
+  },
+  5: {
+    correct: "Correct. Detumble mode is a designed ADCS operating mode — it is what the satellite enters after launch separation (when it may be tumbling from the dispenser) or after an attitude anomaly. Magnetorquers create torques against the Earth's magnetic field to slow the rotation rate. This is normal, expected behaviour. You monitor the progress — are the wheel speeds decreasing? Is the mode transitioning toward coarse pointing on schedule? — but there is no immediate alarm. Understanding ADCS mode state machines is important for interpreting telemetry correctly.",
+    wrong:   "Incorrect. Detumble is a normal, designed ADCS mode — not a critical anomaly. After launch separation, most small satellites enter detumble mode to reduce the tumbling imparted by the dispenser. The magnetorquers work against the Earth's field to slow rotation. The correct response is to monitor progress and verify the transition to coarse pointing mode follows within the expected timeline, not to panic or command safe mode."
+  },
+  6: {
+    correct: "Correct. A CDE doesn't unilaterally refuse or accept unusual customer requests — they investigate feasibility with the spacecraft team and provide the customer with an accurate, quantified assessment of what is possible. 7 days continuous payload operation may be feasible with margin, feasible with constraints (intermittent thermal pauses), or infeasible due to power budget limitations. The customer deserves to know the actual operational envelope, not a blanket no or a blanket yes without verification.",
+    wrong:   "Incorrect. A CDE's job is to be the customer's advocate AND to protect spacecraft health. The right response is not to simply agree (without verifying the spacecraft can support it) or to refuse (without checking if it's actually feasible). It is to investigate with the spacecraft team and give the customer an honest, quantified assessment. If 7 days is feasible with a 4-hour thermal pause each day, say so. If it requires reducing duty cycle to 60%, say so."
+  },
+  7: {
+    correct: "Correct. This answer demonstrates ConOps literacy: understanding that a ConOps is structured around mission phases, not just a static parameter list, and that it captures operational responsibilities and success criteria, not just system capabilities. It also makes the honest and effective translation from SATCOM experience — 'I've done equivalent documentation' — without overclaiming and without dismissing the question. The structure answer shows you can contribute to ConOps immediately.",
+    wrong:   "Incorrect. Options A and D are too passive — template-filling and scope-limiting. Option B mischaracterises the CDE's role in ConOps; CDEs contribute the operational and customer requirements perspective, not just a data entry function. The strongest answer shows you understand what ConOps is for (operational governance across mission phases), can structure it, and can relate it to equivalent documentation you've produced."
+  },
+  8: {
+    correct: "Correct. This answer succeeds because it reframes the gap as a reason to trust your judgment, not a deficit to apologise for. Matt isn't looking for someone with ten years of spacecraft ops — he's looking for someone who won't break his satellite. The instinct not to act when uncertain, the discipline to verify before commanding, and the willingness to escalate — these are more valuable than knowledge, because knowledge can be taught but discipline is either there or it isn't. This answer demonstrates self-awareness and operational maturity.",
+    wrong:   "Incorrect. Option A overclaims equivalence. Option B minimises the gap in a way that sounds defensive. Option D is too passive — it signals you'd be a drag on the team. The right answer acknowledges the gap directly, then reframes it: your value is not the spacecraft knowledge (which can be taught) but the operational discipline (which is harder to develop). Intellectual honesty about limits, combined with clear reasoning about why your methodology translates, is the right posture with Matt."
+  }
+};
+
+let answered = {};
+document.querySelectorAll('.quiz-opt').forEach(btn => {
+  btn.addEventListener('click', function() {
+    const q = this.dataset.q;
+    if (answered[q] !== undefined) return;
+    const correct = this.dataset.correct === 'true';
+    answered[q] = correct;
+    document.querySelectorAll(`.quiz-opt[data-q="${q}"]`).forEach(b => {
+      b.disabled = true;
+      if (b.dataset.correct === 'true') b.classList.add('correct');
+    });
+    if (!correct) this.classList.add('wrong');
+    const fb = document.getElementById(`fb${q}`);
+    fb.textContent = (correct ? '✓ ' : '✗ ') + feedbacks[q][correct ? 'correct' : 'wrong'];
+    fb.style.color = correct ? '#39ff14' : '#ff004f';
+
+    if (Object.keys(answered).length === 8) {
+      const total = Object.values(answered).filter(Boolean).length;
+      const el = document.getElementById('quizScore');
+      el.style.display = 'block';
+      const pct = Math.round(total / 8 * 100);
+      el.textContent = `SCORE: ${total} / 8 (${pct}%) — ${pct === 100 ? 'PERFECT. MATT WILL RESPECT THAT.' : pct >= 75 ? 'SOLID. REVIEW ANY MISSES CAREFULLY.' : 'REVISIT SECTIONS 2, 6, AND 8 BEFORE THURSDAY.'}`;
+    }
+  });
+});
+
+const btn = document.getElementById('completeBtn');
+const msg = document.getElementById('completeMsg');
+btn.addEventListener('click', () => {
+  const done = btn.classList.contains('done');
+  if (!done) {
+    btn.textContent = '✓ COMPLETE — CLICK TO UNDO';
+    btn.classList.add('done');
+    msg.style.color = '#ffaa00';
+    msg.textContent = 'Session marked complete.';
+  } else {
+    btn.textContent = 'MARK SESSION COMPLETE';
+    btn.classList.remove('done');
+    msg.style.color = '#ffffff55';
+    msg.textContent = 'Prep session not yet marked complete.';
+  }
+});
+
+const btt = document.getElementById('backToTop');
+window.addEventListener('scroll', () => btt.classList.toggle('visible', window.scrollY > 400));
+btt.addEventListener('click', () => window.scrollTo({ top: 0, behavior: 'smooth' }));
+</script>
+
+</body>
+</html>
