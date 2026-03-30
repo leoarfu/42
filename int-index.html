@@ -1,0 +1,252 @@
+<!DOCTYPE html>
+
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, shrink-to-fit=no">
+<title>Loft Orbital Interview Prep · LEOAF</title>
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;600;800&family=Share+Tech+Mono&family=Libre+Baskerville:ital,wght@0,400;0,700;1,400&display=swap" rel="stylesheet">
+<style>
+* { box-sizing:border-box; margin:0; padding:0; }
+html { height:100%; -webkit-text-size-adjust:100%; overflow-x:hidden; }
+body { font-family:'Share Tech Mono',monospace; background:#000; color:white; overflow-x:hidden; min-height:100vh; }
+#starsCanvas { position:fixed; inset:0; z-index:-1; }
+
+header {
+background:#000; border-bottom:1px solid #ff004f33;
+position:sticky; top:0; z-index:100;
+padding:1rem clamp(1.5rem,5vw,4rem);
+display:flex; justify-content:space-between; align-items:center;
+box-shadow:0 4px 16px #0008;
+}
+.logo { font-family:‘Orbitron’,sans-serif; font-weight:800; font-size:clamp(16px,2vw,22px); letter-spacing:3px; text-decoration:none; }
+.logo span:first-child { color:white; }
+.logo span:last-child { color:#ff004f; }
+.nav-right a {
+background:transparent; border:1px solid #ff004f44; color:#ff004f;
+padding:6px 14px; font-size:11px; font-family:‘Orbitron’,sans-serif; letter-spacing:1px;
+text-decoration:none; display:inline-block; transition:0.3s ease;
+}
+.nav-right a:hover { background:#ff004f; color:black; }
+
+.hero { padding:clamp(40px,6vw,80px) clamp(1.5rem,5vw,4rem) 20px; max-width:900px; margin:0 auto; position:relative; z-index:1; }
+.mission-tag { font-family:‘Orbitron’,sans-serif; font-size:10px; color:#ff004f; letter-spacing:3px; margin-bottom:16px; }
+.hero h1 { font-family:‘Orbitron’,sans-serif; font-size:clamp(22px,4vw,38px); font-weight:800; line-height:1.2; margin-bottom:16px; }
+.hero h1 span { color:#ff004f; }
+.hero-sub { font-size:13px; line-height:1.85; opacity:0.7; max-width:640px; margin-bottom:32px; }
+
+.timeline-bar { max-width:900px; margin:0 auto 48px; padding:0 clamp(1.5rem,5vw,4rem); position:relative; z-index:1; }
+.timeline-bar h3 { font-family:‘Orbitron’,sans-serif; font-size:10px; color:#00d9ff; letter-spacing:2px; margin-bottom:16px; }
+.timeline-grid { display:grid; grid-template-columns:repeat(5,1fr); gap:4px; }
+.tl-slot { padding:10px 8px; text-align:center; border:1px solid #ffffff11; }
+.tl-time { font-family:‘Orbitron’,sans-serif; font-size:9px; color:#ffffff55; letter-spacing:1px; display:block; margin-bottom:4px; }
+.tl-name { font-size:10px; line-height:1.4; }
+.tl-role { font-size:9px; opacity:0.5; margin-top:3px; display:block; }
+
+.grid-wrap { max-width:900px; margin:0 auto; padding:0 clamp(1.5rem,5vw,4rem) 80px; position:relative; z-index:1; }
+.grid-wrap h3 { font-family:‘Orbitron’,sans-serif; font-size:10px; color:#ffffff44; letter-spacing:2px; margin-bottom:20px; }
+.panel-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(260px,1fr)); gap:16px; }
+
+.panel-card {
+background:#090909; border:1px solid var(–accent-dim);
+padding:24px; text-decoration:none; display:block;
+transition:border-color 0.25s ease, box-shadow 0.25s ease;
+position:relative; overflow:hidden;
+}
+.panel-card::before {
+content:’’; position:absolute; inset:0;
+background:linear-gradient(135deg, var(–accent-dim) 0%, transparent 60%);
+opacity:0; transition:opacity 0.25s ease;
+}
+.panel-card:hover { border-color:var(–accent); box-shadow:0 0 24px var(–accent-dim); }
+.panel-card:hover::before { opacity:1; }
+
+.card-slot { font-family:‘Orbitron’,sans-serif; font-size:9px; letter-spacing:2px; color:var(–accent); margin-bottom:8px; }
+.card-time { font-family:‘Orbitron’,sans-serif; font-size:10px; color:#ffffff44; letter-spacing:1px; margin-bottom:12px; }
+.card-name { font-family:‘Orbitron’,sans-serif; font-size:15px; font-weight:800; color:white; margin-bottom:4px; line-height:1.2; }
+.card-role { font-size:11px; color:#ffffff66; margin-bottom:16px; line-height:1.4; }
+.card-focus { font-size:11px; color:var(–accent); line-height:1.7; margin-bottom:16px; }
+.card-tags { display:flex; flex-wrap:wrap; gap:6px; }
+.card-tag { font-family:‘Orbitron’,sans-serif; font-size:9px; padding:3px 8px; border:1px solid var(–accent-dim); color:var(–accent); letter-spacing:1px; }
+.card-arrow { position:absolute; top:20px; right:20px; font-size:18px; color:var(–accent); opacity:0.5; transition:opacity 0.2s, transform 0.2s; }
+.panel-card:hover .card-arrow { opacity:1; transform:translateX(4px); }
+
+.narrative-box { max-width:900px; margin:0 auto 40px; padding:0 clamp(1.5rem,5vw,4rem); position:relative; z-index:1; }
+.narrative-inner { background:rgba(255,255,255,0.03); border:1px solid #ffffff11; padding:24px 28px; }
+.narrative-inner h3 { font-family:‘Orbitron’,sans-serif; font-size:10px; color:#00d9ff; letter-spacing:2px; margin-bottom:14px; }
+.narrative-inner p { font-family:‘Libre Baskerville’,Georgia,serif; font-size:14px; line-height:1.9; color:#cccccc; margin-bottom:12px; }
+.narrative-inner p:last-child { margin-bottom:0; }
+.narrative-inner strong { color:white; }
+
+footer { text-align:center; padding:30px; opacity:0.3; font-size:11px; position:relative; z-index:1; letter-spacing:1px; }
+@media (max-width:600px) {
+.timeline-grid { grid-template-columns:1fr 1fr; }
+}
+</style>
+
+</head>
+<body>
+
+<canvas id="starsCanvas"></canvas>
+
+<header>
+  <a href="index.html" class="logo"><span>LEO</span><span>AF</span></a>
+  <div class="nav-right">
+    <a href="index.html">← LEOAF HOME</a>
+  </div>
+</header>
+
+<div class="hero">
+  <div class="mission-tag">MISSION BRIEF · THURSDAY APRIL 2, 2026</div>
+  <h1>Loft Orbital<br><span>CDE Panel Prep</span></h1>
+  <p class="hero-sub">Five 45-minute interviews. Five different evaluators. One thread: 20 years at the boundary where systems meet operations, always writing code to make that boundary work better. Select any panel below to begin your prep session.</p>
+</div>
+
+<div class="timeline-bar">
+  <h3>THURSDAY SCHEDULE — APRIL 2 · ALL TIMES CEST</h3>
+  <div class="timeline-grid">
+    <div class="tl-slot" style="border-color:#ff004f44;">
+      <span class="tl-time">12:30–13:15</span>
+      <div class="tl-name" style="color:#ff004f;">Bella<br>Acevedo</div>
+      <span class="tl-role">Senior CDE</span>
+    </div>
+    <div class="tl-slot" style="border-color:#39ff1444;">
+      <span class="tl-time">13:15–14:00</span>
+      <div class="tl-name" style="color:#39ff14;">Madeline<br>Fleury</div>
+      <span class="tl-role">Customer Ops Eng.</span>
+    </div>
+    <div class="tl-slot" style="border-color:#00d9ff44;">
+      <span class="tl-time">14:00–14:45</span>
+      <div class="tl-name" style="color:#00d9ff;">Xavier<br>Almenar</div>
+      <span class="tl-role">Lead Ground Software</span>
+    </div>
+    <div class="tl-slot" style="border-color:#ffaa0044;">
+      <span class="tl-time">21:00–21:45</span>
+      <div class="tl-name" style="color:#ffaa00;">Matt<br>Zeigler</div>
+      <span class="tl-role">Sr. Satellite Systems</span>
+    </div>
+    <div class="tl-slot" style="border-color:#aa66ff44;">
+      <span class="tl-time">21:45–22:30</span>
+      <div class="tl-name" style="color:#aa66ff;">Gauthier<br>Damien</div>
+      <span class="tl-role">Lead Mission Ops</span>
+    </div>
+  </div>
+</div>
+
+<div class="narrative-box">
+  <div class="narrative-inner">
+    <h3>CROSS-PANEL NARRATIVE</h3>
+    <p><strong>"I've spent 20 years at the boundary where systems meet operations, and I've always written code to make that boundary work better."</strong></p>
+    <p>Use iDirect for operational credibility with Bella and Matt. Use Airbus HBC+ for architecture and cross-divisional complexity with Xavier. Use Python/Ansible for automation discipline with Madeline and Gauthier. Use LEOAF as a signal of genuine domain passion across all five.</p>
+    <p>Don't repeat the same story five times. The break before the US slots is four hours — use it, don't drift through it.</p>
+  </div>
+</div>
+
+<div class="grid-wrap">
+  <h3>PREP SESSIONS — SELECT A PANEL</h3>
+  <div class="panel-grid">
+
+```
+<a class="panel-card" href="int-bella.html" style="--accent:#ff004f; --accent-dim:#ff004f22;">
+  <div class="card-arrow">→</div>
+  <div class="card-slot">PANEL 1 OF 5</div>
+  <div class="card-time">12:30–13:15 CEST · Toulouse</div>
+  <div class="card-name">Bella<br>Acevedo-Rodriguez</div>
+  <div class="card-role">Senior Customer Delivery Engineer</div>
+  <div class="card-focus">Peer evaluation — operational credibility. "Can you do this job day-to-day without creating work for me?"</div>
+  <div class="card-tags">
+    <span class="card-tag">CDE OPS</span>
+    <span class="card-tag">MISSION LIFECYCLE</span>
+    <span class="card-tag">ANOMALY TRIAGE</span>
+  </div>
+</a>
+
+<a class="panel-card" href="int-madeline.html" style="--accent:#39ff14; --accent-dim:#39ff1422;">
+  <div class="card-arrow">→</div>
+  <div class="card-slot">PANEL 2 OF 5</div>
+  <div class="card-time">13:15–14:00 CEST · Toulouse</div>
+  <div class="card-name">Madeline<br>Fleury</div>
+  <div class="card-role">Customer Operations Engineer</div>
+  <div class="card-focus">Python precision and commissioning discipline. Expects quantitative reasoning and edge-case awareness.</div>
+  <div class="card-tags">
+    <span class="card-tag">PYTHON</span>
+    <span class="card-tag">COMMISSIONING</span>
+    <span class="card-tag">AUTOMATION</span>
+  </div>
+</a>
+
+<a class="panel-card" href="int-xavier.html" style="--accent:#00d9ff; --accent-dim:#00d9ff22;">
+  <div class="card-arrow">→</div>
+  <div class="card-slot">PANEL 3 OF 5</div>
+  <div class="card-time">14:00–14:45 CEST · Toulouse</div>
+  <div class="card-name">Xavier<br>Almenar Cerdán</div>
+  <div class="card-role">Lead, Ground Software Solutions</div>
+  <div class="card-focus">Software architecture and API literacy. "Can you be the CDE who doesn't waste my team's time with bad bug reports?"</div>
+  <div class="card-tags">
+    <span class="card-tag">GROUND SOFTWARE</span>
+    <span class="card-tag">APIS</span>
+    <span class="card-tag">KAFKA · DOCKER</span>
+  </div>
+</a>
+
+<a class="panel-card" href="int-matt.html" style="--accent:#ffaa00; --accent-dim:#ffaa0022;">
+  <div class="card-arrow">→</div>
+  <div class="card-slot">PANEL 4 OF 5</div>
+  <div class="card-time">21:00–21:45 CEST · Golden CO</div>
+  <div class="card-name">Matt<br>Zeigler</div>
+  <div class="card-role">Senior Satellite Systems Engineer</div>
+  <div class="card-focus">Spacecraft credibility check. Link budgets are your home ground. Intellectual honesty about the gap wins trust.</div>
+  <div class="card-tags">
+    <span class="card-tag">SUBSYSTEMS</span>
+    <span class="card-tag">LINK BUDGETS</span>
+    <span class="card-tag">SAFE MODE</span>
+  </div>
+</a>
+
+<a class="panel-card" href="int-gauthier.html" style="--accent:#aa66ff; --accent-dim:#aa66ff22;">
+  <div class="card-arrow">→</div>
+  <div class="card-slot">PANEL 5 OF 5</div>
+  <div class="card-time">21:45–22:30 CEST · Toulouse</div>
+  <div class="card-name">Gauthier<br>Damien</div>
+  <div class="card-role">Lead, Mission Operation Services</div>
+  <div class="card-focus">SatDevOps and automation systems design. ML background — he thinks in data pipelines and observability. LEOAF is your strongest card here.</div>
+  <div class="card-tags">
+    <span class="card-tag">SATDEVOPS</span>
+    <span class="card-tag">OBSERVABILITY</span>
+    <span class="card-tag">STATE MACHINES</span>
+  </div>
+</a>
+```
+
+  </div>
+</div>
+
+<footer>© 2026 LEOAF · LOFT ORBITAL CDE INTERVIEW PREP · THURSDAY APRIL 2, 2026</footer>
+
+<script>
+const canvas = document.getElementById('starsCanvas');
+const ctx = canvas.getContext('2d');
+let stars = [];
+function resizeCanvas() { canvas.width = window.innerWidth; canvas.height = window.innerHeight; }
+function initStars() {
+  stars = [];
+  for (let i = 0; i < 200; i++) {
+    stars.push({ x: Math.random()*canvas.width, y: Math.random()*canvas.height, size: Math.random()*1.4+0.3, speed: Math.random()*0.12+0.02, hue: Math.random()*360 });
+  }
+}
+resizeCanvas(); initStars();
+window.addEventListener('resize', resizeCanvas);
+function animateStars() {
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
+  stars.forEach(s => {
+    s.y -= s.speed;
+    if (s.y < 0) { s.y = canvas.height; s.x = Math.random()*canvas.width; }
+    ctx.beginPath(); ctx.fillStyle = `hsl(${s.hue},70%,80%)`; ctx.arc(s.x, s.y, s.size, 0, Math.PI*2); ctx.fill();
+  });
+  requestAnimationFrame(animateStars);
+}
+animateStars();
+</script>
+
+</body>
+</html>
