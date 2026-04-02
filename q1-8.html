@@ -1,0 +1,1477 @@
+<!DOCTYPE html>
+
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, shrink-to-fit=no">
+<title>L08 — OneWeb Deep Dive · LEOAF</title>
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;600;800&family=Share+Tech+Mono&family=Libre+Baskerville:ital,wght@0,400;0,700;1,400&display=swap" rel="stylesheet">
+<link rel="icon" href="favicon.ico" sizes="any" type="image/x-icon">
+<link rel="manifest" href="site.webmanifest">
+<meta name="theme-color" content="#0f0f0f">
+<style>
+* { box-sizing:border-box; margin:0; padding:0; }
+html { height:100%; -webkit-text-size-adjust:100%; overflow-x:hidden; }
+body { font-family:'Share Tech Mono',monospace; background:#000; color:white; overflow-x:hidden; min-height:100vh; }
+#starsCanvas { position:fixed; inset:0; z-index:-1; }
+
+header {
+background:#000; border-bottom:1px solid #ff004f33;
+position:sticky; top:0; z-index:100;
+padding:1rem clamp(1.5rem,5vw,4rem);
+display:flex; justify-content:space-between; align-items:center;
+box-shadow:0 4px 16px #0008;
+}
+.logo { font-family:‘Orbitron’,sans-serif; font-weight:800; font-size:clamp(16px,2vw,22px); letter-spacing:3px; text-decoration:none; }
+.logo span:first-child { color:white; }
+.logo span:last-child { color:#ff004f; }
+.nav-right { display:flex; align-items:center; gap:10px; }
+.nav-btn {
+background:transparent; border:1px solid #ff004f44; color:#ff004f;
+padding:6px 14px; cursor:pointer; transition:0.3s ease;
+font-size:11px; font-family:‘Orbitron’,sans-serif; letter-spacing:1px;
+text-decoration:none; display:inline-block;
+}
+.nav-btn:hover { background:#ff004f; color:black; }
+
+.breadcrumb { padding:14px clamp(1.5rem,5vw,4rem); font-size:11px; color:#ffffff44; letter-spacing:1px; position:relative; z-index:1; }
+.breadcrumb a { color:#00d9ff66; text-decoration:none; }
+.breadcrumb a:hover { color:#00d9ff; }
+.breadcrumb span { margin:0 8px; }
+
+.lesson-wrap { max-width:820px; margin:0 auto; padding:0 clamp(1.5rem,5vw,4rem) 80px; position:relative; z-index:1; }
+
+.lesson-header { padding:30px 0 28px; border-bottom:1px solid #ffffff11; margin-bottom:36px; }
+.lesson-tag { font-family:‘Orbitron’,sans-serif; font-size:10px; color:#ff004f; letter-spacing:3px; margin-bottom:10px; }
+.lesson-header h1 { font-family:‘Orbitron’,sans-serif; font-size:clamp(20px,3.5vw,32px); font-weight:800; line-height:1.2; margin-bottom:12px; }
+.lesson-meta { display:flex; gap:10px; flex-wrap:wrap; margin-bottom:16px; }
+.l-pill { font-family:‘Orbitron’,sans-serif; font-size:10px; padding:3px 10px; border:1px solid; letter-spacing:1px; }
+.l-pill-q  { color:#ff004f; border-color:#ff004f44; }
+.l-pill-t  { color:#39ff14; border-color:#39ff1444; }
+.l-pill-s  { color:#ffaa00; border-color:#ffaa0044; }
+.lesson-intro { font-size:13px; line-height:1.85; opacity:0.75; }
+
+.toc { background:rgba(0,217,255,0.06); border:1px solid #00d9ff33; padding:24px 28px; margin:30px 0; }
+.toc h4 { font-family:‘Orbitron’,sans-serif; font-size:10px; color:#00d9ff; letter-spacing:2px; margin-bottom:16px; }
+.toc ol { padding-left:20px; }
+.toc li { font-size:13px; line-height:2.1; }
+.toc li a { color:#00d9ffbb; text-decoration:none; transition:0.15s; }
+.toc li a:hover { color:#fff; padding-left:4px; }
+.toc li::marker { color:#ff004f; font-family:‘Orbitron’,sans-serif; font-size:10px; }
+
+/* ── LIGHT READING CARDS ── */
+.content-block {
+background:#f5f2ec; color:#1a1a1a;
+padding:36px clamp(24px,4vw,48px);
+margin-bottom:24px;
+border-left:4px solid #00d9ff;
+position:relative; z-index:1;
+}
+.content-block h2 {
+font-family:‘Orbitron’,sans-serif; font-size:13px;
+color:#003d66; letter-spacing:2px; text-transform:uppercase;
+margin-bottom:20px; padding-bottom:10px;
+border-bottom:2px solid #00d9ff66; scroll-margin-top:80px;
+}
+.content-block h3 {
+font-family:‘Orbitron’,sans-serif; font-size:11px;
+color:#444; letter-spacing:1.5px; text-transform:uppercase;
+margin:32px 0 14px;
+}
+.content-block p {
+font-family:‘Libre Baskerville’,Georgia,serif;
+font-size:15px; line-height:1.9; color:#1a1a1a; opacity:1; margin-bottom:18px;
+}
+.content-block ul li, .content-block ol li {
+font-family:‘Libre Baskerville’,Georgia,serif;
+font-size:14px; line-height:1.85; color:#1a1a1a; opacity:1; margin-bottom:8px;
+}
+.content-block ul, .content-block ol { padding-left:0; margin-bottom:16px; }
+.content-block ul li { padding-left:20px; position:relative; }
+.content-block ul li::before { content:’›’; position:absolute; left:0; color:#0077aa; }
+.content-block ol { counter-reset:item; }
+.content-block ol li { counter-increment:item; padding-left:20px; position:relative; }
+.content-block ol li::before { content:counter(item)’.’; position:absolute; left:0; color:#cc0033; font-family:‘Orbitron’,sans-serif; font-size:10px; top:2px; }
+
+.callout { border-left:3px solid #0088cc; background:#e8f4fb; color:#1a1a1a; padding:16px 20px; margin:22px 0; font-size:13px; line-height:1.8; }
+.callout.red   { border-left-color:#cc0033; background:#fdecea; }
+.callout.green { border-left-color:#1a7a1a; background:#eafaea; }
+.callout.amber { border-left-color:#996600; background:#fef9ec; }
+.callout strong { font-family:‘Orbitron’,sans-serif; font-size:10px; letter-spacing:1px; display:block; margin-bottom:8px; color:inherit; }
+
+.key-numbers { display:grid; grid-template-columns:repeat(auto-fit,minmax(140px,1fr)); gap:12px; margin:22px 0; }
+.kn-item { background:#fff; border:1px solid #d0d0d0; padding:16px 12px; text-align:center; }
+.kn-val  { font-family:‘Orbitron’,sans-serif; font-size:clamp(16px,2.5vw,22px); font-weight:800; color:#003d66; display:block; }
+.kn-label { font-size:10px; color:#555; letter-spacing:1px; margin-top:5px; display:block; line-height:1.4; }
+
+.compare-table { width:100%; border-collapse:collapse; margin:22px 0; font-size:12px; }
+.compare-table th { font-family:‘Orbitron’,sans-serif; font-size:10px; letter-spacing:1px; color:#003d66; padding:10px 12px; border-bottom:2px solid #00d9ff66; text-align:left; }
+.compare-table td { padding:10px 12px; border-bottom:1px solid #ddd; line-height:1.5; color:#1a1a1a; vertical-align:top; }
+.compare-table tr:hover td { background:#f0f0f0; }
+.compare-table .hi { color:#1a7a1a; font-weight:bold; }
+.compare-table .lo { color:#cc0033; }
+.compare-table .md { color:#996600; }
+
+.deep-dive { background:#fffbf0; border:1px solid #e0c060; padding:20px 22px; margin:24px 0; }
+.deep-dive h4 { font-family:‘Orbitron’,sans-serif; font-size:10px; color:#996600; letter-spacing:2px; margin-bottom:12px; }
+.deep-dive p { font-family:‘Libre Baskerville’,Georgia,serif; font-size:13px; line-height:1.8; color:#333; margin-bottom:10px; }
+.deep-dive p:last-child { margin-bottom:0; }
+
+.diagram-wrap { margin:24px 0; background:#0a0a0a; border:1px solid #333; padding:20px; overflow-x:auto; }
+.diagram-wrap figcaption { font-size:11px; color:#ffffff44; margin-top:12px; text-align:center; letter-spacing:1px; }
+
+.timeline { margin:22px 0; }
+.tl-item { display:flex; gap:16px; margin-bottom:16px; }
+.tl-year { font-family:‘Orbitron’,sans-serif; font-size:11px; color:#cc0033; min-width:56px; padding-top:2px; }
+.tl-body { flex:1; border-left:1px solid #cc003344; padding-left:16px; padding-bottom:8px; }
+.tl-body strong { font-family:‘Orbitron’,sans-serif; font-size:11px; color:#333; letter-spacing:1px; display:block; margin-bottom:4px; }
+.tl-body p { font-family:‘Libre Baskerville’,Georgia,serif; font-size:13px; color:#444; line-height:1.7; margin:0; }
+
+/* ── DARK BLOCKS ── */
+.quiz-block { background:rgba(17,17,17,0.95); border:1px solid #ff004f33; padding:28px; margin:48px 0 32px; }
+.quiz-block h2 { font-family:‘Orbitron’,sans-serif; font-size:13px; color:#ff004f; letter-spacing:2px; margin-bottom:6px; }
+.quiz-intro { font-size:12px; opacity:0.6; margin-bottom:24px; padding-bottom:16px; border-bottom:1px solid #ff004f22; line-height:1.6; }
+.quiz-q { margin-bottom:28px; }
+.quiz-q p { font-size:13px; color:#ddd; margin-bottom:12px; line-height:1.65; }
+.quiz-q p strong { color:#00d9ff; }
+.quiz-options { display:flex; flex-direction:column; gap:8px; }
+.quiz-opt {
+background:rgba(255,255,255,0.03); border:1px solid #ffffff1a;
+padding:11px 16px; cursor:pointer; font-size:12px; font-family:‘Share Tech Mono’,monospace;
+transition:0.2s ease; text-align:left; color:white; line-height:1.5;
+}
+.quiz-opt:hover:not(:disabled) { background:rgba(0,217,255,0.08); border-color:#00d9ff44; }
+.quiz-opt.correct { background:rgba(57,255,20,0.1);  border-color:#39ff14; color:#39ff14; }
+.quiz-opt.wrong   { background:rgba(255,0,79,0.1);   border-color:#ff004f; color:#ff004f; }
+.quiz-opt:disabled { cursor:default; }
+.quiz-feedback { font-size:12px; margin-top:10px; min-height:18px; line-height:1.7; opacity:0.9; padding:0 4px; }
+.quiz-score { font-family:‘Orbitron’,sans-serif; font-size:12px; color:#39ff14; margin-top:20px; letter-spacing:1px; display:none; padding-top:16px; border-top:1px solid #39ff1433; }
+
+.py-block { background:rgba(10,10,10,0.95); border:1px solid #39ff1422; padding:28px; margin:32px 0; }
+.py-block h2 { font-family:‘Orbitron’,sans-serif; font-size:13px; color:#39ff14; letter-spacing:2px; margin-bottom:8px; }
+.py-block .py-intro { font-size:12px; opacity:0.7; margin-bottom:20px; padding-bottom:16px; border-bottom:1px solid #39ff1422; line-height:1.7; }
+.py-exercise { margin-bottom:32px; }
+.py-exercise:last-child { margin-bottom:0; }
+.py-exercise h3 { font-family:‘Orbitron’,sans-serif; font-size:11px; color:#39ff1499; letter-spacing:1.5px; text-transform:uppercase; margin-bottom:10px; }
+.py-exercise p { font-size:12px; color:#aaa; margin-bottom:14px; line-height:1.75; }
+.py-block pre {
+background:#050505; border:1px solid #39ff1433; padding:20px;
+font-family:‘Share Tech Mono’,monospace; font-size:11.5px;
+line-height:1.75; overflow-x:auto; color:#39ff14;
+white-space:pre; margin-bottom:12px;
+}
+.py-block .py-note { font-size:11px; color:#ffffff44; line-height:1.75; margin-top:10px; }
+.py-block .py-challenge { background:rgba(57,255,20,0.04); border-left:2px solid #39ff14; padding:12px 16px; margin-top:14px; font-size:12px; line-height:1.75; color:#aaa; }
+.py-block .py-challenge strong { font-family:‘Orbitron’,sans-serif; font-size:10px; color:#39ff14; display:block; margin-bottom:6px; letter-spacing:1px; }
+
+.reflection-block { background:rgba(255,170,0,0.04); border:1px solid #ffaa0033; padding:24px; margin:32px 0; }
+.reflection-block h2 { font-family:‘Orbitron’,sans-serif; font-size:13px; color:#ffaa00; letter-spacing:2px; margin-bottom:8px; }
+.reflection-block .ref-intro { font-size:12px; opacity:0.7; margin-bottom:20px; padding-bottom:14px; border-bottom:1px solid #ffaa0022; line-height:1.7; }
+.ref-prompt { margin-bottom:20px; }
+.ref-prompt h3 { font-family:‘Orbitron’,sans-serif; font-size:11px; color:#ffaa0099; letter-spacing:1px; margin-bottom:8px; }
+.ref-prompt p { font-size:12px; color:#bbb; line-height:1.75; margin-bottom:10px; }
+.ref-prompt ul li { font-size:12px; color:#bbb; padding-left:18px; position:relative; margin-bottom:6px; }
+.ref-prompt ul li::before { content:’›’; position:absolute; left:0; color:#ffaa00; }
+
+.back-to-top {
+position:fixed; bottom:28px; right:28px; z-index:200;
+width:44px; height:44px; background:#000;
+border:1px solid #00d9ff55; color:#00d9ff;
+font-size:20px; cursor:pointer;
+display:flex; align-items:center; justify-content:center;
+opacity:0; pointer-events:none; transition:opacity 0.3s ease;
+}
+.back-to-top.visible { opacity:1; pointer-events:auto; }
+.back-to-top:hover { border-color:#00d9ff; background:#001a2c; }
+
+.complete-wrap { margin-top:56px; padding-top:30px; border-top:1px solid #ffffff11; text-align:center; }
+.complete-btn {
+font-family:‘Orbitron’,sans-serif; font-size:13px; letter-spacing:2px;
+padding:14px 44px; background:transparent;
+border:1px solid #39ff14; color:#39ff14; cursor:pointer; transition:0.3s ease;
+}
+.complete-btn:hover:not(.done) { background:#39ff14; color:black; box-shadow:0 0 20px rgba(57,255,20,0.4); }
+.complete-btn.done { background:rgba(57,255,20,0.1); cursor:default; opacity:0.7; }
+.complete-msg { font-size:12px; color:#ffffff55; margin-top:14px; min-height:18px; letter-spacing:1px; }
+
+.lesson-nav { display:flex; justify-content:space-between; margin-top:30px; flex-wrap:wrap; gap:10px; }
+.lesson-nav a { font-family:‘Orbitron’,sans-serif; font-size:11px; color:#00d9ff66; text-decoration:none; letter-spacing:1px; transition:0.2s; }
+.lesson-nav a:hover { color:#00d9ff; }
+
+footer { text-align:center; padding:30px; opacity:0.3; font-size:11px; position:relative; z-index:1; letter-spacing:1px; }
+
+@media (max-width:600px) {
+.key-numbers { grid-template-columns:1fr 1fr; }
+.compare-table { font-size:11px; }
+.compare-table th, .compare-table td { padding:8px; }
+}
+</style>
+
+</head>
+<body>
+<canvas id="starsCanvas"></canvas>
+
+<header>
+    <a href="dashboard.html" class="logo"><span>LEO</span><span>AF</span></a>
+    <div class="nav-right">
+        <a href="q1.html" class="nav-btn">← Q1 HUB</a>
+        <button id="logoffBtn" class="nav-btn">ABORT</button>
+    </div>
+</header>
+
+<div class="breadcrumb">
+    <a href="dashboard.html">DASHBOARD</a><span>/</span>
+    <a href="q1.html">Q1</a><span>/</span>
+    <span style="color:#ffffff88;">LESSON 08 — ONEWEB DEEP DIVE</span>
+</div>
+
+<div class="lesson-wrap">
+
+<div class="lesson-header">
+    <div class="lesson-tag">Q1 · LESSON 08 OF 15</div>
+    <h1>OneWeb Deep Dive</h1>
+    <div class="lesson-meta">
+        <div class="l-pill l-pill-q">QUARTER 1</div>
+        <div class="l-pill l-pill-t">MODERN CONSTELLATIONS</div>
+        <div class="l-pill l-pill-s">PART III</div>
+    </div>
+    <p class="lesson-intro">OneWeb is the most instructive case study in the modern LEO era — not because it succeeded, but because it failed spectacularly once, was rescued twice, and emerged with a fundamentally different business model than it started with. It began as a mass-market broadband vision, collapsed into Chapter 11 bankruptcy in March 2020 with 74 satellites in orbit and $3.4 billion spent, was acquired by a UK government and Indian conglomerate consortium, relaunched its constellation, and pivoted entirely to B2B and aviation markets where Eutelsat's acquisition in 2023 repositioned it as part of a hybrid LEO+GEO operator. This lesson traces that arc — original architecture and Greg Wyler's founding thesis, the structural reasons for the bankruptcy, the rescue and its terms, current constellation status and technical architecture, and the B2B/aviation commercial strategy that defines OneWeb today.</p>
+</div>
+
+<div class="toc">
+    <h4>CONTENTS</h4>
+    <ol>
+        <li><a href="#s1">Greg Wyler and the founding thesis</a></li>
+        <li><a href="#s2">Original constellation architecture</a></li>
+        <li><a href="#s3">The road to bankruptcy: 2020</a></li>
+        <li><a href="#s4">The rescue: Bharti, UK Government, and the Chapter 11 exit</a></li>
+        <li><a href="#s5">Reconstitution: relaunch, Soyuz, and the Ukraine disruption</a></li>
+        <li><a href="#s6">Current constellation status and technical architecture</a></li>
+        <li><a href="#s7">B2B-only strategy: rationale and market segments</a></li>
+        <li><a href="#s8">Aviation: OneWeb's primary growth market</a></li>
+        <li><a href="#s9">Eutelsat merger and the hybrid LEO+GEO operator thesis</a></li>
+        <li><a href="#quiz">Knowledge check</a></li>
+        <li><a href="#python">Python exercises</a></li>
+        <li><a href="#reflect">Reflection prompts</a></li>
+    </ol>
+</div>
+
+<!-- ═══ S1 ═══ -->
+
+<div class="content-block" id="s1">
+    <h2>1. Greg Wyler and the Founding Thesis</h2>
+
+```
+<p>OneWeb was founded by Greg Wyler in 2012, though its direct antecedent was O3b Networks, which Wyler had founded in 2007 and sold to SES in 2013. Wyler's founding thesis for OneWeb was more ambitious than O3b's: not a medium-Earth-orbit constellation serving underserved enterprise markets, but a true LEO mega-constellation capable of delivering broadband connectivity to every person on Earth. The mission was explicitly humanitarian in framing — Wyler frequently cited the 3+ billion people without meaningful internet access as the target constituency, and positioned OneWeb as infrastructure for closing the global digital divide.</p>
+
+<p>The original business logic rested on unit cost reduction at scale. Wyler's argument was that a purpose-designed small satellite, manufactured in large numbers through a highly automated factory, could achieve per-satellite costs of $500,000 or less — low enough that a 648-satellite constellation could be built and launched for under $3 billion, generating sufficient capacity to serve both underserved populations at subsidised rates and commercial customers at margins that would sustain the business. This cost thesis was the constellation's central financial assumption, and it proved optimistic in ways that contributed directly to the 2020 bankruptcy.</p>
+
+<p>Wyler's background shaped the architecture in a specific way. O3b had been a GEO-adjacent play — medium orbits, large enterprise customers, fibre-quality latency that justified premium pricing. OneWeb was conceptually the opposite: low orbits, mass-market scale, commodity pricing, and global coverage including polar regions that no GEO constellation could serve. Wyler wanted to reach the places no existing infrastructure reached, which drove the constellation's orbital design toward high-inclination orbits with near-polar coverage.</p>
+
+<h3>The SoftBank relationship</h3>
+
+<p>OneWeb's most consequential early decision was accepting a $1 billion investment from SoftBank's Vision Fund in 2016 — at the time the largest single investment in a satellite company. SoftBank's involvement provided capital for the constellation buildout but also created a dependency that became structurally dangerous when SoftBank's Vision Fund encountered portfolio stress in 2019–2020. The SoftBank relationship brought additional investors into the OneWeb cap table, including Airbus (which became the joint-venture manufacturing partner), Qualcomm, Hughes Network Systems, Grupo Salinas, Intelsat (briefly), and the Virgin Group. This broad investor syndicate reflected confidence in the LEO broadband thesis but also created a complex governance structure that would complicate the bankruptcy proceedings.</p>
+
+<h3>The Airbus manufacturing joint venture</h3>
+
+<p>OneWeb's satellite manufacturing strategy was to build a dedicated high-volume factory in Toulouse, France, through a joint venture with Airbus called OneWeb Satellites. The factory was designed to produce satellites at a rate of several per day when at full production — an unprecedented manufacturing velocity for spacecraft. The Toulouse factory ultimately built the Gen1 OneWeb satellites. A second factory was planned in Florida (Exploration Park near Cape Canaveral) to serve the US market and provide manufacturing redundancy, but was never brought to full production before the bankruptcy.</p>
+
+<div class="key-numbers">
+    <div class="kn-item"><span class="kn-val">2012</span><span class="kn-label">Founded by Greg Wyler</span></div>
+    <div class="kn-item"><span class="kn-val">$1B</span><span class="kn-label">SoftBank Vision Fund investment (2016)</span></div>
+    <div class="kn-item"><span class="kn-val">$3.4B</span><span class="kn-label">Total raised before bankruptcy</span></div>
+    <div class="kn-item"><span class="kn-val">648</span><span class="kn-label">Original target constellation size</span></div>
+    <div class="kn-item"><span class="kn-val">74</span><span class="kn-label">Satellites in orbit at bankruptcy filing</span></div>
+    <div class="kn-item"><span class="kn-val">2020</span><span class="kn-label">Chapter 11 filing (March)</span></div>
+</div>
+```
+
+</div>
+
+<!-- ═══ S2 ═══ -->
+
+<div class="content-block" id="s2">
+    <h2>2. Original Constellation Architecture</h2>
+
+```
+<p>OneWeb's original constellation design was a 648-satellite Walker constellation at 1,200 km altitude in 18 orbital planes with 36 satellites per plane, at an inclination of 87.9° — effectively polar orbits, providing global coverage including the poles. This architectural choice was deliberate and distinguishing: a near-polar 87.9° inclination provides coverage at all latitudes including the Arctic and Antarctic, which GEO satellites cannot serve and which even Starlink's initial 53° inclination shells covered poorly. OneWeb's polar coverage capability was from day one a core competitive differentiator, particularly for maritime routes (transpolar shipping, Arctic oil and gas) and high-latitude government and defence customers.</p>
+
+<h3>Altitude selection: 1,200 km</h3>
+
+<p>The choice of 1,200 km altitude placed OneWeb in the lower portion of the Van Allen inner radiation belt — a zone of elevated energetic particle flux that requires radiation-hardened components and reduces satellite lifetime compared to lower orbits. This was a significant design compromise. The motivation for 1,200 km over a lower orbit like Starlink's 550 km was coverage geometry: at 1,200 km, each satellite's footprint on the ground is larger, meaning fewer satellites are needed to achieve global coverage. At 550 km, a 648-satellite constellation would leave significant coverage gaps at high latitudes; at 1,200 km, 648 satellites provides continuous global coverage with generous elevation angle margins.</p>
+
+<p>The radiation environment at 1,200 km drove component selection costs upward compared to Starlink's 550 km architecture, contributing to the per-satellite cost overruns that preceded the bankruptcy. The trade-off between altitude (coverage per satellite vs radiation hardening cost) was one of the fundamental architectural decisions where OneWeb's original team and Starlink's team reached opposite conclusions — Starlink accepted more satellites at lower altitude and lower cost per satellite; OneWeb chose fewer satellites at higher altitude but higher cost per satellite due to the radiation environment.</p>
+
+<h3>Satellite design: the Gen1 OneWeb satellite</h3>
+
+<p>The Gen1 OneWeb satellite was designed for mass production, with a target unit cost of approximately $500,000 at high production volume. Each satellite had a mass of approximately 147 kg — significantly lighter than Starlink v1.0 (260 kg), reflecting the smaller aperture of OneWeb's user-link antennas. The satellite used Ku-band for user links and Ka-band for gateway feeder links, the same frequency allocation as Starlink Gen1. Propulsion was provided by a cold gas thruster system for station-keeping and deorbit — adequate for the 1,200 km operational altitude but not capable of significant orbital manoeuvring.</p>
+
+<p>Critically, the Gen1 OneWeb satellite design had no inter-satellite links. All traffic was relayed to the nearest ground gateway — a bent-pipe architecture identical to Starlink v1.0. This means OneWeb, even after full Gen1 constellation deployment, would depend entirely on the ground gateway network for routing. In regions without nearby gateways, service quality would be constrained by the gateway geometry, exactly as early Starlink was. OneWeb's planned Gen2 satellite design included ISLs, but Gen2 was never built under the original company.</p>
+
+<h3>Gateway and ground segment architecture</h3>
+
+<p>OneWeb planned a network of approximately 40–50 ground gateways globally, using Ka-band feeder links to connect the constellation to the terrestrial internet. The gateway siting strategy prioritised geographic coverage over density: fewer, larger gateways rather than the denser gateway network Starlink built. This made economic sense for OneWeb's B2B focus — enterprise and government customers willing to pay premium prices required connectivity solutions that could be engineered end-to-end, and a sparser but carefully sited gateway network was sufficient for the initial commercial launch. The user terminal for OneWeb service was a small Ku-band flat-panel terminal approximately 40 cm in diameter, designed for easy installation and suitable for maritime, aviation, and fixed enterprise installations.</p>
+
+<div class="diagram-wrap">
+    <svg viewBox="0 0 700 300" width="100%" xmlns="http://www.w3.org/2000/svg" font-family="Share Tech Mono, monospace">
+        <defs>
+            <pattern id="gridL8" width="35" height="35" patternUnits="userSpaceOnUse">
+                <path d="M 35 0 L 0 0 0 35" fill="none" stroke="#ffffff05" stroke-width="0.5"/>
+            </pattern>
+        </defs>
+        <rect width="700" height="300" fill="url(#gridL8)"/>
+        <text x="350" y="18" text-anchor="middle" font-size="9" fill="#00d9ff88" letter-spacing="2">ONEWEB GEN1 ARCHITECTURE — ORBIT SHELLS AND COVERAGE GEOMETRY</text>
+
+        <!-- Earth -->
+        <circle cx="350" cy="175" r="80" fill="none" stroke="#00d9ff33" stroke-width="1.5"/>
+        <circle cx="350" cy="175" r="80" fill="#001a2c55"/>
+        <text x="350" y="179" text-anchor="middle" font-size="9" fill="#00d9ff66">EARTH</text>
+        <text x="350" y="191" text-anchor="middle" font-size="8" fill="#00d9ff44">r = 6,371 km</text>
+
+        <!-- 1200km shell -->
+        <circle cx="350" cy="175" r="122" fill="none" stroke="#ffaa0055" stroke-width="1.5" stroke-dasharray="4,3"/>
+        <text x="478" y="145" font-size="8" fill="#ffaa0099">1,200 km</text>
+        <text x="478" y="157" font-size="8" fill="#ffaa0066">OneWeb Gen1</text>
+
+        <!-- 550km shell (Starlink reference) -->
+        <circle cx="350" cy="175" r="95" fill="none" stroke="#39ff1433" stroke-width="1" stroke-dasharray="2,4"/>
+        <text x="447" y="184" font-size="8" fill="#39ff1466">550 km (Starlink ref)</text>
+
+        <!-- OneWeb satellites on shell -->
+        <g id="ow-sats">
+            <circle cx="472" cy="175" r="4" fill="#ffaa00" opacity="0.9"/>
+            <circle cx="228" cy="175" r="4" fill="#ffaa00" opacity="0.9"/>
+            <circle cx="436" cy="89"  r="4" fill="#ffaa00" opacity="0.9"/>
+            <circle cx="264" cy="261" r="4" fill="#ffaa00" opacity="0.9"/>
+            <circle cx="350" cy="53"  r="4" fill="#ffaa00" opacity="0.9"/>
+            <circle cx="350" cy="297" r="4" fill="#ffaa00" opacity="0.7"/>
+        </g>
+
+        <!-- Footprint arc for one satellite -->
+        <path d="M 392,110 A 122,122 0 0,1 472,175" fill="none" stroke="#ffaa0033" stroke-width="1"/>
+        <line x1="436" y1="89" x2="350" y2="175" stroke="#ffaa0033" stroke-width="1" stroke-dasharray="2,3"/>
+        <text x="395" y="128" font-size="7" fill="#ffaa0066">slant range</text>
+
+        <!-- Coverage cone from top satellite -->
+        <line x1="350" y1="53" x2="302" y2="175" stroke="#ffaa0022" stroke-width="8" opacity="0.4"/>
+        <line x1="350" y1="53" x2="398" y2="175" stroke="#ffaa0022" stroke-width="8" opacity="0.4"/>
+        <text x="350" y="42" text-anchor="middle" font-size="7" fill="#ffaa0088">coverage footprint</text>
+
+        <!-- Inclination label -->
+        <text x="180" y="100" font-size="8" fill="#ff004f88">87.9°</text>
+        <text x="175" y="112" font-size="8" fill="#ff004f66">inclination</text>
+        <text x="170" y="124" font-size="8" fill="#ff004f55">(near-polar)</text>
+
+        <!-- Legend -->
+        <circle cx="50" cy="250" r="4" fill="#ffaa00"/>
+        <text x="60" y="254" font-size="8" fill="#ffaa0099">OneWeb Gen1 sat (×648 planned)</text>
+        <line x1="46" y1="268" x2="62" y2="268" stroke="#ffaa0055" stroke-width="1.5" stroke-dasharray="4,3"/>
+        <text x="66" y="272" font-size="8" fill="#ffaa0066">1,200 km orbital shell</text>
+        <line x1="46" y1="284" x2="62" y2="284" stroke="#39ff1433" stroke-width="1" stroke-dasharray="2,4"/>
+        <text x="66" y="288" font-size="8" fill="#39ff1466">550 km (Starlink, reference)</text>
+
+        <text x="350" y="292" text-anchor="middle" font-size="7" fill="#ffffff22" letter-spacing="1">18 PLANES × 36 SATS · 87.9° INCLINATION · NO ISL · KU-BAND USER LINK</text>
+    </svg>
+    <figcaption>ONEWEB GEN1 ORBITAL ARCHITECTURE · 648 SATELLITES · 1,200 KM · NEAR-POLAR COVERAGE · NOT TO SCALE</figcaption>
+</div>
+
+<div class="deep-dive">
+    <h4>DEEPER CONTEXT — THE 1,200 KM ALTITUDE TRADE-OFF</h4>
+    <p>OneWeb's choice of 1,200 km placed its constellation at the inner edge of the Van Allen radiation belt's proton flux region. Energetic protons at this altitude damage semiconductor junctions in solar cells and electronics, degrading performance and shortening satellite lifetime. The original OneWeb design life was 5 years — shorter than the 7-year design life of Starlink Gen1 at 550 km, which sits below the bulk of the proton flux. The radiation hardening required at 1,200 km added approximately 15–25% to electronic component costs compared to a comparable satellite at 550 km. Ironically, the radiation environment that justified choosing 1,200 km for coverage reasons (larger footprint, fewer satellites needed) simultaneously made each satellite more expensive, partially undermining the cost-reduction logic.</p>
+    <p>Debris mitigation at 1,200 km is also more challenging than at 550 km. At 550 km, atmospheric drag provides meaningful passive orbit decay over 5–7 years. At 1,200 km, orbital decay without active propulsion takes decades to centuries. OneWeb's deorbit strategy relies on its cold gas thrusters actively lowering the orbit to a point where drag-assisted decay brings the satellite down within 25 years — the ITU and FCC standard for post-mission disposal. The adequacy of this strategy at scale (648+ satellites) has been scrutinised by orbital debris researchers.</p>
+</div>
+```
+
+</div>
+
+<!-- ═══ S3 ═══ -->
+
+<div class="content-block" id="s3">
+    <h2>3. The Road to Bankruptcy: 2020</h2>
+
+```
+<p>OneWeb's Chapter 11 filing on 27 March 2020 was one of the largest satellite industry bankruptcies in history, exceeded only by Iridium Original (1999) and ICO Global Communications (1999). Understanding why it happened requires tracing three concurrent failures: a cost thesis that proved too optimistic, a market entry that was too slow, and a financing structure that became brittle when a single key investor withdrew.</p>
+
+<h3>The cost overrun problem</h3>
+
+<p>OneWeb's financial model was built on the assumption that its Toulouse factory, once at full production rate, would manufacture satellites at approximately $500,000 each. This unit cost target required the factory to reach a sustained production rate of several satellites per day and for the supply chain to deliver components at volumes that enabled commodity pricing. Neither condition was fully achieved before the bankruptcy. The factory took longer to reach design production velocity than planned; supply chain negotiations for radiation-hardened components at volume were more complex than anticipated; and first-of-kind integration and test costs were higher than the financial model assumed. Independent estimates placed actual satellite unit costs at $900,000–$1.2 million per satellite in the early production runs — roughly double the target — a gap that materially changed the economics of the full 648-satellite buildout.</p>
+
+<h3>Market entry delay</h3>
+
+<p>OneWeb's first launch occurred in February 2019 — approximately three years after Starlink's regulatory filing and nine months before Starlink's first batch of 60 operational satellites launched in May 2019. The companies were roughly contemporaneous in first launch, but OneWeb's constellation buildout was slower: by March 2020, it had 74 satellites in orbit (six launches on Soyuz), while Starlink had conducted six Starlink launches totalling 360 satellites and was preparing to begin beta service. The slower OneWeb buildout reflected both manufacturing constraints and a more conservative launch campaign pace. With no commercial service revenue to partially offset costs, OneWeb was entirely dependent on investor capital for every dollar of constellation buildout — a dependency that became fatal when investor sentiment changed.</p>
+
+<h3>The SoftBank withdrawal</h3>
+
+<p>The proximate cause of the bankruptcy was SoftBank's decision in late February 2020 to decline participating in a planned $2 billion funding round that OneWeb urgently needed to continue operations. SoftBank's Vision Fund was under severe pressure in early 2020 from the WeWork collapse (announced September 2019), portfolio impairments across multiple investments, and the early signals of COVID-19's economic impact. SoftBank had already invested approximately $1 billion in OneWeb and was the single largest shareholder. When it declined to continue funding, other investors — uncertain about the constellation's commercial trajectory and facing their own COVID-related financial pressures — declined to fill the gap. Without the $2 billion, OneWeb had insufficient cash to continue launch operations. It filed for Chapter 11 within weeks of SoftBank's withdrawal, laying off approximately 85% of its workforce and halting the launch campaign.</p>
+
+<div class="timeline">
+    <div class="tl-item">
+        <div class="tl-year">2012</div>
+        <div class="tl-body"><strong>FOUNDED</strong><p>Greg Wyler founds OneWeb Ltd with global broadband mission.</p></div>
+    </div>
+    <div class="tl-item">
+        <div class="tl-year">2015</div>
+        <div class="tl-body"><strong>AIRBUS JV</strong><p>OneWeb Satellites joint venture with Airbus announced; Toulouse factory planned.</p></div>
+    </div>
+    <div class="tl-item">
+        <div class="tl-year">2016</div>
+        <div class="tl-body"><strong>SOFTBANK $1B</strong><p>SoftBank Vision Fund leads $1.2B investment round. Total capital raised exceeds $3B over lifetime.</p></div>
+    </div>
+    <div class="tl-item">
+        <div class="tl-year">Feb 2019</div>
+        <div class="tl-body"><strong>FIRST LAUNCH</strong><p>6 prototype/operational satellites launched on Soyuz from Baikonur. Production begins.</p></div>
+    </div>
+    <div class="tl-item">
+        <div class="tl-year">Feb 2020</div>
+        <div class="tl-body"><strong>SOFTBANK DECLINES</strong><p>SoftBank declines $2B funding round amid Vision Fund portfolio stress and COVID uncertainty.</p></div>
+    </div>
+    <div class="tl-item">
+        <div class="tl-year">27 Mar 2020</div>
+        <div class="tl-body"><strong>CHAPTER 11</strong><p>OneWeb files for bankruptcy protection. 74 satellites in orbit. ~85% workforce laid off.</p></div>
+    </div>
+</div>
+
+<div class="callout red">
+    <strong>THE STRUCTURAL FRAGILITY OF SINGLE-INVESTOR DEPENDENCY</strong>
+    OneWeb's bankruptcy illustrates a structural risk pattern that recurs across the historical LEO failures: concentration of funding in a small number of investors whose continued participation is essential to project viability. Iridium Original depended on Motorola as guarantor; OneWeb depended on SoftBank as the majority capital provider and implicit lead investor whose participation signalled confidence to the syndicate. When SoftBank withdrew, not only did its direct capital disappear but the withdrawal signal caused the rest of the syndicate to step back. The lesson for constellation financing is that a diverse, government-anchored, or revenue-backed capital structure is more resilient than a VC-style lead investor model — which is directly reflected in the structure of OneWeb's rescue (UK government as anchor) and in the EU's approach to IRIS² (government-anchored from inception).
+</div>
+```
+
+</div>
+
+<!-- ═══ S4 ═══ -->
+
+<div class="content-block" id="s4">
+    <h2>4. The Rescue: Bharti, UK Government, and the Chapter 11 Exit</h2>
+
+```
+<p>OneWeb emerged from Chapter 11 bankruptcy in November 2020 — seven months after filing — through an acquisition led by two unlikely partners: Bharti Global, the international investment arm of Indian conglomerate Bharti Enterprises (owner of Airtel, one of India's largest telecom operators), and the UK Government. The acquisition price was approximately $1 billion for the entire OneWeb estate — 74 satellites in orbit, spectrum licences, manufacturing assets, intellectual property, and the Airbus joint venture — against the $3.4 billion that had been invested. Creditors received cents on the dollar; equity holders were largely wiped out.</p>
+
+<h3>Why the UK Government?</h3>
+
+<p>The UK Government's participation in the OneWeb rescue is best understood as a strategic industrial and sovereign connectivity decision taken in the context of Brexit. In the months before the OneWeb bankruptcy, the UK had been negotiating its continued participation in the EU's Galileo navigation satellite programme — and the EU had determined that post-Brexit, the UK could not participate in Galileo's security-critical PRS (Public Regulated Service) as a non-member state. The UK government was therefore actively evaluating sovereign alternatives to Galileo, and OneWeb's low-Earth-orbit constellation was identified as a potential asset for building UK sovereign satellite communications and, speculatively, a navigation capability.</p>
+
+<p>The UK Government invested approximately £400 million for approximately a 20% equity stake in the restructured OneWeb, alongside Bharti's investment of approximately $500 million for a similar stake. Importantly, the acquisition gave the UK Government board representation and specific rights over OneWeb's UK operations and spectrum licences — providing a mechanism for sovereign control over the asset if needed. The navigation use case was subsequently deprioritised as it became clear that OneWeb's Ku-band constellation architecture was ill-suited for navigation (which requires dedicated L-band signals and a different orbital geometry), but the connectivity rationale remained and was operationally valid.</p>
+
+<h3>Bharti's strategic rationale</h3>
+
+<p>Bharti Global's participation was strategically coherent: Bharti Airtel serves hundreds of millions of mobile customers across India and sub-Saharan Africa, many of them in rural and underserved areas where satellite backhaul for 4G/5G towers would be a natural application. OneWeb's Ku-band constellation provided satellite connectivity infrastructure that Bharti could deploy as a distribution channel — using its existing enterprise and telecom relationships to sell OneWeb capacity to enterprises, ISPs, and telecom operators in its served markets. The acquisition effectively gave Bharti a satellite wholesale capability without the need to build a constellation from scratch.</p>
+
+<h3>Post-acquisition restructuring</h3>
+
+<p>The restructured OneWeb retained a small core team of approximately 300 employees — a skeleton crew compared to the 600+ before bankruptcy. The Toulouse factory was preserved and restarted under modified commercial terms with Airbus. The launch campaign was restarted using Soyuz rockets, which OneWeb had been using since its first launch, and which were available through Arianespace at competitive rates. The post-bankruptcy constellation buildout accelerated significantly: from 74 satellites at bankruptcy to 648 satellites (the complete Gen1 constellation) by the end of 2022. The speed of this reconstitution was made possible by the Toulouse factory's ability to return to production quickly once funding was secured.</p>
+
+<div class="key-numbers">
+    <div class="kn-item"><span class="kn-val">~$1B</span><span class="kn-label">Acquisition price (vs $3.4B invested)</span></div>
+    <div class="kn-item"><span class="kn-val">£400M</span><span class="kn-label">UK Government investment</span></div>
+    <div class="kn-item"><span class="kn-val">~20%</span><span class="kn-label">UK Govt equity stake</span></div>
+    <div class="kn-item"><span class="kn-val">~20%</span><span class="kn-label">Bharti equity stake</span></div>
+    <div class="kn-item"><span class="kn-val">Nov 2020</span><span class="kn-label">Chapter 11 exit</span></div>
+    <div class="kn-item"><span class="kn-val">~300</span><span class="kn-label">Employees retained post-rescue</span></div>
+</div>
+
+<div class="callout green">
+    <strong>SPECTRUM AS THE CROWN JEWEL</strong>
+    OneWeb's bankruptcy estate was worth far more than its 74 satellites. The most valuable asset was its ITU spectrum coordination filings — an extensive set of Ku-band and Ka-band spectrum rights that had been filed and defended over years of ITU regulatory process. Spectrum coordination rights are not easily replicated: the ITU filing process takes years, filings must be defended against interference claims from other operators, and the regulatory landscape is increasingly competitive as more constellations seek the same frequency bands. A buyer acquiring OneWeb acquired not just hardware but a regulatory position in the global spectrum order that would cost significantly more and take far longer to establish from scratch. This is why the bankruptcy estate commanded a $1 billion acquisition price despite the operational failure — the spectrum licences alone justified the investment.
+</div>
+```
+
+</div>
+
+<!-- ═══ S5 ═══ -->
+
+<div class="content-block" id="s5">
+    <h2>5. Reconstitution: Relaunch, Soyuz, and the Ukraine Disruption</h2>
+
+```
+<p>OneWeb's post-bankruptcy launch campaign resumed in December 2020 with a Soyuz launch from the Baikonur Cosmodrome in Kazakhstan — the same launch vehicle and site that had carried all of OneWeb's pre-bankruptcy satellites. The reconstitution plan required approximately 14 additional Soyuz launches to reach the 648-satellite constellation target. Between December 2020 and early 2022, OneWeb conducted 13 successful Soyuz launches, placing 428 additional satellites into orbit and reaching a total of approximately 502 satellites.</p>
+
+<h3>The Russia–Ukraine crisis and Soyuz suspension</h3>
+
+<p>On 24 February 2022, Russia invaded Ukraine. The geopolitical consequences for OneWeb were immediate and severe. Russia's Roscosmos state space agency announced that it would suspend Soyuz launch services for OneWeb unless OneWeb provided guarantees that its satellites would not be used for military purposes and unless the UK Government divested its stake — conditions that OneWeb could not accept. A launch campaign that had been scheduled for 5 March 2022 at the Baikonur Cosmodrome was halted: Roscosmos demanded the return of already-integrated OneWeb satellites from the launch pad, and after tense negotiations they were eventually returned, though Roscosmos retained 36 satellites that had already been integrated into the Soyuz vehicle. OneWeb lost those 36 satellites — a total loss with no compensation.</p>
+
+<p>The Soyuz suspension left OneWeb's constellation at approximately 502 satellites — short of the 648 needed for complete global coverage — with no alternative launch vehicle immediately available. This was a genuine operational crisis: OneWeb had no redundant launch provider relationship because Soyuz had been its sole launch partner since inception. The suspension exposed a single-point-of-failure in the supply chain that the company had failed to mitigate despite the obvious geopolitical context (the UK Government's £400M investment should have prompted immediate launch vehicle diversification).</p>
+
+<h3>Launch vehicle pivot: SpaceX and Arianespace</h3>
+
+<p>OneWeb's response was rapid and pragmatic — it contracted with two alternative launch providers almost simultaneously. SpaceX agreed to launch OneWeb satellites on Falcon 9, despite the obvious competitive dynamic (Starlink is SpaceX's own LEO broadband constellation). The first SpaceX launch of OneWeb satellites took place in March 2023. Arianespace contracted to use Ariane 6, Vega-C, and eventually the new Arianegroup launch vehicles. The mix of providers — a European prime (Arianespace) and a US commercial (SpaceX) — also provided geopolitical diversification appropriate to a UK Government–co-owned asset. The per-launch cost of Falcon 9 was higher than Soyuz (which had been among the cheapest orbital launch vehicles available), but the urgency of completing the constellation overrode cost optimisation.</p>
+
+<p>By mid-2023, OneWeb had completed the 648-satellite Gen1 constellation through a combination of the remaining Soyuz-launched satellites and Falcon 9 launches — a turnaround from the crisis that demonstrated operational resilience, albeit at significant unplanned cost.</p>
+
+<div class="callout amber">
+    <strong>SINGLE-LAUNCH-PROVIDER DEPENDENCY: A RECURRING RISK PATTERN</strong>
+    OneWeb's Soyuz dependency illustrates a supply chain concentration risk that appears in multiple forms across the industry. Iridium Original depended on McDonnell Douglas Delta II vehicles; OneWeb depended on Soyuz; early Globalstar depended on Zenit. In each case, loss of the primary launch provider would have been catastrophic without a backup. Modern constellation operators have learned from these failures: SpaceX uses only its own vehicles (eliminating third-party risk but creating internal dependency); Amazon Kuiper has contracted with ULA, New Glenn, and Arianespace simultaneously; Telesat Lightspeed has multi-vehicle contracts. For any architect evaluating a constellation's risk profile, launch provider concentration is a first-order infrastructure risk question — not a footnote.
+</div>
+```
+
+</div>
+
+<!-- ═══ S6 ═══ -->
+
+<div class="content-block" id="s6">
+    <h2>6. Current Constellation Status and Technical Architecture</h2>
+
+```
+<p>As of early 2025, OneWeb operates 618 active Gen1 satellites in its near-polar constellation at 1,200 km altitude — slightly below the full 648-satellite target due to satellite failures and deorbit decisions on early production units. The constellation provides continuous global coverage above approximately 40° latitude with reasonable coverage below that latitude, though with lower satellite density (fewer simultaneous visible satellites) near the equator than near the poles. This coverage profile is the inverse of Starlink's: Starlink's 53° inclination primary shells provide excellent mid-latitude coverage but reduced polar coverage; OneWeb's near-polar constellation provides excellent polar coverage but proportionally less mid-latitude satellite density.</p>
+
+<h3>Technical architecture: what Gen1 can and cannot do</h3>
+
+<p>The current Gen1 constellation has several important technical limitations that bound OneWeb's commercial offering. There are no inter-satellite links — every packet must travel to the nearest ground gateway, transit the terrestrial internet, and return. This creates a hard dependency on the gateway network and means that transoceanic routing incurs full round-trip latency through two uplinks and the terrestrial path, similar to Starlink pre-ISL. Latency is approximately 30–50 ms to a nearby gateway, but effective end-to-end latency for transoceanic routes can be 60–100 ms depending on gateway proximity and terrestrial routing.</p>
+
+<p>Throughput per satellite on the Gen1 design is significantly lower than Starlink Gen1, reflecting the smaller aperture and power budget: approximately 7–8 Gbps per satellite in optimal conditions. At 618 active satellites, the aggregate constellation capacity is in the range of 4–5 Tbps — substantially less than Starlink's Gen1 capacity of approximately 20–40 Tbps. This capacity gap directly limits OneWeb's ability to serve mass-market residential customers and is the principal reason the B2B strategy — where volumes are lower but per-bit pricing is higher — is the commercially rational path.</p>
+
+<h3>Ground terminal: the OneWeb terminal ecosystem</h3>
+
+<p>OneWeb's user terminal is a Ku-band flat-panel phased array approximately 40 cm in diameter, purpose-designed for enterprise and mobility applications. Unlike Starlink's consumer-grade terminals with plug-and-play installation, OneWeb's terminal ecosystem targets professional installation and managed service delivery. Terminals are sold through distribution partners (telecom operators, system integrators, aviation connectivity providers) rather than direct-to-consumer. The terminal supports download speeds of 100–200 Mbps with latency of 30–50 ms — competitive for enterprise and aviation use cases, though below Starlink's peak residential performance. OneWeb has also qualified terminals for maritime and aviation installations, including aeronautical terminals certified for in-flight connectivity.</p>
+
+<h3>Gen2 planning: the post-Eutelsat question</h3>
+
+<p>OneWeb's Gen2 constellation design — which included ISLs, higher per-satellite capacity, and potentially a lower orbital altitude — was planned before the Eutelsat acquisition but has not been formally committed to as a funded programme as of early 2025. The Eutelsat merger (Section 9) has created uncertainty about whether the capital required for Gen2 will be available, and whether a standalone OneWeb Gen2 or a combined Eutelsat-OneWeb GEO+LEO next-generation architecture is the right investment. Gen2 planning continues, but a commercial launch decision with funded manufacturing contracts had not been announced as of early 2025.</p>
+
+<div class="compare-table" style="overflow-x:auto;">
+    <table class="compare-table" style="min-width:580px;">
+        <thead>
+            <tr>
+                <th>Parameter</th>
+                <th>OneWeb Gen1</th>
+                <th>Starlink v1.0</th>
+                <th>Starlink v2 Mini</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr><td>Altitude</td><td>1,200 km</td><td>550 km</td><td>530 km</td></tr>
+            <tr><td>Inclination</td><td class="hi">87.9° (near-polar)</td><td class="md">53° (mid-lat focus)</td><td class="md">43°/53°</td></tr>
+            <tr><td>Satellites (planned)</td><td>648</td><td>~1,584 (Phase 1)</td><td>Growing to 7,500+</td></tr>
+            <tr><td>Satellites (operational)</td><td class="md">~618 (2025)</td><td class="hi">6,000+</td><td class="hi">Growing</td></tr>
+            <tr><td>Mass per satellite</td><td>~147 kg</td><td>~260 kg</td><td>~800 kg</td></tr>
+            <tr><td>User link</td><td>Ku-band</td><td>Ku-band</td><td>Ku + Ka</td></tr>
+            <tr><td>Optical ISL</td><td class="lo">No</td><td class="lo">No (v1.0)</td><td class="hi">Yes</td></tr>
+            <tr><td>Est. capacity/satellite</td><td class="lo">~7–8 Gbps</td><td class="md">~17–20 Gbps</td><td class="hi">~40–80 Gbps</td></tr>
+            <tr><td>Polar coverage</td><td class="hi">Full (incl. poles)</td><td class="md">Partial (53° shells)</td><td class="md">Partial + polar shells</td></tr>
+            <tr><td>Target market</td><td class="md">B2B / enterprise / aviation</td><td class="hi">Residential + all segments</td><td class="hi">All segments</td></tr>
+        </tbody>
+    </table>
+</div>
+```
+
+</div>
+
+<!-- ═══ S7 ═══ -->
+
+<div class="content-block" id="s7">
+    <h2>7. B2B-Only Strategy: Rationale and Market Segments</h2>
+
+```
+<p>OneWeb's post-bankruptcy commercial strategy is explicitly and exclusively B2B. The company does not sell directly to individual consumers. Every OneWeb service is sold through a distribution channel — a telecom operator, system integrator, ISP, maritime service provider, or aviation connectivity provider — who purchases capacity wholesale and packages it for end customers. This is a fundamental strategic departure from the original Greg Wyler vision of mass-market consumer broadband and from Starlink's direct-to-consumer model.</p>
+
+<h3>Why B2B?</h3>
+
+<p>The B2B-only decision reflects an honest assessment of where OneWeb's Gen1 constellation can compete given its technical constraints. With approximately 4–5 Tbps of aggregate capacity and no ISLs, OneWeb cannot win in mass-market residential broadband against Starlink's 20–40 Tbps Gen1 constellation and growing Gen2 capacity. The per-bit economics of mass-market residential service require volume and low customer acquisition costs that OneWeb's smaller constellation and higher per-bit cost cannot sustain. B2B enterprise customers, by contrast, value reliability, managed service quality, SLA guarantees, and specific geographic capabilities — notably polar and high-latitude coverage — over raw throughput. OneWeb's near-polar constellation excels precisely at the high-latitude coverage that Starlink's primary shells underserve.</p>
+
+<p>The B2B model also avoids the terminal subsidy trap that hurt Starlink early on. Starlink subsidised its consumer terminal from $499 (with an estimated manufacturing cost of $1,000–1,500 per unit at launch) to accelerate subscriber growth — a cash cost that totalled hundreds of millions of dollars before terminal costs fell to match retail pricing. OneWeb terminals are sold at professional installation prices through distribution partners, and the cost of terminal provisioning is embedded in the partner's service economics rather than subsidised by OneWeb directly.</p>
+
+<h3>Government and defence</h3>
+
+<p>OneWeb's most important B2B market segment is government and defence. The UK Government's equity stake creates an implicit preferential relationship with UK government customers — the Ministry of Defence, GCHQ-adjacent programmes, and UK-aligned NATO members have natural procurement reasons to prefer a UK sovereign-adjacent satellite operator over a US-controlled competitor. OneWeb has pursued government connectivity contracts in the UK, EU (for programmes not covered by IRIS²), and allied nations. The near-polar constellation's coverage of Arctic maritime routes and high-latitude military training ranges is specifically relevant to NATO's northern flank priorities — a capability Starlink cannot fully match with its mid-latitude primary shells.</p>
+
+<h3>Enterprise backhaul and telecom operators</h3>
+
+<p>OneWeb sells backhaul capacity to telecom operators deploying 4G/5G towers in areas where terrestrial fibre backhaul is unavailable or prohibitively expensive. Bharti Airtel's market presence in rural India and sub-Saharan Africa provides a natural distribution channel for this use case: a rural tower site in Rajasthan or Uganda that lacks fibre can receive 4G/5G backhaul via a OneWeb terminal, extending mobile network coverage without the cost of fibre installation. This wholesale backhaul model allows OneWeb to serve millions of indirect users (mobile network customers) through a small number of direct B2B contracts with telecom operators.</p>
+
+<h3>Maritime enterprise</h3>
+
+<p>OneWeb serves commercial maritime customers — cargo vessels, fishing fleets, offshore energy platforms — through maritime service provider partners. The near-polar constellation provides reliable coverage on transpolar Arctic shipping routes (increasingly economically significant as Arctic ice reduction extends the northern sea route season), oil and gas platforms in the North Sea and Arctic Ocean, and high-latitude fishing operations. These are exactly the customers that Starlink's initial 53° inclination shells underserved and where OneWeb's polar coverage provides a genuine differentiated capability. Maritime pricing is in the range of several hundred to several thousand dollars per month per vessel depending on service tier.</p>
+```
+
+</div>
+
+<!-- ═══ S8 ═══ -->
+
+<div class="content-block" id="s8">
+    <h2>8. Aviation: OneWeb's Primary Growth Market</h2>
+
+```
+<p>Aviation in-flight connectivity is OneWeb's most strategically important commercial market and the segment in which it has invested most heavily in terms of terminal qualification, airline relationships, and distribution partnerships. The commercial aviation IFC (in-flight connectivity) market is projected to grow from approximately $3 billion in 2023 to $7–9 billion by 2030, driven by passenger expectations for broadband-quality connectivity and airline revenue opportunities from connectivity services. OneWeb is competing for this market directly with Starlink Aviation, Panasonic Avionics (which distributes both GEO-based capacity and LEO solutions), ViaSat (now part of Inmarsat/Viasat), and SES/O3b.</p>
+
+<h3>The LEO advantage for aviation</h3>
+
+<p>Aviation in-flight connectivity has historically been dominated by GEO satellite systems — Ku-band and Ka-band services from operators like Inmarsat, ViaSat, and Panasonic. GEO connectivity provides adequate capacity for most cabin use cases but suffers from several structural limitations: the 600–700 ms round-trip latency of GEO links makes real-time applications (video calls, certain enterprise applications) frustrating; the GEO satellite's footprint is fixed and cannot be steered to track aircraft, so aircraft flying at high latitudes (polar routes) experience degraded or no GEO service; and GEO capacity per aircraft is limited by the fixed spot-beam architecture of the GEO payload.</p>
+
+<p>LEO constellations address all three limitations: latency drops to 30–60 ms, well within the threshold for real-time applications; the constellation's global coverage follows aircraft on any route including polar; and the capacity-per-aircraft scales with the number of satellites in view. For an airline operating a mix of mid-latitude and transoceanic polar routes, a LEO IFC provider is uniquely able to offer a consistent service level on all routes — the transoceanic business class cabin video call that works over the North Atlantic also works over the pole to Tokyo.</p>
+
+<h3>OneWeb's aviation terminal and partners</h3>
+
+<p>OneWeb's aviation terminal is qualified for commercial aviation installation under relevant airworthiness standards. The terminal is a flat-panel Ku-band phased array designed for fuselage conformal mounting, optimised for the SWaP (size, weight, and power) constraints of commercial aircraft. The aeronautical terminal supports download speeds of up to 195 Mbps per aircraft — lower than Starlink Aviation's quoted 350 Mbps but adequate for typical cabin connectivity use cases (streaming, email, enterprise VPN) at commercial load factors.</p>
+
+<p>OneWeb has pursued aviation market access primarily through distribution partnerships rather than direct airline sales. The key partnerships include SES (the Luxembourg-based GEO/MEO operator, which distributes OneWeb capacity on certain aviation routes), aviation connectivity integrators such as Satcom Direct and Global Eagle, and regional airlines seeking LEO upgrades from aging GEO systems. OneWeb's distribution-through-partners model means it does not carry the cost of direct airline certification programmes (which require Supplemental Type Certificate approval per aircraft type), leaving that cost with the integrator partner — a capital-efficient approach that trades margin for reach.</p>
+
+<h3>The Starlink Aviation competitive threat</h3>
+
+<p>Starlink's entry into aviation IFC — with higher throughput (350 Mbps), direct airline relationships, and a growing track record with Alaska Airlines, United Airlines, and others — is the most significant competitive threat to OneWeb's aviation ambitions. Starlink's advantage is structural: more capacity per satellite, lower latency via ISLs on transoceanic routes, and SpaceX's vertical integration enabling aggressive pricing. OneWeb's counter-positioning is on reliability-over-spectacle: enterprise airline customers want proven, managed service with contractual SLAs, not the fastest possible peak throughput. OneWeb's B2B-through-integrators model, combined with its polar coverage superiority on high-latitude routes, provides a defensible niche — but it requires OneWeb to win on service quality and coverage rather than throughput.</p>
+
+<div class="callout">
+    <strong>POLAR ROUTES: ONEWEB'S STRUCTURAL AVIATION ADVANTAGE</strong>
+    The defining aviation use case where OneWeb's near-polar constellation has a structural advantage over Starlink's primary shell architecture is transpolar routing. The polar great circle route from London Heathrow to Tokyo Narita (approximately 9,550 km) passes north of 70° latitude for a significant portion of the flight. On this route, Starlink's 53° inclination primary shells provide no coverage — aircraft on this routing rely on Starlink's smaller polar shell (fewer satellites, lower density) or fall back to GEO service. OneWeb's 87.9° near-polar constellation provides continuous, high-elevation-angle satellite coverage on this route. For airlines with significant transpolar flying — JAL, ANA, Lufthansa, British Airways — OneWeb's polar coverage is a genuine differentiating capability that Starlink Gen1 cannot match.
+</div>
+
+<div class="key-numbers">
+    <div class="kn-item"><span class="kn-val">195 Mbps</span><span class="kn-label">Aviation terminal peak (per aircraft)</span></div>
+    <div class="kn-item"><span class="kn-val">30–50ms</span><span class="kn-label">LEO latency advantage vs GEO 600ms</span></div>
+    <div class="kn-item"><span class="kn-val">$3–9B</span><span class="kn-label">Aviation IFC market 2023–2030</span></div>
+    <div class="kn-item"><span class="kn-val">87.9°</span><span class="kn-label">Inclination — full polar route coverage</span></div>
+</div>
+```
+
+</div>
+
+<!-- ═══ S9 ═══ -->
+
+<div class="content-block" id="s9">
+    <h2>9. Eutelsat Merger and the Hybrid LEO+GEO Operator Thesis</h2>
+
+```
+<p>In November 2022, Eutelsat Communications — one of Europe's largest GEO satellite operators with a fleet of approximately 36 GEO satellites — announced a merger with OneWeb, completing in September 2023. The combined entity, operating under the Eutelsat brand but incorporating OneWeb's LEO constellation, became the world's first major hybrid LEO+GEO satellite operator: a company owning and operating both geostationary high-capacity broadband and media distribution satellites alongside a low-Earth-orbit broadband constellation.</p>
+
+<h3>The merger logic</h3>
+
+<p>The merger thesis was driven by complementary strengths and existential pressures on both sides. Eutelsat's GEO business faced secular revenue decline: video distribution (the core GEO revenue driver, accounting for ~70% of Eutelsat's revenue) was under structural pressure from the shift of TV viewing to streaming delivered over terrestrial broadband, and GEO broadband was losing ground to LEO competitors. Without access to a LEO constellation, Eutelsat had no credible offering for the enterprise, maritime, and aviation markets that LEO was beginning to win. OneWeb provided that LEO asset.</p>
+
+<p>From OneWeb's perspective, Eutelsat brought capital, a global distribution network through existing GEO customer relationships, and — critically — the financial resources to consider Gen2 constellation development. As a standalone entity, the restructured OneWeb was growing but remained capital-constrained relative to the investment required to maintain competitive constellation capabilities against Starlink's Gen2 deployment. The Eutelsat balance sheet and access to European capital markets provided a route to longer-term financial stability.</p>
+
+<h3>The hybrid LEO+GEO product vision</h3>
+
+<p>The combined Eutelsat-OneWeb commercial vision is a multi-orbit connectivity offering: LEO for enterprise, aviation, maritime, and any application requiring low latency; GEO for broadcast, media distribution, and high-throughput fixed broadband in served markets where GEO economics remain competitive. The combined satellite fleet — GEO satellites at 36 orbital slots plus 600+ LEO satellites — gives Eutelsat the ability to offer customers a single contract for multi-orbit connectivity, with automatic switching between LEO and GEO links depending on application requirements and coverage geography. This is the architecture that individual operators competing with only one orbit type cannot offer.</p>
+
+<p>The integration of LEO and GEO service delivery is technically and commercially complex: different ground terminals, different latency profiles, different pricing models, and different regulatory regimes must be bridged in a coherent customer offering. As of early 2025, the OneWeb and Eutelsat commercial operations were being progressively integrated but had not yet reached a fully unified multi-orbit product portfolio.</p>
+
+<h3>Financial stress and capital concerns</h3>
+
+<p>The Eutelsat-OneWeb merger has not been without financial difficulty. Eutelsat's stock price declined significantly following the merger announcement and continued to underperform through 2023–2024, reflecting investor concern about the capital requirements of Gen2 constellation development, the continued decline of Eutelsat's video distribution revenue, and uncertainty about the combined entity's path to profitability. Eutelsat's net debt position following the merger exceeded €2 billion, and the company's ability to fund a full OneWeb Gen2 constellation while servicing existing debt and managing the GEO business transition has been a persistent market concern. Rating agency downgrades followed the merger, increasing the cost of any additional debt financing.</p>
+
+<div class="compare-table" style="overflow-x:auto;">
+    <table class="compare-table" style="min-width:580px;">
+        <thead>
+            <tr>
+                <th>Dimension</th>
+                <th>OneWeb (pre-merger)</th>
+                <th>Eutelsat (pre-merger)</th>
+                <th>Combined (2025)</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr><td>Orbit type</td><td>LEO only</td><td>GEO only</td><td class="hi">LEO + GEO (hybrid)</td></tr>
+            <tr><td>Revenue profile</td><td class="lo">Pre-revenue / early growth</td><td class="md">Declining (video loss)</td><td class="md">Mixed, transitioning</td></tr>
+            <tr><td>Satellites</td><td>~618 LEO</td><td>~36 GEO</td><td>~618 LEO + 36 GEO</td></tr>
+            <tr><td>Target markets</td><td>B2B, aviation, gov</td><td>Video, HTS broadband</td><td>All segments via multi-orbit</td></tr>
+            <tr><td>ISL capability</td><td class="lo">None</td><td class="lo">N/A (GEO)</td><td class="lo">None (Gen1)</td></tr>
+            <tr><td>Gen2 status</td><td>Planned, unfunded</td><td>N/A</td><td class="lo">Uncertain / capital-constrained</td></tr>
+            <tr><td>UK Govt stake</td><td class="hi">~20%</td><td>None</td><td class="hi">Retained (~7% of combined)</td></tr>
+            <tr><td>Net debt</td><td>Low (post-bankruptcy)</td><td>~€1.5B</td><td class="lo">&gt;€2B combined</td></tr>
+        </tbody>
+    </table>
+</div>
+
+<div class="deep-dive">
+    <h4>DEEPER CONTEXT — WHAT THE EUTELSAT MERGER MEANS FOR IRIS²</h4>
+    <p>The EU's IRIS² programme (Infrastructure for Resilience, Interconnectivity and Security by Satellite) is a €2.4 billion government-funded LEO constellation designed to provide European sovereign broadband connectivity. Eutelsat-OneWeb is one of the industrial consortia competing for the IRIS² concession, alongside an SES-led consortium. If Eutelsat-OneWeb wins or participates significantly in IRIS², it would receive EU public funding to develop next-generation LEO satellite capabilities — effectively resolving the Gen2 funding uncertainty through government contract. This is why the IRIS² procurement process is financially existential for Eutelsat-OneWeb: a successful IRIS² role would provide both revenue and the industrial basis for Gen2 development; exclusion from IRIS² would leave the combined entity reliant on its existing Gen1 constellation with no funded path to the next generation.</p>
+</div>
+```
+
+</div>
+
+<!-- ═══ QUIZ ═══ -->
+
+<div class="quiz-block" id="quiz">
+    <h2>KNOWLEDGE CHECK</h2>
+    <p class="quiz-intro">Ten questions covering OneWeb's founding architecture, the bankruptcy mechanics, the rescue structure, constellation reconstitution, B2B strategy, aviation market, and the Eutelsat merger thesis.</p>
+
+```
+<div class="quiz-q" id="q1">
+    <p><strong>Q1.</strong> OneWeb chose 1,200 km altitude for its Gen1 constellation instead of Starlink's ~550 km. What was the primary architectural motivation, and what was the primary cost penalty that followed from it?</p>
+    <div class="quiz-options">
+        <button class="quiz-opt" data-q="1" data-correct="false">A. 1,200 km was chosen because it sits above the ISS operational altitude, avoiding conjunction risk; the penalty was reduced global coverage because the footprint is smaller at higher altitude</button>
+        <button class="quiz-opt" data-q="1" data-correct="true">B. 1,200 km provides a larger coverage footprint per satellite, enabling global coverage with only 648 satellites; the penalty was elevated radiation exposure at the inner Van Allen belt fringe, requiring more expensive radiation-hardened components and reducing satellite design life</button>
+        <button class="quiz-opt" data-q="1" data-correct="false">C. 1,200 km was chosen to avoid Starlink's Ku-band frequency interference at 550 km; the penalty was higher launch cost per satellite due to greater delta-v required</button>
+        <button class="quiz-opt" data-q="1" data-correct="false">D. 1,200 km was chosen because Soyuz could not deploy satellites at lower altitudes; the penalty was that latency exceeded 100 ms RTT, making real-time applications impossible</button>
+    </div>
+    <div class="quiz-feedback" id="fb1"></div>
+</div>
+
+<div class="quiz-q" id="q2">
+    <p><strong>Q2.</strong> OneWeb's 87.9° inclination is described as a core competitive differentiator. Against which specific competitor type does it provide the most direct technical advantage, and for which market?</p>
+    <div class="quiz-options">
+        <button class="quiz-opt" data-q="2" data-correct="false">A. Against Starlink's maritime service, because OneWeb's higher inclination provides better elevation angles in temperate ocean regions</button>
+        <button class="quiz-opt" data-q="2" data-correct="false">B. Against GEO Ka-band systems for residential broadband, because GEO satellites cannot serve equatorial regions well</button>
+        <button class="quiz-opt" data-q="2" data-correct="true">C. Against both GEO systems (which cannot serve polar latitudes at all) and Starlink's primary 53° shells (which provide reduced polar satellite density) for aviation and maritime customers on high-latitude and transpolar routes including Arctic shipping and polar airline routes</button>
+        <button class="quiz-opt" data-q="2" data-correct="false">D. Against MEO O3b constellations, which are optimised for tropical latitudes and cannot reach above 45° latitude</button>
+    </div>
+    <div class="quiz-feedback" id="fb2"></div>
+</div>
+
+<div class="quiz-q" id="q3">
+    <p><strong>Q3.</strong> OneWeb filed for Chapter 11 bankruptcy in March 2020 with $3.4 billion spent and 74 satellites in orbit. What was the proximate cause of the filing?</p>
+    <div class="quiz-options">
+        <button class="quiz-opt" data-q="3" data-correct="false">A. A Soyuz launch failure destroyed 34 satellites in February 2020, causing total loss and triggering insurance-related financial disruption</button>
+        <button class="quiz-opt" data-q="3" data-correct="false">B. The FCC revoked OneWeb's US market authorisation in early 2020, eliminating the largest projected revenue market</button>
+        <button class="quiz-opt" data-q="3" data-correct="true">C. SoftBank — the largest shareholder and implicit lead investor — declined to participate in a planned $2 billion funding round in late February 2020, amid Vision Fund portfolio stress from the WeWork collapse and emerging COVID-19 uncertainty; other investors followed SoftBank's lead and declined, leaving OneWeb unable to fund continued operations</button>
+        <button class="quiz-opt" data-q="3" data-correct="false">D. Greg Wyler departed the company in early 2020, causing the leadership vacuum that prevented fundraising from closing</button>
+    </div>
+    <div class="quiz-feedback" id="fb3"></div>
+</div>
+
+<div class="quiz-q" id="q4">
+    <p><strong>Q4.</strong> The UK Government invested approximately £400 million in OneWeb's rescue. What was the primary strategic rationale?</p>
+    <div class="quiz-options">
+        <button class="quiz-opt" data-q="4" data-correct="false">A. The UK Government needed to subsidise a struggling British technology company to prevent job losses in a politically sensitive pre-election period</button>
+        <button class="quiz-opt" data-q="4" data-correct="true">B. Post-Brexit exclusion from Galileo's security-critical Public Regulated Service prompted the UK to seek sovereign satellite capability; OneWeb's spectrum licences, constellation, and manufacturing assets were identified as a route to UK sovereign connectivity and, initially, a potential navigation complement — and the price ($1B total for a $3.4B-invested asset) made it financially attractive</button>
+        <button class="quiz-opt" data-q="4" data-correct="false">C. The UK Government was contractually obligated to rescue OneWeb because the Toulouse factory was part of a UK-France industrial agreement that required UK financial backing</button>
+        <button class="quiz-opt" data-q="4" data-correct="false">D. The UK Government invested as part of a NATO agreement to ensure the Alliance had a European-aligned LEO connectivity capability independent of US-controlled assets</button>
+    </div>
+    <div class="quiz-feedback" id="fb4"></div>
+</div>
+
+<div class="quiz-q" id="q5">
+    <p><strong>Q5.</strong> In March 2022, Russia demanded the return of already-integrated OneWeb satellites from the Baikonur launch pad. What was the outcome, and what supply chain lesson does it illustrate?</p>
+    <div class="quiz-options">
+        <button class="quiz-opt" data-q="5" data-correct="false">A. Russia returned all satellites; OneWeb immediately contracted with SpaceX, suffering no operational delay. The lesson is that commercial relationships survive geopolitical disruption when economics are aligned</button>
+        <button class="quiz-opt" data-q="5" data-correct="true">B. Roscosmos returned the satellites from the pad but retained 36 already integrated into the Soyuz vehicle — a total loss for OneWeb. The lesson is that single-launch-provider dependency is a first-order infrastructure risk: without a diversified launch supply chain, a geopolitical event affecting one provider can halt constellation buildout entirely</button>
+        <button class="quiz-opt" data-q="5" data-correct="false">C. Russia launched the satellites without OneWeb's authorisation and transferred operational control to a Russian state-owned operator; OneWeb recovered the assets through international arbitration</button>
+        <button class="quiz-opt" data-q="5" data-correct="false">D. The satellites were stranded at Baikonur for six months before being recovered; the lesson is that dual-use concerns about satellite constellations require government-to-government diplomatic engagement</button>
+    </div>
+    <div class="quiz-feedback" id="fb5"></div>
+</div>
+
+<div class="quiz-q" id="q6">
+    <p><strong>Q6.</strong> OneWeb operates an exclusively B2B commercial model. Which of the following correctly identifies the primary reason for this strategic choice relative to a direct-to-consumer model?</p>
+    <div class="quiz-options">
+        <button class="quiz-opt" data-q="6" data-correct="false">A. OneWeb's bankruptcy prevented it from obtaining the FCC consumer broadband licence required to sell directly to US residential customers</button>
+        <button class="quiz-opt" data-q="6" data-correct="false">B. Bharti Airtel's ownership required OneWeb to sell through Airtel's distribution channels under a contractual exclusivity agreement</button>
+        <button class="quiz-opt" data-q="6" data-correct="true">C. OneWeb's Gen1 constellation capacity (~4–5 Tbps aggregate) is insufficient to compete with Starlink on per-bit price in mass-market residential; B2B enterprise and aviation customers pay higher per-bit prices, value polar and managed-service capabilities where OneWeb differentiates, and can be served at scale through a wholesale distribution model that avoids OneWeb carrying terminal subsidy and consumer support costs</button>
+        <button class="quiz-opt" data-q="6" data-correct="false">D. The UK Government's ownership stake legally prohibits OneWeb from competing with BT and Virgin Media in the UK residential broadband market</button>
+    </div>
+    <div class="quiz-feedback" id="fb6"></div>
+</div>
+
+<div class="quiz-q" id="q7">
+    <p><strong>Q7.</strong> What is the single most important technical advantage OneWeb's near-polar constellation provides for commercial aviation customers specifically on transpolar routes?</p>
+    <div class="quiz-options">
+        <button class="quiz-opt" data-q="7" data-correct="false">A. Lower Doppler shift at polar latitudes enables more stable modulation and higher spectral efficiency</button>
+        <button class="quiz-opt" data-q="7" data-correct="true">B. Continuous high-elevation-angle satellite coverage above 70° latitude — where GEO satellites provide no service and Starlink's primary 53° shells provide reduced density — enabling consistent in-flight connectivity on routes like London–Tokyo Narita and London–Los Angeles (over the pole) that GEO systems and mid-inclination LEO shells cannot reliably serve</button>
+        <button class="quiz-opt" data-q="7" data-correct="false">C. The 1,200 km altitude provides a longer slant range, enabling a single satellite to serve an entire long-haul flight without handover, reducing connection drops during critical flight phases</button>
+        <button class="quiz-opt" data-q="7" data-correct="false">D. Near-polar orbits align with aircraft routes more naturally than inclined orbits, reducing the angular rate of satellite motion relative to the aircraft and simplifying antenna tracking</button>
+    </div>
+    <div class="quiz-feedback" id="fb7"></div>
+</div>
+
+<div class="quiz-q" id="q8">
+    <p><strong>Q8.</strong> The Eutelsat–OneWeb merger created the world's first significant hybrid LEO+GEO operator. What was the strategic rationale from Eutelsat's perspective?</p>
+    <div class="quiz-options">
+        <button class="quiz-opt" data-q="8" data-correct="false">A. Eutelsat needed OneWeb's manufacturing facility in Toulouse to replace its ageing GEO satellite production capability</button>
+        <button class="quiz-opt" data-q="8" data-correct="true">B. Eutelsat's core GEO video distribution revenue was under secular decline from streaming over terrestrial broadband; without a LEO asset, Eutelsat had no credible offering for enterprise, aviation, and maritime markets that LEO was winning; OneWeb provided the LEO constellation, while OneWeb gained Eutelsat's capital, distribution network, and GEO customer relationships</button>
+        <button class="quiz-opt" data-q="8" data-correct="false">C. The French Government required a European operator to acquire OneWeb to prevent it from falling under further UK sovereign control following Brexit</button>
+        <button class="quiz-opt" data-q="8" data-correct="false">D. Eutelsat merged with OneWeb to block Starlink's entry into the European aviation IFC market by acquiring OneWeb's STC certifications</button>
+    </div>
+    <div class="quiz-feedback" id="fb8"></div>
+</div>
+
+<div class="quiz-q" id="q9">
+    <p><strong>Q9.</strong> OneWeb's spectrum licences were described as the "crown jewel" of the bankruptcy estate — worth more than the 74 satellites in orbit. Why?</p>
+    <div class="quiz-options">
+        <button class="quiz-opt" data-q="9" data-correct="false">A. Spectrum licences generate direct government royalty revenue; OneWeb's licences were generating approximately $100M per year in spectrum utilisation fees at the time of bankruptcy</button>
+        <button class="quiz-opt" data-q="9" data-correct="true">B. ITU spectrum coordination filings take years to establish, must be actively defended against interference claims, and cannot easily be replicated by a new entrant; acquiring OneWeb's filed spectrum rights gave the buyer a regulatory position in Ku-band and Ka-band that would cost significantly more time and money to establish from scratch — making the filing portfolio worth far more than the hardware alone</button>
+        <button class="quiz-opt" data-q="9" data-correct="false">C. OneWeb's spectrum licences included exclusive geographic rights to serve the EU and UK markets, providing the buyer with a legal monopoly in those regions worth billions in protected revenue</button>
+        <button class="quiz-opt" data-q="9" data-correct="false">D. Spectrum licences at 1,200 km altitude are unique because the ITU restricts new filings at that altitude; existing licences therefore command a scarcity premium that new entrants cannot circumvent</button>
+    </div>
+    <div class="quiz-feedback" id="fb9"></div>
+</div>
+
+<div class="quiz-q" id="q10">
+    <p><strong>Q10 — Synthesis.</strong> You are advising a European airline evaluating LEO IFC providers for its long-haul fleet. The airline's routes include London–Singapore (over Central Asia), London–Tokyo (transpolar), and London–New York (transatlantic). Compare OneWeb and Starlink Aviation across these three routes, then recommend a strategy.</p>
+    <div class="quiz-options">
+        <button class="quiz-opt" data-q="10" data-correct="false">A. Starlink Aviation dominates on all three routes due to higher throughput (350 Mbps vs 195 Mbps); recommend Starlink for the entire fleet</button>
+        <button class="quiz-opt" data-q="10" data-correct="false">B. OneWeb dominates on all three routes due to its B2B managed service model and contractual SLAs; recommend OneWeb for the entire fleet</button>
+        <button class="quiz-opt" data-q="10" data-correct="true">C. Starlink Aviation offers higher throughput and ISL-based latency advantage on London–New York (transatlantic) and London–Singapore (mid-latitude overland); OneWeb's near-polar constellation provides superior and more consistent coverage on London–Tokyo (transpolar above 70° latitude where Starlink's primary shells are sparse). The optimal strategy for an airline with significant transpolar flying is a dual-provider approach — OneWeb for polar routes, Starlink for mid-latitude routes — or a single provider with demonstrably adequate polar coverage. Alternatively, select OneWeb if the managed-service model and polar reliability outweigh the throughput gap, and negotiate gen-2 upgrade rights in the contract</button>
+        <button class="quiz-opt" data-q="10" data-correct="false">D. Both providers offer equivalent performance on all three routes; choose based solely on price per Mbps per month</button>
+    </div>
+    <div class="quiz-feedback" id="fb10"></div>
+</div>
+
+<div class="quiz-score" id="quizScore"></div>
+```
+
+</div>
+
+<!-- ═══ PYTHON ═══ -->
+
+<div class="py-block" id="python">
+    <h2>PYTHON EXERCISES</h2>
+    <p class="py-intro">Three exercises: OneWeb vs Starlink coverage geometry comparison at polar latitudes; constellation reconstitution cost modelling with the Soyuz-to-Falcon-9 transition; and a B2B market sizing model for OneWeb's addressable segments.</p>
+
+```
+<div class="py-exercise">
+    <h3>Exercise 1 — Polar Coverage: OneWeb vs Starlink Geometry</h3>
+    <p>Compare the number of satellites visible and aggregate coverage capacity as a function of latitude for OneWeb's near-polar Gen1 constellation versus Starlink's primary 53° shell. Quantify the crossover latitude where OneWeb's geometry becomes advantageous.</p>
+```
+
+<pre>
+import numpy as np
+import matplotlib.pyplot as plt
+
+Re = 6_371  # km Earth radius
+
+def visible_sats_walker(lat_deg, alt_km, incl_deg,
+                         n_planes, n_per_plane, elev_min_deg=25):
+    """
+    Estimate mean satellites visible from a ground station at lat_deg.
+    Simplified Walker coverage model — analytical approximation.
+    """
+    lat  = np.radians(abs(lat_deg))
+    incl = np.radians(incl_deg)
+    elev = np.radians(elev_min_deg)
+
+    # Earth central half-angle for minimum elevation
+    sin_rho = Re / (Re + alt_km) * np.cos(elev)
+    rho = np.arcsin(sin_rho)
+    lam = np.pi/2 - elev - rho   # coverage half-angle from satellite nadir
+
+    # Single-satellite footprint as fraction of Earth surface
+    fp_frac = (1 - np.cos(lam)) / 2
+
+    total_sats  = n_planes * n_per_plane
+    total_fp    = total_sats * fp_frac   # total footprint fractions (can exceed 1 = overlap)
+
+    # Latitude weighting: for inclined Walker, satellite density is higher
+    # near the inclination limit (Walker "bunching" effect)
+    # For near-polar (incl ≈ 90°), density is roughly uniform with latitude
+    # For inclined (incl = 53°), density peaks near ±53° and drops at poles
+    if incl_deg >= 80:
+        # Near-polar: roughly uniform density up to incl_deg, slight increase at poles
+        if abs(lat_deg) <= incl_deg:
+            lat_factor = 1.0 + 0.15 * (lat / incl)
+        else:
+            lat_factor = 0.05   # very few satellites beyond inclination
+    else:
+        # Inclined Walker: density enhancement near inclination limit
+        if abs(lat_deg) < incl_deg - 5:
+            lat_factor = 0.6 + 0.4 * np.sin(lat / incl * np.pi / 2)
+        elif abs(lat_deg) <= incl_deg:
+            lat_factor = 1.0  # peak density near inclination
+        else:
+            lat_factor = max(0.05, 1 - (abs(lat_deg) - incl_deg) / 15)
+
+    # Expected visible satellites
+    mean_vis = max(0.1, total_fp * lat_factor * 4)
+    return min(mean_vis, total_sats * 0.15)  # cap at physically plausible
+
+# Constellation definitions
+CONSTELLATIONS = {
+    'OneWeb Gen1\n(87.9°, 1200km)': {
+        'alt': 1200, 'incl': 87.9, 'npl': 18, 'npp': 36,
+        'cap_gbps': 7.5, 'color': '#ffaa00', 'ls': '-'
+    },
+    'Starlink v1 53° shell\n(53°, 550km)': {
+        'alt': 550, 'incl': 53, 'npl': 72, 'npp': 22,
+        'cap_gbps': 18, 'color': '#39ff14', 'ls': '-'
+    },
+    'Starlink polar shell\n(97.6°, 560km)': {
+        'alt': 560, 'incl': 97.6, 'npl': 6, 'npp': 58,
+        'cap_gbps': 18, 'color': '#00d9ff', 'ls': '--'
+    },
+}
+
+lats = np.arange(-90, 91, 1)
+
+fig, axes = plt.subplots(1, 3, figsize=(16, 5))
+fig.patch.set_facecolor('#0a0a0a')
+for ax in axes:
+    ax.set_facecolor('#0d0d0d')
+    ax.tick_params(colors='#888')
+    for sp in ax.spines.values(): sp.set_color('#333')
+
+# Panel 1: visible satellites vs latitude
+ax = axes[0]
+for name, cfg in CONSTELLATIONS.items():
+    vis = [visible_sats_walker(lat, cfg['alt'], cfg['incl'],
+                               cfg['npl'], cfg['npp']) for lat in lats]
+    ax.plot(lats, vis, color=cfg['color'], linewidth=2, linestyle=cfg['ls'], label=name)
+
+# Mark key aviation latitudes
+for lat, label in [(51,'London'), (35,'Tokyo'), (65,'Arctic route'), (-33,'Sydney')]:
+    ax.axvline(x=lat, color='#ffffff11', linewidth=0.8, linestyle=':')
+    ax.text(lat+1, ax.get_ylim()[1]*0.02 if lat > 0 else ax.get_ylim()[1]*0.05,
+            label, fontsize=6.5, color='#ffffff44', rotation=90)
+
+ax.set_xlabel('Latitude (°)', color='#aaa')
+ax.set_ylabel('Est. satellites visible (>25° elev)', color='#aaa')
+ax.set_title('Satellites Visible vs Latitude\nOneWeb vs Starlink', color='#ccc')
+ax.legend(facecolor='#111', edgecolor='#333', labelcolor='white', fontsize=7.5)
+ax.grid(True, alpha=0.07, color='#444')
+ax.axhline(y=0, color='#ffffff22', linewidth=0.5)
+
+# Panel 2: aggregate capacity vs latitude
+ax = axes[1]
+for name, cfg in CONSTELLATIONS.items():
+    cap = [visible_sats_walker(lat, cfg['alt'], cfg['incl'],
+                               cfg['npl'], cfg['npp']) * cfg['cap_gbps'] for lat in lats]
+    ax.plot(lats, cap, color=cfg['color'], linewidth=2, linestyle=cfg['ls'], label=name)
+
+ax.set_xlabel('Latitude (°)', color='#aaa')
+ax.set_ylabel('Est. overhead capacity (Gbps)', color='#aaa')
+ax.set_title('Aggregate Overhead Capacity vs Latitude\n(visible sats × capacity/sat)', color='#ccc')
+ax.legend(facecolor='#111', edgecolor='#333', labelcolor='white', fontsize=7.5)
+ax.grid(True, alpha=0.07, color='#444')
+
+# Panel 3: OneWeb vs Starlink 53° advantage ratio by latitude
+ax = axes[2]
+ow_vis = [visible_sats_walker(lat, 1200, 87.9, 18, 36) * 7.5 for lat in lats]
+sl_vis = [visible_sats_walker(lat, 550, 53, 72, 22) * 18 for lat in lats]
+
+# Ratio: positive = OneWeb advantage, negative = Starlink advantage
+ratio = [o / max(s, 0.1) for o, s in zip(ow_vis, sl_vis)]
+colors_r = ['#ffaa00' if r >= 1 else '#39ff14' for r in ratio]
+
+ax.fill_between(lats, [r - 1 for r in ratio], 0,
+                where=[r >= 1 for r in ratio],
+                color='#ffaa00', alpha=0.2, label='OneWeb capacity advantage')
+ax.fill_between(lats, [r - 1 for r in ratio], 0,
+                where=[r < 1 for r in ratio],
+                color='#39ff14', alpha=0.2, label='Starlink capacity advantage')
+ax.plot(lats, [r - 1 for r in ratio], color='#ffffff66', linewidth=1)
+ax.axhline(y=0, color='#ffffff44', linewidth=1.5)
+ax.axvline(x=53, color='#39ff1444', linewidth=1, linestyle='--')
+ax.axvline(x=-53, color='#39ff1444', linewidth=1, linestyle='--')
+ax.text(54, max([r-1 for r in ratio])*0.8, '53° Starlink\nincl. limit',
+        fontsize=7, color='#39ff1466')
+
+# Mark crossover latitudes
+crossover_lats = [lats[i] for i in range(len(lats)-1)
+                  if (ratio[i]-1) * (ratio[i+1]-1) < 0]
+for cl in crossover_lats:
+    ax.axvline(x=cl, color='#ff004f55', linewidth=1, linestyle=':')
+    ax.text(cl+1, 0.1, f'{cl}°\ncrossover', fontsize=7, color='#ff004f88')
+
+ax.set_xlabel('Latitude (°)', color='#aaa')
+ax.set_ylabel('Capacity ratio OneWeb/Starlink53° − 1', color='#aaa')
+ax.set_title('OneWeb vs Starlink 53° Shell\nRelative Capacity Advantage by Latitude', color='#ccc')
+ax.legend(facecolor='#111', edgecolor='#333', labelcolor='white', fontsize=8)
+ax.grid(True, alpha=0.07, color='#444')
+
+plt.tight_layout()
+plt.savefig('oneweb_coverage.png', dpi=150, bbox_inches='tight')
+plt.show()
+
+print("\nCrossover latitudes (where OneWeb and Starlink 53° shell are roughly equal):")
+for cl in crossover_lats:
+    print(f"  {cl}° — above this latitude, OneWeb's polar coverage becomes competitive")
+</pre>
+
+```
+    <div class="py-note">
+        The three panels together visualise the coverage geometry competition: Starlink's 53° shell dominates in mid-latitudes (0–53°) due to greater satellite count and higher per-satellite capacity, but OneWeb's near-polar shell maintains meaningful satellite density above 53°–60° latitude where Starlink's mid-inclination shells begin to thin. The crossover latitude identifies where OneWeb's architecture transitions from disadvantaged to competitive.
+    </div>
+    <div class="py-challenge">
+        <strong>EXTENSION CHALLENGE</strong>
+        Add Starlink's combined shell (53° + 70° + 97.6° polar) to the comparison. At what latitude does the combined Starlink multi-shell constellation overtake OneWeb even in polar regions? Does Starlink's polar shell addition eliminate OneWeb's coverage advantage above 70°, and what are the implications for OneWeb's aviation transpolar positioning?
+    </div>
+</div>
+
+<div class="py-exercise">
+    <h3>Exercise 2 — Reconstitution Cost Model: Soyuz vs Falcon 9</h3>
+    <p>Model the incremental cost of completing the OneWeb Gen1 constellation after the Soyuz suspension, comparing the Soyuz-baseline cost to the actual Falcon 9 cost. Quantify the financial impact of the launch provider switch and the 36-satellite loss.</p>
+```
+
+<pre>
+import numpy as np
+import matplotlib.pyplot as plt
+
+# ── Constellation parameters ──────────────────────────────────────
+TOTAL_TARGET      = 648    # planned constellation size
+SATS_AT_CRISIS    = 502    # satellites in orbit at Soyuz suspension (Feb 2022)
+SATS_LOST         = 36     # satellites retained by Roscosmos
+SATS_NEEDED       = TOTAL_TARGET - (SATS_AT_CRISIS - SATS_LOST)  # = 182
+
+# ── Launch vehicle parameters ─────────────────────────────────────
+SOYUZ = {
+    'name':         'Soyuz-2.1b',
+    'sats_per_lv':  36,
+    'cost_per_lv':  65e6,   # USD — OneWeb contracted rate (estimated ~$65M/launch)
+    'cost_per_sat': None,   # computed below
+}
+FALCON9 = {
+    'name':         'Falcon 9',
+    'sats_per_lv':  40,     # OneWeb manifest: ~36-40 per F9 (smaller than Starlink batch)
+    'cost_per_lv':  95e6,   # USD — estimated commercial rate for dedicated OneWeb mission
+    'cost_per_sat': None,
+}
+for lv in [SOYUZ, FALCON9]:
+    lv['cost_per_sat'] = lv['cost_per_lv'] / lv['sats_per_lv']
+
+SAT_MANUFACTURING_COST = 900_000  # USD per satellite (mid-point of overrun range)
+
+# ── Scenario A: Soyuz baseline (counterfactual — no Soyuz suspension) ──
+def scenario_soyuz(sats_needed):
+    n_launches = int(np.ceil(sats_needed / SOYUZ['sats_per_lv']))
+    launch_cost = n_launches * SOYUZ['cost_per_lv']
+    sat_cost    = sats_needed * SAT_MANUFACTURING_COST
+    total       = launch_cost + sat_cost
+    return {'n_launches': n_launches, 'launch_cost': launch_cost,
+            'sat_cost': sat_cost, 'total': total, 'sats_needed': sats_needed}
+
+# ── Scenario B: Actual — lose 36 sats, switch to Falcon 9 ──
+def scenario_falcon9(sats_needed_after_loss):
+    # Must manufacture and launch both the remaining target sats AND replace the 36 lost
+    sats_to_launch = sats_needed_after_loss + SATS_LOST
+    n_launches = int(np.ceil(sats_to_launch / FALCON9['sats_per_lv']))
+    launch_cost = n_launches * FALCON9['cost_per_lv']
+    sat_cost    = sats_to_launch * SAT_MANUFACTURING_COST
+    total       = launch_cost + sat_cost
+    return {'n_launches': n_launches, 'launch_cost': launch_cost,
+            'sat_cost': sat_cost, 'total': total, 'sats_needed': sats_to_launch}
+
+soyuz_a = scenario_soyuz(TOTAL_TARGET - SATS_AT_CRISIS)  # = 146 sats from Soyuz baseline
+falcon_b = scenario_falcon9(TOTAL_TARGET - SATS_AT_CRISIS)  # = 182 sats on F9
+
+overhead = falcon_b['total'] - soyuz_a['total']
+per_sat_overhead = overhead / TOTAL_TARGET
+
+print("=" * 64)
+print("ONEWEB RECONSTITUTION COST MODEL")
+print("=" * 64)
+print(f"\nScenario A — Soyuz baseline (counterfactual, no suspension):")
+print(f"  Satellites to launch: {soyuz_a['sats_needed']}")
+print(f"  Launches required:    {soyuz_a['n_launches']} × Soyuz @ ${SOYUZ['cost_per_lv']/1e6:.0f}M")
+print(f"  Launch cost:          ${soyuz_a['launch_cost']/1e6:.1f}M")
+print(f"  Satellite mfg cost:   ${soyuz_a['sat_cost']/1e6:.1f}M")
+print(f"  Total:                ${soyuz_a['total']/1e6:.1f}M")
+
+print(f"\nScenario B — Actual (36 sats lost, switch to Falcon 9):")
+print(f"  Satellites to launch: {falcon_b['sats_needed']} (+{SATS_LOST} replacement)")
+print(f"  Launches required:    {falcon_b['n_launches']} × Falcon 9 @ ${FALCON9['cost_per_lv']/1e6:.0f}M")
+print(f"  Launch cost:          ${falcon_b['launch_cost']/1e6:.1f}M")
+print(f"  Satellite mfg cost:   ${falcon_b['sat_cost']/1e6:.1f}M")
+print(f"  Total:                ${falcon_b['total']/1e6:.1f}M")
+
+print(f"\nOverhead vs counterfactual:")
+print(f"  Additional cost:      ${overhead/1e6:.1f}M")
+print(f"  Per-constellation-sat:${per_sat_overhead/1e3:.0f}K additional cost per sat")
+print(f"  Launch cost delta:    ${(falcon_b['launch_cost']-soyuz_a['launch_cost'])/1e6:.1f}M")
+print(f"  Replacement sat cost: ${SATS_LOST * SAT_MANUFACTURING_COST/1e6:.1f}M")
+
+# ── Sensitivity: vary F9 launch cost and sat replacement count ──
+f9_costs   = np.linspace(70e6, 130e6, 50)
+lost_counts = [0, 18, 36, 54]
+
+fig, axes = plt.subplots(1, 2, figsize=(13, 5))
+fig.patch.set_facecolor('#0a0a0a')
+for ax in axes:
+    ax.set_facecolor('#0d0d0d')
+    ax.tick_params(colors='#888')
+    for sp in ax.spines.values(): sp.set_color('#333')
+
+# Left: overhead vs F9 launch cost for different lost-satellite counts
+colors_lc = ['#39ff14', '#ffaa00', '#ff004f', '#00d9ff']
+for lc, c in zip(lost_counts, colors_lc):
+    overheads = []
+    for f9c in f9_costs:
+        n_lv = int(np.ceil((TOTAL_TARGET - SATS_AT_CRISIS + lc) / FALCON9['sats_per_lv']))
+        f9_total = n_lv * f9c + (TOTAL_TARGET - SATS_AT_CRISIS + lc) * SAT_MANUFACTURING_COST
+        sy_total = soyuz_a['total']
+        overheads.append((f9_total - sy_total) / 1e6)
+    axes[0].plot(f9_costs/1e6, overheads, color=c, linewidth=2,
+                 label=f'{lc} sats lost to Roscosmos')
+axes[0].axvline(x=FALCON9['cost_per_lv']/1e6, color='#ffffff44',
+                linewidth=1, linestyle='--', label=f'Base case ${FALCON9["cost_per_lv"]/1e6:.0f}M/launch')
+axes[0].axhline(y=0, color='#ffffff22', linewidth=0.8)
+axes[0].set_xlabel('Falcon 9 cost per launch ($M)', color='#aaa')
+axes[0].set_ylabel('Additional cost vs Soyuz baseline ($M)', color='#aaa')
+axes[0].set_title('Reconstitution Overhead\nvs F9 Launch Price & Satellites Lost', color='#ccc')
+axes[0].legend(facecolor='#111', edgecolor='#333', labelcolor='white', fontsize=8)
+axes[0].grid(True, alpha=0.07, color='#444')
+
+# Right: cumulative cost waterfall — Soyuz vs Falcon 9 scenario
+categories  = ['Soyuz\nbaseline', 'F9 launch\npremium', 'Lost sat\nreplacement', 'Total\nactual']
+soyuz_total = soyuz_a['total'] / 1e6
+f9_premium  = (falcon_b['launch_cost'] - soyuz_a['launch_cost']) / 1e6
+lost_cost   = SATS_LOST * SAT_MANUFACTURING_COST / 1e6
+actual_total = falcon_b['total'] / 1e6
+
+bar_vals  = [soyuz_total, f9_premium, lost_cost, actual_total]
+bar_colors = ['#00d9ff', '#ff004f', '#ffaa00', '#39ff14']
+bars = axes[1].bar(categories, bar_vals, color=bar_colors, alpha=0.85, edgecolor='#111')
+axes[1].set_ylabel('Cost ($M)', color='#aaa')
+axes[1].set_title('Reconstitution Cost Waterfall\nSoyuz Baseline → Actual (Falcon 9)', color='#ccc')
+axes[1].grid(True, alpha=0.07, color='#444', axis='y')
+for bar, val in zip(bars, bar_vals):
+    axes[1].text(bar.get_x() + bar.get_width()/2, val + 3,
+                 f'${val:.0f}M', ha='center', va='bottom', fontsize=9, color='#ccc')
+
+plt.tight_layout()
+plt.savefig('oneweb_reconstitution.png', dpi=150, bbox_inches='tight')
+plt.show()
+</pre>
+
+```
+    <div class="py-note">
+        The waterfall chart quantifies the full financial cost of the Soyuz suspension: the launch premium of switching to Falcon 9, plus the manufacturing cost of replacing the 36 satellites lost to Roscosmos. The sensitivity panel shows how the overhead scales with F9 pricing and the number of satellites lost — inputs that were uncertain in real time during the crisis.
+    </div>
+    <div class="py-challenge">
+        <strong>EXTENSION CHALLENGE</strong>
+        Add a third scenario: OneWeb had pre-contracted a second launch provider (Arianespace Ariane 6) as a backup from 2021, adding a 10% cost premium on 30% of planned launches. Model the insurance cost of this diversification vs the actual crisis cost. At what probability of a Soyuz-type disruption does the insurance cost break even — and does that probability seem reasonable given the geopolitical context of 2021?
+    </div>
+</div>
+
+<div class="py-exercise">
+    <h3>Exercise 3 — B2B Market Sizing Model</h3>
+    <p>Build a bottom-up addressable market model for OneWeb's B2B segments: government/defence, maritime enterprise, aviation IFC, and telecom backhaul. Estimate revenue at different market penetration rates and compare against constellation capacity constraints.</p>
+```
+
+<pre>
+import numpy as np
+import matplotlib.pyplot as plt
+
+# ── Market segment definitions ─────────────────────────────────────
+SEGMENTS = {
+    'Government / Defence': {
+        'tam_mpa':      800,     # $M/yr total addressable market (non-US allied gov)
+        'arpu_monthly': 50_000,  # USD/mo per contract (site or vessel)
+        'units':        1_333,   # implied accounts at TAM / ARPU / 12
+        'color':        '#ff004f',
+        'penetration_base': 0.08,  # realistic base penetration (8%)
+    },
+    'Maritime Enterprise': {
+        'tam_mpa':      1_200,
+        'arpu_monthly': 3_000,
+        'units':        33_333,
+        'color':        '#00d9ff',
+        'penetration_base': 0.05,
+    },
+    'Aviation IFC': {
+        'tam_mpa':      700,
+        'arpu_monthly': 15_000,  # per aircraft/month
+        'units':        3_889,
+        'color':        '#39ff14',
+        'penetration_base': 0.04,
+    },
+    'Telecom Backhaul': {
+        'tam_mpa':      600,
+        'arpu_monthly': 8_000,   # per tower site / month
+        'units':        6_250,
+        'color':        '#ffaa00',
+        'penetration_base': 0.06,
+    },
+}
+
+# ── Capacity constraint check ──────────────────────────────────────
+CONSTELLATION_CAPACITY_TBPS = 4.5   # OneWeb Gen1 aggregate
+BITS_PER_SUBSCRIBER_MBPS    = 50    # assumed committed rate per B2B subscriber
+
+def revenue_at_penetration(segment, pct):
+    return segment['tam_mpa'] * pct
+
+def total_units_at_penetration(segment, pct):
+    return int(segment['units'] * pct)
+
+# ── Penetration sweep ──────────────────────────────────────────────
+pcts = np.linspace(0.01, 0.30, 100)
+
+fig, axes = plt.subplots(1, 3, figsize=(16, 5))
+fig.patch.set_facecolor('#0a0a0a')
+for ax in axes:
+    ax.set_facecolor('#0d0d0d')
+    ax.tick_params(colors='#888')
+    for sp in ax.spines.values(): sp.set_color('#333')
+
+# Left: revenue by segment and total vs penetration
+ax = axes[0]
+total_rev = np.zeros(len(pcts))
+for name, seg in SEGMENTS.items():
+    rev = [revenue_at_penetration(seg, p) for p in pcts]
+    ax.fill_between(pcts*100, total_rev, total_rev + rev,
+                    alpha=0.4, color=seg['color'])
+    ax.plot(pcts*100, total_rev + rev, color=seg['color'],
+            linewidth=1.5, label=name)
+    total_rev += np.array(rev)
+
+ax.plot(pcts*100, total_rev, color='white', linewidth=2.5, label='Total revenue')
+ax.axhline(y=1000, color='#ffffff33', linewidth=1, linestyle='--')
+ax.text(1.5, 1020, '$1B target', fontsize=8, color='#ffffff55')
+ax.axvline(x=5, color='#ff004f33', linewidth=1, linestyle=':')
+ax.text(5.2, 50, '5% pen.', fontsize=7, color='#ff004f66')
+ax.set_xlabel('Average B2B market penetration (%)', color='#aaa')
+ax.set_ylabel('Annual revenue ($M)', color='#aaa')
+ax.set_title('OneWeb B2B Revenue Model\nby Segment and Penetration', color='#ccc')
+ax.legend(facecolor='#111', edgecolor='#333', labelcolor='white', fontsize=7.5)
+ax.grid(True, alpha=0.07, color='#444')
+
+# Centre: capacity utilisation vs penetration
+ax = axes[1]
+total_units  = []
+cap_used_pct = []
+for p in pcts:
+    units = sum(total_units_at_penetration(seg, p) for seg in SEGMENTS.values())
+    capacity_used_tbps = units * BITS_PER_SUBSCRIBER_MBPS / 1e6   # Mbps → Tbps
+    total_units.append(units)
+    cap_used_pct.append(capacity_used_tbps / CONSTELLATION_CAPACITY_TBPS * 100)
+
+ax.fill_between(pcts*100, cap_used_pct, alpha=0.2,
+                color=[('#ff004f' if c > 80 else '#39ff14') for c in cap_used_pct][0])
+ax.plot(pcts*100, cap_used_pct, color='#00d9ff', linewidth=2)
+ax.axhline(y=80, color='#ff004f55', linewidth=1, linestyle='--', label='80% cap threshold')
+ax.axhline(y=100, color='#ff004f', linewidth=1.5, linestyle='-', label='Capacity limit')
+
+# Find saturation penetration
+sat_pct = None
+for i, c in enumerate(cap_used_pct):
+    if c >= 100:
+        sat_pct = pcts[i] * 100
+        break
+if sat_pct:
+    ax.axvline(x=sat_pct, color='#ff004f88', linewidth=1.5, linestyle=':')
+    ax.text(sat_pct+0.3, 50, f'Capacity\nfull at\n{sat_pct:.0f}% pen.',
+            fontsize=7.5, color='#ff004f88')
+
+ax.set_xlabel('Average B2B market penetration (%)', color='#aaa')
+ax.set_ylabel('Gen1 constellation capacity utilised (%)', color='#aaa')
+ax.set_title('Capacity Utilisation vs Market Penetration\n(OneWeb Gen1, 4.5 Tbps)', color='#ccc')
+ax.legend(facecolor='#111', edgecolor='#333', labelcolor='white', fontsize=8)
+ax.grid(True, alpha=0.07, color='#444')
+
+# Right: base-case scenario breakdown (at base penetration rates)
+ax = axes[2]
+seg_names  = list(SEGMENTS.keys())
+seg_revs   = [revenue_at_penetration(SEGMENTS[n], SEGMENTS[n]['penetration_base'])
+              for n in seg_names]
+seg_colors = [SEGMENTS[n]['color'] for n in seg_names]
+total_base = sum(seg_revs)
+
+bars = ax.bar(range(len(seg_names)), seg_revs, color=seg_colors, alpha=0.85, edgecolor='#111')
+ax.set_xticks(range(len(seg_names)))
+ax.set_xticklabels([n.replace(' ', '\n') for n in seg_names], color='#aaa', fontsize=8)
+ax.set_ylabel('Annual revenue ($M)', color='#aaa')
+ax.set_title(f'Base Case Revenue by Segment\n(Base penetration rates — total ${total_base:.0f}M/yr)',
+             color='#ccc')
+ax.grid(True, alpha=0.07, color='#444', axis='y')
+for bar, val, name in zip(bars, seg_revs, seg_names):
+    pct = val / total_base * 100
+    ax.text(bar.get_x() + bar.get_width()/2, val + 5,
+            f'${val:.0f}M\n({pct:.0f}%)', ha='center', va='bottom',
+            fontsize=8, color='#ccc')
+
+ax.axhline(y=total_base, color='#ffffff33', linewidth=1, linestyle='--')
+ax.text(len(seg_names)-0.5, total_base+5, f'Total: ${total_base:.0f}M', fontsize=8,
+        color='#ffffff55', ha='right')
+
+plt.tight_layout()
+plt.savefig('oneweb_b2b_model.png', dpi=150, bbox_inches='tight')
+plt.show()
+
+print(f"\nBase case annual revenue:  ${total_base:.0f}M")
+print(f"Constellation capacity:    {CONSTELLATION_CAPACITY_TBPS} Tbps")
+print(f"Capacity at base case:     {sum(total_units_at_penetration(SEGMENTS[n], SEGMENTS[n]['penetration_base']) for n in seg_names) * BITS_PER_SUBSCRIBER_MBPS / 1e6:.2f} Tbps")
+print(f"Revenue needed for $1B:    {1000/total_base*sum(SEGMENTS[n]['penetration_base'] for n in seg_names)/4*100:.1f}% average penetration")
+</pre>
+
+```
+    <div class="py-note">
+        The three panels together reveal OneWeb's financial and capacity reality: at realistic B2B penetration rates (4–8%), revenue is well below $1 billion annually — the level typically cited as needed for constellation financial sustainability. The capacity utilisation panel shows that Gen1's 4.5 Tbps is not the binding constraint at realistic penetration rates; the binding constraint is revenue, not capacity. Gen2's value is therefore not just capacity — it is also the ability to serve higher-throughput enterprise customers that increase per-subscriber ARPU.
+    </div>
+    <div class="py-challenge">
+        <strong>EXTENSION CHALLENGE</strong>
+        Add an IRIS² scenario: if OneWeb wins a 30% share of the €2.4B EU IRIS² contract, what does the additional revenue (spread over 5 years) do to the base case model? At what IRIS² share does OneWeb achieve financial sustainability without requiring Gen2 capacity? Does this suggest that IRIS² participation is essential to OneWeb's standalone viability?
+    </div>
+</div>
+```
+
+</div>
+
+<!-- ═══ REFLECTION ═══ -->
+
+<div class="reflection-block" id="reflect">
+    <h2>REFLECTION PROMPTS</h2>
+    <p class="ref-intro">Four prompts requiring synthesis across the lesson and the broader Q1 context. Aim for 200–300 words each.</p>
+
+```
+<div class="ref-prompt">
+    <h3>Prompt 1 — The Bankruptcy Post-Mortem</h3>
+    <p>Apply the three-axis failure taxonomy from Lesson 6 (market risk, technical risk, financial structure risk) to OneWeb's 2020 bankruptcy. Score each axis 1–5 (5 = well-mitigated). Was the bankruptcy primarily a market failure, a technical failure, or a financial structure failure? Could it have been avoided with a different capital structure (e.g., government-anchored funding from inception rather than VC-led) or a different manufacturing strategy (e.g., outsourcing satellite production rather than building a dedicated factory)?</p>
+</div>
+
+<div class="ref-prompt">
+    <h3>Prompt 2 — The Spectrum as Strategic Asset</h3>
+    <p>OneWeb's spectrum licences were worth more than its operational satellites at bankruptcy. This suggests that regulatory position — not hardware — is the scarce resource in the LEO broadband market. If spectrum coordination filings are the most durable competitive moat, what are the implications for new entrants attempting to build LEO constellations in 2025–2030? Is the spectrum coordination landscape now effectively closed to truly new players, or are there paths to relevant spectrum position that a well-capitalised new entrant could pursue?</p>
+</div>
+
+<div class="ref-prompt">
+    <h3>Prompt 3 — B2B vs Direct-to-Consumer: Strategic Fit or Strategic Retreat?</h3>
+    <p>OneWeb's B2B-only strategy is frequently framed as a deliberate strategic choice — but it is equally fair to frame it as the only commercially viable option given Gen1's capacity constraints relative to Starlink. Distinguish between these two framings. Under the "strategic choice" framing, what advantages does B2B provide that Starlink's direct-to-consumer model cannot easily replicate? Under the "strategic retreat" framing, what does the B2B model give up, and what would OneWeb need (technically and financially) to credibly re-enter direct-to-consumer competition?</p>
+</div>
+
+<div class="ref-prompt">
+    <h3>Prompt 4 — The Eutelsat Merger in Ten Years</h3>
+    <p>Project the Eutelsat-OneWeb merger outcome over a 10-year horizon. Consider three scenarios: (A) IRIS² participation funds Gen2 development, GEO revenue decline is managed through cost reduction, and the hybrid LEO+GEO model finds a sustainable niche; (B) GEO revenue declines faster than expected, Gen2 is not funded, and the combined entity is forced into a second restructuring or acquisition; (C) A strategic buyer (SES, Amazon, a sovereign wealth fund) acquires the combined entity for its spectrum rights and LEO constellation before Gen2 becomes necessary. Which scenario do you consider most probable, and what early indicators would signal which path the company is on?</p>
+    <ul>
+        <li>Watch: Eutelsat stock price, net debt trajectory, IRIS² award timeline</li>
+        <li>Watch: Gen2 manufacturing contract announcement (or absence)</li>
+        <li>Watch: Aviation IFC market share data vs Starlink</li>
+        <li>Watch: UK Government stake — maintained, reduced, or increased?</li>
+    </ul>
+</div>
+```
+
+</div>
+
+<div class="complete-wrap">
+    <button class="complete-btn" id="completeBtn">MARK LESSON COMPLETE</button>
+    <div class="complete-msg" id="completeMsg">Not yet marked complete.</div>
+</div>
+
+<div class="lesson-nav">
+    <a href="q1-7.html">← L07: Starlink Deep Dive</a>
+    <a href="q1-9.html">L09: Amazon Kuiper →</a>
+</div>
+
+</div><!-- .lesson-wrap -->
+
+<footer>© 2026 LEOAF · Q1 · LESSON 08 OF 15</footer>
+<button class="back-to-top" id="backToTop">↑</button>
+
+<script>
+const canvas = document.getElementById('starsCanvas');
+const ctx    = canvas.getContext('2d');
+let stars    = [];
+function initStars() {
+    stars = [];
+    for (let i = 0; i < 180; i++)
+        stars.push({ x:Math.random()*canvas.width, y:Math.random()*canvas.height,
+            size:Math.random()*1.4+0.3, speed:Math.random()*0.15+0.03, hue:Math.random()*360 });
+}
+function resizeCanvas() { canvas.width=window.innerWidth; canvas.height=window.innerHeight; }
+resizeCanvas(); initStars();
+window.addEventListener('resize', resizeCanvas);
+function animateStars() {
+    ctx.clearRect(0,0,canvas.width,canvas.height);
+    stars.forEach(s => {
+        s.y -= s.speed;
+        if (s.y < 0) { s.y=canvas.height; s.x=Math.random()*canvas.width; }
+        ctx.beginPath(); ctx.fillStyle=`hsl(${s.hue},70%,80%)`;
+        ctx.arc(s.x,s.y,s.size,0,Math.PI*2); ctx.fill();
+    });
+    requestAnimationFrame(animateStars);
+}
+animateStars();
+</script>
+
+<script>
+const feedbacks = {
+    1:{
+        correct:"Correct. OneWeb chose 1,200 km specifically because the larger satellite footprint at that altitude enables global coverage with only 648 satellites — a number that seemed manufacturable within the budget. At 550 km, 648 satellites would leave significant coverage gaps at high latitudes. The penalty was the Van Allen inner radiation belt's proton flux at 1,200 km, which degrades solar cells and semiconductors, requiring more expensive radiation-tolerant components and producing a shorter satellite design life (~5 years) than Starlink's 550 km design (~7 years). This radiation hardening cost was one of the contributors to satellite unit costs running above the $500K target.",
+        wrong:"Incorrect. The ISS operates at ~400 km — well below both OneWeb and Starlink, so ISS conjunction avoidance was not the motivation. The coverage footprint is larger at higher altitude (a satellite at 1,200 km sees more of the Earth's surface), not smaller — this was the motivation. Launch delta-v is a modest factor between 550 km and 1,200 km, not a primary driver. Soyuz routinely deployed satellites across a wide altitude range. The correct answer centres on coverage geometry (larger footprint → fewer satellites needed) versus radiation cost (Van Allen belt exposure → more expensive components)."
+    },
+    2:{
+        correct:"Correct. OneWeb's 87.9° near-polar inclination provides continuous coverage at all latitudes including both poles. GEO satellites cannot serve latitudes above approximately 75–80° because the satellite appears too low on the horizon for reliable Ku/Ka-band links. Starlink's primary 53° inclination shells provide reduced satellite density above 53° latitude — adequate but not optimal — and rely on smaller polar shells for Arctic coverage. Aviation customers on transpolar routes (London–Tokyo, London–Los Angeles over the Pole, Lufthansa's polar Asian routes) and maritime customers on Arctic shipping lanes face GEO unavailability and Starlink primary-shell degradation; OneWeb's polar constellation serves these routes with high elevation angles and consistent satellite density.",
+        wrong:"Incorrect. At mid-latitude temperate ocean regions, OneWeb and Starlink are more competitive — the differentiation is most pronounced at high latitudes above 53–60°. GEO satellites actually serve equatorial regions well — it is polar regions where GEO coverage fails. MEO O3b uses ~8,000 km altitude at approximately 0° inclination (equatorial), and its coverage limit is approximately ±45° latitude — entirely different geometry from OneWeb's polar advantage."
+    },
+    3:{
+        correct:"Correct. SoftBank's withdrawal was the proximate cause. SoftBank's Vision Fund had committed $1 billion to OneWeb and was expected to lead any subsequent funding round — its participation would have signalled confidence to the rest of the investor syndicate. When SoftBank declined to participate in the $2 billion February 2020 round (citing Vision Fund portfolio stress from WeWork and uncertainty about COVID-19's economic impact), other investors declined to fill the gap without SoftBank's lead. OneWeb, with insufficient cash to continue launch operations, filed Chapter 11 within weeks. The underlying vulnerability — a cost thesis that required $500K/satellite but was achieving $900K–$1.2M — had been building for years, but the immediate trigger was the funding withdrawal.",
+        wrong:"Incorrect. There was no Soyuz launch failure in February 2020 — the Soyuz suspension occurred in March 2022 following the Russian invasion of Ukraine, more than two years after the bankruptcy. The FCC had granted OneWeb US market authorisation and did not revoke it before bankruptcy. Greg Wyler had already stepped back from the CEO role before the bankruptcy (replaced by Adrián Steckel in 2018), but his departure was not the bankruptcy trigger."
+    },
+    4:{
+        correct:"Correct. The UK's post-Brexit exclusion from Galileo's Public Regulated Service left the government seeking sovereign satellite capability. OneWeb's package — a partially built constellation, valuable Ku/Ka-band spectrum coordination filings, manufacturing infrastructure, and a post-bankruptcy price of approximately $1 billion for a $3.4 billion-invested asset — was strategically attractive as the foundation for UK sovereign connectivity. The navigation use case (OneWeb as a Galileo replacement) was initially cited but subsequently deprioritised when it became clear the Ku-band LEO constellation architecture was ill-suited for navigation. The connectivity and sovereign control rationale remained operative and was strengthened by the UK's interest in ensuring satellite communication assets under UK governance were available for government and defence use.",
+        wrong:"Incorrect. Job preservation in a specific region was not the stated rationale; the manufacturing facility is in Toulouse, France (not the UK), and the workforce was largely already laid off before the rescue. There was no UK-France industrial agreement requiring UK financial backing for the Toulouse factory. While NATO connectivity considerations may have been background context, the investment was a unilateral UK decision rather than a NATO obligation."
+    },
+    5:{
+        correct:"Correct. The outcome was partial: Roscosmos returned the satellites that had been removed from the launch pad and were still in the integration facility, but retained 36 satellites that had already been integrated into the Soyuz vehicle and were effectively in Roscosmos' possession. OneWeb lost those 36 satellites with no compensation. The supply chain lesson is direct: OneWeb's sole dependence on Soyuz throughout its post-bankruptcy reconstitution — despite operating under UK Government co-ownership in a geopolitically sensitive relationship with Russia — left it with no fallback when Russia suspended services. The crisis resolved through emergency contracting with SpaceX and Arianespace, at significantly higher cost than Soyuz, and with a several-month delay in constellation completion.",
+        wrong:"Incorrect. Russia did not return all satellites — 36 were retained. OneWeb did contract SpaceX (the launches began in 2023), but there was a meaningful operational delay and significant additional cost. Russia did not launch the satellites without authorisation — they were retained and the launch was cancelled. While arbitration may have been considered, there is no public record of a successful international arbitration recovering the OneWeb assets."
+    },
+    6:{
+        correct:"Correct. The B2B model follows directly from Gen1's capacity constraints. At approximately 4–5 Tbps aggregate capacity versus Starlink's 20–40 Tbps Gen1, OneWeb cannot compete on volume in mass-market residential broadband without per-bit economics that don't work at residential ARPU levels. B2B enterprise customers — government, maritime, aviation, telecom backhaul — pay significantly higher per-bit prices, value managed service quality and SLAs over raw throughput, and specifically value OneWeb's polar coverage capability. The distribution-through-partners model also avoids the terminal subsidy cost that Starlink absorbed in consumer market entry, preserving OneWeb's capital for constellation operations.",
+        wrong:"Incorrect. OneWeb's bankruptcy did not result in loss of US consumer broadband licensing — FCC authorisation was maintained through the Chapter 11 process as a condition of the restructuring. Bharti Airtel is a distribution partner and investor, not an exclusivity constraint on OneWeb's commercial model. The UK Government's ownership does not create legal restrictions on OneWeb competing in UK residential broadband — though competitive dynamics with BT and Virgin Media would make that market unattractive regardless."
+    },
+    7:{
+        correct:"Correct. The transpolar route is the defining use case where OneWeb's near-polar 87.9° inclination provides a structural capability advantage. London–Tokyo Narita (approximately 9,550 km great circle) passes above 70° latitude for a meaningful portion of the flight — well beyond the coverage of Starlink's primary 53° shells, which have lower satellite density above 53° and no primary coverage above approximately 75°. GEO satellites provide no service above roughly 75–80° latitude due to horizon geometry. OneWeb's near-polar constellation maintains multiple satellites visible above 25° elevation angle at all latitudes including 90°N, providing consistent in-flight connectivity on transpolar routes that neither GEO nor Starlink's primary shells can match.",
+        wrong:"Incorrect. Doppler shift at polar latitudes is a technical consideration but not the primary commercial advantage — modern terminal modems handle LEO Doppler through adaptive waveforms. The 1,200 km altitude does provide a larger footprint, but satellite handover occurs within the terminal's phased array tracking capability — the handover rate is not a primary commercial differentiator. Near-polar inclination does not particularly reduce relative angular rate between satellite and aircraft at cruise altitude — the relative geometry depends on orbit plane alignment to the aircraft track, not inclination alone."
+    },
+    8:{
+        correct:"Correct. Eutelsat's video distribution revenue — approximately 70% of total revenue — was under structural secular decline as satellite-delivered TV was displaced by streaming via terrestrial broadband. Without a LEO asset, Eutelsat had no offering for the enterprise, maritime, and aviation segments where LEO was winning market share, and no competitive response to Starlink's and OneWeb's growing enterprise penetration. The merger gave Eutelsat a LEO constellation to arrest revenue decline and open new market segments, while OneWeb gained Eutelsat's capital, global distribution infrastructure, existing enterprise relationships, and access to European capital markets that would be harder to access as a standalone post-bankruptcy entity.",
+        wrong:"Incorrect. The Toulouse factory is operated by a joint venture with Airbus (OneWeb Satellites) and Eutelsat does not have a satellite manufacturing capability gap that OneWeb filled. The French Government's involvement in IRIS² creates a French industrial interest in European LEO, but the Eutelsat-OneWeb merger was a commercial decision not a government mandate. Starlink Aviation STC certifications are aircraft-type-specific and not transferable; acquiring OneWeb would not give Eutelsat access to Starlink certifications."
+    },
+    9:{
+        correct:"Correct. ITU spectrum coordination filings are the product of years of regulatory work — filing, coordinating interference agreements with other operators, defending priority rights, and renewing filings. The regulatory landscape is competitive: the global Ku-band and Ka-band spectrum at LEO altitudes is increasingly contested among Starlink, Kuiper, OneWeb, Telesat, and others. A new entrant cannot simply file and expect priority — it must coordinate with all existing operators, resolve interference claims, and wait for ITU processing timelines measured in years. Acquiring OneWeb's filing portfolio gave the buyer an established regulatory position that would cost significantly more and take far longer to build from scratch than the $1 billion acquisition price — making the spectrum portfolio the primary source of value in the bankruptcy estate.",
+        wrong:"Incorrect. Spectrum coordination rights do not generate direct royalty revenue — they are rights to use specific frequencies, not sources of income from others using them. OneWeb did not hold exclusive geographic market rights in the EU or UK — spectrum licences govern frequency use, not market exclusivity. The ITU does not restrict new filings at specific altitudes — the constraint is coordination complexity and processing time, not an altitude-specific moratorium."
+    },
+    10:{
+        correct:"Correct. The optimal analysis distinguishes the three routes by where each provider has structural advantages. London–New York transatlantic: Starlink's ISL routing provides measurably lower latency than fibre and more throughput than OneWeb Gen1. London–Singapore overland via Central Asia: both providers offer adequate service; Starlink's throughput advantage is the deciding factor. London–Tokyo transpolar (the critical differentiator): OneWeb's near-polar constellation provides consistent high-elevation coverage above 70° where Starlink's primary shells thin out significantly. For an airline with significant transpolar flying, the answer is not simple: a dual-provider strategy captures the best of both, a single-OneWeb strategy sacrifices throughput on mid-latitude routes, and a single-Starlink strategy risks degraded service on the polar route that matters most to premium passengers and crew. Contracting for Gen2 upgrade rights with OneWeb is a sensible hedge if Gen2 includes ISLs.",
+        wrong:"Incorrect. Neither provider dominates across all three routes — the correct answer requires distinguishing route types. Starlink has higher throughput on mid-latitude routes but has a coverage gap at high latitudes on polar routes. OneWeb has polar coverage superiority but lower throughput than Starlink on mid-latitude routes. A sophisticated airline recommendation accounts for route mix, not just a single aggregate comparison. Price per Mbps is a relevant factor but not the only one — coverage, latency, SLA, and managed service quality all matter for commercial airline IFC procurement."
+    }
+};
+
+let answered = {};
+document.querySelectorAll('.quiz-opt').forEach(btn => {
+    btn.addEventListener('click', function() {
+        const q = this.dataset.q;
+        if (answered[q] !== undefined) return;
+        const correct = this.dataset.correct === 'true';
+        answered[q] = correct;
+        document.querySelectorAll(`.quiz-opt[data-q="${q}"]`).forEach(b => {
+            b.disabled = true;
+            if (b.dataset.correct === 'true') b.classList.add('correct');
+        });
+        if (!correct) this.classList.add('wrong');
+        const fb = document.getElementById(`fb${q}`);
+        fb.textContent = (correct ? '✓ ' : '✗ ') + feedbacks[q][correct?'correct':'wrong'];
+        fb.style.color = correct ? '#39ff14' : '#ff004f';
+        if (Object.keys(answered).length === 10) {
+            const total = Object.values(answered).filter(Boolean).length;
+            const el = document.getElementById('quizScore');
+            el.style.display = 'block';
+            const pct = Math.round(total/10*100);
+            el.textContent = `SCORE: ${total} / 10 (${pct}%) — ${pct===100?'PERFECT.':pct>=80?'STRONG. REVIEW ANY MISSES.':pct>=60?'ADEQUATE. REVISIT WEAK SECTIONS.':'REVISIT THE LESSON BEFORE PROCEEDING.'}`;
+        }
+    });
+});
+</script>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+<script src="supabase.js"></script>
+
+<script src="user_progress.js"></script>
+
+<script>
+const LESSON_ID = 'q1-8';
+document.addEventListener('DOMContentLoaded', async () => {
+    const { data:{ session } } = await client.auth.getSession();
+    if (!session) { window.location.href = 'index.html'; return; }
+    document.getElementById('logoffBtn').addEventListener('click', async () => {
+        await client.auth.signOut(); window.location.href = 'index.html';
+    });
+    const mastered = await getMasteredSections();
+    const btn = document.getElementById('completeBtn');
+    const msg = document.getElementById('completeMsg');
+    function setDone(done) {
+        if (done) {
+            btn.textContent = '✓ COMPLETE — CLICK TO UNDO';
+            btn.classList.add('done');
+            btn.style.cssText = 'border-color:#39ff14;color:#39ff14;background:rgba(57,255,20,0.1);cursor:pointer;opacity:1;';
+            msg.style.color = '#39ff14'; msg.textContent = 'Lesson marked complete. Click again to undo.';
+        } else {
+            btn.textContent = 'MARK LESSON COMPLETE'; btn.classList.remove('done');
+            btn.style.cssText = ''; msg.style.color = '#ffffff55'; msg.textContent = 'Not yet marked complete.';
+        }
+    }
+    setDone(mastered.includes(LESSON_ID));
+    btn.addEventListener('click', async () => {
+        const isDone = btn.classList.contains('done');
+        msg.style.color = '#00d9ff'; msg.textContent = 'Saving...';
+        const ok = await upsertSection(LESSON_ID, !isDone);
+        if (ok) setDone(!isDone);
+        else { msg.style.color = '#ff004f'; msg.textContent = 'Error saving. Try again.'; }
+    });
+    const btt = document.getElementById('backToTop');
+    window.addEventListener('scroll', () => btt.classList.toggle('visible', window.scrollY > 400));
+    btt.addEventListener('click', () => window.scrollTo({ top:0, behavior:'smooth' }));
+});
+</script>
+
+</body>
+</html>
