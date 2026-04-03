@@ -1,0 +1,1446 @@
+<!DOCTYPE html>
+
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, shrink-to-fit=no">
+<title>L09 — Amazon Kuiper Deep Dive · LEOAF</title>
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;600;800&family=Share+Tech+Mono&family=Libre+Baskerville:ital,wght@0,400;0,700;1,400&display=swap" rel="stylesheet">
+<link rel="icon" href="favicon.ico" sizes="any" type="image/x-icon">
+<link rel="manifest" href="site.webmanifest">
+<meta name="theme-color" content="#0f0f0f">
+<style>
+* { box-sizing:border-box; margin:0; padding:0; }
+html { height:100%; -webkit-text-size-adjust:100%; overflow-x:hidden; }
+body { font-family:'Share Tech Mono',monospace; background:#000; color:white; overflow-x:hidden; min-height:100vh; }
+#starsCanvas { position:fixed; inset:0; z-index:-1; }
+
+header {
+background:#000; border-bottom:1px solid #ff004f33;
+position:sticky; top:0; z-index:100;
+padding:1rem clamp(1.5rem,5vw,4rem);
+display:flex; justify-content:space-between; align-items:center;
+box-shadow:0 4px 16px #0008;
+}
+.logo { font-family:‘Orbitron’,sans-serif; font-weight:800; font-size:clamp(16px,2vw,22px); letter-spacing:3px; text-decoration:none; }
+.logo span:first-child { color:white; }
+.logo span:last-child { color:#ff004f; }
+.nav-right { display:flex; align-items:center; gap:10px; }
+.nav-btn {
+background:transparent; border:1px solid #ff004f44; color:#ff004f;
+padding:6px 14px; cursor:pointer; transition:0.3s ease;
+font-size:11px; font-family:‘Orbitron’,sans-serif; letter-spacing:1px;
+text-decoration:none; display:inline-block;
+}
+.nav-btn:hover { background:#ff004f; color:black; }
+
+.breadcrumb { padding:14px clamp(1.5rem,5vw,4rem); font-size:11px; color:#ffffff44; letter-spacing:1px; position:relative; z-index:1; }
+.breadcrumb a { color:#00d9ff66; text-decoration:none; }
+.breadcrumb a:hover { color:#00d9ff; }
+.breadcrumb span { margin:0 8px; }
+
+.lesson-wrap { max-width:820px; margin:0 auto; padding:0 clamp(1.5rem,5vw,4rem) 80px; position:relative; z-index:1; }
+
+.lesson-header { padding:30px 0 28px; border-bottom:1px solid #ffffff11; margin-bottom:36px; }
+.lesson-tag { font-family:‘Orbitron’,sans-serif; font-size:10px; color:#ff004f; letter-spacing:3px; margin-bottom:10px; }
+.lesson-header h1 { font-family:‘Orbitron’,sans-serif; font-size:clamp(20px,3.5vw,32px); font-weight:800; line-height:1.2; margin-bottom:12px; }
+.lesson-meta { display:flex; gap:10px; flex-wrap:wrap; margin-bottom:16px; }
+.l-pill { font-family:‘Orbitron’,sans-serif; font-size:10px; padding:3px 10px; border:1px solid; letter-spacing:1px; }
+.l-pill-q  { color:#ff004f; border-color:#ff004f44; }
+.l-pill-t  { color:#39ff14; border-color:#39ff1444; }
+.l-pill-s  { color:#ffaa00; border-color:#ffaa0044; }
+.lesson-intro { font-size:13px; line-height:1.85; opacity:0.75; }
+
+.toc { background:rgba(0,217,255,0.06); border:1px solid #00d9ff33; padding:24px 28px; margin:30px 0; }
+.toc h4 { font-family:‘Orbitron’,sans-serif; font-size:10px; color:#00d9ff; letter-spacing:2px; margin-bottom:16px; }
+.toc ol { padding-left:20px; }
+.toc li { font-size:13px; line-height:2.1; }
+.toc li a { color:#00d9ffbb; text-decoration:none; transition:0.15s; }
+.toc li a:hover { color:#fff; padding-left:4px; }
+.toc li::marker { color:#ff004f; font-family:‘Orbitron’,sans-serif; font-size:10px; }
+
+.content-block {
+background:#f5f2ec; color:#1a1a1a;
+padding:36px clamp(24px,4vw,48px);
+margin-bottom:24px;
+border-left:4px solid #00d9ff;
+position:relative; z-index:1;
+}
+.content-block h2 {
+font-family:‘Orbitron’,sans-serif; font-size:13px;
+color:#003d66; letter-spacing:2px; text-transform:uppercase;
+margin-bottom:20px; padding-bottom:10px;
+border-bottom:2px solid #00d9ff66; scroll-margin-top:80px;
+}
+.content-block h3 {
+font-family:‘Orbitron’,sans-serif; font-size:11px;
+color:#444; letter-spacing:1.5px; text-transform:uppercase;
+margin:32px 0 14px;
+}
+.content-block p {
+font-family:‘Libre Baskerville’,Georgia,serif;
+font-size:15px; line-height:1.9; color:#1a1a1a; margin-bottom:18px;
+}
+.content-block ul li, .content-block ol li {
+font-family:‘Libre Baskerville’,Georgia,serif;
+font-size:14px; line-height:1.85; color:#1a1a1a; margin-bottom:8px;
+}
+.content-block ul, .content-block ol { padding-left:0; margin-bottom:16px; }
+.content-block ul li { padding-left:20px; position:relative; }
+.content-block ul li::before { content:’›’; position:absolute; left:0; color:#0077aa; }
+.content-block ol { counter-reset:item; }
+.content-block ol li { counter-increment:item; padding-left:20px; position:relative; }
+.content-block ol li::before { content:counter(item)’.’; position:absolute; left:0; color:#cc0033; font-family:‘Orbitron’,sans-serif; font-size:10px; top:2px; }
+
+.callout { border-left:3px solid #0088cc; background:#e8f4fb; color:#1a1a1a; padding:16px 20px; margin:22px 0; font-size:13px; line-height:1.8; }
+.callout.red   { border-left-color:#cc0033; background:#fdecea; }
+.callout.green { border-left-color:#1a7a1a; background:#eafaea; }
+.callout.amber { border-left-color:#996600; background:#fef9ec; }
+.callout strong { font-family:‘Orbitron’,sans-serif; font-size:10px; letter-spacing:1px; display:block; margin-bottom:8px; color:inherit; }
+
+.key-numbers { display:grid; grid-template-columns:repeat(auto-fit,minmax(140px,1fr)); gap:12px; margin:22px 0; }
+.kn-item { background:#fff; border:1px solid #d0d0d0; padding:16px 12px; text-align:center; }
+.kn-val  { font-family:‘Orbitron’,sans-serif; font-size:clamp(16px,2.5vw,22px); font-weight:800; color:#003d66; display:block; }
+.kn-label { font-size:10px; color:#555; letter-spacing:1px; margin-top:5px; display:block; line-height:1.4; }
+
+.compare-table { width:100%; border-collapse:collapse; margin:22px 0; font-size:12px; }
+.compare-table th { font-family:‘Orbitron’,sans-serif; font-size:10px; letter-spacing:1px; color:#003d66; padding:10px 12px; border-bottom:2px solid #00d9ff66; text-align:left; }
+.compare-table td { padding:10px 12px; border-bottom:1px solid #ddd; line-height:1.5; color:#1a1a1a; vertical-align:top; }
+.compare-table tr:hover td { background:#f0f0f0; }
+.compare-table .hi { color:#1a7a1a; font-weight:bold; }
+.compare-table .lo { color:#cc0033; }
+.compare-table .md { color:#996600; }
+
+.deep-dive { background:#fffbf0; border:1px solid #e0c060; padding:20px 22px; margin:24px 0; }
+.deep-dive h4 { font-family:‘Orbitron’,sans-serif; font-size:10px; color:#996600; letter-spacing:2px; margin-bottom:12px; }
+.deep-dive p { font-family:‘Libre Baskerville’,Georgia,serif; font-size:13px; line-height:1.8; color:#333; margin-bottom:10px; }
+.deep-dive p:last-child { margin-bottom:0; }
+
+.diagram-wrap { margin:24px 0; background:#0a0a0a; border:1px solid #333; padding:20px; overflow-x:auto; }
+.diagram-wrap figcaption { font-size:11px; color:#ffffff44; margin-top:12px; text-align:center; letter-spacing:1px; }
+
+.timeline { margin:22px 0; }
+.tl-item { display:flex; gap:16px; margin-bottom:16px; }
+.tl-year { font-family:‘Orbitron’,sans-serif; font-size:11px; color:#cc0033; min-width:60px; padding-top:2px; }
+.tl-body { flex:1; border-left:1px solid #cc003344; padding-left:16px; padding-bottom:8px; }
+.tl-body strong { font-family:‘Orbitron’,sans-serif; font-size:11px; color:#333; letter-spacing:1px; display:block; margin-bottom:4px; }
+.tl-body p { font-family:‘Libre Baskerville’,Georgia,serif; font-size:13px; color:#444; line-height:1.7; margin:0; }
+
+.quiz-block { background:rgba(17,17,17,0.95); border:1px solid #ff004f33; padding:28px; margin:48px 0 32px; }
+.quiz-block h2 { font-family:‘Orbitron’,sans-serif; font-size:13px; color:#ff004f; letter-spacing:2px; margin-bottom:6px; }
+.quiz-intro { font-size:12px; opacity:0.6; margin-bottom:24px; padding-bottom:16px; border-bottom:1px solid #ff004f22; line-height:1.6; }
+.quiz-q { margin-bottom:28px; }
+.quiz-q p { font-size:13px; color:#ddd; margin-bottom:12px; line-height:1.65; }
+.quiz-q p strong { color:#00d9ff; }
+.quiz-options { display:flex; flex-direction:column; gap:8px; }
+.quiz-opt {
+background:rgba(255,255,255,0.03); border:1px solid #ffffff1a;
+padding:11px 16px; cursor:pointer; font-size:12px; font-family:‘Share Tech Mono’,monospace;
+transition:0.2s ease; text-align:left; color:white; line-height:1.5;
+}
+.quiz-opt:hover:not(:disabled) { background:rgba(0,217,255,0.08); border-color:#00d9ff44; }
+.quiz-opt.correct { background:rgba(57,255,20,0.1); border-color:#39ff14; color:#39ff14; }
+.quiz-opt.wrong   { background:rgba(255,0,79,0.1);  border-color:#ff004f; color:#ff004f; }
+.quiz-opt:disabled { cursor:default; }
+.quiz-feedback { font-size:12px; margin-top:10px; min-height:18px; line-height:1.7; opacity:0.9; padding:0 4px; }
+.quiz-score { font-family:‘Orbitron’,sans-serif; font-size:12px; color:#39ff14; margin-top:20px; letter-spacing:1px; display:none; padding-top:16px; border-top:1px solid #39ff1433; }
+
+.py-block { background:rgba(10,10,10,0.95); border:1px solid #39ff1422; padding:28px; margin:32px 0; }
+.py-block h2 { font-family:‘Orbitron’,sans-serif; font-size:13px; color:#39ff14; letter-spacing:2px; margin-bottom:8px; }
+.py-block .py-intro { font-size:12px; opacity:0.7; margin-bottom:20px; padding-bottom:16px; border-bottom:1px solid #39ff1422; line-height:1.7; }
+.py-exercise { margin-bottom:32px; }
+.py-exercise:last-child { margin-bottom:0; }
+.py-exercise h3 { font-family:‘Orbitron’,sans-serif; font-size:11px; color:#39ff1499; letter-spacing:1.5px; text-transform:uppercase; margin-bottom:10px; }
+.py-exercise p { font-size:12px; color:#aaa; margin-bottom:14px; line-height:1.75; }
+.py-block pre {
+background:#050505; border:1px solid #39ff1433; padding:20px;
+font-family:‘Share Tech Mono’,monospace; font-size:11.5px;
+line-height:1.75; overflow-x:auto; color:#39ff14;
+white-space:pre; margin-bottom:12px;
+}
+.py-block .py-note { font-size:11px; color:#ffffff44; line-height:1.75; margin-top:10px; }
+.py-block .py-challenge { background:rgba(57,255,20,0.04); border-left:2px solid #39ff14; padding:12px 16px; margin-top:14px; font-size:12px; line-height:1.75; color:#aaa; }
+.py-block .py-challenge strong { font-family:‘Orbitron’,sans-serif; font-size:10px; color:#39ff14; display:block; margin-bottom:6px; letter-spacing:1px; }
+
+.reflection-block { background:rgba(255,170,0,0.04); border:1px solid #ffaa0033; padding:24px; margin:32px 0; }
+.reflection-block h2 { font-family:‘Orbitron’,sans-serif; font-size:13px; color:#ffaa00; letter-spacing:2px; margin-bottom:8px; }
+.reflection-block .ref-intro { font-size:12px; opacity:0.7; margin-bottom:20px; padding-bottom:14px; border-bottom:1px solid #ffaa0022; line-height:1.7; }
+.ref-prompt { margin-bottom:20px; }
+.ref-prompt h3 { font-family:‘Orbitron’,sans-serif; font-size:11px; color:#ffaa0099; letter-spacing:1px; margin-bottom:8px; }
+.ref-prompt p { font-size:12px; color:#bbb; line-height:1.75; margin-bottom:10px; }
+.ref-prompt ul li { font-size:12px; color:#bbb; padding-left:18px; position:relative; margin-bottom:6px; }
+.ref-prompt ul li::before { content:’›’; position:absolute; left:0; color:#ffaa00; }
+
+.back-to-top {
+position:fixed; bottom:28px; right:28px; z-index:200;
+width:44px; height:44px; background:#000;
+border:1px solid #00d9ff55; color:#00d9ff;
+font-size:20px; cursor:pointer;
+display:flex; align-items:center; justify-content:center;
+opacity:0; pointer-events:none; transition:opacity 0.3s ease;
+}
+.back-to-top.visible { opacity:1; pointer-events:auto; }
+.back-to-top:hover { border-color:#00d9ff; background:#001a2c; }
+
+.complete-wrap { margin-top:56px; padding-top:30px; border-top:1px solid #ffffff11; text-align:center; }
+.complete-btn {
+font-family:‘Orbitron’,sans-serif; font-size:13px; letter-spacing:2px;
+padding:14px 44px; background:transparent;
+border:1px solid #39ff14; color:#39ff14; cursor:pointer; transition:0.3s ease;
+}
+.complete-btn:hover:not(.done) { background:#39ff14; color:black; box-shadow:0 0 20px rgba(57,255,20,0.4); }
+.complete-btn.done { background:rgba(57,255,20,0.1); cursor:default; opacity:0.7; }
+.complete-msg { font-size:12px; color:#ffffff55; margin-top:14px; min-height:18px; letter-spacing:1px; }
+
+.lesson-nav { display:flex; justify-content:space-between; margin-top:30px; flex-wrap:wrap; gap:10px; }
+.lesson-nav a { font-family:‘Orbitron’,sans-serif; font-size:11px; color:#00d9ff66; text-decoration:none; letter-spacing:1px; transition:0.2s; }
+.lesson-nav a:hover { color:#00d9ff; }
+
+footer { text-align:center; padding:30px; opacity:0.3; font-size:11px; position:relative; z-index:1; letter-spacing:1px; }
+
+@media (max-width:600px) {
+.key-numbers { grid-template-columns:1fr 1fr; }
+.compare-table { font-size:11px; }
+.compare-table th, .compare-table td { padding:8px; }
+}
+</style>
+
+</head>
+<body>
+<canvas id="starsCanvas"></canvas>
+
+<header>
+    <a href="dashboard.html" class="logo"><span>LEO</span><span>AF</span></a>
+    <div class="nav-right">
+        <a href="q1.html" class="nav-btn">← Q1 HUB</a>
+        <button id="logoffBtn" class="nav-btn">ABORT</button>
+    </div>
+</header>
+
+<div class="breadcrumb">
+    <a href="dashboard.html">DASHBOARD</a><span>/</span>
+    <a href="q1.html">Q1</a><span>/</span>
+    <span style="color:#ffffff88;">LESSON 09 — AMAZON KUIPER DEEP DIVE</span>
+</div>
+
+<div class="lesson-wrap">
+
+<div class="lesson-header">
+    <div class="lesson-tag">Q1 · LESSON 09 OF 15</div>
+    <h1>Amazon Kuiper Deep Dive</h1>
+    <div class="lesson-meta">
+        <div class="l-pill l-pill-q">QUARTER 1</div>
+        <div class="l-pill l-pill-t">MODERN CONSTELLATIONS</div>
+        <div class="l-pill l-pill-s">PART III</div>
+    </div>
+    <p class="lesson-intro">Amazon Kuiper is the most well-capitalised LEO broadband constellation that has not yet reached operational scale — and the one whose outcome will most directly test whether a second viable commercial LEO broadband operator can exist alongside Starlink. Amazon has committed $10 billion to Project Kuiper, secured FCC authorisation for 3,236 satellites, contracted the largest commercial launch campaign in history across three launch providers, and positioned the constellation as a native extension of Amazon Web Services — a commercial integration no other LEO operator can replicate. Yet as of early 2025, Kuiper has fewer than 30 satellites in orbit, faces a hard FCC deadline requiring half its constellation deployed by July 2026, and must demonstrate at commercial scale whether AWS integration translates into paying enterprise customers. This lesson examines Kuiper's founding logic, satellite architecture, the multi-provider launch strategy and its FCC deadline pressure, the AWS integration thesis as its defining commercial differentiator, and its competitive positioning against Starlink and OneWeb.</p>
+</div>
+
+<div class="toc">
+    <h4>CONTENTS</h4>
+    <ol>
+        <li><a href="#s1">Origins: Bezos, Blue Origin, and the vertical integration question</a></li>
+        <li><a href="#s2">FCC authorisation and the constellation design</a></li>
+        <li><a href="#s3">Satellite architecture: the Kuiper Gen1 satellite</a></li>
+        <li><a href="#s4">The launch campaign: Atlas V, New Glenn, and Ariane 6</a></li>
+        <li><a href="#s5">The FCC deadline: July 2026 and the deployment race</a></li>
+        <li><a href="#s6">AWS integration: the defining commercial differentiator</a></li>
+        <li><a href="#s7">Terminal strategy: three form factors and the consumer play</a></li>
+        <li><a href="#s8">Commercial strategy: enterprise, government, and consumer segments</a></li>
+        <li><a href="#s9">Competitive positioning: Kuiper vs Starlink vs OneWeb</a></li>
+        <li><a href="#quiz">Knowledge check</a></li>
+        <li><a href="#python">Python exercises</a></li>
+        <li><a href="#reflect">Reflection prompts</a></li>
+    </ol>
+</div>
+
+<!-- ═══ S1 ═══ -->
+
+<div class="content-block" id="s1">
+    <h2>1. Origins: Bezos, Blue Origin, and the Vertical Integration Question</h2>
+
+```
+<p>Project Kuiper was publicly revealed in April 2019, when Amazon confirmed it had filed with the ITU for a 3,236-satellite LEO broadband constellation. The project had been in internal development for at least two years prior, with Amazon quietly assembling a satellite engineering team and filing regulatory paperwork before the public announcement. Jeff Bezos personally championed the project, and its ambition — delivering broadband to the approximately 3 billion people globally without reliable internet access — echoed the stated humanitarian motivations of OneWeb's Greg Wyler and Starlink's early mission framing.</p>
+
+<p>The most frequently asked question about Kuiper in its early years was whether Amazon would use Blue Origin rockets — Jeff Bezos's space launch company — to deploy the constellation, mirroring SpaceX's Starlink/Falcon 9 vertical integration. The answer, ultimately, was partial: Kuiper contracted New Glenn (Blue Origin's orbital launch vehicle) for a significant share of its launch campaign, but also contracted Atlas V (ULA) and Ariane 6 (Arianespace). This multi-provider approach was a deliberate risk management decision — Blue Origin's New Glenn was unproven at contract signing, and Kuiper's FCC deadline left no margin for a sole-source launch vehicle that might experience development delays.</p>
+
+<h3>The Amazon flywheel logic</h3>
+
+<p>Amazon's strategic rationale for Kuiper is more explicitly commercial than Starlink's founding logic and more integrated than OneWeb's. Bezos framed Kuiper not as a standalone satellite business but as an extension of Amazon's existing platforms — particularly AWS, Amazon's cloud computing business that generates the majority of Amazon's operating profit. The argument was that Kuiper could serve as the last-mile connectivity layer for AWS customers in areas where terrestrial broadband is unavailable, creating a bundled offering — cloud compute plus satellite connectivity — that no competitor could match. An enterprise customer running workloads on AWS in a location with no fibre could use Kuiper for low-latency connectivity to its AWS infrastructure without switching cloud providers or installing a separate satellite solution.</p>
+
+<p>This flywheel logic also extends to Amazon's consumer and retail business: Prime Video streaming, Amazon Echo smart home devices, and Amazon's e-commerce ecosystem all benefit from broader broadband penetration. Every household that gains broadband access through Kuiper is a potential new Amazon Prime subscriber, e-commerce customer, and Alexa device owner. Kuiper's $10 billion capital commitment is therefore partially justified by its value as infrastructure for Amazon's broader business ecosystem — a justification Starlink, which has no equivalent platform to leverage, cannot make.</p>
+
+<div class="key-numbers">
+    <div class="kn-item"><span class="kn-val">2019</span><span class="kn-label">Public announcement (April)</span></div>
+    <div class="kn-item"><span class="kn-val">$10B</span><span class="kn-label">Committed capital investment</span></div>
+    <div class="kn-item"><span class="kn-val">3,236</span><span class="kn-label">FCC-authorised satellites</span></div>
+    <div class="kn-item"><span class="kn-val">July 2026</span><span class="kn-label">FCC half-constellation deadline</span></div>
+    <div class="kn-item"><span class="kn-val">~27</span><span class="kn-label">Satellites in orbit (early 2025)</span></div>
+    <div class="kn-item"><span class="kn-val">83+</span><span class="kn-label">Launch contracts secured</span></div>
+</div>
+```
+
+</div>
+
+<!-- ═══ S2 ═══ -->
+
+<div class="content-block" id="s2">
+    <h2>2. FCC Authorisation and the Constellation Design</h2>
+
+```
+<p>The FCC granted Kuiper authorisation in July 2020 for a 3,236-satellite constellation across three orbital shells. This approval was notable for its size — the largest FCC constellation authorisation at the time — and for the conditions attached. The FCC required that Amazon deploy at least half the constellation (1,618 satellites) by July 30, 2026, and the full constellation by July 30, 2029. These milestone requirements are standard for large LEO constellation authorisations and are intended to prevent spectrum warehousing — operators filing for spectrum rights and then failing to deploy, blocking the spectrum from other users.</p>
+
+<h3>The three-shell architecture</h3>
+
+<p>Kuiper's FCC-authorised constellation is organised in three orbital shells:</p>
+<ul>
+    <li><strong>Shell 1:</strong> 784 satellites at 590 km altitude, 33° inclination</li>
+    <li><strong>Shell 2:</strong> 1,296 satellites at 610 km altitude, 42° inclination</li>
+    <li><strong>Shell 3:</strong> 1,156 satellites at 630 km altitude, 51.9° inclination</li>
+</ul>
+
+<p>All three shells use mid-range inclinations (33°–51.9°), which provides excellent coverage across the populated mid-latitude band (approximately 56°S to 56°N) where the majority of internet users and potential Kuiper customers are located. Unlike OneWeb's near-polar design, Kuiper explicitly prioritises the mid-latitude markets where broadband demand is highest and where Amazon's existing AWS customer base and retail infrastructure are most concentrated. Polar coverage — and the Arctic maritime and aviation markets that OneWeb targets — is explicitly deprioritised in Kuiper's Gen1 design.</p>
+
+<p>The three-shell layered architecture provides coverage redundancy and capacity management flexibility that a single-shell design does not: in any given mid-latitude region, satellites from multiple shells may be simultaneously visible, allowing the ground terminal to select the optimal satellite across shells and providing graceful degradation if one shell has maintenance gaps. The shells' different altitudes (590–630 km) also provide some separation that reduces conjunction probability between shells.</p>
+
+<h3>Kuiper vs Starlink coverage geometry</h3>
+
+<p>Kuiper's 51.9° maximum inclination compares directly to Starlink's primary 53° inclination shell — the coverage geometries are broadly similar for mid-latitude markets. The significant difference is in polar coverage: Starlink has added 70° and 97.6° polar shells that extend coverage to Arctic and Antarctic latitudes; Kuiper's FCC-authorised constellation has no polar shell above 51.9°. This is not an oversight — it is a deliberate commercial prioritisation. Amazon's satellite broadband addressable market analysis identified mid-latitude markets as the primary commercial opportunity, and the cost of an additional polar shell (hundreds of additional satellites, additional launch campaigns) was not justified by the incremental revenue from high-latitude markets at launch.</p>
+
+<div class="diagram-wrap">
+    <svg viewBox="0 0 700 280" width="100%" xmlns="http://www.w3.org/2000/svg" font-family="Share Tech Mono, monospace">
+        <defs>
+            <pattern id="gridL9" width="35" height="35" patternUnits="userSpaceOnUse">
+                <path d="M 35 0 L 0 0 0 35" fill="none" stroke="#ffffff05" stroke-width="0.5"/>
+            </pattern>
+        </defs>
+        <rect width="700" height="280" fill="url(#gridL9)"/>
+        <text x="350" y="18" text-anchor="middle" font-size="9" fill="#00d9ff88" letter-spacing="2">KUIPER THREE-SHELL ARCHITECTURE — ALTITUDE AND INCLINATION COMPARISON</text>
+
+        <!-- Earth -->
+        <circle cx="200" cy="155" r="70" fill="#001a2c55" stroke="#00d9ff33" stroke-width="1.5"/>
+        <text x="200" y="159" text-anchor="middle" font-size="8" fill="#00d9ff55">EARTH</text>
+
+        <!-- Shell 1: 590km / 33° -->
+        <ellipse cx="200" cy="155" rx="107" ry="107" fill="none" stroke="#ff004f55" stroke-width="1.5" stroke-dasharray="5,3"/>
+        <!-- Shell 2: 610km / 42° -->
+        <ellipse cx="200" cy="155" rx="110" ry="110" fill="none" stroke="#ffaa0055" stroke-width="1.5" stroke-dasharray="3,3"/>
+        <!-- Shell 3: 630km / 51.9° -->
+        <ellipse cx="200" cy="155" rx="113" ry="113" fill="none" stroke="#00d9ff55" stroke-width="1.5" stroke-dasharray="2,4"/>
+
+        <!-- Satellite dots -->
+        <circle cx="307" cy="155" r="3.5" fill="#ff004f" opacity="0.9"/>
+        <circle cx="93" cy="155" r="3.5" fill="#ff004f" opacity="0.9"/>
+        <circle cx="200" cy="48" r="3.5" fill="#ffaa00" opacity="0.9"/>
+        <circle cx="200" cy="265" r="3.5" fill="#ffaa00" opacity="0.7"/>
+        <circle cx="313" cy="100" r="3.5" fill="#00d9ff" opacity="0.9"/>
+        <circle cx="87" cy="210" r="3.5" fill="#00d9ff" opacity="0.9"/>
+
+        <!-- Legend shells -->
+        <line x1="340" y1="80" x2="370" y2="80" stroke="#ff004f55" stroke-width="1.5" stroke-dasharray="5,3"/>
+        <circle cx="345" cy="80" r="3" fill="#ff004f"/>
+        <text x="375" y="84" font-size="8.5" fill="#ff004f99">Shell 1 — 590 km / 33° / 784 sats</text>
+        <line x1="340" y1="100" x2="370" y2="100" stroke="#ffaa0055" stroke-width="1.5" stroke-dasharray="3,3"/>
+        <circle cx="345" cy="100" r="3" fill="#ffaa00"/>
+        <text x="375" y="104" font-size="8.5" fill="#ffaa0099">Shell 2 — 610 km / 42° / 1,296 sats</text>
+        <line x1="340" y1="120" x2="370" y2="120" stroke="#00d9ff55" stroke-width="1.5" stroke-dasharray="2,4"/>
+        <circle cx="345" cy="120" r="3" fill="#00d9ff"/>
+        <text x="375" y="124" font-size="8.5" fill="#00d9ff99">Shell 3 — 630 km / 51.9° / 1,156 sats</text>
+
+        <!-- Coverage latitude bands -->
+        <rect x="340" y="148" width="340" height="40" fill="none" stroke="#39ff1422" stroke-width="1" rx="2"/>
+        <text x="510" y="163" text-anchor="middle" font-size="8" fill="#39ff1488">Mid-latitude coverage band</text>
+        <text x="510" y="177" text-anchor="middle" font-size="8" fill="#39ff1466">56°S – 56°N (all three shells)</text>
+
+        <rect x="340" y="200" width="340" height="30" fill="none" stroke="#ff004f22" stroke-width="1" rx="2"/>
+        <text x="510" y="213" text-anchor="middle" font-size="8" fill="#ff004f88">No Kuiper polar shell above 51.9°</text>
+        <text x="510" y="225" text-anchor="middle" font-size="8" fill="#ff004f55">OneWeb / Starlink polar shells cover &gt;56°</text>
+
+        <!-- Total label -->
+        <text x="510" y="260" text-anchor="middle" font-size="9" fill="#ffffff44" letter-spacing="1">3,236 TOTAL SATELLITES · FCC AUTHORISED JULY 2020</text>
+    </svg>
+    <figcaption>KUIPER THREE-SHELL ARCHITECTURE · 590–630 KM · 33°–51.9° INCLINATION · MID-LATITUDE FOCUS · NOT TO SCALE</figcaption>
+</div>
+```
+
+</div>
+
+<!-- ═══ S3 ═══ -->
+
+<div class="content-block" id="s3">
+    <h2>3. Satellite Architecture: the Kuiper Gen1 Satellite</h2>
+
+```
+<p>Amazon has disclosed relatively little about the Kuiper satellite's detailed technical specifications — considerably less than SpaceX disclosed about Starlink during the same development phase. What is publicly known comes from FCC filings, patent applications, job postings, and carefully worded press releases. The picture that emerges is of a satellite designed for high per-satellite throughput, aggressive cost reduction through manufacturing scale, and tight integration with AWS ground infrastructure.</p>
+
+<h3>Mass and form factor</h3>
+
+<p>The Kuiper Gen1 satellite has a mass of approximately 500–600 kg — significantly heavier than OneWeb's 147 kg Gen1 satellite and heavier than Starlink's v1.0 at 260 kg, but lighter than Starlink's v2 Mini at 800 kg. The larger mass reflects a more capable satellite with a larger solar array, higher-power amplifiers, and more sophisticated phased array antennas. Amazon has stated that its satellite design team achieved significant cost reduction relative to early estimates through custom chip design — specifically, designing proprietary ASICs (application-specific integrated circuits) for the phased array beam-forming circuitry rather than using commercially available components. Custom ASICs dramatically reduce per-unit cost at volume but require substantial upfront engineering investment, making them economically rational only when the production volume justifies the NRE (non-recurring engineering) cost.</p>
+
+<h3>Frequency bands and phased arrays</h3>
+
+<p>Kuiper uses Ka-band (26.5–40 GHz) for both user links and gateway feeder links — a different choice from Starlink Gen1's Ku-band user links. Ka-band offers more bandwidth than Ku-band (approximately 3.5 GHz of user-link bandwidth in Ka vs approximately 2 GHz in Ku) and smaller antenna apertures for equivalent gain, enabling more compact user terminals. The trade-off is greater susceptibility to rain fade: Ka-band's shorter wavelength is attenuated more significantly by rainfall than Ku-band. For Kuiper's primary mid-latitude markets (where precipitation events are common), this rain fade sensitivity requires link margin budgeting and adaptive coding and modulation to maintain service quality in adverse weather.</p>
+
+<p>The phased array antennas on the Kuiper satellite support multiple simultaneous beams, with the exact beam count not publicly specified. Amazon's phased array custom ASIC development — announced in 2021 as a core technology investment — is designed to enable high beam count at low cost, directly addressing the cell-density throughput problem described in Lesson 7. A satellite with more simultaneous beams can serve denser geographic areas without per-subscriber throughput degradation, making the custom ASIC investment a capacity efficiency play as much as a cost reduction.</p>
+
+<h3>Inter-satellite links</h3>
+
+<p>Amazon has filed for and been granted authorisation for optical inter-satellite links on Kuiper satellites, and the Gen1 satellite design is understood to include ISL capability. Unlike Starlink's ISL rollout — which began with v1.5 and was retrofitted into an existing constellation mid-deployment — Kuiper's ISL architecture was designed in from the start. If the deployed constellation includes ISLs from the first operational batch, Kuiper would from day one have the transoceanic routing capability that Starlink's Gen1 lacked and that OneWeb's Gen1 still lacks. This is a significant architectural advantage if realised: a new entrant that launches with ISL capability immediately offers a product that matches or exceeds the network capabilities that Starlink took several years to achieve.</p>
+
+<h3>Manufacturing: the Kuiper facility in Redmond</h3>
+
+<p>Amazon built a dedicated satellite manufacturing facility in Redmond, Washington — the same city as SpaceX's Starlink manufacturing facility, approximately 3 km away. The Kuiper facility spans approximately 100,000 square feet and is designed for high-volume production with extensive automation. Amazon has targeted a production rate sufficient to manufacture and launch 3,236 satellites within the FCC-authorised deployment window, implying a sustained production rate of several satellites per day at peak. The manufacturing facility's proximity to Amazon's corporate headquarters and technical workforce in the Seattle area provides a talent pipeline that satellite manufacturers in more traditional aerospace locations (Toulouse, El Segundo) do not have equally close access to.</p>
+
+<div class="deep-dive">
+    <h4>DEEPER CONTEXT — THE CUSTOM ASIC STRATEGY</h4>
+    <p>Amazon's investment in custom ASICs for Kuiper's phased array beam-forming is the satellite industry equivalent of Apple's silicon strategy for iPhones. Standard commercial phased array beam-forming chips — available from suppliers like Anokiwave, Renesas, and others — are designed for the broadest possible market, which means they include features Kuiper doesn't need and lack optimisations Kuiper does need. A custom ASIC strips out unnecessary functions, optimises the power and area for Kuiper's specific beam count, frequency plan, and modulation requirements, and can be manufactured at volume pricing that commercial off-the-shelf chips cannot match once annual production volumes reach tens of thousands of units. The NRE cost of a complex ASIC — designing, simulating, taping out, and qualifying — is typically $5–30 million depending on process node and complexity. At a production volume of 3,236 satellites with multiple ASICs per satellite, the NRE is amortised to a few thousand dollars per satellite, while the unit cost savings from custom vs commercial parts at that volume can be $10,000–50,000 per satellite. The economics strongly favour custom silicon at Kuiper's scale.</p>
+</div>
+```
+
+</div>
+
+<!-- ═══ S4 ═══ -->
+
+<div class="content-block" id="s4">
+    <h2>4. The Launch Campaign: Atlas V, New Glenn, and Ariane 6</h2>
+
+```
+<p>Kuiper's launch strategy is the most diversified of any LEO broadband constellation — a deliberate risk management choice driven by both the FCC deployment timeline and the immaturity of its preferred launch vehicle (New Glenn) at the time of contract signing. Amazon contracted with three separate launch providers, securing what it described as the largest commercial launch procurement in history by total launch count.</p>
+
+<h3>Atlas V: the reliable workhorse</h3>
+
+<p>United Launch Alliance's Atlas V was Kuiper's first contracted launch vehicle and the one with the most demonstrated reliability track record. Atlas V, flying since 2002, has a near-perfect reliability record across more than 80 missions. Amazon contracted for nine Atlas V launches dedicated to Kuiper — sufficient to deploy several hundred satellites. The Atlas V flights provide Kuiper with a proven, near-term launch capability that could begin deploying the constellation before New Glenn or Ariane 6 were ready. The first Kuiper launch on Atlas V (carrying two prototype satellites, KuiperSat-1 and KuiperSat-2) flew in October 2023, successfully demonstrating the satellite bus and key on-orbit systems. The first operational Kuiper batch launch took place in early 2025.</p>
+
+<h3>New Glenn: the Blue Origin vehicle</h3>
+
+<p>New Glenn is Blue Origin's heavy-lift orbital rocket, designed for a fairing large enough to carry approximately 45 Kuiper satellites per launch — a batch size comparable to Starlink's Falcon 9 manifest. Amazon contracted for 12 New Glenn launches. New Glenn's first flight occurred in January 2025, successfully reaching orbit on its inaugural mission — a significant milestone for Blue Origin, which had never previously operated an orbital rocket. For Kuiper, New Glenn's demonstrated orbital capability reduced the deployment risk associated with that contract. At 12 launches with approximately 45 satellites per launch, New Glenn is contracted to deploy approximately 540 Kuiper satellites — roughly 17% of the total constellation.</p>
+
+<h3>Ariane 6: the European vehicle</h3>
+
+<p>Arianespace's Ariane 6 rocket, flying in its A62 and A64 configurations, forms the largest portion of Kuiper's contracted launch manifest: 18 dedicated launches. Ariane 6's first flight occurred in July 2024 after significant delays from its original 2020 target date. Kuiper is Ariane 6's largest commercial customer by launch count, and the constellation deployment contract is commercially essential to Arianespace's post-Soyuz business plan. At approximately 35–40 Kuiper satellites per Ariane 6 launch, the 18 flights would deploy approximately 630–720 satellites — the largest single launch provider share of the Kuiper manifest.</p>
+
+<h3>The launch economics versus Starlink</h3>
+
+<p>The critical difference between Kuiper's multi-provider launch strategy and Starlink's single-provider model is cost. SpaceX's internal marginal cost for a Falcon 9 Starlink mission — estimated at $5–15 million per launch — gives it a per-satellite launch cost of roughly $100,000–250,000. Kuiper, buying commercial launch services from Atlas V ($150–200M per launch), New Glenn ($80–120M estimated), and Ariane 6 ($90–120M estimated), faces per-satellite launch costs of approximately $2–4 million per satellite at the contracted batch sizes. This is roughly 10–20× Starlink's per-satellite launch cost. Amazon's $10 billion budget must therefore absorb significantly higher launch costs than Starlink faces — a structural disadvantage that does not disappear unless Blue Origin substantially reduces New Glenn's launch price at volume, or unless Kuiper secures access to Starship-class pricing through some mechanism.</p>
+
+<div class="compare-table" style="overflow-x:auto;">
+    <table class="compare-table" style="min-width:580px;">
+        <thead>
+            <tr>
+                <th>Vehicle</th>
+                <th>Provider</th>
+                <th>Launches contracted</th>
+                <th>Sats per launch (est.)</th>
+                <th>Est. cost/launch</th>
+                <th>First flight status</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr><td>Atlas V</td><td>ULA</td><td class="md">9</td><td>~27</td><td class="lo">~$150–200M</td><td class="hi">✓ Proven (2002–)</td></tr>
+            <tr><td>New Glenn</td><td>Blue Origin</td><td class="md">12</td><td>~45</td><td class="md">~$80–120M (est.)</td><td class="md">✓ Jan 2025 (inaugural)</td></tr>
+            <tr><td>Ariane 6</td><td>Arianespace</td><td class="hi">18</td><td>~35–40</td><td class="md">~$90–120M</td><td class="md">✓ Jul 2024 (inaugural)</td></tr>
+            <tr><td><em>Falcon 9 (Starlink ref)</em></td><td><em>SpaceX</em></td><td>—</td><td><em>~60</em></td><td class="hi"><em>~$5–15M internal</em></td><td class="hi"><em>✓ 200+ Starlink flights</em></td></tr>
+        </tbody>
+    </table>
+</div>
+
+<div class="callout amber">
+    <strong>THE LAUNCH COST ASYMMETRY AND ITS IMPLICATIONS</strong>
+    Kuiper's per-satellite launch cost of approximately $2–4 million versus Starlink's ~$100–250K is the single most significant financial structural difference between the two constellations. At 3,236 satellites, Kuiper's launch costs alone could reach $6–13 billion at commercial rates — consuming the majority of the $10 billion budget before satellite manufacturing, ground segment, or operations costs are included. This math explains why Amazon has invested heavily in Blue Origin's New Glenn: at scale, New Glenn's cost structure is intended to be substantially lower than Atlas V or Ariane 6, and a vertically integrated Blue Origin–Kuiper launch relationship would compress the cost asymmetry versus Starlink. New Glenn's inaugural success in January 2025 was therefore commercially significant far beyond its technical achievement.
+</div>
+```
+
+</div>
+
+<!-- ═══ S5 ═══ -->
+
+<div class="content-block" id="s5">
+    <h2>5. The FCC Deadline: July 2026 and the Deployment Race</h2>
+
+```
+<p>The FCC's July 30, 2026 milestone — requiring 1,618 of Kuiper's 3,236 satellites to be deployed and operational — is the most consequential near-term constraint on Project Kuiper. It is not a soft target or an aspirational goal: the FCC has the authority to revoke spectrum authorisation for operators that fail to meet milestone requirements, and while it has granted extensions in some historical cases (notably SpaceX's Starlink constellation received a partial waiver on certain deployment milestones), it has also declined to grant extensions when operators had not demonstrated sufficient progress.</p>
+
+<h3>The deployment mathematics</h3>
+
+<p>As of early 2025, Kuiper had approximately 27 satellites in orbit — all from the first operational Kuiper launch batch in early 2025 and the two prototype satellites from 2023. Deploying 1,618 satellites by July 30, 2026 from a standing start of 27 in early 2025 requires deploying approximately 1,591 additional satellites in approximately 18 months. At the planned batch sizes (27–45 per launch), this implies approximately 35–60 launches in 18 months — roughly 2–3 launches per month sustained across all three launch providers. This is an unprecedented commercial launch pace for a single constellation. For comparison, Starlink averaged approximately 2–3 Falcon 9 Starlink launches per month during its peak deployment phase — but SpaceX was using only its own dedicated launch system at that point, while Kuiper must coordinate across three separate launch providers with different pad facilities, integration schedules, and range conflicts.</p>
+
+<h3>Waiver risk and FCC negotiation</h3>
+
+<p>The industry assumption among satellite industry observers is that Amazon will apply for an FCC extension or partial waiver if the July 2026 milestone appears unreachable. The FCC's precedent in such cases is mixed: it has granted extensions with conditions (requiring more aggressive subsequent milestones), denied extensions (requiring forfeiture of some spectrum rights), and in rare cases imposed fines. Amazon's leverage in any extension negotiation is substantial — the company has demonstrably invested billions of dollars, has satellites in orbit, and is actively launching. A regulator that revokes spectrum authorisation from a credible, well-capitalised operator that is visibly progressing faces reputational and legal consequences. However, the mere existence of the deadline creates financial and operational urgency that is structurally beneficial: it forces Amazon to commit to a launch pace that it might otherwise stretch to a more leisurely schedule.</p>
+
+<h3>Commercial service timeline</h3>
+
+<p>Amazon has stated its intention to begin commercial Kuiper service in 2025. A practical minimum viable constellation for commercial service — providing continuous coverage in a target region — requires approximately 578 satellites (the first two shells partially populated). Beta service with a limited geographic footprint could begin once that threshold is crossed. Full global mid-latitude coverage at competitive throughput requires closer to the full 3,236-satellite constellation. The gap between "beta service begins" and "full commercial scale" is likely to span 2025–2027, assuming the launch campaign proceeds at the required pace.</p>
+
+<div class="timeline">
+    <div class="tl-item">
+        <div class="tl-year">Apr 2019</div>
+        <div class="tl-body"><strong>PUBLIC ANNOUNCEMENT</strong><p>Amazon confirms Project Kuiper, 3,236-satellite LEO constellation.</p></div>
+    </div>
+    <div class="tl-item">
+        <div class="tl-year">Jul 2020</div>
+        <div class="tl-body"><strong>FCC AUTHORISATION</strong><p>FCC grants full constellation authorisation with Jul 2026 (half) and Jul 2029 (full) deployment milestones.</p></div>
+    </div>
+    <div class="tl-item">
+        <div class="tl-year">Oct 2023</div>
+        <div class="tl-body"><strong>PROTOTYPE LAUNCH</strong><p>KuiperSat-1 and -2 launch on Atlas V. Successful on-orbit test of satellite systems.</p></div>
+    </div>
+    <div class="tl-item">
+        <div class="tl-year">Jul 2024</div>
+        <div class="tl-body"><strong>ARIANE 6 FIRST FLIGHT</strong><p>Ariane 6 inaugural launch (non-Kuiper). Key Kuiper launch provider now operational.</p></div>
+    </div>
+    <div class="tl-item">
+        <div class="tl-year">Jan 2025</div>
+        <div class="tl-body"><strong>NEW GLENN INAUGURAL</strong><p>Blue Origin's New Glenn reaches orbit on first attempt. Second key Kuiper launch provider demonstrated.</p></div>
+    </div>
+    <div class="tl-item">
+        <div class="tl-year">Early 2025</div>
+        <div class="tl-body"><strong>FIRST OPERATIONAL BATCH</strong><p>First large Kuiper satellite batch launched on Atlas V. Commercial service beta preparation begins.</p></div>
+    </div>
+    <div class="tl-item">
+        <div class="tl-year">Jul 2026</div>
+        <div class="tl-body"><strong>FCC MILESTONE — 1,618 SATS</strong><p>Half-constellation deployment deadline. Miss = spectrum authorisation risk.</p></div>
+    </div>
+</div>
+```
+
+</div>
+
+<!-- ═══ S6 ═══ -->
+
+<div class="content-block" id="s6">
+    <h2>6. AWS Integration: the Defining Commercial Differentiator</h2>
+
+```
+<p>Amazon Web Services is the most profitable division of Amazon — generating approximately $90 billion in annual revenue and the majority of Amazon's total operating profit as of 2024. AWS is also the world's largest cloud computing platform, serving enterprise customers from startups to the Fortune 500, government agencies, and critical infrastructure operators in every industry. Kuiper's integration with AWS is not merely a co-marketing agreement — it is a deep technical and commercial integration that no other LEO broadband operator can replicate, because no other LEO operator owns a hyperscale cloud platform.</p>
+
+<h3>AWS Ground Station as the gateway backbone</h3>
+
+<p>AWS Ground Station is an existing AWS service that provides managed satellite ground station infrastructure — antenna arrays, RF processing, and data downlink services — available to any satellite operator as a cloud-managed service. Customers pay per minute of satellite contact time rather than building and operating their own ground station network. For Kuiper, AWS Ground Station provides the gateway infrastructure: Kuiper's satellite feeder links connect to AWS Ground Station facilities, which are co-located with or directly connected to AWS data centres. This architectural integration means that a Kuiper user's data traverses from the user terminal to the satellite, then to the nearest AWS Ground Station, and then directly into the AWS network fabric — bypassing the public internet and its associated congestion, latency variability, and security exposure. For an enterprise customer running applications on AWS, this end-to-end path through AWS-controlled infrastructure is architecturally cleaner and potentially more secure than Starlink's path through SpaceX's gateway network and then through commercial internet peering.</p>
+
+<h3>Service integration: Kuiper as an AWS service</h3>
+
+<p>Amazon has positioned Kuiper as an AWS service — meaning enterprise customers will be able to purchase Kuiper connectivity through the AWS console alongside compute, storage, database, and networking services. This procurement integration is commercially significant: large enterprises that already have AWS enterprise agreements, AWS credits, and AWS billing relationships can add Kuiper connectivity to their existing contract without a separate procurement process. For an IT director managing a multi-site enterprise on AWS, adding satellite connectivity at a remote site becomes as simple as provisioning a new EC2 instance — a workflow already familiar to millions of AWS customers. This procurement simplicity reduces sales friction and customer acquisition cost in a way that Starlink's separate consumer/enterprise sales process does not.</p>
+
+<h3>Edge computing integration: AWS Outposts and Wavelength</h3>
+
+<p>AWS Outposts (AWS-managed cloud infrastructure running on-premises at customer sites) and AWS Wavelength (ultra-low-latency compute at the network edge) represent specific integration points where Kuiper's connectivity adds differentiated value. A remote industrial site — an oil platform, a mining operation, a military forward operating base — that runs AWS Outposts for local compute and uses Kuiper for connectivity to the AWS backbone can run latency-sensitive applications locally while maintaining secure connectivity to central AWS services. This edge-plus-connectivity architecture is specifically relevant to the industrial IoT, energy, and defence markets where remote sites need both local compute and reliable WAN connectivity — and where Starlink provides connectivity but not the deeply integrated edge compute layer.</p>
+
+<h3>The Amazon Prime bundling option</h3>
+
+<p>Amazon has not publicly confirmed plans to bundle Kuiper connectivity with Amazon Prime, but the commercial logic is frequently discussed by analysts. Amazon Prime already bundles e-commerce shipping, Prime Video streaming, Prime Music, Prime Reading, and other services for a single monthly fee. Adding satellite broadband to Prime — at a price premium — would create a single subscription that addresses both entertainment and connectivity needs for rural households, directly competing with Starlink's $120/month residential plan. The bundling would leverage Amazon's existing billing relationships with approximately 200 million Prime subscribers globally, many of whom are in suburban and rural areas where Kuiper's addressable market overlaps with Prime's existing base.</p>
+
+<div class="callout green">
+    <strong>WHY AWS INTEGRATION IS A STRUCTURAL MOAT</strong>
+    Starlink cannot replicate AWS integration because SpaceX does not own a cloud computing platform. OneWeb cannot replicate it because Bharti Enterprises and the UK Government do not own hyperscale cloud. Telesat Lightspeed cannot replicate it. The AWS integration is unique to Kuiper and creates a customer segment — the millions of enterprise organisations running on AWS — where Kuiper has a structural procurement and technical advantage that price competition cannot easily overcome. An enterprise choosing between Kuiper (native AWS integration, single billing, end-to-end AWS network path) and Starlink Business (separate procurement, SpaceX gateway, public internet transit) has a non-price reason to prefer Kuiper that is independent of throughput or latency comparisons. This is the commercial logic that justifies Amazon's $10 billion commitment even knowing that Starlink has a 3–4 year head start.
+</div>
+```
+
+</div>
+
+<!-- ═══ S7 ═══ -->
+
+<div class="content-block" id="s7">
+    <h2>7. Terminal Strategy: Three Form Factors and the Consumer Play</h2>
+
+```
+<p>Amazon has developed three Kuiper user terminal form factors targeting different market segments and price points — a portfolio approach that differs from Starlink's evolution from a single residential terminal to a family of form factors, and from OneWeb's single professional-grade terminal.</p>
+
+<h3>Standard residential terminal</h3>
+
+<p>The standard Kuiper residential terminal is a Ka-band flat-panel phased array approximately 30 cm × 30 cm — slightly smaller than Starlink's Gen2 rectangular terminal. Amazon has publicly stated a target retail price of under $400 for the terminal — below Starlink's $599 Gen2 price — achieved through the custom ASIC cost reduction discussed in Section 3 and through Amazon's manufacturing scale and supply chain expertise. The terminal is designed for self-installation: no professional installer required, no pointing calibration, plug in and connect. This matches Starlink's consumer installation model and is essential for reaching the rural residential market at volume. Amazon has indicated download speeds of up to 400 Mbps from the standard terminal — above Starlink's 100–300 Mbps residential specification.</p>
+
+<h3>Compact terminal</h3>
+
+<p>The compact Kuiper terminal targets mobility applications — vehicles, boats, and portable deployments. It is smaller and lighter than the standard residential terminal, with somewhat reduced throughput (the smaller aperture provides less antenna gain), and is ruggedised for outdoor mobile mounting. This terminal competes directly with Starlink's Flat High Performance terminal in the maritime and vehicle market, and with Starlink Mini in the portable use case, though at different performance and price points.</p>
+
+<h3>Enterprise terminal</h3>
+
+<p>The enterprise Kuiper terminal is a larger, higher-gain flat panel designed for fixed enterprise installations — cellular backhaul towers, enterprise branch offices, government sites, and similar applications requiring higher sustained throughput and more robust weather margin. This terminal connects directly to AWS Ground Station via the Kuiper satellite and delivers traffic into the AWS network fabric with no public internet transit — the architecture specifically designed for enterprise AWS customers with data sovereignty, security, and latency requirements.</p>
+
+<h3>The $400 terminal as a market signal</h3>
+
+<p>Amazon's stated sub-$400 terminal price target is strategically significant for two reasons. First, it signals intent to compete directly for the mass-market residential customer that Starlink currently serves at $599 — if achievable, it removes the hardware cost barrier for a meaningful additional segment of rural households. Second, it signals Amazon's manufacturing confidence: achieving a $400 retail price with positive margin requires a bill-of-materials cost of approximately $250–300, achievable only through custom silicon and Amazon-scale supply chain purchasing power. If this target is achieved at launch, it will be the lowest cost LEO residential terminal on the market and will force a competitive response from Starlink on terminal pricing.</p>
+```
+
+</div>
+
+<!-- ═══ S8 ═══ -->
+
+<div class="content-block" id="s8">
+    <h2>8. Commercial Strategy: Enterprise, Government, and Consumer Segments</h2>
+
+```
+<p>Kuiper's commercial strategy addresses three distinct segments with different value propositions, pricing, and competitive dynamics. Unlike OneWeb's explicit B2B-only positioning, Kuiper is pursuing all three segments simultaneously — a broader scope that requires more complex go-to-market execution but reflects the ambition of a company with Amazon's resources.</p>
+
+<h3>Enterprise: the AWS customer base</h3>
+
+<p>Enterprise is Kuiper's primary near-term revenue opportunity, for the reasons described in Section 6. Amazon's enterprise sales force — already engaged with millions of AWS customers globally — provides a ready distribution channel for Kuiper enterprise connectivity. The target enterprise customer is one already on AWS with remote sites (manufacturing facilities, retail distribution centres, agricultural operations, logistics depots) that lack adequate broadband. Kuiper connectivity sold through the AWS console and billed on the AWS invoice requires no new procurement relationship — a uniquely low-friction sales motion that Starlink Business cannot match. Initial enterprise pricing is expected to be in the range of $500–2,000 per month per site at business-tier throughput levels, premium to residential but justified by the AWS integration and managed service quality.</p>
+
+<h3>Government and defence</h3>
+
+<p>Kuiper has pursued US government and allied government contracts through a dedicated government service programme, analogous to Starlink's Starshield. Amazon has existing US government cloud relationships through AWS GovCloud — a dedicated AWS infrastructure region serving US government classified workloads — and Kuiper is positioned as the connectivity complement to AWS GovCloud for remote government sites. The commercial arrangement leverages Amazon's existing security clearances, FedRAMP authorisations, and DoD cloud contract relationships, providing a faster path to government satellite connectivity procurement than a standalone constellation operator could achieve. Amazon has been awarded contracts under the DoD Commercial Satellite Communications (COMSATCOM) programme, indicating government customer engagement before full constellation deployment.</p>
+
+<h3>Consumer residential</h3>
+
+<p>Consumer residential is Kuiper's most direct competitive battleground with Starlink, and the segment where Starlink's four-year head start is most consequential. By the time Kuiper reaches sufficient constellation coverage for broad US residential service (likely 2026–2027), Starlink will have 4+ million subscribers, several years of operational experience, and a brand recognition in rural broadband markets that Kuiper will need to overcome. Amazon's competitive advantages — lower terminal price, Prime ecosystem bundling, Amazon brand familiarity — are meaningful but will face a Starlink incumbent effect: rural households that already have Starlink installed and working have little incentive to switch providers and reinstall hardware. Kuiper's residential strategy is therefore likely to focus more on acquiring the next wave of rural broadband customers — those who have not yet subscribed to Starlink — rather than winning Starlink switchers.</p>
+
+<div class="key-numbers">
+    <div class="kn-item"><span class="kn-val">&lt;$400</span><span class="kn-label">Target residential terminal price</span></div>
+    <div class="kn-item"><span class="kn-val">400 Mbps</span><span class="kn-label">Quoted peak download speed</span></div>
+    <div class="kn-item"><span class="kn-val">$90B</span><span class="kn-label">AWS annual revenue (2024)</span></div>
+    <div class="kn-item"><span class="kn-val">200M+</span><span class="kn-label">Amazon Prime subscribers globally</span></div>
+</div>
+```
+
+</div>
+
+<!-- ═══ S9 ═══ -->
+
+<div class="content-block" id="s9">
+    <h2>9. Competitive Positioning: Kuiper vs Starlink vs OneWeb</h2>
+
+```
+<p>By the time Kuiper reaches full commercial scale, the LEO broadband market will have at least two well-capitalised constellation operators (Kuiper and Starlink) and one restructured mid-scale B2B operator (OneWeb/Eutelsat). The competitive dynamics among these three operators are not symmetric — each has a different mix of structural advantages and disadvantages that determine where it can credibly win.</p>
+
+<h3>Kuiper vs Starlink: the structural comparison</h3>
+
+<p>Starlink's advantages over Kuiper are primarily temporal and scale-based: a four-year operational head start, 6,000+ deployed satellites versus Kuiper's early hundreds, 4+ million paying subscribers versus Kuiper's zero, and a launch cost structure that is 10–20× more favourable. Starlink's ISL network is operational and delivering measurable latency advantages on transoceanic routes. These advantages are real and significant.</p>
+
+<p>Kuiper's advantages over Starlink are primarily platform-based: AWS integration that Starlink cannot replicate, a lower terminal price target, Amazon's consumer brand and Prime ecosystem, and the absence of CEO concentration risk (Amazon is a $1.8 trillion market cap public company governed by a board, not a single individual). For enterprise customers in the AWS ecosystem, Kuiper's platform advantages may outweigh Starlink's scale advantages — the procurement simplicity and end-to-end AWS network path are genuinely differentiated. For consumer residential customers, the competition is more direct and Starlink's incumbent advantage is significant.</p>
+
+<h3>Kuiper vs OneWeb: non-overlapping strategies</h3>
+
+<p>Kuiper and OneWeb are less direct competitors than Kuiper and Starlink, because their architectures and strategies point at different market segments. OneWeb's polar coverage targets markets Kuiper's mid-latitude shells cannot serve: Arctic maritime, high-latitude government, transpolar aviation. Kuiper's mid-latitude focus and AWS integration targets markets OneWeb's B2B-only model and smaller capacity cannot efficiently serve. The most direct competition is in enterprise B2B in mid-latitude markets — where both operators target managed enterprise connectivity — but even there, Kuiper's AWS integration distinguishes its value proposition from OneWeb's managed service model through Eutelsat distribution partners.</p>
+
+<h3>The long-term market structure question</h3>
+
+<p>The central question for LEO broadband market structure over the next decade is whether the market can sustain two large-scale constellation operators (Starlink and Kuiper) at the investment levels required, or whether one operator consolidates the mass market while others serve niches. The historical pattern in network infrastructure — broadband, mobile networks, cable — is that markets with high fixed costs and low marginal costs tend toward oligopoly, with two to three operators splitting the market rather than fragmenting across many. If this pattern holds for LEO broadband, Starlink and Kuiper are the most likely survivors of the current field, OneWeb occupies a viable niche through Eutelsat, and Telesat Lightspeed faces the hardest path given its late deployment and smaller scale.</p>
+
+<div class="compare-table" style="overflow-x:auto;">
+    <table class="compare-table" style="min-width:640px;">
+        <thead>
+            <tr>
+                <th>Dimension</th>
+                <th>Kuiper</th>
+                <th>Starlink</th>
+                <th>OneWeb</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr><td>Satellites operational (2025)</td><td class="lo">~27 (early deploy)</td><td class="hi">6,000+</td><td class="md">~618</td></tr>
+            <tr><td>Target constellation</td><td>3,236</td><td>7,500+ (Gen2)</td><td class="md">648 (Gen1)</td></tr>
+            <tr><td>Inclination range</td><td class="md">33°–51.9°</td><td class="hi">53°–97.6°</td><td class="hi">87.9°</td></tr>
+            <tr><td>Polar coverage</td><td class="lo">No (&lt;56°)</td><td class="md">Partial (polar shells)</td><td class="hi">Full</td></tr>
+            <tr><td>Optical ISLs</td><td class="hi">Planned (gen1)</td><td class="hi">Yes (v1.5+)</td><td class="lo">No</td></tr>
+            <tr><td>Launch cost advantage</td><td class="md">Partial (New Glenn)</td><td class="hi">Own rockets</td><td class="lo">Third-party only</td></tr>
+            <tr><td>Cloud platform integration</td><td class="hi">AWS (native)</td><td class="lo">None</td><td class="lo">None</td></tr>
+            <tr><td>Consumer market intent</td><td class="hi">Yes (direct)</td><td class="hi">Yes (direct)</td><td class="lo">No (B2B only)</td></tr>
+            <tr><td>Terminal price (residential)</td><td class="hi">&lt;$400 (target)</td><td class="md">$599</td><td class="lo">Professional only</td></tr>
+            <tr><td>CEO concentration risk</td><td class="hi">Low (public co.)</td><td class="lo">High (Musk)</td><td class="md">Moderate</td></tr>
+            <tr><td>Financial backing</td><td class="hi">$10B Amazon</td><td class="hi">SpaceX self-fund</td><td class="lo">Eutelsat (debt-stressed)</td></tr>
+            <tr><td>Subscribers (2025)</td><td class="lo">0 (pre-commercial)</td><td class="hi">4M+</td><td class="md">B2B (undisclosed)</td></tr>
+        </tbody>
+    </table>
+</div>
+
+<div class="deep-dive">
+    <h4>DEEPER CONTEXT — THE ANTITRUST IRONY</h4>
+    <p>Amazon's Project Kuiper faces an ironic regulatory risk: the same Amazon that regulators in the EU, UK, and US are scrutinising for anticompetitive behaviour in e-commerce, cloud computing, and logistics is building a satellite broadband constellation that is explicitly designed to leverage those platforms for competitive advantage. If AWS integration creates a structural preference for Kuiper among AWS enterprise customers — and if that preference becomes dominant in the enterprise satellite broadband market — regulators may question whether the integration constitutes anticompetitive bundling. The EU's Digital Markets Act (DMA), which requires gatekeeper platforms to ensure interoperability and prohibits self-preferencing in certain contexts, could in principle apply to a situation where AWS cloud services are made materially better with Kuiper connectivity than with Starlink or OneWeb connectivity. This regulatory risk is speculative but not implausible, and it adds a governance dimension to Kuiper's competitive strategy that Starlink — with its own but different regulatory challenges — does not face.</p>
+</div>
+```
+
+</div>
+
+<!-- ═══ QUIZ ═══ -->
+
+<div class="quiz-block" id="quiz">
+    <h2>KNOWLEDGE CHECK</h2>
+    <p class="quiz-intro">Ten questions covering Kuiper's architecture, launch strategy, FCC deadline, AWS integration thesis, terminal pricing, and competitive positioning. Questions 8–10 require synthesis and application.</p>
+
+```
+<div class="quiz-q" id="q1">
+    <p><strong>Q1.</strong> Why did Amazon contract three separate launch providers (Atlas V, New Glenn, Ariane 6) rather than relying solely on New Glenn — Blue Origin's vehicle in which Jeff Bezos has substantial personal investment?</p>
+    <div class="quiz-options">
+        <button class="quiz-opt" data-q="1" data-correct="false">A. FCC regulations require LEO operators to use non-US launch vehicles for at least a portion of their constellation deployment to ensure international participation</button>
+        <button class="quiz-opt" data-q="1" data-correct="true">B. New Glenn was unproven at the time of contract signing — its first orbital launch was January 2025 — and the FCC's July 2026 half-constellation deployment deadline left no margin for sole-sourcing an undemonstrated vehicle; multi-provider contracting spread the deployment risk across three vehicles with staggered development risks</button>
+        <button class="quiz-opt" data-q="1" data-correct="false">C. Blue Origin's production capacity was insufficient for the full Kuiper manifest, so additional providers were required to fill the launch rate gap regardless of risk preferences</button>
+        <button class="quiz-opt" data-q="1" data-correct="false">D. Amazon's board required competitive bidding across multiple launch providers as a corporate governance requirement for projects above $1 billion in total contract value</button>
+    </div>
+    <div class="quiz-feedback" id="fb1"></div>
+</div>
+
+<div class="quiz-q" id="q2">
+    <p><strong>Q2.</strong> Kuiper's three orbital shells are all between 33° and 51.9° inclination. What is the primary commercial rationale for this mid-latitude focus, and what market segment does it explicitly deprioritise?</p>
+    <div class="quiz-options">
+        <button class="quiz-opt" data-q="2" data-correct="false">A. Mid-latitude orbits reduce atmospheric drag and extend satellite lifetime; the deprioritised segment is equatorial maritime traffic which uses GEO alternatives</button>
+        <button class="quiz-opt" data-q="2" data-correct="true">B. Mid-latitude orbits (33°–52°) cover the 56°S–56°N band where the majority of the global population, internet users, and AWS enterprise customers are concentrated; the deprioritised segment is high-latitude coverage (Arctic maritime, transpolar aviation, polar government), where OneWeb's 87.9° near-polar constellation has a structural advantage</button>
+        <button class="quiz-opt" data-q="2" data-correct="false">C. Mid-latitude orbits simplify launch geometry from US and European launch sites; the deprioritised segment is sub-equatorial coverage below 33°S which is served by GEO</button>
+        <button class="quiz-opt" data-q="2" data-correct="false">D. Mid-latitude orbits minimise ISL pointing complexity; high-latitude orbits were deprioritised because the ISL geometry becomes unstable near the poles</button>
+    </div>
+    <div class="quiz-feedback" id="fb2"></div>
+</div>
+
+<div class="quiz-q" id="q3">
+    <p><strong>Q3.</strong> Amazon's custom ASIC strategy for Kuiper's phased array beam-forming is described as analogous to Apple's silicon strategy. What is the economic logic that makes custom ASICs rational at Kuiper's scale but not at smaller constellation scales?</p>
+    <div class="quiz-options">
+        <button class="quiz-opt" data-q="3" data-correct="false">A. Custom ASICs require fewer regulatory approvals than commercial off-the-shelf chips for space applications, reducing qualification timeline and cost</button>
+        <button class="quiz-opt" data-q="3" data-correct="true">B. Custom ASIC NRE costs ($5–30M) are fixed regardless of production volume; at 3,236 satellites with multiple ASICs per satellite, the NRE amortises to a few thousand dollars per satellite, while the per-unit cost savings from optimised custom silicon vs commercial parts (potentially $10–50K per satellite at volume) far exceed the NRE — the economics only work when production volume is large enough that per-unit savings overwhelm the fixed NRE</button>
+        <button class="quiz-opt" data-q="3" data-correct="false">C. Custom ASICs can be manufactured at Amazon's own semiconductor fabs, eliminating third-party supplier dependency that would otherwise represent a supply chain risk at constellation scale</button>
+        <button class="quiz-opt" data-q="3" data-correct="false">D. Custom ASICs are required because no commercial phased array beam-forming chips support Ka-band frequencies; the custom development was therefore technically necessary, not an economic choice</button>
+    </div>
+    <div class="quiz-feedback" id="fb3"></div>
+</div>
+
+<div class="quiz-q" id="q4">
+    <p><strong>Q4.</strong> The FCC requires Kuiper to deploy 1,618 satellites by July 30, 2026. As of early 2025, approximately 27 satellites are in orbit. What launch rate would be required to meet the deadline, and why is this rate historically unprecedented for a single constellation?</p>
+    <div class="quiz-options">
+        <button class="quiz-opt" data-q="4" data-correct="false">A. Approximately 5–10 launches per month are needed; this is unprecedented because no launch vehicle has flown more than 4 times per month in history</button>
+        <button class="quiz-opt" data-q="4" data-correct="true">B. Approximately 1,591 additional satellites are needed in ~18 months; at 27–45 satellites per launch, this requires approximately 35–60 launches (2–3 per month) coordinated across three separate launch providers with different pads, integration schedules, and range conflicts — a pace that Starlink approached but achieved with a single vehicle on a single pad system, while Kuiper must synchronise three independent supply chains simultaneously</button>
+        <button class="quiz-opt" data-q="4" data-correct="false">C. Approximately 100 launches are required; unprecedented because the FCC has never previously required a deployment rate exceeding 500 satellites per year</button>
+        <button class="quiz-opt" data-q="4" data-correct="false">D. The rate is not unprecedented — Starlink deployed at a similar pace in 2020–2021, providing a clear roadmap for Kuiper to follow with three providers instead of one</button>
+    </div>
+    <div class="quiz-feedback" id="fb4"></div>
+</div>
+
+<div class="quiz-q" id="q5">
+    <p><strong>Q5.</strong> AWS Ground Station is described as Kuiper's gateway backbone. How does this architectural integration change the data path for an enterprise AWS customer using Kuiper, compared to the same customer using Starlink Business?</p>
+    <div class="quiz-options">
+        <button class="quiz-opt" data-q="5" data-correct="false">A. AWS Ground Station provides lower-latency feeder links because its antennas operate at E-band frequencies with higher throughput than standard Ka-band gateway links</button>
+        <button class="quiz-opt" data-q="5" data-correct="true">B. With Kuiper via AWS Ground Station, the data path goes: enterprise site → Kuiper satellite → AWS Ground Station (co-located with AWS data centre) → AWS private network fabric → customer's AWS workloads. With Starlink Business: enterprise site → Starlink satellite → SpaceX gateway → public internet → customer's AWS workloads. The Kuiper path avoids public internet transit entirely, providing more consistent latency, better security posture, and potential compliance benefits for customers with data sovereignty requirements</button>
+        <button class="quiz-opt" data-q="5" data-correct="false">C. AWS Ground Station encrypts all Kuiper traffic end-to-end using AWS KMS keys, which Starlink's gateway infrastructure cannot provide for customer-managed encryption</button>
+        <button class="quiz-opt" data-q="5" data-correct="false">D. The data path is architecturally identical — both Kuiper and Starlink route enterprise traffic through ground gateways to the internet; the only difference is that AWS bills Kuiper separately from Starlink Business</button>
+    </div>
+    <div class="quiz-feedback" id="fb5"></div>
+</div>
+
+<div class="quiz-q" id="q6">
+    <p><strong>Q6.</strong> Amazon targets a sub-$400 residential terminal price — below Starlink's $599 Gen2 terminal. What manufacturing and design strategies make this target achievable, and what does it signal about Amazon's consumer market intent?</p>
+    <div class="quiz-options">
+        <button class="quiz-opt" data-q="6" data-correct="false">A. The $400 target is achieved by using a smaller antenna aperture with lower throughput; the signal is that Amazon is targeting a budget broadband segment with lower performance expectations than Starlink customers</button>
+        <button class="quiz-opt" data-q="6" data-correct="true">B. The target is made achievable through custom ASIC cost reduction (optimised beam-forming silicon vs commercial parts), Amazon's supply chain scale and purchasing power for commodity components, and manufacturing automation at its Redmond facility; the signal is direct mass-market residential competition with Starlink — Amazon intends to win on hardware cost in the rural consumer segment, not retreat to a B2B niche as OneWeb did</button>
+        <button class="quiz-opt" data-q="6" data-correct="false">C. Amazon will subsidise the terminal below cost and recover margin through service subscription fees, as Starlink did in its early consumer rollout; the $400 price is not a manufacturing cost target but a market penetration strategy</button>
+        <button class="quiz-opt" data-q="6" data-correct="false">D. The $400 target assumes volume production of 50 million terminals — the Prime subscriber base — which provides economies of scale unavailable to Starlink at its current subscriber count</button>
+    </div>
+    <div class="quiz-feedback" id="fb6"></div>
+</div>
+
+<div class="quiz-q" id="q7">
+    <p><strong>Q7.</strong> Kuiper is described as having "no CEO concentration risk" compared to Starlink. What specific risk does this refer to, and why does Amazon's corporate governance structure mitigate it?</p>
+    <div class="quiz-options">
+        <button class="quiz-opt" data-q="7" data-correct="false">A. CEO concentration risk refers to the risk that a single executive's technical decisions create systematic design flaws; Amazon's matrix management structure distributes technical decision-making across multiple senior engineers</button>
+        <button class="quiz-opt" data-q="7" data-correct="true">B. CEO concentration risk in Starlink's context refers to Elon Musk's ability to make unilateral commercial and political decisions about Starlink service — restricting coverage in Ukraine, making politically controversial statements that affected government customer confidence — because he controls SpaceX as a private company. Amazon is a public company with a board of directors, institutional shareholders, and governance structures that limit any individual executive's ability to make unilateral decisions that harm customer or government relationships; Andy Jassy as CEO operates under board oversight and fiduciary duties to shareholders</button>
+        <button class="quiz-opt" data-q="7" data-correct="false">C. CEO concentration risk refers to the risk of key-man dependency where a CEO's departure would cause talent flight; Amazon mitigates this through deep bench strength in its satellite engineering organisation</button>
+        <button class="quiz-opt" data-q="7" data-correct="false">D. CEO concentration risk is primarily a financial risk — a CEO who controls capital allocation can divert satellite constellation investment to other priorities; Amazon's CFO sign-off requirement for capital expenditures above $100M prevents this</button>
+    </div>
+    <div class="quiz-feedback" id="fb7"></div>
+</div>
+
+<div class="quiz-q" id="q8">
+    <p><strong>Q8.</strong> An enterprise customer runs its ERP system, data warehouse, and real-time IoT analytics on AWS. It has 12 remote manufacturing sites in rural Southeast Asia with no fibre. Compare the end-to-end architecture of connecting those sites via Kuiper versus Starlink Business, identifying the specific advantage that would determine your recommendation.</p>
+    <div class="quiz-options">
+        <button class="quiz-opt" data-q="8" data-correct="false">A. Starlink Business is preferable because its larger global constellation provides more satellite density over Southeast Asia, reducing handover frequency and improving connection stability for latency-sensitive ERP transactions</button>
+        <button class="quiz-opt" data-q="8" data-correct="true">B. Kuiper is preferable for this specific customer: the end-to-end path via AWS Ground Station into the AWS private network fabric eliminates public internet transit between the remote sites and the AWS-hosted ERP and analytics — materially improving latency consistency, security posture, and compliance with any data locality requirements. Additionally, Kuiper connectivity purchased through the AWS console eliminates a separate vendor relationship, and the AWS Outposts integration enables local compute at the manufacturing sites with secure Kuiper backhaul. Starlink Business routes traffic via SpaceX gateways and the public internet to AWS — adding variable latency hops and public internet exposure</button>
+        <button class="quiz-opt" data-q="8" data-correct="false">C. Both provide equivalent connectivity for this use case; the decision should be based purely on price per Mbps because the application performance requirements are the same regardless of routing path</button>
+        <button class="quiz-opt" data-q="8" data-correct="false">D. OneWeb via Eutelsat is preferable because its B2B managed service model provides contractual SLAs that consumer-grade Starlink Business and beta-phase Kuiper cannot match</button>
+    </div>
+    <div class="quiz-feedback" id="fb8"></div>
+</div>
+
+<div class="quiz-q" id="q9">
+    <p><strong>Q9.</strong> Kuiper faces a structural launch cost disadvantage: approximately $2–4 million per satellite versus Starlink's ~$100–250K internal marginal cost. What is the single most plausible path for Amazon to close this gap over time?</p>
+    <div class="quiz-options">
+        <button class="quiz-opt" data-q="9" data-correct="false">A. Negotiate volume discounts with ULA and Arianespace as the constellation matures — at 83+ launches, Kuiper should be able to secure pricing substantially below published rates</button>
+        <button class="quiz-opt" data-q="9" data-correct="true">B. Scale New Glenn to high flight rates and reduce its marginal launch cost through reusability — Blue Origin's long-term plan for New Glenn includes booster reuse analogous to Falcon 9's reusability, which is the primary mechanism through which SpaceX reduced Falcon 9's marginal cost. A reusable New Glenn at 20–30 flights per booster could reduce per-launch cost from $80–120M to $20–40M, cutting per-satellite launch cost by 3–5×; combined with Starship-class vehicles in the longer term, Amazon could approach a cost structure within a factor of 2–3× of Starlink's internal cost</button>
+        <button class="quiz-opt" data-q="9" data-correct="false">C. Amazon could acquire a launch provider — purchasing Rocket Lab or a stake in ULA — to vertically integrate launch capability and internalise the launch margin currently paid to third parties</button>
+        <button class="quiz-opt" data-q="9" data-correct="false">D. The launch cost gap is structurally permanent and cannot be meaningfully closed; Amazon's $10B budget implicitly accepts the higher launch cost as the price of not owning a rocket company</button>
+    </div>
+    <div class="quiz-feedback" id="fb9"></div>
+</div>
+
+<div class="quiz-q" id="q10">
+    <p><strong>Q10 — Synthesis.</strong> It is July 2026. Kuiper has deployed 1,400 satellites (just short of the 1,618 FCC milestone) and is seeking a 6-month extension. Starlink has 8,000+ satellites in orbit and 6 million subscribers. Advise Amazon's Kuiper team on their three most important strategic priorities for the next 18 months.</p>
+    <div class="quiz-options">
+        <button class="quiz-opt" data-q="10" data-correct="false">A. Immediately reduce terminal prices below $200 to trigger mass consumer adoption before Starlink can respond; accelerate remaining constellation deployment; file for FCC extension with a committed catch-up schedule</button>
+        <button class="quiz-opt" data-q="10" data-correct="true">B. Priority 1 — Secure the FCC extension with a credible committed deployment schedule and evidence of good-faith progress (1,400 of 1,618 is 87% — a defensible position); simultaneously accelerate New Glenn launch cadence to close the final gap. Priority 2 — Activate the AWS enterprise segment aggressively: the enterprise customers already on AWS are the fastest-converting market requiring no constellation scale advantage over Starlink (enterprise customers don't need global coverage, just coverage at their specific sites — and those sites are now likely covered at 1,400 satellites). Priority 3 — Lock in key aviation and government contracts before Starlink cements those relationships; the 18-month window before full constellation is the window to establish enterprise reference customers whose case studies will define Kuiper's commercial narrative</button>
+        <button class="quiz-opt" data-q="10" data-correct="false">C. Concede the consumer residential market to Starlink and refocus entirely on enterprise AWS customers; withdraw the FCC extension request and accept the loss of polar spectrum rights as an acceptable trade for capital reallocation to AWS integration development</button>
+        <button class="quiz-opt" data-q="10" data-correct="false">D. Acquire OneWeb from Eutelsat to immediately add 618 operational satellites to the constellation count, satisfying the FCC milestone; the combined spectrum portfolio would also strengthen Kuiper's regulatory position</button>
+    </div>
+    <div class="quiz-feedback" id="fb10"></div>
+</div>
+
+<div class="quiz-score" id="quizScore"></div>
+```
+
+</div>
+
+<!-- ═══ PYTHON ═══ -->
+
+<div class="py-block" id="python">
+    <h2>PYTHON EXERCISES</h2>
+    <p class="py-intro">Three exercises: Kuiper FCC deadline deployment race simulation; launch cost comparison model across providers with New Glenn reusability sensitivity; and an AWS integration revenue model estimating the addressable enterprise market.</p>
+
+```
+<div class="py-exercise">
+    <h3>Exercise 1 — FCC Deadline Deployment Race Simulation</h3>
+    <p>Simulate Kuiper's constellation deployment trajectory from early 2025 to July 2026, modelling different launch cadence scenarios and computing the probability of meeting the FCC milestone under different assumptions about launch provider reliability and schedule slippage.</p>
+```
+
+<pre>
+import numpy as np
+import matplotlib.pyplot as plt
+from datetime import date, timedelta
+
+# ── Parameters ─────────────────────────────────────────────────────
+START_DATE      = date(2025, 2, 1)
+FCC_DEADLINE    = date(2026, 7, 30)
+FCC_TARGET      = 1618
+SATS_IN_ORBIT   = 27        # as of early 2025
+TOTAL_MONTHS    = 18        # approximate window
+
+# Launch provider scenarios
+PROVIDERS = {
+    'Atlas V':   {'sats_per_launch': 27,  'launches_remaining': 8,
+                  'months_between': 1.5,  'reliability': 0.97},
+    'New Glenn': {'sats_per_launch': 45,  'launches_remaining': 11,
+                  'months_between': 1.2,  'reliability': 0.88},  # newer vehicle
+    'Ariane 6':  {'sats_per_launch': 38,  'launches_remaining': 17,
+                  'months_between': 1.0,  'reliability': 0.92},
+}
+
+def simulate_deployment(providers, sats_start, target, months, n_sim=2000):
+    """
+    Monte Carlo simulation of constellation deployment.
+    Returns array of (satellites deployed at deadline) across simulations.
+    """
+    results = []
+    for _ in range(n_sim):
+        total_sats = sats_start
+        for name, p in providers.items():
+            launches_done  = 0
+            month_cursor   = p['months_between']
+            while launches_done < p['launches_remaining'] and month_cursor <= months:
+                # Add schedule jitter (+/- 0.5 months)
+                month_cursor += p['months_between'] + np.random.uniform(-0.3, 0.5)
+                if month_cursor > months:
+                    break
+                # Launch success
+                if np.random.random() < p['reliability']:
+                    total_sats += p['sats_per_launch']
+                launches_done += 1
+        results.append(min(total_sats, sum(
+            p['launches_remaining'] * p['sats_per_launch']
+            for p in providers.values()) + sats_start))
+    return np.array(results)
+
+# Base scenario
+base_results = simulate_deployment(PROVIDERS, SATS_IN_ORBIT, FCC_TARGET, TOTAL_MONTHS)
+
+# Optimistic: New Glenn reliability improves to 0.95, tighter cadence
+opt_providers = {k: dict(v) for k, v in PROVIDERS.items()}
+opt_providers['New Glenn']['reliability'] = 0.95
+opt_providers['New Glenn']['months_between'] = 1.0
+opt_results = simulate_deployment(opt_providers, SATS_IN_ORBIT, FCC_TARGET, TOTAL_MONTHS)
+
+# Pessimistic: Ariane 6 schedule slips, New Glenn reliability drops
+pes_providers = {k: dict(v) for k, v in PROVIDERS.items()}
+pes_providers['Ariane 6']['months_between'] = 1.5
+pes_providers['New Glenn']['reliability'] = 0.80
+pes_results = simulate_deployment(pes_providers, SATS_IN_ORBIT, FCC_TARGET, TOTAL_MONTHS)
+
+def pct_meeting(results, target=FCC_TARGET):
+    return (results >= target).sum() / len(results) * 100
+
+print("FCC DEADLINE DEPLOYMENT SIMULATION (2,000 runs each)")
+print(f"{'Scenario':<20} {'Mean sats':>10} {'P(meet FCC)':>13} {'P(>1400)':>10}")
+print("-" * 56)
+for label, res in [("Base case", base_results),
+                   ("Optimistic", opt_results),
+                   ("Pessimistic", pes_results)]:
+    print(f"{label:<20} {res.mean():>10.0f} {pct_meeting(res):>12.1f}% "
+          f"{pct_meeting(res, 1400):>9.1f}%")
+
+# ── Deterministic trajectory ────────────────────────────────────────
+months = np.arange(0, 19, 0.5)
+cum_base = SATS_IN_ORBIT + np.array([
+    sum(
+        p['launches_remaining'] * p['sats_per_launch']
+        * min(1, m / (p['launches_remaining'] * p['months_between']))
+        * p['reliability']
+        for p in PROVIDERS.values()
+    )
+    for m in months
+])
+
+fig, axes = plt.subplots(1, 2, figsize=(13, 5))
+fig.patch.set_facecolor('#0a0a0a')
+for ax in axes:
+    ax.set_facecolor('#0d0d0d')
+    ax.tick_params(colors='#888')
+    for sp in ax.spines.values(): sp.set_color('#333')
+
+# Left: deployment trajectory
+ax = axes[0]
+month_labels = [(START_DATE + timedelta(days=30*m)).strftime('%b %Y')
+                for m in range(0, 20, 3)]
+
+ax.plot(months, cum_base, color='#00d9ff', linewidth=2.5, label='Base trajectory')
+ax.axhline(y=FCC_TARGET, color='#ff004f', linewidth=1.5, linestyle='--',
+           label=f'FCC milestone ({FCC_TARGET} sats)')
+ax.axhline(y=1400, color='#ffaa00', linewidth=1, linestyle=':',
+           label='Extension-eligible threshold (~1,400)')
+ax.axvline(x=TOTAL_MONTHS, color='#ff004f55', linewidth=1, linestyle='-')
+ax.text(TOTAL_MONTHS + 0.1, 200, 'Jul 2026\ndeadline', fontsize=7.5, color='#ff004f88')
+
+# Shade uncertainty band
+ax.fill_between(months,
+                np.percentile([simulate_deployment(PROVIDERS, SATS_IN_ORBIT, FCC_TARGET, m)
+                               for m in [TOTAL_MONTHS]*len(months)], 10, axis=1) if False else cum_base * 0.82,
+                cum_base * 1.05,
+                alpha=0.08, color='#00d9ff')
+
+ax.set_xticks(np.arange(0, 19, 3))
+ax.set_xticklabels(month_labels, color='#aaa', fontsize=7.5, rotation=20)
+ax.set_ylabel('Satellites in orbit', color='#aaa')
+ax.set_title('Kuiper Deployment Trajectory\nFeb 2025 → Jul 2026', color='#ccc')
+ax.legend(facecolor='#111', edgecolor='#333', labelcolor='white', fontsize=8)
+ax.grid(True, alpha=0.07, color='#444')
+ax.set_ylim(0, 1800)
+
+# Right: Monte Carlo distribution
+ax = axes[1]
+for label, res, c in [("Base", base_results, '#00d9ff'),
+                       ("Optimistic", opt_results, '#39ff14'),
+                       ("Pessimistic", pes_results, '#ff004f')]:
+    ax.hist(res, bins=40, alpha=0.35, color=c, label=f'{label} (P={pct_meeting(res):.0f}%)')
+    ax.axvline(x=res.mean(), color=c, linewidth=1.5, linestyle='--')
+
+ax.axvline(x=FCC_TARGET, color='white', linewidth=2, label=f'FCC target ({FCC_TARGET})')
+ax.set_xlabel('Satellites in orbit at Jul 2026 deadline', color='#aaa')
+ax.set_ylabel('Simulation count', color='#aaa')
+ax.set_title('Monte Carlo: Satellites at FCC Deadline\n(2,000 simulations per scenario)', color='#ccc')
+ax.legend(facecolor='#111', edgecolor='#333', labelcolor='white', fontsize=8)
+ax.grid(True, alpha=0.07, color='#444')
+
+plt.tight_layout()
+plt.savefig('kuiper_deployment.png', dpi=150, bbox_inches='tight')
+plt.show()
+</pre>
+
+```
+    <div class="py-note">
+        The Monte Carlo simulation quantifies the FCC deadline risk across scenarios. The base case probability of meeting the 1,618-satellite milestone reflects realistic assumptions about launch cadence, schedule jitter, and vehicle reliability. The gap between the base case mean and the FCC target reveals whether an extension request is likely to be a contingency or a certainty — and the 1,400-satellite threshold models the "good faith progress" argument Amazon would make in extension negotiations.
+    </div>
+    <div class="py-challenge">
+        <strong>EXTENSION CHALLENGE</strong>
+        Add a fourth scenario: one Ariane 6 launch failure (losing 38 satellites and the launch slot) and a 3-month New Glenn stand-down for anomaly investigation. How does this compound failure scenario affect the probability of meeting the FCC milestone? What is the minimum Atlas V launch cadence increase that would compensate for this combined failure in the remaining window?
+    </div>
+</div>
+
+<div class="py-exercise">
+    <h3>Exercise 2 — Launch Cost Comparison and New Glenn Reusability Sensitivity</h3>
+    <p>Model the total constellation launch cost for Kuiper vs Starlink under different New Glenn reusability assumptions, quantifying how booster reuse compresses the cost gap over time.</p>
+```
+
+<pre>
+import numpy as np
+import matplotlib.pyplot as plt
+
+# ── Constellation parameters ───────────────────────────────────────
+KUIPER_TOTAL_SATS  = 3_236
+STARLINK_TOTAL_SATS = 7_500   # Gen2 target
+
+# ── Kuiper launch parameters ───────────────────────────────────────
+KUIPER_LAUNCHES = {
+    'Atlas V':   {'count': 9,  'sats_per': 27, 'cost_base': 175e6},
+    'New Glenn': {'count': 12, 'sats_per': 45, 'cost_base': 100e6},  # inaugural cost
+    'Ariane 6':  {'count': 18, 'sats_per': 38, 'cost_base': 110e6},
+}
+
+# Starlink internal marginal cost per Falcon 9 mission
+STARLINK_F9_COST   = 10e6    # $10M internal marginal cost (mid estimate)
+STARLINK_SATS_PER  = 60
+STARLINK_NUM_LV    = int(np.ceil(STARLINK_TOTAL_SATS / STARLINK_SATS_PER))
+
+# Satellite manufacturing costs (separate from launch)
+KUIPER_SAT_COST    = 500_000   # $500K per satellite (target with custom ASICs)
+STARLINK_SAT_COST  = 300_000   # $300K per Gen2 Mini (estimated at scale)
+
+# ── Reusability model for New Glenn ───────────────────────────────
+# Reflight factor: 1.0 = no savings, 0.3 = 70% cost reduction (like F9 at maturity)
+def ng_cost_with_reuse(base_cost, reuse_factor, flights_per_booster):
+    """
+    Effective launch cost accounting for booster reuse.
+    reuse_factor: fraction of base cost for a reused flight (0.3–0.5 is realistic)
+    flights_per_booster: total reuses per booster (including first flight)
+    """
+    # First flight cost = base_cost; subsequent flights = base_cost * reuse_factor
+    # Average over all flights on a booster:
+    avg = base_cost * (1 + reuse_factor * (flights_per_booster - 1)) / flights_per_booster
+    return avg
+
+reuse_factors     = np.linspace(0.3, 1.0, 50)   # 1.0 = expendable, 0.3 = F9-like
+flights_per_boost = [5, 10, 20]
+
+fig, axes = plt.subplots(1, 3, figsize=(16, 5))
+fig.patch.set_facecolor('#0a0a0a')
+for ax in axes:
+    ax.set_facecolor('#0d0d0d')
+    ax.tick_params(colors='#888')
+    for sp in ax.spines.values(): sp.set_color('#333')
+
+# Left: total Kuiper launch cost vs New Glenn reuse factor
+ax = axes[0]
+for fpb in flights_per_boost:
+    ng_costs = []
+    for rf in reuse_factors:
+        ng_avg = ng_cost_with_reuse(KUIPER_LAUNCHES['New Glenn']['cost_base'], rf, fpb)
+        total_lc = (KUIPER_LAUNCHES['Atlas V']['count'] * KUIPER_LAUNCHES['Atlas V']['cost_base'] +
+                    KUIPER_LAUNCHES['New Glenn']['count'] * ng_avg +
+                    KUIPER_LAUNCHES['Ariane 6']['count'] * KUIPER_LAUNCHES['Ariane 6']['cost_base'])
+        ng_costs.append(total_lc / 1e9)
+    ax.plot(reuse_factors, ng_costs, linewidth=2,
+            label=f'New Glenn: {fpb} flights/booster')
+
+# Starlink reference line
+sl_launch_total = STARLINK_NUM_LV * STARLINK_F9_COST / 1e9
+ax.axhline(y=sl_launch_total, color='#39ff14', linewidth=2, linestyle='--',
+           label=f'Starlink F9 total ({STARLINK_NUM_LV} launches @ ${STARLINK_F9_COST/1e6:.0f}M)')
+ax.axvline(x=0.35, color='#ffffff22', linewidth=1, linestyle=':')
+ax.text(0.36, ax.get_ylim()[1] * 0.05 if ax.get_ylim()[1] > 0 else 1,
+        'F9 mature\nreuse zone', fontsize=7, color='#ffffff44')
+
+ax.set_xlabel('New Glenn reuse factor (1.0=expendable, 0.3=F9-mature)', color='#aaa')
+ax.set_ylabel('Total constellation launch cost ($B)', color='#aaa')
+ax.set_title('Kuiper Total Launch Cost\nvs New Glenn Reusability', color='#ccc')
+ax.legend(facecolor='#111', edgecolor='#333', labelcolor='white', fontsize=7.5)
+ax.grid(True, alpha=0.07, color='#444')
+
+# Centre: per-satellite total cost comparison (launch + manufacturing)
+ax = axes[1]
+scenarios = {
+    'Kuiper\n(expendable\nNew Glenn)': {
+        'launch': (9*175e6 + 12*100e6 + 18*110e6) / KUIPER_TOTAL_SATS,
+        'mfg': KUIPER_SAT_COST, 'color': '#ff004f'
+    },
+    'Kuiper\n(NG 10-flight\nreuse)': {
+        'launch': (9*175e6 + 12*ng_cost_with_reuse(100e6, 0.45, 10) + 18*110e6) / KUIPER_TOTAL_SATS,
+        'mfg': KUIPER_SAT_COST, 'color': '#ffaa00'
+    },
+    'Kuiper\n(NG F9-parity\nreuse)': {
+        'launch': (9*175e6 + 12*ng_cost_with_reuse(100e6, 0.30, 20) + 18*110e6) / KUIPER_TOTAL_SATS,
+        'mfg': KUIPER_SAT_COST, 'color': '#00d9ff'
+    },
+    'Starlink\n(F9 internal\ncost)': {
+        'launch': STARLINK_F9_COST / STARLINK_SATS_PER,
+        'mfg': STARLINK_SAT_COST, 'color': '#39ff14'
+    },
+}
+x = np.arange(len(scenarios))
+labels = list(scenarios.keys())
+launch_vals = [v['launch']/1e3 for v in scenarios.values()]
+mfg_vals    = [v['mfg']/1e3 for v in scenarios.values()]
+colors      = [v['color'] for v in scenarios.values()]
+
+b1 = ax.bar(x, mfg_vals, 0.5, label='Manufacturing cost ($K/sat)',
+            color=[c+'88' for c in colors], edgecolor='#111')
+b2 = ax.bar(x, launch_vals, 0.5, bottom=mfg_vals, label='Launch cost ($K/sat)',
+            color=colors, edgecolor='#111', alpha=0.85)
+ax.set_xticks(x)
+ax.set_xticklabels(labels, color='#aaa', fontsize=7.5)
+ax.set_ylabel('Cost per satellite ($K)', color='#aaa')
+ax.set_title('Total Per-Satellite Cost\n(Launch + Manufacturing)', color='#ccc')
+ax.legend(facecolor='#111', edgecolor='#333', labelcolor='white', fontsize=8)
+ax.grid(True, alpha=0.07, color='#444', axis='y')
+for i, (lv, mv) in enumerate(zip(launch_vals, mfg_vals)):
+    ax.text(i, lv + mv + 20, f'${lv+mv:.0f}K', ha='center', va='bottom',
+            fontsize=8, color='#ccc')
+
+# Right: cumulative program cost over deployment timeline
+ax = axes[2]
+years = np.linspace(0, 5, 50)
+# Kuiper: $10B committed, spread over ~5 years
+kuiper_cum = np.minimum(10, years / 5 * 10)
+# Starlink: estimated $15B total invested (constellation + terminals + ops)
+starlink_cum = np.minimum(15, (years + 2) / 7 * 15)  # 2-year head start
+
+ax.fill_between(years, kuiper_cum, alpha=0.15, color='#ff004f')
+ax.fill_between(years, starlink_cum, alpha=0.15, color='#39ff14')
+ax.plot(years, kuiper_cum, color='#ff004f', linewidth=2.5, label='Kuiper ($10B committed)')
+ax.plot(years, starlink_cum, color='#39ff14', linewidth=2.5, label='Starlink (est. $15B total)')
+ax.axvline(x=1.5, color='#ff004f44', linewidth=1, linestyle='--')
+ax.text(1.6, 2, 'FCC\ndeadline', fontsize=7.5, color='#ff004f66')
+ax.set_xlabel('Years from 2025', color='#aaa')
+ax.set_ylabel('Cumulative program investment ($B)', color='#aaa')
+ax.set_title('Cumulative Investment Trajectory\nKuiper vs Starlink', color='#ccc')
+ax.legend(facecolor='#111', edgecolor='#333', labelcolor='white', fontsize=8)
+ax.grid(True, alpha=0.07, color='#444')
+
+plt.tight_layout()
+plt.savefig('kuiper_launch_cost.png', dpi=150, bbox_inches='tight')
+plt.show()
+
+print("\nPer-satellite cost summary:")
+for label, s in scenarios.items():
+    total = (s['launch'] + s['mfg']) / 1e3
+    lname = label.replace('\n', ' ')
+    print(f"  {lname:<45} ${total:.0f}K/sat total")
+</pre>
+
+```
+    <div class="py-note">
+        The centre panel quantifies the cost convergence story: as New Glenn approaches F9-parity reusability (reuse factor 0.30, 20 flights per booster), Kuiper's per-satellite total cost drops from roughly 6–8× Starlink's to approximately 2–3×. The launch cost sensitivity panel shows that booster reuse — not satellite manufacturing — is the primary lever for compressing the cost gap. This is why Blue Origin's reusability programme is strategically essential to Kuiper's long-term economics.
+    </div>
+    <div class="py-challenge">
+        <strong>EXTENSION CHALLENGE</strong>
+        Add a scenario where Kuiper negotiates access to Starship for 10% of its satellite deployments at a hypothetical $20M per launch cost. At what Starship price per launch does this become the dominant launch vehicle for future Kuiper expansion, and what does it imply for the competitive dynamics of the launch market if Amazon becomes a significant Starship customer?
+    </div>
+</div>
+
+<div class="py-exercise">
+    <h3>Exercise 3 — AWS Enterprise Addressable Market Model</h3>
+    <p>Build a bottom-up model of Kuiper's addressable enterprise market through the AWS channel. Estimate the number of AWS customers with remote sites lacking adequate broadband, the potential ARPU, and the revenue ceiling that AWS integration can address.</p>
+```
+
+<pre>
+import numpy as np
+import matplotlib.pyplot as plt
+
+# ── AWS customer base (estimates from public disclosures) ──────────
+AWS_TOTAL_CUSTOMERS     = 1_000_000  # active AWS accounts (est. 2024)
+# Enterprise tier: >$10K/yr AWS spend — approximately 100K accounts
+AWS_ENTERPRISE_ACCTS    = 100_000
+# Large enterprise: >$1M/yr AWS spend — approximately 10K accounts
+AWS_LARGE_ENTERPRISE    = 10_000
+
+# Remote site assumptions per account tier
+REMOTE_SITES_LARGE  = 15    # avg remote sites per large enterprise
+REMOTE_SITES_MID    = 4     # avg remote sites per mid enterprise
+REMOTE_SITES_SMB    = 1.2   # avg remote sites per SMB with any remote presence
+
+# Fraction of remote sites lacking adequate broadband (terrestrial)
+PCT_UNDERSERVED_LARGE = 0.18   # large enterprise: 18% of remote sites need satellite
+PCT_UNDERSERVED_MID   = 0.28   # mid enterprise: 28%
+PCT_UNDERSERVED_SMB   = 0.45   # SMB: 45% (smaller companies often in rural areas)
+
+# ARPU estimates per site per month (USD)
+ARPU_LARGE = 2_500    # large enterprise: managed, priority service
+ARPU_MID   = 800      # mid enterprise: business tier
+ARPU_SMB   = 200      # SMB: consumer+
+
+# AWS accounts by tier (rough distribution)
+AWS_MID_ENTERPRISE = AWS_ENTERPRISE_ACCTS - AWS_LARGE_ENTERPRISE
+AWS_SMB_WITH_REMOTE = 150_000   # SMB accounts with at least one remote site
+
+def compute_segment(n_accounts, remote_per, pct_underserved, arpu_monthly):
+    sites = n_accounts * remote_per * pct_underserved
+    revenue_annual = sites * arpu_monthly * 12 / 1e6   # $M/yr at 100% penetration
+    return {'accounts': n_accounts, 'addressable_sites': int(sites),
+            'tam_annual_mpa': revenue_annual, 'arpu_monthly': arpu_monthly}
+
+SEGMENTS = {
+    'Large Enterprise\n(>$1M AWS/yr)':
+        compute_segment(AWS_LARGE_ENTERPRISE, REMOTE_SITES_LARGE,
+                        PCT_UNDERSERVED_LARGE, ARPU_LARGE),
+    'Mid Enterprise\n($10K–$1M AWS/yr)':
+        compute_segment(AWS_MID_ENTERPRISE, REMOTE_SITES_MID,
+                        PCT_UNDERSERVED_MID, ARPU_MID),
+    'SMB with\nremote sites':
+        compute_segment(AWS_SMB_WITH_REMOTE, REMOTE_SITES_SMB,
+                        PCT_UNDERSERVED_SMB, ARPU_SMB),
+}
+
+print("KUIPER AWS ENTERPRISE ADDRESSABLE MARKET")
+print(f"{'Segment':<35} {'Accts':>8} {'Addr. Sites':>12} {'TAM ($M/yr)':>13} {'ARPU/mo':>9}")
+print("-" * 80)
+total_sites = 0
+total_tam   = 0
+for name, s in SEGMENTS.items():
+    nm = name.replace('\n', ' ')
+    print(f"{nm:<35} {s['accounts']:>8,} {s['addressable_sites']:>12,} "
+          f"${s['tam_annual_mpa']:>11,.0f}M ${s['arpu_monthly']:>7,}/mo")
+    total_sites += s['addressable_sites']
+    total_tam   += s['tam_annual_mpa']
+print(f"\n{'TOTAL':<35} {'':>8} {total_sites:>12,} ${total_tam:>11,.0f}M")
+
+# ── Revenue at different penetration rates ──────────────────────────
+pcts = np.linspace(0.01, 0.25, 100)
+
+fig, axes = plt.subplots(1, 3, figsize=(16, 5))
+fig.patch.set_facecolor('#0a0a0a')
+for ax in axes:
+    ax.set_facecolor('#0d0d0d')
+    ax.tick_params(colors='#888')
+    for sp in ax.spines.values(): sp.set_color('#333')
+
+colors_seg = ['#ff004f', '#ffaa00', '#00d9ff']
+seg_names  = list(SEGMENTS.keys())
+
+# Left: revenue by segment vs penetration
+ax = axes[0]
+cumrev = np.zeros(len(pcts))
+for (name, seg), c in zip(SEGMENTS.items(), colors_seg):
+    rev = [seg['tam_annual_mpa'] * p for p in pcts]
+    ax.fill_between(pcts*100, cumrev, cumrev + rev, alpha=0.35, color=c)
+    ax.plot(pcts*100, cumrev + rev, color=c, linewidth=1.5, label=name.replace('\n',' '))
+    cumrev = cumrev + np.array(rev)
+ax.plot(pcts*100, cumrev, color='white', linewidth=2.5, label='Total enterprise revenue')
+ax.axhline(y=1000, color='#39ff14', linewidth=1, linestyle='--', label='$1B milestone')
+ax.set_xlabel('AWS remote site penetration (%)', color='#aaa')
+ax.set_ylabel('Annual revenue ($M)', color='#aaa')
+ax.set_title('Kuiper Enterprise Revenue\nvia AWS Channel', color='#ccc')
+ax.legend(facecolor='#111', edgecolor='#333', labelcolor='white', fontsize=7.5)
+ax.grid(True, alpha=0.07, color='#444')
+
+# Centre: addressable sites breakdown
+ax = axes[1]
+site_counts = [s['addressable_sites'] for s in SEGMENTS.values()]
+wedges, texts, autotexts = ax.pie(
+    site_counts,
+    labels=[n.replace('\n', '\n') for n in seg_names],
+    colors=colors_seg,
+    autopct='%1.0f%%',
+    startangle=90,
+    textprops={'color': '#aaa', 'fontsize': 8},
+    wedgeprops={'edgecolor': '#111', 'linewidth': 1.5},
+)
+for at in autotexts:
+    at.set_color('white')
+    at.set_fontsize(8.5)
+ax.set_title(f'Addressable Remote Sites by Tier\n(Total: {total_sites:,} sites)', color='#ccc')
+
+# Right: revenue ramp — Kuiper enterprise vs Starlink residential comparison
+ax = axes[2]
+years = np.arange(1, 7)
+# Kuiper enterprise: slow ramp (B2B sales cycles) then acceleration
+kuiper_ent_pct = [0.01, 0.03, 0.07, 0.12, 0.17, 0.22]
+kuiper_ent_rev = [total_tam * p for p in kuiper_ent_pct]
+
+# Starlink residential ref: ~$6B in 2024, growing ~30%/yr
+starlink_res_ref = [6.0 * (1.3**y) for y in range(6)]
+
+ax.fill_between(years, kuiper_ent_rev, alpha=0.15, color='#00d9ff')
+ax.plot(years, kuiper_ent_rev, color='#00d9ff', linewidth=2.5,
+        marker='o', markersize=5, label='Kuiper AWS enterprise (modelled)')
+ax.fill_between(years, starlink_res_ref, alpha=0.1, color='#39ff14')
+ax.plot(years, starlink_res_ref, color='#39ff14', linewidth=2.5,
+        linestyle='--', label='Starlink all-segment (projected)')
+ax.set_xlabel('Years from service launch (2025 = Year 1)', color='#aaa')
+ax.set_ylabel('Annual revenue ($B)', color='#aaa')
+ax.set_title('Revenue Trajectory Comparison\nKuiper Enterprise vs Starlink', color='#ccc')
+ax.legend(facecolor='#111', edgecolor='#333', labelcolor='white', fontsize=8)
+ax.grid(True, alpha=0.07, color='#444')
+ax.yaxis.set_major_formatter(plt.FuncFormatter(lambda x, _: f'${x:.0f}B'))
+
+plt.tight_layout()
+plt.savefig('kuiper_aws_market.png', dpi=150, bbox_inches='tight')
+plt.show()
+
+print(f"\nAWS enterprise channel at 10% penetration: ${total_tam*0.10:.0f}M/yr")
+print(f"AWS enterprise channel at 20% penetration: ${total_tam*0.20:.0f}M/yr")
+print(f"Breakeven vs Starlink residential (Year 3 est.): requires ~{total_tam*0.07:.0f}M/yr → {7:.0f}% penetration")
+</pre>
+
+```
+    <div class="py-note">
+        The model reveals the revenue ceiling and ramp dynamics of the AWS enterprise channel: at realistic 10–20% penetration of addressable remote sites, Kuiper enterprise revenue reaches several hundred million to low billions annually — significant but not by itself sufficient to justify the $10B investment. The full Kuiper financial case requires stacking the enterprise channel with consumer residential revenue (which contributes the larger volume) and government/defence (which contributes high ARPU). The model also illustrates why the AWS enterprise channel is strategically important as a first-revenue source: enterprise sales cycles are slower than consumer adoption but more predictable and higher-ARPU, making the enterprise channel Kuiper's most reliable path to initial revenue before full constellation coverage enables broad consumer service.
+    </div>
+    <div class="py-challenge">
+        <strong>EXTENSION CHALLENGE</strong>
+        Add an Amazon Prime bundling scenario: assume 5% of the 200M Prime subscriber base is in rural areas without adequate broadband, and Kuiper is offered as a $60/month add-on to Prime. At what Prime rural penetration rate does this exceed the entire AWS enterprise channel revenue? What does this reveal about the relative importance of consumer vs enterprise strategy for Kuiper's long-term revenue mix?
+    </div>
+</div>
+```
+
+</div>
+
+<!-- ═══ REFLECTION ═══ -->
+
+<div class="reflection-block" id="reflect">
+    <h2>REFLECTION PROMPTS</h2>
+    <p class="ref-intro">Four prompts requiring synthesis across the lesson and the broader Q1 constellation case study arc. Aim for 200–300 words each.</p>
+
+```
+<div class="ref-prompt">
+    <h3>Prompt 1 — The AWS Integration Moat: Durable or Replicable?</h3>
+    <p>Amazon's AWS integration is described as a structural moat that Starlink and OneWeb cannot replicate because they do not own hyperscale cloud platforms. Assess how durable this moat is. Could Microsoft Azure (with its own satellite broadband investment in the SATCOM market via its Azure Space programme and Viasat partnership) eventually offer a comparable integration — effectively commoditising the cloud-satellite bundle? What would it take for a Starlink-Azure or Starlink-Google Cloud integration to erode Kuiper's AWS advantage? Is Kuiper's moat rooted in technical integration, commercial relationships, or both?</p>
+</div>
+
+<div class="ref-prompt">
+    <h3>Prompt 2 — The FCC Deadline as Strategic Tool</h3>
+    <p>The FCC's deployment milestone requirement is often framed as a regulatory burden on Kuiper. Reframe it as a strategic tool. From the perspective of a rival operator (Starlink, OneWeb, Telesat), what outcome is most desirable: Kuiper meeting the deadline and becoming a full competitor, or Kuiper missing it and losing spectrum rights? From the perspective of the FCC itself, what is the regulatory logic of milestone requirements — what market failure is the FCC trying to prevent? And from Amazon's perspective, does the deadline help or hurt its strategic position relative to investors and enterprise customers who want certainty about service availability?</p>
+</div>
+
+<div class="ref-prompt">
+    <h3>Prompt 3 — Kuiper vs Starlink: Who Wins the Enterprise Market in Five Years?</h3>
+    <p>Construct the strongest possible case for each of three outcomes in the enterprise satellite broadband market by 2030: (A) Kuiper wins the enterprise segment through AWS integration, displacing Starlink Business among AWS customers; (B) Starlink retains enterprise market leadership through constellation scale, performance advantage, and ISL-based latency; (C) both coexist with AWS-centric enterprises choosing Kuiper and non-AWS enterprises choosing Starlink, producing a stable duopoly. Which outcome do you consider most likely, and what leading indicators in 2025–2026 would signal which path the market is taking?</p>
+</div>
+
+<div class="ref-prompt">
+    <h3>Prompt 4 — Applying the Historical Failure Taxonomy to Kuiper</h3>
+    <p>Apply the three-axis failure taxonomy from Lesson 6 to Kuiper as of early 2025 — score market risk, technical risk, and financial structure risk (5 = well-mitigated). Compare your Kuiper scores to your scores for Starlink (from L07) and OneWeb pre-bankruptcy (from L08). What does the comparison reveal about how the LEO broadband industry has learned from its historical failures? Identify the one scenario that could cause Kuiper to fail despite strong scores on all three axes — and assess whether that scenario is more analogous to Iridium's market failure, Teledesic's technical failure, or OneWeb's financial structure failure.</p>
+    <ul>
+        <li>Market risk factors: terrestrial 5G expansion, Amazon ecosystem dependency, mid-latitude-only coverage gaps</li>
+        <li>Technical risk factors: FCC deadline, New Glenn maturation, Ka-band rain fade at scale</li>
+        <li>Financial risk factors: $10B ceiling, no standalone revenue yet, Blue Origin cost path</li>
+    </ul>
+</div>
+```
+
+</div>
+
+<div class="complete-wrap">
+    <button class="complete-btn" id="completeBtn">MARK LESSON COMPLETE</button>
+    <div class="complete-msg" id="completeMsg">Not yet marked complete.</div>
+</div>
+
+<div class="lesson-nav">
+    <a href="q1-8.html">← L08: OneWeb Deep Dive</a>
+    <a href="q1-10.html">L10: Telesat Lightspeed →</a>
+</div>
+
+</div><!-- .lesson-wrap -->
+
+<footer>© 2026 LEOAF · Q1 · LESSON 09 OF 15</footer>
+<button class="back-to-top" id="backToTop">↑</button>
+
+<script>
+const canvas = document.getElementById('starsCanvas');
+const ctx    = canvas.getContext('2d');
+let stars    = [];
+function initStars() {
+    stars = [];
+    for (let i = 0; i < 180; i++)
+        stars.push({ x:Math.random()*canvas.width, y:Math.random()*canvas.height,
+            size:Math.random()*1.4+0.3, speed:Math.random()*0.15+0.03, hue:Math.random()*360 });
+}
+function resizeCanvas() { canvas.width=window.innerWidth; canvas.height=window.innerHeight; }
+resizeCanvas(); initStars();
+window.addEventListener('resize', resizeCanvas);
+function animateStars() {
+    ctx.clearRect(0,0,canvas.width,canvas.height);
+    stars.forEach(s => {
+        s.y -= s.speed;
+        if (s.y < 0) { s.y=canvas.height; s.x=Math.random()*canvas.width; }
+        ctx.beginPath(); ctx.fillStyle=`hsl(${s.hue},70%,80%)`;
+        ctx.arc(s.x,s.y,s.size,0,Math.PI*2); ctx.fill();
+    });
+    requestAnimationFrame(animateStars);
+}
+animateStars();
+</script>
+
+<script>
+const feedbacks = {
+    1:{
+        correct:"Correct. New Glenn's first orbital launch was January 2025 — years after Kuiper's launch contracts were signed. At contract time, New Glenn was an undemonstrated vehicle with an uncertain development schedule. Sole-sourcing the entire Kuiper manifest to New Glenn would have created a single point of failure: if New Glenn experienced development delays or launch failures, the entire constellation buildout — and the FCC July 2026 deadline — would be jeopardised. The multi-provider strategy spreads schedule risk across three vehicles with different development trajectories, ensuring that delays at one provider do not halt the overall programme. Atlas V's proven reliability provided near-term deployment certainty while New Glenn and Ariane 6 matured.",
+        wrong:"Incorrect. The FCC does not require non-US launch vehicles for domestic constellation authorisations — there is no such requirement. Blue Origin's production capacity for New Glenn was not the primary driver; the primary driver was the vehicle's unproven status at contract time. The board governance explanation mischaracterises how the procurement decision was made — it was a programme-level risk management choice, not a corporate governance requirement."
+    },
+    2:{
+        correct:"Correct. The 33°–51.9° inclination band provides coverage of the 56°S–56°N latitude range, which contains approximately 93% of the world's population and the vast majority of global internet users, AWS enterprise customers, and Amazon's e-commerce and Prime subscriber base. This mid-latitude focus is a deliberate commercial prioritisation: the cost of deploying an additional polar shell (hundreds of additional satellites, additional launch campaigns) was not justified by the incremental revenue from Arctic maritime, transpolar aviation, and high-latitude government markets — which are served by OneWeb's near-polar constellation. Amazon's core addressable markets are in the mid-latitude band where its other businesses are also concentrated.",
+        wrong:"Incorrect. Atmospheric drag is a minor design factor for altitudes above 500 km — not a primary reason to choose inclination. Equatorial maritime uses GEO, but that market is not the deprioritised segment — high-latitude polar markets are. Launch geometry from US and European sites actually accommodates a wide range of inclinations; the choice was driven by market coverage, not launch trajectory. ISL pointing at polar latitudes is a design challenge but not the reason inclination was limited to 51.9°."
+    },
+    3:{
+        correct:"Correct. The custom ASIC economics are a classic fixed-cost vs variable-cost trade-off. NRE is a fixed cost — $5–30M regardless of how many units are produced. At small production volumes, the NRE amortised per unit is large (e.g., $30M NRE / 100 satellites = $300K/satellite just for NRE, making custom silicon more expensive than commercial parts). At 3,236 satellites with multiple ASICs each, the NRE amortises to perhaps $3,000–10,000 per satellite, while the per-unit manufacturing cost savings from optimised silicon (no unnecessary features, lower power, smaller die, higher yield) can be $10,000–50,000 per satellite. The economics only cross into positive territory at high production volume — which is why custom ASICs are rational for Apple (billions of iPhones) and Amazon (3,236 satellites, each with multiple complex ASICs) but not for a constellation of 50 satellites.",
+        wrong:"Incorrect. Amazon does not own semiconductor fabs — it designs ASICs and contracts manufacturing to TSMC or similar foundries, just as Apple does. Commercial phased array chips do support Ka-band frequencies — the choice of custom silicon is economic, not a technical necessity forced by frequency band. Regulatory qualification for space-grade components is required for both commercial and custom parts and does not differentiate the decision."
+    },
+    4:{
+        correct:"Correct. The mathematics: 1,618 − 27 = 1,591 satellites needed in approximately 18 months (February 2025 to July 2026). At 27–45 satellites per launch depending on vehicle, this requires 35–59 launches. At ~18 months, this implies 2–3 launches per month sustained. Starlink achieved comparable launch rates with a single vehicle (Falcon 9) operating from a single dedicated pad system with a highly optimised turnaround process. Kuiper must achieve similar aggregate launch rates by coordinating Atlas V (LC-41, Cape Canaveral), New Glenn (LC-36, Cape Canaveral), and Ariane 6 (Kourou, French Guiana) — three separate launch vehicles, three separate launch sites, three separate integration and range scheduling systems, with no single entity controlling all three. The coordination complexity is genuinely unprecedented for a single customer.",
+        wrong:"Incorrect. 5–10 launches per month would far exceed what is required — the actual requirement is 2–3 per month across three providers. The FCC has required deployment rates this aggressive before (Starlink itself faced similar pressure), so the rate is not unprecedented for a single constellation, but the multi-provider coordination aspect adds a new dimension. Starlink's 2020–2021 pace was achieved with a single vehicle — Kuiper's challenge is coordinating three, which is different in kind even if similar in aggregate rate."
+    },
+    5:{
+        correct:"Correct. The architectural difference is where the data enters the AWS network. Kuiper routes traffic from the satellite to AWS Ground Station (co-located with AWS data centres), then the data travels on AWS's private global network backbone — never touching the public internet — until it reaches the customer's AWS resources. Starlink routes traffic from the satellite to SpaceX's gateway infrastructure, then onto the public internet, where it traverses multiple internet exchange points before reaching AWS. For enterprise applications with data sovereignty requirements, latency-sensitive workloads, or security policies prohibiting public internet transit, the Kuiper path is architecturally preferable: it provides a private, AWS-managed end-to-end path with consistent latency characteristics and no public internet exposure.",
+        wrong:"Incorrect. The gateway frequency band (Ka for both) does not determine the downstream network path. AWS KMS encryption is available to any application running on AWS regardless of how it connects — it is not a connectivity-layer feature specific to Kuiper. The data paths are architecturally quite different: Kuiper enters the AWS private network at the ground station; Starlink transits the public internet. This architectural difference is the defining technical advantage of Kuiper for AWS enterprise customers."
+    },
+    6:{
+        correct:"Correct. Amazon's sub-$400 terminal target is enabled by two primary mechanisms: (1) custom ASIC cost reduction — proprietary beam-forming silicon eliminates the profit margin and specification overhead of commercial parts, reducing the terminal's most expensive component cost at production volume; (2) Amazon's supply chain and manufacturing expertise — a company that designs and builds millions of Echo devices, Kindle readers, and Fire tablets applies the same procurement leverage, component standardisation, and manufacturing automation to terminal production. The strategic signal is unambiguous: Amazon intends to compete for the mass-market rural residential customer, not retreat to a B2B-only niche. A sub-$400 terminal removes the hardware cost barrier that has slowed Starlink's residential adoption in price-sensitive markets.",
+        wrong:"Incorrect. The terminal is not a smaller-aperture budget product — Amazon quotes 400 Mbps peak, higher than Starlink's residential specification. A pure terminal subsidy strategy (below-cost pricing recovered through subscriptions) is possible but the stated goal is to achieve the target at positive margin through manufacturing economics, not to subsidise below cost. The 50 million terminal volume assumption mischaracterises the plan — 3,236 satellites and perhaps a few million customer terminals are the relevant production volumes, not the Prime subscriber base."
+    },
+    7:{
+        correct:"Correct. CEO concentration risk in the Starlink context refers specifically to Elon Musk's ability to make unilateral decisions that affect service availability, commercial relationships, and government customer confidence — demonstrated concretely by the Ukraine Starlink episode and by his Twitter/X acquisition's reputational consequences for certain customer segments. As a private company majority-controlled by Musk, SpaceX has no governance mechanism to override such decisions. Amazon is a Delaware corporation with a board of directors, SEC oversight, institutional shareholders who hold tens of billions in equity, and fiduciary duties requiring the board to act in shareholder interests. Andy Jassy operates under constraints Musk does not: board approval for major strategic changes, shareholder pressure through public markets, and regulatory oversight as a large public company. These structures substantially reduce the risk of unilateral decisions that could harm government or enterprise customer relationships.",
+        wrong:"Incorrect. Technical decision distribution is a management structure question, not a CEO concentration risk question. Key-man dependency (leadership departure) is a distinct risk from CEO concentration risk as defined here. Capital allocation governance is a real constraint but not the primary definition of CEO concentration risk in this context — the primary concern is the ability to make unilateral commercial/political decisions affecting service provision."
+    },
+    8:{
+        correct:"Correct. This is the canonical enterprise use case where Kuiper's AWS integration creates a decisive architectural advantage. The customer's entire application stack — ERP, data warehouse, IoT analytics — runs on AWS. The 12 remote sites need to reach AWS with low, consistent latency and without public internet exposure (ERP traffic often contains sensitive data; IoT analytics requires real-time responsiveness; compliance may prohibit unencrypted public internet transit). Kuiper's path: remote site → satellite → AWS Ground Station → AWS private backbone → customer VPC. Starlink's path: remote site → satellite → SpaceX gateway → public internet → AWS. The Kuiper path provides better latency consistency (no public internet variability), better security posture (private network end-to-end), potential compliance simplification, and single-vendor billing through the AWS console. The recommendation is Kuiper for this specific customer, with the caveat that Kuiper must have coverage over the specific Southeast Asian sites — which its mid-latitude constellation supports.",
+        wrong:"Incorrect. Starlink's coverage advantage is real but is not the deciding factor for a purely-AWS customer at fixed sites in mid-latitude Southeast Asia, where both constellations provide coverage. The architectural difference in data path — Kuiper staying within AWS infrastructure vs Starlink traversing the public internet — is the decisive factor for security, latency, and compliance. OneWeb's B2B managed service model is a legitimate consideration but does not offer AWS-native integration and has less constellation capacity than either Kuiper or Starlink."
+    },
+    9:{
+        correct:"Correct. New Glenn's booster reusability is the most plausible and direct path to closing the launch cost gap. SpaceX reduced Falcon 9's effective launch cost primarily through booster reuse — recovering and refurbishing the first stage, which represents approximately 60–70% of the total vehicle cost. At mature reusability (20+ flights per booster), the amortised booster cost per flight drops to approximately 10–15% of an expendable equivalent. If New Glenn achieves comparable reusability — which Blue Origin has explicitly planned for, designing New Glenn's BE-4 engines and booster for reuse — the New Glenn cost per launch could drop from $80–120M to $20–40M at scale. This alone would cut Kuiper's per-satellite launch cost by 3–4×, moving it from approximately 10–15× Starlink's cost to 3–5× — still a disadvantage but a manageable one within a $10B budget.",
+        wrong:"Incorrect. Volume discounts from ULA and Arianespace at 9–18 launches are likely already reflected in contracted pricing — additional leverage is limited. Acquiring a launch provider is technically possible but extraordinarily capital-intensive and faces competition law constraints given Amazon's market position. Accepting the permanent cost gap as a given underestimates the strategic importance of New Glenn's reusability programme, which is explicitly designed to compress this gap and which Blue Origin has been developing for years."
+    },
+    10:{
+        correct:"Correct. The July 2026 scenario with 1,400 satellites is an 87% completion rate — strong enough for a credible extension request but not guaranteed. Priority 1 is securing the FCC extension: Amazon's leverage is its demonstrated $10B investment, 1,400 satellites already deployed, and a committed catch-up schedule with New Glenn now operational. The FCC has historically been more accommodating to operators showing genuine progress. Priority 2 is immediately activating the AWS enterprise channel — at 1,400 satellites, mid-latitude coverage is largely complete and enterprise sites at specific coordinates can already be served; the AWS enterprise customer doesn't care about global coverage, only coverage at their sites. Enterprise reference customers won during this period become the commercial proof points for Kuiper's whole thesis. Priority 3 is aviation and government locking: these are long-cycle procurement decisions where early relationships define long-term market share; Starlink has head starts in both, but hasn't fully closed every major airline or government programme.",
+        wrong:"Incorrect. Immediately cutting terminal prices below $200 risks margin destruction before revenue scale justifies it, and consumer residential requires global coverage that 1,400 satellites doesn't yet provide. Conceding the consumer residential market permanently misses the long-term volume revenue source that justifies the $10B investment. Acquiring OneWeb from a stressed Eutelsat might seem attractive but introduces integration complexity, regulatory overlap issues, and additional capital requirements at a moment when the priority is completing the Kuiper deployment — a distraction risk that outweighs the satellite count benefit."
+    }
+};
+
+let answered = {};
+document.querySelectorAll('.quiz-opt').forEach(btn => {
+    btn.addEventListener('click', function() {
+        const q = this.dataset.q;
+        if (answered[q] !== undefined) return;
+        const correct = this.dataset.correct === 'true';
+        answered[q] = correct;
+        document.querySelectorAll(`.quiz-opt[data-q="${q}"]`).forEach(b => {
+            b.disabled = true;
+            if (b.dataset.correct === 'true') b.classList.add('correct');
+        });
+        if (!correct) this.classList.add('wrong');
+        const fb = document.getElementById(`fb${q}`);
+        fb.textContent = (correct ? '✓ ' : '✗ ') + feedbacks[q][correct?'correct':'wrong'];
+        fb.style.color = correct ? '#39ff14' : '#ff004f';
+        if (Object.keys(answered).length === 10) {
+            const total = Object.values(answered).filter(Boolean).length;
+            const el = document.getElementById('quizScore');
+            el.style.display = 'block';
+            const pct = Math.round(total/10*100);
+            el.textContent = `SCORE: ${total} / 10 (${pct}%) — ${pct===100?'PERFECT.':pct>=80?'STRONG. REVIEW ANY MISSES.':pct>=60?'ADEQUATE. REVISIT WEAK SECTIONS.':'REVISIT THE LESSON BEFORE PROCEEDING.'}`;
+        }
+    });
+});
+</script>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+<script src="supabase.js"></script>
+
+<script src="user_progress.js"></script>
+
+<script>
+const LESSON_ID = 'q1-9';
+document.addEventListener('DOMContentLoaded', async () => {
+    const { data:{ session } } = await client.auth.getSession();
+    if (!session) { window.location.href = 'index.html'; return; }
+    document.getElementById('logoffBtn').addEventListener('click', async () => {
+        await client.auth.signOut(); window.location.href = 'index.html';
+    });
+    const mastered = await getMasteredSections();
+    const btn = document.getElementById('completeBtn');
+    const msg = document.getElementById('completeMsg');
+    function setDone(done) {
+        if (done) {
+            btn.textContent = '✓ COMPLETE — CLICK TO UNDO';
+            btn.classList.add('done');
+            btn.style.cssText = 'border-color:#39ff14;color:#39ff14;background:rgba(57,255,20,0.1);cursor:pointer;opacity:1;';
+            msg.style.color = '#39ff14'; msg.textContent = 'Lesson marked complete. Click again to undo.';
+        } else {
+            btn.textContent = 'MARK LESSON COMPLETE'; btn.classList.remove('done');
+            btn.style.cssText = ''; msg.style.color = '#ffffff55'; msg.textContent = 'Not yet marked complete.';
+        }
+    }
+    setDone(mastered.includes(LESSON_ID));
+    btn.addEventListener('click', async () => {
+        const isDone = btn.classList.contains('done');
+        msg.style.color = '#00d9ff'; msg.textContent = 'Saving...';
+        const ok = await upsertSection(LESSON_ID, !isDone);
+        if (ok) setDone(!isDone);
+        else { msg.style.color = '#ff004f'; msg.textContent = 'Error saving. Try again.'; }
+    });
+    const btt = document.getElementById('backToTop');
+    window.addEventListener('scroll', () => btt.classList.toggle('visible', window.scrollY > 400));
+    btt.addEventListener('click', () => window.scrollTo({ top:0, behavior:'smooth' }));
+});
+</script>
+
+</body>
+</html>
