@@ -1,0 +1,401 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>LEOAF // Verification of Record — Constellation Architect</title>
+
+<!-- LinkedIn / OG preview -->
+<meta property="og:title" content="LEOAF // Constellation Architect — Verification of Record">
+<meta property="og:description" content="Self-directed two-year LEO satellite architecture program. ~660 hours across 8 quarters. Personal record of completion.">
+<meta property="og:image" content="https://leoarfu.github.io/42/assets/leoaf-seal.png">
+<meta property="og:url" content="https://leoarfu.github.io/42/verify.html">
+<meta property="og:type" content="article">
+<meta name="twitter:card" content="summary_large_image">
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700;900&family=Share+Tech+Mono&family=Libre+Baskerville:ital,wght@0,400;0,700;1,400&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0a0c10;
+    --ink: #e8e8e8;
+    --muted: #6a6a6a;
+    --red: #ff004f;
+    --cyan: #00d9ff;
+    --green: #39ff14;
+    --amber: #ffaa00;
+    --line: rgba(255,255,255,0.1);
+    --panel: rgba(12,14,18,0.85);
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html, body {
+    background: var(--bg);
+    color: var(--ink);
+    font-family: 'Share Tech Mono', monospace;
+    min-height: 100vh;
+  }
+  body::before {
+    content: "";
+    position: fixed; inset: 0;
+    background:
+      radial-gradient(circle at 20% 10%, rgba(0,217,255,0.06), transparent 40%),
+      radial-gradient(circle at 80% 90%, rgba(255,0,79,0.05), transparent 40%);
+    z-index: 0; pointer-events: none;
+  }
+  body::after {
+    content: "";
+    position: fixed; inset: 0;
+    background: repeating-linear-gradient(to bottom, rgba(255,255,255,0.012) 0 1px, transparent 1px 3px);
+    z-index: 99; pointer-events: none; mix-blend-mode: overlay;
+  }
+
+  main {
+    position: relative;
+    z-index: 1;
+    max-width: 880px;
+    margin: 0 auto;
+    padding: 3rem 1.5rem 4rem;
+  }
+
+  /* header */
+  .hdr {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-bottom: 1px solid var(--line);
+    padding-bottom: 0.9rem;
+    margin-bottom: 2rem;
+    font-size: 0.72rem;
+    letter-spacing: 0.22em;
+    color: var(--muted);
+    text-transform: uppercase;
+  }
+  .hdr a { color: var(--cyan); text-decoration: none; }
+  .hdr .cls { color: var(--red); border: 1px solid var(--red); padding: 2px 8px; }
+
+  /* mast */
+  .mast {
+    font-family: 'Orbitron', sans-serif;
+    text-align: center;
+    margin-bottom: 2rem;
+  }
+  .mast .kicker {
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 0.72rem;
+    letter-spacing: 0.5em;
+    color: var(--amber);
+    margin-bottom: 1rem;
+    text-transform: uppercase;
+  }
+  .mast h1 {
+    font-weight: 900;
+    font-size: clamp(2rem, 6vw, 3.6rem);
+    letter-spacing: 0.04em;
+    line-height: 1;
+  }
+  .mast h1 .accent { color: var(--cyan); display: block; font-size: 0.7em; letter-spacing: 0.14em; margin-top: 0.3em; }
+  .mast .sub {
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 0.85rem;
+    color: var(--muted);
+    letter-spacing: 0.3em;
+    margin-top: 1rem;
+    text-transform: uppercase;
+  }
+
+  /* divider */
+  .divider {
+    height: 1px;
+    background: linear-gradient(to right, transparent, var(--line) 20%, var(--cyan) 50%, var(--line) 80%, transparent);
+    margin: 2rem 0;
+    position: relative;
+  }
+  .divider::after {
+    content: "◆";
+    position: absolute;
+    left: 50%; top: 50%;
+    transform: translate(-50%, -50%);
+    background: var(--bg);
+    padding: 0 0.8rem;
+    color: var(--cyan);
+    font-size: 0.7rem;
+  }
+
+  /* citation */
+  .citation {
+    font-family: 'Libre Baskerville', serif;
+    font-size: 1.02rem;
+    line-height: 1.75;
+    text-align: center;
+    color: var(--ink);
+    max-width: 60ch;
+    margin: 0 auto 2rem;
+  }
+  .citation .recipient {
+    display: block;
+    font-family: 'Orbitron', sans-serif;
+    font-size: 1.6rem;
+    font-weight: 700;
+    letter-spacing: 0.1em;
+    color: var(--green);
+    margin: 1rem 0;
+    text-transform: uppercase;
+  }
+  .citation em { color: var(--amber); font-style: italic; }
+
+  /* record block */
+  .record {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 1px;
+    background: var(--line);
+    border: 1px solid var(--line);
+    margin: 2rem 0;
+  }
+  .cell {
+    background: rgba(0,0,0,0.55);
+    padding: 1rem 1rem;
+    text-align: center;
+  }
+  .cell .k {
+    font-size: 0.6rem;
+    letter-spacing: 0.3em;
+    color: var(--muted);
+    text-transform: uppercase;
+    margin-bottom: 0.5rem;
+  }
+  .cell .v {
+    font-family: 'Orbitron', sans-serif;
+    font-size: 1.6rem;
+    font-weight: 700;
+  }
+  .cell .v.cyan  { color: var(--cyan); }
+  .cell .v.amber { color: var(--amber); }
+  .cell .v.green { color: var(--green); }
+
+  /* program scope */
+  h2 {
+    font-family: 'Orbitron', sans-serif;
+    font-size: 0.9rem;
+    letter-spacing: 0.4em;
+    color: var(--muted);
+    text-transform: uppercase;
+    margin: 2.5rem 0 1rem;
+    padding-bottom: 0.5rem;
+    border-bottom: 1px solid var(--line);
+  }
+  .scope {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 0.5rem 1.5rem;
+  }
+  .scope a {
+    display: block;
+    padding: 0.9rem 1rem;
+    background: rgba(0,0,0,0.45);
+    border: 1px solid var(--line);
+    color: var(--ink);
+    text-decoration: none;
+    transition: border-color 0.2s, transform 0.2s;
+  }
+  .scope a:hover { border-color: var(--cyan); transform: translateX(2px); }
+  .scope .q {
+    font-family: 'Orbitron', sans-serif;
+    font-size: 0.95rem;
+    font-weight: 700;
+    color: var(--cyan);
+    letter-spacing: 0.06em;
+  }
+  .scope .t {
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 0.85rem;
+    color: var(--ink);
+    margin-top: 0.2rem;
+  }
+  .scope .m {
+    font-size: 0.7rem;
+    color: var(--muted);
+    letter-spacing: 0.2em;
+    margin-top: 0.4rem;
+    text-transform: uppercase;
+  }
+
+  /* capstones callout */
+  .capstones {
+    margin-top: 1.5rem;
+    padding: 1rem 1.2rem;
+    border-left: 2px solid var(--amber);
+    background: rgba(255,170,0,0.04);
+    font-family: 'Libre Baskerville', serif;
+    font-size: 0.95rem;
+    line-height: 1.65;
+  }
+  .capstones strong { font-family: 'Orbitron', sans-serif; color: var(--amber); letter-spacing: 0.1em; font-size: 0.85rem; }
+
+  /* signature */
+  .sig {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 2.5rem;
+    padding-top: 1.4rem;
+    border-top: 1px solid var(--line);
+    font-size: 0.78rem;
+    letter-spacing: 0.2em;
+    color: var(--muted);
+    text-transform: uppercase;
+    gap: 2rem;
+  }
+  .sig .block { flex: 1; }
+  .sig .line { color: var(--ink); padding-bottom: 0.3rem; margin-bottom: 0.4rem; border-bottom: 1px dashed var(--line); }
+
+  .meta {
+    text-align: center;
+    margin-top: 2rem;
+    font-size: 0.75rem;
+    letter-spacing: 0.22em;
+    color: var(--muted);
+    text-transform: uppercase;
+  }
+  .meta .hash { color: var(--cyan); font-family: 'Share Tech Mono', monospace; letter-spacing: 0.18em; }
+  .disclaimer {
+    text-align: center;
+    margin-top: 1rem;
+    font-size: 0.62rem;
+    letter-spacing: 0.3em;
+    color: #555;
+    text-transform: uppercase;
+  }
+
+  @media (max-width: 700px) {
+    .record { grid-template-columns: repeat(2, 1fr); }
+    .scope { grid-template-columns: 1fr; }
+    .sig { flex-direction: column; }
+  }
+</style>
+</head>
+<body>
+
+<main>
+  <div class="hdr">
+    <span><a href="./dashboard.html">← LEOAF / DASHBOARD</a></span>
+    <span>VERIFICATION OF RECORD</span>
+    <span class="cls">SELF-ISSUED</span>
+  </div>
+
+  <div class="mast">
+    <div class="kicker">LEOAF · Capstone of Record</div>
+    <h1>
+      CONSTELLATION
+      <span class="accent">ARCHITECT</span>
+    </h1>
+    <div class="sub">Two-Year Self-Directed Program</div>
+  </div>
+
+  <div class="divider"></div>
+
+  <p class="citation">
+    This page records the personal completion of the LEOAF Constellation Architect program by the operator named below.
+    <span class="recipient" id="recipient">DIDIER DELATTRE</span>
+    The curriculum spans <em>orbital mechanics, RF link engineering, terminal design, networking and mobility, inter-satellite optical links, ground operations, debris and regulation, and end-to-end constellation economics.</em> All work was self-directed and self-assessed. This artifact certifies internal program completion only; it confers no academic degree, professional license, or accredited credential.
+  </p>
+
+  <div class="record">
+    <div class="cell"><div class="k">Quarters</div><div class="v cyan">8</div></div>
+    <div class="cell"><div class="k">Hours</div><div class="v amber">~660</div></div>
+    <div class="cell"><div class="k">Capstones</div><div class="v green">2</div></div>
+    <div class="cell"><div class="k">Months</div><div class="v">24</div></div>
+  </div>
+
+  <h2>Program Scope</h2>
+
+  <div class="scope">
+    <a href="./q1.html">
+      <div class="q">Q1</div>
+      <div class="t">Connectivity Landscape & Satcom Refresh</div>
+      <div class="m">Months 1–3 · ~60 hrs</div>
+    </a>
+    <a href="./q2.html">
+      <div class="q">Q2</div>
+      <div class="t">Orbital Mechanics & Constellation Design</div>
+      <div class="m">Months 4–6 · ~80 hrs</div>
+    </a>
+    <a href="./q3.html">
+      <div class="q">Q3</div>
+      <div class="t">RF Link Budgets, Spectrum & Terminal Engineering</div>
+      <div class="m">Months 7–9 · ~90 hrs</div>
+    </a>
+    <a href="./q4.html">
+      <div class="q">Q4</div>
+      <div class="t">Networking, Mobility, Safety & Security</div>
+      <div class="m">Months 10–12 · ~80 hrs</div>
+    </a>
+    <a href="./q5.html">
+      <div class="q">Q5</div>
+      <div class="t">Inter-Satellite Networking & Routing</div>
+      <div class="m">Months 13–15 · ~90 hrs</div>
+    </a>
+    <a href="./q6.html">
+      <div class="q">Q6</div>
+      <div class="t">Ground Segment, Operations & Fleet Management</div>
+      <div class="m">Months 16–18 · ~80 hrs</div>
+    </a>
+    <a href="./q7.html">
+      <div class="q">Q7</div>
+      <div class="t">Economics, Regulations & Capstone #1</div>
+      <div class="m">Months 19–21 · ~80 hrs</div>
+    </a>
+    <a href="./q8.html">
+      <div class="q">Q8</div>
+      <div class="t">Capstone #2, Portfolio & Career Prep</div>
+      <div class="m">Months 22–24 · ~100 hrs</div>
+    </a>
+  </div>
+
+  <div class="capstones">
+    <strong>CAPSTONE 1</strong> — Full constellation simulator: orbits, RF, routing, economics integrated into a single working repo (Q7).<br>
+    <strong>CAPSTONE 2</strong> — End-to-end aviation LEO service case: terminal trade study, link budget, sizing, economics, regulatory path; multi-orbit hybrid architecture paper (Q8).
+  </div>
+
+  <h2>Issuance</h2>
+
+  <div class="sig">
+    <div class="block">
+      <div class="line" id="recipient2">D. DELATTRE</div>
+      <div>Operator of Record</div>
+    </div>
+    <div class="block">
+      <div class="line">LEOAF // GROUND CONTROL</div>
+      <div>Issuing Authority (Self)</div>
+    </div>
+  </div>
+
+  <div class="meta">
+    REC-HASH · <span class="hash" id="hash">—</span><br>
+    SERIAL · <span class="hash" id="serial">—</span> · ISSUED <span id="dateIssued">—</span>
+  </div>
+
+  <div class="disclaimer">Self-directed program · Personal record only · Not a degree, license, or accredited credential</div>
+</main>
+
+<script>
+  const REC = {
+    recipient: "DIDIER DELATTRE",
+    dateISO: new Date().toISOString().slice(0,10),
+  };
+  document.getElementById("recipient").textContent  = REC.recipient;
+  document.getElementById("recipient2").textContent = "D. " + REC.recipient.split(" ").slice(-1)[0];
+  document.getElementById("dateIssued").textContent = REC.dateISO;
+
+  function djb2(s) {
+    let h = 5381;
+    for (let i = 0; i < s.length; i++) h = ((h << 5) + h) + s.charCodeAt(i);
+    return (h >>> 0).toString(16).toUpperCase().padStart(8,"0");
+  }
+  const key = [REC.recipient, "CONSTELLATION-ARCHITECT", REC.dateISO].join("|");
+  const full = djb2(key) + djb2(key.split("").reverse().join(""));
+  document.getElementById("hash").textContent = full.match(/.{1,4}/g).join("-");
+  document.getElementById("serial").textContent = "SN-" + full.slice(0,8);
+</script>
+</body>
+</html>
