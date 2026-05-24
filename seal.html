@@ -1,0 +1,357 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>LEOAF // SEAL</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700;900&family=Share+Tech+Mono&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #000;
+    --ink: #ececec;
+    --muted: #6e6e6e;
+    --red: #ff004f;
+    --cyan: #00d9ff;
+    --green: #39ff14;
+    --amber: #ffaa00;
+    --line: rgba(255,255,255,0.18);
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html, body { background: var(--bg); color: var(--ink); font-family: 'Share Tech Mono', monospace; }
+  body {
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+  }
+
+  /* 1080 × 1080 canvas — screenshot or headless-chrome to export as PNG */
+  .seal {
+    position: relative;
+    width: 1080px;
+    height: 1080px;
+    background:
+      radial-gradient(ellipse at center, #0a0d14 0%, #000 70%),
+      #000;
+    overflow: hidden;
+    border: 1px solid var(--line);
+  }
+
+  /* starfield via CSS box-shadow trick */
+  .stars { position: absolute; inset: 0; pointer-events: none; }
+  .stars::before, .stars::after {
+    content: "";
+    position: absolute;
+    width: 2px; height: 2px;
+    border-radius: 50%;
+    background: transparent;
+    box-shadow:
+      87px 142px #fff, 200px 53px #fff, 340px 290px #ccc, 480px 80px #fff,
+      620px 410px #aaa, 780px 150px #fff, 920px 380px #ccc, 1010px 90px #fff,
+      150px 520px #aaa, 290px 660px #fff, 420px 750px #ccc, 580px 920px #fff,
+      720px 600px #aaa, 860px 820px #fff, 1000px 720px #ccc, 80px 880px #fff,
+      230px 380px #aaa, 380px 510px #fff, 540px 240px #ccc, 670px 70px #fff,
+      810px 480px #aaa, 950px 250px #fff, 60px 200px #ccc, 180px 1000px #fff,
+      400px 1020px #aaa, 590px 560px #fff, 740px 320px #ccc, 870px 1010px #fff,
+      990px 540px #aaa, 130px 60px #fff, 270px 200px #ccc, 460px 660px #fff,
+      640px 800px #aaa, 760px 920px #fff, 890px 100px #ccc, 1020px 870px #fff;
+  }
+  .stars::after {
+    box-shadow:
+      102px 412px #fff, 250px 833px #ccc, 410px 122px #fff, 530px 700px #aaa,
+      690px 220px #fff, 820px 560px #ccc, 960px 920px #fff, 50px 540px #aaa,
+      210px 750px #fff, 360px 410px #ccc, 500px 950px #fff, 660px 480px #aaa,
+      780px 740px #fff, 900px 200px #ccc, 1040px 380px #fff, 30px 320px #aaa;
+    opacity: 0.6;
+  }
+
+  /* concentric orbit rings (background context) */
+  .orbits {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    pointer-events: none;
+  }
+  .ring {
+    position: absolute;
+    border-radius: 50%;
+    border: 1px dashed rgba(0,217,255,0.18);
+  }
+  .ring.r1 { width: 760px; height: 760px; }
+  .ring.r2 { width: 920px; height: 920px; border-style: solid; border-color: rgba(0,217,255,0.10); }
+  .ring.r3 { width: 1050px; height: 1050px; border-color: rgba(255,170,0,0.10); }
+
+  /* satellite ticks on r1 */
+  .tick {
+    position: absolute;
+    width: 8px; height: 8px;
+    background: var(--cyan);
+    border-radius: 50%;
+    top: 50%; left: 50%;
+    box-shadow: 0 0 12px var(--cyan);
+  }
+  .tick.t1 { transform: translate(-50%,-50%) rotate(0deg) translateY(-380px); }
+  .tick.t2 { transform: translate(-50%,-50%) rotate(72deg) translateY(-380px); background: var(--amber); box-shadow: 0 0 12px var(--amber); }
+  .tick.t3 { transform: translate(-50%,-50%) rotate(144deg) translateY(-380px); background: var(--green); box-shadow: 0 0 12px var(--green); }
+  .tick.t4 { transform: translate(-50%,-50%) rotate(216deg) translateY(-380px); background: var(--red); box-shadow: 0 0 12px var(--red); }
+  .tick.t5 { transform: translate(-50%,-50%) rotate(288deg) translateY(-380px); }
+
+  /* top bar */
+  .topbar {
+    position: absolute;
+    top: 40px; left: 50px; right: 50px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 18px;
+    letter-spacing: 0.32em;
+    color: var(--muted);
+    text-transform: uppercase;
+  }
+  .topbar .id { color: var(--cyan); }
+  .topbar .cls {
+    color: var(--red);
+    border: 1px solid var(--red);
+    padding: 4px 12px;
+    letter-spacing: 0.3em;
+  }
+
+  /* wordmark */
+  .wordmark {
+    position: absolute;
+    top: 110px;
+    left: 0; right: 0;
+    text-align: center;
+    font-family: 'Orbitron', sans-serif;
+    font-weight: 900;
+    font-size: 36px;
+    letter-spacing: 0.5em;
+    color: var(--ink);
+    text-indent: 0.5em; /* compensate for letter-spacing visual centering */
+  }
+  .wordmark::after {
+    content: "LOW EARTH ORBIT ARCHITECTURE FELLOWSHIP";
+    display: block;
+    font-family: 'Share Tech Mono', monospace;
+    font-weight: 400;
+    font-size: 13px;
+    letter-spacing: 0.45em;
+    color: var(--muted);
+    margin-top: 14px;
+  }
+
+  /* center emblem */
+  .emblem {
+    position: absolute;
+    top: 50%; left: 50%;
+    transform: translate(-50%,-50%);
+    width: 560px; height: 560px;
+    border: 2px solid var(--cyan);
+    border-radius: 50%;
+    background:
+      radial-gradient(circle at 50% 40%, rgba(0,217,255,0.06) 0%, transparent 60%),
+      rgba(0,0,0,0.6);
+    box-shadow:
+      0 0 60px rgba(0,217,255,0.18),
+      inset 0 0 50px rgba(0,0,0,0.6);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    padding: 50px 40px;
+  }
+  .emblem::before {
+    content: "";
+    position: absolute;
+    inset: 14px;
+    border: 1px solid rgba(0,217,255,0.35);
+    border-radius: 50%;
+  }
+  .emblem::after {
+    content: "";
+    position: absolute;
+    inset: 26px;
+    border: 1px dashed rgba(255,255,255,0.08);
+    border-radius: 50%;
+  }
+
+  .badge-kicker {
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 16px;
+    letter-spacing: 0.45em;
+    color: var(--amber);
+    text-transform: uppercase;
+    margin-bottom: 18px;
+  }
+  .badge-title {
+    font-family: 'Orbitron', sans-serif;
+    font-weight: 900;
+    font-size: 64px;
+    line-height: 0.95;
+    letter-spacing: 0.04em;
+    color: var(--ink);
+    text-transform: uppercase;
+  }
+  .badge-title .accent { color: var(--cyan); display: block; font-size: 42px; letter-spacing: 0.12em; margin-top: 6px; }
+  .badge-sub {
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 18px;
+    letter-spacing: 0.28em;
+    color: var(--muted);
+    text-transform: uppercase;
+    margin-top: 22px;
+  }
+  .recipient {
+    font-family: 'Orbitron', sans-serif;
+    font-weight: 700;
+    font-size: 30px;
+    letter-spacing: 0.14em;
+    color: var(--green);
+    text-transform: uppercase;
+    margin-top: 18px;
+    padding-top: 18px;
+    border-top: 1px solid rgba(255,255,255,0.1);
+    width: 78%;
+  }
+
+  /* stats row */
+  .stats {
+    position: absolute;
+    bottom: 200px; left: 50%;
+    transform: translateX(-50%);
+    display: flex;
+    gap: 70px;
+    text-align: center;
+  }
+  .stat .v {
+    font-family: 'Orbitron', sans-serif;
+    font-weight: 700;
+    font-size: 36px;
+    color: var(--ink);
+  }
+  .stat .v.cyan  { color: var(--cyan); }
+  .stat .v.amber { color: var(--amber); }
+  .stat .v.green { color: var(--green); }
+  .stat .k {
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 12px;
+    letter-spacing: 0.3em;
+    color: var(--muted);
+    text-transform: uppercase;
+    margin-top: 6px;
+  }
+
+  /* footer */
+  .footer {
+    position: absolute;
+    bottom: 50px; left: 50px; right: 50px;
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-end;
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 14px;
+    letter-spacing: 0.22em;
+    color: var(--muted);
+    text-transform: uppercase;
+  }
+  .footer .verify {
+    color: var(--cyan);
+    font-size: 16px;
+  }
+  .footer .hash { color: var(--ink); }
+  .footer .col { display: flex; flex-direction: column; gap: 6px; }
+  .footer .col.r { align-items: flex-end; }
+  .footer .label { color: var(--muted); font-size: 11px; }
+
+  .disclaimer {
+    position: absolute;
+    bottom: 18px; left: 0; right: 0;
+    text-align: center;
+    font-size: 10px;
+    letter-spacing: 0.35em;
+    color: #555;
+    text-transform: uppercase;
+  }
+</style>
+</head>
+<body>
+
+<div class="seal" id="seal">
+  <div class="stars"></div>
+  <div class="orbits">
+    <div class="ring r3"></div>
+    <div class="ring r2"></div>
+    <div class="ring r1"></div>
+    <div class="tick t1"></div>
+    <div class="tick t2"></div>
+    <div class="tick t3"></div>
+    <div class="tick t4"></div>
+    <div class="tick t5"></div>
+  </div>
+
+  <div class="topbar">
+    <span class="id">LEOAF / SEAL / <span id="serial">—</span></span>
+    <span class="cls">SELF-ISSUED</span>
+  </div>
+
+  <div class="wordmark">LEOAF</div>
+
+  <div class="emblem">
+    <div class="badge-kicker">Capstone of Record</div>
+    <div class="badge-title">
+      Constellation
+      <span class="accent">Architect</span>
+    </div>
+    <div class="badge-sub">Two-Year Self-Directed Program</div>
+    <div class="recipient" id="recipient">DIDIER DELATTRE</div>
+  </div>
+
+  <div class="stats">
+    <div class="stat"><div class="v cyan">8</div><div class="k">Quarters</div></div>
+    <div class="stat"><div class="v amber">~660</div><div class="k">Hours</div></div>
+    <div class="stat"><div class="v green">2</div><div class="k">Capstones</div></div>
+    <div class="stat"><div class="v">24</div><div class="k">Months</div></div>
+  </div>
+
+  <div class="footer">
+    <div class="col">
+      <div class="label">Verify</div>
+      <div class="verify" id="verifyUrl">leoarfu.github.io/42/verify.html</div>
+    </div>
+    <div class="col r">
+      <div class="label">Record</div>
+      <div class="hash" id="hash">—</div>
+      <div id="dateIssued" style="font-size:12px;color:var(--muted)">—</div>
+    </div>
+  </div>
+
+  <div class="disclaimer">Self-directed program · Personal record · Not a degree, license, or accredited credential</div>
+</div>
+
+<script>
+  const REC = {
+    recipient: "DIDIER DELATTRE",
+    dateISO: new Date().toISOString().slice(0,10),
+    verifyUrl: "leoarfu.github.io/42/verify.html",
+  };
+  document.getElementById("recipient").textContent = REC.recipient;
+  document.getElementById("dateIssued").textContent = REC.dateISO;
+  document.getElementById("verifyUrl").textContent = REC.verifyUrl;
+
+  function djb2(s) {
+    let h = 5381;
+    for (let i = 0; i < s.length; i++) h = ((h << 5) + h) + s.charCodeAt(i);
+    return (h >>> 0).toString(16).toUpperCase().padStart(8,"0");
+  }
+  const key = [REC.recipient, "CONSTELLATION-ARCHITECT", REC.dateISO].join("|");
+  const full = djb2(key) + djb2(key.split("").reverse().join(""));
+  document.getElementById("hash").textContent = full.match(/.{1,4}/g).join("-");
+  document.getElementById("serial").textContent = "SN-" + full.slice(0,8);
+</script>
+</body>
+</html>
