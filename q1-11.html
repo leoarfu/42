@@ -1,0 +1,1088 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, shrink-to-fit=no">
+<title>L11 — Ground Segment Architecture · LEOAF</title>
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;600;800&family=Share+Tech+Mono&family=Libre+Baskerville:ital,wght@0,400;0,700;1,400&display=swap" rel="stylesheet">
+<link rel="icon" href="favicon.ico" sizes="any" type="image/x-icon">
+<link rel="manifest" href="site.webmanifest">
+<meta name="theme-color" content="#0f0f0f">
+
+<style>
+* { box-sizing:border-box; margin:0; padding:0; }
+html { height:100%; -webkit-text-size-adjust:100%; overflow-x:hidden; }
+body { font-family:'Share Tech Mono',monospace; background:#000; color:white; overflow-x:hidden; min-height:100vh; }
+#starsCanvas { position:fixed; inset:0; z-index:-1; }
+
+/* HEADER */
+header {
+    background:#000; border-bottom:1px solid #ff004f33;
+    position:sticky; top:0; z-index:100;
+    padding:1rem clamp(1.5rem,5vw,4rem);
+    display:flex; justify-content:space-between; align-items:center;
+    box-shadow:0 4px 16px #0008;
+}
+.logo { font-family:'Orbitron',sans-serif; font-weight:800; font-size:clamp(16px,2vw,22px); letter-spacing:3px; text-decoration:none; }
+.logo span:first-child { color:white; }
+.logo span:last-child { color:#ff004f; }
+.nav-right { display:flex; align-items:center; gap:10px; }
+.nav-btn {
+    background:transparent; border:1px solid #ff004f44; color:#ff004f;
+    padding:6px 14px; cursor:pointer; transition:0.3s ease;
+    font-size:11px; font-family:'Orbitron',sans-serif; letter-spacing:1px;
+    text-decoration:none; display:inline-block;
+}
+.nav-btn:hover { background:#ff004f; color:black; }
+
+/* BREADCRUMB */
+.breadcrumb { padding:14px clamp(1.5rem,5vw,4rem); font-size:11px; color:#ffffff44; letter-spacing:1px; position:relative; z-index:1; }
+.breadcrumb a { color:#00d9ff66; text-decoration:none; }
+.breadcrumb a:hover { color:#00d9ff; }
+.breadcrumb span { margin:0 8px; }
+
+/* LESSON LAYOUT */
+.lesson-wrap { max-width:820px; margin:0 auto; padding:0 clamp(1.5rem,5vw,4rem) 80px; position:relative; z-index:1; }
+
+/* LESSON HEADER */
+.lesson-header { padding:30px 0 28px; border-bottom:1px solid #ffffff11; margin-bottom:36px; }
+.lesson-tag { font-family:'Orbitron',sans-serif; font-size:10px; color:#ff004f; letter-spacing:3px; margin-bottom:10px; }
+.lesson-header h1 { font-family:'Orbitron',sans-serif; font-size:clamp(20px,3.5vw,32px); font-weight:800; line-height:1.2; margin-bottom:12px; }
+.lesson-meta { display:flex; gap:10px; flex-wrap:wrap; margin-bottom:16px; }
+.l-pill { font-family:'Orbitron',sans-serif; font-size:10px; padding:3px 10px; border:1px solid; letter-spacing:1px; }
+.l-pill-q { color:#ff004f; border-color:#ff004f44; }
+.l-pill-t { color:#39ff14; border-color:#39ff1444; }
+.lesson-intro { font-size:13px; line-height:1.85; opacity:0.75; }
+
+/* TABLE OF CONTENTS */
+.toc { background:rgba(0,217,255,0.06); border:1px solid #00d9ff33; padding:24px 28px; margin:30px 0; }
+.toc h4 { font-family:'Orbitron',sans-serif; font-size:10px; color:#00d9ff; letter-spacing:2px; margin-bottom:16px; }
+.toc ol { padding-left:20px; }
+.toc li { font-size:13px; line-height:2.1; opacity:1; }
+.toc li a { color:#00d9ffbb; text-decoration:none; transition:0.15s; }
+.toc li a:hover { color:#ffffff; padding-left:4px; }
+.toc li::marker { color:#ff004f; font-family:'Orbitron',sans-serif; font-size:10px; }
+
+/* CONTENT SECTIONS */
+.content-block { margin-bottom:48px; }
+.content-block h2 {
+    font-family:'Orbitron',sans-serif; font-size:13px; color:#00d9ff;
+    letter-spacing:2px; text-transform:uppercase;
+    margin-bottom:18px; padding-bottom:10px;
+    border-bottom:1px solid #00d9ff22;
+    scroll-margin-top:80px;
+}
+.content-block h3 {
+    font-family:'Orbitron',sans-serif; font-size:11px; color:#ffffff88;
+    letter-spacing:1.5px; text-transform:uppercase; margin:28px 0 12px;
+}
+.content-block h4 {
+    font-size:12px; color:#ffffff66; letter-spacing:1px; margin:20px 0 8px;
+    font-family:'Orbitron',sans-serif; font-size:10px;
+}
+.content-block p { font-size:13px; line-height:1.9; opacity:0.85; margin-bottom:16px; }
+.content-block ul, .content-block ol { padding-left:0; margin-bottom:16px; }
+.content-block ul li, .content-block ol li { font-size:13px; line-height:1.85; opacity:0.85; padding-left:20px; position:relative; margin-bottom:6px; }
+.content-block ul li::before { content:'›'; position:absolute; left:0; color:#00d9ff; }
+.content-block ol { counter-reset:item; }
+.content-block ol li { counter-increment:item; }
+.content-block ol li::before { content:counter(item)'.'; position:absolute; left:0; color:#ff004f; font-family:'Orbitron',sans-serif; font-size:10px; top:2px; }
+
+/* CALLOUT BOXES */
+.callout {
+    border-left:3px solid #00d9ff; background:rgba(0,217,255,0.05);
+    padding:16px 20px; margin:22px 0; font-size:12px; line-height:1.8;
+}
+.callout.red   { border-left-color:#ff004f; background:rgba(255,0,79,0.05); }
+.callout.green { border-left-color:#39ff14; background:rgba(57,255,20,0.05); }
+.callout.amber { border-left-color:#ffaa00; background:rgba(255,170,0,0.05); }
+.callout strong { font-family:'Orbitron',sans-serif; font-size:10px; letter-spacing:1px; display:block; margin-bottom:8px; color:inherit; }
+
+/* KEY NUMBERS GRID */
+.key-numbers { display:grid; grid-template-columns:repeat(auto-fit,minmax(140px,1fr)); gap:12px; margin:22px 0; }
+.kn-item { background:rgba(255,255,255,0.03); border:1px solid #ffffff11; padding:16px 12px; text-align:center; }
+.kn-val { font-family:'Orbitron',sans-serif; font-size:clamp(16px,2.5vw,24px); font-weight:800; color:#00d9ff; display:block; }
+.kn-label { font-size:10px; opacity:0.5; letter-spacing:1px; margin-top:5px; display:block; line-height:1.4; }
+
+/* COMPARISON TABLE */
+.compare-table { width:100%; border-collapse:collapse; margin:22px 0; font-size:12px; }
+.compare-table th { font-family:'Orbitron',sans-serif; font-size:10px; letter-spacing:1px; color:#00d9ff; padding:10px 12px; border-bottom:1px solid #00d9ff33; text-align:left; }
+.compare-table td { padding:10px 12px; border-bottom:1px solid #ffffff0a; line-height:1.5; opacity:0.85; vertical-align:top; }
+.compare-table tr:hover td { background:rgba(255,255,255,0.02); }
+.compare-table .hi { color:#39ff14; }
+.compare-table .lo { color:#ff004f; }
+.compare-table .md { color:#ffaa00; }
+
+/* TIMELINE */
+.timeline { margin:22px 0; }
+.tl-item { display:flex; gap:16px; margin-bottom:16px; }
+.tl-year { font-family:'Orbitron',sans-serif; font-size:11px; color:#ff004f; min-width:52px; padding-top:2px; }
+.tl-body { flex:1; border-left:1px solid #ff004f33; padding-left:16px; padding-bottom:8px; }
+.tl-body strong { font-family:'Orbitron',sans-serif; font-size:11px; color:#ffffff88; letter-spacing:1px; display:block; margin-bottom:4px; }
+.tl-body p { font-size:12px; opacity:0.75; line-height:1.7; margin:0; }
+
+/* SVG DIAGRAM */
+.diagram-wrap { margin:24px 0; background:rgba(255,255,255,0.02); border:1px solid #ffffff11; padding:20px; overflow-x:auto; }
+.diagram-wrap figcaption { font-size:11px; color:#ffffff44; margin-top:12px; text-align:center; letter-spacing:1px; }
+
+/* DEEP DIVE BOX */
+.deep-dive { background:rgba(255,170,0,0.04); border:1px solid #ffaa0022; padding:20px 22px; margin:24px 0; }
+.deep-dive h4 { font-family:'Orbitron',sans-serif; font-size:10px; color:#ffaa00; letter-spacing:2px; margin-bottom:12px; }
+.deep-dive p { font-size:12px; line-height:1.8; opacity:0.8; margin-bottom:10px; }
+.deep-dive p:last-child { margin-bottom:0; }
+
+/* QUIZ */
+.quiz-block { background:rgba(17,17,17,0.9); border:1px solid #ff004f33; padding:28px; margin:48px 0 32px; }
+.quiz-block h2 { font-family:'Orbitron',sans-serif; font-size:13px; color:#ff004f; letter-spacing:2px; margin-bottom:6px; }
+.quiz-intro { font-size:12px; opacity:0.6; margin-bottom:24px; padding-bottom:16px; border-bottom:1px solid #ff004f22; line-height:1.6; }
+.quiz-q { margin-bottom:28px; }
+.quiz-q p { font-size:13px; opacity:0.9; margin-bottom:12px; line-height:1.65; }
+.quiz-q p strong { color:#00d9ff; }
+.quiz-options { display:flex; flex-direction:column; gap:8px; }
+.quiz-opt {
+    background:rgba(255,255,255,0.03); border:1px solid #ffffff1a;
+    padding:11px 16px; cursor:pointer; font-size:12px; font-family:'Share Tech Mono',monospace;
+    transition:0.2s ease; text-align:left; color:white; line-height:1.5;
+}
+.quiz-opt:hover:not(:disabled) { background:rgba(0,217,255,0.08); border-color:#00d9ff44; }
+.quiz-opt.correct  { background:rgba(57,255,20,0.1);  border-color:#39ff14; color:#39ff14; }
+.quiz-opt.wrong    { background:rgba(255,0,79,0.1);   border-color:#ff004f; color:#ff004f; }
+.quiz-opt:disabled { cursor:default; }
+.quiz-feedback { font-size:12px; margin-top:10px; min-height:18px; line-height:1.7; opacity:0.9; padding:0 4px; }
+.quiz-score { font-family:'Orbitron',sans-serif; font-size:12px; color:#39ff14; margin-top:20px; letter-spacing:1px; display:none; padding-top:16px; border-top:1px solid #39ff1433; }
+
+/* PYTHON EXERCISES */
+.py-block { background:rgba(10,10,10,0.95); border:1px solid #39ff1422; padding:28px; margin:32px 0; }
+.py-block h2 { font-family:'Orbitron',sans-serif; font-size:13px; color:#39ff14; letter-spacing:2px; margin-bottom:8px; }
+.py-block .py-intro { font-size:12px; opacity:0.7; margin-bottom:20px; padding-bottom:16px; border-bottom:1px solid #39ff1422; line-height:1.7; }
+.py-exercise { margin-bottom:32px; }
+.py-exercise:last-child { margin-bottom:0; }
+.py-exercise h3 { font-family:'Orbitron',sans-serif; font-size:11px; color:#39ff1499; letter-spacing:1.5px; text-transform:uppercase; margin-bottom:10px; }
+.py-exercise p { font-size:12px; opacity:0.8; margin-bottom:14px; line-height:1.75; }
+.py-block pre {
+    background:#050505; border:1px solid #39ff1433; padding:20px;
+    font-family:'Share Tech Mono',monospace; font-size:11.5px;
+    line-height:1.75; overflow-x:auto; color:#39ff14;
+    white-space:pre; margin-bottom:12px;
+}
+.py-block .py-note { font-size:11px; color:#ffffff44; line-height:1.75; margin-top:10px; }
+.py-block .py-challenge { background:rgba(57,255,20,0.04); border-left:2px solid #39ff14; padding:12px 16px; margin-top:14px; font-size:12px; line-height:1.75; opacity:0.8; }
+.py-block .py-challenge strong { font-family:'Orbitron',sans-serif; font-size:10px; color:#39ff14; display:block; margin-bottom:6px; letter-spacing:1px; }
+
+/* REFLECTION */
+.reflection-block { background:rgba(255,170,0,0.04); border:1px solid #ffaa0033; padding:24px; margin:32px 0; }
+.reflection-block h2 { font-family:'Orbitron',sans-serif; font-size:13px; color:#ffaa00; letter-spacing:2px; margin-bottom:8px; }
+.reflection-block .ref-intro { font-size:12px; opacity:0.7; margin-bottom:20px; padding-bottom:14px; border-bottom:1px solid #ffaa0022; line-height:1.7; }
+.ref-prompt { margin-bottom:20px; }
+.ref-prompt h3 { font-family:'Orbitron',sans-serif; font-size:11px; color:#ffaa0099; letter-spacing:1px; margin-bottom:8px; }
+.ref-prompt p { font-size:12px; opacity:0.8; line-height:1.75; margin-bottom:10px; }
+.ref-prompt ul li { font-size:12px; }
+
+/* BACK TO TOP */
+.back-to-top {
+    position:fixed; bottom:28px; right:28px; z-index:200;
+    width:44px; height:44px; background:#000;
+    border:1px solid #00d9ff55; color:#00d9ff;
+    font-size:20px; cursor:pointer;
+    display:flex; align-items:center; justify-content:center;
+    opacity:0; pointer-events:none;
+    transition:opacity 0.3s ease, border-color 0.3s ease;
+}
+.back-to-top.visible { opacity:1; pointer-events:auto; }
+.back-to-top:hover { border-color:#00d9ff; background:#001a2c; }
+
+/* COMPLETE WRAP */
+.complete-wrap { margin-top:56px; padding-top:30px; border-top:1px solid #ffffff11; text-align:center; }
+.complete-btn {
+    font-family:'Orbitron',sans-serif; font-size:13px; letter-spacing:2px;
+    padding:14px 44px; background:transparent;
+    border:1px solid #39ff14; color:#39ff14; cursor:pointer; transition:0.3s ease;
+}
+.complete-btn:hover:not(.done) { background:#39ff14; color:black; box-shadow:0 0 20px rgba(57,255,20,0.4); }
+.complete-btn.done { background:rgba(57,255,20,0.1); cursor:default; opacity:0.7; }
+.complete-msg { font-size:12px; color:#39ff14; margin-top:14px; min-height:18px; letter-spacing:1px; }
+
+/* LESSON NAV */
+.lesson-nav { display:flex; justify-content:space-between; margin-top:30px; flex-wrap:wrap; gap:10px; }
+.lesson-nav a { font-family:'Orbitron',sans-serif; font-size:11px; color:#00d9ff66; text-decoration:none; letter-spacing:1px; transition:0.2s; }
+.lesson-nav a:hover { color:#00d9ff; }
+
+footer { text-align:center; padding:30px; opacity:0.3; font-size:11px; position:relative; z-index:1; letter-spacing:1px; }
+
+@media (max-width:600px) {
+    .key-numbers { grid-template-columns:1fr 1fr; }
+    .compare-table { font-size:11px; }
+    .compare-table th, .compare-table td { padding:8px 8px; }
+}
+
+/* ── LIGHT READING MODE ── */
+.content-block {
+    background: #f5f2ec;
+    color: #1a1a1a;
+    padding: 36px clamp(24px,4vw,48px);
+    margin-bottom: 24px;
+    border-left: 4px solid #00d9ff;
+    position: relative;
+    z-index: 1;
+}
+.content-block h2 {
+    font-family:'Orbitron',sans-serif; font-size:13px;
+    color:#003d66; letter-spacing:2px; text-transform:uppercase;
+    margin-bottom:20px; padding-bottom:10px;
+    border-bottom:2px solid #00d9ff66;
+    scroll-margin-top:80px;
+}
+.content-block h3 {
+    font-family:'Orbitron',sans-serif; font-size:11px;
+    color:#444; letter-spacing:1.5px; text-transform:uppercase;
+    margin:32px 0 14px;
+}
+.content-block p {
+    font-family:'Libre Baskerville', Georgia, serif;
+    font-size:15px; line-height:1.9; color:#1a1a1a;
+    opacity:1; margin-bottom:18px;
+}
+.content-block ul li, .content-block ol li {
+    font-family:'Libre Baskerville', Georgia, serif;
+    font-size:14px; line-height:1.85; color:#1a1a1a; opacity:1;
+    margin-bottom:8px;
+}
+.content-block ul li::before { color:#0077aa; }
+.content-block ol li::before { color:#cc0033; }
+
+.content-block .callout {
+    border-left:3px solid #0088cc;
+    background:#e8f4fb;
+    color:#1a1a1a;
+}
+.content-block .callout.red   { border-left-color:#cc0033; background:#fdecea; }
+.content-block .callout.green { border-left-color:#1a7a1a; background:#eafaea; }
+.content-block .callout.amber { border-left-color:#996600; background:#fef9ec; }
+.content-block .callout strong { color:inherit; }
+
+.content-block .kn-item {
+    background:#fff; border:1px solid #d0d0d0;
+}
+.content-block .kn-label { color:#555; opacity:1; }
+
+.content-block .compare-table th {
+    color:#003d66; border-bottom:2px solid #00d9ff66;
+}
+.content-block .compare-table td {
+    color:#1a1a1a; opacity:1;
+    border-bottom:1px solid #ddd;
+}
+.content-block .compare-table tr:hover td { background:#f0f0f0; }
+
+.content-block .tl-body strong { color:#333; }
+.content-block .tl-body p { font-size:13px; color:#444; }
+.content-block .tl-year { color:#cc0033; }
+.content-block .tl-body { border-left-color:#cc003344; }
+
+.content-block .deep-dive {
+    background:#fffbf0; border:1px solid #e0c060;
+}
+.content-block .deep-dive p { font-size:13px; color:#333; }
+
+.content-block .diagram-wrap {
+    background:#0a0a0a; border:1px solid #333;
+}
+.content-block .diagram-wrap figcaption { color:#ffffff55; }
+</style>
+
+</head>
+<body>
+
+<canvas id="starsCanvas"></canvas>
+
+<header>
+    <a href="dashboard.html" class="logo"><span>LEO</span><span>AF</span></a>
+    <div class="nav-right">
+        <a href="q1.html" class="nav-btn">← Q1 HUB</a>
+        <button id="logoffBtn" class="nav-btn">ABORT</button>
+    </div>
+</header>
+
+<div class="breadcrumb">
+    <a href="dashboard.html">DASHBOARD</a><span>/</span>
+    <a href="q1.html">Q1</a><span>/</span>
+    <span style="color:#ffffff88;">LESSON 11 — GROUND SEGMENT ARCHITECTURE</span>
+</div>
+
+<div class="lesson-wrap">
+
+<div class="lesson-header">
+    <div class="lesson-tag">Q1 · LESSON 11 OF 15</div>
+    <h1>Ground Segment Architecture</h1>
+    <div class="lesson-meta">
+        <div class="l-pill l-pill-q">QUARTER 1</div>
+        <div class="l-pill l-pill-t">FOUNDATIONS</div>
+    </div>
+    <p class="lesson-intro">You have spent two decades in ground segment. This lesson is not a primer on teleports or TT&C — it is a reframing exercise. The GEO ground segment is a small number of large antennas pointed at fixed slots, operated by people, sized by satellite count. The LEO ground segment inverts almost every one of those assumptions. The discriminators are constellation motion and constellation scale, and they turn the ground segment from a supporting system into a primary architectural battleground. By the end you should be able to state, with numbers, why a bent-pipe constellation needs dozens of gateways while an ISL constellation needs a handful — and why that single decision propagates into latency, landing rights, and capex.</p>
+</div>
+
+<div class="toc">
+    <h4>CONTENTS</h4>
+    <ol>
+        <li><a href="#s1">What the ground segment is — and the GEO→LEO inversion</a></li>
+        <li><a href="#s2">Gateways: feeder links, siting, and diversity</a></li>
+        <li><a href="#s3">TT&amp;C at constellation scale</a></li>
+        <li><a href="#s4">PoP topology and backhaul: where the bits meet the internet</a></li>
+        <li><a href="#s5">Ground-station-as-a-service and cloud convergence</a></li>
+        <li><a href="#s6">How the ground segment scales — and how ISLs bend the curve</a></li>
+        <li><a href="#s7">Implications for the systems architect</a></li>
+        <li><a href="#quiz">Knowledge check</a></li>
+        <li><a href="#python">Python exercises</a></li>
+        <li><a href="#reflect">Reflection prompts</a></li>
+    </ol>
+</div>
+
+<!-- ═══ SECTION 1 ═══ -->
+<div class="content-block" id="s1">
+    <h2>1. What the Ground Segment Is — and the GEO→LEO Inversion</h2>
+
+    <p>A satellite communications system decomposes into three segments: the space segment (the satellites), the user segment (the terminals, covered in Lesson 12), and the ground segment — everything else on Earth that makes the system function. For a communications constellation the ground segment contains five functional blocks, and it is worth naming them precisely because the rest of this lesson treats each in turn:</p>
+
+    <ul>
+        <li><strong>Gateways (feeder-link earth stations)</strong> — the antennas that carry user traffic between the constellation and the terrestrial network.</li>
+        <li><strong>TT&amp;C stations</strong> — telemetry, tracking, and command: the fleet's health-and-control nervous system.</li>
+        <li><strong>The operations centres</strong> — the network operations centre (NOC) for the data plane and the satellite/mission operations centre (SOC/MOC) for the fleet.</li>
+        <li><strong>Points of presence and backhaul</strong> — the terrestrial transport and peering that moves demodulated traffic to and from the public internet.</li>
+        <li><strong>The cloud and edge tier</strong> — increasingly, compute and caching co-located with the gateway, blurring the line between ground segment and CDN.</li>
+    </ul>
+
+    <p>None of these blocks is new to you. What is new is what happens to each one when the satellite stops sitting still.</p>
+
+    <h3>The four inversions</h3>
+
+    <p>Every instinct a GEO ground-segment architect carries inverts in LEO. Hold these four in mind; the entire lesson is an elaboration of them.</p>
+
+    <table class="compare-table" style="overflow-x:auto;">
+        <table class="compare-table" style="min-width:560px;">
+            <thead>
+                <tr><th>Dimension</th><th>GEO ground segment</th><th>LEO ground segment</th></tr>
+            </thead>
+            <tbody>
+                <tr><td>Antenna pointing</td><td class="hi">Point once, leave it</td><td class="lo">Continuous tracking, handover every few minutes</td></tr>
+                <tr><td>Contact duration</td><td class="hi">Permanent</td><td class="lo">Minutes per satellite pass</td></tr>
+                <tr><td>Site count driver</td><td>Satellite count (few)</td><td>Coverage geometry + traffic + ISL topology</td></tr>
+                <tr><td>Operations model</td><td>Human-in-the-loop, scheduled</td><td class="md">Autonomous, exception-based</td></tr>
+            </tbody>
+        </table>
+    </table>
+
+    <p>The GEO antenna is mechanically and operationally simple precisely because the satellite is stationary. A LEO satellite crosses the sky at 7–8 km/s and is visible from a given gateway for only a few minutes above a usable elevation angle before it sets and a successor must be acquired. A gateway therefore cannot be a single antenna — it must host several, so that one can acquire the next satellite before the current one drops below the horizon (make-before-break), while additional antennas carry simultaneous links for capacity. The single GEO dish becomes an antenna farm.</p>
+
+    <div class="callout red">
+        <strong>THE CONTACT IS NOW EPHEMERAL</strong>
+        In GEO you provisioned a link and forgot about it. In LEO every link is temporary by construction. Continuity is an emergent property of scheduling and handover across an antenna farm, not a property of any single antenna. This is the conceptual hinge of the whole lesson: the ground segment's job shifts from maintaining links to orchestrating their continuous replacement.
+    </div>
+</div>
+
+<!-- ═══ SECTION 2 ═══ -->
+<div class="content-block" id="s2">
+    <h2>2. Gateways: Feeder Links, Siting, and Diversity</h2>
+
+    <p>The gateway is where user traffic enters and leaves the constellation. The link between gateway and satellite is the <strong>feeder link</strong>, and it is deliberately separated from the user link in most modern designs. Starlink, for example, runs user links in Ku-band and feeder links in Ka-band; the higher feeder frequency buys spectrum and supports the aggregate throughput of many users funneled through one gateway. The feeder link is the trunk; the user links are the branches.</p>
+
+    <h3>What drives gateway siting</h3>
+
+    <p>Gateway placement is a multi-constraint optimisation, and the constraints frequently conflict. The dominant drivers:</p>
+
+    <ol>
+        <li><strong>RF propagation.</strong> Ka-band feeder links are rain-sensitive. Arid, high-altitude, low-precipitation sites give better link availability. The site's rain-rate climatology directly sets the link margin you must budget.</li>
+        <li><strong>Site diversity.</strong> Because rain fade is local, operators pair geographically separated gateways and switch the feeder traffic to whichever site has clear sky. Two sites 30–50 km apart rarely experience the same heavy rain cell simultaneously, so combined availability climbs toward the "four nines" that single sites cannot reach in wet climates.</li>
+        <li><strong>Backhaul proximity.</strong> A gateway is useless without fat fiber to a peering point. A perfect RF site stranded from terrestrial transport is a non-starter — this constraint frequently overrides the RF-optimal location.</li>
+        <li><strong>Regulatory and coordination.</strong> The site needs landing rights in the host country and frequency coordination against terrestrial fixed-service users and, critically, against the GSO arc — NGSO feeder links must respect EPFD limits and avoid interfering with geostationary systems. (Spectrum coordination and EPFD get their proper treatment in Lesson 14 and again in Q7.)</li>
+    </ol>
+
+    <h3>Why bent-pipe forces a dense gateway network</h3>
+
+    <p>This is the architectural crux, and it connects directly to the ISL-versus-bent-pipe discussion from Lesson 1. In a bent-pipe constellation, a satellite has no way to forward traffic except straight back down to a gateway in its current field of view. The implication is unforgiving: <strong>to serve a user, the serving satellite must simultaneously see both the user and a gateway.</strong></p>
+
+    <p>Over land with good fiber, that is manageable. Over an ocean, it is not — there is no place to put a gateway in the middle of the Pacific, so a bent-pipe constellation simply cannot serve mid-ocean users unless an island gateway happens to fall within the geometry. Polar coverage faces the same wall: gateways at extreme latitudes are operationally and politically expensive. OneWeb's Gen1 architecture, which deliberately omitted inter-satellite links, consequently required a global network on the order of forty gateway sites to stitch together its service area — and still inherited the ocean and polar gaps that gateway geography imposes.</p>
+
+    <div class="diagram-wrap">
+        <svg viewBox="0 0 700 320" width="100%" xmlns="http://www.w3.org/2000/svg" font-family="Share Tech Mono, monospace">
+            <defs>
+                <pattern id="grid3" width="35" height="35" patternUnits="userSpaceOnUse">
+                    <path d="M 35 0 L 0 0 0 35" fill="none" stroke="#ffffff06" stroke-width="0.5"/>
+                </pattern>
+            </defs>
+            <rect width="700" height="320" fill="url(#grid3)"/>
+
+            <!-- ground line -->
+            <line x1="0" y1="270" x2="700" y2="270" stroke="#00d9ff33" stroke-width="1"/>
+            <text x="12" y="262" font-size="9" fill="#00d9ff66">EARTH SURFACE</text>
+
+            <!-- User terminal left -->
+            <rect x="70" y="256" width="22" height="14" fill="none" stroke="#ffaa00" stroke-width="1.2"/>
+            <text x="81" y="290" font-size="9" fill="#ffaa0099" text-anchor="middle">USER</text>
+
+            <!-- Gateway left -->
+            <path d="M 150 270 L 138 248 L 162 248 Z" fill="none" stroke="#39ff14" stroke-width="1.2"/>
+            <text x="150" y="290" font-size="9" fill="#39ff1499" text-anchor="middle">GATEWAY A</text>
+
+            <!-- Satellite 1 (near, has gateway in view) -->
+            <rect x="170" y="70" width="26" height="16" fill="none" stroke="#00d9ff" stroke-width="1.4"/>
+            <line x1="166" y1="78" x2="156" y2="78" stroke="#00d9ff" stroke-width="1"/>
+            <line x1="200" y1="78" x2="210" y2="78" stroke="#00d9ff" stroke-width="1"/>
+            <text x="183" y="60" font-size="9" fill="#00d9ffcc" text-anchor="middle">SAT 1</text>
+
+            <!-- bent-pipe links: user up to sat1, sat1 down to gateway -->
+            <line x1="81" y1="256" x2="178" y2="86" stroke="#ffaa0077" stroke-width="1.2" stroke-dasharray="4,3"/>
+            <line x1="183" y1="86" x2="150" y2="248" stroke="#39ff1477" stroke-width="1.2" stroke-dasharray="4,3"/>
+            <text x="250" y="180" font-size="8" fill="#ffffff44">BENT-PIPE: user→sat→gateway</text>
+
+            <!-- Satellite 2 (over ocean, NO gateway in view) -->
+            <rect x="520" y="70" width="26" height="16" fill="none" stroke="#ff004f" stroke-width="1.4"/>
+            <line x1="516" y1="78" x2="506" y2="78" stroke="#ff004f" stroke-width="1"/>
+            <line x1="550" y1="78" x2="560" y2="78" stroke="#ff004f" stroke-width="1"/>
+            <text x="533" y="60" font-size="9" fill="#ff004fcc" text-anchor="middle">SAT 2</text>
+
+            <!-- ocean user -->
+            <path d="M 600 264 q 6 -8 12 0 q 6 8 12 0" fill="none" stroke="#ff004f88" stroke-width="1.2"/>
+            <text x="612" y="290" font-size="9" fill="#ff004f88" text-anchor="middle">OCEAN USER</text>
+
+            <!-- ocean user up to sat2, but no gateway down -->
+            <line x1="612" y1="260" x2="533" y2="86" stroke="#ff004f55" stroke-width="1.2" stroke-dasharray="4,3"/>
+            <line x1="546" y1="86" x2="640" y2="200" stroke="#ff004f33" stroke-width="1" stroke-dasharray="2,5"/>
+            <text x="640" y="215" font-size="8" fill="#ff004f88" text-anchor="middle">no gateway ✗</text>
+
+            <!-- ISL bypass sat2 -> sat1 -->
+            <line x1="196" y1="78" x2="520" y2="78" stroke="#00d9ff" stroke-width="1.6"/>
+            <text x="358" y="70" font-size="9" fill="#00d9ffcc" text-anchor="middle">OPTICAL ISL — bypasses gateway gap</text>
+        </svg>
+        <figcaption>BENT-PIPE GATEWAY DEPENDENCY VS ISL BYPASS — SCHEMATIC, NOT TO SCALE</figcaption>
+    </div>
+
+    <h3>The antenna farm and its sizing</h3>
+
+    <p>Each gateway site is sized by two independent demands. First, <strong>continuity</strong>: enough antennas that handover from a setting satellite to a rising one never drops the feeder. Second, <strong>capacity</strong>: enough simultaneous satellite links to carry the aggregate user throughput funneled through that site. As a constellation densifies its user base, the limiting factor at a gateway shifts from continuity to capacity, and the antenna count grows accordingly. This is why a mature gateway is a fenced field of radomes rather than a single dish.</p>
+
+    <div class="callout amber">
+        <strong>NOTE FOR THE GEO-TRAINED</strong>
+        Your GEO teleport sized antennas by the number of satellites you operated. A LEO gateway sizes antennas by traffic and handover continuity — the satellite count is almost irrelevant to a single gateway, because each antenna is talking to a continuously changing satellite. The mental model "one antenna per bird" does not transfer.
+    </div>
+</div>
+
+<!-- ═══ SECTION 3 ═══ -->
+<div class="content-block" id="s3">
+    <h2>3. TT&amp;C at Constellation Scale</h2>
+
+    <p>Telemetry, tracking, and command is the function that breaks most visibly under scale. Flying one GEO satellite, you schedule TT&amp;C passes, a human reviews telemetry, commands are reviewed and uplinked. That workflow does not survive contact with a five-thousand-satellite fleet.</p>
+
+    <h3>The arithmetic of the scaling wall</h3>
+
+    <p>Consider the raw contact load. A LEO satellite at ~550 km makes roughly fifteen orbits per day, and a given ground station sees any individual satellite for only a few short passes. The number of TT&amp;C contacts the system must schedule per day scales with the satellite count multiplied by passes per day. For a fleet in the thousands this is tens of thousands of contacts daily — orders of magnitude beyond what a human-staffed pass schedule can absorb.</p>
+
+    <div class="key-numbers">
+        <div class="kn-item"><span class="kn-val">~15</span><span class="kn-label">Orbits per day, 550 km satellite</span></div>
+        <div class="kn-item"><span class="kn-val">~90 min</span><span class="kn-label">Orbital period, 550 km</span></div>
+        <div class="kn-item"><span class="kn-val">mins</span><span class="kn-label">Usable contact per pass per station</span></div>
+        <div class="kn-item"><span class="kn-val">10⁴+</span><span class="kn-label">TT&C contacts/day, large fleet</span></div>
+    </div>
+
+    <h3>What changes operationally</h3>
+
+    <p>The response is automation, and it is not optional. Three shifts define modern constellation TT&amp;C:</p>
+
+    <ul>
+        <li><strong>Autonomous orbit determination.</strong> Onboard GNSS receivers give each satellite its own ephemeris, collapsing the "tracking" workload that historically consumed ground resources. The ground no longer ranges every satellite; the satellite reports where it is.</li>
+        <li><strong>Exception-based operations.</strong> Telemetry is processed by automated health monitoring; humans are engaged only when an anomaly trips a threshold. The NOC/SOC staff supervise a fleet rather than fly individual satellites — the same shift that turned data-centre operations from per-server administration into orchestration.</li>
+        <li><strong>Contact scheduling as an optimisation problem.</strong> Which satellite talks to which antenna, when, becomes a continuous scheduling solver balancing TT&amp;C needs, software uploads, and feeder capacity across the whole ground network.</li>
+    </ul>
+
+    <p>TT&amp;C antennas may be dedicated (often S-band) or folded into the gateway sites; mega-constellation operators tend to integrate TT&amp;C into their gateway infrastructure rather than maintaining a separate physical network, since they already have antenna farms with constellation visibility.</p>
+
+    <div class="callout">
+        <strong>THE OPERATIONS PARALLEL</strong>
+        The transition from GEO to LEO fleet operations mirrors the transition from pets to cattle in IT infrastructure. A GEO satellite is a pet: named, individually monitored, hand-tended. A LEO constellation is a herd: managed by policy and automation, with individuals replaced rather than nursed. An architect who has internalised this analogy designs ground operations correctly; one who has not will try to scale a manual workflow and fail.
+    </div>
+</div>
+
+<!-- ═══ SECTION 4 ═══ -->
+<div class="content-block" id="s4">
+    <h2>4. PoP Topology and Backhaul: Where the Bits Meet the Internet</h2>
+
+    <p>A gateway demodulates the feeder link and recovers the user's IP packets. That is only half the job. Those packets must then reach the destination on the public internet — and the topology of that terrestrial leg determines a large fraction of the end-to-end latency and cost that the user actually experiences.</p>
+
+    <h3>From gateway to PoP to peering</h3>
+
+    <p>Behind each gateway sits terrestrial backhaul — fiber connecting the gateway to one or more points of presence where the operator interconnects with the rest of the internet, through transit providers, private peering, or an internet exchange (IXP). The PoP is where the operator's network meets everyone else's. Its placement is a deliberate choice: an operator wants its egress PoPs close to the content its users consume, which in practice means co-locating near major IXPs and the CDN caches of the large content providers.</p>
+
+    <p>This is why the low-latency promise of LEO is not delivered by the space segment alone. Shaving propagation delay to single-digit milliseconds in space is wasted if the gateway then backhauls traffic hundreds of kilometres to a distant PoP and the content sits three networks away. The full latency budget is space leg + feeder + backhaul + terrestrial transport to content. The ground segment owns three of those four terms.</p>
+
+    <div class="callout green">
+        <strong>THE LATENCY YOU SELL IS THE LATENCY YOU MEASURE END-TO-END</strong>
+        A constellation can win the physics in orbit and still lose the user-perceived latency on the ground. Caching popular content at or near the gateway PoP — the cloud/edge tier of Section 5 — is frequently a larger latency win than any orbital optimisation, because it removes terrestrial network legs entirely.
+    </div>
+
+    <h3>Backhaul sizing</h3>
+
+    <p>Backhaul capacity scales with the aggregate user throughput funneled through a gateway. A site aggregating tens or hundreds of gigabits per second of user demand needs commensurate fiber — another reason gateways gravitate to fiber-rich locations and another reason a remote RF-optimal site is often unusable. The feeder link and the backhaul must be capacity-matched; over-provisioning one without the other strands investment.</p>
+</div>
+
+<!-- ═══ SECTION 5 ═══ -->
+<div class="content-block" id="s5">
+    <h2>5. Ground-Station-as-a-Service and Cloud Convergence</h2>
+
+    <p>The last decade produced a structural change in how ground segment is procured: you can now rent it. Cloud providers built antenna networks and exposed them as a service — AWS Ground Station, introduced around 2018, and Microsoft's Azure Orbital ground-station offering shortly after — letting an operator schedule antenna time by the minute and have the demodulated data delivered directly into cloud storage and compute, with no teleport to build.</p>
+
+    <h3>Who uses it, and who does not</h3>
+
+    <p>Ground-station-as-a-service transformed the economics for Earth-observation and small-fleet operators, who previously needed bespoke ground infrastructure disproportionate to their mission. For them the model removed a major capital barrier. Mega-constellation operators are a different case: at Starlink's scale, the feeder throughput and tight control requirements justify building proprietary gateways rather than renting. The build-versus-rent line falls roughly where aggregate feeder capacity and operational control outweigh the capital savings of outsourcing.</p>
+
+    <h3>The convergence with terrestrial cloud</h3>
+
+    <p>The more consequential trend for an architect is the merging of the ground segment with the cloud and CDN. Amazon's Kuiper is the explicit case discussed in Lesson 1: terminals and gateways designed to drop traffic directly onto AWS edge infrastructure, so that a latency-sensitive workload runs on a nearby AWS node rather than being hauled to a central data centre. The gateway stops being merely an RF demarcation point and becomes an edge PoP — a compute and caching site that happens to also have antennas.</p>
+
+    <p>For the systems architect the implication is that the ground-segment boundary is dissolving. The questions "where do I put a gateway," "where do I peer," and "where do I cache" are converging into one optimisation. A ground-segment design that treats the gateway as a dumb RF box and ignores the compute/CDN layer will be out-competed on user-perceived latency by one that does not.</p>
+</div>
+
+<!-- ═══ SECTION 6 ═══ -->
+<div class="content-block" id="s6">
+    <h2>6. How the Ground Segment Scales — and How ISLs Bend the Curve</h2>
+
+    <p>Everything to this point converges on one decision with outsized leverage: inter-satellite links. The presence or absence of ISLs changes not just the space segment but the entire shape, cost, and political exposure of the ground segment.</p>
+
+    <h3>The bent-pipe scaling curve</h3>
+
+    <p>Without ISLs, gateway count is driven by the requirement that every serving satellite must see a gateway. To cover a global service area you need gateways distributed so that no serving satellite is ever without one in view — which forces gateways into inconvenient places (islands for ocean coverage, high latitudes for polar coverage) and multiplies the number of jurisdictions whose landing rights you must secure. The gateway network is large, geographically constrained, and politically complex.</p>
+
+    <h3>The ISL scaling curve</h3>
+
+    <p>With ISLs, traffic can route through space to a satellite that does have a gateway in view. The serving satellite no longer needs a local gateway; it needs only a path through the constellation to one. The consequences cascade favourably:</p>
+
+    <ul>
+        <li>Far fewer gateways are required — a handful of well-chosen sites can serve a global constellation.</li>
+        <li>Those gateways can be clustered where it is convenient: fiber-rich, low-rain, friendly-jurisdiction locations.</li>
+        <li>Ocean and polar coverage become possible without local gateways, because traffic egresses through space to a continental gateway.</li>
+        <li>Landing-rights exposure shrinks — fewer host countries to negotiate with, which is a strategic and not merely an operational advantage.</li>
+    </ul>
+
+    <table class="compare-table" style="overflow-x:auto; display:block; min-width:560px;">
+        <thead>
+            <tr><th>Property</th><th>Bent-pipe (no ISL)</th><th>ISL-equipped</th></tr>
+        </thead>
+        <tbody>
+            <tr><td>Gateways needed</td><td class="lo">Dozens — global, dense</td><td class="hi">Few — clustered</td></tr>
+            <tr><td>Gateway siting freedom</td><td class="lo">Constrained by coverage geometry</td><td class="hi">Free to optimise for fiber/rain/jurisdiction</td></tr>
+            <tr><td>Ocean / polar service</td><td class="lo">Gaps without local gateways</td><td class="hi">Served via space routing</td></tr>
+            <tr><td>Landing-rights exposure</td><td class="lo">Many jurisdictions</td><td class="hi">Few jurisdictions</td></tr>
+            <tr><td>Satellite cost / complexity</td><td class="hi">Lower</td><td class="lo">Higher (optical terminals)</td></tr>
+        </tbody>
+    </table>
+
+    <div class="callout red">
+        <strong>THE TRADE IS CAPEX RELOCATION, NOT CAPEX ELIMINATION</strong>
+        ISLs do not make the ground segment free — they move cost and complexity from the ground into the space segment. You trade a large, politically exposed gateway network for more expensive satellites carrying optical terminals. Whether that trade is worthwhile depends on your coverage requirements (do you need oceans and poles?), your tolerance for landing-rights negotiation, and your satellite unit economics. This is the single most consequential ground-segment decision an architect makes, and it is made when you choose the space architecture — which is exactly why ground segment cannot be designed after the constellation.
+    </div>
+</div>
+
+<!-- ═══ SECTION 7 ═══ -->
+<div class="content-block" id="s7">
+    <h2>7. Implications for the Systems Architect</h2>
+
+    <p>This lesson sits in the foundations quarter deliberately: the ground segment is not a downstream implementation detail, it is co-determined with the space architecture. Carry these four conclusions into the rest of the programme.</p>
+
+    <h3>The ISL decision is a ground-segment decision</h3>
+    <p>You will be tempted to treat inter-satellite links as a space-segment topic. Resist it. The ISL choice sets your gateway count, your siting freedom, your coverage envelope, and your landing-rights exposure. An architect who decides ISLs without modelling the ground-segment consequences has made a half-decision.</p>
+
+    <h3>Gateways gravitate to fiber and dry sky, not to coverage</h3>
+    <p>The RF-optimal gateway location and the buildable gateway location are usually different places, and backhaul usually wins. When you evaluate a constellation design, check that the gateway plan is consistent with terrestrial fiber and rain climatology — not just with satellite visibility geometry.</p>
+
+    <h3>Operations must be autonomous from day one</h3>
+    <p>The manual GEO operations workflow does not scale and cannot be retrofitted. Exception-based, automated fleet operations are a design requirement, not an optimisation. If a proposed ground-segment design assumes human-paced TT&amp;C, it is not a constellation design.</p>
+
+    <h3>The latency you sell is owned mostly by the ground</h3>
+    <p>Three of the four terms in the end-to-end latency budget — feeder, backhaul, terrestrial transport — live in the ground segment. Edge caching and PoP placement frequently deliver larger user-perceived latency wins than orbital optimisation. Design the PoP and edge tier with the same rigour you give the orbit.</p>
+
+    <div class="callout green">
+        <strong>LESSON OBJECTIVE MET</strong>
+        You should now be able to explain why a LEO ground segment inverts the GEO model on pointing, contact duration, site-count drivers, and operations; why bent-pipe constellations need dense gateway networks while ISL constellations need few; how gateway siting trades RF, diversity, backhaul, and regulation; why TT&amp;C must be autonomous at scale; and why most of the latency you sell is owned by the ground segment, not the orbit. If any of these is not yet crisp, re-read the relevant section before the Knowledge Check.
+    </div>
+</div>
+
+<!-- ═══ QUIZ ═══ -->
+<div class="quiz-block" id="quiz">
+    <h2>KNOWLEDGE CHECK</h2>
+    <p class="quiz-intro">Ten questions covering the full content of this lesson. Some require recall; others require reasoning from the material. There is always exactly one correct answer. Read each option carefully before selecting.</p>
+
+    <div class="quiz-q">
+        <p><strong>Q1.</strong> The single most important reason a LEO gateway is an antenna farm rather than one dish is:</p>
+        <div class="quiz-options">
+            <button class="quiz-opt" data-q="1" data-correct="false">A — LEO satellites transmit at higher power, requiring more antennas to absorb the signal</button>
+            <button class="quiz-opt" data-q="1" data-correct="true">B — Satellites are visible only for minutes per pass, so multiple antennas are needed for make-before-break handover plus simultaneous links for capacity</button>
+            <button class="quiz-opt" data-q="1" data-correct="false">C — Ka-band requires multiple antennas to operate legally</button>
+            <button class="quiz-opt" data-q="1" data-correct="false">D — One antenna is needed per satellite in the constellation</button>
+        </div>
+        <div class="quiz-feedback" id="fb1"></div>
+    </div>
+
+    <div class="quiz-q">
+        <p><strong>Q2.</strong> Starlink separates user links (Ku-band) from feeder links (Ka-band) primarily because:</p>
+        <div class="quiz-options">
+            <button class="quiz-opt" data-q="2" data-correct="false">A — Ka-band is immune to rain fade</button>
+            <button class="quiz-opt" data-q="2" data-correct="true">B — The feeder link is a trunk aggregating many users' traffic, so the higher-frequency band supplies the spectrum and throughput a single gateway needs</button>
+            <button class="quiz-opt" data-q="2" data-correct="false">C — Regulations prohibit user and feeder links sharing a band</button>
+            <button class="quiz-opt" data-q="2" data-correct="false">D — Ku-band cannot reach satellite altitude</button>
+        </div>
+        <div class="quiz-feedback" id="fb2"></div>
+    </div>
+
+    <div class="quiz-q">
+        <p><strong>Q3.</strong> Gateway site diversity (paired, geographically separated gateways) exists chiefly to:</p>
+        <div class="quiz-options">
+            <button class="quiz-opt" data-q="3" data-correct="false">A — Double the constellation's total capacity</button>
+            <button class="quiz-opt" data-q="3" data-correct="false">B — Provide TT&C redundancy for the fleet</button>
+            <button class="quiz-opt" data-q="3" data-correct="true">C — Mitigate localised rain fade on the feeder link by switching traffic to whichever site has clear sky</button>
+            <button class="quiz-opt" data-q="3" data-correct="false">D — Satisfy landing-rights requirements in two countries</button>
+        </div>
+        <div class="quiz-feedback" id="fb3"></div>
+    </div>
+
+    <div class="quiz-q">
+        <p><strong>Q4.</strong> A bent-pipe constellation cannot serve a user in the mid-Pacific because:</p>
+        <div class="quiz-options">
+            <button class="quiz-opt" data-q="4" data-correct="false">A — Salt water attenuates the user link</button>
+            <button class="quiz-opt" data-q="4" data-correct="true">B — The serving satellite must see both the user and a gateway simultaneously, and there is no place to site a gateway in mid-ocean</button>
+            <button class="quiz-opt" data-q="4" data-correct="false">D — Maritime users are not authorised to receive satellite service</button>
+            <button class="quiz-opt" data-q="4" data-correct="false">C — Ocean coverage requires a lower orbital altitude than land coverage</button>
+        </div>
+        <div class="quiz-feedback" id="fb4"></div>
+    </div>
+
+    <div class="quiz-q">
+        <p><strong>Q5.</strong> Onboard GNSS receivers changed LEO ground operations most directly by:</p>
+        <div class="quiz-options">
+            <button class="quiz-opt" data-q="5" data-correct="false">A — Eliminating the need for feeder links</button>
+            <button class="quiz-opt" data-q="5" data-correct="true">B — Letting each satellite determine its own ephemeris, collapsing the ground tracking workload</button>
+            <button class="quiz-opt" data-q="5" data-correct="false">C — Removing the need for backhaul fiber</button>
+            <button class="quiz-opt" data-q="5" data-correct="false">D — Allowing satellites to command themselves without any ground contact</button>
+        </div>
+        <div class="quiz-feedback" id="fb5"></div>
+    </div>
+
+    <div class="quiz-q">
+        <p><strong>Q6.</strong> "Exception-based operations" for a mega-constellation means:</p>
+        <div class="quiz-options">
+            <button class="quiz-opt" data-q="6" data-correct="false">A — Only operating the constellation during exceptional weather</button>
+            <button class="quiz-opt" data-q="6" data-correct="true">B — Automated health monitoring handles routine telemetry; humans are engaged only when an anomaly trips a threshold</button>
+            <button class="quiz-opt" data-q="6" data-correct="false">C — Each satellite is flown individually by a dedicated operator</button>
+            <button class="quiz-opt" data-q="6" data-correct="false">D — Commands are uploaded only in emergencies</button>
+        </div>
+        <div class="quiz-feedback" id="fb6"></div>
+    </div>
+
+    <div class="quiz-q">
+        <p><strong>Q7.</strong> A perfect RF gateway site (dry, high, low interference) is frequently rejected because:</p>
+        <div class="quiz-options">
+            <button class="quiz-opt" data-q="7" data-correct="false">A — High sites have too much atmospheric pressure</button>
+            <button class="quiz-opt" data-q="7" data-correct="true">B — It lacks terrestrial fiber backhaul to a peering point, stranding the gateway from the internet</button>
+            <button class="quiz-opt" data-q="7" data-correct="false">C — Dry climates damage radomes</button>
+            <button class="quiz-opt" data-q="7" data-correct="false">D — Low-interference sites cannot coordinate with the GSO arc</button>
+        </div>
+        <div class="quiz-feedback" id="fb7"></div>
+    </div>
+
+    <div class="quiz-q">
+        <p><strong>Q8.</strong> Why do mega-constellation operators generally build proprietary gateways instead of using ground-station-as-a-service, while Earth-observation operators often do the reverse?</p>
+        <div class="quiz-options">
+            <button class="quiz-opt" data-q="8" data-correct="false">A — Cloud ground stations cannot receive Ka-band</button>
+            <button class="quiz-opt" data-q="8" data-correct="true">B — At mega-constellation scale, aggregate feeder throughput and control requirements justify the capital of building; for small fleets, renting removes a disproportionate capital barrier</button>
+            <button class="quiz-opt" data-q="8" data-correct="false">C — Earth-observation satellites do not need TT&C</button>
+            <button class="quiz-opt" data-q="8" data-correct="false">D — Regulations forbid broadband operators from renting antennas</button>
+        </div>
+        <div class="quiz-feedback" id="fb8"></div>
+    </div>
+
+    <div class="quiz-q">
+        <p><strong>Q9.</strong> The strongest argument that "the latency you sell is owned mostly by the ground segment" is:</p>
+        <div class="quiz-options">
+            <button class="quiz-opt" data-q="9" data-correct="false">A — The space propagation leg is always the largest latency term</button>
+            <button class="quiz-opt" data-q="9" data-correct="true">B — Three of the four end-to-end latency terms — feeder, backhaul, terrestrial transport to content — live on the ground, and edge caching can remove terrestrial legs entirely</button>
+            <button class="quiz-opt" data-q="9" data-correct="false">C — Satellites cannot reduce latency below 100 ms</button>
+            <button class="quiz-opt" data-q="9" data-correct="false">D — Ground equipment is slower than orbital equipment</button>
+        </div>
+        <div class="quiz-feedback" id="fb9"></div>
+    </div>
+
+    <div class="quiz-q">
+        <p><strong>Q10.</strong> An operator wants global ocean and polar coverage with the fewest possible gateways concentrated in friendly, fiber-rich jurisdictions. The architecturally coherent choice is:</p>
+        <div class="quiz-options">
+            <button class="quiz-opt" data-q="10" data-correct="false">A — A bent-pipe constellation with a denser gateway network</button>
+            <button class="quiz-opt" data-q="10" data-correct="true">B — An ISL-equipped constellation, accepting higher satellite cost in exchange for far fewer gateways, free siting, and ocean/polar coverage via space routing</button>
+            <button class="quiz-opt" data-q="10" data-correct="false">C — A bent-pipe constellation at higher altitude</button>
+            <button class="quiz-opt" data-q="10" data-correct="false">D — Either architecture works equally; the choice is purely cost-driven</button>
+        </div>
+        <div class="quiz-feedback" id="fb10"></div>
+    </div>
+
+    <div class="quiz-score" id="quizScore"></div>
+</div>
+
+<!-- ═══ PYTHON EXERCISES ═══ -->
+<div class="py-block" id="python">
+    <h2>PYTHON EXERCISES</h2>
+    <p class="py-intro">Three exercises of escalating depth. The first quantifies gateway contact geometry. The second models the rain-fade rationale for site diversity. The third forces the bent-pipe-vs-ISL ground-segment economics into numbers. Python 3.8+ standard library only, except where an extension calls for matplotlib.</p>
+
+    <div class="py-exercise">
+        <h3>Exercise 1 — Gateway Pass Geometry</h3>
+        <p>How long is a satellite usable to a gateway per pass, and how many antennas does continuity demand? Compute the maximum geometric pass duration for a circular orbit above a minimum elevation angle, and reason about antenna count from it.</p>
+<pre>
+import math
+
+MU      = 398_600.4418     # Earth gravitational parameter, km^3/s^2
+RE_KM   = 6_371            # mean Earth radius, km
+
+def orbital_period_s(altitude_km):
+    a = RE_KM + altitude_km
+    return 2 * math.pi * math.sqrt(a**3 / MU)
+
+def max_pass_duration_s(altitude_km, min_elev_deg):
+    """
+    Maximum geometric pass duration (overhead pass) above min elevation.
+    Half-angle of the visibility cap as an Earth-central angle:
+        rho = acos( Re*cos(el) / (Re+h) ) - el
+    The ground track arc within the cap is traversed at the orbital rate.
+    """
+    el  = math.radians(min_elev_deg)
+    rho = math.acos(RE_KM * math.cos(el) / (RE_KM + altitude_km)) - el
+    T   = orbital_period_s(altitude_km)
+    # Fraction of the orbit spent inside the +/- rho central-angle window:
+    frac = (2 * rho) / (2 * math.pi)
+    return frac * T
+
+configs = [
+    ("Starlink shell 2", 550),
+    ("OneWeb",         1_200),
+    ("Telesat LS",     1_100),
+]
+
+print(f"\n{'Constellation':<18} {'Period min':>11} {'Max pass @25deg':>16} {'@40deg':>9}")
+print("-" * 56)
+for name, alt in configs:
+    T   = orbital_period_s(alt) / 60
+    p25 = max_pass_duration_s(alt, 25)
+    p40 = max_pass_duration_s(alt, 40)
+    print(f"{name:<18} {T:>10.1f}  {p25:>14.0f}s {p40:>7.0f}s")
+
+# Questions to answer from your output:
+# 1. A higher minimum elevation angle gives a SHORTER pass. Why does a
+#    gateway nonetheless often demand a high min elevation? (Hint: link
+#    margin and interference, not pass duration.)
+# 2. If a single feeder link must be maintained continuously and each pass
+#    lasts ~P seconds with handover overhead H, sketch the minimum antenna
+#    count needed for make-before-break. What else forces it higher?
+</pre>
+        <p class="py-note">Expected: a 550 km satellite at 25° minimum elevation gives a maximum overhead pass on the order of a few minutes; higher altitude lengthens it. Real passes are shorter than the overhead maximum because most are not overhead. Continuity therefore needs at least two antennas just to hand over, before any capacity antennas are added.</p>
+        <div class="py-challenge">
+            <strong>EXTENSION</strong>
+            The overhead pass is the best case. Implement the pass duration for an arbitrary maximum-elevation pass (not just overhead) and plot the distribution of pass durations for satellites crossing a gateway's visibility cone. What fraction of passes are long enough to be worth scheduling?
+        </div>
+    </div>
+
+    <div class="py-exercise">
+        <h3>Exercise 2 — Site Diversity and Rain Fade</h3>
+        <p>Quantify why operators pair gateways. Model feeder-link availability for a single site and for a diversity pair under a simple independence assumption, then test how the benefit degrades as the sites become correlated.</p>
+<pre>
+def single_site_availability(outage_prob):
+    """Availability of one gateway given its fade-outage probability."""
+    return 1 - outage_prob
+
+def diversity_availability(outage_prob, correlation=0.0):
+    """
+    Two paired sites. With independent fades, both must be down to lose
+    the link: P(both down) = p^2. Correlation raises the joint outage
+    toward the single-site value (fully correlated => no benefit).
+    """
+    p_indep = outage_prob ** 2
+    p_joint = (1 - correlation) * p_indep + correlation * outage_prob
+    return 1 - p_joint
+
+print(f"\n{'Site outage p':>14} {'Single avail':>14} {'Pair (indep)':>14} {'Pair (rho=0.5)':>16}")
+print("-" * 60)
+for p in [0.05, 0.02, 0.01, 0.005, 0.001]:
+    single = single_site_availability(p)
+    pair0  = diversity_availability(p, 0.0)
+    pair5  = diversity_availability(p, 0.5)
+    print(f"{p:>14.3f} {single*100:>13.3f}% {pair0*100:>13.4f}% {pair5*100:>15.4f}%")
+
+# Questions:
+# 1. A single Ka site in a wet climate might run p = 0.02 (98.0% avail).
+#    What availability does an independent pair give? Express the gap in
+#    "nines."
+# 2. At what correlation does the diversity pair stop being worth the cost
+#    of a second site? There is no single number -- argue it against the
+#    cost of the second gateway.
+# 3. Real rain cells are spatially correlated. What site separation makes
+#    the independence assumption roughly defensible, and why is "too far"
+#    also a problem? (Hint: both sites must still see the same satellites.)
+</pre>
+        <div class="py-challenge">
+            <strong>EXTENSION</strong>
+            Replace the toy outage probability with an ITU-R P.618 rain-attenuation calculation for a real site's rain-rate statistics and feeder frequency. Compute the actual link margin required for 99.9% feeder availability at a Ka site in a tropical versus an arid climate. This is the real Lesson 14 / Q3 link-budget machinery applied to the ground segment.
+        </div>
+    </div>
+
+    <div class="py-exercise">
+        <h3>Exercise 3 — Bent-Pipe vs ISL Ground-Segment Economics</h3>
+        <p>Force the Section 6 trade into numbers. Build a first-order cost comparison between a dense bent-pipe gateway network and a sparse ISL gateway network with an offsetting per-satellite optical-terminal premium. The point is not a precise answer — it is to find where the crossover sits and which variable dominates it.</p>
+<pre>
+def bentpipe_ground_cost(n_gateways, gw_capex, gw_annual_opex,
+                         landing_rights_cost_per_jurisdiction,
+                         n_jurisdictions, years):
+    capex = n_gateways * gw_capex
+    rights = n_jurisdictions * landing_rights_cost_per_jurisdiction
+    opex  = n_gateways * gw_annual_opex * years
+    return capex + rights + opex
+
+def isl_total_cost(n_gateways, gw_capex, gw_annual_opex,
+                   landing_rights_cost_per_jurisdiction, n_jurisdictions,
+                   n_satellites, isl_premium_per_sat, years):
+    ground = bentpipe_ground_cost(n_gateways, gw_capex, gw_annual_opex,
+                                  landing_rights_cost_per_jurisdiction,
+                                  n_jurisdictions, years)
+    space_premium = n_satellites * isl_premium_per_sat
+    return ground + space_premium
+
+YEARS = 10
+
+# Bent-pipe: many gateways, many jurisdictions, no ISL premium
+bp = bentpipe_ground_cost(
+    n_gateways = 45,
+    gw_capex   = 8e6,
+    gw_annual_opex = 1.2e6,
+    landing_rights_cost_per_jurisdiction = 1.5e6,
+    n_jurisdictions = 30,
+    years = YEARS,
+)
+
+# ISL: few gateways, few jurisdictions, but pay optical terminals on every sat
+isl = isl_total_cost(
+    n_gateways = 8,
+    gw_capex   = 8e6,
+    gw_annual_opex = 1.2e6,
+    landing_rights_cost_per_jurisdiction = 1.5e6,
+    n_jurisdictions = 5,
+    n_satellites = 1_500,
+    isl_premium_per_sat = 120_000,
+    years = YEARS,
+)
+
+print(f"\nBent-pipe 10-yr ground cost: ${bp/1e9:.2f}B")
+print(f"ISL 10-yr (ground + space premium): ${isl/1e9:.2f}B")
+print(f"Delta: ${(isl-bp)/1e9:.2f}B  -> {'ISL cheaper' if isl < bp else 'bent-pipe cheaper'}")
+
+# Crossover: at what ISL premium per satellite do the two break even?
+# Solve isl == bp for isl_premium_per_sat.
+ground_isl = bentpipe_ground_cost(8, 8e6, 1.2e6, 1.5e6, 5, YEARS)
+breakeven_premium = (bp - ground_isl) / 1_500
+print(f"\nISL breakeven premium per satellite: ${breakeven_premium:,.0f}")
+
+# Your tasks:
+# 1. Above the breakeven premium, bent-pipe wins on cost alone. But cost
+#    is not the only axis. What does ISL buy that this model does not price?
+#    (Ocean/polar coverage, latency, landing-rights strategic risk.)
+# 2. Make n_satellites a variable. As the constellation grows, does ISL
+#    get relatively cheaper or more expensive vs bent-pipe? Why?
+# 3. The model treats landing rights as a one-off dollar cost. Argue why
+#    that is the weakest assumption in the whole model.
+</pre>
+        <div class="py-challenge">
+            <strong>EXTENSION</strong>
+            Turn this into a two-variable sensitivity surface: sweep ISL premium per satellite against constellation size, and shade the region where each architecture wins on cost. Overlay the (non-cost) coverage requirement as a hard constraint that rules out bent-pipe entirely for ocean/polar service. The resulting plot is the actual decision diagram an architect should carry into a constellation kickoff.
+        </div>
+    </div>
+</div>
+
+<!-- ═══ REFLECTION ═══ -->
+<div class="reflection-block" id="reflect">
+    <h2>REFLECTION PROMPTS</h2>
+    <p class="ref-intro">Not graded. They force the synthesis that recall does not. Write in your own words, drawing explicitly on your ground-segment and aero-connectivity experience. Aim for 200–400 words each.</p>
+
+    <div class="ref-prompt">
+        <h3>Prompt 1 — What Breaks at Scale</h3>
+        <p>You have operated GEO ground segments where each satellite is individually tended. Take one specific operational workflow you know well — anomaly response, a software upload campaign, a ranging/orbit-determination cycle — and describe precisely what breaks when the fleet goes from a handful of satellites to several thousand. Where exactly does the human-in-the-loop model fail, and what would you automate first?</p>
+    </div>
+
+    <div class="ref-prompt">
+        <h3>Prompt 2 — Gateway Siting for an Aviation Operator</h3>
+        <p>An operator targets transoceanic and transpolar aviation routes — your HBC+ domain. Given that aircraft on these routes spend hours over water and high latitudes, argue the ground-segment architecture this forces. Does the route geography make ISLs effectively mandatory rather than optional? Where would you site the small number of gateways, and what would you optimise them for?</p>
+    </div>
+
+    <div class="ref-prompt">
+        <h3>Prompt 3 — The Latency You Sell</h3>
+        <p>For in-flight connectivity specifically, take one application and trace its full end-to-end latency budget: user terminal → satellite → feeder → gateway → backhaul → PoP → content. Which terms can the ground segment actually move, and by how much? Make the case for where edge caching at the gateway PoP would beat any orbital optimisation for the passenger experience.</p>
+    </div>
+
+    <div class="ref-prompt">
+        <h3>Prompt 4 — Landing Rights as Architecture</h3>
+        <p>The lesson claims reduced landing-rights exposure is a strategic and not merely operational advantage of ISLs. Drawing on what you have seen of how national regulators behave (Lesson 1's examples: blocked or delayed service in several markets), argue whether the landing-rights argument alone could justify the ISL satellite-cost premium for a constellation serving politically sensitive regions.</p>
+        <ul>
+            <li>Consider markets that have blocked or conditioned satellite broadband, and what a sparse-gateway architecture does to your dependence on any single host nation.</li>
+            <li>Be concrete about which jurisdictions you would and would not place a gateway in.</li>
+        </ul>
+    </div>
+</div>
+
+<!-- ═══ MARK COMPLETE ═══ -->
+<div class="complete-wrap">
+    <button class="complete-btn" id="completeBtn">MARK LESSON COMPLETE</button>
+    <div class="complete-msg" id="completeMsg"></div>
+</div>
+
+<div class="lesson-nav">
+    <a href="q1-10.html">← LESSON 10 — TELESAT LIGHTSPEED DEEP DIVE</a>
+    <a href="q1-12.html">LESSON 12 — USER TERMINALS →</a>
+</div>
+
+</div>
+
+<button class="back-to-top" id="backToTop" title="Back to top">↑</button>
+
+<footer>© 2026 LEOAF · Q1 · LESSON 11 OF 15</footer>
+
+<!-- Stars -->
+<script>
+const canvas = document.getElementById('starsCanvas');
+const ctx = canvas.getContext('2d');
+let stars = [];
+function initStars() { stars=[]; for(let i=0;i<180;i++) stars.push({x:Math.random()*canvas.width,y:Math.random()*canvas.height,size:Math.random()*1.5+0.4,speed:Math.random()*0.18+0.04,hue:Math.random()*360}); }
+function resizeCanvas() { canvas.width=window.innerWidth; canvas.height=window.innerHeight; }
+resizeCanvas(); initStars(); window.addEventListener('resize', resizeCanvas);
+function animateStars() { ctx.clearRect(0,0,canvas.width,canvas.height); stars.forEach(s=>{s.y-=s.speed;if(s.y<0){s.y=canvas.height;s.x=Math.random()*canvas.width;} ctx.beginPath();ctx.fillStyle=`hsl(${s.hue},80%,80%)`;ctx.arc(s.x,s.y,s.size,0,Math.PI*2);ctx.fill();}); requestAnimationFrame(animateStars); }
+animateStars();
+</script>
+
+<!-- Quiz -->
+<script>
+const feedbacks = {
+    1: {
+        correct: "Correct. A LEO satellite is visible for only minutes per pass, so a gateway needs at least one antenna to acquire the rising satellite before the setting one drops (make-before-break), plus additional antennas to carry simultaneous links for capacity.",
+        wrong:   "Incorrect. The driver is the ephemeral contact: minutes-long passes force make-before-break handover (one antenna acquiring the next satellite before the current one sets), and capacity demands further simultaneous links. Satellite count does not size a single gateway."
+    },
+    2: {
+        correct: "Correct. The feeder link is a trunk aggregating many users' traffic. The higher Ka-band supplies the spectrum and throughput that a gateway concentrating many user links needs; the user link stays in Ku.",
+        wrong:   "Incorrect. The separation exists because the feeder link aggregates many users into one trunk and needs the spectrum/throughput of the higher band. Ka is in fact more rain-sensitive than Ku, not immune."
+    },
+    3: {
+        correct: "Correct. Rain fade is local, so a paired, separated gateway lets the operator switch feeder traffic to whichever site has clear sky, pushing combined availability past what a single Ka site can reach in a wet climate.",
+        wrong:   "Incorrect. Site diversity is a rain-fade mitigation: because heavy rain is spatially local, two separated sites rarely fade simultaneously, so traffic switches to the clear one. It is not primarily about capacity, TT&C, or landing rights."
+    },
+    4: {
+        correct: "Correct. In a bent-pipe architecture the serving satellite has no way to forward traffic except down to a gateway it can currently see. With no gateway siteable in mid-ocean, there is no relay path — the gap the ISL bypass solves.",
+        wrong:   "Incorrect. The cause is the bent-pipe gateway dependency: the serving satellite must see both the user and a gateway, and you cannot site a gateway in mid-ocean. ISLs solve this by routing traffic through space to a satellite that does see a gateway."
+    },
+    5: {
+        correct: "Correct. Onboard GNSS lets each satellite report its own ephemeris, collapsing the ground-based ranging/tracking workload that historically consumed ground resources — a key enabler of fleet-scale operations.",
+        wrong:   "Incorrect. GNSS gave each satellite self-determined ephemeris, removing most of the ground tracking workload. It did not eliminate feeder links, backhaul, or the need for ground contact for commanding and telemetry."
+    },
+    6: {
+        correct: "Correct. Routine telemetry is handled by automated health monitoring; humans engage only when an anomaly trips a threshold. The staff supervise a fleet by policy rather than flying individual satellites.",
+        wrong:   "Incorrect. Exception-based operations means automation handles the routine and humans are pulled in only on threshold-tripping anomalies — the opposite of per-satellite manual operation, which is exactly what does not scale."
+    },
+    7: {
+        correct: "Correct. A gateway must reach a peering point over terrestrial fiber. An RF-perfect but fiber-stranded site cannot move its demodulated traffic to the internet, so backhaul proximity routinely overrides RF optimality.",
+        wrong:   "Incorrect. The usual disqualifier is lack of fiber backhaul: the gateway must connect to a peering point, and an RF-optimal but stranded site is useless. Backhaul proximity frequently beats the RF-optimal location."
+    },
+    8: {
+        correct: "Correct. At mega-constellation scale the aggregate feeder throughput and control requirements justify building proprietary gateways; for small fleets, renting antenna time removes a capital barrier disproportionate to the mission.",
+        wrong:   "Incorrect. It is a build-versus-rent economics line: mega-constellations have feeder volume and control needs that justify building, while small/EO fleets avoid a disproportionate capital barrier by renting. Cloud ground stations do handle the relevant bands, and EO satellites still need TT&C."
+    },
+    9: {
+        correct: "Correct. Of the four end-to-end terms — space, feeder, backhaul, terrestrial transport — three are ground-segment terms, and edge caching can delete terrestrial legs entirely, often beating any orbital optimisation on user-perceived latency.",
+        wrong:   "Incorrect. The point is that three of the four latency terms (feeder, backhaul, terrestrial transport) are ground-owned, and edge caching can remove terrestrial legs outright. The space leg is not always dominant — that is precisely why the ground segment owns most of the budget."
+    },
+    10: {
+        correct: "Correct. Ocean/polar coverage plus minimal, freely-sited gateways in friendly jurisdictions is the ISL profile: traffic egresses through space to a few clustered gateways, accepting the optical-terminal cost premium on the satellites.",
+        wrong:   "Incorrect. The requirement set — ocean/polar coverage, few gateways, free siting, friendly jurisdictions — is exactly what ISLs deliver and bent-pipe cannot. The trade is a higher satellite cost, not a denser or higher-altitude bent-pipe network."
+    }
+};
+
+let answered = {};
+document.querySelectorAll('.quiz-opt').forEach(btn => {
+    btn.addEventListener('click', function() {
+        const q = this.dataset.q;
+        if (answered[q] !== undefined) return;
+        const correct = this.dataset.correct === 'true';
+        answered[q] = correct;
+        document.querySelectorAll(`.quiz-opt[data-q="${q}"]`).forEach(b => {
+            b.disabled = true;
+            if (b.dataset.correct === 'true') b.classList.add('correct');
+        });
+        if (!correct) this.classList.add('wrong');
+        const fb = document.getElementById(`fb${q}`);
+        fb.textContent = (correct ? '✓ ' : '✗ ') + feedbacks[q][correct ? 'correct' : 'wrong'];
+        fb.style.color = correct ? '#39ff14' : '#ff004f';
+        if (Object.keys(answered).length === 10) {
+            const total = Object.values(answered).filter(Boolean).length;
+            const el = document.getElementById('quizScore');
+            el.style.display = 'block';
+            const pct = Math.round(total / 10 * 100);
+            el.textContent = `SCORE: ${total} / 10 (${pct}%) — ${pct===100?'PERFECT.':pct>=80?'STRONG. REVIEW ANY MISSES.':pct>=60?'ADEQUATE. REVISIT WEAK SECTIONS.':'REVISIT THE LESSON BEFORE PROCEEDING.'}`;
+        }
+    });
+});
+</script>
+
+<!-- Supabase -->
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="supabase.js"></script>
+<script src="user_progress.js"></script>
+<script>
+const LESSON_ID = 'q1-11';
+document.addEventListener('DOMContentLoaded', async () => {
+    const { data: { session } } = await client.auth.getSession();
+    if (!session) { window.location.href = 'index.html'; return; }
+
+    document.getElementById('logoffBtn').addEventListener('click', async () => {
+        await client.auth.signOut(); window.location.href = 'index.html';
+    });
+
+    const mastered = await getMasteredSections();
+    const btn = document.getElementById('completeBtn');
+    const msg = document.getElementById('completeMsg');
+
+    function setDone(done) {
+        if (done) {
+            btn.textContent = '✓ COMPLETE — CLICK TO UNDO';
+            btn.classList.add('done');
+            btn.style.cssText = 'border-color:#39ff14;color:#39ff14;background:rgba(57,255,20,0.1);cursor:pointer;opacity:1;';
+            msg.style.color = '#39ff14';
+            msg.textContent = 'Lesson marked complete. Click again to undo.';
+        } else {
+            btn.textContent = 'MARK LESSON COMPLETE';
+            btn.classList.remove('done');
+            btn.style.cssText = '';
+            msg.style.color = '#ffffff55';
+            msg.textContent = 'Not yet marked complete.';
+        }
+    }
+
+    setDone(mastered.includes(LESSON_ID));
+
+    btn.addEventListener('click', async () => {
+        const isCurrentlyDone = btn.classList.contains('done');
+        msg.style.color = '#00d9ff';
+        msg.textContent = 'Saving...';
+        const ok = await upsertSection(LESSON_ID, !isCurrentlyDone);
+        if (ok) {
+            setDone(!isCurrentlyDone);
+        } else {
+            msg.style.color = '#ff004f';
+            msg.textContent = 'Error saving. Try again.';
+        }
+    });
+
+    const btt = document.getElementById('backToTop');
+    window.addEventListener('scroll', () => {
+        btt.classList.toggle('visible', window.scrollY > 400);
+    });
+    btt.addEventListener('click', () => window.scrollTo({ top: 0, behavior: 'smooth' }));
+});
+</script>
+
+</body>
+</html>
