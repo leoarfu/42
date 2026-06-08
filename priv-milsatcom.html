@@ -1,0 +1,1049 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, shrink-to-fit=no">
+<title>PRIV — MilSatcom Brief · LEOAF</title>
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;600;800&family=Share+Tech+Mono&family=Libre+Baskerville:ital,wght@0,400;0,700;1,400&display=swap" rel="stylesheet">
+<link rel="icon" href="favicon.ico" sizes="any" type="image/x-icon">
+<meta name="theme-color" content="#0f0f0f">
+<style>
+* { box-sizing:border-box; margin:0; padding:0; }
+html { height:100%; -webkit-text-size-adjust:100%; overflow-x:hidden; }
+body { font-family:'Share Tech Mono',monospace; background:#000; color:#ececec; overflow-x:hidden; min-height:100vh; }
+
+/* SCANLINE */
+body::before {
+  content:''; position:fixed; inset:0; z-index:50; pointer-events:none;
+  background:repeating-linear-gradient(to bottom,rgba(255,255,255,0.015) 0 1px,transparent 1px 3px);
+  mix-blend-mode:overlay;
+}
+
+/* HEADER */
+header {
+  background:#000; border-bottom:1px solid #ff004f33;
+  position:sticky; top:0; z-index:100;
+  padding:1rem clamp(1rem,4vw,3rem);
+  display:flex; justify-content:space-between; align-items:center;
+  box-shadow:0 4px 16px #0008;
+}
+.logo { font-family:'Orbitron',sans-serif; font-weight:800; font-size:clamp(14px,2vw,20px); letter-spacing:3px; text-decoration:none; }
+.logo span:first-child { color:white; }
+.logo span:last-child { color:#ff004f; }
+.header-right { display:flex; align-items:center; gap:10px; }
+.nav-btn {
+  background:transparent; border:1px solid #ff004f44; color:#ff004f;
+  padding:5px 12px; cursor:pointer; transition:0.3s ease;
+  font-size:10px; font-family:'Orbitron',sans-serif; letter-spacing:1px;
+  text-decoration:none; display:inline-block;
+}
+.nav-btn:hover { background:#ff004f; color:black; }
+.stamp {
+  font-family:'Orbitron',sans-serif; font-size:9px; letter-spacing:2px;
+  border:1px solid #ff004f; color:#ff004f; padding:3px 8px; opacity:0.6;
+}
+
+/* TAB BAR */
+.tab-bar {
+  position:sticky; top:57px; z-index:90; background:#000;
+  border-bottom:1px solid #ffffff11;
+  display:flex; overflow-x:auto; gap:0;
+  padding:0 clamp(1rem,4vw,3rem);
+}
+.tab-bar::-webkit-scrollbar { height:3px; }
+.tab-bar::-webkit-scrollbar-track { background:#000; }
+.tab-bar::-webkit-scrollbar-thumb { background:#ff004f44; }
+.tab-btn {
+  font-family:'Orbitron',sans-serif; font-size:10px; letter-spacing:1.5px;
+  color:#ffffff44; background:transparent; border:none; border-bottom:2px solid transparent;
+  padding:14px 20px; cursor:pointer; white-space:nowrap; transition:0.2s ease;
+}
+.tab-btn:hover { color:#ffffff88; }
+.tab-btn.active { color:#00d9ff; border-bottom-color:#00d9ff; }
+
+/* MAIN WRAP */
+.main-wrap { max-width:860px; margin:0 auto; padding:0 clamp(1rem,4vw,3rem) 80px; position:relative; z-index:1; }
+
+/* TAB PANELS */
+.tab-panel { display:none; padding-top:40px; }
+.tab-panel.active { display:block; }
+
+/* PAGE HEADER */
+.page-header { margin-bottom:40px; padding-bottom:24px; border-bottom:1px solid #ffffff11; }
+.page-tag { font-family:'Orbitron',sans-serif; font-size:10px; color:#ff004f; letter-spacing:3px; margin-bottom:10px; }
+.page-header h1 { font-family:'Orbitron',sans-serif; font-size:clamp(18px,3vw,28px); font-weight:800; line-height:1.2; margin-bottom:12px; }
+.page-header p { font-size:13px; line-height:1.8; opacity:0.7; max-width:660px; }
+
+/* SECTION */
+.section { margin-bottom:48px; }
+.section h2 {
+  font-family:'Orbitron',sans-serif; font-size:12px; color:#00d9ff;
+  letter-spacing:2px; text-transform:uppercase;
+  margin-bottom:18px; padding-bottom:10px;
+  border-bottom:1px solid #00d9ff22;
+  scroll-margin-top:120px;
+}
+.section h3 {
+  font-family:'Orbitron',sans-serif; font-size:10px; color:#ffffff66;
+  letter-spacing:1.5px; text-transform:uppercase; margin:28px 0 12px;
+}
+.section p {
+  font-family:'Libre Baskerville',Georgia,serif;
+  font-size:14px; line-height:1.9; color:#d8d4cc; margin-bottom:16px;
+}
+.section ul { margin-bottom:16px; padding-left:0; }
+.section ul li {
+  font-family:'Libre Baskerville',Georgia,serif;
+  font-size:13px; line-height:1.85; color:#d8d4cc;
+  padding-left:18px; position:relative; margin-bottom:6px;
+}
+.section ul li::before { content:'›'; position:absolute; left:0; color:#00d9ff; }
+
+/* CALLOUT */
+.callout {
+  border-left:3px solid #00d9ff; background:rgba(0,217,255,0.05);
+  padding:14px 18px; margin:20px 0; font-size:13px; line-height:1.8;
+  font-family:'Libre Baskerville',Georgia,serif; color:#d8d4cc;
+}
+.callout.red   { border-left-color:#ff004f; background:rgba(255,0,79,0.05); }
+.callout.green { border-left-color:#39ff14; background:rgba(57,255,20,0.05); }
+.callout.amber { border-left-color:#ffaa00; background:rgba(255,170,0,0.05); }
+.callout strong {
+  font-family:'Orbitron',sans-serif; font-size:9px; letter-spacing:1.5px;
+  display:block; margin-bottom:8px; color:inherit;
+}
+
+/* STAT GRID */
+.stat-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(160px,1fr)); gap:10px; margin:20px 0; }
+.stat-cell { background:rgba(255,255,255,0.03); border:1px solid #ffffff11; padding:14px 12px; }
+.stat-val { font-family:'Orbitron',sans-serif; font-size:clamp(15px,2.5vw,22px); font-weight:800; color:#00d9ff; display:block; }
+.stat-val.amber { color:#ffaa00; }
+.stat-val.green { color:#39ff14; }
+.stat-val.red   { color:#ff004f; }
+.stat-label { font-size:10px; opacity:0.5; letter-spacing:1px; margin-top:4px; display:block; line-height:1.4; }
+
+/* TABLE */
+.data-table { width:100%; border-collapse:collapse; margin:20px 0; font-size:12px; overflow-x:auto; display:block; }
+.data-table th {
+  font-family:'Orbitron',sans-serif; font-size:9px; letter-spacing:1px;
+  color:#00d9ff; padding:10px 12px; border-bottom:1px solid #00d9ff33;
+  text-align:left; white-space:nowrap;
+}
+.data-table td {
+  padding:9px 12px; border-bottom:1px solid #ffffff08;
+  line-height:1.5; color:#d8d4cc; vertical-align:top; font-size:12px;
+}
+.data-table tr:hover td { background:rgba(255,255,255,0.02); }
+.hi { color:#39ff14; }
+.lo { color:#ff004f; }
+.md { color:#ffaa00; }
+
+/* CODE BLOCK */
+.code-block {
+  background:#050505; border:1px solid #ffffff11;
+  padding:18px 20px; margin:16px 0;
+  font-family:'Share Tech Mono',monospace; font-size:12px;
+  line-height:1.75; overflow-x:auto; color:#39ff14;
+  white-space:pre;
+}
+
+/* EQUATION */
+.eq {
+  background:rgba(0,217,255,0.04); border:1px solid #00d9ff22;
+  padding:12px 18px; margin:14px 0;
+  font-family:'Share Tech Mono',monospace; font-size:12.5px;
+  line-height:1.8; color:#00d9ff; overflow-x:auto; white-space:pre-wrap;
+}
+
+/* GAP TABLE */
+.gap-row { display:flex; gap:12px; margin-bottom:8px; align-items:flex-start; }
+.gap-label {
+  font-family:'Orbitron',sans-serif; font-size:9px; letter-spacing:1px;
+  padding:3px 8px; white-space:nowrap; flex-shrink:0; margin-top:2px;
+}
+.gap-strong { background:rgba(57,255,20,0.1); color:#39ff14; border:1px solid #39ff1444; }
+.gap-medium { background:rgba(255,170,0,0.1); color:#ffaa00; border:1px solid #ffaa0044; }
+.gap-thin   { background:rgba(255,0,79,0.1); color:#ff004f; border:1px solid #ff004f44; }
+.gap-text { font-family:'Libre Baskerville',Georgia,serif; font-size:13px; line-height:1.75; color:#d8d4cc; }
+
+/* Q&A BLOCK */
+.qa-item { margin-bottom:24px; padding:18px 20px; background:rgba(255,255,255,0.02); border-left:3px solid #ffaa00; }
+.qa-q { font-family:'Orbitron',sans-serif; font-size:10px; color:#ffaa00; letter-spacing:1px; margin-bottom:10px; }
+.qa-a { font-family:'Libre Baskerville',Georgia,serif; font-size:13px; line-height:1.85; color:#d8d4cc; }
+
+/* JD CONTENT */
+.jd-wrap { background:rgba(8,10,14,0.8); border:1px solid #ffffff11; padding:28px 32px; }
+.jd-wrap h2 { font-family:'Orbitron',sans-serif; font-size:13px; color:#00d9ff; letter-spacing:2px; margin:28px 0 14px; padding-bottom:8px; border-bottom:1px solid #00d9ff22; }
+.jd-wrap h2:first-child { margin-top:0; }
+.jd-wrap h3 { font-family:'Orbitron',sans-serif; font-size:10px; color:#ffffff66; letter-spacing:1px; margin:20px 0 10px; }
+.jd-wrap p { font-size:13px; line-height:1.85; color:#d8d4cc; margin-bottom:12px; font-family:'Libre Baskerville',Georgia,serif; }
+.jd-wrap ul { margin-bottom:14px; padding-left:0; }
+.jd-wrap ul li { font-size:13px; line-height:1.8; color:#d8d4cc; padding-left:18px; position:relative; margin-bottom:5px; font-family:'Libre Baskerville',Georgia,serif; }
+.jd-wrap ul li::before { content:'—'; position:absolute; left:0; color:#ff004f; font-family:'Share Tech Mono',monospace; }
+.jd-tag { display:inline-block; font-family:'Orbitron',sans-serif; font-size:9px; letter-spacing:1px; padding:2px 8px; border:1px solid #00d9ff44; color:#00d9ff; margin-right:6px; margin-bottom:6px; }
+
+/* BACK TO TOP */
+.back-to-top {
+  position:fixed; bottom:24px; right:24px; z-index:200;
+  width:40px; height:40px; background:#000; border:1px solid #00d9ff44;
+  color:#00d9ff; font-size:18px; cursor:pointer;
+  display:flex; align-items:center; justify-content:center;
+  opacity:0; pointer-events:none; transition:opacity 0.3s;
+}
+.back-to-top.visible { opacity:1; pointer-events:auto; }
+.back-to-top:hover { border-color:#00d9ff; }
+
+footer { text-align:center; padding:24px; opacity:0.25; font-size:10px; position:relative; z-index:1; letter-spacing:1px; }
+
+@media (max-width:600px) {
+  .stat-grid { grid-template-columns:1fr 1fr; }
+  .tab-btn { padding:12px 14px; font-size:9px; }
+  .jd-wrap { padding:18px; }
+}
+</style>
+</head>
+<body>
+
+<header>
+  <a href="dashboard.html" class="logo"><span>LEO</span><span>AF</span></a>
+  <div class="header-right">
+    <span class="stamp">PRIV · SELF-USE ONLY</span>
+    <a href="dashboard.html" class="nav-btn">← DASHBOARD</a>
+    <button id="logoffBtn" class="nav-btn">ABORT</button>
+  </div>
+</header>
+
+<div class="tab-bar">
+  <button class="tab-btn active" data-tab="overview">01 · OVERVIEW</button>
+  <button class="tab-btn" data-tab="jd">02 · JOB DESCRIPTION</button>
+  <button class="tab-btn" data-tab="domain">03 · DOMAIN MAP</button>
+  <button class="tab-btn" data-tab="analytics">04 · ANALYTICAL WORK</button>
+  <button class="tab-btn" data-tab="meeting">05 · MEETING PREP</button>
+</div>
+
+<div class="main-wrap">
+
+<!-- ══════════════════════════════════════════════
+     TAB 01 — OVERVIEW
+══════════════════════════════════════════════ -->
+<div class="tab-panel active" id="tab-overview">
+  <div class="page-header">
+    <div class="page-tag">PRIVATE BRIEF · MILSATCOM ROLE</div>
+    <h1>Architecte Système<br>MilSatcom — Airbus D&S</h1>
+    <p>Two-day brief. Meeting in 48 hours. This document contains everything you need to understand the role, the domain, and how to navigate the conversation — built from the JD and your existing background.</p>
+  </div>
+
+  <div class="section">
+    <h2>The Four Questions</h2>
+
+    <h3>Do I Want It?</h3>
+    <p>The role is pre-sales architecture: CONOPS, trade studies, proposals, customer working groups. You define systems before they are constrained by a signed contract. You talk to customers about real problems. You have visibility across multiple programmes simultaneously.</p>
+    <p>The downside is structural: you don't build anything to completion. The job stops at contract signature. If you need to see a system through from design to IVQ to handover, this role by design stops before that point. Know which mode suits you before you walk in.</p>
+
+    <h3>Can I Do It?</h3>
+    <p>Your HBC+ background covers roughly 55–60% of the technical surface area directly. The rest is bridgeable in weeks to months, not years. The gaps are real but not disqualifying at entry — the question is whether the team has the patience for a ramp.</p>
+
+    <h3>Should I Do It?</h3>
+    <p>That depends on the manager, the team structure, and the trajectory of Connected Intelligence within ADS post-programme cuts. The meeting is where you gather that data. Go in with specific questions, not a general openness.</p>
+
+    <h3>How to Nail the Meeting?</h3>
+    <p>Your strongest card is not milsatcom depth — you don't have it yet and two days won't change that. Your strongest card is: systems architect who has built LEO aero connectivity end-to-end, understands the full stack from RF to IP to business case, and is technically honest about where the boundaries are. Lead with what you've built. Ask about what they actually need. Name your gaps before they find them.</p>
+  </div>
+
+  <div class="section">
+    <h2>Your Honest Gap Inventory</h2>
+
+    <div class="gap-row">
+      <span class="gap-label gap-strong">STRONG</span>
+      <span class="gap-text">RF/hyperfrequency, link budgets, Ka-band physics, terminals, LEO constellation architecture, IP networking, ground segment, aero connectivity constraints (SWaP, DO-160), system engineering process, pre-project architecture thinking.</span>
+    </div>
+    <div class="gap-row">
+      <span class="gap-label gap-medium">MEDIUM</span>
+      <span class="gap-text">Military Ka-band specifics (WGS, SGDC), optical ISL physics (adjacent to LEOAF work), services IT architecture, pre-sales bid workflow (process-transferable from your current role), X-band fundamentals (learnable in one day).</span>
+    </div>
+    <div class="gap-row">
+      <span class="gap-label gap-thin">THIN</span>
+      <span class="gap-text">Protected waveforms / anti-jam / LPI-LPD (conceptual map needed, not classified internals), SSI / homologation doctrine (ANSSI framework, DR/CD/SD classification levels), EHF systems, military operational doctrine as a requirements source.</span>
+    </div>
+
+    <div class="callout amber">
+      <strong>THE RIGHT POSTURE</strong>
+      A manager hiring a lead architect wants someone who can identify what they don't know. Pretending otherwise is the wrong move. Name the gaps, frame them as a structured ramp with your existing base, and ask what the team's tolerance for that ramp is.
+    </div>
+  </div>
+
+  <div class="section">
+    <h2>Role Seniority — Honest Read</h2>
+    <p>The JD title says "lead architect" but the signals lean toward senior individual contributor within a team, not team lead. The tells: "contribution à la rédaction" (not ownership), "en étroite collaboration avec" (alongside, not above), and Niveau 2 (Autonomous) across all competency referentials — Niveau 3 is where you lead others and define methods. Ask the manager directly: how many architects are on the team, what does the seniority structure look like, and what does "lead" mean in practice.</p>
+  </div>
+
+  <div class="section">
+    <h2>Will You Be Stuck in Sales?</h2>
+    <p>The JD is honest: this is pre-sales architecture. You will spend significant time on proposals that don't win. Whether that is "stuck in sales" or "upstream strategic architecture" depends entirely on temperament. The analytical work is real and non-negotiable — link budgets, trade studies, sizing analyses — but you write them to inform a proposal document, not to hand off to a delivery team that implements them directly. Ask the manager: what fraction of bids win, what happens to the architects when a bid wins, and whether there is a path to programme-side roles from this position.</p>
+  </div>
+</div>
+
+
+<!-- ══════════════════════════════════════════════
+     TAB 02 — JOB DESCRIPTION
+══════════════════════════════════════════════ -->
+<div class="tab-panel" id="tab-jd">
+  <div class="page-header">
+    <div class="page-tag">SOURCE DOCUMENT</div>
+    <h1>Job Description<br>As Received</h1>
+    <p>Verbatim content of the posting. Annotations added in callouts.</p>
+  </div>
+
+  <div class="jd-wrap">
+    <h2>Architecte Système MilSatcom (H/F)</h2>
+    <p><strong style="color:#00d9ff;">Localisation:</strong> Toulouse, France &nbsp;|&nbsp; <strong style="color:#00d9ff;">Division:</strong> Connected Intelligence &nbsp;|&nbsp; <strong style="color:#00d9ff;">Entité:</strong> Airbus Defence &amp; Space</p>
+
+    <h2>Description du poste</h2>
+    <p>Un poste de lead architect MilSatcom vient de s'ouvrir au sein d'Airbus Defence &amp; Space à Toulouse, dans la division "Connected Intelligence".</p>
+    <p>En étroite collaboration avec la direction de programme et les équipes de vente, le titulaire du poste réalise les activités de conception préliminaire et de proposition technico-commerciales pour des solutions de communications militaires ou gouvernementales par satellite.</p>
+    <p>Le contexte demande d'adresser un large spectre technique : Charges utiles et ancrages RF (bandes X et Ka), charges utiles optiques, constellations LEO, transmissions RF protégées, SSI, services IT.</p>
+    <p><em>Ce poste nécessite une habilitation de sécurité ou nécessite d'être éligible à une habilitation par les autorités reconnues.</em></p>
+
+    <div class="callout amber">
+      <strong>NOTE — SECURITY CLEARANCE</strong>
+      Habilitation requirement means the role handles classified material (likely CD or SD level). If you don't currently hold a clearance, "éligible" means French national with clean background — ADS manages the process. Worth confirming what level and what the timeline is.
+    </div>
+
+    <h2>Tâches et missions principales</h2>
+    <p>Vous serez responsable de la production des éléments de conception Système :</p>
+    <ul>
+      <li>Définition du CONOPS</li>
+      <li>Etudes de dimensionnement</li>
+      <li>Définition des architectures système candidates</li>
+      <li>Réalisation et formalisation des analyses et trade-offs entre les solutions candidates</li>
+      <li>Contribution à la rédaction des spécifications système et sous-systèmes et de la proposition technique d'une offre</li>
+      <li>Production de la matrice de traçabilité/conformité</li>
+      <li>Définition du Work Breakdown (structure, coût, planning/charge)</li>
+      <li>Organisation et participation aux revues de vente et de conception (interne/externe)</li>
+      <li>Préparation et participation aux groupes de travail avec le client</li>
+    </ul>
+    <p><em>Quelques déplacements professionnels sont à prévoir en France.</em></p>
+
+    <div class="callout">
+      <strong>WHAT THIS ACTUALLY MEANS DAY TO DAY</strong>
+      CONOPS → trade study → sizing → spec → compliance matrix → WBS input → proposal writing → customer working groups. That is the full cycle of a bid. You run multiple bids in parallel at different stages. The analytical work (link budgets, coverage analysis) happens privately. The communication work (proposals, reviews, working groups) is the primary output.
+    </div>
+
+    <h2>Compétences requises</h2>
+    <h3>Votre profil</h3>
+    <ul>
+      <li>Titulaire d'un diplôme d'Ingénieur avec une spécialisation en Télécommunications</li>
+      <li>5 à 10 ans d'expérience dans l'industrie des télécommunications, dont une première expérience dans le domaine spatial</li>
+      <li>Ingénierie système dans un environnement complexe, de la définition à l'IVQ</li>
+      <li>Gestion de workpackage</li>
+    </ul>
+    <h3>Compétences techniques souhaitées</h3>
+    <ul>
+      <li>Radio / Hyper fréquence, transmission</li>
+      <li>Charges utiles Télécom</li>
+      <li>Terminaux Satcom</li>
+      <li>Sécurité des Systèmes d'Information et services IT</li>
+      <li>Réseaux</li>
+      <li>Communications optiques</li>
+    </ul>
+    <h3>Votre savoir-être</h3>
+    <ul>
+      <li>Autonomie et sens des responsabilités</li>
+      <li>Rigueur et méthode</li>
+      <li>Leadership dans un environnement technique et industriel complexe</li>
+      <li>Goût du travail en équipe pluridisciplinaire, capacité à convaincre et motiver, résoudre des problèmes</li>
+      <li>Persévérance, endurance, curiosité pour les domaines hors expertise, capacité de synthèse technique</li>
+      <li>Excellent niveau en expression écrite et orale en français / Niveau avancé en anglais</li>
+    </ul>
+
+    <h2>Référentiels de compétences</h2>
+    <p>
+      <span class="jd-tag">A100 Architecture des systèmes — Niv.2</span>
+      <span class="jd-tag">D010 Systems Engineering — Niv.2</span>
+      <span class="jd-tag">D020 Overall qualification — Niv.2</span>
+      <span class="jd-tag">Interagir et Influencer — Niv.2</span>
+    </p>
+
+    <div class="callout amber">
+      <strong>NIVEAU 2 = AUTONOMOUS, NOT LEAD</strong>
+      Niveau 2 in the Airbus competency framework means you execute independently without supervision. Niveau 3 is where you lead others and define methods. All four referentials at Niveau 2 is consistent with senior IC, not team lead. Verify the actual team structure in the meeting.
+    </div>
+  </div>
+</div>
+
+
+<!-- ══════════════════════════════════════════════
+     TAB 03 — DOMAIN MAP
+══════════════════════════════════════════════ -->
+<div class="tab-panel" id="tab-domain">
+  <div class="page-header">
+    <div class="page-tag">TECHNICAL DOMAIN</div>
+    <h1>MilSatcom<br>Domain Map A–Z</h1>
+    <p>The logical structure of the domain: what it is, how it works, who wants what, and how a bid starts and finishes.</p>
+  </div>
+
+  <div class="section">
+    <h2>The Problem This Job Exists to Solve</h2>
+    <p>Militaries need to communicate globally, including over oceans and in regions with no terrestrial infrastructure, and they need it when someone is actively trying to stop them — jamming, intercepting, spoofing, or physically destroying ground stations. They need links that survive a nuclear event that has destroyed the ionosphere. They need interoperability: a French general and a US commander must exchange classified traffic through systems built by different nations on different generations of hardware.</p>
+    <p>No terrestrial network solves this. Satellite does — if the system is designed from the ground up around three constraints that commercial comms largely ignores:</p>
+    <div class="stat-grid">
+      <div class="stat-cell"><span class="stat-val red">SURVIVABILITY</span><span class="stat-label">Link must work when someone is actively trying to break it</span></div>
+      <div class="stat-cell"><span class="stat-val amber">SECURITY</span><span class="stat-label">Traffic must be protected end-to-end, classified, homologated</span></div>
+      <div class="stat-cell"><span class="stat-val">INTEROP</span><span class="stat-label">NATO forces must communicate across nations and hardware generations</span></div>
+    </div>
+    <p>Every architectural choice in milsatcom — frequency band, waveform, ISL vs bent-pipe, terminal form factor, ground segment topology — traces back to one of these three.</p>
+  </div>
+
+  <div class="section">
+    <h2>The Customer</h2>
+    <p>The customer is a government defence procurement body. In France: DGA (Direction Générale de l'Armement). For NATO programmes: NSPA or a multinational procurement agency. For export: allied nation defence ministries.</p>
+    <p>What they want is not a satellite. They want a <em>capability</em>: the ability to move classified information between defined endpoints — headquarters, deployed units, ships, aircraft, submarines — with guaranteed availability, security, and performance under adversarial conditions. Requirements come from operational doctrine, not from a commercial service spec. An architect who cannot read doctrine cannot derive requirements.</p>
+  </div>
+
+  <div class="section">
+    <h2>The Space Segment</h2>
+
+    <h3>X-Band (7/8 GHz)</h3>
+    <p>Legacy military band, NATO-standardised since the 1960s. Better rain fade resistance than Ka. Enormous installed base of terminals globally. New satellites — WGS, Syracuse 4, SICRAL — carry X-band payloads partly because interoperability with existing terminals is a hard requirement. Not replacing it; coexisting with it.</p>
+
+    <h3>Military Ka-Band (20/30 GHz)</h3>
+    <p>Higher bandwidth than X-band. Narrower beams — militarily advantageous because narrow beams are harder to intercept and harder to jam. Rain fade tradeoff compensated with link margin, adaptive coding, and geographic diversity. WGS and Syracuse 4 carry Ka alongside X.</p>
+
+    <h3>EHF — Extremely High Frequency (44/20 GHz)</h3>
+    <p>Used for the most protected military communications. AEHF (US) and NATO EHF are designed for nuclear survivability and maximum anti-jam protection. Narrow beams, hard to intercept. Lower data rates than Ka but for protected command and control, this is the requirement. Terminals are expensive.</p>
+
+    <h3>Optical Payloads</h3>
+    <p>Laser communication terminals on the satellite. An optical ISL transmits data as a laser beam — cannot be jammed by RF, extremely high bandwidth, beam so narrow that interception is practically impossible. Tradeoff: pointing precision. The satellite must point a laser millimetres wide at a receiver thousands of kilometres away. Requires precise attitude control. Military-preferred for constellation routing of high-classification traffic. Adjacent to what you already know from LEOAF ISL work.</p>
+
+    <h3>Transponders vs Onboard Processors</h3>
+    <p>A bent-pipe transponder amplifies and shifts frequency — dumb relay. An onboard processor demodulates, processes, re-modulates — can apply encryption, routing, and waveform conversion onboard. Modern military satellites increasingly carry onboard processing for flexible beam routing and multi-waveform support.</p>
+  </div>
+
+  <div class="section">
+    <h2>The Ground Segment — Anchor Stations</h2>
+    <p>Large-aperture ground antennas (typically 3–7m diameter) maintaining stable, high-capacity links to the satellite. For a GEO military satellite: two or three anchor stations globally for redundancy. Functions simultaneously as traffic gateway, TT&C station, and interface to the military's classified terrestrial network.</p>
+    <p>The classified network interface is where SSI enters: the anchor station must be physically secured, access-controlled, and homologated to handle traffic at the classification level of the users. The crypto equipment (qualified by ANSSI) lives here. Anchor station siting is itself an architecture decision: clear sky view, reliable terrestrial fibre, politically stable location, physically defensible, geographically separated from other stations.</p>
+  </div>
+
+  <div class="section">
+    <h2>The User Segment — Terminals</h2>
+    <p>Military terminal design is dominated by three constraints that barely exist in commercial design:</p>
+    <ul>
+      <li><strong>SWaP</strong> — a special operations unit on foot cannot carry a 60cm dish. Manpack terminals must fit in a rucksack, draw battery power, set up in minutes. Drives phased-array antenna design.</li>
+      <li><strong>Survivability</strong> — must maintain link in a jamming environment. Requires anti-jam waveforms (spread spectrum, frequency hopping, nulling antennas), link margin designed around the jamming scenario, sometimes physical hardening against EMP.</li>
+      <li><strong>Interoperability</strong> — French terminal must talk to the same satellite as a US terminal, exchange classified traffic. Requires agreed waveforms, agreed protocols, agreed crypto interoperability. Governed by NATO STANAGs.</li>
+    </ul>
+  </div>
+
+  <div class="section">
+    <h2>Protected Waveforms</h2>
+    <p>The layer that makes military satcom militarily useful rather than expensive commercial satcom. Conceptual map — not classified internals:</p>
+
+    <h3>Direct Sequence Spread Spectrum (DSSS)</h3>
+    <p>Signal spread over bandwidth much wider than needed using a pseudo-random code. Jammer must jam the entire wide bandwidth — requires enormous power. Without the code, the signal looks like noise. Low probability of intercept (LPI). Processing gain = 10×log₁₀(spread bandwidth / data rate).</p>
+
+    <h3>Frequency Hopping</h3>
+    <p>Signal jumps between frequencies in a pseudo-random pattern synchronised between transmitter and receiver. A jammer cannot track the hops fast enough to jam continuously. A receiver without the hopping pattern cannot follow.</p>
+
+    <h3>Nulling / Adaptive Beam</h3>
+    <p>Phased array antennas steered to place a null — direction of minimum sensitivity — toward a jamming source while maintaining the main beam toward the satellite. Requires onboard processing in the terminal.</p>
+
+    <h3>Anti-Jam Margin (AJM)</h3>
+    <p>The link budget includes an explicit margin against a defined jamming threat. If the requirement says "survive a 1 kW jammer at 100 km", the architect designs the waveform and link budget to maintain the required data rate under that scenario. AJM = Processing gain + link margin above threshold — J/S ratio at receiver.</p>
+  </div>
+
+  <div class="section">
+    <h2>SSI — Sécurité des Systèmes d'Information</h2>
+    <p>French defence information security doctrine. Governs how systems handling classified data are designed, approved, and operated. Hard constraint, not afterthought — must design around it from day one.</p>
+
+    <div class="data-table" style="overflow-x:auto;">
+      <table class="data-table">
+        <thead>
+          <tr><th>Level</th><th>French Name</th><th>Meaning</th><th>System Implications</th></tr>
+        </thead>
+        <tbody>
+          <tr><td class="md">DR</td><td>Diffusion Restreinte</td><td>Restricted — controlled distribution</td><td>Marked documents, access control, approved handling procedures</td></tr>
+          <tr><td class="amber" style="color:#ffaa00">CD</td><td>Confidentiel Défense</td><td>Confidential — formal classification</td><td>Cleared personnel, ANSSI-qualified crypto, homologated systems</td></tr>
+          <tr><td class="lo">SD</td><td>Secret Défense</td><td>Secret — strict compartmentalisation</td><td>Highest routine level, full homologation, physical security, audit trails</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <p><strong style="font-family:'Orbitron',sans-serif;font-size:10px;letter-spacing:1px;color:#ffffff88;">HOMOLOGATION</strong> is the formal approval of an information system to handle classified traffic at a given level. Granted by ANSSI or relevant authority after a security audit. The architect must design a system that <em>can be homologated</em> — flagging SSI problems early is part of the job. You are not the SSI specialist; you direct the SSI engineer and design around their constraints.</p>
+  </div>
+
+  <div class="section">
+    <h2>LEO Military Constellations</h2>
+    <p>GEO has dominated military satcom since the 1960s. LEO is entering the military domain seriously, driven by commercial LEO logic plus military-specific motivations:</p>
+    <ul>
+      <li><strong>Polar coverage</strong> — GEO cannot serve Arctic routes, submarine patrol areas, Arctic sovereignty monitoring. LEO or MEO required.</li>
+      <li><strong>Resilience through numbers</strong> — a GEO military satellite is a high-value single-point-of-failure. An adversary destroying one GEO satellite eliminates significant capacity. A 50–200 satellite LEO constellation degrades under attack but does not fail. Post-Ukraine 2022, this argument is driving procurement thinking across NATO.</li>
+      <li><strong>Lower latency</strong> — real-time drone video, time-sensitive targeting, interactive C2. GEO 600ms RTT is operationally awkward. LEO 20–40ms RTT changes what is possible.</li>
+      <li><strong>Optical ISL security</strong> — traffic routed entirely through the constellation without touching potentially compromised ground stations. Architecturally very attractive for high-classification traffic.</li>
+    </ul>
+    <p>Active programmes: France/EU IRIS², US Space Development Agency Transport Layer, various national programmes. This is the frontier of what is being built now.</p>
+  </div>
+
+  <div class="section">
+    <h2>How the Job Runs — Start to Finish</h2>
+
+    <h3>1 — Trigger: RFP or Early Engagement</h3>
+    <p>DGA issues a request for proposal, or sales identifies an opportunity and engages a defence ministry. Programme director asks the architect team to begin preliminary design.</p>
+
+    <h3>2 — CONOPS Definition</h3>
+    <p>Before any engineering: understand and document how the system will be used operationally. Who are the users? Where are they? What are they sending? What happens if the link is degraded? If a satellite is lost? The CONOPS is a narrative of the system in operation, detailed enough to derive quantitative requirements from it.</p>
+
+    <h3>3 — Requirements Derivation</h3>
+    <p>From the CONOPS, derive system requirements: availability (% of time link is up), throughput (bps, simultaneous users), latency (acceptable RTT by traffic type), anti-jam margin (what jamming scenario must be survived), coverage (which zones, which elevation angles), classification level (which SSI requirements apply).</p>
+
+    <h3>4 — Architecture Trade Studies</h3>
+    <p>Define multiple candidate architectures — different orbits, frequency bands, payload types, ground segment configurations — and evaluate systematically against requirements. Structured comparison with quantitative analysis of performance, cost, risk, and compliance. Output: trade study document justifying the recommended architecture.</p>
+
+    <h3>5 — Sizing Studies</h3>
+    <p>For the recommended architecture: link budgets for each terminal class and scenario, constellation coverage analysis, ground segment capacity sizing. Quantitative analyses establishing that the proposed architecture meets requirements with adequate margin.</p>
+
+    <h3>6 — Specification Writing</h3>
+    <p>System specification: what the system must do, to the level needed to allocate requirements to subsystems (space, ground, terminal, network management) and evaluate compliance. This becomes part of the contract if the bid wins.</p>
+
+    <h3>7 — Compliance Matrix</h3>
+    <p>Maps each customer requirement from the RFP to a section of the technical proposal and states how the proposed system complies. Formal deliverable evaluated during bid assessment.</p>
+
+    <h3>8 — WBS and Cost Input</h3>
+    <p>Define the Work Breakdown Structure and provide technical input to the cost estimate. The architect must think about what it costs to build what they've designed, and whether the programme can be executed in the proposed timeline.</p>
+
+    <h3>9 — Proposal Writing and Reviews</h3>
+    <p>Technical proposal argues the case for the proposed system. Architect writes the technical sections, participates in internal and external reviews.</p>
+
+    <h3>10 — Customer Working Groups</h3>
+    <p>DGA probes the proposed architecture. Architect represents ADS: answering technical questions, defending design choices, gathering information about requirements the RFP did not make explicit. Hardest mode — must defend analysis in real time against domain experts.</p>
+
+    <h3>11 — Bid Submitted</h3>
+    <p>It wins or it doesn't. If it wins: handover to delivery team. If it loses: debrief and apply lessons to next bid. Losing bids are a normal part of the job.</p>
+  </div>
+
+  <div class="section">
+    <h2>What the Architect Must Be Good At</h2>
+
+    <h3>Systems Thinking at Multiple Altitudes</h3>
+    <p>Hold the operational picture (what does a commander in the field need?), the system picture (how does space/ground/terminal deliver it?), and the subsystem picture (what does the payload transponder need to do?) simultaneously — and move fluidly between them. An engineer who can only work at one level is not a lead architect.</p>
+
+    <h3>Quantitative Rigour Under Uncertainty</h3>
+    <p>Pre-sales architecture is done with incomplete information. The architect makes defensible quantitative claims — link budgets, availability calculations, coverage analysis — while being explicit about assumptions and sensitive to the parameters that dominate the answer. A link budget with ten implicit assumptions and no sensitivity analysis is not a useful document.</p>
+
+    <h3>Communication Across Audiences</h3>
+    <p>Explain the system to the customer (operational language), programme director (cost and risk language), subsystem engineers (detailed technical requirements), sales team (competitive differentiation language). Each audience needs a different frame. Inability to shift register is a real limitation in this role.</p>
+  </div>
+</div>
+
+
+<!-- ══════════════════════════════════════════════
+     TAB 04 — ANALYTICAL WORK
+══════════════════════════════════════════════ -->
+<div class="tab-panel" id="tab-analytics">
+  <div class="page-header">
+    <div class="page-tag">FULL ANALYTICAL DEPTH</div>
+    <h1>How the Real Work<br>Gets Done</h1>
+    <p>Three worked examples at full engineering depth: Ka-band link budget with jamming analysis, LEO constellation sizing, and a trade matrix. These are the kinds of analyses a DGA evaluator will probe. Numbers are real. Methodology is defensible.</p>
+  </div>
+
+  <!-- ── LINK BUDGET ── -->
+  <div class="section">
+    <h2>I — Ka-Band Link Budget, Manpack Terminal, Jamming Scenario</h2>
+
+    <h3>The Scenario</h3>
+    <div class="callout">
+      <strong>SCENARIO DEFINITION</strong>
+      French SOF unit, on foot, contested environment. Must maintain 256 kbps encrypted data link to GEO military satellite at 36,000 km, Ka-band (uplink 30 GHz, downlink 20 GHz). Hostile jammer 50 km from terminal, 100W ERP in uplink band. Link must close with at least 3 dB margin above the jamming threshold.
+    </div>
+    <p>State the scenario in one paragraph with specific numbers before opening any spreadsheet. If you cannot do this, you are not ready to run the budget.</p>
+
+    <h3>The Master Equation</h3>
+    <div class="eq">C/N₀ = EIRP + G/T − FSPL − k − other_losses
+
+Where:
+  C/N₀  = carrier-to-noise density ratio (dBHz) — the result
+  EIRP   = Effective Isotropic Radiated Power of transmitter (dBW)
+  G/T    = receive figure of merit of the receiver (dB/K)
+  FSPL   = Free Space Path Loss (dB)
+  k      = Boltzmann constant = −228.6 dBW/Hz/K
+  losses = atmospheric, pointing, polarisation losses (dB, negative)</div>
+    <p>Run this twice: uplink (terminal to satellite) and downlink (satellite to anchor station). The weaker link dominates. For manpack terminals, the uplink is always the constraint.</p>
+
+    <h3>Uplink — Terminal EIRP</h3>
+    <p>Manpack terminal hard SWaP constraints:</p>
+    <ul>
+      <li>Transmit power: 2W = 3 dBW (battery-operable limit; beyond 2–4W continuous is operationally impractical)</li>
+      <li>Antenna: phased array 20cm × 20cm. At 30 GHz:</li>
+    </ul>
+    <div class="eq">λ = c/f = 3×10⁸ / 30×10⁹ = 0.01 m
+A = 0.04 m²,  η = 0.55 (aperture efficiency)
+Gain = η × (4π × A) / λ²
+     = 0.55 × (4π × 0.04) / (0.01)²
+     = 0.55 × 50,265 = 27,646 = 44.4 dBi</div>
+    <ul>
+      <li>Pointing loss: 45° scan from boresight = −3 dB + 0.5 dB alignment = −3.5 dB</li>
+      <li><strong>EIRP = 3 + 44.4 − 3.5 = 43.9 dBW</strong></li>
+    </ul>
+    <div class="callout amber">
+      <strong>EVALUATOR CHALLENGE POINT</strong>
+      "Is 2W realistic for the battery budget? Is 44 dBi achievable in a 20cm aperture at Ka?" Both are defensible — but you must have thought about them before the room asks. Have the answer ready.
+    </div>
+
+    <h3>Free Space Path Loss</h3>
+    <div class="eq">FSPL = 20×log₁₀(4πd/λ)
+d = 36,000 km = 3.6×10⁷ m,  λ = 0.01 m
+
+FSPL = 20×log₁₀(4π × 3.6×10⁷ / 0.01)
+     = 20×log₁₀(4.52×10¹⁰)
+     = 20 × 10.655
+     = 213.1 dB</div>
+    <p>This is physics. It does not change with design choices. At 30 GHz to GEO, it is 213.1 dB. Memorise it.</p>
+
+    <h3>Atmospheric Losses</h3>
+    <p>System designed for 99.5% availability (down for 44 hours/year maximum). At 30 GHz, mid-latitude terminal, 10° elevation angle (worst case field conditions):</p>
+    <ul>
+      <li>Rain attenuation at 99.5% availability: ~6 dB (ITU-R P.618)</li>
+      <li>Gaseous absorption: ~0.5 dB</li>
+      <li><strong>Total atmospheric loss: −6.5 dB</strong></li>
+    </ul>
+    <p>Elevation angle is a critical assumption. Flag it: at 20° elevation, rain loss drops to ~4 dB. A manpack in terrain may be forced to low angles. This assumption governs whether the link closes.</p>
+
+    <h3>Satellite Receive G/T</h3>
+    <ul>
+      <li>Satellite receive antenna gain: 32 dBi (spot beam, ~500 km diameter)</li>
+      <li>System noise temperature: 500 K = 27 dBK</li>
+      <li><strong>G/T = 32 − 27 = +5 dB/K</strong></li>
+    </ul>
+
+    <h3>Uplink C/N₀ — No Jamming</h3>
+    <div class="eq">C/N₀ = EIRP + G/T − FSPL − Latm + k
+     = 43.9 + 5 − 213.1 − 6.5 + 228.6
+     = 57.9 dBHz</div>
+
+    <h3>Required C/N₀ for 256 kbps</h3>
+    <p>Using BPSK with rate-1/2 turbo coding (standard for military protected waveforms):</p>
+    <div class="eq">Required Eb/N₀ for BER 10⁻⁶: ~2.5 dB
+Required C/N₀ = Eb/N₀ + 10×log₁₀(bitrate)
+             = 2.5 + 10×log₁₀(256,000)
+             = 2.5 + 54.1
+             = 56.6 dBHz</div>
+
+    <h3>Uplink Margin — No Jamming</h3>
+    <div class="eq">Margin = 57.9 − 56.6 = 1.3 dB</div>
+    <div class="callout red">
+      <strong>THIS IS THIN AND INTENTIONALLY SO</strong>
+      Before jamming, the link barely closes. This is realistic for a manpack — constrained by transmit power and antenna size. An evaluator will say this is insufficient. The response: this is worst case (10° elevation, 99.5% availability, maximum rain). At 20° elevation and 99% availability the margin opens to ~4 dB. The protected waveform changes the jamming analysis — addressed next.
+    </div>
+
+    <h3>The Jamming Analysis</h3>
+    <p>Two geometries matter. The real threat for uplink disruption is the jammer trying to overpower the terminal's signal at the satellite:</p>
+    <div class="eq">Jammer ERP: 100 W = 20 dBW,  distance to satellite: ~36,000 km
+Path loss (same as terminal): 213.1 dB
+Jammer signal at satellite: 20 − 213.1 = −193.1 dBW
+
+Terminal signal at satellite: 43.9 − 213.1 − 6.5 = −175.7 dBW
+
+J/S at satellite = −193.1 − (−175.7) = −17.4 dB</div>
+    <p>The jammer is already 17.4 dB below the terminal signal at the satellite. Without spread spectrum, it still degrades the link. With spread spectrum:</p>
+
+    <h3>Spread Spectrum Processing Gain</h3>
+    <div class="eq">Spread bandwidth: 50 MHz,  Data rate: 256 kbps
+
+Gp = 10×log₁₀(Bss / Rdata)
+   = 10×log₁₀(50×10⁶ / 256×10³)
+   = 10×log₁₀(195.3)
+   = 22.9 dB</div>
+
+    <h3>Anti-Jam Margin</h3>
+    <div class="eq">AJM = Gp + Link_margin − J/S_at_satellite
+    = 22.9 + 1.3 − (−17.4)
+    = 41.6 dB</div>
+    <div class="callout green">
+      <strong>RESULT</strong>
+      Link survives this jammer with 41.6 dB AJM. Requirement was 3 dB. The link closes. The spread spectrum processing gain is doing the work.
+    </div>
+
+    <h3>Jammer Exclusion Zone — Sensitivity</h3>
+    <div class="data-table" style="overflow-x:auto;">
+      <table class="data-table">
+        <thead><tr><th>Jammer Distance</th><th>Extra Path Loss vs 50km</th><th>AJM</th><th>Status</th></tr></thead>
+        <tbody>
+          <tr><td>50 km</td><td>0 dB</td><td class="hi">41.6 dB</td><td class="hi">Comfortable</td></tr>
+          <tr><td>5 km</td><td>−20 dB</td><td class="md">21.6 dB</td><td class="md">Adequate</td></tr>
+          <tr><td>500 m</td><td>−40 dB</td><td class="lo">1.6 dB</td><td class="lo">Marginal</td></tr>
+          <tr><td>50 m</td><td>−60 dB</td><td class="lo">−18.4 dB</td><td class="lo">Link fails</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <p>The honest answer: jammer exclusion zone is approximately 500 m for this terminal configuration. Document it as an operational constraint, not a system failure. The operator must maintain 500 m separation from a 100W jammer for the link to close. This is a realistic and defensible constraint for SOF operations.</p>
+
+    <h3>Downlink — Satellite to Anchor Station</h3>
+    <p>The anchor station (3.7m dish, cryogenic LNA) is not the constraint. For completeness:</p>
+    <div class="eq">Satellite EIRP (spot beam): 55 dBW
+FSPL at 20 GHz: 209.6 dB
+Atmospheric loss: 3 dB
+Anchor station G/T: 52 dBi − 19 dBK = +33 dB/K
+
+C/N₀ = 55 + 33 − 209.6 − 3 + 228.6 = 104 dBHz
+Required: 56.6 dBHz
+Margin: 47.4 dB — not the constraint.</div>
+  </div>
+
+  <!-- ── CONSTELLATION SIZING ── -->
+  <div class="section">
+    <h2>II — LEO Military Constellation Sizing</h2>
+
+    <h3>The Requirement</h3>
+    <div class="callout">
+      <strong>SCENARIO</strong>
+      100% continuous single coverage between ±70° latitude. Minimum terminal elevation angle 10°. Design life 7 years. Select altitude and size the constellation.
+    </div>
+
+    <h3>Step 1 — Altitude Selection</h3>
+    <p>Altitude drives four things simultaneously: coverage footprint per satellite, orbital period, radiation environment, and propagation delay.</p>
+    <ul>
+      <li>Inner Van Allen belt begins ~1,000 km. For COTS-derived electronics and 7-year design life, stay below 800 km.</li>
+      <li>Coverage vs count tradeoff: higher altitude = larger footprint = fewer satellites, but higher latency and higher path loss.</li>
+      <li>Military LEO sweet spot: 600–700 km — adequate footprint, sub-30ms RTT, acceptable link budget.</li>
+    </ul>
+    <p><strong>Selected: 650 km circular orbit.</strong></p>
+
+    <h3>Step 2 — Coverage Geometry</h3>
+    <div class="eq">Re = 6,371 km,  h = 650 km,  El_min = 10°
+
+Nadir angle ρ:
+  sin(ρ) = (Re / (Re + h)) × cos(El_min)
+         = (6371 / 7021) × cos(10°)
+         = 0.9073 × 0.9848 = 0.8935
+  ρ = 63.4°
+
+Earth central angle λ:
+  λ = 90° − El_min − ρ = 90° − 10° − 63.4° = 16.6°
+
+Coverage area per satellite:
+  A = 2π × Re² × (1 − cos(λ))
+    = 2π × 40,589,641 × (1 − 0.9580)
+    = 10,707,000 km²
+
+Earth surface area ±70° latitude:
+  A_zone = 2π × Re² × 2 × sin(70°)
+         = 479,500,000 km²
+
+Geometric minimum satellites:
+  N = 479,500,000 / 10,707,000 = 44.8 → 45 satellites
+
+Walker correction factor 1.4–1.6:
+  N_practical = 45 × 1.5 = 68 satellites</div>
+
+    <h3>Step 3 — Walker Delta Constellation</h3>
+    <p>Walker Delta notation: i: T/P/F — inclination, total satellites, planes, phasing parameter.</p>
+    <p>For ±70° coverage, inclination ≥ 70°. Use <strong>75° for margin</strong>. With 68 satellites: <strong>75°: 72/6/1</strong></p>
+    <ul>
+      <li>6 orbital planes, 12 satellites per plane</li>
+      <li>Planes spaced 60° apart in RAAN</li>
+      <li>Satellites spaced 30° within each plane</li>
+      <li>Inter-plane phasing: 5° offset</li>
+    </ul>
+    <div class="stat-grid">
+      <div class="stat-cell"><span class="stat-val">72</span><span class="stat-label">Total satellites</span></div>
+      <div class="stat-cell"><span class="stat-val">6</span><span class="stat-label">Orbital planes</span></div>
+      <div class="stat-cell"><span class="stat-val">650 km</span><span class="stat-label">Altitude</span></div>
+      <div class="stat-cell"><span class="stat-val">75°</span><span class="stat-label">Inclination</span></div>
+    </div>
+
+    <h3>Step 4 — Key Derived Parameters</h3>
+    <div class="eq">Orbital period:
+  T = 2π × √((Re+h)³ / μ),  μ = 3.986×10⁵ km³/s²
+  T = 2π × √(7021³ / 398,600) = 5,860 s = 97.7 min
+
+Satellite velocity: 7.53 km/s
+
+Average contact time per pass:
+  t = (2λ / 360°) × T = (33.2° / 360°) × 97.7 = 9.0 minutes
+
+→ Handover every ~9 minutes. Terminal must acquire and hand over
+  without link interruption. This is a terminal design requirement
+  derived from the constellation geometry.
+
+RTT at 10° elevation (slant range):
+  Slant = √(6371² + 7021² − 2×6371×7021×cos(16.6°)) = 2,114 km
+  RTT = 2 × 2114 / 299,792 × 1000 = 14.1 ms
+
+RTT at zenith: 2 × 650 / 299,792 × 1000 = 4.3 ms
+Working figure for system design: 10–20 ms RTT.</div>
+
+    <div class="callout amber">
+      <strong>EVALUATOR CHALLENGE: "72 SATELLITES IS TOO MANY"</strong>
+      Response: 72 is the geometric result of 650 km altitude, 10° minimum elevation, and ±70° coverage. Satellite count can be reduced by accepting higher altitude (larger footprint, more latency, worse link budget) or higher minimum elevation (less coverage at latitude extremes). Show the trade: at 1,200 km altitude the count drops to ~30 but latency doubles and radiation hardening adds per-satellite cost. At what altitude does total programme cost minimise? That is the next analysis step if affordability is the binding constraint.
+    </div>
+  </div>
+
+  <!-- ── TRADE MATRIX ── -->
+  <div class="section">
+    <h2>III — Architecture Trade Matrix</h2>
+
+    <h3>The Decision</h3>
+    <div class="callout">
+      <strong>SCENARIO</strong>
+      Military LEO broadband constellation for the scenario above. Three candidate architectures: (A) bent-pipe relay, no ISLs; (B) optical ISL full mesh; (C) RF ISL mesh. Evaluate and recommend.
+    </div>
+
+    <h3>Trade Criteria and Weights</h3>
+    <p>Criteria must be derived from requirements, not invented. For a military system:</p>
+    <div class="data-table" style="overflow-x:auto;">
+      <table class="data-table">
+        <thead><tr><th>Criterion</th><th>Weight</th><th>Rationale</th></tr></thead>
+        <tbody>
+          <tr><td>Anti-jam / LPI performance</td><td class="hi">25%</td><td>Primary military requirement</td></tr>
+          <tr><td>End-to-end latency</td><td class="hi">20%</td><td>C2 and drone video requirement</td></tr>
+          <tr><td>Coverage continuity</td><td class="md">15%</td><td>No single point of failure</td></tr>
+          <tr><td>SSI / security architecture</td><td class="md">15%</td><td>Classification handling</td></tr>
+          <tr><td>CapEx (relative)</td><td class="md">15%</td><td>Programme affordability</td></tr>
+          <tr><td>Operational complexity</td><td>10%</td><td>Sustainment over 7-year life</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="callout amber">
+      <strong>THE WEIGHTING IS A DESIGN CHOICE — DEFEND IT</strong>
+      A DGA evaluator will challenge the weights. If they weight CapEx higher, the ranking may change. You must know this before the room asks. Always show sensitivity to weighting changes.
+    </div>
+
+    <h3>Option Scoring (1–5, 5 = best)</h3>
+    <div class="data-table" style="overflow-x:auto;">
+      <table class="data-table">
+        <thead>
+          <tr>
+            <th>Criterion</th><th>Weight</th>
+            <th>A — Bent-Pipe</th><th>B — Optical ISL</th><th>C — RF ISL</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr><td>Anti-jam / LPI</td><td>25%</td><td class="md">3</td><td class="hi">5</td><td>4</td></tr>
+          <tr><td>End-to-end latency</td><td>20%</td><td class="md">3</td><td class="hi">5</td><td>4</td></tr>
+          <tr><td>Coverage continuity</td><td>15%</td><td class="lo">2</td><td class="hi">5</td><td>4</td></tr>
+          <tr><td>SSI / security arch.</td><td>15%</td><td>4</td><td class="md">3</td><td class="md">3</td></tr>
+          <tr><td>CapEx</td><td>15%</td><td class="hi">5</td><td class="lo">2</td><td class="md">3</td></tr>
+          <tr><td>Operational complexity</td><td>10%</td><td>4</td><td class="lo">2</td><td class="md">3</td></tr>
+          <tr style="border-top:1px solid #00d9ff33;">
+            <td><strong>Weighted Total</strong></td><td></td>
+            <td class="md"><strong>3.20</strong></td>
+            <td class="hi"><strong>3.80</strong></td>
+            <td><strong>3.55</strong></td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <h3>Recommendation</h3>
+    <div class="callout green">
+      <strong>RECOMMENDED: OPTION B — OPTICAL ISL FULL MESH (3.80)</strong>
+      Driven by anti-jam and coverage continuity criteria (40% combined weight), which reflect the primary military requirements. A bent-pipe system routing classified traffic through fixed ground gateways is fundamentally vulnerable to those gateways being targeted, jammed, or compromised. A military system for contested environments cannot accept that dependency.
+    </div>
+
+    <h3>Sensitivity Analysis — Mandatory</h3>
+    <p>If CapEx weight increases from 15% to 30% (at the expense of anti-jam, reduced to 10%): Option A scores 3.45, Option B scores 3.30. The recommendation inverts.</p>
+    <p>Present this to the programme director. The recommendation is only valid if the customer accepts the cost premium. If budget is the binding constraint, Option A is the answer — with explicit documentation of the operational risk accepted by that choice. The architect makes the recommendation and presents the sensitivity. The programme director owns the weighting.</p>
+
+    <h3>Three Pushbacks You Will Receive</h3>
+
+    <div class="qa-item">
+      <div class="qa-q">CHALLENGE 1 — "Your 2W transmit power is insufficient for Ka in a contested environment."</div>
+      <div class="qa-a">2W is the starting assumption based on battery-operable manpack SWaP constraints. The link closes against the stated jamming scenario with 41.6 dB AJM. If the programme requires a more severe jamming scenario — higher ERP jammer, closer range — the analysis can be rerun. The spread spectrum architecture provides the processing gain to absorb additional margin. The question becomes whether the terminal SWaP budget supports higher transmit power, which is a terminal design trade separate from the system architecture.</div>
+    </div>
+
+    <div class="qa-item">
+      <div class="qa-q">CHALLENGE 2 — "72 satellites is too many for programme affordability."</div>
+      <div class="qa-a">72 is the geometric result of 650 km altitude, 10° minimum elevation, and ±70° coverage requirement. Reducing satellite count requires accepting either higher altitude (larger footprint, higher latency, worse link budget, more radiation hardening) or higher minimum elevation (reduced coverage at latitude extremes). Show the trade: at 1,200 km the count drops to ~30 but latency doubles and per-satellite cost rises. The optimisation of total programme cost against altitude is the next analysis step if affordability is the binding constraint.</div>
+    </div>
+
+    <div class="qa-item">
+      <div class="qa-q">CHALLENGE 3 — "Your optical ISL recommendation assumes the homologation path is achievable — where is your evidence?"</div>
+      <div class="qa-a">The homologation path for distributed classification enforcement on a LEO constellation is not yet fully defined in French doctrine. This is flagged as a programme risk in the trade. The recommendation stands on operational grounds. The programme should include an early SSI working group with ANSSI to define the homologation approach before PDR. If ANSSI determines that distributed classification enforcement is not homologable within the programme timeline, Option C becomes the recommendation with explicit LPI risk accepted and documented.</div>
+    </div>
+
+    <div class="callout">
+      <strong>WHAT SEPARATES ARCHITECTS FROM ENGINEERS IN THIS CONTEXT</strong>
+      The DGA evaluator is not trying to trick you. They are checking whether you know where your analysis is strong and where it rests on assumptions. Knowing your own assumptions better than they do is the preparation. An architect who cannot state the assumptions behind their own numbers has not finished the analysis.
+    </div>
+  </div>
+</div>
+
+
+<!-- ══════════════════════════════════════════════
+     TAB 05 — MEETING PREP
+══════════════════════════════════════════════ -->
+<div class="tab-panel" id="tab-meeting">
+  <div class="page-header">
+    <div class="page-tag">48-HOUR PREPARATION</div>
+    <h1>Meeting Prep<br>Manager Conversation</h1>
+    <p>What to read, what to say, what to ask, and what to listen for. The meeting is partly for you to evaluate them.</p>
+  </div>
+
+  <div class="section">
+    <h2>Two-Day Ramp — What Is Achievable</h2>
+
+    <h3>Day 1 — Domain Map and Military Logic (3–4 hours)</h3>
+    <p>The key insight that unlocks everything else: every architectural choice in milsatcom traces back to survivability, security, or interoperability. Read through the Domain Map tab in full. Then read these specific public sources:</p>
+    <ul>
+      <li><strong>WGS (Wideband Global SATCOM)</strong> — US DoD Ka/X-band GEO system. Extensive public documentation. This is the reference architecture for modern military broadband satcom. Boeing white papers, USAF fact sheets.</li>
+      <li><strong>Syracuse 4</strong> — French military satcom, built by ADS. What the team you're meeting built. Read everything public about it.</li>
+      <li><strong>AEHF overview</strong> — protected EHF. Read the concept, not the details.</li>
+      <li><strong>SDA Transport Layer</strong> — US Space Development Agency's LEO military constellation. Closest public analogue to what this team will be bidding on.</li>
+    </ul>
+
+    <h3>Day 2 — SSI Framework and Pre-Sales Process (3–4 hours)</h3>
+    <p>Half day on SSI: read ANSSI public documentation. You need the vocabulary — homologation, qualification, DR/CD/SD levels, the role of ANSSI, what a system dossier looks like — so you can participate in a conversation without looking lost. You are not becoming an SSI engineer. You are learning enough to ask the right questions and design around the constraints.</p>
+    <p>Half day on the pre-sales architecture workflow as described in the Domain Map tab. Internalise the sequence: CONOPS → requirements → trade study → sizing → spec → compliance matrix → WBS → proposal → customer reviews → bid submission. Know what each step produces and who consumes it.</p>
+  </div>
+
+  <div class="section">
+    <h2>Your Opening Frame</h2>
+    <p>Do not open with milsatcom knowledge you don't have. Open with what you've built and why it's relevant:</p>
+    <div class="callout green">
+      <strong>SUGGESTED FRAMING</strong>
+      "My background is ground segment architecture for LEO aero connectivity — I've been working the full stack from Ka-band link budgets and phased-array terminal design through IP networking and ground segment topology. I understand the system-level integration problem. The milsatcom domain is new to me specifically — X-band, protected waveforms, SSI doctrine — but the system engineering process and the RF fundamentals transfer directly. I want to understand how much of a ramp you're able to accommodate and over what timeline."
+    </div>
+    <p>This is honest, technically credible, and puts the ramp question on the table before they have to ask it. It also signals that you know what you don't know, which is the right signal for a lead architect role.</p>
+  </div>
+
+  <div class="section">
+    <h2>Questions to Ask the Manager</h2>
+    <p>Prepare all of these. Ask the ones that feel most relevant based on how the conversation develops. These are evaluative — you are gathering data, not just being polite.</p>
+
+    <div class="qa-item">
+      <div class="qa-q">ON THE TEAM STRUCTURE</div>
+      <div class="qa-a">How many architects are on the team? What is the seniority structure? When the JD says "lead architect," what does that mean in practice — is there a team to lead, or is it a seniority label for a senior IC role? Who would I be working alongside day to day?</div>
+    </div>
+
+    <div class="qa-item">
+      <div class="qa-q">ON THE ACTUAL WORK</div>
+      <div class="qa-a">What programmes is the team currently bidding on? Is it primarily GEO or are LEO military constellations (IRIS²-type) a significant part of the pipeline? What does a typical bid cycle look like — how long from RFP to submission, how many architects on a bid?</div>
+    </div>
+
+    <div class="qa-item">
+      <div class="qa-q">ON WIN RATE AND WHAT HAPPENS AFTER</div>
+      <div class="qa-a">What fraction of bids win? When a bid wins, what happens to the architects — do they transition to the programme or hand off to a delivery team? Is there a path to programme-side roles from this position, or is this a permanent pre-sales function?</div>
+    </div>
+
+    <div class="qa-item">
+      <div class="qa-q">ON THE DOMAIN GAP</div>
+      <div class="qa-a">My background is commercial LEO satcom, not military. How much milsatcom-specific knowledge does the team expect at entry? Is there structured onboarding for the military domain — SSI doctrine, protected waveforms, DGA procurement process — or is it expected to be self-directed?</div>
+    </div>
+
+    <div class="qa-item">
+      <div class="qa-q">ON CONNECTED INTELLIGENCE WITHIN ADS</div>
+      <div class="qa-a">How is Connected Intelligence positioned within ADS right now? Is the division growing, stable, or under pressure? What is the team's relationship to the programme delivery side of the house?</div>
+    </div>
+
+    <div class="qa-item">
+      <div class="qa-q">ON THE SECURITY CLEARANCE</div>
+      <div class="qa-a">What classification level does the role require — DR, CD, or SD? If I don't currently hold a clearance, what is the typical timeline for the eligibility process, and is the role accessible while it is in progress?</div>
+    </div>
+  </div>
+
+  <div class="section">
+    <h2>What to Listen For</h2>
+
+    <h3>Green Signals</h3>
+    <ul>
+      <li>Manager describes active LEO military bids, not just GEO maintenance work — the role has a future in the domain you know</li>
+      <li>Clear seniority structure with senior architects above — you are not walking in accountable for everything on day one</li>
+      <li>Explicit tolerance for a milsatcom ramp — they are hiring for system engineering ability, not domain knowledge</li>
+      <li>Win rate above ~30% — pre-sales architecture at ADS level should not be below this</li>
+      <li>Architects transition to programme when bids win — the role has continuity and closure</li>
+    </ul>
+
+    <h3>Amber Signals</h3>
+    <ul>
+      <li>Vague on team structure — could mean reorganisation in progress, or unclear reporting lines</li>
+      <li>All current bids are GEO — the milsatcom domain knowledge gap matters more if LEO is not actually on the pipeline</li>
+      <li>No structured milsatcom onboarding — self-directed domain ramp while running live bids is a heavy ask in the first 6 months</li>
+    </ul>
+
+    <h3>Red Signals</h3>
+    <ul>
+      <li>Manager cannot clearly describe the team structure or where this role sits — indicates the role is not well-defined</li>
+      <li>Win rate below 20% or unknown — the analytical work is not connecting to commercial outcomes</li>
+      <li>Architects always hand off at contract signature, no continuity to delivery — this is a pure sales-support function, not systems architecture</li>
+      <li>Connected Intelligence is under headcount pressure — you are filling a gap left by departures, not building capacity</li>
+    </ul>
+  </div>
+
+  <div class="section">
+    <h2>Technical Vocabulary to Carry Into the Room</h2>
+    <p>You do not need to use all of these. You need to understand them when the manager uses them, and be able to deploy three or four naturally in context. Using technical vocabulary incorrectly is worse than not using it.</p>
+
+    <div class="data-table" style="overflow-x:auto;">
+      <table class="data-table">
+        <thead><tr><th>Term</th><th>What It Means</th><th>Use It When...</th></tr></thead>
+        <tbody>
+          <tr><td>AJM — Anti-Jam Margin</td><td>dB margin the link maintains under the defined jamming scenario</td><td>Discussing terminal link budget design</td></tr>
+          <tr><td>CONOPS</td><td>Concept of Operations — narrative of system in operational use</td><td>Describing the pre-sales workflow</td></tr>
+          <tr><td>Homologation</td><td>ANSSI/authority approval of a system to handle classified traffic</td><td>Discussing SSI constraints on architecture</td></tr>
+          <tr><td>LPI / LPD</td><td>Low Probability of Intercept / Detection — signal hard to find</td><td>Discussing waveform or optical ISL advantages</td></tr>
+          <tr><td>STANAG</td><td>NATO standardisation agreement — governs interoperability</td><td>Discussing terminal interoperability requirements</td></tr>
+          <tr><td>DSSS</td><td>Direct Sequence Spread Spectrum — anti-jam technique</td><td>Discussing protected waveform fundamentals</td></tr>
+          <tr><td>Walker Delta</td><td>Notation for symmetric satellite constellation geometry</td><td>Discussing LEO constellation sizing</td></tr>
+          <tr><td>Bent-pipe vs OBP</td><td>Dumb relay vs onboard processor — payload architecture choice</td><td>Discussing satellite payload trade</td></tr>
+          <tr><td>EPFD</td><td>Equivalent Power Flux Density — ITU interference metric for NGSO</td><td>Discussing spectrum coordination</td></tr>
+          <tr><td>DGA</td><td>Direction Générale de l'Armement — French defence procurement</td><td>Any time the customer is mentioned</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <div class="section">
+    <h2>The One-Paragraph Version</h2>
+    <p>If you need to reduce this entire brief to one thing to hold in your head walking into the meeting:</p>
+    <div class="callout green">
+      <strong>THE CORE POSTURE</strong>
+      You are a systems architect who has built LEO aero connectivity end-to-end. The military domain is new to you specifically and you are not pretending otherwise. Your value is the system-level integration ability, the RF and IP stack depth, and the disciplined quantitative approach. The meeting is as much you evaluating them as them evaluating you. Ask the hard questions about team structure, win rate, and what happens when a bid wins. Listen for whether they are hiring a systems thinker who will ramp the domain, or filling a milsatcom domain gap that needs someone who already has it. If it's the latter, be honest with yourself about whether two months of ramp changes that answer.
+    </div>
+  </div>
+</div>
+
+</div><!-- end main-wrap -->
+
+<button class="back-to-top" id="backToTop">↑</button>
+<footer>© 2026 LEOAF · PRIVATE BRIEF · NOT LINKED FROM NAV</footer>
+
+<!-- Stars suppressed — this is a reading document -->
+
+<script>
+// Tab navigation
+document.querySelectorAll('.tab-btn').forEach(btn => {
+  btn.addEventListener('click', function() {
+    const target = this.dataset.tab;
+    document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+    document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
+    this.classList.add('active');
+    document.getElementById('tab-' + target).classList.add('active');
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  });
+});
+
+// Back to top
+const btt = document.getElementById('backToTop');
+window.addEventListener('scroll', () => {
+  btt.classList.toggle('visible', window.scrollY > 400);
+});
+btt.addEventListener('click', () => window.scrollTo({ top: 0, behavior: 'smooth' }));
+</script>
+
+<!-- Auth -->
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="supabase.js"></script>
+<script src="user_progress.js"></script>
+<script>
+document.addEventListener('DOMContentLoaded', async () => {
+  const { data: { session } } = await client.auth.getSession();
+  if (!session) { window.location.href = 'index.html'; return; }
+  document.getElementById('logoffBtn').addEventListener('click', async () => {
+    await client.auth.signOut({ scope: 'local' });
+    window.location.href = 'index.html?signedout=1';
+  });
+});
+</script>
+
+</body>
+</html>
