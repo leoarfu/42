@@ -1,0 +1,715 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, shrink-to-fit=no">
+<title>M1-2 — Orbital Regimes Compared · LEOAF</title>
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;600;800&family=Share+Tech+Mono&family=Libre+Baskerville:ital,wght@0,400;0,700;1,400&display=swap" rel="stylesheet">
+<link rel="icon" href="favicon.ico" sizes="any" type="image/x-icon">
+<link rel="manifest" href="site.webmanifest">
+<meta name="theme-color" content="#0f0f0f">
+
+<script>
+window.leoafAbort = async function () {
+    function go() { window.location.replace("index.html?signedout=1"); }
+    try {
+        if (typeof client !== "undefined" && client && client.auth && client.auth.signOut) {
+            try { await client.auth.signOut({ scope: "local" }); } catch (e) {}
+        }
+    } catch (e) {}
+    go();
+};
+</script>
+
+<style>
+* { box-sizing:border-box; margin:0; padding:0; }
+html { height:100%; -webkit-text-size-adjust:100%; overflow-x:hidden; }
+body { font-family:'Share Tech Mono',monospace; background:#000; color:white; overflow-x:hidden; min-height:100vh; }
+#starsCanvas { position:fixed; inset:0; z-index:-1; }
+
+header {
+    background:#000; border-bottom:1px solid #ff004f33;
+    position:sticky; top:0; z-index:100;
+    padding:1rem clamp(1.5rem,5vw,4rem);
+    display:flex; justify-content:space-between; align-items:center;
+    box-shadow:0 4px 16px #0008;
+}
+.logo { font-family:'Orbitron',sans-serif; font-weight:800; font-size:clamp(16px,2vw,22px); letter-spacing:3px; text-decoration:none; }
+.logo span:first-child { color:white; }
+.logo span:last-child { color:#ff004f; }
+.nav-right { display:flex; align-items:center; gap:10px; }
+.nav-btn {
+    background:transparent; border:1px solid #ff004f44; color:#ff004f;
+    padding:6px 14px; cursor:pointer; transition:0.3s ease;
+    font-size:11px; font-family:'Orbitron',sans-serif; letter-spacing:1px;
+    text-decoration:none; display:inline-block;
+}
+.nav-btn:hover { background:#ff004f; color:black; }
+
+.breadcrumb { padding:14px clamp(1.5rem,5vw,4rem); font-size:11px; color:#ffffff44; letter-spacing:1px; position:relative; z-index:1; }
+.breadcrumb a { color:#00d9ff66; text-decoration:none; }
+.breadcrumb a:hover { color:#00d9ff; }
+.breadcrumb span { margin:0 8px; }
+
+.lesson-wrap { max-width:820px; margin:0 auto; padding:0 clamp(1.5rem,5vw,4rem) 80px; position:relative; z-index:1; }
+
+.lesson-header { padding:30px 0 28px; border-bottom:1px solid #ffffff11; margin-bottom:36px; }
+.lesson-tag { font-family:'Orbitron',sans-serif; font-size:10px; color:#ff004f; letter-spacing:3px; margin-bottom:10px; }
+.lesson-header h1 { font-family:'Orbitron',sans-serif; font-size:clamp(20px,3.5vw,32px); font-weight:800; line-height:1.2; margin-bottom:12px; }
+.lesson-meta { display:flex; gap:10px; flex-wrap:wrap; margin-bottom:16px; }
+.l-pill { font-family:'Orbitron',sans-serif; font-size:10px; padding:3px 10px; border:1px solid; letter-spacing:1px; }
+.l-pill-q { color:#ff004f; border-color:#ff004f44; }
+.l-pill-t { color:#39ff14; border-color:#39ff1444; }
+.lesson-intro { font-size:13px; line-height:1.85; opacity:0.75; }
+
+.toc { background:rgba(0,217,255,0.06); border:1px solid #00d9ff33; padding:24px 28px; margin:30px 0; }
+.toc h4 { font-family:'Orbitron',sans-serif; font-size:10px; color:#00d9ff; letter-spacing:2px; margin-bottom:16px; }
+.toc ol { padding-left:20px; }
+.toc li { font-size:13px; line-height:2.1; opacity:1; }
+.toc li a { color:#00d9ffbb; text-decoration:none; transition:0.15s; }
+.toc li a:hover { color:#ffffff; padding-left:4px; }
+.toc li::marker { color:#ff004f; font-family:'Orbitron',sans-serif; font-size:10px; }
+
+.content-block { margin-bottom:48px; }
+.content-block h2 {
+    font-family:'Orbitron',sans-serif; font-size:13px; color:#00d9ff;
+    letter-spacing:2px; text-transform:uppercase;
+    margin-bottom:18px; padding-bottom:10px;
+    border-bottom:1px solid #00d9ff22;
+    scroll-margin-top:80px;
+}
+.content-block h3 { font-family:'Orbitron',sans-serif; font-size:11px; color:#ffffff88; letter-spacing:1.5px; text-transform:uppercase; margin:28px 0 12px; }
+.content-block p { font-size:13px; line-height:1.9; opacity:0.85; margin-bottom:16px; }
+.content-block ul, .content-block ol { padding-left:0; margin-bottom:16px; }
+.content-block ul li, .content-block ol li { font-size:13px; line-height:1.85; opacity:0.85; padding-left:20px; position:relative; margin-bottom:6px; }
+.content-block ul li::before { content:'›'; position:absolute; left:0; color:#00d9ff; }
+
+.callout { border-left:3px solid #00d9ff; background:rgba(0,217,255,0.05); padding:16px 20px; margin:22px 0; font-size:12px; line-height:1.8; }
+.callout.red   { border-left-color:#ff004f; background:rgba(255,0,79,0.05); }
+.callout.green { border-left-color:#39ff14; background:rgba(57,255,20,0.05); }
+.callout.amber { border-left-color:#ffaa00; background:rgba(255,170,0,0.05); }
+.callout strong { font-family:'Orbitron',sans-serif; font-size:10px; letter-spacing:1px; display:block; margin-bottom:8px; color:inherit; }
+
+.key-numbers { display:grid; grid-template-columns:repeat(auto-fit,minmax(140px,1fr)); gap:12px; margin:22px 0; }
+.kn-item { background:rgba(255,255,255,0.03); border:1px solid #ffffff11; padding:16px 12px; text-align:center; }
+.kn-val { font-family:'Orbitron',sans-serif; font-size:clamp(15px,2.3vw,22px); font-weight:800; color:#00d9ff; display:block; }
+.kn-label { font-size:10px; opacity:0.5; letter-spacing:1px; margin-top:5px; display:block; line-height:1.4; }
+
+.compare-table { width:100%; border-collapse:collapse; margin:22px 0; font-size:12px; }
+.compare-table th { font-family:'Orbitron',sans-serif; font-size:10px; letter-spacing:1px; color:#00d9ff; padding:10px 12px; border-bottom:1px solid #00d9ff33; text-align:left; }
+.compare-table td { padding:10px 12px; border-bottom:1px solid #ffffff0a; line-height:1.5; opacity:0.85; vertical-align:top; }
+.compare-table tr:hover td { background:rgba(255,255,255,0.02); }
+
+.diagram-wrap { margin:24px 0; background:rgba(255,255,255,0.02); border:1px solid #ffffff11; padding:20px; overflow-x:auto; }
+.diagram-wrap figcaption { font-size:11px; color:#ffffff44; margin-top:12px; text-align:center; letter-spacing:1px; }
+
+.quiz-block { background:rgba(17,17,17,0.9); border:1px solid #ff004f33; padding:28px; margin:48px 0 32px; }
+.quiz-block h2 { font-family:'Orbitron',sans-serif; font-size:13px; color:#ff004f; letter-spacing:2px; margin-bottom:6px; }
+.quiz-intro { font-size:12px; opacity:0.6; margin-bottom:24px; padding-bottom:16px; border-bottom:1px solid #ff004f22; line-height:1.6; }
+.quiz-q { margin-bottom:28px; }
+.quiz-q p { font-size:13px; opacity:0.9; margin-bottom:12px; line-height:1.65; }
+.quiz-q p strong { color:#00d9ff; }
+.quiz-options { display:flex; flex-direction:column; gap:8px; }
+.quiz-opt { background:rgba(255,255,255,0.03); border:1px solid #ffffff1a; padding:11px 16px; cursor:pointer; font-size:12px; font-family:'Share Tech Mono',monospace; transition:0.2s ease; text-align:left; color:white; line-height:1.5; }
+.quiz-opt:hover:not(:disabled) { background:rgba(0,217,255,0.08); border-color:#00d9ff44; }
+.quiz-opt.correct  { background:rgba(57,255,20,0.1);  border-color:#39ff14; color:#39ff14; }
+.quiz-opt.wrong    { background:rgba(255,0,79,0.1);   border-color:#ff004f; color:#ff004f; }
+.quiz-opt:disabled { cursor:default; }
+.quiz-feedback { font-size:12px; margin-top:10px; min-height:18px; line-height:1.7; opacity:0.9; padding:0 4px; }
+.quiz-score { font-family:'Orbitron',sans-serif; font-size:12px; color:#39ff14; margin-top:20px; letter-spacing:1px; display:none; padding-top:16px; border-top:1px solid #39ff1433; }
+
+.py-block { background:rgba(10,10,10,0.95); border:1px solid #39ff1422; padding:28px; margin:32px 0; }
+.py-block h2 { font-family:'Orbitron',sans-serif; font-size:13px; color:#39ff14; letter-spacing:2px; margin-bottom:8px; }
+.py-block .py-intro { font-size:12px; opacity:0.7; margin-bottom:20px; padding-bottom:16px; border-bottom:1px solid #39ff1422; line-height:1.7; }
+.py-exercise { margin-bottom:32px; }
+.py-exercise:last-child { margin-bottom:0; }
+.py-exercise h3 { font-family:'Orbitron',sans-serif; font-size:11px; color:#39ff1499; letter-spacing:1.5px; text-transform:uppercase; margin-bottom:10px; }
+.py-exercise p { font-size:12px; opacity:0.8; margin-bottom:14px; line-height:1.75; }
+.py-block pre { background:#050505; border:1px solid #39ff1433; padding:20px; font-family:'Share Tech Mono',monospace; font-size:11.5px; line-height:1.75; overflow-x:auto; color:#39ff14; white-space:pre; margin-bottom:12px; }
+.py-block .py-challenge { background:rgba(57,255,20,0.04); border-left:2px solid #39ff14; padding:12px 16px; margin-top:14px; font-size:12px; line-height:1.75; opacity:0.8; }
+.py-block .py-challenge strong { font-family:'Orbitron',sans-serif; font-size:10px; color:#39ff14; display:block; margin-bottom:6px; letter-spacing:1px; }
+
+.reflection-block { background:rgba(255,170,0,0.04); border:1px solid #ffaa0033; padding:24px; margin:32px 0; }
+.reflection-block h2 { font-family:'Orbitron',sans-serif; font-size:13px; color:#ffaa00; letter-spacing:2px; margin-bottom:8px; }
+.reflection-block .ref-intro { font-size:12px; opacity:0.7; margin-bottom:20px; padding-bottom:14px; border-bottom:1px solid #ffaa0022; line-height:1.7; }
+.ref-prompt { margin-bottom:20px; }
+.ref-prompt h3 { font-family:'Orbitron',sans-serif; font-size:11px; color:#ffaa0099; letter-spacing:1px; margin-bottom:8px; }
+.ref-prompt p { font-size:12px; opacity:0.8; line-height:1.75; margin-bottom:10px; }
+
+.back-to-top { position:fixed; bottom:28px; right:28px; z-index:200; width:44px; height:44px; background:#000; border:1px solid #00d9ff55; color:#00d9ff; font-size:20px; cursor:pointer; display:flex; align-items:center; justify-content:center; opacity:0; pointer-events:none; transition:opacity 0.3s ease, border-color 0.3s ease; }
+.back-to-top.visible { opacity:1; pointer-events:auto; }
+.back-to-top:hover { border-color:#00d9ff; background:#001a2c; }
+
+.complete-wrap { margin-top:56px; padding-top:30px; border-top:1px solid #ffffff11; text-align:center; }
+.complete-btn { font-family:'Orbitron',sans-serif; font-size:13px; letter-spacing:2px; padding:14px 44px; background:transparent; border:1px solid #39ff14; color:#39ff14; cursor:pointer; transition:0.3s ease; }
+.complete-btn:hover:not(.done) { background:#39ff14; color:black; box-shadow:0 0 20px rgba(57,255,20,0.4); }
+.complete-btn.done { background:rgba(57,255,20,0.1); cursor:default; opacity:0.7; }
+.complete-msg { font-size:12px; color:#39ff14; margin-top:14px; min-height:18px; letter-spacing:1px; }
+
+.lesson-nav { display:flex; justify-content:space-between; margin-top:30px; flex-wrap:wrap; gap:10px; }
+.lesson-nav a { font-family:'Orbitron',sans-serif; font-size:11px; color:#00d9ff66; text-decoration:none; letter-spacing:1px; transition:0.2s; }
+.lesson-nav a:hover { color:#00d9ff; }
+
+footer { text-align:center; padding:30px; opacity:0.3; font-size:11px; position:relative; z-index:1; letter-spacing:1px; }
+
+@media (max-width:600px) {
+    .key-numbers { grid-template-columns:1fr 1fr; }
+    .compare-table { font-size:11px; }
+    .compare-table th, .compare-table td { padding:8px 8px; }
+}
+
+/* ── LIGHT READING MODE ── */
+.content-block { background:#f5f2ec; color:#1a1a1a; padding:36px clamp(24px,4vw,48px); margin-bottom:24px; border-left:4px solid #00d9ff; position:relative; z-index:1; }
+.content-block h2 { font-family:'Orbitron',sans-serif; font-size:13px; color:#003d66; letter-spacing:2px; text-transform:uppercase; margin-bottom:20px; padding-bottom:10px; border-bottom:2px solid #00d9ff66; scroll-margin-top:80px; }
+.content-block h3 { font-family:'Orbitron',sans-serif; font-size:11px; color:#444; letter-spacing:1.5px; text-transform:uppercase; margin:32px 0 14px; }
+.content-block p { font-family:'Libre Baskerville', Georgia, serif; font-size:15px; line-height:1.9; color:#1a1a1a; opacity:1; margin-bottom:18px; }
+.content-block ul li { font-family:'Libre Baskerville', Georgia, serif; font-size:14px; line-height:1.85; color:#1a1a1a; opacity:1; margin-bottom:8px; }
+.content-block ul li::before { color:#0077aa; }
+.content-block .callout { border-left:3px solid #0088cc; background:#e8f4fb; color:#1a1a1a; }
+.content-block .callout.red   { border-left-color:#cc0033; background:#fdecea; }
+.content-block .callout.green { border-left-color:#1a7a1a; background:#eafaea; }
+.content-block .callout.amber { border-left-color:#996600; background:#fef9ec; }
+.content-block .callout strong { color:inherit; }
+.content-block .kn-item { background:#fff; border:1px solid #d0d0d0; }
+.content-block .kn-label { color:#555; opacity:1; }
+.content-block .compare-table th { color:#003d66; border-bottom:2px solid #00d9ff66; }
+.content-block .compare-table td { color:#1a1a1a; opacity:1; border-bottom:1px solid #ddd; }
+.content-block .compare-table tr:hover td { background:#f0f0f0; }
+.content-block .diagram-wrap { background:#0a0a0a; border:1px solid #333; }
+.content-block .diagram-wrap figcaption { color:#ffffff55; }
+</style>
+
+</head>
+<body>
+
+<canvas id="starsCanvas"></canvas>
+
+<header>
+    <a href="dashboard.html" class="logo"><span>LEO</span><span>AF</span></a>
+    <div class="nav-right">
+        <a href="m1.html" class="nav-btn">← M1 HUB</a>
+        <button class="nav-btn" onclick="leoafAbort()">ABORT</button>
+    </div>
+</header>
+
+<div class="breadcrumb">
+    <a href="dashboard.html">DASHBOARD</a><span>/</span>
+    <a href="m1.html">M1</a><span>/</span>
+    <span style="color:#ffffff88;">LESSON 02 — ORBITAL REGIMES COMPARED</span>
+</div>
+
+<div class="lesson-wrap">
+
+<div class="lesson-header">
+    <div class="lesson-tag">M1 · LESSON 02 OF 7</div>
+    <h1>Orbital Regimes Compared</h1>
+    <div class="lesson-meta">
+        <div class="l-pill l-pill-q">MODULE 1</div>
+        <div class="l-pill l-pill-t">FOUNDATIONS</div>
+    </div>
+    <p class="lesson-intro">Altitude is the first and most consequential decision an architect makes, because almost everything else follows from it — how many satellites you need, how fast the link is, how strong the signal is, how hard the radiation hits, how long the satellite lives, and how much it costs to get there. This lesson compares the orbital regimes along every axis that matters. It is a comparison, not a derivation: the orbital mechanics behind these behaviours are the next module, the latency physics the next lesson, and link budgets the RF module. Here the goal is the map and the tradeoffs it forces.</p>
+</div>
+
+<div class="toc">
+    <h4>CONTENTS</h4>
+    <ol>
+        <li><a href="#s1">The altitude map</a></li>
+        <li><a href="#s2">The master tradeoff</a></li>
+        <li><a href="#s3">Coverage geometry</a></li>
+        <li><a href="#s4">Latency by regime</a></li>
+        <li><a href="#s5">Link strength &amp; terminal implications</a></li>
+        <li><a href="#s6">The radiation environment</a></li>
+        <li><a href="#s7">Drag, lifetime &amp; debris</a></li>
+        <li><a href="#s8">Eclipse, thermal &amp; power</a></li>
+        <li><a href="#s9">Doppler &amp; dynamics</a></li>
+        <li><a href="#s10">Getting there: launch by regime</a></li>
+        <li><a href="#s11">Regime profiles &amp; use cases</a></li>
+        <li><a href="#s12">The comparison, side by side</a></li>
+        <li><a href="#quiz">Knowledge check</a></li>
+        <li><a href="#python">Python exercises</a></li>
+        <li><a href="#reflect">Reflection prompts</a></li>
+    </ol>
+</div>
+
+<div class="content-block" id="s1">
+    <h2>1. The Altitude Map</h2>
+    <p>Orbits are grouped into regimes by altitude, and the boundaries are not arbitrary — each is set by physics. From the ground up:</p>
+    <p><strong>Very Low Earth Orbit (VLEO)</strong> sits roughly below 450 km, with the most aggressive proposals under 300 km. Its lower edge is set by atmospheric drag: below a few hundred kilometres the residual atmosphere is thick enough that a satellite decays in weeks to months without propulsion.</p>
+    <p><strong>Low Earth Orbit (LEO)</strong> spans roughly 200 to 2,000 km. This is where the broadband mega-constellations live — Starlink's main shell at 550 km, OneWeb at 1,200 km, Kuiper near 600 km — along with Earth-observation satellites and the ISS at about 400 km. Its upper edge butts against the inner radiation belt.</p>
+    <p><strong>Medium Earth Orbit (MEO)</strong> spans 2,000 km up to just below geostationary altitude. It is shaped internally by the radiation belts: the navigation constellations sit around 19,000–23,000 km, while O3b's data constellation deliberately sits near 8,000 km in the relatively benign gap between the belts.</p>
+    <p><strong>Geostationary Orbit (GEO)</strong> is a single special altitude, 35,786 km above the equator, where the orbital period equals one sidereal day so the satellite appears fixed in the sky. This is the home of broadcast, weather, and traditional fixed satellite services.</p>
+    <p><strong>Highly Elliptical Orbit (HEO)</strong> is the exception to the altitude-band logic: a deliberately eccentric orbit, the classic example being Molniya, with a low perigee and an apogee near 40,000 km, used to dwell over high latitudes that GEO cannot reach.</p>
+
+    <div class="diagram-wrap">
+        <svg viewBox="0 0 700 360" width="100%" xmlns="http://www.w3.org/2000/svg" font-family="Share Tech Mono, monospace">
+            <defs><pattern id="g12" width="35" height="35" patternUnits="userSpaceOnUse"><path d="M 35 0 L 0 0 0 35" fill="none" stroke="#ffffff06" stroke-width="0.5"/></pattern></defs>
+            <rect width="700" height="360" fill="url(#g12)"/>
+            <!-- log-ish altitude axis, ground at bottom -->
+            <line x1="120" y1="340" x2="120" y2="20" stroke="#ffffff33" stroke-width="1"/>
+            <text x="112" y="20" font-size="8" fill="#ffffff44" text-anchor="end">alt ↑</text>
+            <!-- Earth surface -->
+            <line x1="120" y1="340" x2="660" y2="340" stroke="#00d9ff55" stroke-width="1.5"/>
+            <text x="124" y="353" font-size="9" fill="#00d9ff88">EARTH SURFACE — 0 km</text>
+
+            <!-- VLEO band -->
+            <rect x="120" y="318" width="540" height="22" fill="#39ff1410"/>
+            <text x="130" y="333" font-size="9" fill="#39ff14cc">VLEO  &lt;450 km — drag floor, self-cleans</text>
+
+            <!-- LEO band -->
+            <rect x="120" y="280" width="540" height="38" fill="#39ff1408"/>
+            <text x="130" y="303" font-size="9" fill="#39ff14aa">LEO  200–2,000 km — Starlink 550, OneWeb 1,200, ISS 400</text>
+
+            <!-- inner belt -->
+            <rect x="120" y="232" width="540" height="40" fill="#ff004f22"/>
+            <text x="130" y="256" font-size="9" fill="#ff004fcc">INNER VAN ALLEN BELT  ~1,000–6,000 km (protons)</text>
+
+            <!-- slot region -->
+            <rect x="120" y="196" width="540" height="34" fill="#00d9ff14"/>
+            <text x="130" y="217" font-size="9" fill="#00d9ffcc">SLOT  ~6,000–13,000 km — benign — O3b 8,000</text>
+
+            <!-- outer belt -->
+            <rect x="120" y="120" width="540" height="72" fill="#ff004f1c"/>
+            <text x="130" y="150" font-size="9" fill="#ff004fcc">OUTER VAN ALLEN BELT  ~13,000–60,000 km (electrons)</text>
+            <text x="130" y="166" font-size="9" fill="#ff004f99">GNSS 19,000–23,000 km — heavily hardened</text>
+
+            <!-- GEO -->
+            <line x1="120" y1="70" x2="660" y2="70" stroke="#ffaa00" stroke-width="1.5" stroke-dasharray="6,4"/>
+            <text x="130" y="62" font-size="9" fill="#ffaa00cc">GEO  35,786 km — fixed in sky, no poles, ~600 ms RTT</text>
+
+            <!-- latency arrow -->
+            <text x="678" y="330" font-size="8" fill="#39ff1499" text-anchor="end" transform="rotate(-90 678 330)">low latency, many sats</text>
+            <text x="678" y="120" font-size="8" fill="#ffaa0099" text-anchor="end" transform="rotate(-90 678 120)">high latency, few sats</text>
+        </svg>
+        <figcaption>ALTITUDE REGIMES &amp; THE VAN ALLEN BELTS — SCHEMATIC, NOT TO SCALE</figcaption>
+    </div>
+</div>
+
+<div class="content-block" id="s2">
+    <h2>2. The Master Tradeoff</h2>
+    <p>Every regime comparison reduces to one tension: <strong>altitude buys coverage per satellite, and costs you almost everything else.</strong></p>
+    <p>Go higher and a single satellite sees a larger slice of the Earth, so you need fewer of them, and at GEO the satellite stops moving across the sky so the user terminal can be a fixed dish. But the same distance that widens the footprint also lengthens the round trip to hundreds of milliseconds, weakens the signal, and — at MEO — drops you into the radiation belts.</p>
+    <p>Go lower and the round trip collapses to tens of milliseconds, the signal is far stronger so the terminal can be small, and below the inner belt the radiation environment is benign. But the footprint shrinks, so you need hundreds or thousands of satellites for continuous coverage, the terminal must track fast-moving targets, and atmospheric drag starts fighting you.</p>
+    <div class="callout amber">
+        <strong>HOLD THIS THROUGHOUT</strong>
+        Every section below is a different face of the same tension. There is no free altitude — each metre you climb or descend trades one set of problems for another.
+    </div>
+</div>
+
+<div class="content-block" id="s3">
+    <h2>3. Coverage Geometry</h2>
+    <p>How much of the Earth one satellite can serve depends on its altitude and the minimum elevation angle at which a terminal can still close the link. Higher means a wider footprint and fewer satellites; lower means a narrow footprint and many.</p>
+    <p>A single GEO satellite is geometrically visible from roughly a third of the Earth's surface, up to about 81° latitude in theory and closer to 70° in practice once a usable elevation angle is required. Three GEO satellites spaced 120° apart give near-global coverage — with one critical exception: the poles. Because GEO sits over the equator, it cannot see high latitudes at all, which is why polar regions have always been a GEO blind spot.</p>
+    <p>MEO footprints are smaller but still large. The GNSS constellations use on the order of 24 to 30 satellites so that at least four are visible from anywhere for positioning. O3b reaches near-global non-polar data coverage with roughly twenty satellites.</p>
+    <p>LEO is where the satellite count explodes. A single LEO satellite's footprint is small and it crosses the sky in minutes, so continuous coverage demands dozens for a single-coverage service — Iridium used 66 at 780 km for global voice — and thousands when the goal is broadband capacity rather than mere coverage, which is why Starlink is counted in the thousands. The count rises steeply as altitude drops, because footprint area falls roughly with the square of how close you are.</p>
+    <div class="key-numbers">
+        <div class="kn-item"><span class="kn-val">~1/3</span><span class="kn-label">Earth seen by one GEO sat</span></div>
+        <div class="kn-item"><span class="kn-val">3</span><span class="kn-label">GEO sats for near-global (no poles)</span></div>
+        <div class="kn-item"><span class="kn-val">66</span><span class="kn-label">Iridium sats, global voice @ 780 km</span></div>
+        <div class="kn-item"><span class="kn-val">1,000s</span><span class="kn-label">LEO sats for broadband capacity</span></div>
+    </div>
+</div>
+
+<div class="content-block" id="s4">
+    <h2>4. Latency by Regime</h2>
+    <p>Latency is set by distance and the finite speed of light, so it tracks altitude directly. The values below are for comparison; the derivation and the full end-to-end budget are the subject of the next lesson.</p>
+    <p>A GEO round trip — up and back down, and again for the return path — runs to roughly 500–600 ms once ground handling is included, enough to be felt in any interactive use. MEO at 8,000 km brings the round trip down to roughly 100–150 ms. LEO at 550 km collapses it to roughly 20–50 ms, comparable to terrestrial broadband, which is the entire commercial point of LEO. VLEO shaves a little more off LEO but the marginal latency gain is small; VLEO is chosen for other reasons.</p>
+    <div class="key-numbers">
+        <div class="kn-item"><span class="kn-val">~500–600 ms</span><span class="kn-label">GEO round trip</span></div>
+        <div class="kn-item"><span class="kn-val">~100–150 ms</span><span class="kn-label">MEO (~8,000 km)</span></div>
+        <div class="kn-item"><span class="kn-val">~20–50 ms</span><span class="kn-label">LEO (~550 km)</span></div>
+    </div>
+</div>
+
+<div class="content-block" id="s5">
+    <h2>5. Link Strength &amp; Terminal Implications</h2>
+    <p>Signal strength falls with the square of distance, so a closer satellite delivers a far stronger signal for the same transmit power. The practical consequence is the user terminal. A GEO link, spanning 35,786 km, needs a high-gain dish to close; a LEO link a tenth as far needs far less aperture, which is part of why a flat panel can serve LEO. The full link-budget mathematics belongs to the RF module; the regime-level point is that lower orbits permit smaller, cheaper terminals, and higher orbits demand larger ones.</p>
+</div>
+
+<div class="content-block" id="s6">
+    <h2>6. The Radiation Environment</h2>
+    <p>Radiation is the axis most often underestimated, and it is the main reason MEO is a harder place to operate than either LEO or GEO. The Earth is wrapped in the Van Allen belts, regions where the magnetic field traps energetic charged particles, and where a satellite sits relative to them drives how much shielding and radiation-hardening it needs — which drives its cost.</p>
+    <p>The inner belt, dominated by high-energy protons, extends from roughly 1,000 km out to about 6,000 km. Above it lies a relatively calm slot region from about 6,000 to 13,000 km. The outer belt, dominated by energetic electrons, runs from roughly 13,000 km to 60,000 km, most intense around 16,000–20,000 km.</p>
+    <p>This geography explains the regimes. LEO below about 1,000 km sits beneath the inner belt and enjoys a benign environment, which is exactly what lets mega-constellations use cheaper commercial-grade electronics. MEO is the hard case: the navigation constellations at 19,000–23,000 km sit squarely in the outer belt and must be heavily hardened, whereas O3b's choice of roughly 8,000 km is no accident — it threads the calm slot region between the belts. GEO sits beyond the most intense belts but still in an energetic-electron environment that causes spacecraft surface charging, a different hazard requiring its own mitigation.</p>
+    <p>One LEO caveat completes the picture: the South Atlantic Anomaly, a region where the inner belt dips down to around 200 km over the South Atlantic, exposing otherwise-benign LEO satellites to elevated radiation each time they pass through it.</p>
+    <div class="callout red">
+        <strong>WHY MEO IS THE HARD CASE</strong>
+        It is the one comms regime that sits inside a radiation belt by necessity. O3b's 8,000 km slot choice and the navigation constellations' heavy hardening are two different answers to the same belt problem.
+    </div>
+</div>
+
+<div class="content-block" id="s7">
+    <h2>7. Atmospheric Drag, Orbital Lifetime &amp; Debris</h2>
+    <p>The lower atmosphere does not stop cleanly at a fixed altitude; thin residual gas extends well into LEO and exerts drag that slowly lowers an orbit. How strongly depends sharply on altitude, and it creates a tradeoff with a sustainability dimension that has become central to the industry.</p>
+    <p>At the ISS altitude of about 400 km, drag is strong enough that the station would re-enter within a year or two without periodic reboosts. At 550 km, a satellite naturally decays over roughly five years once it stops station-keeping — which is why Starlink's main shell is considered relatively self-cleaning. At 1,200 km, the same satellite would take centuries to come down, which is why OneWeb at that altitude must actively deorbit its satellites rather than rely on decay. VLEO is the extreme: below 300 km a satellite needs continuous propulsion just to stay up, and decays in months if it stops.</p>
+    <p>This produces a genuine architectural tension. Lower orbits demand propulsion and accept shorter lifetimes, but they self-clean: failed satellites and debris re-enter on their own, keeping the environment manageable. Higher LEO buys long satellite life and no drag penalty, but anything left there — a dead satellite, a fragment — persists for centuries, accumulating as a collision hazard. The full treatment of debris, conjunction, and disposal rules is in the resilience module; the regime-level point is that altitude is also a debris decision.</p>
+    <div class="key-numbers">
+        <div class="kn-item"><span class="kn-val">~400 km</span><span class="kn-label">ISS — needs reboost</span></div>
+        <div class="kn-item"><span class="kn-val">~5 yr</span><span class="kn-label">Decay at ~550 km</span></div>
+        <div class="kn-item"><span class="kn-val">centuries</span><span class="kn-label">Decay at ~1,200 km</span></div>
+        <div class="kn-item"><span class="kn-val">months</span><span class="kn-label">VLEO without propulsion</span></div>
+    </div>
+</div>
+
+<div class="content-block" id="s8">
+    <h2>8. Eclipse, Thermal Cycling &amp; Power</h2>
+    <p>A satellite is powered by sunlight on its solar panels and by batteries when the Earth eclipses the Sun. How often that happens depends on the orbit, and it shapes the satellite's power and thermal design.</p>
+    <p>A LEO satellite orbits in about 90 to 100 minutes, so it makes 15 to 16 orbits a day and is eclipsed on most of them — thousands of charge-and-discharge cycles a year. Battery wear from that cycling is a real life-limiter for LEO satellites and a driver of their sizing. The same rapid passage in and out of sunlight imposes thermal cycling on the structure and electronics.</p>
+    <p>GEO is the opposite. A geostationary satellite is in continuous sunlight for most of the year and is eclipsed only during two roughly 45-day seasons around the equinoxes, for up to about 70 minutes a day — on the order of 90 eclipse cycles a year rather than thousands. Its batteries live far easier lives, though each eclipse is longer.</p>
+</div>
+
+<div class="content-block" id="s9">
+    <h2>9. Doppler &amp; Dynamics</h2>
+    <p>Because a LEO satellite moves fast relative to the ground, its signal carries a large Doppler shift that the system must track and compensate, and it crosses the sky quickly enough to force continuous handover between satellites. A GEO satellite, fixed relative to the ground, has effectively no Doppler and never hands over. MEO sits between. The mechanics of this motion are the next module's subject and the handover and Doppler-compensation machinery is covered in the networking and air-interface modules; the regime-level point is simply that lower orbits trade a fixed, quiet link for a fast, dynamic one.</p>
+</div>
+
+<div class="content-block" id="s10">
+    <h2>10. Getting There: Launch Cost by Regime</h2>
+    <p>Altitude also sets how hard the satellite is to launch, because reaching a higher orbit takes more energy. LEO is the cheapest destination. GEO is among the most expensive: a launch must first reach a transfer orbit and then circularise at altitude, requiring substantially more delta-v, and the satellite often carries its own propulsion to finish the job. MEO falls between. This feeds straight into the economics — a GEO satellite is not only more expensive to build and harden, it is more expensive to place — and is part of why the cost-per-delivered-capacity comparison between regimes is not as simple as comparing satellite counts.</p>
+</div>
+
+<div class="content-block" id="s11">
+    <h2>11. Regime Profiles &amp; Use Cases</h2>
+    <p><strong>GEO</strong> — One satellite covers a third of the planet and never moves in the sky, making it ideal for one-to-many broadcast, weather imaging, and fixed services where latency does not matter. Its weaknesses are latency, the polar blind spot, and the cost of building, hardening, and launching a large satellite.</p>
+    <p><strong>MEO</strong> — A middle ground used where its specific geometry pays off. The navigation constellations live here because the altitude gives good global geometry with a manageable satellite count; O3b uses the benign slot region for lower-latency data than GEO without LEO's satellite count.</p>
+    <p><strong>LEO</strong> — Low latency, strong signal, small terminals, benign radiation, self-cleaning at the lower end — at the price of needing hundreds to thousands of satellites and fighting drag. This is the regime of the broadband mega-constellations, most Earth observation, and crewed spaceflight.</p>
+    <p><strong>VLEO</strong> — Pushes LEO's advantages further: even lower latency, even stronger signal, sharper Earth-observation imagery, and rapid self-cleaning. The price is constant propulsion against drag and short lifetimes. It is mostly the domain of high-resolution imaging and experimental systems, with growing interest for communications.</p>
+    <p><strong>HEO</strong> — The specialist. By dwelling for hours near a high apogee, a Molniya-type orbit covers high-latitude regions that GEO cannot, historically used for high-latitude communications and early-warning missions.</p>
+</div>
+
+<div class="content-block" id="s12">
+    <h2>12. The Comparison, Side by Side</h2>
+    <table class="compare-table" style="overflow-x:auto; display:block; min-width:560px;">
+        <thead>
+            <tr><th>Regime</th><th>Altitude</th><th>Round trip</th><th>Sats for global</th><th>Radiation</th><th>Drag / lifetime</th><th>Typical use</th></tr>
+        </thead>
+        <tbody>
+            <tr><td>VLEO</td><td>&lt;450 km</td><td>lowest</td><td>many thousands</td><td>benign</td><td>high drag, self-cleans</td><td>hi-res imaging, experimental</td></tr>
+            <tr><td>LEO</td><td>200–2,000 km</td><td>~20–50 ms</td><td>hundreds–thousands</td><td>benign (SAA aside)</td><td>self-cleans only when low</td><td>broadband, EO, crewed</td></tr>
+            <tr><td>MEO</td><td>2,000–35,786 km</td><td>~100–150 ms</td><td>tens</td><td>harsh (belts)</td><td>negligible; persists</td><td>GNSS, O3b data</td></tr>
+            <tr><td>GEO</td><td>35,786 km</td><td>~500–600 ms</td><td>3 (no poles)</td><td>electron charging</td><td>none; graveyard at EOL</td><td>broadcast, weather, fixed</td></tr>
+            <tr><td>HEO</td><td>apogee ~40,000 km</td><td>varies</td><td>few</td><td>crosses belts</td><td>persists</td><td>high-latitude comms</td></tr>
+        </tbody>
+    </table>
+    <div class="callout green">
+        <strong>THE ONE SENTENCE TO CARRY OUT</strong>
+        There is no best orbit, only a best orbit for a given job, and the choice is a trade of coverage-per-satellite against latency, link strength, radiation, lifetime, and launch cost. Every architecture in the rest of the program is, at bottom, a particular resolution of that trade.
+    </div>
+</div>
+
+<!-- QUIZ -->
+<div class="quiz-block" id="quiz">
+    <h2>KNOWLEDGE CHECK</h2>
+    <p class="quiz-intro">Ten questions on this lesson's scope — the regimes and the axes that distinguish them. One correct answer each; read carefully.</p>
+
+    <div class="quiz-q"><p><strong>Q1.</strong> The lower boundary of usable LEO/VLEO is set primarily by:</p>
+        <div class="quiz-options">
+            <button class="quiz-opt" data-q="1" data-correct="false">A — The inner Van Allen belt</button>
+            <button class="quiz-opt" data-q="1" data-correct="true">B — Atmospheric drag, which decays low orbits in weeks to months</button>
+            <button class="quiz-opt" data-q="1" data-correct="false">C — Launch vehicle limits</button>
+            <button class="quiz-opt" data-q="1" data-correct="false">D — International regulation</button>
+        </div><div class="quiz-feedback" id="fb1"></div></div>
+
+    <div class="quiz-q"><p><strong>Q2.</strong> Three GEO satellites give near-global coverage except for:</p>
+        <div class="quiz-options">
+            <button class="quiz-opt" data-q="2" data-correct="false">A — The oceans</button>
+            <button class="quiz-opt" data-q="2" data-correct="true">B — The poles, because GEO sits over the equator</button>
+            <button class="quiz-opt" data-q="2" data-correct="false">C — The equator</button>
+            <button class="quiz-opt" data-q="2" data-correct="false">D — Mountainous terrain</button>
+        </div><div class="quiz-feedback" id="fb2"></div></div>
+
+    <div class="quiz-q"><p><strong>Q3.</strong> The "master tradeoff" of orbital regime is best stated as:</p>
+        <div class="quiz-options">
+            <button class="quiz-opt" data-q="3" data-correct="false">A — Higher orbits are always better</button>
+            <button class="quiz-opt" data-q="3" data-correct="true">B — Altitude buys coverage per satellite at the cost of latency, link strength, radiation exposure, and drag</button>
+            <button class="quiz-opt" data-q="3" data-correct="false">C — Lower orbits are always cheaper</button>
+            <button class="quiz-opt" data-q="3" data-correct="false">D — All regimes are equivalent</button>
+        </div><div class="quiz-feedback" id="fb3"></div></div>
+
+    <div class="quiz-q"><p><strong>Q4.</strong> Why does MEO require the most radiation hardening of the comms regimes?</p>
+        <div class="quiz-options">
+            <button class="quiz-opt" data-q="4" data-correct="false">A — It is closest to the Sun</button>
+            <button class="quiz-opt" data-q="4" data-correct="true">B — The navigation altitudes sit inside the Van Allen belts</button>
+            <button class="quiz-opt" data-q="4" data-correct="false">C — It has the longest eclipses</button>
+            <button class="quiz-opt" data-q="4" data-correct="false">D — It experiences the most drag</button>
+        </div><div class="quiz-feedback" id="fb4"></div></div>
+
+    <div class="quiz-q"><p><strong>Q5.</strong> O3b deliberately operates near 8,000 km because that altitude:</p>
+        <div class="quiz-options">
+            <button class="quiz-opt" data-q="5" data-correct="false">A — Is geostationary</button>
+            <button class="quiz-opt" data-q="5" data-correct="true">B — Lies in the calm slot region between the Van Allen belts</button>
+            <button class="quiz-opt" data-q="5" data-correct="false">C — Has no atmospheric drag at all</button>
+            <button class="quiz-opt" data-q="5" data-correct="false">D — Is the cheapest to launch to</button>
+        </div><div class="quiz-feedback" id="fb5"></div></div>
+
+    <div class="quiz-q"><p><strong>Q6.</strong> A satellite at 550 km is considered relatively "self-cleaning" because:</p>
+        <div class="quiz-options">
+            <button class="quiz-opt" data-q="6" data-correct="false">A — It has onboard cleaning systems</button>
+            <button class="quiz-opt" data-q="6" data-correct="true">B — Residual drag decays it naturally in about five years after it stops station-keeping</button>
+            <button class="quiz-opt" data-q="6" data-correct="false">C — It burns up immediately</button>
+            <button class="quiz-opt" data-q="6" data-correct="false">D — It is deorbited by ground command only</button>
+        </div><div class="quiz-feedback" id="fb6"></div></div>
+
+    <div class="quiz-q"><p><strong>Q7.</strong> Why does a satellite at 1,200 km pose a greater debris concern than one at 550 km?</p>
+        <div class="quiz-options">
+            <button class="quiz-opt" data-q="7" data-correct="false">A — It is heavier</button>
+            <button class="quiz-opt" data-q="7" data-correct="true">B — Without active deorbit it persists for centuries rather than decaying in years</button>
+            <button class="quiz-opt" data-q="7" data-correct="false">C — It carries more fuel</button>
+            <button class="quiz-opt" data-q="7" data-correct="false">D — It is closer to the belts</button>
+        </div><div class="quiz-feedback" id="fb7"></div></div>
+
+    <div class="quiz-q"><p><strong>Q8.</strong> LEO satellites stress their batteries far more than GEO satellites because:</p>
+        <div class="quiz-options">
+            <button class="quiz-opt" data-q="8" data-correct="false">A — LEO batteries are smaller</button>
+            <button class="quiz-opt" data-q="8" data-correct="true">B — LEO satellites are eclipsed on most of their 15–16 daily orbits, cycling thousands of times a year</button>
+            <button class="quiz-opt" data-q="8" data-correct="false">C — GEO satellites have no batteries</button>
+            <button class="quiz-opt" data-q="8" data-correct="false">D — LEO is colder</button>
+        </div><div class="quiz-feedback" id="fb8"></div></div>
+
+    <div class="quiz-q"><p><strong>Q9.</strong> Compared with GEO, a LEO link allows a smaller user terminal mainly because:</p>
+        <div class="quiz-options">
+            <button class="quiz-opt" data-q="9" data-correct="false">A — LEO uses lower frequencies</button>
+            <button class="quiz-opt" data-q="9" data-correct="true">B — The far shorter distance gives a much stronger signal for the same power</button>
+            <button class="quiz-opt" data-q="9" data-correct="false">C — LEO satellites transmit more power</button>
+            <button class="quiz-opt" data-q="9" data-correct="false">D — Terminals are subsidised</button>
+        </div><div class="quiz-feedback" id="fb9"></div></div>
+
+    <div class="quiz-q"><p><strong>Q10.</strong> The single best summary of the lesson is:</p>
+        <div class="quiz-options">
+            <button class="quiz-opt" data-q="10" data-correct="false">A — LEO is the best orbit</button>
+            <button class="quiz-opt" data-q="10" data-correct="true">B — There is no best orbit, only a best orbit for a given job, set by trading coverage against latency, link, radiation, lifetime, and launch cost</button>
+            <button class="quiz-opt" data-q="10" data-correct="false">C — GEO is obsolete</button>
+            <button class="quiz-opt" data-q="10" data-correct="false">D — Altitude does not matter</button>
+        </div><div class="quiz-feedback" id="fb10"></div></div>
+
+    <div class="quiz-score" id="quizScore"></div>
+</div>
+
+<!-- PYTHON -->
+<div class="py-block" id="python">
+    <h2>PYTHON EXERCISES</h2>
+    <p class="py-intro">Three exercises grounding the regime comparison — radiation geography, coverage scaling, and the drag-versus-debris tradeoff. Python 3.8+ standard library only.</p>
+
+    <div class="py-exercise">
+        <h3>Exercise 1 — Altitude classifier with radiation flag</h3>
+        <p>Classify an altitude into its regime and flag its radiation exposure, encoding the belt geography from this lesson.</p>
+<pre>
+def classify(altitude_km):
+    if altitude_km < 450:      regime = "VLEO"
+    elif altitude_km < 2000:   regime = "LEO"
+    elif altitude_km < 35786:  regime = "MEO"
+    elif abs(altitude_km - 35786) < 100: regime = "GEO"
+    else:                      regime = "above GEO"
+
+    if 1000 <= altitude_km <= 6000:
+        rad = "INNER BELT — proton-hardening required"
+    elif 6000 < altitude_km < 13000:
+        rad = "slot region — relatively benign"
+    elif 13000 <= altitude_km <= 60000 and regime != "GEO":
+        rad = "OUTER BELT — electron-hardening required"
+    elif regime == "GEO":
+        rad = "energetic electrons — surface charging risk"
+    else:
+        rad = "benign (watch the South Atlantic Anomaly in LEO)"
+    return regime, rad
+
+for alt in [350, 550, 1200, 8000, 20200, 35786]:
+    regime, rad = classify(alt)
+    print(f"{alt:>6} km -> {regime:<10} | {rad}")
+
+# 1. Which two altitudes share the harshest radiation verdict, and why?
+# 2. The classifier treats LEO as benign. What real exception did the lesson name?
+</pre>
+    </div>
+
+    <div class="py-exercise">
+        <h3>Exercise 2 — Footprint and satellites for a coverage ring</h3>
+        <p>Estimate how the satellite count for continuous coverage scales as altitude drops, using simple geometry. (Real constellation design is the next module; this is only the floor.)</p>
+<pre>
+import math
+R_E = 6371.0  # km
+
+def central_half_angle(altitude_km, min_elev_deg):
+    el = math.radians(min_elev_deg)
+    return math.acos(R_E * math.cos(el) / (R_E + altitude_km)) - el
+
+def sats_floor(altitude_km, min_elev_deg=25):
+    rho = central_half_angle(altitude_km, min_elev_deg)
+    cap = 2 * math.pi * (1 - math.cos(rho))   # steradians
+    return (4 * math.pi) / cap
+
+print(f"{'Altitude':>10}{'Half-angle':>14}{'~Sats (floor)':>16}")
+print("-" * 40)
+for alt in [350, 550, 1200, 8000, 20200, 35786]:
+    rho = math.degrees(central_half_angle(alt, 25))
+    print(f"{alt:>8} km {rho:>11.1f} deg {sats_floor(alt):>14.0f}")
+
+# 1. By what factor does the count grow from GEO down to 550 km?
+# 2. Why is the real Starlink count far higher than this floor?
+#    (Coverage is not the same requirement as capacity.)
+</pre>
+    </div>
+
+    <div class="py-exercise">
+        <h3>Exercise 3 — The drag-versus-debris tradeoff</h3>
+        <p>A toy model of natural orbital lifetime versus altitude, illustrating why low self-cleans and high persists. (Decay depends on mass, area, and solar activity — modelled properly in the resilience module.)</p>
+<pre>
+decay_years = {250: 0.3, 400: 1.5, 550: 5, 800: 100, 1200: 1000}
+
+print(f"{'Altitude':>10}{'~Decay':>14}{'Verdict':>24}")
+print("-" * 50)
+for alt, yrs in decay_years.items():
+    verdict = "self-cleans" if yrs <= 25 else "must actively deorbit"
+    label = f"{yrs:g} yr" if yrs < 1000 else f"{yrs:g}+ yr"
+    print(f"{alt:>8} km {label:>14}{verdict:>24}")
+
+# The 25-year line reflects a common post-mission deorbit guideline.
+# 1. Which altitudes fail the 25-year guideline?
+# 2. State the tradeoff in one sentence: what does flying lower cost you,
+#    and what does it buy the orbital environment?
+</pre>
+        <div class="py-challenge"><strong>EXTENSION</strong>
+            Combine all three exercises: for a candidate altitude, print its regime, radiation verdict, coverage-satellite floor, and decay verdict together — a one-call "regime report" you could reuse when sketching an architecture.
+        </div>
+    </div>
+</div>
+
+<!-- REFLECTION -->
+<div class="reflection-block" id="reflect">
+    <h2>REFLECTION PROMPTS</h2>
+    <p class="ref-intro">Not graded. Write in your own words, 200–400 words each.</p>
+
+    <div class="ref-prompt"><h3>Prompt 1 — Choosing MEO</h3>
+        <p>An operator wants a data service with latency well below GEO but is unwilling to fly thousands of satellites. Argue the case for MEO, and be specific about which altitude you would pick and why, referencing the radiation geography from this lesson.</p></div>
+
+    <div class="ref-prompt"><h3>Prompt 2 — VLEO, For and Against</h3>
+        <p>VLEO offers lower latency, stronger signal, and sharper imaging than LEO, and self-cleans fastest. Yet most broadband constellations chose higher LEO. Lay out the case for VLEO, then against, and decide which is stronger for a broadband business specifically.</p></div>
+
+    <div class="ref-prompt"><h3>Prompt 3 — Why GEO Persists</h3>
+        <p>GEO has the worst latency and a permanent polar blind spot, yet it is far from dead. Make the strongest case for why GEO persists and keeps specific markets, drawing only on the comparison axes in this lesson.</p></div>
+
+    <div class="ref-prompt"><h3>Prompt 4 — Infer the Driver</h3>
+        <p>Altitude is at once a coverage, latency, radiation, debris, and launch-cost decision. Pick a satellite system you know of, infer which axis most likely drove its altitude choice, and justify the inference.</p></div>
+</div>
+
+<!-- MARK COMPLETE -->
+<div class="complete-wrap">
+    <button class="complete-btn" id="completeBtn">MARK LESSON COMPLETE</button>
+    <div class="complete-msg" id="completeMsg"></div>
+</div>
+
+<div class="lesson-nav">
+    <a href="m1-1.html">← LESSON 01 — WHY LEO NOW</a>
+    <a href="m1-3.html">LESSON 03 — THE PHYSICS OF LATENCY →</a>
+</div>
+
+</div>
+
+<button class="back-to-top" id="backToTop" title="Back to top">↑</button>
+
+<footer>© 2026 LEOAF · M1 · LESSON 02 OF 7</footer>
+
+<script>
+const canvas = document.getElementById('starsCanvas');
+const ctx = canvas.getContext('2d');
+let stars = [];
+function initStars() { stars=[]; for(let i=0;i<180;i++) stars.push({x:Math.random()*canvas.width,y:Math.random()*canvas.height,size:Math.random()*1.5+0.4,speed:Math.random()*0.18+0.04,hue:Math.random()*360}); }
+function resizeCanvas() { canvas.width=window.innerWidth; canvas.height=window.innerHeight; }
+resizeCanvas(); initStars(); window.addEventListener('resize', resizeCanvas);
+function animateStars() { ctx.clearRect(0,0,canvas.width,canvas.height); stars.forEach(s=>{s.y-=s.speed;if(s.y<0){s.y=canvas.height;s.x=Math.random()*canvas.width;} ctx.beginPath();ctx.fillStyle=`hsl(${s.hue},80%,80%)`;ctx.arc(s.x,s.y,s.size,0,Math.PI*2);ctx.fill();}); requestAnimationFrame(animateStars); }
+animateStars();
+</script>
+
+<script>
+const feedbacks = {
+    1:{correct:"Correct. Residual atmosphere causes drag that decays very low orbits in weeks to months, setting the practical floor.",wrong:"Incorrect. The floor is drag — residual atmosphere decays very low orbits quickly. The Van Allen belt is an upper-LEO concern, not the floor."},
+    2:{correct:"Correct. GEO is equatorial, so it cannot see high latitudes — the poles are its inherent blind spot.",wrong:"Incorrect. The gap is the poles. GEO sits over the equator and cannot see high latitudes regardless of how many satellites you add."},
+    3:{correct:"Correct. Going higher widens the footprint but worsens latency, signal, radiation, and launch cost; going lower reverses all of it.",wrong:"Incorrect. It is a trade, not a ranking — altitude buys coverage per satellite while costing latency, link strength, radiation, and more."},
+    4:{correct:"Correct. GNSS altitudes (~19,000–23,000 km) sit squarely in the outer belt, demanding heavy hardening.",wrong:"Incorrect. MEO's navigation altitudes lie inside the Van Allen belts; that is the hazard, not the Sun, eclipses, or drag."},
+    5:{correct:"Correct. The ~6,000–13,000 km slot is relatively benign, letting O3b avoid the belts while staying well below GEO.",wrong:"Incorrect. 8,000 km sits in the benign slot between the belts — a radiation choice, not launch cost or geostationarity."},
+    6:{correct:"Correct. At 550 km, natural decay brings a dead satellite down in roughly five years, limiting debris accumulation.",wrong:"Incorrect. 'Self-cleaning' means natural drag decay — about five years at 550 km — not an onboard system or instant re-entry."},
+    7:{correct:"Correct. Drag is far weaker at 1,200 km, so debris persists for centuries unless actively deorbited.",wrong:"Incorrect. The issue is persistence — at 1,200 km natural decay takes centuries, so the satellite must be actively deorbited."},
+    8:{correct:"Correct. With 15–16 orbits a day, a LEO satellite is eclipsed thousands of times a year, and that cycling wears the battery.",wrong:"Incorrect. The driver is cycle count — LEO is eclipsed on most of its 15–16 daily orbits, thousands a year, versus roughly 90 for GEO."},
+    9:{correct:"Correct. Signal strength falls with the square of distance, so a tenth-the-distance LEO link is far stronger and needs less aperture.",wrong:"Incorrect. It is distance — signal falls with the square of range, so the much closer LEO satellite permits a smaller terminal."},
+    10:{correct:"Correct. Each regime wins different jobs; the choice is a multi-axis trade, which is the mental model the lesson builds.",wrong:"Incorrect. The lesson's point is that no regime is universally best — the right one depends on the job and the multi-axis trade behind it."}
+};
+let answered = {};
+document.querySelectorAll('.quiz-opt').forEach(btn => {
+    btn.addEventListener('click', function() {
+        const q = this.dataset.q;
+        if (answered[q] !== undefined) return;
+        const correct = this.dataset.correct === 'true';
+        answered[q] = correct;
+        document.querySelectorAll(`.quiz-opt[data-q="${q}"]`).forEach(b => { b.disabled = true; if (b.dataset.correct === 'true') b.classList.add('correct'); });
+        if (!correct) this.classList.add('wrong');
+        const fb = document.getElementById(`fb${q}`);
+        fb.textContent = (correct ? '✓ ' : '✗ ') + feedbacks[q][correct ? 'correct' : 'wrong'];
+        fb.style.color = correct ? '#39ff14' : '#ff004f';
+        if (Object.keys(answered).length === 10) {
+            const total = Object.values(answered).filter(Boolean).length;
+            const el = document.getElementById('quizScore');
+            el.style.display = 'block';
+            const pct = Math.round(total / 10 * 100);
+            el.textContent = `SCORE: ${total} / 10 (${pct}%) — ${pct===100?'PERFECT.':pct>=80?'STRONG. REVIEW ANY MISSES.':pct>=60?'ADEQUATE. REVISIT WEAK SECTIONS.':'REVISIT THE LESSON BEFORE PROCEEDING.'}`;
+        }
+    });
+});
+</script>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="supabase.js"></script>
+<script src="user_progress.js"></script>
+<script>
+const LESSON_ID = 'm1-2';
+(function () {
+    function bounceToLogin(reason) {
+        console.error("Auth guard:", reason, "- redirecting to index.html");
+        window.location.replace("index.html");
+    }
+    async function init() {
+        if (typeof client === "undefined" || !client || !client.auth) {
+            return bounceToLogin("Supabase client not loaded (is supabase.js in this directory?)");
+        }
+        let session = null;
+        try { ({ data: { session } } = await client.auth.getSession()); }
+        catch (e) { return bounceToLogin("getSession threw: " + e.message); }
+        if (!session) { window.location.replace("index.html"); return; }
+
+        const btn = document.getElementById('completeBtn');
+        const msg = document.getElementById('completeMsg');
+        function setDone(done) {
+            if (done) {
+                btn.textContent = '✓ COMPLETE — CLICK TO UNDO';
+                btn.classList.add('done');
+                btn.style.cssText = 'border-color:#39ff14;color:#39ff14;background:rgba(57,255,20,0.1);cursor:pointer;opacity:1;';
+                msg.style.color = '#39ff14';
+                msg.textContent = 'Lesson marked complete. Click again to undo.';
+            } else {
+                btn.textContent = 'MARK LESSON COMPLETE';
+                btn.classList.remove('done');
+                btn.style.cssText = '';
+                msg.style.color = '#ffffff55';
+                msg.textContent = 'Not yet marked complete.';
+            }
+        }
+        let mastered = [];
+        try { mastered = await getMasteredSections(); } catch (e) { console.error(e); }
+        setDone(mastered.includes(LESSON_ID));
+        btn.addEventListener('click', async () => {
+            const isCurrentlyDone = btn.classList.contains('done');
+            msg.style.color = '#00d9ff';
+            msg.textContent = 'Saving...';
+            const ok = await upsertSection(LESSON_ID, !isCurrentlyDone);
+            if (ok) { setDone(!isCurrentlyDone); }
+            else { msg.style.color = '#ff004f'; msg.textContent = 'Error saving. Try again.'; }
+        });
+        const btt = document.getElementById('backToTop');
+        window.addEventListener('scroll', () => { btt.classList.toggle('visible', window.scrollY > 400); });
+        btt.addEventListener('click', () => window.scrollTo({ top: 0, behavior: 'smooth' }));
+    }
+    if (document.readyState === "loading") { document.addEventListener("DOMContentLoaded", init); }
+    else { init(); }
+})();
+</script>
+
+</body>
+</html>
