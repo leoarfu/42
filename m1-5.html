@@ -1,0 +1,669 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, shrink-to-fit=no">
+<title>M1-5 — GEO vs LEO: The Commercial Delta · LEOAF</title>
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;600;800&family=Share+Tech+Mono&family=Libre+Baskerville:ital,wght@0,400;0,700;1,400&display=swap" rel="stylesheet">
+<link rel="icon" href="favicon.ico" sizes="any" type="image/x-icon">
+<link rel="manifest" href="site.webmanifest">
+<meta name="theme-color" content="#0f0f0f">
+
+<script>
+window.leoafAbort = async function () {
+    function go() { window.location.replace("index.html?signedout=1"); }
+    try {
+        if (typeof client !== "undefined" && client && client.auth && client.auth.signOut) {
+            try { await client.auth.signOut({ scope: "local" }); } catch (e) {}
+        }
+    } catch (e) {}
+    go();
+};
+</script>
+
+<style>
+* { box-sizing:border-box; margin:0; padding:0; }
+html { height:100%; -webkit-text-size-adjust:100%; overflow-x:hidden; }
+body { font-family:'Share Tech Mono',monospace; background:#000; color:white; overflow-x:hidden; min-height:100vh; }
+#starsCanvas { position:fixed; inset:0; z-index:-1; }
+
+header { background:#000; border-bottom:1px solid #ff004f33; position:sticky; top:0; z-index:100; padding:1rem clamp(1.5rem,5vw,4rem); display:flex; justify-content:space-between; align-items:center; box-shadow:0 4px 16px #0008; }
+.logo { font-family:'Orbitron',sans-serif; font-weight:800; font-size:clamp(16px,2vw,22px); letter-spacing:3px; text-decoration:none; }
+.logo span:first-child { color:white; }
+.logo span:last-child { color:#ff004f; }
+.nav-right { display:flex; align-items:center; gap:10px; }
+.nav-btn { background:transparent; border:1px solid #ff004f44; color:#ff004f; padding:6px 14px; cursor:pointer; transition:0.3s ease; font-size:11px; font-family:'Orbitron',sans-serif; letter-spacing:1px; text-decoration:none; display:inline-block; }
+.nav-btn:hover { background:#ff004f; color:black; }
+
+.breadcrumb { padding:14px clamp(1.5rem,5vw,4rem); font-size:11px; color:#ffffff44; letter-spacing:1px; position:relative; z-index:1; }
+.breadcrumb a { color:#00d9ff66; text-decoration:none; }
+.breadcrumb a:hover { color:#00d9ff; }
+.breadcrumb span { margin:0 8px; }
+
+.lesson-wrap { max-width:820px; margin:0 auto; padding:0 clamp(1.5rem,5vw,4rem) 80px; position:relative; z-index:1; }
+
+.lesson-header { padding:30px 0 28px; border-bottom:1px solid #ffffff11; margin-bottom:36px; }
+.lesson-tag { font-family:'Orbitron',sans-serif; font-size:10px; color:#ff004f; letter-spacing:3px; margin-bottom:10px; }
+.lesson-header h1 { font-family:'Orbitron',sans-serif; font-size:clamp(20px,3.5vw,32px); font-weight:800; line-height:1.2; margin-bottom:12px; }
+.lesson-meta { display:flex; gap:10px; flex-wrap:wrap; margin-bottom:16px; }
+.l-pill { font-family:'Orbitron',sans-serif; font-size:10px; padding:3px 10px; border:1px solid; letter-spacing:1px; }
+.l-pill-q { color:#ff004f; border-color:#ff004f44; }
+.l-pill-t { color:#39ff14; border-color:#39ff1444; }
+.lesson-intro { font-size:13px; line-height:1.85; opacity:0.75; }
+
+.toc { background:rgba(0,217,255,0.06); border:1px solid #00d9ff33; padding:24px 28px; margin:30px 0; }
+.toc h4 { font-family:'Orbitron',sans-serif; font-size:10px; color:#00d9ff; letter-spacing:2px; margin-bottom:16px; }
+.toc ol { padding-left:20px; }
+.toc li { font-size:13px; line-height:2.1; opacity:1; }
+.toc li a { color:#00d9ffbb; text-decoration:none; transition:0.15s; }
+.toc li a:hover { color:#ffffff; padding-left:4px; }
+.toc li::marker { color:#ff004f; font-family:'Orbitron',sans-serif; font-size:10px; }
+
+.content-block { margin-bottom:48px; }
+.content-block h2 { font-family:'Orbitron',sans-serif; font-size:13px; color:#00d9ff; letter-spacing:2px; text-transform:uppercase; margin-bottom:18px; padding-bottom:10px; border-bottom:1px solid #00d9ff22; scroll-margin-top:80px; }
+.content-block h3 { font-family:'Orbitron',sans-serif; font-size:11px; color:#ffffff88; letter-spacing:1.5px; text-transform:uppercase; margin:28px 0 12px; }
+.content-block p { font-size:13px; line-height:1.9; opacity:0.85; margin-bottom:16px; }
+.content-block ul, .content-block ol { padding-left:0; margin-bottom:16px; }
+.content-block ul li, .content-block ol li { font-size:13px; line-height:1.85; opacity:0.85; padding-left:20px; position:relative; margin-bottom:6px; }
+.content-block ul li::before { content:'›'; position:absolute; left:0; color:#00d9ff; }
+.content-block blockquote { border-left:3px solid #39ff14; background:rgba(57,255,20,0.05); padding:14px 20px; margin:18px 0; font-size:14px; font-family:'Share Tech Mono',monospace; color:#39ff14; letter-spacing:1px; }
+
+.callout { border-left:3px solid #00d9ff; background:rgba(0,217,255,0.05); padding:16px 20px; margin:22px 0; font-size:12px; line-height:1.8; }
+.callout.red   { border-left-color:#ff004f; background:rgba(255,0,79,0.05); }
+.callout.green { border-left-color:#39ff14; background:rgba(57,255,20,0.05); }
+.callout.amber { border-left-color:#ffaa00; background:rgba(255,170,0,0.05); }
+.callout strong { font-family:'Orbitron',sans-serif; font-size:10px; letter-spacing:1px; display:block; margin-bottom:8px; color:inherit; }
+
+.key-numbers { display:grid; grid-template-columns:repeat(auto-fit,minmax(140px,1fr)); gap:12px; margin:22px 0; }
+.kn-item { background:rgba(255,255,255,0.03); border:1px solid #ffffff11; padding:16px 12px; text-align:center; }
+.kn-val { font-family:'Orbitron',sans-serif; font-size:clamp(15px,2.3vw,22px); font-weight:800; color:#00d9ff; display:block; }
+.kn-label { font-size:10px; opacity:0.5; letter-spacing:1px; margin-top:5px; display:block; line-height:1.4; }
+
+.compare-table { width:100%; border-collapse:collapse; margin:22px 0; font-size:12px; }
+.compare-table th { font-family:'Orbitron',sans-serif; font-size:10px; letter-spacing:1px; color:#00d9ff; padding:10px 12px; border-bottom:1px solid #00d9ff33; text-align:left; }
+.compare-table td { padding:10px 12px; border-bottom:1px solid #ffffff0a; line-height:1.5; opacity:0.85; vertical-align:top; }
+.compare-table tr:hover td { background:rgba(255,255,255,0.02); }
+
+.diagram-wrap { margin:24px 0; background:rgba(255,255,255,0.02); border:1px solid #ffffff11; padding:20px; overflow-x:auto; }
+.diagram-wrap figcaption { font-size:11px; color:#ffffff44; margin-top:12px; text-align:center; letter-spacing:1px; }
+
+.quiz-block { background:rgba(17,17,17,0.9); border:1px solid #ff004f33; padding:28px; margin:48px 0 32px; }
+.quiz-block h2 { font-family:'Orbitron',sans-serif; font-size:13px; color:#ff004f; letter-spacing:2px; margin-bottom:6px; }
+.quiz-intro { font-size:12px; opacity:0.6; margin-bottom:24px; padding-bottom:16px; border-bottom:1px solid #ff004f22; line-height:1.6; }
+.quiz-q { margin-bottom:28px; }
+.quiz-q p { font-size:13px; opacity:0.9; margin-bottom:12px; line-height:1.65; }
+.quiz-q p strong { color:#00d9ff; }
+.quiz-options { display:flex; flex-direction:column; gap:8px; }
+.quiz-opt { background:rgba(255,255,255,0.03); border:1px solid #ffffff1a; padding:11px 16px; cursor:pointer; font-size:12px; font-family:'Share Tech Mono',monospace; transition:0.2s ease; text-align:left; color:white; line-height:1.5; }
+.quiz-opt:hover:not(:disabled) { background:rgba(0,217,255,0.08); border-color:#00d9ff44; }
+.quiz-opt.correct  { background:rgba(57,255,20,0.1);  border-color:#39ff14; color:#39ff14; }
+.quiz-opt.wrong    { background:rgba(255,0,79,0.1);   border-color:#ff004f; color:#ff004f; }
+.quiz-opt:disabled { cursor:default; }
+.quiz-feedback { font-size:12px; margin-top:10px; min-height:18px; line-height:1.7; opacity:0.9; padding:0 4px; }
+.quiz-score { font-family:'Orbitron',sans-serif; font-size:12px; color:#39ff14; margin-top:20px; letter-spacing:1px; display:none; padding-top:16px; border-top:1px solid #39ff1433; }
+
+.py-block { background:rgba(10,10,10,0.95); border:1px solid #39ff1422; padding:28px; margin:32px 0; }
+.py-block h2 { font-family:'Orbitron',sans-serif; font-size:13px; color:#39ff14; letter-spacing:2px; margin-bottom:8px; }
+.py-block .py-intro { font-size:12px; opacity:0.7; margin-bottom:20px; padding-bottom:16px; border-bottom:1px solid #39ff1422; line-height:1.7; }
+.py-exercise { margin-bottom:32px; }
+.py-exercise:last-child { margin-bottom:0; }
+.py-exercise h3 { font-family:'Orbitron',sans-serif; font-size:11px; color:#39ff1499; letter-spacing:1.5px; text-transform:uppercase; margin-bottom:10px; }
+.py-exercise p { font-size:12px; opacity:0.8; margin-bottom:14px; line-height:1.75; }
+.py-block pre { background:#050505; border:1px solid #39ff1433; padding:20px; font-family:'Share Tech Mono',monospace; font-size:11.5px; line-height:1.75; overflow-x:auto; color:#39ff14; white-space:pre; margin-bottom:12px; }
+.py-block .py-challenge { background:rgba(57,255,20,0.04); border-left:2px solid #39ff14; padding:12px 16px; margin-top:14px; font-size:12px; line-height:1.75; opacity:0.8; }
+.py-block .py-challenge strong { font-family:'Orbitron',sans-serif; font-size:10px; color:#39ff14; display:block; margin-bottom:6px; letter-spacing:1px; }
+
+.reflection-block { background:rgba(255,170,0,0.04); border:1px solid #ffaa0033; padding:24px; margin:32px 0; }
+.reflection-block h2 { font-family:'Orbitron',sans-serif; font-size:13px; color:#ffaa00; letter-spacing:2px; margin-bottom:8px; }
+.reflection-block .ref-intro { font-size:12px; opacity:0.7; margin-bottom:20px; padding-bottom:14px; border-bottom:1px solid #ffaa0022; line-height:1.7; }
+.ref-prompt { margin-bottom:20px; }
+.ref-prompt h3 { font-family:'Orbitron',sans-serif; font-size:11px; color:#ffaa0099; letter-spacing:1px; margin-bottom:8px; }
+.ref-prompt p { font-size:12px; opacity:0.8; line-height:1.75; margin-bottom:10px; }
+
+.back-to-top { position:fixed; bottom:28px; right:28px; z-index:200; width:44px; height:44px; background:#000; border:1px solid #00d9ff55; color:#00d9ff; font-size:20px; cursor:pointer; display:flex; align-items:center; justify-content:center; opacity:0; pointer-events:none; transition:opacity 0.3s ease, border-color 0.3s ease; }
+.back-to-top.visible { opacity:1; pointer-events:auto; }
+.back-to-top:hover { border-color:#00d9ff; background:#001a2c; }
+
+.complete-wrap { margin-top:56px; padding-top:30px; border-top:1px solid #ffffff11; text-align:center; }
+.complete-btn { font-family:'Orbitron',sans-serif; font-size:13px; letter-spacing:2px; padding:14px 44px; background:transparent; border:1px solid #39ff14; color:#39ff14; cursor:pointer; transition:0.3s ease; }
+.complete-btn:hover:not(.done) { background:#39ff14; color:black; box-shadow:0 0 20px rgba(57,255,20,0.4); }
+.complete-btn.done { background:rgba(57,255,20,0.1); cursor:default; opacity:0.7; }
+.complete-msg { font-size:12px; color:#39ff14; margin-top:14px; min-height:18px; letter-spacing:1px; }
+
+.lesson-nav { display:flex; justify-content:space-between; margin-top:30px; flex-wrap:wrap; gap:10px; }
+.lesson-nav a { font-family:'Orbitron',sans-serif; font-size:11px; color:#00d9ff66; text-decoration:none; letter-spacing:1px; transition:0.2s; }
+.lesson-nav a:hover { color:#00d9ff; }
+
+footer { text-align:center; padding:30px; opacity:0.3; font-size:11px; position:relative; z-index:1; letter-spacing:1px; }
+
+@media (max-width:600px) { .key-numbers { grid-template-columns:1fr 1fr; } .compare-table { font-size:11px; } .compare-table th, .compare-table td { padding:8px 8px; } }
+
+/* ── LIGHT READING MODE ── */
+.content-block { background:#f5f2ec; color:#1a1a1a; padding:36px clamp(24px,4vw,48px); margin-bottom:24px; border-left:4px solid #00d9ff; position:relative; z-index:1; }
+.content-block h2 { font-family:'Orbitron',sans-serif; font-size:13px; color:#003d66; letter-spacing:2px; text-transform:uppercase; margin-bottom:20px; padding-bottom:10px; border-bottom:2px solid #00d9ff66; scroll-margin-top:80px; }
+.content-block h3 { font-family:'Orbitron',sans-serif; font-size:11px; color:#444; letter-spacing:1.5px; text-transform:uppercase; margin:32px 0 14px; }
+.content-block p { font-family:'Libre Baskerville', Georgia, serif; font-size:15px; line-height:1.9; color:#1a1a1a; opacity:1; margin-bottom:18px; }
+.content-block ul li { font-family:'Libre Baskerville', Georgia, serif; font-size:14px; line-height:1.85; color:#1a1a1a; opacity:1; margin-bottom:8px; }
+.content-block ul li::before { color:#0077aa; }
+.content-block blockquote { border-left:3px solid #1a7a1a; background:#eafaea; color:#0a3d0a; }
+.content-block .callout { border-left:3px solid #0088cc; background:#e8f4fb; color:#1a1a1a; }
+.content-block .callout.red   { border-left-color:#cc0033; background:#fdecea; }
+.content-block .callout.green { border-left-color:#1a7a1a; background:#eafaea; }
+.content-block .callout.amber { border-left-color:#996600; background:#fef9ec; }
+.content-block .callout strong { color:inherit; }
+.content-block .kn-item { background:#fff; border:1px solid #d0d0d0; }
+.content-block .kn-label { color:#555; opacity:1; }
+.content-block .compare-table th { color:#003d66; border-bottom:2px solid #00d9ff66; }
+.content-block .compare-table td { color:#1a1a1a; opacity:1; border-bottom:1px solid #ddd; }
+.content-block .compare-table tr:hover td { background:#f0f0f0; }
+.content-block .diagram-wrap { background:#0a0a0a; border:1px solid #333; }
+.content-block .diagram-wrap figcaption { color:#ffffff55; }
+</style>
+
+</head>
+<body>
+
+<canvas id="starsCanvas"></canvas>
+
+<header>
+    <a href="dashboard.html" class="logo"><span>LEO</span><span>AF</span></a>
+    <div class="nav-right">
+        <a href="m1.html" class="nav-btn">← M1 HUB</a>
+        <button class="nav-btn" onclick="leoafAbort()">ABORT</button>
+    </div>
+</header>
+
+<div class="breadcrumb">
+    <a href="dashboard.html">DASHBOARD</a><span>/</span>
+    <a href="m1.html">M1</a><span>/</span>
+    <span style="color:#ffffff88;">LESSON 05 — GEO VS LEO: THE COMMERCIAL DELTA</span>
+</div>
+
+<div class="lesson-wrap">
+
+<div class="lesson-header">
+    <div class="lesson-tag">M1 · LESSON 05 OF 7</div>
+    <h1>GEO vs LEO: The Commercial Delta</h1>
+    <div class="lesson-meta">
+        <div class="l-pill l-pill-q">MODULE 1</div>
+        <div class="l-pill l-pill-t">FOUNDATIONS</div>
+    </div>
+    <p class="lesson-intro">The earlier lessons explained why LEO became viable, how the regimes differ, why latency ranks them, and when an operator runs more than one. This lesson asks the question a technical comparison alone never answers: how do GEO and LEO actually make money, and why are their business models so different that the orbit choice is also a business-model choice? The performance difference is real, but the commercial difference is what decides which orbit an operator builds, how it finances the build, and whether the unit economics ever close. This lesson owns the commercial comparison; it defers the deep financial modelling, capital-structure detail, and regulatory economics to the economics module, and the case-study post-mortems to the applications module.</p>
+</div>
+
+<div class="toc">
+    <h4>CONTENTS</h4>
+    <ol>
+        <li><a href="#s1">Two cost structures that differ in kind</a></li>
+        <li><a href="#s2">Critical mass &amp; the replenishment treadmill</a></li>
+        <li><a href="#s3">Wholesale capacity vs retail service</a></li>
+        <li><a href="#s4">Capacity density — economics under the orbit</a></li>
+        <li><a href="#s5">Utilisation — why fill rate makes or breaks LEO</a></li>
+        <li><a href="#s6">Financing — incremental debt vs patient equity</a></li>
+        <li><a href="#s7">Where each orbit wins commercially</a></li>
+        <li><a href="#s8">The incumbent transition</a></li>
+        <li><a href="#s9">The vertical-integration edge</a></li>
+        <li><a href="#s10">The architect's takeaway</a></li>
+        <li><a href="#quiz">Knowledge check</a></li>
+        <li><a href="#python">Python exercises</a></li>
+        <li><a href="#reflect">Reflection prompts</a></li>
+    </ol>
+</div>
+
+<div class="content-block" id="s1">
+    <h2>1. Two Cost Structures That Differ in Kind</h2>
+    <p>The first and deepest delta is that GEO and LEO have cost structures that are not just different in size but different in kind.</p>
+    <p>A GEO system is a small number of very expensive, very long-lived satellites. One spacecraft costs on the order of a few hundred million dollars, lasts around fifteen years, and from its single slot covers roughly a third of the Earth. An operator can build one satellite, launch it, and earn revenue from it for fifteen years. Capacity is added incrementally, satellite by satellite, and each addition is a large but self-contained capital decision that begins paying back as soon as it is in service.</p>
+    <p>A LEO system is the opposite on every axis: thousands of cheap, short-lived satellites. One spacecraft costs on the order of a million dollars or less, lasts around five years, and covers a small patch of ground for a few minutes at a time. The fleet only provides continuous service once a large fraction of it is in orbit, and because each satellite lasts only about five years, roughly a fifth of the entire constellation must be rebuilt and relaunched every year, forever. Capacity is not added one satellite at a time; it arrives in bulk when the constellation reaches critical mass, and it is sustained by a permanent replenishment effort.</p>
+    <p>The figures matter less than the shapes. GEO is incremental, long-lived, and self-paying-back per asset. LEO is all-at-once up front, short-lived, and carried by a replenishment treadmill that never stops.</p>
+    <table class="compare-table">
+        <thead><tr><th>Dimension</th><th>GEO</th><th>LEO</th></tr></thead>
+        <tbody>
+            <tr><td>Satellites</td><td>A few</td><td>Thousands</td></tr>
+            <tr><td>Cost per satellite</td><td>~$150–400M</td><td>~$0.5–1M</td></tr>
+            <tr><td>Service life</td><td>~15 years</td><td>~5 years</td></tr>
+            <tr><td>Annual fleet replacement</td><td>~1/15 (~7%)</td><td>~1/5 (~20%)</td></tr>
+            <tr><td>Capacity added</td><td>Incrementally, per satellite</td><td>In bulk, at critical mass</td></tr>
+            <tr><td>Coverage per satellite</td><td>~1/3 of Earth</td><td>Small, transient footprint</td></tr>
+        </tbody>
+    </table>
+</div>
+
+<div class="content-block" id="s2">
+    <h2>2. The Critical-Mass Problem and the Replenishment Treadmill</h2>
+    <p>Two features of the LEO cost structure dominate its commercial risk, and neither has a GEO equivalent.</p>
+    <p>The first is critical mass. A GEO operator can launch a single satellite over a single region and begin selling capacity immediately. A LEO operator cannot sell continuous coverage until enough satellites are in orbit to hold a service area without gaps, which means an enormous capital outlay is committed before the first dollar of meaningful revenue arrives. This is the valley of death that killed the 1990s ventures, which ran out of capital before reaching the subscriber base their cost base demanded — the structural failure the first lesson described. The capital is spent first and the revenue comes later, and the gap between them is the single most dangerous feature of the LEO business.</p>
+    <p>The second is the replenishment treadmill. A five-year service life means about a fifth of the constellation must be replaced every year, indefinitely, just to stand still. That is a perpetual capital cost with no analogue in GEO, where a fifteen-year life makes replacement a gentle, occasional event. The treadmill has a hidden upside — each replenishment cycle can fly improved hardware, so the fleet refreshes its technology continuously — but commercially it is a standing obligation that must be funded out of revenue forever, and it raises the bar the unit economics must clear.</p>
+
+    <div class="diagram-wrap">
+        <svg viewBox="0 0 700 290" width="100%" xmlns="http://www.w3.org/2000/svg" font-family="Share Tech Mono, monospace">
+            <rect width="700" height="290" fill="#0a0a0a"/>
+            <!-- zero line -->
+            <line x1="60" y1="99" x2="660" y2="99" stroke="#ffffff55" stroke-width="1" stroke-dasharray="3,3"/>
+            <text x="664" y="102" font-size="9" fill="#ffffff77">$0</text>
+            <!-- axes labels -->
+            <text x="60" y="284" font-size="9" fill="#ffffff66">year 0</text>
+            <text x="610" y="284" font-size="9" fill="#ffffff66">year 7</text>
+            <text x="60" y="34" font-size="9" fill="#ffffff66">cumulative cash flow →</text>
+            <!-- GEO curve (incremental, shallow dip) -->
+            <polyline fill="none" stroke="#00d9ff" stroke-width="2"
+                points="70,113 150,111 230,108 310,106 390,104 470,102 550,100 630,98"/>
+            <text x="636" y="96" font-size="10" fill="#00d9ff">GEO</text>
+            <!-- LEO curve (deep valley of death) -->
+            <polyline fill="none" stroke="#ff004f" stroke-width="2"
+                points="70,180 150,223 230,245 310,229 390,191 470,142 550,94 630,45"/>
+            <text x="636" y="45" font-size="10" fill="#ff004f">LEO</text>
+            <!-- annotations -->
+            <text x="230" y="262" font-size="9" fill="#ff004f99" text-anchor="middle">valley of death</text>
+            <text x="560" y="86" font-size="9" fill="#ff004f99" text-anchor="middle">payback</text>
+        </svg>
+        <figcaption>CUMULATIVE CASH FLOW (ILLUSTRATIVE) — GEO dips one satellite's cost then climbs steadily; LEO plunges through a deep up-front trough before critical-mass revenue turns it around</figcaption>
+    </div>
+</div>
+
+<div class="content-block" id="s3">
+    <h2>3. Two Revenue Models — Wholesale Capacity vs Retail Service</h2>
+    <p>The cost structures differ in kind, and so do the revenue models built on them.</p>
+    <p>The traditional GEO model is wholesale capacity. The operator sells raw capacity — transponders, megahertz, or megabits — to other businesses: broadcasters, telcos, internet providers, governments. Someone else retails the end service; the operator is a capacity landlord with long contracts, predictable revenue, and a business-to-business relationship that insulates it from consumer churn and consumer-facing operations. Increasingly GEO operators also sell managed services higher up the value chain, but the wholesale-capacity model is the historical core and still much of the revenue.</p>
+    <p>The LEO model is predominantly retail or managed service, and usually vertically integrated. The operator owns the satellites, often the terminals, and the service, and sells connectivity directly — consumer broadband subscriptions, managed enterprise and mobility connectivity, government contracts. This means direct revenue per user, but also consumer-facing operations, churn, subscriber acquisition cost, and the need to retail at scale. The operator captures the whole value chain instead of just the capacity layer, which raises both the potential margin and the operational burden.</p>
+    <p>The delta in one line: GEO sells capacity to businesses that retail it; LEO retails connectivity itself. That difference drives margin structure, revenue predictability, and the kind of company each has to be.</p>
+    <table class="compare-table">
+        <thead><tr><th>Dimension</th><th>GEO (traditional)</th><th>LEO</th></tr></thead>
+        <tbody>
+            <tr><td>What is sold</td><td>Wholesale capacity (MHz/Mbps)</td><td>Retail/managed connectivity</td></tr>
+            <tr><td>Customer</td><td>Broadcasters, telcos, governments</td><td>End users, enterprises, governments</td></tr>
+            <tr><td>Relationship</td><td>B2B, long contracts</td><td>B2C/B2B, subscriptions</td></tr>
+            <tr><td>Revenue character</td><td>Predictable, contracted</td><td>Direct ARPU, churn-exposed</td></tr>
+            <tr><td>Value chain</td><td>Capacity layer only</td><td>Vertically integrated</td></tr>
+        </tbody>
+    </table>
+</div>
+
+<div class="content-block" id="s4">
+    <h2>4. Capacity Density — the Economics Underneath the Orbit</h2>
+    <p>Beneath both models sits a physical fact with direct commercial consequences: how much sellable capacity each orbit puts over a given area.</p>
+    <p>A GEO satellite spreads its capacity over roughly a third of the Earth, so its capacity per unit area is low. That is an economic strength for one-to-many distribution and for sparse coverage, and a weakness for dense two-way demand. Broadcast is the perfect GEO economic case: a single transmission reaches millions of receivers at zero marginal cost per viewer, which no terrestrial or LEO architecture matches for one-to-many video. GEO is also economic where demand is thin and spread out, because there a low capacity density is exactly enough and the wide beam is an asset.</p>
+    <p>A LEO constellation reuses its spectrum intensively — each satellite covers a small area, so the same frequencies are used over and over across the fleet — giving very high capacity per unit area. That supports many simultaneous two-way broadband users with real throughput each, which is the economic basis for consumer broadband. But the capacity is only worth anything where there is demand to fill it. Over empty ocean or empty desert, that dense capacity is wasted, because the constellation costs the same whether the cell below holds ten users or ten thousand. LEO's economics therefore depend on pointing its capacity at demand, and on filling it.</p>
+</div>
+
+<div class="content-block" id="s5">
+    <h2>5. Utilisation — Why Fill Rate Makes or Breaks LEO</h2>
+    <p>That last point deserves its own section, because fill rate is the make-or-break variable of the LEO business and barely registers in the GEO one.</p>
+    <p>A LEO constellation's cost is almost entirely fixed: building and replenishing the fleet costs the same regardless of how many subscribers it serves. Revenue, by contrast, scales with subscribers. So the unit economics live entirely on the fill rate — the fraction of the constellation's capacity that is actually sold. A constellation half-empty over the regions it covers earns half the revenue against the same cost, and the difference between a fill rate that closes the economics and one that does not is the difference between a viable business and a bankrupt one. This is why subscriber acquisition and the geographic match between capacity and demand are existential for LEO, not merely important.</p>
+    <p>The GEO wholesale model is far less exposed to this, because capacity is sold in large contracted blocks to businesses rather than retailed user by user, so revenue is committed in advance rather than dependent on filling consumer demand cell by cell. The commercial reading is that LEO trades GEO's contracted predictability for direct revenue, and pays for it in fill-rate risk.</p>
+    <div class="callout red">
+        <strong>THE LEO MAKE-OR-BREAK</strong>
+        A constellation costs the same full or empty. Revenue scales with subscribers. So fill rate — not coverage, not capacity — is the variable on which LEO unit economics live or die.
+    </div>
+</div>
+
+<div class="content-block" id="s6">
+    <h2>6. Financing — Incremental Debt vs Patient Equity</h2>
+    <p>The cost and revenue shapes dictate how each system is financed, and the financing difference is itself a commercial barrier.</p>
+    <p>A GEO satellite can be financed incrementally and largely with debt, because it is a discrete asset with a long life and contracted revenue to borrow against. The risk per increment is contained: one satellite, one financing decision, revenue starting on entry to service. This is a mature, bankable model.</p>
+    <p>A LEO constellation cannot be financed that way, because the capital is committed before the revenue exists and the sum is enormous. It requires deep, patient, high-risk capital up front — the enabling condition the first lesson flagged as both necessary and fragile — and that capital is available only to a few kinds of actor: a vertically integrated operator that can self-fund (one that owns its launch and pays marginal rather than market cost), a strategic corporate parent with the balance sheet to absorb years of losses, or a market unusually willing to fund long-horizon bets. The financing model is therefore a structural filter on who can even attempt LEO, not just a line in the spreadsheet, and it explains why the field is a handful of very large players rather than many small ones.</p>
+</div>
+
+<div class="content-block" id="s7">
+    <h2>7. Where Each Orbit Wins Commercially</h2>
+    <p>Putting cost, revenue, capacity density, and fill rate together gives the commercial map — where each orbit's business model fits the demand.</p>
+    <p>GEO wins where its strengths are decisive. Broadcast and one-to-many video remain its unmatched economic case, though that segment faces secular pressure from streaming. Wide-area coverage of thin, spread-out demand suits GEO's low capacity density. Bulk, backup, and delay-tolerant capacity suit its cheap-per-bit wide beam. And the established wholesale relationships with broadcasters, telcos, and governments are durable, long-contracted revenue. GEO's commercial profile is mature, profitable, and under pressure at the edges rather than collapsing.</p>
+    <p>LEO wins where latency or capacity density is the binding requirement. Consumer broadband in underserved and rural areas is the headline case — places terrestrial networks cannot reach economically and where LEO's density and latency deliver a real service. Mobility, aviation and maritime, where low latency plus genuine throughput beats the GEO incumbent. Government and resilience demand, where low latency and assured connectivity command premium contracts. And any application where the interactive latency threshold is the deciding factor. LEO's profile is high-growth, capital-hungry, and unproven at full-scale unit economics, with fill rate the open question.</p>
+    <p>The honest summary is that this is not a contest one orbit wins outright. Each business model fits a different shape of demand, which is exactly why the multi-orbit operator of the previous lesson exists — to hold both.</p>
+    <table class="compare-table">
+        <thead><tr><th>Segment</th><th>Favoured orbit</th><th>Why</th></tr></thead>
+        <tbody>
+            <tr><td>Broadcast / DTH video</td><td>GEO</td><td>One-to-many, zero marginal cost per viewer</td></tr>
+            <tr><td>Sparse wide-area coverage</td><td>GEO</td><td>Low capacity density is sufficient</td></tr>
+            <tr><td>Bulk / backup capacity</td><td>GEO</td><td>Cheap per bit, latency irrelevant</td></tr>
+            <tr><td>Rural / underserved broadband</td><td>LEO</td><td>Density + latency, terrestrial uneconomic</td></tr>
+            <tr><td>Modern mobility (aero/maritime)</td><td>LEO</td><td>Low latency plus throughput</td></tr>
+            <tr><td>Government / resilience</td><td>LEO</td><td>Low latency, assured, premium contracts</td></tr>
+        </tbody>
+    </table>
+</div>
+
+<div class="content-block" id="s8">
+    <h2>8. The Incumbent Transition — a Business Under Pressure</h2>
+    <p>The commercial delta is also a transition story, which is why GEO operators behave the way they do. The high-margin GEO wholesale business is under pressure on several fronts at once: broadcast video is eroding as streaming displaces linear television, raw data-capacity prices are falling as supply grows, and LEO is taking the low-latency and mobility segments that GEO served by default. None of this is collapse, but it is enough to force a response.</p>
+    <p>The responses are exactly the moves the earlier lessons predict. GEO operators go multi-orbit, adding a low-latency LEO or MEO layer to defend and extend the franchise — the hybrid architecture of the previous lesson, driven by commercial necessity rather than engineering preference. They move up the value chain from selling raw capacity to selling managed services and solutions, capturing more margin and stickier customers. And they consolidate, merging to gain scale and multi-orbit reach. The commercial delta, read forward, is the story of a mature business adapting to a faster, cheaper, latency-advantaged entrant — the incumbent's dilemma from the first lesson, now playing out in the income statement.</p>
+</div>
+
+<div class="content-block" id="s9">
+    <h2>9. The Vertical-Integration Edge</h2>
+    <p>One structural advantage deserves isolating, because it distorts the whole comparison: the operator that owns its launch. A vertically integrated LEO operator that builds its own satellites, flies them on its own rockets, and makes its own terminals pays marginal launch cost rather than the open-market price, captures margin at every layer of the stack, and controls its own deployment and replenishment cadence rather than buying it. That lowers its effective cost per satellite delivered to orbit and per subscriber served, in a way a competitor assembling the same constellation from purchased launch and purchased hardware cannot match.</p>
+    <p>The flip side is concentrated risk: owning the whole stack means funding the whole stack, and a vertically integrated operator carries the launch business, the manufacturing business, the terminal business, and the service business together. But on the cost axis the advantage is real and structural, and it is part of why the LEO field is led by an actor that came to it from launch. The deeper economics of this — the capital structures, the cross-subsidy, the make-versus-buy calculus — belong to the economics module; the commercial intuition here is that vertical integration is a cost-side moat, not merely an operating choice.</p>
+    <div class="callout green">
+        <strong>A COST-SIDE MOAT</strong>
+        Owning launch means paying marginal, not market, cost per satellite delivered — and capturing margin across the whole stack. It is a structural cost advantage a buy-everything competitor cannot match, paid for with concentrated risk.
+    </div>
+</div>
+
+<div class="content-block" id="s10">
+    <h2>10. The Architect's Takeaway</h2>
+    <p>The commercial delta reframes the orbit decision one more time. The regimes lesson framed it as physics, the latency lesson as a delay floor, the hybrid lesson as a per-service assignment — and this lesson frames it as a business model. GEO is a few expensive, long-lived assets, financed incrementally as debt, earning predictable wholesale revenue from selling capacity to businesses, economic for broadcast and sparse coverage. LEO is thousands of cheap, short-lived assets on a replenishment treadmill, financed by enormous patient equity up front, earning direct retail revenue whose viability hinges on filling capacity, economic for dense broadband and low-latency demand.</p>
+    <p>Two things to carry forward. First, the orbit choice is inseparable from the business-model choice: an operator does not pick an altitude and then find a way to make money, it picks the cost-and-revenue structure that matches its demand and that determines the orbit. Second, the comparison has no single winner, which is precisely why mature operators run both and why the field is consolidating toward multi-orbit. When you evaluate any operator or proposal, read the business model alongside the link budget — ask what it costs to build and sustain, how it earns, and whether the demand it targets can fill what it builds. That commercial lens is the contribution of this lesson; the module's synthesis pulls all five threads together next.</p>
+    <div class="callout green">
+        <strong>LESSON OBJECTIVE MET</strong>
+        You can now contrast the two cost structures, explain the critical-mass and replenishment-treadmill risks, distinguish wholesale-capacity from retail-service revenue, state why fill rate is existential for LEO, and map which orbit wins which segment commercially.
+    </div>
+</div>
+
+<!-- QUIZ -->
+<div class="quiz-block" id="quiz">
+    <h2>KNOWLEDGE CHECK</h2>
+    <p class="quiz-intro">Ten questions on the commercial delta — cost structures, revenue models, fill rate, financing, and commercial fit. One correct answer each.</p>
+
+    <div class="quiz-q"><p><strong>Q1.</strong> The most fundamental commercial difference between GEO and LEO cost structures is:</p>
+        <div class="quiz-options">
+            <button class="quiz-opt" data-q="1" data-correct="false">A — LEO satellites are heavier</button>
+            <button class="quiz-opt" data-q="1" data-correct="true">B — GEO is a few expensive long-lived assets added incrementally; LEO is thousands of cheap short-lived assets deployed in bulk and replenished perpetually</button>
+            <button class="quiz-opt" data-q="1" data-correct="false">C — GEO satellites are launched more often</button>
+            <button class="quiz-opt" data-q="1" data-correct="false">D — They are essentially the same</button>
+        </div><div class="quiz-feedback" id="fb1"></div></div>
+
+    <div class="quiz-q"><p><strong>Q2.</strong> The "valley of death" specific to LEO refers to:</p>
+        <div class="quiz-options">
+            <button class="quiz-opt" data-q="2" data-correct="false">A — A region with no coverage</button>
+            <button class="quiz-opt" data-q="2" data-correct="true">B — The large capital committed before critical mass is reached and meaningful revenue can begin</button>
+            <button class="quiz-opt" data-q="2" data-correct="false">C — The eclipse season</button>
+            <button class="quiz-opt" data-q="2" data-correct="false">D — A failed launch</button>
+        </div><div class="quiz-feedback" id="fb2"></div></div>
+
+    <div class="quiz-q"><p><strong>Q3.</strong> The replenishment treadmill means:</p>
+        <div class="quiz-options">
+            <button class="quiz-opt" data-q="3" data-correct="false">A — Satellites move on a track</button>
+            <button class="quiz-opt" data-q="3" data-correct="true">B — About a fifth of the LEO fleet must be rebuilt and relaunched each year because of the ~5-year life</button>
+            <button class="quiz-opt" data-q="3" data-correct="false">C — GEO satellites are replaced yearly</button>
+            <button class="quiz-opt" data-q="3" data-correct="false">D — Nothing needs replacing</button>
+        </div><div class="quiz-feedback" id="fb3"></div></div>
+
+    <div class="quiz-q"><p><strong>Q4.</strong> The traditional GEO revenue model is best described as:</p>
+        <div class="quiz-options">
+            <button class="quiz-opt" data-q="4" data-correct="false">A — Retail consumer subscriptions</button>
+            <button class="quiz-opt" data-q="4" data-correct="true">B — Wholesale capacity — selling transponders or megabits to businesses that retail the service</button>
+            <button class="quiz-opt" data-q="4" data-correct="false">C — Selling satellites outright</button>
+            <button class="quiz-opt" data-q="4" data-correct="false">D — Government grants only</button>
+        </div><div class="quiz-feedback" id="fb4"></div></div>
+
+    <div class="quiz-q"><p><strong>Q5.</strong> The LEO revenue model differs because:</p>
+        <div class="quiz-options">
+            <button class="quiz-opt" data-q="5" data-correct="false">A — It also sells wholesale only</button>
+            <button class="quiz-opt" data-q="5" data-correct="true">B — It retails connectivity directly and is usually vertically integrated, capturing the whole value chain</button>
+            <button class="quiz-opt" data-q="5" data-correct="false">C — It avoids government customers</button>
+            <button class="quiz-opt" data-q="5" data-correct="false">D — It sells only to broadcasters</button>
+        </div><div class="quiz-feedback" id="fb5"></div></div>
+
+    <div class="quiz-q"><p><strong>Q6.</strong> Why is broadcast the ideal GEO economic case?</p>
+        <div class="quiz-options">
+            <button class="quiz-opt" data-q="6" data-correct="false">A — It needs low latency</button>
+            <button class="quiz-opt" data-q="6" data-correct="true">B — One transmission reaches millions of receivers at zero marginal cost per viewer</button>
+            <button class="quiz-opt" data-q="6" data-correct="false">C — It uses the least capacity</button>
+            <button class="quiz-opt" data-q="6" data-correct="false">D — LEO cannot broadcast at all</button>
+        </div><div class="quiz-feedback" id="fb6"></div></div>
+
+    <div class="quiz-q"><p><strong>Q7.</strong> Fill rate is existential for LEO because:</p>
+        <div class="quiz-options">
+            <button class="quiz-opt" data-q="7" data-correct="false">A — LEO has no capacity</button>
+            <button class="quiz-opt" data-q="7" data-correct="true">B — The fleet cost is fixed while revenue scales with subscribers, so unsold capacity is pure loss</button>
+            <button class="quiz-opt" data-q="7" data-correct="false">C — GEO has the same problem</button>
+            <button class="quiz-opt" data-q="7" data-correct="false">D — Fill rate affects latency</button>
+        </div><div class="quiz-feedback" id="fb7"></div></div>
+
+    <div class="quiz-q"><p><strong>Q8.</strong> Why can't a LEO constellation be financed incrementally like a GEO satellite?</p>
+        <div class="quiz-options">
+            <button class="quiz-opt" data-q="8" data-correct="false">A — Banks dislike satellites</button>
+            <button class="quiz-opt" data-q="8" data-correct="true">B — The huge capital is committed before revenue exists, requiring deep patient equity up front rather than asset-by-asset debt</button>
+            <button class="quiz-opt" data-q="8" data-correct="false">C — LEO satellites have no resale value</button>
+            <button class="quiz-opt" data-q="8" data-correct="false">D — It can be financed identically</button>
+        </div><div class="quiz-feedback" id="fb8"></div></div>
+
+    <div class="quiz-q"><p><strong>Q9.</strong> Which segment does GEO win commercially?</p>
+        <div class="quiz-options">
+            <button class="quiz-opt" data-q="9" data-correct="false">A — Cloud gaming</button>
+            <button class="quiz-opt" data-q="9" data-correct="true">B — Broadcast video and sparse wide-area coverage</button>
+            <button class="quiz-opt" data-q="9" data-correct="false">C — Low-latency enterprise connectivity</button>
+            <button class="quiz-opt" data-q="9" data-correct="false">D — Real-time interactive control</button>
+        </div><div class="quiz-feedback" id="fb9"></div></div>
+
+    <div class="quiz-q"><p><strong>Q10.</strong> How are GEO incumbents responding to commercial pressure from LEO?</p>
+        <div class="quiz-options">
+            <button class="quiz-opt" data-q="10" data-correct="false">A — Shutting down entirely</button>
+            <button class="quiz-opt" data-q="10" data-correct="true">B — Going multi-orbit, moving up to managed services, and consolidating</button>
+            <button class="quiz-opt" data-q="10" data-correct="false">C — Lowering their orbits</button>
+            <button class="quiz-opt" data-q="10" data-correct="false">D — Ignoring it</button>
+        </div><div class="quiz-feedback" id="fb10"></div></div>
+
+    <div class="quiz-score" id="quizScore"></div>
+</div>
+
+<!-- PYTHON -->
+<div class="py-block" id="python">
+    <h2>PYTHON EXERCISES</h2>
+    <p class="py-intro">Three exercises on the commercial structure — the replenishment treadmill, break-even versus fill rate, and the valley-of-death cash flow. Python 3.8+ standard library only.</p>
+
+    <div class="py-exercise">
+        <h3>Exercise 1 — The replenishment treadmill</h3>
+        <p>Compare annual fleet-replacement capital for GEO and LEO from count, unit cost, and life.</p>
+<pre>
+def annual_replacement(n_sats, unit_cost, life_years):
+    return n_sats * unit_cost / life_years
+
+systems = [
+    ("GEO fleet", 5,    250_000_000, 15),
+    ("LEO small", 1500,   1_000_000,  5),
+    ("LEO large", 4000,     750_000,  5),
+]
+
+print(f"{'System':<12}{'Fleet capex':>14}{'Annual replace':>16}")
+print("-" * 42)
+for name, n, cost, life in systems:
+    fleet = n * cost
+    print(f"{name:<12}{fleet/1e9:>12.2f}B{annual_replacement(n, cost, life)/1e6:>14.0f}M")
+
+# 1. Which system carries the heaviest perpetual replacement burden, and
+#    how does the short LEO life drive it?
+# 2. Halve the LEO satellite life to 2.5 years. What happens to the annual
+#    cost, and what would justify accepting it?
+</pre>
+    </div>
+
+    <div class="py-exercise">
+        <h3>Exercise 2 — Break-even and fill rate</h3>
+        <p>Find the subscribers a LEO system needs to break even, and how it moves with utilisation.</p>
+<pre>
+fleet_capex   = 3_000_000_000   # USD
+life_years    = 5
+annual_opex   = 500_000_000     # USD/yr
+arpu_monthly  = 100             # USD per subscriber per month
+
+annual_cost = fleet_capex / life_years + annual_opex
+annual_rev_per_sub = arpu_monthly * 12
+
+def breakeven_subs():
+    return annual_cost / annual_rev_per_sub
+
+print(f"Annual cost:            ${annual_cost/1e9:.2f}B")
+print(f"Revenue per sub/yr:     ${annual_rev_per_sub}")
+print(f"Break-even subscribers: {breakeven_subs():,.0f}")
+
+# 1. If the capacity ceiling is 5,000,000 subscribers, what fill rate must
+#    it reach just to break even?
+# 2. Drop ARPU to $60. How many more subscribers are needed, and what does
+#    that imply about consumer vs premium/government mix?
+</pre>
+    </div>
+
+    <div class="py-exercise">
+        <h3>Exercise 3 — Cash-flow valley of death</h3>
+        <p>Model cumulative cash flow for GEO (incremental) vs LEO (upfront) and find each trough and payback.</p>
+<pre>
+def cumulative(flows):
+    out, run = [], 0
+    for f in flows:
+        run += f
+        out.append(run)
+    return out
+
+# Year 0..7 net cash flow (USD millions), illustrative.
+geo = [-250, 40, 40, 40, 40, 40, 40, 40]
+leo = [-1500, -800, -400, 300, 700, 900, 900, 900]
+
+for name, flows in [("GEO", geo), ("LEO", leo)]:
+    cum = cumulative(flows)
+    trough = min(cum)
+    payback = next((i for i, v in enumerate(cum) if v >= 0), None)
+    print(f"{name}: trough ${trough}M, "
+          f"payback {'year '+str(payback) if payback is not None else 'not within window'}")
+
+# 1. How much deeper is LEO's trough, and why does that drive its
+#    financing model (see the financing section)?
+# 2. Delay LEO's revenue by one year (slower critical mass). What does that
+#    do to the trough and payback?
+</pre>
+        <div class="py-challenge"><strong>EXTENSION</strong>
+            Combine all three exercises: add the replenishment cost from Exercise 1 as an ongoing yearly outflow in the Exercise 3 LEO cash flow, and the break-even subscribers from Exercise 2 as the revenue ramp. Watch how the replenishment treadmill flattens the post-payback curve.
+        </div>
+    </div>
+</div>
+
+<!-- REFLECTION -->
+<div class="reflection-block" id="reflect">
+    <h2>REFLECTION PROMPTS</h2>
+    <p class="ref-intro">Not graded. Write in your own words, 200–400 words each.</p>
+
+    <div class="ref-prompt"><h3>Prompt 1 — Which Orbit Wins This Segment?</h3>
+        <p>Pick a single market segment — rural consumer broadband, transoceanic aviation, live sports broadcast, a national government network — and argue which orbit's business model wins it, grounding the argument in cost structure, revenue model, capacity density, and fill rate rather than latency alone. Then name the condition that would flip your verdict.</p></div>
+
+    <div class="ref-prompt"><h3>Prompt 2 — Treadmill as Advantage</h3>
+        <p>The replenishment treadmill is usually framed as a cost burden. Argue the opposite: that a five-year satellite life is a commercial advantage, not just a liability, and identify what an operator must do to actually capture that upside rather than merely pay the cost.</p></div>
+
+    <div class="ref-prompt"><h3>Prompt 3 — Is GEO Wholesale Declining or Durable?</h3>
+        <p>Take a position on the GEO wholesale-capacity business: is it a structurally declining business that LEO and streaming will hollow out, or a durable niche that survives by retreating to the segments it genuinely wins? Defend the position with the commercial logic of this lesson.</p></div>
+
+    <div class="ref-prompt"><h3>Prompt 4 — When Do LEO Economics Close?</h3>
+        <p>LEO's unit economics live on fill rate. Design the demand conditions — geography, ARPU mix, customer segments — under which a LEO constellation's economics clearly close, and the conditions under which they clearly do not. What is the single variable that most separates the two cases?</p></div>
+</div>
+
+<!-- MARK COMPLETE -->
+<div class="complete-wrap">
+    <button class="complete-btn" id="completeBtn">MARK LESSON COMPLETE</button>
+    <div class="complete-msg" id="completeMsg"></div>
+</div>
+
+<div class="lesson-nav">
+    <a href="m1-4.html">← LESSON 04 — MULTI-ORBIT HYBRID ARCHITECTURES</a>
+    <a href="m1-6.html">LESSON 06 — SPECTRUM &amp; REGULATORY ORIENTATION →</a>
+</div>
+
+</div>
+
+<button class="back-to-top" id="backToTop" title="Back to top">↑</button>
+
+<footer>© 2026 LEOAF · M1 · LESSON 05 OF 7</footer>
+
+<script>
+const canvas = document.getElementById('starsCanvas');
+const ctx = canvas.getContext('2d');
+let stars = [];
+function initStars() { stars=[]; for(let i=0;i<180;i++) stars.push({x:Math.random()*canvas.width,y:Math.random()*canvas.height,size:Math.random()*1.5+0.4,speed:Math.random()*0.18+0.04,hue:Math.random()*360}); }
+function resizeCanvas() { canvas.width=window.innerWidth; canvas.height=window.innerHeight; }
+resizeCanvas(); initStars(); window.addEventListener('resize', resizeCanvas);
+function animateStars() { ctx.clearRect(0,0,canvas.width,canvas.height); stars.forEach(s=>{s.y-=s.speed;if(s.y<0){s.y=canvas.height;s.x=Math.random()*canvas.width;} ctx.beginPath();ctx.fillStyle=`hsl(${s.hue},80%,80%)`;ctx.arc(s.x,s.y,s.size,0,Math.PI*2);ctx.fill();}); requestAnimationFrame(animateStars); }
+animateStars();
+</script>
+
+<script>
+const feedbacks = {
+    1:{correct:"Correct. The structures differ in kind — GEO incremental and long-lived, LEO all-at-once and on a replenishment treadmill.",wrong:"Incorrect. It is the shape — GEO adds a few long-lived satellites incrementally, LEO deploys thousands of short-lived ones in bulk and must replenish them forever."},
+    2:{correct:"Correct. LEO must deploy a large fraction of the constellation before selling continuous service, so huge capital is spent before revenue arrives.",wrong:"Incorrect. It is the capital gap — LEO spends enormously to reach critical mass before earning, the gap that bankrupted the 1990s ventures."},
+    3:{correct:"Correct. A five-year life forces ~20%/yr replacement indefinitely — a perpetual cost with no GEO equivalent.",wrong:"Incorrect. It is the ~20%/yr replacement a five-year life forces on a LEO fleet, a standing cost GEO's fifteen-year life avoids."},
+    4:{correct:"Correct. GEO classically sells raw capacity to broadcasters, telcos, and governments who retail the end service — a B2B capacity-landlord model.",wrong:"Incorrect. It is wholesale capacity — leasing MHz/Mbps to businesses that retail it, not consumer subscriptions."},
+    5:{correct:"Correct. LEO typically retails connectivity and owns the stack, taking direct ARPU and the operational burden that comes with it.",wrong:"Incorrect. LEO retails connectivity itself and integrates vertically — direct revenue and the whole value chain, versus GEO's wholesale capacity layer."},
+    6:{correct:"Correct. One-to-many distribution over a wide beam serves millions from a single transmission — unbeatable economics for broadcast.",wrong:"Incorrect. Broadcast is one-to-many at zero marginal cost per viewer, which GEO's wide beam serves better than any dense two-way architecture."},
+    7:{correct:"Correct. A constellation costs the same full or empty, but only sold capacity earns, so the fill rate decides whether the economics close.",wrong:"Incorrect. LEO's cost is fixed and revenue scales with users, so empty capacity is wasted spend — fill rate makes or breaks the business."},
+    8:{correct:"Correct. LEO's capital precedes its revenue and is enormous, so it needs patient equity up front — a structural filter on who can attempt it.",wrong:"Incorrect. LEO commits the capital before earning, so it needs large patient equity up front, not the incremental debt a discrete GEO asset supports."},
+    9:{correct:"Correct. GEO's economics suit one-to-many broadcast and thin, spread-out demand where low capacity density is sufficient.",wrong:"Incorrect. GEO wins broadcast and sparse wide-area coverage; the latency-bound segments belong to LEO."},
+    10:{correct:"Correct. They add low-latency layers, sell managed services rather than raw capacity, and merge for scale and multi-orbit reach.",wrong:"Incorrect. The response is multi-orbit, managed services, and consolidation — adapting the franchise, not abandoning it."}
+};
+let answered = {};
+document.querySelectorAll('.quiz-opt').forEach(btn => {
+    btn.addEventListener('click', function() {
+        const q = this.dataset.q;
+        if (answered[q] !== undefined) return;
+        const correct = this.dataset.correct === 'true';
+        answered[q] = correct;
+        document.querySelectorAll(`.quiz-opt[data-q="${q}"]`).forEach(b => { b.disabled = true; if (b.dataset.correct === 'true') b.classList.add('correct'); });
+        if (!correct) this.classList.add('wrong');
+        const fb = document.getElementById(`fb${q}`);
+        fb.textContent = (correct ? '✓ ' : '✗ ') + feedbacks[q][correct ? 'correct' : 'wrong'];
+        fb.style.color = correct ? '#39ff14' : '#ff004f';
+        if (Object.keys(answered).length === 10) {
+            const total = Object.values(answered).filter(Boolean).length;
+            const el = document.getElementById('quizScore');
+            el.style.display = 'block';
+            const pct = Math.round(total / 10 * 100);
+            el.textContent = `SCORE: ${total} / 10 (${pct}%) — ${pct===100?'PERFECT.':pct>=80?'STRONG. REVIEW ANY MISSES.':pct>=60?'ADEQUATE. REVISIT WEAK SECTIONS.':'REVISIT THE LESSON BEFORE PROCEEDING.'}`;
+        }
+    });
+});
+</script>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="supabase.js"></script>
+<script src="user_progress.js"></script>
+<script>
+const LESSON_ID = 'm1-5';
+(function () {
+    function bounceToLogin(reason) {
+        console.error("Auth guard:", reason, "- redirecting to index.html");
+        window.location.replace("index.html");
+    }
+    async function init() {
+        if (typeof client === "undefined" || !client || !client.auth) {
+            return bounceToLogin("Supabase client not loaded (is supabase.js in this directory?)");
+        }
+        let session = null;
+        try { ({ data: { session } } = await client.auth.getSession()); }
+        catch (e) { return bounceToLogin("getSession threw: " + e.message); }
+        if (!session) { window.location.replace("index.html"); return; }
+
+        const btn = document.getElementById('completeBtn');
+        const msg = document.getElementById('completeMsg');
+        function setDone(done) {
+            if (done) {
+                btn.textContent = '✓ COMPLETE — CLICK TO UNDO';
+                btn.classList.add('done');
+                btn.style.cssText = 'border-color:#39ff14;color:#39ff14;background:rgba(57,255,20,0.1);cursor:pointer;opacity:1;';
+                msg.style.color = '#39ff14';
+                msg.textContent = 'Lesson marked complete. Click again to undo.';
+            } else {
+                btn.textContent = 'MARK LESSON COMPLETE';
+                btn.classList.remove('done');
+                btn.style.cssText = '';
+                msg.style.color = '#ffffff55';
+                msg.textContent = 'Not yet marked complete.';
+            }
+        }
+        let mastered = [];
+        try { mastered = await getMasteredSections(); } catch (e) { console.error(e); }
+        setDone(mastered.includes(LESSON_ID));
+        btn.addEventListener('click', async () => {
+            const isCurrentlyDone = btn.classList.contains('done');
+            msg.style.color = '#00d9ff';
+            msg.textContent = 'Saving...';
+            const ok = await upsertSection(LESSON_ID, !isCurrentlyDone);
+            if (ok) { setDone(!isCurrentlyDone); }
+            else { msg.style.color = '#ff004f'; msg.textContent = 'Error saving. Try again.'; }
+        });
+        const btt = document.getElementById('backToTop');
+        window.addEventListener('scroll', () => { btt.classList.toggle('visible', window.scrollY > 400); });
+        btt.addEventListener('click', () => window.scrollTo({ top: 0, behavior: 'smooth' }));
+    }
+    if (document.readyState === "loading") { document.addEventListener("DOMContentLoaded", init); }
+    else { init(); }
+})();
+</script>
+
+</body>
+</html>
