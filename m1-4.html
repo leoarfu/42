@@ -1,0 +1,694 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, shrink-to-fit=no">
+<title>M1-4 — Multi-Orbit Hybrid Architectures · LEOAF</title>
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;600;800&family=Share+Tech+Mono&family=Libre+Baskerville:ital,wght@0,400;0,700;1,400&display=swap" rel="stylesheet">
+<link rel="icon" href="favicon.ico" sizes="any" type="image/x-icon">
+<link rel="manifest" href="site.webmanifest">
+<meta name="theme-color" content="#0f0f0f">
+
+<script>
+window.leoafAbort = async function () {
+    function go() { window.location.replace("index.html?signedout=1"); }
+    try {
+        if (typeof client !== "undefined" && client && client.auth && client.auth.signOut) {
+            try { await client.auth.signOut({ scope: "local" }); } catch (e) {}
+        }
+    } catch (e) {}
+    go();
+};
+</script>
+
+<style>
+* { box-sizing:border-box; margin:0; padding:0; }
+html { height:100%; -webkit-text-size-adjust:100%; overflow-x:hidden; }
+body { font-family:'Share Tech Mono',monospace; background:#000; color:white; overflow-x:hidden; min-height:100vh; }
+#starsCanvas { position:fixed; inset:0; z-index:-1; }
+
+header { background:#000; border-bottom:1px solid #ff004f33; position:sticky; top:0; z-index:100; padding:1rem clamp(1.5rem,5vw,4rem); display:flex; justify-content:space-between; align-items:center; box-shadow:0 4px 16px #0008; }
+.logo { font-family:'Orbitron',sans-serif; font-weight:800; font-size:clamp(16px,2vw,22px); letter-spacing:3px; text-decoration:none; }
+.logo span:first-child { color:white; }
+.logo span:last-child { color:#ff004f; }
+.nav-right { display:flex; align-items:center; gap:10px; }
+.nav-btn { background:transparent; border:1px solid #ff004f44; color:#ff004f; padding:6px 14px; cursor:pointer; transition:0.3s ease; font-size:11px; font-family:'Orbitron',sans-serif; letter-spacing:1px; text-decoration:none; display:inline-block; }
+.nav-btn:hover { background:#ff004f; color:black; }
+
+.breadcrumb { padding:14px clamp(1.5rem,5vw,4rem); font-size:11px; color:#ffffff44; letter-spacing:1px; position:relative; z-index:1; }
+.breadcrumb a { color:#00d9ff66; text-decoration:none; }
+.breadcrumb a:hover { color:#00d9ff; }
+.breadcrumb span { margin:0 8px; }
+
+.lesson-wrap { max-width:820px; margin:0 auto; padding:0 clamp(1.5rem,5vw,4rem) 80px; position:relative; z-index:1; }
+
+.lesson-header { padding:30px 0 28px; border-bottom:1px solid #ffffff11; margin-bottom:36px; }
+.lesson-tag { font-family:'Orbitron',sans-serif; font-size:10px; color:#ff004f; letter-spacing:3px; margin-bottom:10px; }
+.lesson-header h1 { font-family:'Orbitron',sans-serif; font-size:clamp(20px,3.5vw,32px); font-weight:800; line-height:1.2; margin-bottom:12px; }
+.lesson-meta { display:flex; gap:10px; flex-wrap:wrap; margin-bottom:16px; }
+.l-pill { font-family:'Orbitron',sans-serif; font-size:10px; padding:3px 10px; border:1px solid; letter-spacing:1px; }
+.l-pill-q { color:#ff004f; border-color:#ff004f44; }
+.l-pill-t { color:#39ff14; border-color:#39ff1444; }
+.lesson-intro { font-size:13px; line-height:1.85; opacity:0.75; }
+
+.toc { background:rgba(0,217,255,0.06); border:1px solid #00d9ff33; padding:24px 28px; margin:30px 0; }
+.toc h4 { font-family:'Orbitron',sans-serif; font-size:10px; color:#00d9ff; letter-spacing:2px; margin-bottom:16px; }
+.toc ol { padding-left:20px; }
+.toc li { font-size:13px; line-height:2.1; opacity:1; }
+.toc li a { color:#00d9ffbb; text-decoration:none; transition:0.15s; }
+.toc li a:hover { color:#ffffff; padding-left:4px; }
+.toc li::marker { color:#ff004f; font-family:'Orbitron',sans-serif; font-size:10px; }
+
+.content-block { margin-bottom:48px; }
+.content-block h2 { font-family:'Orbitron',sans-serif; font-size:13px; color:#00d9ff; letter-spacing:2px; text-transform:uppercase; margin-bottom:18px; padding-bottom:10px; border-bottom:1px solid #00d9ff22; scroll-margin-top:80px; }
+.content-block h3 { font-family:'Orbitron',sans-serif; font-size:11px; color:#ffffff88; letter-spacing:1.5px; text-transform:uppercase; margin:28px 0 12px; }
+.content-block p { font-size:13px; line-height:1.9; opacity:0.85; margin-bottom:16px; }
+.content-block ul, .content-block ol { padding-left:0; margin-bottom:16px; }
+.content-block ul li, .content-block ol li { font-size:13px; line-height:1.85; opacity:0.85; padding-left:20px; position:relative; margin-bottom:6px; }
+.content-block ul li::before { content:'›'; position:absolute; left:0; color:#00d9ff; }
+.content-block blockquote { border-left:3px solid #39ff14; background:rgba(57,255,20,0.05); padding:14px 20px; margin:18px 0; font-size:14px; font-family:'Share Tech Mono',monospace; color:#39ff14; letter-spacing:1px; }
+
+.callout { border-left:3px solid #00d9ff; background:rgba(0,217,255,0.05); padding:16px 20px; margin:22px 0; font-size:12px; line-height:1.8; }
+.callout.red   { border-left-color:#ff004f; background:rgba(255,0,79,0.05); }
+.callout.green { border-left-color:#39ff14; background:rgba(57,255,20,0.05); }
+.callout.amber { border-left-color:#ffaa00; background:rgba(255,170,0,0.05); }
+.callout strong { font-family:'Orbitron',sans-serif; font-size:10px; letter-spacing:1px; display:block; margin-bottom:8px; color:inherit; }
+
+.key-numbers { display:grid; grid-template-columns:repeat(auto-fit,minmax(140px,1fr)); gap:12px; margin:22px 0; }
+.kn-item { background:rgba(255,255,255,0.03); border:1px solid #ffffff11; padding:16px 12px; text-align:center; }
+.kn-val { font-family:'Orbitron',sans-serif; font-size:clamp(15px,2.3vw,22px); font-weight:800; color:#00d9ff; display:block; }
+.kn-label { font-size:10px; opacity:0.5; letter-spacing:1px; margin-top:5px; display:block; line-height:1.4; }
+
+.compare-table { width:100%; border-collapse:collapse; margin:22px 0; font-size:12px; }
+.compare-table th { font-family:'Orbitron',sans-serif; font-size:10px; letter-spacing:1px; color:#00d9ff; padding:10px 12px; border-bottom:1px solid #00d9ff33; text-align:left; }
+.compare-table td { padding:10px 12px; border-bottom:1px solid #ffffff0a; line-height:1.5; opacity:0.85; vertical-align:top; }
+.compare-table tr:hover td { background:rgba(255,255,255,0.02); }
+
+.diagram-wrap { margin:24px 0; background:rgba(255,255,255,0.02); border:1px solid #ffffff11; padding:20px; overflow-x:auto; }
+.diagram-wrap figcaption { font-size:11px; color:#ffffff44; margin-top:12px; text-align:center; letter-spacing:1px; }
+
+.quiz-block { background:rgba(17,17,17,0.9); border:1px solid #ff004f33; padding:28px; margin:48px 0 32px; }
+.quiz-block h2 { font-family:'Orbitron',sans-serif; font-size:13px; color:#ff004f; letter-spacing:2px; margin-bottom:6px; }
+.quiz-intro { font-size:12px; opacity:0.6; margin-bottom:24px; padding-bottom:16px; border-bottom:1px solid #ff004f22; line-height:1.6; }
+.quiz-q { margin-bottom:28px; }
+.quiz-q p { font-size:13px; opacity:0.9; margin-bottom:12px; line-height:1.65; }
+.quiz-q p strong { color:#00d9ff; }
+.quiz-options { display:flex; flex-direction:column; gap:8px; }
+.quiz-opt { background:rgba(255,255,255,0.03); border:1px solid #ffffff1a; padding:11px 16px; cursor:pointer; font-size:12px; font-family:'Share Tech Mono',monospace; transition:0.2s ease; text-align:left; color:white; line-height:1.5; }
+.quiz-opt:hover:not(:disabled) { background:rgba(0,217,255,0.08); border-color:#00d9ff44; }
+.quiz-opt.correct  { background:rgba(57,255,20,0.1);  border-color:#39ff14; color:#39ff14; }
+.quiz-opt.wrong    { background:rgba(255,0,79,0.1);   border-color:#ff004f; color:#ff004f; }
+.quiz-opt:disabled { cursor:default; }
+.quiz-feedback { font-size:12px; margin-top:10px; min-height:18px; line-height:1.7; opacity:0.9; padding:0 4px; }
+.quiz-score { font-family:'Orbitron',sans-serif; font-size:12px; color:#39ff14; margin-top:20px; letter-spacing:1px; display:none; padding-top:16px; border-top:1px solid #39ff1433; }
+
+.py-block { background:rgba(10,10,10,0.95); border:1px solid #39ff1422; padding:28px; margin:32px 0; }
+.py-block h2 { font-family:'Orbitron',sans-serif; font-size:13px; color:#39ff14; letter-spacing:2px; margin-bottom:8px; }
+.py-block .py-intro { font-size:12px; opacity:0.7; margin-bottom:20px; padding-bottom:16px; border-bottom:1px solid #39ff1422; line-height:1.7; }
+.py-exercise { margin-bottom:32px; }
+.py-exercise:last-child { margin-bottom:0; }
+.py-exercise h3 { font-family:'Orbitron',sans-serif; font-size:11px; color:#39ff1499; letter-spacing:1.5px; text-transform:uppercase; margin-bottom:10px; }
+.py-exercise p { font-size:12px; opacity:0.8; margin-bottom:14px; line-height:1.75; }
+.py-block pre { background:#050505; border:1px solid #39ff1433; padding:20px; font-family:'Share Tech Mono',monospace; font-size:11.5px; line-height:1.75; overflow-x:auto; color:#39ff14; white-space:pre; margin-bottom:12px; }
+.py-block .py-challenge { background:rgba(57,255,20,0.04); border-left:2px solid #39ff14; padding:12px 16px; margin-top:14px; font-size:12px; line-height:1.75; opacity:0.8; }
+.py-block .py-challenge strong { font-family:'Orbitron',sans-serif; font-size:10px; color:#39ff14; display:block; margin-bottom:6px; letter-spacing:1px; }
+
+.reflection-block { background:rgba(255,170,0,0.04); border:1px solid #ffaa0033; padding:24px; margin:32px 0; }
+.reflection-block h2 { font-family:'Orbitron',sans-serif; font-size:13px; color:#ffaa00; letter-spacing:2px; margin-bottom:8px; }
+.reflection-block .ref-intro { font-size:12px; opacity:0.7; margin-bottom:20px; padding-bottom:14px; border-bottom:1px solid #ffaa0022; line-height:1.7; }
+.ref-prompt { margin-bottom:20px; }
+.ref-prompt h3 { font-family:'Orbitron',sans-serif; font-size:11px; color:#ffaa0099; letter-spacing:1px; margin-bottom:8px; }
+.ref-prompt p { font-size:12px; opacity:0.8; line-height:1.75; margin-bottom:10px; }
+
+.back-to-top { position:fixed; bottom:28px; right:28px; z-index:200; width:44px; height:44px; background:#000; border:1px solid #00d9ff55; color:#00d9ff; font-size:20px; cursor:pointer; display:flex; align-items:center; justify-content:center; opacity:0; pointer-events:none; transition:opacity 0.3s ease, border-color 0.3s ease; }
+.back-to-top.visible { opacity:1; pointer-events:auto; }
+.back-to-top:hover { border-color:#00d9ff; background:#001a2c; }
+
+.complete-wrap { margin-top:56px; padding-top:30px; border-top:1px solid #ffffff11; text-align:center; }
+.complete-btn { font-family:'Orbitron',sans-serif; font-size:13px; letter-spacing:2px; padding:14px 44px; background:transparent; border:1px solid #39ff14; color:#39ff14; cursor:pointer; transition:0.3s ease; }
+.complete-btn:hover:not(.done) { background:#39ff14; color:black; box-shadow:0 0 20px rgba(57,255,20,0.4); }
+.complete-btn.done { background:rgba(57,255,20,0.1); cursor:default; opacity:0.7; }
+.complete-msg { font-size:12px; color:#39ff14; margin-top:14px; min-height:18px; letter-spacing:1px; }
+
+.lesson-nav { display:flex; justify-content:space-between; margin-top:30px; flex-wrap:wrap; gap:10px; }
+.lesson-nav a { font-family:'Orbitron',sans-serif; font-size:11px; color:#00d9ff66; text-decoration:none; letter-spacing:1px; transition:0.2s; }
+.lesson-nav a:hover { color:#00d9ff; }
+
+footer { text-align:center; padding:30px; opacity:0.3; font-size:11px; position:relative; z-index:1; letter-spacing:1px; }
+
+@media (max-width:600px) { .key-numbers { grid-template-columns:1fr 1fr; } .compare-table { font-size:11px; } .compare-table th, .compare-table td { padding:8px 8px; } }
+
+/* ── LIGHT READING MODE ── */
+.content-block { background:#f5f2ec; color:#1a1a1a; padding:36px clamp(24px,4vw,48px); margin-bottom:24px; border-left:4px solid #00d9ff; position:relative; z-index:1; }
+.content-block h2 { font-family:'Orbitron',sans-serif; font-size:13px; color:#003d66; letter-spacing:2px; text-transform:uppercase; margin-bottom:20px; padding-bottom:10px; border-bottom:2px solid #00d9ff66; scroll-margin-top:80px; }
+.content-block h3 { font-family:'Orbitron',sans-serif; font-size:11px; color:#444; letter-spacing:1.5px; text-transform:uppercase; margin:32px 0 14px; }
+.content-block p { font-family:'Libre Baskerville', Georgia, serif; font-size:15px; line-height:1.9; color:#1a1a1a; opacity:1; margin-bottom:18px; }
+.content-block ul li { font-family:'Libre Baskerville', Georgia, serif; font-size:14px; line-height:1.85; color:#1a1a1a; opacity:1; margin-bottom:8px; }
+.content-block ul li::before { color:#0077aa; }
+.content-block blockquote { border-left:3px solid #1a7a1a; background:#eafaea; color:#0a3d0a; }
+.content-block .callout { border-left:3px solid #0088cc; background:#e8f4fb; color:#1a1a1a; }
+.content-block .callout.red   { border-left-color:#cc0033; background:#fdecea; }
+.content-block .callout.green { border-left-color:#1a7a1a; background:#eafaea; }
+.content-block .callout.amber { border-left-color:#996600; background:#fef9ec; }
+.content-block .callout strong { color:inherit; }
+.content-block .kn-item { background:#fff; border:1px solid #d0d0d0; }
+.content-block .kn-label { color:#555; opacity:1; }
+.content-block .compare-table th { color:#003d66; border-bottom:2px solid #00d9ff66; }
+.content-block .compare-table td { color:#1a1a1a; opacity:1; border-bottom:1px solid #ddd; }
+.content-block .compare-table tr:hover td { background:#f0f0f0; }
+.content-block .diagram-wrap { background:#0a0a0a; border:1px solid #333; }
+.content-block .diagram-wrap figcaption { color:#ffffff55; }
+</style>
+
+</head>
+<body>
+
+<canvas id="starsCanvas"></canvas>
+
+<header>
+    <a href="dashboard.html" class="logo"><span>LEO</span><span>AF</span></a>
+    <div class="nav-right">
+        <a href="m1.html" class="nav-btn">← M1 HUB</a>
+        <button class="nav-btn" onclick="leoafAbort()">ABORT</button>
+    </div>
+</header>
+
+<div class="breadcrumb">
+    <a href="dashboard.html">DASHBOARD</a><span>/</span>
+    <a href="m1.html">M1</a><span>/</span>
+    <span style="color:#ffffff88;">LESSON 04 — MULTI-ORBIT HYBRID ARCHITECTURES</span>
+</div>
+
+<div class="lesson-wrap">
+
+<div class="lesson-header">
+    <div class="lesson-tag">M1 · LESSON 04 OF 7</div>
+    <h1>Multi-Orbit Hybrid Architectures</h1>
+    <div class="lesson-meta">
+        <div class="l-pill l-pill-q">MODULE 1</div>
+        <div class="l-pill l-pill-t">FOUNDATIONS</div>
+    </div>
+    <p class="lesson-intro">The previous lessons established that no single orbit is best at everything: altitude buys coverage at the cost of latency, link strength, and satellite count, and the speed of light fixes a delay floor that ranks the orbits by altitude. This lesson takes the obvious next step. If each orbit is strong where another is weak, why choose at all — why not run more than one layer and route each service to the orbit that suits it? That is the multi-orbit hybrid architecture, the mature answer for any operator serving heterogeneous demand. This lesson owns the combination question: when and why to run multiple layers, how services are matched to layers, how traffic is steered between them, and what real deployments look like. It defers the routing mechanism to the networking module, the terminal hardware to the user-terminals module, and the deep economics to its own module.</p>
+</div>
+
+<div class="toc">
+    <h4>CONTENTS</h4>
+    <ol>
+        <li><a href="#s1">Why one orbit can't serve every service</a></li>
+        <li><a href="#s2">The complementarity thesis</a></li>
+        <li><a href="#s3">Matching services to layers</a></li>
+        <li><a href="#s4">Traffic steering — the decision logic</a></li>
+        <li><a href="#s5">Multi-orbit terminals &amp; managed service</a></li>
+        <li><a href="#s6">Resilience &amp; diversity — the second motive</a></li>
+        <li><a href="#s7">The cost of hybrid — when it pays off</a></li>
+        <li><a href="#s8">Multi-shell is not multi-orbit</a></li>
+        <li><a href="#s9">Real-world hybrid deployments</a></li>
+        <li><a href="#s10">The architect's takeaway</a></li>
+        <li><a href="#quiz">Knowledge check</a></li>
+        <li><a href="#python">Python exercises</a></li>
+        <li><a href="#reflect">Reflection prompts</a></li>
+    </ol>
+</div>
+
+<div class="content-block" id="s1">
+    <h2>1. Why One Orbit Cannot Serve Every Service</h2>
+    <p>Recall the tension from the regimes and latency lessons, stated now as a service problem rather than an engineering one. GEO gives persistent wide-area coverage from a single satellite and is unmatched for broadcast and bulk distribution, but its half-second round trip rules out interactive use. LEO gives terrestrial-class latency and dense, reusable capacity, but each satellite sees a small area for a few minutes, so it takes thousands of them and continuous handover to hold coverage. MEO sits between the two on every axis.</p>
+    <p>The architect's problem is that real demand is heterogeneous. A single customer — an airline, a government, a telco — often needs both a latency-sensitive interactive service and a bulk or broadcast service at the same time, and the orbit that serves one badly serves the other. Forcing all of it through one regime means accepting that regime's weakness for the traffic it suits least. The multi-orbit answer refuses that compromise: it places each service on the layer that serves it best and steers traffic accordingly.</p>
+</div>
+
+<div class="content-block" id="s2">
+    <h2>2. The Complementarity Thesis</h2>
+    <p>The case for hybrid rests on complementarity: each regime's strength covers another's weakness, so a blend can be better than any single layer for a mixed workload. Stated as the working division of labour:</p>
+    <ul>
+        <li><strong>GEO</strong> owns persistence, wide-area reach, broadcast and multicast, and bulk or delay-tolerant capacity. One satellite covers roughly a third of the Earth and never moves in the sky — ideal for one-to-many distribution and for backup.</li>
+        <li><strong>LEO</strong> owns low latency and high capacity-density. Its short round trip serves interactive traffic, and because each satellite covers a small area, the same spectrum is reused intensively across the constellation, giving high throughput per unit area.</li>
+        <li><strong>MEO</strong> owns the middle: lower latency than GEO, far wider per-satellite coverage than LEO, and high trunk throughput, reached with a moderate satellite count — the regime O3b chose for high-capacity backhaul.</li>
+    </ul>
+    <p>The thesis is not that hybrid is always right. It is that when an operator's demand spans latency classes and service types, the strengths compose: GEO carries what is delay-tolerant or one-to-many, LEO carries what is interactive, and the blend serves the whole workload better than either alone could.</p>
+
+    <div class="diagram-wrap">
+        <svg viewBox="0 0 700 330" width="100%" xmlns="http://www.w3.org/2000/svg" font-family="Share Tech Mono, monospace">
+            <rect width="700" height="330" fill="#0a0a0a"/>
+            <!-- Earth -->
+            <rect x="40" y="296" width="620" height="24" fill="none" stroke="#00d9ff55" stroke-width="1.5"/>
+            <text x="350" y="312" font-size="10" fill="#00d9ff" text-anchor="middle">EARTH SURFACE / USER EDGE</text>
+            <!-- LEO band -->
+            <line x1="40" y1="232" x2="660" y2="232" stroke="#39ff14" stroke-width="1.5" stroke-dasharray="4,4"/>
+            <text x="48" y="226" font-size="11" fill="#39ff14">LEO  ~550–1,200 km</text>
+            <text x="48" y="250" font-size="9" fill="#39ff1499">low latency · capacity density → interactive, gaming, real-time</text>
+            <!-- MEO band -->
+            <line x1="40" y1="150" x2="660" y2="150" stroke="#ffaa00" stroke-width="1.5" stroke-dasharray="4,4"/>
+            <text x="48" y="144" font-size="11" fill="#ffaa00">MEO  ~8,000 km</text>
+            <text x="48" y="168" font-size="9" fill="#ffaa0099">balanced latency/coverage → high-capacity trunking, backhaul</text>
+            <!-- GEO band -->
+            <line x1="40" y1="60" x2="660" y2="60" stroke="#00d9ff" stroke-width="1.5" stroke-dasharray="4,4"/>
+            <text x="48" y="54" font-size="11" fill="#00d9ff">GEO  35,786 km</text>
+            <text x="48" y="78" font-size="9" fill="#00d9ffaa">persistence · wide-area · broadcast → TV/multicast, bulk, backup</text>
+            <!-- steering arrows from edge up to layers -->
+            <line x1="585" y1="296" x2="585" y2="234" stroke="#39ff14" stroke-width="1.2"/>
+            <polygon points="585,228 581,238 589,238" fill="#39ff14"/>
+            <line x1="610" y1="296" x2="610" y2="152" stroke="#ffaa00" stroke-width="1.2"/>
+            <polygon points="610,146 606,156 614,156" fill="#ffaa00"/>
+            <line x1="635" y1="296" x2="635" y2="62" stroke="#00d9ff" stroke-width="1.2"/>
+            <polygon points="635,56 631,66 639,66" fill="#00d9ff"/>
+            <text x="430" y="290" font-size="9" fill="#ffffff88" text-anchor="end">↑ traffic steered to the layer each service needs</text>
+        </svg>
+        <figcaption>SERVICE-TO-LAYER STACK — each service rides the regime its binding requirement demands; the edge steers across layers</figcaption>
+    </div>
+
+    <table class="compare-table">
+        <thead><tr><th>Regime</th><th>Owns</th><th>Weak at</th><th>Natural services</th></tr></thead>
+        <tbody>
+            <tr><td>GEO</td><td>Persistence, wide-area, broadcast</td><td>Interactive latency</td><td>TV/multicast, bulk, backup, IoT</td></tr>
+            <tr><td>MEO</td><td>Balanced latency/coverage, trunking</td><td>Neither best nor worst</td><td>High-capacity backhaul, trunking</td></tr>
+            <tr><td>LEO</td><td>Low latency, capacity density</td><td>Per-satellite coverage, count</td><td>Interactive broadband, gaming, real-time</td></tr>
+        </tbody>
+    </table>
+</div>
+
+<div class="content-block" id="s3">
+    <h2>3. Matching Services to Layers</h2>
+    <p>The core skill of multi-orbit design is assigning each service to the right layer, and the assignment follows from the service's requirements rather than from preference. The dominant axis is latency tolerance, with throughput pattern and coverage need as secondary axes.</p>
+    <p>Interactive and real-time services — video calls, cloud applications, gaming, remote control — are latency-bound and belong on LEO, because they cross the application thresholds the latency lesson set out. Broadcast, multicast, and content distribution — live television, software updates pushed to many endpoints, cached content — are one-to-many and delay-tolerant, and belong on GEO, where a single beam reaches an entire region at once and latency is irrelevant. Bulk transfer and backup that are not time-critical also suit GEO or MEO, where capacity is cheap per bit and the latency penalty does not matter. High-throughput trunking that needs better latency than GEO but not the full constellation cost of LEO suits MEO.</p>
+    <p>The discipline is to assign by requirement, not by habit. A service does not "want" the lowest latency available; it wants the cheapest layer that meets its actual requirement, because latency you do not need is capacity you overpaid for.</p>
+    <table class="compare-table">
+        <thead><tr><th>Service</th><th>Binding requirement</th><th>Preferred layer</th></tr></thead>
+        <tbody>
+            <tr><td>Video call, gaming, interactive</td><td>Low latency</td><td>LEO</td></tr>
+            <tr><td>Live TV, multicast, content push</td><td>One-to-many, delay-tolerant</td><td>GEO</td></tr>
+            <tr><td>Bulk transfer, backup</td><td>Cost per bit, not time-critical</td><td>GEO / MEO</td></tr>
+            <tr><td>High-capacity backhaul/trunking</td><td>Throughput, moderate latency</td><td>MEO</td></tr>
+            <tr><td>IoT, telemetry</td><td>Coverage, tiny payloads</td><td>GEO / LEO</td></tr>
+        </tbody>
+    </table>
+    <div class="callout green">
+        <strong>THE MATCHING RULE</strong>
+        Assign each service to the cheapest layer that meets its binding requirement — not the lowest latency on offer. Latency you do not need is capacity you overpaid for.
+    </div>
+</div>
+
+<div class="content-block" id="s4">
+    <h2>4. Traffic Steering — the Decision Logic</h2>
+    <p>Once services are matched to layers in principle, something has to decide, flow by flow and moment by moment, which layer actually carries each packet. That decision logic is the heart of operating a hybrid system. The mechanism that executes the routing across satellites and gateways is the networking module's subject; here the concern is the decision itself — what the system is optimising when it chooses a layer.</p>
+    <p>The steering decision weighs several inputs at once. The service's latency class sets the floor — an interactive flow cannot be parked on GEO regardless of other factors. Within what the latency class allows, cost per bit pushes traffic toward the cheaper layer. Congestion and available capacity on each layer pull traffic toward whichever is least loaded. Link availability matters when weather, obstruction, or a handover gap degrades one layer and the flow must move to another. The result is a policy: a set of rules or an optimiser that, given a flow's requirements and the live state of each layer, assigns it to the layer that satisfies the requirement at least cost.</p>
+    <p>The important conceptual point is that steering is continuous and stateful, not a one-time assignment. A flow may start on LEO, shift to GEO if the LEO layer congests and the flow can tolerate it, and shift back. Multi-orbit value comes not only from having multiple layers but from steering across them well.</p>
+</div>
+
+<div class="content-block" id="s5">
+    <h2>5. Multi-Orbit Terminals and Managed Service</h2>
+    <p>A hybrid architecture only works if the user side can reach more than one layer, and that is a real constraint, because a GEO dish and a LEO phased array are different hardware pointed differently. There are two broad approaches. One is a multi-orbit terminal that can talk to more than one regime, either as a combined unit or as co-located antennas under one modem. The other is to keep the layers' complexity away from the customer entirely and sell an orbit-agnostic managed service, where the operator presents a single connection and hides the steering behind it, so the customer buys "connectivity" and the network decides the layer.</p>
+    <p>The terminal hardware that makes this possible — combined or steerable antennas, the size, weight, and power tradeoffs, the certification constraints for mobility — is the user-terminals module's subject. The architectural point here is that the multi-orbit decision reaches all the way to the edge: a hybrid network is only as multi-orbit as its terminals allow, and the choice between exposing the layers and hiding them behind a managed service is a defining design decision, not an afterthought.</p>
+</div>
+
+<div class="content-block" id="s6">
+    <h2>6. Resilience and Diversity — the Second Motive</h2>
+    <p>Performance is the first motive for hybrid; resilience is the second, and for some customers it is the stronger one. Running independent orbital layers gives path diversity: if one layer is degraded — by weather on a GEO link, by jamming of a LEO band, by an outage in one network — traffic can fail over to another layer that does not share the same failure mode. A single-orbit system has no such fallback; a multi-orbit system degrades rather than fails.</p>
+    <p>This is why resilience is a major driver of multi-orbit adoption in government and defence, where assured connectivity in a contested or damaged environment is worth paying for, and where the failure modes of different orbits and bands are deliberately uncorrelated. A proliferated LEO layer alongside legacy GEO capacity gives a force both low latency and a fallback if either layer is attacked or degraded. The same logic applies commercially to customers who treat connectivity as critical infrastructure: the blend is bought partly for what it does on a good day and partly for what it still does on a bad one.</p>
+    <div class="callout amber">
+        <strong>THE INDEPENDENCE CATCH</strong>
+        Diversity only buys resilience if the layers fail independently. Shared ground segment, shared spectrum, or a single operator can correlate failures across layers and erode the benefit — interrogate the assumption before relying on it.
+    </div>
+</div>
+
+<div class="content-block" id="s7">
+    <h2>7. The Cost of Hybrid — When the Blend Pays Off</h2>
+    <p>A hybrid architecture is not free: running two or three layers means paying for two or three infrastructures, or buying capacity across them, and integrating steering and terminals that a single-orbit system never needs. So the blend pays off only when the demand actually spans what the layers separately serve. An operator whose customers all want the same thing should serve them from the one orbit that thing suits, and a pure-LEO or pure-GEO system can be the right answer.</p>
+    <p>The blend earns its cost when the workload is genuinely heterogeneous — when the same operator must serve interactive and broadcast, latency-sensitive and bulk, premium and cost-driven, all at once — because then a single orbit overpays on one axis to serve another. The deeper economics of this, the capital structures and the per-bit comparisons, are the economics module's subject and the next lesson's commercial delta; the architectural intuition to carry forward is that hybrid is justified by the breadth of the demand, not by the appeal of having more layers.</p>
+</div>
+
+<div class="content-block" id="s8">
+    <h2>8. Multi-Shell Is Not Multi-Orbit</h2>
+    <p>A distinction worth drawing precisely, because the terms are often blurred. A constellation can have multiple shells — groups of satellites at different altitudes or inclinations within the same regime — without being multi-orbit. A large LEO system commonly uses several shells to tune coverage by latitude and to phase capacity, but every shell is still LEO, so the system has one regime's latency and one regime's coverage character. That is multi-shell, single-orbit.</p>
+    <p>Multi-orbit means spanning regimes — LEO with GEO, or LEO with MEO — so that the architecture has access to genuinely different latency and coverage properties, not just different arrangements of the same one. The complementarity thesis of this lesson is about crossing regimes, where the strengths differ in kind. Multi-shell tuning within LEO is a real and useful technique, but it is a different lever, and it does not give a system GEO's persistence or broadcast reach. Keep the two ideas separate: shells tune a regime, orbits combine regimes.</p>
+    <div class="callout red">
+        <strong>DON'T CONFLATE THEM</strong>
+        Shells tune one regime. Orbits combine regimes. A LEO system with five shells is still single-orbit — it has none of GEO's persistence or broadcast reach.
+    </div>
+</div>
+
+<div class="content-block" id="s9">
+    <h2>9. Real-World Hybrid Deployments</h2>
+    <p>The architecture is not hypothetical; several operators are built around it, though the corporate landscape shifts and any specific structure should be checked for current status.</p>
+    <p>The clearest commercial pattern is the GEO operator that adds a low-latency layer to defend and extend a broadcast-and-bulk franchise. Eutelsat operates a combined GEO and LEO business after bringing the OneWeb LEO constellation together with its GEO fleet, giving it both wide-area GEO reach and low-latency LEO connectivity under one operator. SES has run a GEO-plus-MEO architecture for years, pairing its GEO fleet with the O3b MEO system and its next-generation MEO successor for high-throughput, lower-latency trunking. Telesat, a GEO operator, has been developing its own LEO system to add a low-latency layer to its existing business. Viasat, predominantly GEO after consolidating with Inmarsat, has likewise signalled a multi-orbit direction.</p>
+    <p>Government and defence pursue the same architecture for the resilience motive rather than the commercial one, pairing proliferated LEO capacity with legacy GEO systems so that a force has both low latency and uncorrelated fallback. Across all of these, the shape is consistent: an operator strong in one regime adds another to serve the part of its demand the first regime serves badly, which is the complementarity thesis playing out in the market.</p>
+    <table class="compare-table">
+        <thead><tr><th>Operator</th><th>Regimes combined</th><th>Pattern</th></tr></thead>
+        <tbody>
+            <tr><td>Eutelsat (with OneWeb)</td><td>GEO + LEO</td><td>Broadcast/bulk + low-latency</td></tr>
+            <tr><td>SES (with O3b / successor)</td><td>GEO + MEO</td><td>Wide-area + high-throughput trunking</td></tr>
+            <tr><td>Telesat</td><td>GEO + LEO (in development)</td><td>GEO franchise + low-latency layer</td></tr>
+            <tr><td>Defence / government</td><td>LEO + GEO</td><td>Resilience, uncorrelated fallback</td></tr>
+        </tbody>
+    </table>
+    <div class="callout">
+        <strong>AS-OF NOTE</strong>
+        Operator corporate structures and constellation status evolve. Treat the names here as illustrative of the pattern, and verify the current state of any specific deployment.
+    </div>
+</div>
+
+<div class="content-block" id="s10">
+    <h2>10. The Architect's Takeaway</h2>
+    <p>The lesson reframes orbit choice. The earlier lessons treated it as a single decision — which regime is best — and this lesson dissolves that into a per-service decision: which layer serves each service best, given that you can run more than one. For an operator with heterogeneous demand, the mature architecture is a blend in which each service rides the layer that suits it, traffic is steered across layers by latency class and cost and load, the terminals can reach the layers used, and the diversity buys resilience as a second dividend.</p>
+    <p>Two disciplines keep the idea honest. First, hybrid is justified by the breadth of demand, not by the appeal of more layers: if the workload is uniform, the right answer is the single orbit that workload suits. Second, multi-orbit means crossing regimes, not multiplying shells within one. Carry forward the habit of asking, for any service, what its binding requirement is and which layer meets that requirement at least cost — and the corollary that an operator serving many kinds of demand will usually answer with more than one orbit. The next lesson takes the commercial side of this comparison head-on.</p>
+    <div class="callout green">
+        <strong>LESSON OBJECTIVE MET</strong>
+        You can now state why multi-orbit exists (complementarity over heterogeneous demand), match a service to a layer by its binding requirement, describe what traffic steering optimises, give the resilience motive and its independence caveat, and separate multi-shell from multi-orbit.
+    </div>
+</div>
+
+<!-- QUIZ -->
+<div class="quiz-block" id="quiz">
+    <h2>KNOWLEDGE CHECK</h2>
+    <p class="quiz-intro">Ten questions on multi-orbit architecture — complementarity, service matching, steering, resilience, and the multi-shell distinction. One correct answer each.</p>
+
+    <div class="quiz-q"><p><strong>Q1.</strong> The fundamental reason to run a multi-orbit architecture is:</p>
+        <div class="quiz-options">
+            <button class="quiz-opt" data-q="1" data-correct="false">A — More satellites are always better</button>
+            <button class="quiz-opt" data-q="1" data-correct="true">B — No single orbit is best at every service, so each regime's strength can cover another's weakness</button>
+            <button class="quiz-opt" data-q="1" data-correct="false">C — It is cheaper than a single orbit</button>
+            <button class="quiz-opt" data-q="1" data-correct="false">D — Regulators require multiple orbits</button>
+        </div><div class="quiz-feedback" id="fb1"></div></div>
+
+    <div class="quiz-q"><p><strong>Q2.</strong> Which service is the natural fit for GEO rather than LEO?</p>
+        <div class="quiz-options">
+            <button class="quiz-opt" data-q="2" data-correct="false">A — Cloud gaming</button>
+            <button class="quiz-opt" data-q="2" data-correct="false">B — A live video call</button>
+            <button class="quiz-opt" data-q="2" data-correct="true">C — Broadcast television to a whole region</button>
+            <button class="quiz-opt" data-q="2" data-correct="false">D — Remote real-time control</button>
+        </div><div class="quiz-feedback" id="fb2"></div></div>
+
+    <div class="quiz-q"><p><strong>Q3.</strong> The dominant axis for matching a service to a layer is:</p>
+        <div class="quiz-options">
+            <button class="quiz-opt" data-q="3" data-correct="false">A — Satellite colour</button>
+            <button class="quiz-opt" data-q="3" data-correct="true">B — Latency tolerance, with throughput pattern and coverage as secondary</button>
+            <button class="quiz-opt" data-q="3" data-correct="false">C — The operator's preference</button>
+            <button class="quiz-opt" data-q="3" data-correct="false">D — Launch cost</button>
+        </div><div class="quiz-feedback" id="fb3"></div></div>
+
+    <div class="quiz-q"><p><strong>Q4.</strong> "A service wants the cheapest layer that meets its requirement, not the lowest latency available." Because:</p>
+        <div class="quiz-options">
+            <button class="quiz-opt" data-q="4" data-correct="false">A — Low latency is always bad</button>
+            <button class="quiz-opt" data-q="4" data-correct="true">B — Latency you do not need is capacity you overpaid for</button>
+            <button class="quiz-opt" data-q="4" data-correct="false">C — GEO is always cheapest</button>
+            <button class="quiz-opt" data-q="4" data-correct="false">D — LEO has no capacity</button>
+        </div><div class="quiz-feedback" id="fb4"></div></div>
+
+    <div class="quiz-q"><p><strong>Q5.</strong> Traffic steering in a hybrid system is best described as:</p>
+        <div class="quiz-options">
+            <button class="quiz-opt" data-q="5" data-correct="false">A — A one-time assignment fixed at install</button>
+            <button class="quiz-opt" data-q="5" data-correct="true">B — A continuous, stateful decision weighing latency class, cost, congestion, and availability</button>
+            <button class="quiz-opt" data-q="5" data-correct="false">C — Random selection</button>
+            <button class="quiz-opt" data-q="5" data-correct="false">D — Always choosing GEO</button>
+        </div><div class="quiz-feedback" id="fb5"></div></div>
+
+    <div class="quiz-q"><p><strong>Q6.</strong> Why does the multi-orbit decision reach all the way to the terminal?</p>
+        <div class="quiz-options">
+            <button class="quiz-opt" data-q="6" data-correct="false">A — It does not; terminals are irrelevant</button>
+            <button class="quiz-opt" data-q="6" data-correct="true">B — A network is only as multi-orbit as its terminals allow, since reaching different regimes needs capable or co-located antennas</button>
+            <button class="quiz-opt" data-q="6" data-correct="false">C — Terminals choose the satellites' orbits</button>
+            <button class="quiz-opt" data-q="6" data-correct="false">D — Terminals replace the gateways</button>
+        </div><div class="quiz-feedback" id="fb6"></div></div>
+
+    <div class="quiz-q"><p><strong>Q7.</strong> The resilience motive for hybrid rests on:</p>
+        <div class="quiz-options">
+            <button class="quiz-opt" data-q="7" data-correct="false">A — Higher latency</button>
+            <button class="quiz-opt" data-q="7" data-correct="true">B — Path diversity — independent layers with uncorrelated failure modes allow failover</button>
+            <button class="quiz-opt" data-q="7" data-correct="false">C — Using fewer satellites</button>
+            <button class="quiz-opt" data-q="7" data-correct="false">D — Avoiding regulation</button>
+        </div><div class="quiz-feedback" id="fb7"></div></div>
+
+    <div class="quiz-q"><p><strong>Q8.</strong> A hybrid architecture pays off specifically when:</p>
+        <div class="quiz-options">
+            <button class="quiz-opt" data-q="8" data-correct="false">A — All customers want the same service</button>
+            <button class="quiz-opt" data-q="8" data-correct="true">B — The demand is heterogeneous, spanning what the layers separately serve best</button>
+            <button class="quiz-opt" data-q="8" data-correct="false">C — The operator wants more satellites</button>
+            <button class="quiz-opt" data-q="8" data-correct="false">D — There is only one customer</button>
+        </div><div class="quiz-feedback" id="fb8"></div></div>
+
+    <div class="quiz-q"><p><strong>Q9.</strong> Multi-shell and multi-orbit differ because:</p>
+        <div class="quiz-options">
+            <button class="quiz-opt" data-q="9" data-correct="false">A — They are the same thing</button>
+            <button class="quiz-opt" data-q="9" data-correct="true">B — Multiple shells arrange satellites within one regime; multi-orbit spans different regimes with genuinely different properties</button>
+            <button class="quiz-opt" data-q="9" data-correct="false">C — Multi-shell needs more orbits</button>
+            <button class="quiz-opt" data-q="9" data-correct="false">D — Multi-orbit uses one altitude</button>
+        </div><div class="quiz-feedback" id="fb9"></div></div>
+
+    <div class="quiz-q"><p><strong>Q10.</strong> The common commercial pattern among real multi-orbit operators is:</p>
+        <div class="quiz-options">
+            <button class="quiz-opt" data-q="10" data-correct="false">A — LEO-only startups adding more LEO</button>
+            <button class="quiz-opt" data-q="10" data-correct="true">B — A GEO operator adding a low-latency LEO or MEO layer to serve demand its GEO franchise serves badly</button>
+            <button class="quiz-opt" data-q="10" data-correct="false">C — Abandoning GEO entirely</button>
+            <button class="quiz-opt" data-q="10" data-correct="false">D — Operators avoiding government customers</button>
+        </div><div class="quiz-feedback" id="fb10"></div></div>
+
+    <div class="quiz-score" id="quizScore"></div>
+</div>
+
+<!-- PYTHON -->
+<div class="py-block" id="python">
+    <h2>PYTHON EXERCISES</h2>
+    <p class="py-intro">Three exercises on the multi-orbit decision — service matching, steering under congestion, and resilience from diversity. Python 3.8+ standard library only.</p>
+
+    <div class="py-exercise">
+        <h3>Exercise 1 — Service-to-layer classifier</h3>
+        <p>Assign each service to the cheapest layer that meets its latency requirement, given each layer's round-trip latency.</p>
+<pre>
+layers = {
+    "LEO": {"rtt_ms": 30,  "cost_per_bit": 1.0},
+    "MEO": {"rtt_ms": 110, "cost_per_bit": 0.6},
+    "GEO": {"rtt_ms": 600, "cost_per_bit": 0.3},
+}
+
+services = [
+    ("Video call",        150),   # name, max tolerable RTT (ms)
+    ("Cloud gaming",       80),
+    ("Web browsing",      400),
+    ("Live TV multicast", 100000),  # latency-insensitive
+    ("Bulk backup",       100000),
+]
+
+def cheapest_layer_meeting(max_rtt):
+    eligible = {k: v for k, v in layers.items() if v["rtt_ms"] <= max_rtt}
+    if not eligible:
+        return None
+    return min(eligible, key=lambda k: eligible[k]["cost_per_bit"])
+
+print(f"{'Service':<20}{'Max RTT':>9}{'Layer':>8}")
+print("-" * 37)
+for name, max_rtt in services:
+    layer = cheapest_layer_meeting(max_rtt)
+    print(f"{name:<20}{max_rtt:>9}{(layer or 'NONE'):>8}")
+
+# 1. Which services end up on GEO, and why is that the right call?
+# 2. Drop LEO's cost_per_bit to 0.25. Does anything move? What does that
+#    tell you about when "put everything on LEO" becomes rational?
+</pre>
+    </div>
+
+    <div class="py-exercise">
+        <h3>Exercise 2 — Steering under congestion</h3>
+        <p>Steer a set of flows to layers honouring latency limits, but spill to the next layer when a layer's capacity is exhausted.</p>
+<pre>
+layers = [
+    {"name": "GEO", "rtt_ms": 600, "capacity": 50},
+    {"name": "MEO", "rtt_ms": 110, "capacity": 30},
+    {"name": "LEO", "rtt_ms": 30,  "capacity": 20},
+]
+
+flows = [  # (name, max_rtt_ms, demand)
+    ("interactive_1", 80,  10),
+    ("interactive_2", 80,  15),
+    ("bulk_1",      100000, 40),
+    ("video_1",       150,  10),
+]
+
+remaining = {l["name"]: l["capacity"] for l in layers}
+
+def place(flow_rtt, demand):
+    for l in sorted(layers, key=lambda x: x["capacity"]):  # crude cost proxy
+        if l["rtt_ms"] <= flow_rtt and remaining[l["name"]] >= demand:
+            remaining[l["name"]] -= demand
+            return l["name"]
+    return "BLOCKED"
+
+print(f"{'Flow':<16}{'Layer':>8}")
+print("-" * 24)
+for name, rtt, demand in flows:
+    print(f"{name:<16}{place(rtt, demand):>8}")
+print("\nRemaining capacity:", remaining)
+
+# 1. Does any flow get BLOCKED? What would you change to admit it?
+# 2. The cost proxy here is crude. What real signals should a steering
+#    policy use instead (see the networking module)?
+</pre>
+    </div>
+
+    <div class="py-exercise">
+        <h3>Exercise 3 — Resilience from layer diversity</h3>
+        <p>Compute the availability gained by failing over between two independent layers.</p>
+<pre>
+def combined_availability(a1, a2):
+    # service lost only if BOTH down; failures assumed independent
+    return 1 - (1 - a1) * (1 - a2)
+
+def downtime_hours_per_year(av):
+    return (1 - av) * 365 * 24
+
+single = 0.99
+hybrid = combined_availability(0.99, 0.98)
+
+print(f"Single layer (99%):   {single:.4f}  "
+      f"-> {downtime_hours_per_year(single):.1f} h/yr down")
+print(f"Hybrid (99% + 98%):   {hybrid:.5f}  "
+      f"-> {downtime_hours_per_year(hybrid):.2f} h/yr down")
+
+# 1. By what factor does failover cut annual downtime here?
+# 2. The independence assumption is the catch. Name a failure that hits
+#    both layers at once and breaks it (hint: shared ground segment).
+</pre>
+        <div class="py-challenge"><strong>EXTENSION</strong>
+            Add a shared-dependency term: a probability that a common element (ground segment, operator) fails and takes both layers down regardless. Recompute combined availability and watch the diversity benefit collapse as that term grows.
+        </div>
+    </div>
+</div>
+
+<!-- REFLECTION -->
+<div class="reflection-block" id="reflect">
+    <h2>REFLECTION PROMPTS</h2>
+    <p class="ref-intro">Not graded. Write in your own words, 200–400 words each.</p>
+
+    <div class="ref-prompt"><h3>Prompt 1 — Does This Customer Justify Hybrid?</h3>
+        <p>Take a single customer you understand — an airline, a bank with remote branches, a government ministry, a maritime fleet — and enumerate the distinct services it needs. Assign each to a layer by its binding requirement, then decide whether this customer genuinely justifies a hybrid architecture or whether one orbit would serve it. Defend the verdict.</p></div>
+
+    <div class="ref-prompt"><h3>Prompt 2 — When Over-Provisioning Latency Is Right</h3>
+        <p>The lesson argues a service wants the cheapest layer that meets its requirement, not the lowest latency available. Construct the strongest counter-case: a situation where deliberately putting a delay-tolerant service on LEO anyway is the right business decision. What makes it right?</p></div>
+
+    <div class="ref-prompt"><h3>Prompt 3 — How Independent Are the Layers, Really?</h3>
+        <p>Resilience through path diversity assumes the layers fail independently. Identify the shared dependencies in a real multi-orbit system — ground segment, spectrum, the operator itself, terminals — that could correlate failures across layers, and judge how much they erode the diversity argument.</p></div>
+
+    <div class="ref-prompt"><h3>Prompt 4 — Multi-Shell First, or Multi-Orbit From the Start?</h3>
+        <p>Distinguish, with your own examples, a multi-shell single-orbit system from a true multi-orbit one, and argue which problems each solves. Then take a position: for a new operator serving mixed demand, is it better to start multi-shell within one regime and add a second regime later, or to design multi-orbit from the outset?</p></div>
+</div>
+
+<!-- MARK COMPLETE -->
+<div class="complete-wrap">
+    <button class="complete-btn" id="completeBtn">MARK LESSON COMPLETE</button>
+    <div class="complete-msg" id="completeMsg"></div>
+</div>
+
+<div class="lesson-nav">
+    <a href="m1-3.html">← LESSON 03 — THE PHYSICS OF LATENCY</a>
+    <a href="m1-5.html">LESSON 05 — GEO VS LEO: THE COMMERCIAL DELTA →</a>
+</div>
+
+</div>
+
+<button class="back-to-top" id="backToTop" title="Back to top">↑</button>
+
+<footer>© 2026 LEOAF · M1 · LESSON 04 OF 7</footer>
+
+<script>
+const canvas = document.getElementById('starsCanvas');
+const ctx = canvas.getContext('2d');
+let stars = [];
+function initStars() { stars=[]; for(let i=0;i<180;i++) stars.push({x:Math.random()*canvas.width,y:Math.random()*canvas.height,size:Math.random()*1.5+0.4,speed:Math.random()*0.18+0.04,hue:Math.random()*360}); }
+function resizeCanvas() { canvas.width=window.innerWidth; canvas.height=window.innerHeight; }
+resizeCanvas(); initStars(); window.addEventListener('resize', resizeCanvas);
+function animateStars() { ctx.clearRect(0,0,canvas.width,canvas.height); stars.forEach(s=>{s.y-=s.speed;if(s.y<0){s.y=canvas.height;s.x=Math.random()*canvas.width;} ctx.beginPath();ctx.fillStyle=`hsl(${s.hue},80%,80%)`;ctx.arc(s.x,s.y,s.size,0,Math.PI*2);ctx.fill();}); requestAnimationFrame(animateStars); }
+animateStars();
+</script>
+
+<script>
+const feedbacks = {
+    1:{correct:"Correct. Hybrid exists because demand is heterogeneous and each regime is strong where another is weak; the strengths compose.",wrong:"Incorrect. It is complementarity — no orbit serves every service well, so combining regimes lets each cover the others' weak points. Not about more satellites or lower cost."},
+    2:{correct:"Correct. Broadcast/multicast is one-to-many and delay-tolerant, which GEO's single wide beam serves ideally and latency does not affect.",wrong:"Incorrect. It is broadcast TV — one-to-many and delay-tolerant, suiting GEO's wide beam. The others are latency-bound and belong on LEO."},
+    3:{correct:"Correct. Latency tolerance sets the layer floor; throughput pattern and coverage refine it.",wrong:"Incorrect. It is latency tolerance first — an interactive flow cannot sit on GEO — then throughput and coverage. Preference and launch cost are not the criteria."},
+    4:{correct:"Correct. Over-provisioning latency wastes money; assign by actual requirement, not by chasing the best number.",wrong:"Incorrect. Paying for latency a service does not need is wasted spend — match the requirement at least cost rather than defaulting to the lowest latency."},
+    5:{correct:"Correct. Steering is ongoing — a flow can move between layers as load and availability change, within what its latency class allows.",wrong:"Incorrect. It is continuous and stateful, not fixed — flows can shift layers as congestion and availability change, bounded by the service's latency class."},
+    6:{correct:"Correct. A GEO dish and a LEO phased array differ; without capable or co-located terminals (or a managed service), the edge cannot use the blend.",wrong:"Incorrect. The edge constrains the architecture — reaching multiple regimes needs capable or co-located antennas, so a network is only as multi-orbit as its terminals permit."},
+    7:{correct:"Correct. Independent orbits and bands fail differently, so traffic can move to an unaffected layer — the system degrades rather than fails.",wrong:"Incorrect. It is path diversity — layers with uncorrelated failure modes let traffic fail over, so the system degrades instead of failing. This is why defence values it."},
+    8:{correct:"Correct. The blend earns its extra cost only when the workload spans latency classes and service types; uniform demand suits a single orbit.",wrong:"Incorrect. It pays off with heterogeneous demand — interactive and broadcast, latency-sensitive and bulk at once. Uniform demand should use the single orbit that suits it."},
+    9:{correct:"Correct. Shells tune coverage and phasing within one regime; multi-orbit crosses regimes to access different latency and coverage in kind.",wrong:"Incorrect. Shells tune one regime (all LEO, different altitudes/inclinations); multi-orbit crosses regimes for properties that differ in kind, like GEO's persistence."},
+    10:{correct:"Correct. The recurring shape is a broadcast-and-bulk GEO operator adding a low-latency layer to extend and defend its business.",wrong:"Incorrect. The pattern is a GEO operator adding a low-latency layer (LEO or MEO) to cover the interactive demand its GEO franchise serves poorly — complementarity in the market."}
+};
+let answered = {};
+document.querySelectorAll('.quiz-opt').forEach(btn => {
+    btn.addEventListener('click', function() {
+        const q = this.dataset.q;
+        if (answered[q] !== undefined) return;
+        const correct = this.dataset.correct === 'true';
+        answered[q] = correct;
+        document.querySelectorAll(`.quiz-opt[data-q="${q}"]`).forEach(b => { b.disabled = true; if (b.dataset.correct === 'true') b.classList.add('correct'); });
+        if (!correct) this.classList.add('wrong');
+        const fb = document.getElementById(`fb${q}`);
+        fb.textContent = (correct ? '✓ ' : '✗ ') + feedbacks[q][correct ? 'correct' : 'wrong'];
+        fb.style.color = correct ? '#39ff14' : '#ff004f';
+        if (Object.keys(answered).length === 10) {
+            const total = Object.values(answered).filter(Boolean).length;
+            const el = document.getElementById('quizScore');
+            el.style.display = 'block';
+            const pct = Math.round(total / 10 * 100);
+            el.textContent = `SCORE: ${total} / 10 (${pct}%) — ${pct===100?'PERFECT.':pct>=80?'STRONG. REVIEW ANY MISSES.':pct>=60?'ADEQUATE. REVISIT WEAK SECTIONS.':'REVISIT THE LESSON BEFORE PROCEEDING.'}`;
+        }
+    });
+});
+</script>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="supabase.js"></script>
+<script src="user_progress.js"></script>
+<script>
+const LESSON_ID = 'm1-4';
+(function () {
+    function bounceToLogin(reason) {
+        console.error("Auth guard:", reason, "- redirecting to index.html");
+        window.location.replace("index.html");
+    }
+    async function init() {
+        if (typeof client === "undefined" || !client || !client.auth) {
+            return bounceToLogin("Supabase client not loaded (is supabase.js in this directory?)");
+        }
+        let session = null;
+        try { ({ data: { session } } = await client.auth.getSession()); }
+        catch (e) { return bounceToLogin("getSession threw: " + e.message); }
+        if (!session) { window.location.replace("index.html"); return; }
+
+        const btn = document.getElementById('completeBtn');
+        const msg = document.getElementById('completeMsg');
+        function setDone(done) {
+            if (done) {
+                btn.textContent = '✓ COMPLETE — CLICK TO UNDO';
+                btn.classList.add('done');
+                btn.style.cssText = 'border-color:#39ff14;color:#39ff14;background:rgba(57,255,20,0.1);cursor:pointer;opacity:1;';
+                msg.style.color = '#39ff14';
+                msg.textContent = 'Lesson marked complete. Click again to undo.';
+            } else {
+                btn.textContent = 'MARK LESSON COMPLETE';
+                btn.classList.remove('done');
+                btn.style.cssText = '';
+                msg.style.color = '#ffffff55';
+                msg.textContent = 'Not yet marked complete.';
+            }
+        }
+        let mastered = [];
+        try { mastered = await getMasteredSections(); } catch (e) { console.error(e); }
+        setDone(mastered.includes(LESSON_ID));
+        btn.addEventListener('click', async () => {
+            const isCurrentlyDone = btn.classList.contains('done');
+            msg.style.color = '#00d9ff';
+            msg.textContent = 'Saving...';
+            const ok = await upsertSection(LESSON_ID, !isCurrentlyDone);
+            if (ok) { setDone(!isCurrentlyDone); }
+            else { msg.style.color = '#ff004f'; msg.textContent = 'Error saving. Try again.'; }
+        });
+        const btt = document.getElementById('backToTop');
+        window.addEventListener('scroll', () => { btt.classList.toggle('visible', window.scrollY > 400); });
+        btt.addEventListener('click', () => window.scrollTo({ top: 0, behavior: 'smooth' }));
+    }
+    if (document.readyState === "loading") { document.addEventListener("DOMContentLoaded", init); }
+    else { init(); }
+})();
+</script>
+
+</body>
+</html>
