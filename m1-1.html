@@ -1,0 +1,648 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, shrink-to-fit=no">
+<title>M1-1 — Why LEO Now · LEOAF</title>
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;600;800&family=Share+Tech+Mono&family=Libre+Baskerville:ital,wght@0,400;0,700;1,400&display=swap" rel="stylesheet">
+<link rel="icon" href="favicon.ico" sizes="any" type="image/x-icon">
+<link rel="manifest" href="site.webmanifest">
+<meta name="theme-color" content="#0f0f0f">
+
+<script>
+window.leoafAbort = async function () {
+    function go() { window.location.replace("index.html?signedout=1"); }
+    try {
+        if (typeof client !== "undefined" && client && client.auth && client.auth.signOut) {
+            try { await client.auth.signOut({ scope: "local" }); } catch (e) {}
+        }
+    } catch (e) {}
+    go();
+};
+</script>
+
+<style>
+* { box-sizing:border-box; margin:0; padding:0; }
+html { height:100%; -webkit-text-size-adjust:100%; overflow-x:hidden; }
+body { font-family:'Share Tech Mono',monospace; background:#000; color:white; overflow-x:hidden; min-height:100vh; }
+#starsCanvas { position:fixed; inset:0; z-index:-1; }
+
+header { background:#000; border-bottom:1px solid #ff004f33; position:sticky; top:0; z-index:100; padding:1rem clamp(1.5rem,5vw,4rem); display:flex; justify-content:space-between; align-items:center; box-shadow:0 4px 16px #0008; }
+.logo { font-family:'Orbitron',sans-serif; font-weight:800; font-size:clamp(16px,2vw,22px); letter-spacing:3px; text-decoration:none; }
+.logo span:first-child { color:white; }
+.logo span:last-child { color:#ff004f; }
+.nav-right { display:flex; align-items:center; gap:10px; }
+.nav-btn { background:transparent; border:1px solid #ff004f44; color:#ff004f; padding:6px 14px; cursor:pointer; transition:0.3s ease; font-size:11px; font-family:'Orbitron',sans-serif; letter-spacing:1px; text-decoration:none; display:inline-block; }
+.nav-btn:hover { background:#ff004f; color:black; }
+
+.breadcrumb { padding:14px clamp(1.5rem,5vw,4rem); font-size:11px; color:#ffffff44; letter-spacing:1px; position:relative; z-index:1; }
+.breadcrumb a { color:#00d9ff66; text-decoration:none; }
+.breadcrumb a:hover { color:#00d9ff; }
+.breadcrumb span { margin:0 8px; }
+
+.lesson-wrap { max-width:820px; margin:0 auto; padding:0 clamp(1.5rem,5vw,4rem) 80px; position:relative; z-index:1; }
+
+.lesson-header { padding:30px 0 28px; border-bottom:1px solid #ffffff11; margin-bottom:36px; }
+.lesson-tag { font-family:'Orbitron',sans-serif; font-size:10px; color:#ff004f; letter-spacing:3px; margin-bottom:10px; }
+.lesson-header h1 { font-family:'Orbitron',sans-serif; font-size:clamp(20px,3.5vw,32px); font-weight:800; line-height:1.2; margin-bottom:12px; }
+.lesson-meta { display:flex; gap:10px; flex-wrap:wrap; margin-bottom:16px; }
+.l-pill { font-family:'Orbitron',sans-serif; font-size:10px; padding:3px 10px; border:1px solid; letter-spacing:1px; }
+.l-pill-q { color:#ff004f; border-color:#ff004f44; }
+.l-pill-t { color:#39ff14; border-color:#39ff1444; }
+.lesson-intro { font-size:13px; line-height:1.85; opacity:0.75; }
+
+.toc { background:rgba(0,217,255,0.06); border:1px solid #00d9ff33; padding:24px 28px; margin:30px 0; }
+.toc h4 { font-family:'Orbitron',sans-serif; font-size:10px; color:#00d9ff; letter-spacing:2px; margin-bottom:16px; }
+.toc ol { padding-left:20px; }
+.toc li { font-size:13px; line-height:2.1; opacity:1; }
+.toc li a { color:#00d9ffbb; text-decoration:none; transition:0.15s; }
+.toc li a:hover { color:#ffffff; padding-left:4px; }
+.toc li::marker { color:#ff004f; font-family:'Orbitron',sans-serif; font-size:10px; }
+
+.content-block { margin-bottom:48px; }
+.content-block h2 { font-family:'Orbitron',sans-serif; font-size:13px; color:#00d9ff; letter-spacing:2px; text-transform:uppercase; margin-bottom:18px; padding-bottom:10px; border-bottom:1px solid #00d9ff22; scroll-margin-top:80px; }
+.content-block h3 { font-family:'Orbitron',sans-serif; font-size:11px; color:#ffffff88; letter-spacing:1.5px; text-transform:uppercase; margin:28px 0 12px; }
+.content-block p { font-size:13px; line-height:1.9; opacity:0.85; margin-bottom:16px; }
+.content-block ul, .content-block ol { padding-left:0; margin-bottom:16px; }
+.content-block ul li, .content-block ol li { font-size:13px; line-height:1.85; opacity:0.85; padding-left:20px; position:relative; margin-bottom:6px; }
+.content-block ul li::before { content:'›'; position:absolute; left:0; color:#00d9ff; }
+
+.callout { border-left:3px solid #00d9ff; background:rgba(0,217,255,0.05); padding:16px 20px; margin:22px 0; font-size:12px; line-height:1.8; }
+.callout.red   { border-left-color:#ff004f; background:rgba(255,0,79,0.05); }
+.callout.green { border-left-color:#39ff14; background:rgba(57,255,20,0.05); }
+.callout.amber { border-left-color:#ffaa00; background:rgba(255,170,0,0.05); }
+.callout strong { font-family:'Orbitron',sans-serif; font-size:10px; letter-spacing:1px; display:block; margin-bottom:8px; color:inherit; }
+
+.key-numbers { display:grid; grid-template-columns:repeat(auto-fit,minmax(140px,1fr)); gap:12px; margin:22px 0; }
+.kn-item { background:rgba(255,255,255,0.03); border:1px solid #ffffff11; padding:16px 12px; text-align:center; }
+.kn-val { font-family:'Orbitron',sans-serif; font-size:clamp(15px,2.3vw,22px); font-weight:800; color:#00d9ff; display:block; }
+.kn-label { font-size:10px; opacity:0.5; letter-spacing:1px; margin-top:5px; display:block; line-height:1.4; }
+
+.quiz-block { background:rgba(17,17,17,0.9); border:1px solid #ff004f33; padding:28px; margin:48px 0 32px; }
+.quiz-block h2 { font-family:'Orbitron',sans-serif; font-size:13px; color:#ff004f; letter-spacing:2px; margin-bottom:6px; }
+.quiz-intro { font-size:12px; opacity:0.6; margin-bottom:24px; padding-bottom:16px; border-bottom:1px solid #ff004f22; line-height:1.6; }
+.quiz-q { margin-bottom:28px; }
+.quiz-q p { font-size:13px; opacity:0.9; margin-bottom:12px; line-height:1.65; }
+.quiz-q p strong { color:#00d9ff; }
+.quiz-options { display:flex; flex-direction:column; gap:8px; }
+.quiz-opt { background:rgba(255,255,255,0.03); border:1px solid #ffffff1a; padding:11px 16px; cursor:pointer; font-size:12px; font-family:'Share Tech Mono',monospace; transition:0.2s ease; text-align:left; color:white; line-height:1.5; }
+.quiz-opt:hover:not(:disabled) { background:rgba(0,217,255,0.08); border-color:#00d9ff44; }
+.quiz-opt.correct  { background:rgba(57,255,20,0.1);  border-color:#39ff14; color:#39ff14; }
+.quiz-opt.wrong    { background:rgba(255,0,79,0.1);   border-color:#ff004f; color:#ff004f; }
+.quiz-opt:disabled { cursor:default; }
+.quiz-feedback { font-size:12px; margin-top:10px; min-height:18px; line-height:1.7; opacity:0.9; padding:0 4px; }
+.quiz-score { font-family:'Orbitron',sans-serif; font-size:12px; color:#39ff14; margin-top:20px; letter-spacing:1px; display:none; padding-top:16px; border-top:1px solid #39ff1433; }
+
+.py-block { background:rgba(10,10,10,0.95); border:1px solid #39ff1422; padding:28px; margin:32px 0; }
+.py-block h2 { font-family:'Orbitron',sans-serif; font-size:13px; color:#39ff14; letter-spacing:2px; margin-bottom:8px; }
+.py-block .py-intro { font-size:12px; opacity:0.7; margin-bottom:20px; padding-bottom:16px; border-bottom:1px solid #39ff1422; line-height:1.7; }
+.py-exercise { margin-bottom:32px; }
+.py-exercise:last-child { margin-bottom:0; }
+.py-exercise h3 { font-family:'Orbitron',sans-serif; font-size:11px; color:#39ff1499; letter-spacing:1.5px; text-transform:uppercase; margin-bottom:10px; }
+.py-exercise p { font-size:12px; opacity:0.8; margin-bottom:14px; line-height:1.75; }
+.py-block pre { background:#050505; border:1px solid #39ff1433; padding:20px; font-family:'Share Tech Mono',monospace; font-size:11.5px; line-height:1.75; overflow-x:auto; color:#39ff14; white-space:pre; margin-bottom:12px; }
+.py-block .py-challenge { background:rgba(57,255,20,0.04); border-left:2px solid #39ff14; padding:12px 16px; margin-top:14px; font-size:12px; line-height:1.75; opacity:0.8; }
+.py-block .py-challenge strong { font-family:'Orbitron',sans-serif; font-size:10px; color:#39ff14; display:block; margin-bottom:6px; letter-spacing:1px; }
+
+.reflection-block { background:rgba(255,170,0,0.04); border:1px solid #ffaa0033; padding:24px; margin:32px 0; }
+.reflection-block h2 { font-family:'Orbitron',sans-serif; font-size:13px; color:#ffaa00; letter-spacing:2px; margin-bottom:8px; }
+.reflection-block .ref-intro { font-size:12px; opacity:0.7; margin-bottom:20px; padding-bottom:14px; border-bottom:1px solid #ffaa0022; line-height:1.7; }
+.ref-prompt { margin-bottom:20px; }
+.ref-prompt h3 { font-family:'Orbitron',sans-serif; font-size:11px; color:#ffaa0099; letter-spacing:1px; margin-bottom:8px; }
+.ref-prompt p { font-size:12px; opacity:0.8; line-height:1.75; margin-bottom:10px; }
+
+.back-to-top { position:fixed; bottom:28px; right:28px; z-index:200; width:44px; height:44px; background:#000; border:1px solid #00d9ff55; color:#00d9ff; font-size:20px; cursor:pointer; display:flex; align-items:center; justify-content:center; opacity:0; pointer-events:none; transition:opacity 0.3s ease, border-color 0.3s ease; }
+.back-to-top.visible { opacity:1; pointer-events:auto; }
+.back-to-top:hover { border-color:#00d9ff; background:#001a2c; }
+
+.complete-wrap { margin-top:56px; padding-top:30px; border-top:1px solid #ffffff11; text-align:center; }
+.complete-btn { font-family:'Orbitron',sans-serif; font-size:13px; letter-spacing:2px; padding:14px 44px; background:transparent; border:1px solid #39ff14; color:#39ff14; cursor:pointer; transition:0.3s ease; }
+.complete-btn:hover:not(.done) { background:#39ff14; color:black; box-shadow:0 0 20px rgba(57,255,20,0.4); }
+.complete-btn.done { background:rgba(57,255,20,0.1); cursor:default; opacity:0.7; }
+.complete-msg { font-size:12px; color:#39ff14; margin-top:14px; min-height:18px; letter-spacing:1px; }
+
+.lesson-nav { display:flex; justify-content:space-between; margin-top:30px; flex-wrap:wrap; gap:10px; }
+.lesson-nav a { font-family:'Orbitron',sans-serif; font-size:11px; color:#00d9ff66; text-decoration:none; letter-spacing:1px; transition:0.2s; }
+.lesson-nav a:hover { color:#00d9ff; }
+
+footer { text-align:center; padding:30px; opacity:0.3; font-size:11px; position:relative; z-index:1; letter-spacing:1px; }
+
+@media (max-width:600px) { .key-numbers { grid-template-columns:1fr 1fr; } }
+
+/* ── LIGHT READING MODE ── */
+.content-block { background:#f5f2ec; color:#1a1a1a; padding:36px clamp(24px,4vw,48px); margin-bottom:24px; border-left:4px solid #00d9ff; position:relative; z-index:1; }
+.content-block h2 { font-family:'Orbitron',sans-serif; font-size:13px; color:#003d66; letter-spacing:2px; text-transform:uppercase; margin-bottom:20px; padding-bottom:10px; border-bottom:2px solid #00d9ff66; scroll-margin-top:80px; }
+.content-block h3 { font-family:'Orbitron',sans-serif; font-size:11px; color:#444; letter-spacing:1.5px; text-transform:uppercase; margin:32px 0 14px; }
+.content-block p { font-family:'Libre Baskerville', Georgia, serif; font-size:15px; line-height:1.9; color:#1a1a1a; opacity:1; margin-bottom:18px; }
+.content-block ul li { font-family:'Libre Baskerville', Georgia, serif; font-size:14px; line-height:1.85; color:#1a1a1a; opacity:1; margin-bottom:8px; }
+.content-block ul li::before { color:#0077aa; }
+.content-block .callout { border-left:3px solid #0088cc; background:#e8f4fb; color:#1a1a1a; }
+.content-block .callout.red   { border-left-color:#cc0033; background:#fdecea; }
+.content-block .callout.green { border-left-color:#1a7a1a; background:#eafaea; }
+.content-block .callout.amber { border-left-color:#996600; background:#fef9ec; }
+.content-block .callout strong { color:inherit; }
+.content-block .kn-item { background:#fff; border:1px solid #d0d0d0; }
+.content-block .kn-label { color:#555; opacity:1; }
+</style>
+
+</head>
+<body>
+
+<canvas id="starsCanvas"></canvas>
+
+<header>
+    <a href="dashboard.html" class="logo"><span>LEO</span><span>AF</span></a>
+    <div class="nav-right">
+        <a href="m1.html" class="nav-btn">← M1 HUB</a>
+        <button class="nav-btn" onclick="leoafAbort()">ABORT</button>
+    </div>
+</header>
+
+<div class="breadcrumb">
+    <a href="dashboard.html">DASHBOARD</a><span>/</span>
+    <a href="m1.html">M1</a><span>/</span>
+    <span style="color:#ffffff88;">LESSON 01 — WHY LEO NOW</span>
+</div>
+
+<div class="lesson-wrap">
+
+<div class="lesson-header">
+    <div class="lesson-tag">M1 · LESSON 01 OF 7</div>
+    <h1>Why LEO Now</h1>
+    <div class="lesson-meta">
+        <div class="l-pill l-pill-q">MODULE 1</div>
+        <div class="l-pill l-pill-t">FOUNDATIONS</div>
+    </div>
+    <p class="lesson-intro">This lesson answers one question: why did low-Earth-orbit broadband become viable in the late 2010s, when the same idea was attempted and failed in the 1990s? The answer is a convergence — several industrial enablers on the supply side meeting several durable sources of demand on the pull side, at roughly the same moment, while the companies best placed to see it coming had every reason not to act. This is the landscape view: the orbital regimes are compared in the next lesson, the latency physics worked through in the one after, the commercial model and spectrum in their own lessons, and the detailed failure post-mortems in the case-studies module. Here we stay on "why now."</p>
+</div>
+
+<div class="toc">
+    <h4>CONTENTS</h4>
+    <ol>
+        <li><a href="#s1">The question: why now, not the 1990s?</a></li>
+        <li><a href="#s2">Enabler 1 — the smartphone supply chain</a></li>
+        <li><a href="#s3">Enabler 2 — reusable launch</a></li>
+        <li><a href="#s4">Enabler 3 — flat-panel terminals</a></li>
+        <li><a href="#s5">Enabler 4 — capital &amp; software-defined ops</a></li>
+        <li><a href="#s6">The synthesis — none alone was sufficient</a></li>
+        <li><a href="#s7">Demand — three primary pillars</a></li>
+        <li><a href="#s8">Demand — secondary markets</a></li>
+        <li><a href="#s9">Why the incumbents didn't do it</a></li>
+        <li><a href="#s10">Why GEO could not simply answer</a></li>
+        <li><a href="#s11">The takeaway</a></li>
+        <li><a href="#quiz">Knowledge check</a></li>
+        <li><a href="#python">Python exercises</a></li>
+        <li><a href="#reflect">Reflection prompts</a></li>
+    </ol>
+</div>
+
+<div class="content-block" id="s1">
+    <h2>1. The Question: Why Now, and Not in the 1990s?</h2>
+    <p>Low-Earth-orbit broadband is not a new idea. Several ventures attempted satellite constellations for voice and data in the 1990s — Iridium, Teledesic, and Globalstar among them — and all failed commercially, by bankruptcy or cancellation, around the turn of the century. The comparative post-mortem of those failures is covered in the case-studies module; what matters here is the shared cause.</p>
+    <p>The 1990s ventures failed for the same structural reason: satellites were expensive to build, launch was expensive, and user terminals were expensive. Those costs forced enormous break-even subscriber bases, and the ventures ran out of capital before reaching them. The missing ingredients were industrial, not conceptual. The concept was sound and ahead of its time; the cost base could not support it.</p>
+    <p>So "why now" resolves into a set of questions. What changed on the supply side to collapse those costs? What demand emerged large enough to justify the capital? And why did the incumbents who understood satellites best leave the opening to a newcomer? The rest of the lesson answers all three.</p>
+    <div class="callout red">
+        <strong>THE CONSTRAINT WAS INDUSTRIAL, NOT CONCEPTUAL</strong>
+        The 1990s did not get the physics or the architecture wrong. They got the cost base wrong — or rather, the cost base of their era made the idea impossible. The orbit was always available. What changed was the cost of using it.
+    </div>
+</div>
+
+<div class="content-block" id="s2">
+    <h2>2. Enabler 1 — The Smartphone Supply Chain</h2>
+    <p>The first enabler is the global smartphone industry, which had nothing to do with space and changed it anyway. Smartphone volumes grew from essentially zero in 2007 to well over a billion units per year by the mid-2010s. Meeting that demand drove hundreds of billions of dollars of investment into semiconductors, MEMS sensors, radio-frequency components, and solar cells — and those are the same building blocks a small satellite uses.</p>
+    <p>The mechanism is the manufacturing learning curve: unit cost falls by a roughly fixed fraction every time cumulative production doubles. Smartphones drove cumulative volumes of these component classes through many doublings, and satellites inherited the resulting prices for free. A satellite attitude sensor that once cost tens of thousands of dollars as bespoke aerospace hardware became a few-dollar MEMS part from a consumer supply chain. Commodity GPS receivers handle orbit determination. Commercial-off-the-shelf processors and radiation-tolerant parts survive the LEO environment at acceptable risk — and crucially, they can, because LEO below roughly 1,200 km sits beneath the worst of the radiation belts and is far gentler than GEO. That radiation point is developed in the next lesson; here it is the reason commercial-grade electronics are an option at all, and commercial-grade electronics are what make a satellite cheap.</p>
+    <p>The deeper structural lever is manufacturing itself. The 1990s built satellites the traditional way — small batches, hand-integrated, each one close to bespoke. The mega-constellation approach treats the satellite as a mass-produced good, applying production-line methods, design-for-manufacture, and high-volume component sourcing to push the per-unit cost down by orders of magnitude. The result is a satellite measured in hundreds of thousands of dollars rather than the hundreds of millions a traditional GEO communications satellite still commands.</p>
+    <div class="key-numbers">
+        <div class="kn-item"><span class="kn-val">&gt;1.5B</span><span class="kn-label">Smartphones shipped/yr, mid-2010s</span></div>
+        <div class="kn-item"><span class="kn-val">~$0.5–0.75M</span><span class="kn-label">Starlink sat build cost at scale</span></div>
+        <div class="kn-item"><span class="kn-val">~$150–400M</span><span class="kn-label">Traditional GEO comsat cost</span></div>
+    </div>
+</div>
+
+<div class="content-block" id="s3">
+    <h2>3. Enabler 2 — Reusable Launch</h2>
+    <p>The second enabler is reusable launch, which collapsed the single largest variable in constellation economics. Launch had been the hard bottleneck for decades: a constellation of thousands of satellites is impossible if each kilogram to orbit costs a fortune and if there are only a handful of launch slots a year. The first successful landing of a Falcon 9 first stage in December 2015 turned reusable launch from a theory into a demonstrated practice, and reflying boosters drove the amortised cost per kilogram to orbit sharply down.</p>
+    <p>The cost trajectory is the headline. The Space Shuttle era ran on the order of tens of thousands of dollars per kilogram to LEO; an expendable Falcon 9 brought that to roughly ten thousand; a reused Falcon 9 to a few thousand; and Starship, if it meets its aspirations, targets a figure low enough to change the question entirely.</p>
+    <p>Two structural points matter as much as the headline number. The first is cadence. Deploying and then continually replenishing a constellation of thousands of satellites — each with a service life of only a few years — requires launching hundreds of satellites per year, indefinitely. That launch rate is impossible without reusable vehicles; cost and cadence are two faces of the same enabler. The second is vertical integration and marginal cost. An operator that owns its launch vehicles pays the marginal cost of a flight rather than a market price, and launches its own satellites on its own rockets — a structural advantage a competitor buying launch on the open market cannot match. For smaller players without their own rockets, the same reusable economics show up as cheap rideshare access, where many small satellites share a single launch.</p>
+    <div class="key-numbers">
+        <div class="kn-item"><span class="kn-val">~$65k</span><span class="kn-label">$/kg to LEO, Shuttle era</span></div>
+        <div class="kn-item"><span class="kn-val">~$10k</span><span class="kn-label">$/kg, Falcon 9 expendable</span></div>
+        <div class="kn-item"><span class="kn-val">~$2.7k</span><span class="kn-label">$/kg, Falcon 9 reusable</span></div>
+        <div class="kn-item"><span class="kn-val">&lt;$100</span><span class="kn-label">$/kg, Starship aspirational</span></div>
+    </div>
+</div>
+
+<div class="content-block" id="s4">
+    <h2>4. Enabler 3 — Flat-Panel Phased-Array Terminals</h2>
+    <p>The third enabler is the one most often overlooked, because it is on the user's side rather than the operator's. A constellation only generates revenue if users can afford and install a terminal, and a LEO terminal has a far harder job than a GEO one. A GEO dish points once at a fixed spot and never moves. A LEO terminal must track satellites crossing the sky in minutes, handing off from one to the next continuously.</p>
+    <p>Mechanical tracking antennas can do this, and maritime and aviation used them for years, but they are bulky, fragile, power-hungry, and expensive, with moving parts that wear and fail — impossible at consumer scale and consumer price. The solution is the electronically steered phased array, which steers its beam by adjusting the phase across many small elements, with no moving parts and microsecond response. The barrier was never feasibility but cost: a phased array needs a great many small radio-frequency elements and the silicon to drive them, and that semiconductor content was prohibitive until the mid-2010s, when 5G millimetre-wave development, defence investment in electronically scanned radar, and the general march of RF integration brought the cost per element down far enough. The result was a flat terminal cheap enough to put on a roof — early consumer units around a thousand-plus dollars to manufacture, with the clear target of falling below a few hundred.</p>
+    <div class="callout">
+        <strong>COVERED IN DEPTH LATER</strong>
+        The physics of phased arrays is treated in the RF module, and terminal technology in depth in the user-terminals module. The point here is only that the terminal stopped being the thing that kills the business.
+    </div>
+</div>
+
+<div class="content-block" id="s5">
+    <h2>5. Enabler 4 — Cheap Capital &amp; Software-Defined Operations</h2>
+    <p>Two further enablers are less visible than hardware but just as necessary, and the original telling of "why now" tends to omit them.</p>
+    <p>The first is capital. A mega-constellation needs billions of dollars before it earns meaningful revenue, and that kind of patient, high-risk capital was unusually available in the 2010s. A prolonged period of low interest rates pushed investors toward growth and toward long-horizon bets that would have been unfundable in a higher-rate environment. The reported figures are large: Starlink's build is estimated in the tens of billions of dollars, Amazon committed on the order of ten billion to Kuiper, and OneWeb raised several billion before a 2020 bankruptcy and subsequent rescue. None of those bets clears without a capital market willing to fund years of losses against a distant payoff. Capital availability is a genuine enabling condition, and a changing one — a fact worth holding lightly, because the funding climate that launched this generation is not guaranteed to fund the next.</p>
+    <p>The second is software-defined operations. Flying thousands of satellites would be impossible if each required a room of operators. Automated network management, autonomous collision-avoidance manoeuvring, and software-defined payloads whose behaviour can be reconfigured from the ground let a comparatively small team operate an enormous fleet, and let the system adapt its coverage and capacity without new hardware. This is the operational counterpart to mass-manufacturing: the 1990s flew small fleets with heavy human oversight, while the modern approach treats the constellation as a largely autonomous, continuously updated software system.</p>
+    <div class="key-numbers">
+        <div class="kn-item"><span class="kn-val">tens of $B</span><span class="kn-label">Reported Starlink investment</span></div>
+        <div class="kn-item"><span class="kn-val">~$10B</span><span class="kn-label">Amazon committed to Kuiper</span></div>
+        <div class="kn-item"><span class="kn-val">several $B</span><span class="kn-label">OneWeb raised pre-2020</span></div>
+    </div>
+</div>
+
+<div class="content-block" id="s6">
+    <h2>6. The Synthesis — None of the Enablers Was Sufficient Alone</h2>
+    <p>The enablers matter only together. Cheap satellites without cheap launch leave a constellation no one can afford to deploy. Cheap launch without cheap terminals leaves a system with no users. Cheap terminals with nothing overhead serve no one. Cheap hardware without patient capital never gets built, and a built constellation without automated operations cannot be flown. The 1990s had none of these at once; the late 2010s had all of them. The convergence, roughly between 2018 and 2022, is what made the current generation possible — and it is why "why now" is a better question than "why LEO," because the orbit was always physically available. What changed was the cost of using it.</p>
+    <div class="callout green">
+        <strong>THE CONVERGENCE</strong>
+        Five independent shifts — mass-manufactured satellites, reusable launch, phased-array silicon, patient capital, and automated operations — lined up around 2018–2022. No one of them was aimed at LEO broadband. Their coincidence is the answer to "why now."
+    </div>
+</div>
+
+<div class="content-block" id="s7">
+    <h2>7. The Demand Side — Three Primary Market Pillars</h2>
+    <p>Lower costs are necessary but not sufficient. A mega-constellation needs billions in capital before meaningful revenue, and capital at that scale only moves when the addressable market is large, durable, and underserved. Three distinct demand pillars each clear that bar on their own.</p>
+    <p>The first is the unconnected population. Around 2.9 billion people lacked internet access as of 2020, concentrated where terrestrial fibre and mobile are uneconomical because cost per subscriber rises steeply with low density and difficult terrain. Satellite is the one technology whose capital cost is independent of subscriber density — the constellation costs the same whether a cell holds ten users or ten thousand. The per-user economics are hard, because low density and low income constrain revenue, but governments and development bodies subsidise connectivity and provide anchor-tenant contracts that change the revenue model from pure consumer ARPU to something more durable.</p>
+    <p>The second is mobility: aviation and maritime. These users are captive, willing to pay a premium, and contracted through businesses rather than individuals. In-flight connectivity was a multi-billion-dollar annual market by 2020 and growing, served by GEO at throughputs inadequate for a full aircraft of passengers expecting streaming video. Maritime is larger still by revenue. The aviation case is taken further in the user-terminals and applications modules; the landscape point is that mobility is a high-value, business-contracted demand pillar that LEO serves better than GEO.</p>
+    <p>The third is government and defence. Ukraine's operational use of Starlink from February 2022 reshaped procurement thinking across many governments, demonstrating resilient, low-latency, broadband connectivity in a contested environment. Government revenue is structurally valuable: contracts are long, pricing is less competitive than consumer markets, and anchor tenancy de-risks the early scaling phase when a constellation has high fixed costs and few paying users.</p>
+    <div class="key-numbers">
+        <div class="kn-item"><span class="kn-val">~2.9B</span><span class="kn-label">People unconnected, 2020 (ITU)</span></div>
+        <div class="kn-item"><span class="kn-val">~$3–4B</span><span class="kn-label">In-flight connectivity market/yr, ~2020</span></div>
+        <div class="kn-item"><span class="kn-val">Feb 2022</span><span class="kn-label">Starlink operational use in Ukraine</span></div>
+    </div>
+</div>
+
+<div class="content-block" id="s8">
+    <h2>8. The Demand Side — Secondary Markets That Round Out the Case</h2>
+    <p>Beyond the three headline pillars sit several secondary markets that, while smaller individually, broaden the demand base and improve the utilisation of a constellation that is already in orbit.</p>
+    <p>Cellular backhaul connects remote mobile towers to the core network over satellite, turning mobile network operators into wholesale customers rather than competitors, and extending terrestrial coverage without trenching fibre to every site. Machine-to-machine and IoT connectivity — asset tracking, agriculture, energy, logistics — needs only small amounts of data from very many devices in places terrestrial networks do not reach, a different traffic profile from broadband but a real one. Disaster recovery and resilience is a demand that appears precisely when terrestrial infrastructure fails, valued for being there when nothing else is. Remote enterprise — mining, energy, construction, offshore — pays well for connectivity at sites with no alternative.</p>
+    <p>An emerging vector worth flagging is direct-to-device, where satellites communicate with ordinary unmodified phones to fill terrestrial coverage gaps; the technology and its constraints are the user-terminals module's subject, but as a demand driver it widens the potential market from people who buy a terminal to anyone with a smartphone. Across all of these, demand concentrates in the same geographies: low-density regions, high latitudes underserved by GEO, oceans and air, and areas where terrestrial networks are absent, degraded, or contested.</p>
+</div>
+
+<div class="content-block" id="s9">
+    <h2>9. Why the Incumbents Did Not Do It Themselves</h2>
+    <p>A sharp question cuts through the enabler list: the established satellite operators understood this business better than anyone, had capital and spectrum and customers, and still left the opening to a launch company. Why?</p>
+    <p>The answer is a textbook case of incumbent disadvantage. The established GEO operators were organised around a profitable existing business — a handful of large, long-lived, high-margin satellites — and a LEO mega-constellation threatened that business on every axis. It was lower-margin, vastly more capital-intensive up front, technically unfamiliar in its mass-manufacturing and automated-operations demands, and at risk of cannibalising the very services that funded the company. Rational managers protecting a profitable franchise are precisely the people least likely to bet the company on a cheaper, riskier replacement for it. Incumbents also lacked the one thing that unlocked the economics: a low-cost, high-cadence launch capability, which they bought on the open market rather than owned.</p>
+    <p>The newcomer had the mirror-image position. A launch company with cheap reusable rockets and no legacy satellite business to protect saw a constellation not as a threat to existing margins but as demand for its own launch capacity and a new market entirely. It had the cost base the incumbents lacked and none of the incentives that held them back. This is why "why now" is also "why them": the convergence of enablers created the opening, but it was taken by the actor with the right cost structure and no reason to hesitate, not by the actors with the most expertise. The deeper commercial mechanics of this are developed in <em>GEO vs LEO: The Commercial Delta</em> and the case-studies module; the why-now point is that incumbency was a handicap, not an advantage.</p>
+    <div class="callout amber">
+        <strong>WHY NOW IS ALSO WHY THEM</strong>
+        The opening was taken by the actor with cheap launch and no legacy margins to protect — not by the actors with the most satellite expertise. Incumbency was the handicap.
+    </div>
+</div>
+
+<div class="content-block" id="s10">
+    <h2>10. Why GEO Could Not Simply Answer</h2>
+    <p>Even setting incentives aside, a fair question is whether GEO operators could have neutralised LEO technically. They tried, and the limits are instructive. GEO's latency is a consequence of distance and the finite speed of light, not an engineering shortfall, so it cannot be designed away — the round trip is roughly 600 ms regardless of how good the hardware is. The full derivation, and the reason this matters so much, are the subject of <em>The Physics of Latency</em>.</p>
+    <p>GEO's actual response was to add capacity through high-throughput satellites. But bandwidth and latency are independent, and the latency lesson makes the rigorous version of the point: a high-capacity GEO satellite still delivers its capacity at around 600 ms, and at that round-trip time the way standard internet transport behaves — connections throttled by the bandwidth-delay product, every handshake paying the latency penalty several times over — caps the responsiveness a user actually experiences no matter how much raw capacity sits behind the link. The internet was simultaneously moving toward latency-sensitive uses — video calls, cloud gaming, interactive applications — for which more bandwidth at high latency does not help. Where the two orbits win commercially, and why, is the subject of <em>GEO vs LEO: The Commercial Delta</em>.</p>
+</div>
+
+<div class="content-block" id="s11">
+    <h2>11. The Takeaway</h2>
+    <p>The honest answer to "why LEO now" has three parts. The supply side: cheap mass-manufactured satellites, cheap reusable launch, cheap flat-panel terminals, patient capital, and automated operations all arrived together around 2020. The demand side: durable, large, underserved markets — the unconnected, mobility, and government, broadened by backhaul, IoT, resilience, and direct-to-device — justified the capital. And the actor: the opening was taken by a newcomer with the right cost base and no legacy business to protect, because incumbency was a handicap.</p>
+    <p>The specific numbers in this lesson will be out of date before long; the constellation sizes, prices, funding climates, and market figures all move. The framework does not. When you evaluate any new entrant or any claim that "this time is different," ask the same questions: have the supply-side costs closed, is there demand large and durable enough to justify the capital, and does the actor pursuing it have a cost structure and incentive position that make sense? That three-part test is the mental model this lesson contributes; the full synthesis comes at the end of the module.</p>
+    <div class="callout green">
+        <strong>LESSON OBJECTIVE MET</strong>
+        You should be able to state, without relying on any single figure, why LEO broadband became viable when it did: the five supply-side enablers, the demand pillars and the markets that broaden them, why the incumbents stood aside, and why GEO could not answer with more bandwidth. Carry the three-question test forward — it is the durable part.
+    </div>
+</div>
+
+<!-- QUIZ -->
+<div class="quiz-block" id="quiz">
+    <h2>KNOWLEDGE CHECK</h2>
+    <p class="quiz-intro">Ten questions across the full scope — the five enablers, the demand pillars and secondary markets, why the incumbents stood aside, and why GEO could not answer. One correct answer each.</p>
+
+    <div class="quiz-q"><p><strong>Q1.</strong> The 1990s LEO ventures shared which primary failure cause?</p>
+        <div class="quiz-options">
+            <button class="quiz-opt" data-q="1" data-correct="false">A — Their orbital mechanics were miscalculated</button>
+            <button class="quiz-opt" data-q="1" data-correct="true">B — Satellites, launch, and terminals were all too expensive, forcing break-even subscriber bases they never reached</button>
+            <button class="quiz-opt" data-q="1" data-correct="false">C — Regulators refused to license them</button>
+            <button class="quiz-opt" data-q="1" data-correct="false">D — Latency was too high for any application</button>
+        </div><div class="quiz-feedback" id="fb1"></div></div>
+
+    <div class="quiz-q"><p><strong>Q2.</strong> The manufacturing learning curve lowered satellite cost because:</p>
+        <div class="quiz-options">
+            <button class="quiz-opt" data-q="2" data-correct="false">A — Engineers simply worked harder</button>
+            <button class="quiz-opt" data-q="2" data-correct="true">B — Unit cost falls a fixed fraction per doubling of cumulative production, and smartphones drove the shared components through many doublings</button>
+            <button class="quiz-opt" data-q="2" data-correct="false">C — Satellites became larger</button>
+            <button class="quiz-opt" data-q="2" data-correct="false">D — Governments capped component prices</button>
+        </div><div class="quiz-feedback" id="fb2"></div></div>
+
+    <div class="quiz-q"><p><strong>Q3.</strong> Why does LEO's radiation environment matter to the smartphone-supply-chain enabler?</p>
+        <div class="quiz-options">
+            <button class="quiz-opt" data-q="3" data-correct="false">A — It does not; radiation is irrelevant</button>
+            <button class="quiz-opt" data-q="3" data-correct="true">B — Low LEO is benign enough to permit cheaper commercial-grade electronics rather than expensive rad-hard parts</button>
+            <button class="quiz-opt" data-q="3" data-correct="false">C — Because radiation makes smartphones cheaper</button>
+            <button class="quiz-opt" data-q="3" data-correct="false">D — Because GEO has no radiation</button>
+        </div><div class="quiz-feedback" id="fb3"></div></div>
+
+    <div class="quiz-q"><p><strong>Q4.</strong> Beyond cost per kilogram, why is launch cadence a distinct part of the reusable-launch enabler?</p>
+        <div class="quiz-options">
+            <button class="quiz-opt" data-q="4" data-correct="false">A — It is not distinct from cost</button>
+            <button class="quiz-opt" data-q="4" data-correct="true">B — A constellation of thousands of short-lived satellites needs hundreds of launches per year, which only reuse makes possible</button>
+            <button class="quiz-opt" data-q="4" data-correct="false">C — Cadence affects only crewed flights</button>
+            <button class="quiz-opt" data-q="4" data-correct="false">D — Cadence determines satellite size</button>
+        </div><div class="quiz-feedback" id="fb4"></div></div>
+
+    <div class="quiz-q"><p><strong>Q5.</strong> Flat-panel phased-array terminals replaced mechanical tracking antennas at consumer scale because:</p>
+        <div class="quiz-options">
+            <button class="quiz-opt" data-q="5" data-correct="false">A — Phased arrays are larger</button>
+            <button class="quiz-opt" data-q="5" data-correct="true">B — They steer electronically with no moving parts, once falling RF-silicon cost made them affordable</button>
+            <button class="quiz-opt" data-q="5" data-correct="false">C — Mechanical antennas cannot track satellites</button>
+            <button class="quiz-opt" data-q="5" data-correct="false">D — Regulators banned mechanical antennas</button>
+        </div><div class="quiz-feedback" id="fb5"></div></div>
+
+    <div class="quiz-q"><p><strong>Q6.</strong> Which best describes the fourth enabler the lesson adds beyond hardware?</p>
+        <div class="quiz-options">
+            <button class="quiz-opt" data-q="6" data-correct="false">A — Cheaper fuel</button>
+            <button class="quiz-opt" data-q="6" data-correct="true">B — Patient, low-rate-era capital plus software-defined, automated operations</button>
+            <button class="quiz-opt" data-q="6" data-correct="false">C — New international treaties</button>
+            <button class="quiz-opt" data-q="6" data-correct="false">D — Higher consumer prices</button>
+        </div><div class="quiz-feedback" id="fb6"></div></div>
+
+    <div class="quiz-q"><p><strong>Q7.</strong> The "unconnected population" pillar suits satellite specifically because:</p>
+        <div class="quiz-options">
+            <button class="quiz-opt" data-q="7" data-correct="false">A — Those users have high incomes</button>
+            <button class="quiz-opt" data-q="7" data-correct="true">B — Satellite's capital cost is independent of subscriber density, unlike terrestrial networks</button>
+            <button class="quiz-opt" data-q="7" data-correct="false">C — Terrestrial fibre is cheaper there</button>
+            <button class="quiz-opt" data-q="7" data-correct="false">D — GEO already serves it well</button>
+        </div><div class="quiz-feedback" id="fb7"></div></div>
+
+    <div class="quiz-q"><p><strong>Q8.</strong> Which is a secondary demand market, rather than one of the three primary pillars?</p>
+        <div class="quiz-options">
+            <button class="quiz-opt" data-q="8" data-correct="false">A — The unconnected population</button>
+            <button class="quiz-opt" data-q="8" data-correct="true">B — Cellular backhaul for remote mobile towers</button>
+            <button class="quiz-opt" data-q="8" data-correct="false">C — Mobility (aviation and maritime)</button>
+            <button class="quiz-opt" data-q="8" data-correct="false">D — Government and defence</button>
+        </div><div class="quiz-feedback" id="fb8"></div></div>
+
+    <div class="quiz-q"><p><strong>Q9.</strong> Why did established GEO operators leave the LEO opening to a newcomer?</p>
+        <div class="quiz-options">
+            <button class="quiz-opt" data-q="9" data-correct="false">A — They lacked the technical knowledge entirely</button>
+            <button class="quiz-opt" data-q="9" data-correct="true">B — A LEO constellation was lower-margin, capital-intensive, and threatened to cannibalise their profitable business, and they lacked their own low-cost launch</button>
+            <button class="quiz-opt" data-q="9" data-correct="false">C — Regulators forbade them from building LEO</button>
+            <button class="quiz-opt" data-q="9" data-correct="false">D — They did not believe LEO orbits existed</button>
+        </div><div class="quiz-feedback" id="fb9"></div></div>
+
+    <div class="quiz-q"><p><strong>Q10.</strong> Why does adding bandwidth not let GEO neutralise LEO?</p>
+        <div class="quiz-options">
+            <button class="quiz-opt" data-q="10" data-correct="false">A — GEO satellites cannot add bandwidth</button>
+            <button class="quiz-opt" data-q="10" data-correct="true">B — Latency is fixed by distance; at ~600 ms round trip, transport behaviour caps responsiveness no matter how much capacity sits behind the link</button>
+            <button class="quiz-opt" data-q="10" data-correct="false">C — Bandwidth and latency are the same thing</button>
+            <button class="quiz-opt" data-q="10" data-correct="false">D — High-throughput satellites have less capacity</button>
+        </div><div class="quiz-feedback" id="fb10"></div></div>
+
+    <div class="quiz-score" id="quizScore"></div>
+</div>
+
+<!-- PYTHON -->
+<div class="py-block" id="python">
+    <h2>PYTHON EXERCISES</h2>
+    <p class="py-intro">Three exercises on the economics of the enablers — the supply-side half of "why now." Python 3.8+ standard library only.</p>
+
+    <div class="py-exercise">
+        <h3>Exercise 1 — Launch cost trajectory and booster amortisation</h3>
+        <p>Model how reuse drives cost per kilogram down, and how a booster's amortised cost falls as it flies more times.</p>
+<pre>
+eras = {
+    "Shuttle":             65_000,
+    "Falcon 9 expendable": 10_000,
+    "Falcon 9 reusable":    2_700,
+    "Starship (target)":       80,
+}
+
+print(f"{'Era':<22}{'USD/kg to LEO':>16}")
+print("-" * 38)
+for name, cost in eras.items():
+    print(f"{name:<22}{cost:>16,}")
+
+def amortised_per_flight(build_cost, refurb_per_flight, flights):
+    return build_cost / flights + refurb_per_flight
+
+build  = 30_000_000   # illustrative booster build cost, USD
+refurb =  1_000_000   # illustrative refurb cost per flight, USD
+
+print(f"\n{'Flights':>8}{'Amortised $/flight':>22}")
+print("-" * 30)
+for n in [1, 2, 5, 10, 20]:
+    print(f"{n:>8}{amortised_per_flight(build, refurb, n):>22,.0f}")
+
+# 1. By what factor does reusable Falcon 9 beat the Shuttle era per kg?
+# 2. Most of the per-flight saving appears within the first few flights.
+#    Why do later flights add less benefit?
+</pre>
+        <div class="py-challenge"><strong>EXTENSION</strong>
+            Plot amortised $/flight against flight count and add the flat line of an expendable booster. Find where reuse overtakes it.
+        </div>
+    </div>
+
+    <div class="py-exercise">
+        <h3>Exercise 2 — Constellation build capex, 1990s vs 2020s</h3>
+        <p>Show the order-of-magnitude difference the satellite-cost enabler makes to total build capex.</p>
+<pre>
+def constellation_capex(n_satellites, sat_cost):
+    return n_satellites * sat_cost
+
+scenarios = [
+    ("1990s-style (66 @ $40M)",       66,  40_000_000),
+    ("Modern small (4000 @ $1M)",  4_000,   1_000_000),
+    ("Modern at scale (4000 @ $0.6M)", 4_000, 600_000),
+]
+
+print(f"{'Scenario':<34}{'Sats':>6}{'Total capex':>16}")
+print("-" * 56)
+for name, n, c in scenarios:
+    total = constellation_capex(n, c)
+    print(f"{name:<34}{n:>6}{total/1e9:>14.2f}B")
+
+# 1. The modern constellation has ~60x more satellites but comparable or
+#    lower total build capex. Which enabler makes that possible?
+# 2. This counts build cost only. Name two large cost terms it ignores.
+</pre>
+        <div class="py-challenge"><strong>EXTENSION</strong>
+            Add launch cost using the per-kg figures from Exercise 1 and an assumed satellite mass. Does including launch change which scenario is cheapest per satellite delivered to orbit?
+        </div>
+    </div>
+
+    <div class="py-exercise">
+        <h3>Exercise 3 — The convergence test</h3>
+        <p>A toy model of "none alone is sufficient" — extended with a capital check for the fourth enabler. A system is viable only when all conditions hold at once.</p>
+<pre>
+thresholds = {
+    "sat_cost_usd":      2_000_000,
+    "launch_usd_per_kg":     5_000,
+    "terminal_usd":          1_000,
+    "capital_available_usd": 5_000_000_000,
+}
+
+def is_viable(sat_cost, launch_per_kg, terminal, capital):
+    checks = {
+        "satellite": sat_cost      <= thresholds["sat_cost_usd"],
+        "launch":    launch_per_kg <= thresholds["launch_usd_per_kg"],
+        "terminal":  terminal      <= thresholds["terminal_usd"],
+        "capital":   capital       >= thresholds["capital_available_usd"],
+    }
+    return all(checks.values()), checks
+
+eras = [
+    ("1990s",       40_000_000, 18_000, 5_000,   2_000_000_000),
+    ("Early 2010s",  5_000_000, 10_000, 3_000,  10_000_000_000),
+    ("Early 2020s",    700_000,  2_700,   500,  20_000_000_000),
+]
+
+for name, s, l, t, cap in eras:
+    viable, checks = is_viable(s, l, t, cap)
+    passed = [k for k, v in checks.items() if v]
+    print(f"{name:<12} viable={viable}  passed: {passed}")
+
+# 1. The early-2010s row passes some checks but not all. What does that
+#    imply for a system launched then?
+# 2. Why is capital availability a shakier enabler to rely on than the
+#    falling hardware costs?
+</pre>
+    </div>
+</div>
+
+<!-- REFLECTION -->
+<div class="reflection-block" id="reflect">
+    <h2>REFLECTION PROMPTS</h2>
+    <p class="ref-intro">Not graded. Write in your own words, 200–400 words each.</p>
+
+    <div class="ref-prompt"><h3>Prompt 1 — The Binding Constraint</h3>
+        <p>Pick one of the five enablers — mass-manufactured satellites, reusable launch, flat-panel terminals, patient capital, or automated operations — and argue it was the binding constraint whose absence most directly killed the 1990s ventures. Then argue the opposite, that a different enabler was the real blocker. Which case is stronger, and why?</p></div>
+
+    <div class="ref-prompt"><h3>Prompt 2 — Run the Test</h3>
+        <p>Take a current LEO entrant or proposal and run it through the three-question test: have its supply-side costs closed, is there demand large and durable enough to justify its capital, and does the actor's cost structure and incentive position make sense? Where does your confidence break down, and what data would resolve it?</p></div>
+
+    <div class="ref-prompt"><h3>Prompt 3 — The Incumbent's Counter-Case</h3>
+        <p>The lesson frames incumbency as a handicap. Make the strongest counter-case: under what conditions would an established GEO operator have been the right actor to build a LEO constellation, and what would it have had to do differently to overcome the incumbent's dilemma?</p></div>
+
+    <div class="ref-prompt"><h3>Prompt 4 — How Much Does Automation Matter?</h3>
+        <p>Four enablers are hardware or capital; one — software-defined operations — is neither. Argue how important automated operations really is relative to the others. If launch and manufacturing costs had fallen but operations had stayed manual and human-intensive, could the modern mega-constellation still exist?</p></div>
+</div>
+
+<!-- MARK COMPLETE -->
+<div class="complete-wrap">
+    <button class="complete-btn" id="completeBtn">MARK LESSON COMPLETE</button>
+    <div class="complete-msg" id="completeMsg"></div>
+</div>
+
+<div class="lesson-nav">
+    <a href="m1.html">← BACK TO M1 HUB</a>
+    <a href="m1-2.html">LESSON 02 — ORBITAL REGIMES COMPARED →</a>
+</div>
+
+</div>
+
+<button class="back-to-top" id="backToTop" title="Back to top">↑</button>
+
+<footer>© 2026 LEOAF · M1 · LESSON 01 OF 7</footer>
+
+<script>
+const canvas = document.getElementById('starsCanvas');
+const ctx = canvas.getContext('2d');
+let stars = [];
+function initStars() { stars=[]; for(let i=0;i<180;i++) stars.push({x:Math.random()*canvas.width,y:Math.random()*canvas.height,size:Math.random()*1.5+0.4,speed:Math.random()*0.18+0.04,hue:Math.random()*360}); }
+function resizeCanvas() { canvas.width=window.innerWidth; canvas.height=window.innerHeight; }
+resizeCanvas(); initStars(); window.addEventListener('resize', resizeCanvas);
+function animateStars() { ctx.clearRect(0,0,canvas.width,canvas.height); stars.forEach(s=>{s.y-=s.speed;if(s.y<0){s.y=canvas.height;s.x=Math.random()*canvas.width;} ctx.beginPath();ctx.fillStyle=`hsl(${s.hue},80%,80%)`;ctx.arc(s.x,s.y,s.size,0,Math.PI*2);ctx.fill();}); requestAnimationFrame(animateStars); }
+animateStars();
+</script>
+
+<script>
+const feedbacks = {
+    1:{correct:"Correct. The shared cause was industrial cost, not concept — expensive satellites, launch, and terminals demanded subscriber bases too large to reach before capital ran out.",wrong:"Incorrect. The concept and physics were sound; the ventures failed because the cost base required break-even subscriber numbers they could not reach in time."},
+    2:{correct:"Correct. The learning curve means cost falls with cumulative volume; smartphone-scale production of shared components delivered those price drops to satellites for free.",wrong:"Incorrect. It is the learning curve — cost falls per doubling of cumulative volume, and smartphone volumes pushed the shared components through many doublings."},
+    3:{correct:"Correct. Commercial-off-the-shelf electronics are only an option because low LEO sits beneath the worst belts; that benign environment is what lets the cheap supply chain be used at all.",wrong:"Incorrect. The link is that low LEO is benign enough for commercial-grade parts; without that, satellites would need expensive rad-hard electronics and the cheap supply chain would not apply."},
+    4:{correct:"Correct. Continual replenishment of thousands of short-lived satellites demands a launch rate impossible without reusable vehicles, independent of the per-kg price.",wrong:"Incorrect. Cadence is separate from price — replenishing thousands of short-lived satellites needs hundreds of launches a year, achievable only with reuse."},
+    5:{correct:"Correct. Electronic steering removes the bulky, failure-prone moving parts, and the barrier was cost — solved when RF-silicon prices fell in the mid-2010s.",wrong:"Incorrect. Phased arrays steer electronically with no moving parts; mechanical antennas work but are too bulky and costly for consumers, and the phased-array barrier was silicon cost."},
+    6:{correct:"Correct. Billions in patient capital and automated, software-defined operations are the non-hardware enablers that mass-manufacturing and cheap launch still required.",wrong:"Incorrect. The fourth enabler is the non-hardware pair — patient capital available in a low-rate era, and automated software-defined operations that let small teams fly huge fleets."},
+    7:{correct:"Correct. Terrestrial cost per subscriber rises in low-density areas, while a constellation costs the same regardless of density — monetised via subsidy and anchor tenancy.",wrong:"Incorrect. The fit is density-independence — satellite capital cost does not rise with sparseness the way terrestrial does, which is why it suits low-density unconnected regions."},
+    8:{correct:"Correct. Backhaul, IoT, disaster recovery, remote enterprise, and direct-to-device are the secondary markets that broaden the base beyond the three primary pillars.",wrong:"Incorrect. The three primary pillars are the unconnected, mobility, and government; backhaul is one of the secondary markets that round out the case."},
+    9:{correct:"Correct. Incumbency was a handicap — protecting a high-margin franchise, lacking owned launch, and facing cannibalisation, the rational move was not to bet the company on a cheaper replacement.",wrong:"Incorrect. It is the incumbent's dilemma — the new business was lower-margin and cannibalising, and they lacked owned low-cost launch, so protecting the existing franchise was the limiting choice."},
+    10:{correct:"Correct. Latency is a physics floor independent of bandwidth, and at GEO's round trip the bandwidth-delay product and handshake costs throttle felt responsiveness regardless of raw capacity.",wrong:"Incorrect. Bandwidth and latency are independent — GEO's ~600 ms is fixed by distance, and at that round trip transport behaviour limits responsiveness whatever the capacity."}
+};
+let answered = {};
+document.querySelectorAll('.quiz-opt').forEach(btn => {
+    btn.addEventListener('click', function() {
+        const q = this.dataset.q;
+        if (answered[q] !== undefined) return;
+        const correct = this.dataset.correct === 'true';
+        answered[q] = correct;
+        document.querySelectorAll(`.quiz-opt[data-q="${q}"]`).forEach(b => { b.disabled = true; if (b.dataset.correct === 'true') b.classList.add('correct'); });
+        if (!correct) this.classList.add('wrong');
+        const fb = document.getElementById(`fb${q}`);
+        fb.textContent = (correct ? '✓ ' : '✗ ') + feedbacks[q][correct ? 'correct' : 'wrong'];
+        fb.style.color = correct ? '#39ff14' : '#ff004f';
+        if (Object.keys(answered).length === 10) {
+            const total = Object.values(answered).filter(Boolean).length;
+            const el = document.getElementById('quizScore');
+            el.style.display = 'block';
+            const pct = Math.round(total / 10 * 100);
+            el.textContent = `SCORE: ${total} / 10 (${pct}%) — ${pct===100?'PERFECT.':pct>=80?'STRONG. REVIEW ANY MISSES.':pct>=60?'ADEQUATE. REVISIT WEAK SECTIONS.':'REVISIT THE LESSON BEFORE PROCEEDING.'}`;
+        }
+    });
+});
+</script>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="supabase.js"></script>
+<script src="user_progress.js"></script>
+<script>
+const LESSON_ID = 'm1-1';
+(function () {
+    function bounceToLogin(reason) {
+        console.error("Auth guard:", reason, "- redirecting to index.html");
+        window.location.replace("index.html");
+    }
+    async function init() {
+        if (typeof client === "undefined" || !client || !client.auth) {
+            return bounceToLogin("Supabase client not loaded (is supabase.js in this directory?)");
+        }
+        let session = null;
+        try { ({ data: { session } } = await client.auth.getSession()); }
+        catch (e) { return bounceToLogin("getSession threw: " + e.message); }
+        if (!session) { window.location.replace("index.html"); return; }
+
+        const btn = document.getElementById('completeBtn');
+        const msg = document.getElementById('completeMsg');
+        function setDone(done) {
+            if (done) {
+                btn.textContent = '✓ COMPLETE — CLICK TO UNDO';
+                btn.classList.add('done');
+                btn.style.cssText = 'border-color:#39ff14;color:#39ff14;background:rgba(57,255,20,0.1);cursor:pointer;opacity:1;';
+                msg.style.color = '#39ff14';
+                msg.textContent = 'Lesson marked complete. Click again to undo.';
+            } else {
+                btn.textContent = 'MARK LESSON COMPLETE';
+                btn.classList.remove('done');
+                btn.style.cssText = '';
+                msg.style.color = '#ffffff55';
+                msg.textContent = 'Not yet marked complete.';
+            }
+        }
+        let mastered = [];
+        try { mastered = await getMasteredSections(); } catch (e) { console.error(e); }
+        setDone(mastered.includes(LESSON_ID));
+        btn.addEventListener('click', async () => {
+            const isCurrentlyDone = btn.classList.contains('done');
+            msg.style.color = '#00d9ff';
+            msg.textContent = 'Saving...';
+            const ok = await upsertSection(LESSON_ID, !isCurrentlyDone);
+            if (ok) { setDone(!isCurrentlyDone); }
+            else { msg.style.color = '#ff004f'; msg.textContent = 'Error saving. Try again.'; }
+        });
+        const btt = document.getElementById('backToTop');
+        window.addEventListener('scroll', () => { btt.classList.toggle('visible', window.scrollY > 400); });
+        btt.addEventListener('click', () => window.scrollTo({ top: 0, behavior: 'smooth' }));
+    }
+    if (document.readyState === "loading") { document.addEventListener("DOMContentLoaded", init); }
+    else { init(); }
+})();
+</script>
+
+</body>
+</html>
