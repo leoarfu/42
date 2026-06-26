@@ -1,0 +1,393 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, shrink-to-fit=no">
+<title>Command Center — LEOAF</title>
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;600;800&family=Share+Tech+Mono&display=swap" rel="stylesheet">
+
+<!-- Favicons -->
+<link rel="icon" href="favicon.ico" sizes="any" type="image/x-icon">
+<link rel="icon" href="favicon.svg" type="image/svg+xml">
+<link rel="icon" type="image/png" sizes="96x96" href="favicon-96x96.png">
+<link rel="apple-touch-icon" sizes="180x180" href="apple-touch-icon.png">
+<link rel="manifest" href="site.webmanifest">
+<meta name="theme-color" content="#0f0f0f">
+
+<style>
+* { box-sizing: border-box; margin:0; padding:0; }
+html { height:100%; -webkit-text-size-adjust:100%; max-width:100vw; overflow-x:hidden; }
+body {
+    font-family: 'Share Tech Mono', monospace;
+    background:#000; color:white;
+    overflow-x:hidden; max-width:100vw;
+    position:relative; min-height:100vh;
+}
+#starsCanvas { position:fixed; inset:0; z-index:-1; }
+
+/* HEADER */
+header {
+    background:#000; border-bottom:1px solid #ff004f33;
+    position:sticky; top:0; z-index:100;
+    padding:1rem clamp(1.5rem,5vw,4rem);
+    display:flex; justify-content:space-between; align-items:center;
+    box-shadow:0 4px 16px #0008;
+}
+.logo { font-family:'Orbitron',sans-serif; font-weight:800; font-size:clamp(18px,2vw,24px); letter-spacing:3px; text-decoration:none; }
+.logo span:first-child { color:white; }
+.logo span:last-child { color:#ff004f; }
+.nav-left { display:flex; align-items:center; gap:2rem; }
+.header-controls { display:flex; align-items:center; gap:15px; }
+.user-id { font-size:10px; color:#00d9ff; letter-spacing:1px; opacity:0.8; display:none; }
+.logoff-btn {
+    background:transparent; border:1px solid #ff004f; color:#ff004f;
+    padding:6px 14px; cursor:pointer; transition:0.3s ease;
+    font-size:11px; font-family:'Orbitron',sans-serif; letter-spacing:1px;
+}
+.logoff-btn:hover { background:#ff004f; color:black; box-shadow:0 0 10px #ff004f; }
+
+/* DASHBOARD */
+.dashboard { width:100%; max-width:960px; margin:40px auto; padding:0 15px; position:relative; z-index:1; }
+.welcome-msg { font-family:'Orbitron',sans-serif; font-size:clamp(22px,4vw,32px); margin-bottom:10px; font-weight:800; letter-spacing:1px; }
+
+/* PROGRESS */
+.mission-control {
+    background:rgba(17,17,17,0.8); border:1px solid rgba(0,217,255,0.3);
+    padding:25px; margin-bottom:40px; box-shadow:inset 0 0 20px rgba(0,217,255,0.05);
+}
+.progress-header { display:flex; justify-content:space-between; align-items:flex-end; margin-bottom:15px; }
+.progress-header h2 { font-family:'Orbitron',sans-serif; font-size:13px; color:#00d9ff; letter-spacing:2px; }
+.progress-stats { font-family:'Orbitron',sans-serif; font-size:14px; color:#39ff14; }
+.progress-track { width:100%; height:12px; background:rgba(255,255,255,0.1); overflow:hidden; }
+.progress-fill {
+    height:100%; width:0%; background:linear-gradient(90deg,#00d9ff,#39ff14);
+    box-shadow:0 0 10px rgba(57,255,20,0.5);
+    transition:width 0.8s cubic-bezier(0.4,0,0.2,1);
+}
+
+/* PHASE HEADERS */
+.phase-header {
+    display:flex; align-items:center;
+    padding:18px; margin-top:2.5rem; margin-bottom:0;
+    border-left:3px solid #00d9ff;
+    background:rgba(0,217,255,0.04);
+    pointer-events:none;
+}
+.phase-header .phase-text { flex:1; }
+.phase-header .phase-text h3 { font-family:'Orbitron',sans-serif; color:#00d9ff; font-size:15px; letter-spacing:1px; margin-bottom:6px; text-transform:uppercase; }
+.phase-header .phase-text p { color:#aaa; font-size:13px; line-height:1.5; }
+.phase-badge { font-family:'Orbitron',sans-serif; font-size:10px; color:#00d9ff; border:1px solid #00d9ff; padding:4px 10px; letter-spacing:1px; white-space:nowrap; opacity:0.7; align-self:flex-start; }
+
+/* MODULE CARDS */
+.module-list { display:flex; flex-direction:column; gap:10px; }
+.module-card {
+    background:rgba(255,255,255,0.04); border-left:3px solid #ff004f;
+    padding:18px 20px; text-decoration:none; color:white;
+    transition:0.3s ease; display:block;
+}
+.module-card:hover { background:rgba(0,217,255,0.1); transform:translateX(4px); border-left-color:#00d9ff; }
+.module-card h3 { font-family:'Orbitron',sans-serif; margin:0 0 6px; font-size:13px; color:#ffffff; letter-spacing:1px; text-transform:uppercase; }
+.module-card p { margin:0 0 8px; font-size:12px; color:#aaaaaa; line-height:1.6; }
+.module-meta { display:flex; gap:1rem; flex-wrap:wrap; }
+.module-meta span {
+    font-family:'Orbitron',sans-serif; font-size:10px; letter-spacing:1px;
+    padding:3px 8px;
+}
+.meta-phase { color:#00d9ff88; border:1px solid #00d9ff22; }
+.meta-hours  { color:#39ff1488; border:1px solid #39ff1422; }
+
+/* COMPLETED */
+.module-card.completed { border-left-color:#39ff14; background:rgba(57,255,20,0.04); }
+.module-card.completed h3 { color:#39ff14; text-decoration:line-through; }
+
+/* ENDGAME */
+.endgame-card {
+    margin-top:2.5rem; background:rgba(57,255,20,0.06);
+    border-left:3px solid #39ff14; padding:20px;
+    display:flex; justify-content:space-between; align-items:flex-start; flex-wrap:wrap; gap:12px;
+}
+.endgame-card h3 { font-family:'Orbitron',sans-serif; color:#39ff14; font-size:15px; letter-spacing:1px; margin-bottom:8px; text-transform:uppercase; }
+.endgame-card p { color:#aaa; font-size:12px; line-height:1.6; flex:1 1 60%; }
+.endgame-total {
+    font-family:'Orbitron',sans-serif; font-size:clamp(18px,3vw,28px); font-weight:800;
+    color:#39ff14; text-shadow:0 0 20px rgba(57,255,20,0.5); white-space:nowrap;
+}
+.endgame-total span { display:block; font-size:10px; color:white; opacity:0.5; letter-spacing:1px; margin-top:2px; text-align:right; }
+
+/* RESPONSIVE */
+@media (max-width:600px) {
+    .phase-header { flex-direction:column; gap:10px; }
+    .endgame-card { flex-direction:column; }
+    .endgame-total span { text-align:left; }
+}
+</style>
+
+<script>
+// Bulletproof ABORT: inline onclick calls this. No dependency on script
+// timing or on Supabase loading. Always redirects; signs out first if it can.
+window.leoafAbort = async function () {
+    function go() { window.location.replace("index.html?signedout=1"); }
+    try {
+        if (typeof client !== "undefined" && client && client.auth && client.auth.signOut) {
+            // local scope clears the stored token immediately, no network wait
+            try { await client.auth.signOut({ scope: "local" }); } catch (e) {}
+        }
+    } catch (e) {}
+    go();
+};
+</script>
+</head>
+
+<body>
+
+<canvas id="starsCanvas"></canvas>
+
+<header>
+    <div class="nav-left">
+        <a href="dashboard.html" class="logo"><span>LEO</span><span>AF</span></a>
+    </div>
+    <div class="header-controls">
+        <span id="userEmail" class="user-id">AGENT</span>
+        <button id="logoffBtn" class="logoff-btn" onclick="leoafAbort()">ABORT</button>
+    </div>
+</header>
+
+<main class="dashboard">
+<h1 class="welcome-msg">MISSION DASHBOARD</h1>
+
+<div class="mission-control">
+    <div class="progress-header">
+        <h2>CONSTELLATION ARCHITECT PROGRESSION</h2>
+        <span class="progress-stats" id="progressText">0%</span>
+    </div>
+    <div class="progress-track">
+        <div class="progress-fill" id="progressFill"></div>
+    </div>
+</div>
+
+<div class="module-list">
+
+<!-- PHASE 1 -->
+<div class="phase-header">
+    <div class="phase-text">
+        <h3>Phase 1 — Foundations</h3>
+        <p>Build the mental model the whole program sits on: why LEO, how orbits compare, and how a constellation is designed.</p>
+    </div>
+    <div class="phase-badge">M1–M2</div>
+</div>
+
+<a href="m1.html" class="module-card" data-id="m1">
+    <h3>M1 — Landscape & the Architect's Mental Model</h3>
+    <p>Why LEO emerged · GEO/MEO/LEO/VLEO compared · physics of latency · multi-orbit hybrids · GEO-vs-LEO commercial delta (landscape level) · spectrum & regulatory orientation</p>
+    <div class="module-meta">
+        <span class="meta-phase">PHASE 1</span>
+    </div>
+</a>
+
+<a href="m2.html" class="module-card" data-id="m2">
+    <h3>M2 — Orbital Mechanics & Constellation Design</h3>
+    <p>Kepler & Newton · ground tracks & Doppler · Walker delta/star patterns · inclination & coverage geometry · station-keeping & decay · launch & deployment logistics · constellation optimisation · spine project begins (orbital propagator + coverage)</p>
+    <div class="module-meta">
+        <span class="meta-phase">PHASE 1</span>
+    </div>
+</a>
+
+<!-- PHASE 2 -->
+<div class="phase-header">
+    <div class="phase-text">
+        <h3>Phase 2 — Engineering the System</h3>
+        <p>The technical core: the spacecraft and payload, the RF link, the air interface, the terminal, and the network that ties them together.</p>
+    </div>
+    <div class="phase-badge">M3–M7</div>
+</div>
+
+<a href="m3.html" class="module-card" data-id="m3">
+    <h3>M3 — The Space Segment: Spacecraft, Payload & Production</h3>
+    <p>Bus subsystems (power, thermal, propulsion, ADCS, structure) · the comms payload — transparent vs regenerative, digital channelisers, multibeam antennas, frequency reuse, beam-hopping, flexible/SDR payloads · manufacturing at scale</p>
+    <div class="module-meta">
+        <span class="meta-phase">PHASE 2</span>
+    </div>
+</a>
+
+<a href="m4.html" class="module-card" data-id="m4">
+    <h3>M4 — RF, Propagation & Link Budgets</h3>
+    <p>Link budget math (Eb/N0, G/T, EIRP) · Ka/Ku/V/E-band tradeoffs · antenna & phased-array fundamentals · propagation, rain & atmospherics · space weather & ionosphere · EPFD & interference physics · spine: link-budget engine</p>
+    <div class="module-meta">
+        <span class="meta-phase">PHASE 2</span>
+    </div>
+</a>
+
+<a href="m5.html" class="module-card" data-id="m5">
+    <h3>M5 — Air Interface & Access</h3>
+    <p>Waveforms · MODCOD & adaptive coding/modulation · multiple access & scheduling · DVB-S2X vs proprietary air interfaces · 3GPP NTN air interface · direct-to-device physical layer · spine: throughput-per-beam</p>
+    <div class="module-meta">
+        <span class="meta-phase">PHASE 2</span>
+    </div>
+</a>
+
+<a href="m6.html" class="module-card" data-id="m6">
+    <h3>M6 — User Terminals & Direct-to-Device</h3>
+    <p>AESA & flat-panel technology · beamforming architectures · terminal types by segment · aviation terminal constraints & certification · the device side of D2D</p>
+    <div class="module-meta">
+        <span class="meta-phase">PHASE 2</span>
+    </div>
+</a>
+
+<a href="m7.html" class="module-card" data-id="m7">
+    <h3>M7 — Networking, Inter-Satellite Links & Routing</h3>
+    <p>Mesh vs bent-pipe · handover & mobility · optical ISL physics, pointing & laser link budgets · SDN in space · segment routing for constellation topologies · routing under churn · end-to-end latency · TCP/QUIC in high mobility · spine: routing & latency model</p>
+    <div class="module-meta">
+        <span class="meta-phase">PHASE 2</span>
+    </div>
+</a>
+
+<!-- PHASE 3 -->
+<div class="phase-header">
+    <div class="phase-text">
+        <h3>Phase 3 — Operating & Commercialising</h3>
+        <p>Run the system and make it pay: ground operations, resilience against physical and cyber threats, the economics and regulation, and the applications it serves.</p>
+    </div>
+    <div class="phase-badge">M8–M11</div>
+</div>
+
+<a href="m8.html" class="module-card" data-id="m8">
+    <h3>M8 — Ground Segment & Operations</h3>
+    <p>Gateways, feeder links & site diversity · PoP topology, backhaul & peering · ground-station-as-a-service & cloud convergence · TT&C at scale · early-orbit ops · anomaly playbooks · automated fleet operations · spine: ground/gateway topology</p>
+    <div class="module-meta">
+        <span class="meta-phase">PHASE 3</span>
+    </div>
+</a>
+
+<a href="m9.html" class="module-card" data-id="m9">
+    <h3>M9 — Resilience: Safety, Sustainability & Security</h3>
+    <p>Conjunction analysis & collision avoidance · debris quantification · deorbit & end-of-life disposal · space situational awareness · RF spoofing, jamming & meaconing · ground hardening · supply-chain & firmware threats · encryption at link & network layer</p>
+    <div class="module-meta">
+        <span class="meta-phase">PHASE 3</span>
+    </div>
+</a>
+
+<a href="m10.html" class="module-card" data-id="m10">
+    <h3>M10 — Economics & Regulation</h3>
+    <p>Capex/opex modelling · capacity economics & cost-per-bit · ARPU by segment · break-even & sensitivity · ITU filings & coordination · NGSO/GSO rules, Appendix 17, EPFD · FCC bond & milestones · landing rights · spectrum as a moat · sovereign constellations · spine: economic model</p>
+    <div class="module-meta">
+        <span class="meta-phase">PHASE 3</span>
+    </div>
+</a>
+
+<a href="m11.html" class="module-card" data-id="m11">
+    <h3>M11 — Applications & Analytical Case Studies</h3>
+    <p>Vertical deep-dives: aviation IFC & safety services, maritime, government/defence, IoT & cellular backhaul · comparative post-mortem of the failures (Iridium, Teledesic, Globalstar) · analytical teardowns of Starlink, OneWeb/Eutelsat, Kuiper, Telesat & emerging players</p>
+    <div class="module-meta">
+        <span class="meta-phase">PHASE 3</span>
+    </div>
+</a>
+
+<!-- PHASE 4 -->
+<div class="phase-header">
+    <div class="phase-text">
+        <h3>Phase 4 — Synthesis</h3>
+        <p>Pull every component of the spine project into an integrated design, and defend the architecture in writing.</p>
+    </div>
+    <div class="phase-badge">M12</div>
+</div>
+
+<a href="m12.html" class="module-card" data-id="m12">
+    <h3>M12 — Capstones & Architecture Defence</h3>
+    <p>Spine project integrates into a full constellation simulator (orbits + payload + RF + routing + economics) · aviation multi-orbit architecture study · written defence of the design choices</p>
+    <div class="module-meta">
+        <span class="meta-phase">PHASE 4</span>
+    </div>
+</a>
+
+<!-- ENDGAME -->
+<div class="endgame-card">
+    <div>
+        <h3>Endgame — Constellation Architect</h3>
+        <p>Systems-level fluency across orbital mechanics, the space segment, RF and link budgets, the air interface, terminals, networking and ISLs, ground operations, resilience, economics and regulation. One integrated constellation simulator and an aviation multi-orbit architecture study. A portfolio that demonstrates end-to-end mastery of modern LEO systems.</p>
+    </div>
+    <div class="endgame-total">12<span>MODULES · MISSION COMPLETE</span></div>
+</div>
+
+</div>
+</main>
+
+<!-- Stars -->
+<script>
+function setViewportHeight() { const vh = window.innerHeight * 0.01; document.documentElement.style.setProperty('--vh', `${vh}px`); }
+setViewportHeight(); window.addEventListener('resize', setViewportHeight);
+
+const canvas = document.getElementById('starsCanvas');
+const ctx = canvas.getContext('2d');
+let stars = [];
+function initStars() { stars = []; for (let i = 0; i < 200; i++) { stars.push({ x: Math.random() * canvas.width, y: Math.random() * canvas.height, size: Math.random() * 1.5 + 0.5, speed: Math.random() * 0.2 + 0.05, hue: Math.random() * 360 }); } }
+function resizeCanvas() { canvas.width = window.innerWidth; canvas.height = window.innerHeight; }
+resizeCanvas(); initStars();
+window.addEventListener('resize', resizeCanvas);
+function animateStars() { ctx.clearRect(0, 0, canvas.width, canvas.height); stars.forEach(s => { s.y -= s.speed; if (s.y < 0) { s.y = canvas.height; s.x = Math.random() * canvas.width; } ctx.beginPath(); ctx.fillStyle = `hsl(${s.hue},80%,80%)`; ctx.arc(s.x, s.y, s.size, 0, Math.PI*2); ctx.fill(); }); requestAnimationFrame(animateStars); }
+animateStars();
+</script>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="supabase.js"></script>
+<script src="user_progress.js"></script>
+
+<script>
+(function () {
+
+    function bounceToLogin(reason) {
+        console.error("Auth guard:", reason, "- redirecting to index.html");
+        window.location.replace("index.html");
+    }
+
+    async function init() {
+        // Fail CLOSED: if we cannot confirm a session, leave the dashboard.
+        if (typeof client === "undefined" || !client || !client.auth) {
+            return bounceToLogin("Supabase client not loaded (is supabase.js in this directory?)");
+        }
+
+        let session = null;
+        try {
+            ({ data: { session } } = await client.auth.getSession());
+        } catch (e) {
+            return bounceToLogin("getSession threw: " + e.message);
+        }
+        if (!session) { window.location.replace("index.html"); return; }
+
+        const emailEl = document.getElementById("userEmail");
+        emailEl.textContent = session.user.email;
+        emailEl.style.display = "inline";
+
+        const moduleCards = document.querySelectorAll(".module-card");
+        const totalModules = moduleCards.length;
+
+        const mastered = await getMasteredSections();
+        let masteredCount = 0;
+
+        moduleCards.forEach(card => {
+            const id = card.dataset.id;
+            if (mastered.includes(id)) {
+                card.classList.add("completed");
+                masteredCount++;
+            } else {
+                card.classList.remove("completed");
+            }
+        });
+
+        const percent = totalModules > 0 ? Math.round((masteredCount / totalModules) * 100) : 0;
+        document.getElementById("progressFill").style.width = percent + "%";
+        document.getElementById("progressText").textContent = percent + "%";
+    }
+
+    // Run now if the DOM is already parsed (this script sits at end of body),
+    // otherwise wait for it. Guards against DOMContentLoaded having already fired.
+    if (document.readyState === "loading") {
+        document.addEventListener("DOMContentLoaded", init);
+    } else {
+        init();
+    }
+
+})();
+</script>
+
+</body>
+</html>
