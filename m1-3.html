@@ -1,0 +1,665 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, shrink-to-fit=no">
+<title>M1-3 — The Physics of Latency · LEOAF</title>
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;600;800&family=Share+Tech+Mono&family=Libre+Baskerville:ital,wght@0,400;0,700;1,400&display=swap" rel="stylesheet">
+<link rel="icon" href="favicon.ico" sizes="any" type="image/x-icon">
+<link rel="manifest" href="site.webmanifest">
+<meta name="theme-color" content="#0f0f0f">
+
+<script>
+window.leoafAbort = async function () {
+    function go() { window.location.replace("index.html?signedout=1"); }
+    try {
+        if (typeof client !== "undefined" && client && client.auth && client.auth.signOut) {
+            try { await client.auth.signOut({ scope: "local" }); } catch (e) {}
+        }
+    } catch (e) {}
+    go();
+};
+</script>
+
+<style>
+* { box-sizing:border-box; margin:0; padding:0; }
+html { height:100%; -webkit-text-size-adjust:100%; overflow-x:hidden; }
+body { font-family:'Share Tech Mono',monospace; background:#000; color:white; overflow-x:hidden; min-height:100vh; }
+#starsCanvas { position:fixed; inset:0; z-index:-1; }
+
+header { background:#000; border-bottom:1px solid #ff004f33; position:sticky; top:0; z-index:100; padding:1rem clamp(1.5rem,5vw,4rem); display:flex; justify-content:space-between; align-items:center; box-shadow:0 4px 16px #0008; }
+.logo { font-family:'Orbitron',sans-serif; font-weight:800; font-size:clamp(16px,2vw,22px); letter-spacing:3px; text-decoration:none; }
+.logo span:first-child { color:white; }
+.logo span:last-child { color:#ff004f; }
+.nav-right { display:flex; align-items:center; gap:10px; }
+.nav-btn { background:transparent; border:1px solid #ff004f44; color:#ff004f; padding:6px 14px; cursor:pointer; transition:0.3s ease; font-size:11px; font-family:'Orbitron',sans-serif; letter-spacing:1px; text-decoration:none; display:inline-block; }
+.nav-btn:hover { background:#ff004f; color:black; }
+
+.breadcrumb { padding:14px clamp(1.5rem,5vw,4rem); font-size:11px; color:#ffffff44; letter-spacing:1px; position:relative; z-index:1; }
+.breadcrumb a { color:#00d9ff66; text-decoration:none; }
+.breadcrumb a:hover { color:#00d9ff; }
+.breadcrumb span { margin:0 8px; }
+
+.lesson-wrap { max-width:820px; margin:0 auto; padding:0 clamp(1.5rem,5vw,4rem) 80px; position:relative; z-index:1; }
+
+.lesson-header { padding:30px 0 28px; border-bottom:1px solid #ffffff11; margin-bottom:36px; }
+.lesson-tag { font-family:'Orbitron',sans-serif; font-size:10px; color:#ff004f; letter-spacing:3px; margin-bottom:10px; }
+.lesson-header h1 { font-family:'Orbitron',sans-serif; font-size:clamp(20px,3.5vw,32px); font-weight:800; line-height:1.2; margin-bottom:12px; }
+.lesson-meta { display:flex; gap:10px; flex-wrap:wrap; margin-bottom:16px; }
+.l-pill { font-family:'Orbitron',sans-serif; font-size:10px; padding:3px 10px; border:1px solid; letter-spacing:1px; }
+.l-pill-q { color:#ff004f; border-color:#ff004f44; }
+.l-pill-t { color:#39ff14; border-color:#39ff1444; }
+.lesson-intro { font-size:13px; line-height:1.85; opacity:0.75; }
+
+.toc { background:rgba(0,217,255,0.06); border:1px solid #00d9ff33; padding:24px 28px; margin:30px 0; }
+.toc h4 { font-family:'Orbitron',sans-serif; font-size:10px; color:#00d9ff; letter-spacing:2px; margin-bottom:16px; }
+.toc ol { padding-left:20px; }
+.toc li { font-size:13px; line-height:2.1; opacity:1; }
+.toc li a { color:#00d9ffbb; text-decoration:none; transition:0.15s; }
+.toc li a:hover { color:#ffffff; padding-left:4px; }
+.toc li::marker { color:#ff004f; font-family:'Orbitron',sans-serif; font-size:10px; }
+
+.content-block { margin-bottom:48px; }
+.content-block h2 { font-family:'Orbitron',sans-serif; font-size:13px; color:#00d9ff; letter-spacing:2px; text-transform:uppercase; margin-bottom:18px; padding-bottom:10px; border-bottom:1px solid #00d9ff22; scroll-margin-top:80px; }
+.content-block h3 { font-family:'Orbitron',sans-serif; font-size:11px; color:#ffffff88; letter-spacing:1.5px; text-transform:uppercase; margin:28px 0 12px; }
+.content-block p { font-size:13px; line-height:1.9; opacity:0.85; margin-bottom:16px; }
+.content-block ul, .content-block ol { padding-left:0; margin-bottom:16px; }
+.content-block ul li, .content-block ol li { font-size:13px; line-height:1.85; opacity:0.85; padding-left:20px; position:relative; margin-bottom:6px; }
+.content-block ul li::before { content:'›'; position:absolute; left:0; color:#00d9ff; }
+.content-block blockquote { border-left:3px solid #39ff14; background:rgba(57,255,20,0.05); padding:14px 20px; margin:18px 0; font-size:14px; font-family:'Share Tech Mono',monospace; color:#39ff14; letter-spacing:1px; }
+
+.callout { border-left:3px solid #00d9ff; background:rgba(0,217,255,0.05); padding:16px 20px; margin:22px 0; font-size:12px; line-height:1.8; }
+.callout.red   { border-left-color:#ff004f; background:rgba(255,0,79,0.05); }
+.callout.green { border-left-color:#39ff14; background:rgba(57,255,20,0.05); }
+.callout.amber { border-left-color:#ffaa00; background:rgba(255,170,0,0.05); }
+.callout strong { font-family:'Orbitron',sans-serif; font-size:10px; letter-spacing:1px; display:block; margin-bottom:8px; color:inherit; }
+
+.key-numbers { display:grid; grid-template-columns:repeat(auto-fit,minmax(140px,1fr)); gap:12px; margin:22px 0; }
+.kn-item { background:rgba(255,255,255,0.03); border:1px solid #ffffff11; padding:16px 12px; text-align:center; }
+.kn-val { font-family:'Orbitron',sans-serif; font-size:clamp(15px,2.3vw,22px); font-weight:800; color:#00d9ff; display:block; }
+.kn-label { font-size:10px; opacity:0.5; letter-spacing:1px; margin-top:5px; display:block; line-height:1.4; }
+
+.compare-table { width:100%; border-collapse:collapse; margin:22px 0; font-size:12px; }
+.compare-table th { font-family:'Orbitron',sans-serif; font-size:10px; letter-spacing:1px; color:#00d9ff; padding:10px 12px; border-bottom:1px solid #00d9ff33; text-align:left; }
+.compare-table td { padding:10px 12px; border-bottom:1px solid #ffffff0a; line-height:1.5; opacity:0.85; vertical-align:top; }
+.compare-table tr:hover td { background:rgba(255,255,255,0.02); }
+
+.diagram-wrap { margin:24px 0; background:rgba(255,255,255,0.02); border:1px solid #ffffff11; padding:20px; overflow-x:auto; }
+.diagram-wrap figcaption { font-size:11px; color:#ffffff44; margin-top:12px; text-align:center; letter-spacing:1px; }
+
+.quiz-block { background:rgba(17,17,17,0.9); border:1px solid #ff004f33; padding:28px; margin:48px 0 32px; }
+.quiz-block h2 { font-family:'Orbitron',sans-serif; font-size:13px; color:#ff004f; letter-spacing:2px; margin-bottom:6px; }
+.quiz-intro { font-size:12px; opacity:0.6; margin-bottom:24px; padding-bottom:16px; border-bottom:1px solid #ff004f22; line-height:1.6; }
+.quiz-q { margin-bottom:28px; }
+.quiz-q p { font-size:13px; opacity:0.9; margin-bottom:12px; line-height:1.65; }
+.quiz-q p strong { color:#00d9ff; }
+.quiz-options { display:flex; flex-direction:column; gap:8px; }
+.quiz-opt { background:rgba(255,255,255,0.03); border:1px solid #ffffff1a; padding:11px 16px; cursor:pointer; font-size:12px; font-family:'Share Tech Mono',monospace; transition:0.2s ease; text-align:left; color:white; line-height:1.5; }
+.quiz-opt:hover:not(:disabled) { background:rgba(0,217,255,0.08); border-color:#00d9ff44; }
+.quiz-opt.correct  { background:rgba(57,255,20,0.1);  border-color:#39ff14; color:#39ff14; }
+.quiz-opt.wrong    { background:rgba(255,0,79,0.1);   border-color:#ff004f; color:#ff004f; }
+.quiz-opt:disabled { cursor:default; }
+.quiz-feedback { font-size:12px; margin-top:10px; min-height:18px; line-height:1.7; opacity:0.9; padding:0 4px; }
+.quiz-score { font-family:'Orbitron',sans-serif; font-size:12px; color:#39ff14; margin-top:20px; letter-spacing:1px; display:none; padding-top:16px; border-top:1px solid #39ff1433; }
+
+.py-block { background:rgba(10,10,10,0.95); border:1px solid #39ff1422; padding:28px; margin:32px 0; }
+.py-block h2 { font-family:'Orbitron',sans-serif; font-size:13px; color:#39ff14; letter-spacing:2px; margin-bottom:8px; }
+.py-block .py-intro { font-size:12px; opacity:0.7; margin-bottom:20px; padding-bottom:16px; border-bottom:1px solid #39ff1422; line-height:1.7; }
+.py-exercise { margin-bottom:32px; }
+.py-exercise:last-child { margin-bottom:0; }
+.py-exercise h3 { font-family:'Orbitron',sans-serif; font-size:11px; color:#39ff1499; letter-spacing:1.5px; text-transform:uppercase; margin-bottom:10px; }
+.py-exercise p { font-size:12px; opacity:0.8; margin-bottom:14px; line-height:1.75; }
+.py-block pre { background:#050505; border:1px solid #39ff1433; padding:20px; font-family:'Share Tech Mono',monospace; font-size:11.5px; line-height:1.75; overflow-x:auto; color:#39ff14; white-space:pre; margin-bottom:12px; }
+.py-block .py-challenge { background:rgba(57,255,20,0.04); border-left:2px solid #39ff14; padding:12px 16px; margin-top:14px; font-size:12px; line-height:1.75; opacity:0.8; }
+.py-block .py-challenge strong { font-family:'Orbitron',sans-serif; font-size:10px; color:#39ff14; display:block; margin-bottom:6px; letter-spacing:1px; }
+
+.reflection-block { background:rgba(255,170,0,0.04); border:1px solid #ffaa0033; padding:24px; margin:32px 0; }
+.reflection-block h2 { font-family:'Orbitron',sans-serif; font-size:13px; color:#ffaa00; letter-spacing:2px; margin-bottom:8px; }
+.reflection-block .ref-intro { font-size:12px; opacity:0.7; margin-bottom:20px; padding-bottom:14px; border-bottom:1px solid #ffaa0022; line-height:1.7; }
+.ref-prompt { margin-bottom:20px; }
+.ref-prompt h3 { font-family:'Orbitron',sans-serif; font-size:11px; color:#ffaa0099; letter-spacing:1px; margin-bottom:8px; }
+.ref-prompt p { font-size:12px; opacity:0.8; line-height:1.75; margin-bottom:10px; }
+
+.back-to-top { position:fixed; bottom:28px; right:28px; z-index:200; width:44px; height:44px; background:#000; border:1px solid #00d9ff55; color:#00d9ff; font-size:20px; cursor:pointer; display:flex; align-items:center; justify-content:center; opacity:0; pointer-events:none; transition:opacity 0.3s ease, border-color 0.3s ease; }
+.back-to-top.visible { opacity:1; pointer-events:auto; }
+.back-to-top:hover { border-color:#00d9ff; background:#001a2c; }
+
+.complete-wrap { margin-top:56px; padding-top:30px; border-top:1px solid #ffffff11; text-align:center; }
+.complete-btn { font-family:'Orbitron',sans-serif; font-size:13px; letter-spacing:2px; padding:14px 44px; background:transparent; border:1px solid #39ff14; color:#39ff14; cursor:pointer; transition:0.3s ease; }
+.complete-btn:hover:not(.done) { background:#39ff14; color:black; box-shadow:0 0 20px rgba(57,255,20,0.4); }
+.complete-btn.done { background:rgba(57,255,20,0.1); cursor:default; opacity:0.7; }
+.complete-msg { font-size:12px; color:#39ff14; margin-top:14px; min-height:18px; letter-spacing:1px; }
+
+.lesson-nav { display:flex; justify-content:space-between; margin-top:30px; flex-wrap:wrap; gap:10px; }
+.lesson-nav a { font-family:'Orbitron',sans-serif; font-size:11px; color:#00d9ff66; text-decoration:none; letter-spacing:1px; transition:0.2s; }
+.lesson-nav a:hover { color:#00d9ff; }
+
+footer { text-align:center; padding:30px; opacity:0.3; font-size:11px; position:relative; z-index:1; letter-spacing:1px; }
+
+@media (max-width:600px) { .key-numbers { grid-template-columns:1fr 1fr; } .compare-table { font-size:11px; } .compare-table th, .compare-table td { padding:8px 8px; } }
+
+/* ── LIGHT READING MODE ── */
+.content-block { background:#f5f2ec; color:#1a1a1a; padding:36px clamp(24px,4vw,48px); margin-bottom:24px; border-left:4px solid #00d9ff; position:relative; z-index:1; }
+.content-block h2 { font-family:'Orbitron',sans-serif; font-size:13px; color:#003d66; letter-spacing:2px; text-transform:uppercase; margin-bottom:20px; padding-bottom:10px; border-bottom:2px solid #00d9ff66; scroll-margin-top:80px; }
+.content-block h3 { font-family:'Orbitron',sans-serif; font-size:11px; color:#444; letter-spacing:1.5px; text-transform:uppercase; margin:32px 0 14px; }
+.content-block p { font-family:'Libre Baskerville', Georgia, serif; font-size:15px; line-height:1.9; color:#1a1a1a; opacity:1; margin-bottom:18px; }
+.content-block ul li { font-family:'Libre Baskerville', Georgia, serif; font-size:14px; line-height:1.85; color:#1a1a1a; opacity:1; margin-bottom:8px; }
+.content-block ul li::before { color:#0077aa; }
+.content-block blockquote { border-left:3px solid #1a7a1a; background:#eafaea; color:#0a3d0a; }
+.content-block .callout { border-left:3px solid #0088cc; background:#e8f4fb; color:#1a1a1a; }
+.content-block .callout.red   { border-left-color:#cc0033; background:#fdecea; }
+.content-block .callout.green { border-left-color:#1a7a1a; background:#eafaea; }
+.content-block .callout.amber { border-left-color:#996600; background:#fef9ec; }
+.content-block .callout strong { color:inherit; }
+.content-block .kn-item { background:#fff; border:1px solid #d0d0d0; }
+.content-block .kn-label { color:#555; opacity:1; }
+.content-block .compare-table th { color:#003d66; border-bottom:2px solid #00d9ff66; }
+.content-block .compare-table td { color:#1a1a1a; opacity:1; border-bottom:1px solid #ddd; }
+.content-block .compare-table tr:hover td { background:#f0f0f0; }
+.content-block .diagram-wrap { background:#0a0a0a; border:1px solid #333; }
+.content-block .diagram-wrap figcaption { color:#ffffff55; }
+</style>
+
+</head>
+<body>
+
+<canvas id="starsCanvas"></canvas>
+
+<header>
+    <a href="dashboard.html" class="logo"><span>LEO</span><span>AF</span></a>
+    <div class="nav-right">
+        <a href="m1.html" class="nav-btn">← M1 HUB</a>
+        <button class="nav-btn" onclick="leoafAbort()">ABORT</button>
+    </div>
+</header>
+
+<div class="breadcrumb">
+    <a href="dashboard.html">DASHBOARD</a><span>/</span>
+    <a href="m1.html">M1</a><span>/</span>
+    <span style="color:#ffffff88;">LESSON 03 — THE PHYSICS OF LATENCY</span>
+</div>
+
+<div class="lesson-wrap">
+
+<div class="lesson-header">
+    <div class="lesson-tag">M1 · LESSON 03 OF 7</div>
+    <h1>The Physics of Latency</h1>
+    <div class="lesson-meta">
+        <div class="l-pill l-pill-q">MODULE 1</div>
+        <div class="l-pill l-pill-t">FOUNDATIONS</div>
+    </div>
+    <p class="lesson-intro">Latency is the property that made LEO worth building. The earlier lessons asserted the numbers and pointed here for the reason. This lesson supplies it: where those numbers come from, how to compute them for any orbit, what else besides the orbit adds to them, and why the difference reshapes which applications a satellite system can serve. Latency is also where physics sets a hard floor that no engineering removes — you can add bandwidth, you cannot add speed of light — which is exactly why it is decisive. The routing, handover, and inter-satellite-link mechanisms that change the path are the networking module's subject; here we establish the physics those mechanisms operate within.</p>
+</div>
+
+<div class="toc">
+    <h4>CONTENTS</h4>
+    <ol>
+        <li><a href="#s1">What latency is, and the floor</a></li>
+        <li><a href="#s2">Propagation delay from first principles</a></li>
+        <li><a href="#s3">One-way vs round-trip, counting hops</a></li>
+        <li><a href="#s4">Latency by regime, derived</a></li>
+        <li><a href="#s5">Slant range &amp; the elevation angle</a></li>
+        <li><a href="#s6">The full latency budget</a></li>
+        <li><a href="#s7">Why fibre is not automatically faster</a></li>
+        <li><a href="#s8">What latency does to applications</a></li>
+        <li><a href="#s9">Jitter</a></li>
+        <li><a href="#s10">The takeaway</a></li>
+        <li><a href="#quiz">Knowledge check</a></li>
+        <li><a href="#python">Python exercises</a></li>
+        <li><a href="#reflect">Reflection prompts</a></li>
+    </ol>
+</div>
+
+<div class="content-block" id="s1">
+    <h2>1. What Latency Is, and the One Number That Sets the Floor</h2>
+    <p>Latency is the time it takes a bit to travel from where it is created to where it is needed. In a satellite link the largest and most fundamental contributor is <strong>propagation delay</strong> — the time the signal spends in transit — and that is governed by a single constant: the speed of light, about 299,792 kilometres per second, near enough to 300,000 for working estimates.</p>
+    <p>That constant is the floor. A signal cannot reach a satellite and return faster than the distance allows, so the moment you choose an altitude you have chosen a minimum latency that no better hardware, no faster modem, and no extra bandwidth can beat. Everything else in the latency budget sits on top of that floor; the orbit sets the floor itself.</p>
+    <div class="callout red">
+        <strong>THE LINE TO REMEMBER</strong>
+        You can add bandwidth. You cannot add speed of light. Latency is the one performance axis fixed by physics rather than engineering.
+    </div>
+</div>
+
+<div class="content-block" id="s2">
+    <h2>2. Propagation Delay From First Principles</h2>
+    <p>Propagation delay over a single path is simply distance divided by speed:</p>
+    <blockquote>t = d / c</blockquote>
+    <p>For a signal travelling straight up to a satellite at altitude h, the one-hop delay is h divided by c. That single calculation, applied to each regime's altitude, produces the whole latency hierarchy. Straight up to a 550 km satellite takes about 1.8 ms; to an 8,000 km MEO satellite about 27 ms; to GEO at 35,786 km about 119 ms. The hundredfold spread in altitude becomes a hundredfold spread in delay, because the relationship is linear in distance.</p>
+    <div class="key-numbers">
+        <div class="kn-item"><span class="kn-val">~1.8 ms</span><span class="kn-label">One hop, LEO 550 km</span></div>
+        <div class="kn-item"><span class="kn-val">~4.0 ms</span><span class="kn-label">One hop, LEO 1,200 km</span></div>
+        <div class="kn-item"><span class="kn-val">~27 ms</span><span class="kn-label">One hop, MEO 8,000 km</span></div>
+        <div class="kn-item"><span class="kn-val">~119 ms</span><span class="kn-label">One hop, GEO 35,786 km</span></div>
+    </div>
+</div>
+
+<div class="content-block" id="s3">
+    <h2>3. One-Way Versus Round-Trip, and Counting Hops</h2>
+    <p>Most confusion about satellite latency comes from sloppiness about what is being measured, so be precise. A single hop is ground to satellite, or satellite to ground. A useful link is built from several hops, and the figure that matters to a user is the <strong>round trip</strong> — the time for a request to reach its destination and a response to come back.</p>
+    <p>In a simple bent-pipe link, data goes up to the satellite and down to a gateway: two hops one way. The reply retraces the path: two hops back. So a round trip is four hops. That is why GEO's roughly 119 ms one-hop delay becomes roughly 477 ms of round-trip propagation, and why it is quoted at around 600 ms once the rest of the budget is added. The same four-hop counting applied to a 550 km LEO link gives only about 7 ms of round-trip propagation.</p>
+
+    <div class="diagram-wrap">
+        <svg viewBox="0 0 700 280" width="100%" xmlns="http://www.w3.org/2000/svg" font-family="Share Tech Mono, monospace">
+            <rect width="700" height="280" fill="#0a0a0a"/>
+            <!-- satellite -->
+            <rect x="320" y="24" width="60" height="22" fill="none" stroke="#00d9ff" stroke-width="1.5"/>
+            <text x="350" y="39" font-size="10" fill="#00d9ff" text-anchor="middle">SAT</text>
+            <!-- ground: user and gateway -->
+            <line x1="40" y1="230" x2="660" y2="230" stroke="#00d9ff55" stroke-width="1.5"/>
+            <rect x="70" y="232" width="70" height="22" fill="none" stroke="#39ff14" stroke-width="1.5"/>
+            <text x="105" y="247" font-size="10" fill="#39ff14" text-anchor="middle">USER</text>
+            <rect x="560" y="232" width="80" height="22" fill="none" stroke="#ffaa00" stroke-width="1.5"/>
+            <text x="600" y="247" font-size="10" fill="#ffaa00" text-anchor="middle">GATEWAY</text>
+            <!-- hop 1: user up -->
+            <line x1="105" y1="232" x2="330" y2="46" stroke="#39ff14" stroke-width="1.5"/>
+            <text x="195" y="135" font-size="9" fill="#39ff14" transform="rotate(-40 195 135)">hop 1 ↑</text>
+            <!-- hop 2: sat down to gateway -->
+            <line x1="370" y1="46" x2="595" y2="232" stroke="#39ff14" stroke-width="1.5"/>
+            <text x="490" y="135" font-size="9" fill="#39ff14" transform="rotate(40 490 135)">hop 2 ↓</text>
+            <!-- return hops dashed -->
+            <line x1="595" y1="232" x2="372" y2="50" stroke="#ff004f" stroke-width="1.2" stroke-dasharray="5,4"/>
+            <text x="505" y="150" font-size="9" fill="#ff004f" transform="rotate(40 505 150)">hop 3 ↑ (reply)</text>
+            <line x1="328" y1="50" x2="108" y2="232" stroke="#ff004f" stroke-width="1.2" stroke-dasharray="5,4"/>
+            <text x="178" y="150" font-size="9" fill="#ff004f" transform="rotate(-40 178 150)">hop 4 ↓ (reply)</text>
+            <text x="350" y="272" font-size="10" fill="#ffffff88" text-anchor="middle">ROUND TRIP = 4 HOPS — request (up, down) + reply (up, down)</text>
+        </svg>
+        <figcaption>BENT-PIPE ROUND TRIP — ONE HOP × 4. GEO ≈ 4 × 119 ms ≈ 477 ms; LEO 550 ≈ 4 × 1.8 ms ≈ 7 ms</figcaption>
+    </div>
+
+    <div class="key-numbers">
+        <div class="kn-item"><span class="kn-val">~477 ms</span><span class="kn-label">GEO round-trip propagation</span></div>
+        <div class="kn-item"><span class="kn-val">~107 ms</span><span class="kn-label">MEO 8,000 km RTT prop</span></div>
+        <div class="kn-item"><span class="kn-val">~7 ms</span><span class="kn-label">LEO 550 km RTT prop</span></div>
+        <div class="kn-item"><span class="kn-val">~16 ms</span><span class="kn-label">LEO 1,200 km RTT prop</span></div>
+    </div>
+    <div class="callout">
+        <strong>STATE YOUR BASIS</strong>
+        Always say whether a latency figure is one-way or round-trip, propagation-only or end-to-end. Without that, the number means nothing.
+    </div>
+</div>
+
+<div class="content-block" id="s4">
+    <h2>4. Latency by Regime, Derived</h2>
+    <p>Putting the hop counting together with the altitudes gives the regime hierarchy that the landscape lessons asserted. GEO sits near half a second round trip on propagation alone, which is why it is felt in any back-and-forth use. MEO at 8,000 km lands near 100 ms, low enough for many interactive uses and the reason O3b chose it. LEO at 550 km collapses propagation to single-digit milliseconds, comparable to terrestrial broadband once the rest of the budget is included — and that equivalence is the entire commercial argument for LEO. VLEO trims a little more but the marginal gain over LEO is small, which is why VLEO is chosen for imaging and signal strength rather than latency.</p>
+    <p>The lesson to internalise is that these are not vendor numbers that might improve with a better product. They are consequences of distance, and they rank exactly as altitude ranks.</p>
+</div>
+
+<div class="content-block" id="s5">
+    <h2>5. Slant Range and the Elevation Angle</h2>
+    <p>Altitude is the floor, but the real path is rarely straight up. A satellite low on the horizon is farther away than one overhead, because the line of sight cuts diagonally through a longer slant range. The lower the elevation angle at which a terminal still works, the longer that worst-case path, and the more latency it adds.</p>
+    <p>For a 550 km satellite, the distance grows from 550 km straight overhead to roughly 1,100–1,500 km near the minimum usable elevation — so the latency to a satellite just above the horizon is roughly double that of one overhead. The effect is real but bounded, and it matters most when you are quoting worst-case rather than best-case latency. It also interacts with coverage: a lower minimum elevation angle widens each satellite's footprint, reducing the satellite count, but lengthens the worst-case path and so the worst-case latency. That is one more face of the coverage-versus-everything-else tradeoff from the regimes lesson.</p>
+    <div class="key-numbers">
+        <div class="kn-item"><span class="kn-val">550 km</span><span class="kn-label">Slant, 550 km sat, overhead</span></div>
+        <div class="kn-item"><span class="kn-val">~1,100+ km</span><span class="kn-label">Slant, 550 km sat, ~25° elevation</span></div>
+    </div>
+</div>
+
+<div class="content-block" id="s6">
+    <h2>6. The Full Latency Budget — Propagation Is Only One Term</h2>
+    <p>The orbit sets the floor, but the latency a user actually experiences is a sum of several terms, and for LEO the non-propagation terms can dominate. The end-to-end budget has five parts:</p>
+    <ul>
+        <li><strong>Propagation delay</strong> — time in transit, set by path length. Dominant for GEO, small for LEO.</li>
+        <li><strong>Transmission (serialisation) delay</strong> — the time to clock a packet onto the link, equal to packet size divided by link rate. Usually small on a high-rate link.</li>
+        <li><strong>Processing delay</strong> — time spent in the satellite's payload, the modems, and the gateway equipment demodulating, decoding, and forwarding.</li>
+        <li><strong>Queuing delay</strong> — time a packet waits in buffers when a link is congested. Highly variable, and the main cause of latency spikes under load.</li>
+        <li><strong>Terrestrial backhaul</strong> — once the gateway recovers the packet, it still has to travel over fibre to wherever the content lives.</li>
+    </ul>
+    <p>The consequence is sharp for LEO. A constellation can win the propagation race in orbit, getting the bits to the ground in single-digit milliseconds, and then give the advantage back if the gateway hauls traffic hundreds of kilometres to a distant peering point, or if the content sits several networks away. The latency you can sell is the end-to-end figure, not the space-segment figure. Where gateways and peering points are placed — the ground-segment decision that owns much of this budget — is covered in the ground-segment module; here the point is that propagation is necessary to get right and far from sufficient.</p>
+    <div class="callout green">
+        <strong>THE END-TO-END POINT</strong>
+        LEO can win in orbit and lose on the ground. A single-digit-millisecond space hop means nothing if the gateway backhauls traffic across a continent before it reaches the content.
+    </div>
+</div>
+
+<div class="content-block" id="s7">
+    <h2>7. Why Fibre Is Not Automatically Faster</h2>
+    <p>A natural objection is that terrestrial fibre is the latency benchmark, so why would anyone route through space at all. The answer is that light travels more slowly in glass than in vacuum. The refractive index of fibre is about 1.47, so a signal in fibre moves at roughly 200,000 km/s rather than 300,000 — about a third slower per kilometre. On top of that, fibre routes are not straight: cables follow coastlines, rights of way, and existing infrastructure, adding circuity that can lengthen the real path well beyond the great-circle distance.</p>
+    <p>A LEO constellation with optical inter-satellite links sends light through vacuum at full speed, along a path much closer to the great circle. Over short distances the up-and-down overhead of reaching orbit makes fibre faster, but as distance grows the fibre penalties — slower medium plus circuity — accumulate until the space path wins. The crossover sits in the low thousands of kilometres, which is why long intercontinental routes are where LEO-with-ISLs can genuinely beat fibre on latency. The routing that realises this is the networking module's subject; the physics that makes it possible is here, and it rests entirely on light being faster in vacuum than in glass.</p>
+    <div class="key-numbers">
+        <div class="kn-item"><span class="kn-val">~1.47</span><span class="kn-label">Refractive index of fibre</span></div>
+        <div class="kn-item"><span class="kn-val">~200,000 km/s</span><span class="kn-label">Speed of light in fibre</span></div>
+        <div class="kn-item"><span class="kn-val">~1,000s km</span><span class="kn-label">Fibre-vs-ISL crossover</span></div>
+    </div>
+</div>
+
+<div class="content-block" id="s8">
+    <h2>8. What Latency Does to Applications</h2>
+    <p>Latency matters because human perception and network protocols both have thresholds, and crossing them changes what is possible rather than merely making things slower.</p>
+    <p>For real-time human interaction, the guideline figures are well established. One-way voice latency below about 150 ms is comfortable, up to about 400 ms is tolerable, and beyond that conversation breaks down with people talking over each other. Video conferencing is similar. Interactive applications like cloud gaming want round trips below about 50–100 ms before control feels disconnected from action. A GEO round trip near 600 ms sits outside all of these, which is the concrete reason it cannot serve interactive use, while a LEO round trip near 20–50 ms sits comfortably inside them.</p>
+    <p>The subtler effect is on throughput, through the way TCP works. A connection cannot have more data in flight than its window allows, so its throughput is bounded by the window size divided by the round-trip time — the bandwidth-delay product. On a high-latency link, a single connection is throttled regardless of how much raw bandwidth the link has, which is the technical reason a GEO link can have ample capacity and still feel slow. Worse, opening a connection costs several round trips for the handshake and encryption setup before any data flows, and TCP's slow-start ramps cautiously, so every page load and every new connection pays the latency penalty several times over. This is why latency, not bandwidth, is what users perceive as "responsiveness," and why halving the round trip does more for the felt experience than doubling the capacity. The transport-protocol details are developed in the networking module; the point here is that latency sets a ceiling on throughput that bandwidth cannot lift.</p>
+    <div class="key-numbers">
+        <div class="kn-item"><span class="kn-val">&lt;150 ms</span><span class="kn-label">Comfortable one-way voice</span></div>
+        <div class="kn-item"><span class="kn-val">~400 ms</span><span class="kn-label">Tolerable one-way voice</span></div>
+        <div class="kn-item"><span class="kn-val">&lt;50–100 ms</span><span class="kn-label">Desirable gaming RTT</span></div>
+    </div>
+</div>
+
+<div class="content-block" id="s9">
+    <h2>9. Jitter — the Variability That Real-Time Traffic Feels</h2>
+    <p>Latency is the average delay; jitter is its variation, and for real-time traffic jitter can matter as much as the mean. A voice or video stream buffers a little to smooth out variation, but if the delay swings unpredictably the buffer either underruns, causing dropouts, or grows, adding latency.</p>
+    <p>LEO introduces jitter that GEO does not. Because the satellites move, the path length changes continuously, and every few minutes the terminal hands over to a new satellite, which can change the route through the network and so the delay. Congestion adds queuing jitter on top. A well-designed system keeps jitter low through buffering and careful handover, but it is a property the architect must manage rather than ignore. The handover machinery that causes and controls this is the networking module's subject; the point here is that low average latency is not the whole story — its stability matters too.</p>
+</div>
+
+<div class="content-block" id="s10">
+    <h2>10. The Takeaway</h2>
+    <p>Latency is the one performance axis fixed by physics rather than engineering. It is distance divided by the speed of light, counted over the hops of a round trip, and it ranks the orbits exactly as altitude ranks them. That floor is unbeatable, which is precisely why LEO's low orbit is its defining advantage and why no amount of GEO bandwidth can substitute for it.</p>
+    <p>But two qualifications keep the picture honest. The orbit sets only the floor: processing, queuing, and especially terrestrial backhaul can add latency that gives back LEO's propagation advantage, so the figure that matters is end-to-end, not space-segment. And latency's stability — jitter — matters alongside its average. Carry forward the habit of decomposing any latency claim into its parts and asking which term dominates; for GEO it is propagation, and for LEO it is usually everything else.</p>
+    <div class="callout green">
+        <strong>LESSON OBJECTIVE MET</strong>
+        You can now compute propagation delay for any orbit, count a round trip correctly, name the five terms of the end-to-end budget, explain why fibre is not automatically faster, and state why latency rather than bandwidth governs responsiveness.
+    </div>
+</div>
+
+<!-- QUIZ -->
+<div class="quiz-block" id="quiz">
+    <h2>KNOWLEDGE CHECK</h2>
+    <p class="quiz-intro">Ten questions on the physics of latency — propagation, hop counting, the budget, and application effects. One correct answer each.</p>
+
+    <div class="quiz-q"><p><strong>Q1.</strong> Propagation delay over a path is calculated as:</p>
+        <div class="quiz-options">
+            <button class="quiz-opt" data-q="1" data-correct="false">A — Bandwidth divided by distance</button>
+            <button class="quiz-opt" data-q="1" data-correct="true">B — Distance divided by the speed of light</button>
+            <button class="quiz-opt" data-q="1" data-correct="false">C — Packet size divided by link rate</button>
+            <button class="quiz-opt" data-q="1" data-correct="false">D — Altitude times refractive index</button>
+        </div><div class="quiz-feedback" id="fb1"></div></div>
+
+    <div class="quiz-q"><p><strong>Q2.</strong> A bent-pipe round trip is how many hops?</p>
+        <div class="quiz-options">
+            <button class="quiz-opt" data-q="2" data-correct="false">A — One</button>
+            <button class="quiz-opt" data-q="2" data-correct="false">B — Two</button>
+            <button class="quiz-opt" data-q="2" data-correct="true">C — Four — up and down, then up and down again for the reply</button>
+            <button class="quiz-opt" data-q="2" data-correct="false">D — Eight</button>
+        </div><div class="quiz-feedback" id="fb2"></div></div>
+
+    <div class="quiz-q"><p><strong>Q3.</strong> Why is GEO's latency unbeatable by better hardware?</p>
+        <div class="quiz-options">
+            <button class="quiz-opt" data-q="3" data-correct="false">A — The modems are slow</button>
+            <button class="quiz-opt" data-q="3" data-correct="true">B — It is set by distance and the speed of light, which engineering cannot change</button>
+            <button class="quiz-opt" data-q="3" data-correct="false">C — The satellites are old</button>
+            <button class="quiz-opt" data-q="3" data-correct="false">D — Regulation caps it</button>
+        </div><div class="quiz-feedback" id="fb3"></div></div>
+
+    <div class="quiz-q"><p><strong>Q4.</strong> A satellite low on the horizon has higher latency than one overhead because:</p>
+        <div class="quiz-options">
+            <button class="quiz-opt" data-q="4" data-correct="false">A — It transmits less power</button>
+            <button class="quiz-opt" data-q="4" data-correct="true">B — Its slant range is longer, so the signal travels farther</button>
+            <button class="quiz-opt" data-q="4" data-correct="false">C — It is in a different orbit</button>
+            <button class="quiz-opt" data-q="4" data-correct="false">D — The atmosphere is thicker</button>
+        </div><div class="quiz-feedback" id="fb4"></div></div>
+
+    <div class="quiz-q"><p><strong>Q5.</strong> For a 550 km LEO satellite, the worst-case (low-elevation) latency relative to overhead is roughly:</p>
+        <div class="quiz-options">
+            <button class="quiz-opt" data-q="5" data-correct="false">A — The same</button>
+            <button class="quiz-opt" data-q="5" data-correct="true">B — About double</button>
+            <button class="quiz-opt" data-q="5" data-correct="false">C — Ten times higher</button>
+            <button class="quiz-opt" data-q="5" data-correct="false">D — Lower</button>
+        </div><div class="quiz-feedback" id="fb5"></div></div>
+
+    <div class="quiz-q"><p><strong>Q6.</strong> For a LEO system, which latency term most often gives back the propagation advantage?</p>
+        <div class="quiz-options">
+            <button class="quiz-opt" data-q="6" data-correct="false">A — Serialisation delay</button>
+            <button class="quiz-opt" data-q="6" data-correct="true">B — Terrestrial backhaul from the gateway to distant content</button>
+            <button class="quiz-opt" data-q="6" data-correct="false">C — The speed of light</button>
+            <button class="quiz-opt" data-q="6" data-correct="false">D — Antenna gain</button>
+        </div><div class="quiz-feedback" id="fb6"></div></div>
+
+    <div class="quiz-q"><p><strong>Q7.</strong> Why can a LEO-with-ISL path beat fibre over long distances?</p>
+        <div class="quiz-options">
+            <button class="quiz-opt" data-q="7" data-correct="false">A — Fibre has lower bandwidth</button>
+            <button class="quiz-opt" data-q="7" data-correct="true">B — Light travels ~1.47× slower in glass than in vacuum, and fibre routes add circuity</button>
+            <button class="quiz-opt" data-q="7" data-correct="false">C — Satellites transmit faster</button>
+            <button class="quiz-opt" data-q="7" data-correct="false">D — Fibre cannot cross oceans</button>
+        </div><div class="quiz-feedback" id="fb7"></div></div>
+
+    <div class="quiz-q"><p><strong>Q8.</strong> Why can a GEO link feel slow even with ample bandwidth?</p>
+        <div class="quiz-options">
+            <button class="quiz-opt" data-q="8" data-correct="false">A — Its bandwidth is fake</button>
+            <button class="quiz-opt" data-q="8" data-correct="true">B — High round-trip time throttles per-connection throughput, and handshakes cost several round trips</button>
+            <button class="quiz-opt" data-q="8" data-correct="false">C — GEO uses old protocols only</button>
+            <button class="quiz-opt" data-q="8" data-correct="false">D — Bandwidth and latency are the same thing</button>
+        </div><div class="quiz-feedback" id="fb8"></div></div>
+
+    <div class="quiz-q"><p><strong>Q9.</strong> Jitter is:</p>
+        <div class="quiz-options">
+            <button class="quiz-opt" data-q="9" data-correct="false">A — The average latency</button>
+            <button class="quiz-opt" data-q="9" data-correct="true">B — The variation in latency over time</button>
+            <button class="quiz-opt" data-q="9" data-correct="false">C — The bandwidth of a link</button>
+            <button class="quiz-opt" data-q="9" data-correct="false">D — The number of satellites</button>
+        </div><div class="quiz-feedback" id="fb9"></div></div>
+
+    <div class="quiz-q"><p><strong>Q10.</strong> Why does LEO introduce jitter that GEO does not?</p>
+        <div class="quiz-options">
+            <button class="quiz-opt" data-q="10" data-correct="false">A — LEO uses more bandwidth</button>
+            <button class="quiz-opt" data-q="10" data-correct="true">B — Moving satellites change path length continuously and handovers can reroute traffic every few minutes</button>
+            <button class="quiz-opt" data-q="10" data-correct="false">C — LEO satellites are heavier</button>
+            <button class="quiz-opt" data-q="10" data-correct="false">D — GEO has no buffers</button>
+        </div><div class="quiz-feedback" id="fb10"></div></div>
+
+    <div class="quiz-score" id="quizScore"></div>
+</div>
+
+<!-- PYTHON -->
+<div class="py-block" id="python">
+    <h2>PYTHON EXERCISES</h2>
+    <p class="py-intro">Three exercises computing the latency physics directly — propagation by regime, slant range versus elevation, and the fibre-versus-ISL crossover. Python 3.8+ standard library only.</p>
+
+    <div class="py-exercise">
+        <h3>Exercise 1 — Propagation delay calculator</h3>
+        <p>Compute one-hop, one-way (bent-pipe), and round-trip propagation delay for each regime from altitude. This is the core latency calculation.</p>
+<pre>
+C = 299_792.0  # km/s
+
+def one_hop_ms(alt):        return alt / C * 1000
+def bentpipe_oneway_ms(alt): return 2 * one_hop_ms(alt)   # up + down
+def rtt_ms(alt):            return 4 * one_hop_ms(alt)    # request + reply
+
+regimes = [("VLEO 350",350),("LEO 550",550),("LEO 1200",1200),
+           ("MEO 8000",8000),("MEO 20200",20200),("GEO",35786)]
+
+print(f"{'Regime':<12}{'1 hop':>10}{'1-way':>10}{'RTT':>10}")
+print("-" * 42)
+for name, alt in regimes:
+    print(f"{name:<12}{one_hop_ms(alt):>8.1f}ms{bentpipe_oneway_ms(alt):>8.1f}ms{rtt_ms(alt):>8.1f}ms")
+
+# Propagation only, straight up. Real latency adds processing,
+# queuing, and backhaul (see the budget section).
+# 1. By what factor does RTT grow from LEO 550 to GEO?
+# 2. Add a fixed 20 ms of ground/backhaul to each RTT. Which regimes does
+#    that change meaningfully, and which barely notice it?
+</pre>
+    </div>
+
+    <div class="py-exercise">
+        <h3>Exercise 2 — Slant range and latency versus elevation</h3>
+        <p>Show how latency rises as the satellite drops toward the horizon.</p>
+<pre>
+import math
+C, R_E = 299_792.0, 6371.0
+
+def slant_range_km(alt, elev_deg):
+    el = math.radians(elev_deg)
+    return (-R_E*math.sin(el)
+            + math.sqrt((R_E*math.sin(el))**2 + 2*R_E*alt + alt**2))
+
+def rtt_ms(slant): return 4 * (slant / C) * 1000
+
+alt = 550
+print(f"{'Elev':>6}{'Slant':>12}{'RTT (prop)':>14}")
+print("-" * 32)
+for elev in [90, 60, 40, 25, 10]:
+    s = slant_range_km(alt, elev)
+    print(f"{elev:>5}deg{s:>10.0f}km{rtt_ms(s):>12.1f}ms")
+
+# 1. How much does RTT grow from overhead (90 deg) to 25 deg?
+# 2. Lower minimum elevation widens coverage but raises worst-case
+#    latency. Which way would you push it for a gaming service?
+</pre>
+    </div>
+
+    <div class="py-exercise">
+        <h3>Exercise 3 — Fibre versus LEO-ISL crossover</h3>
+        <p>Find the distance beyond which a near-straight vacuum space path beats terrestrial fibre on latency.</p>
+<pre>
+C = 299_792.0
+C_FIBRE = C / 1.47          # light is slower in glass
+CIRCUITY = 1.4             # fibre routes ~40% longer than great circle
+LEO_OVERHEAD_KM = 2 * 550  # rough up+down to reach the ISL layer
+
+def fibre_oneway_ms(gc):    return (gc * CIRCUITY) / C_FIBRE * 1000
+def leo_isl_oneway_ms(gc):  return (gc + LEO_OVERHEAD_KM) / C * 1000
+
+print(f"{'Distance':>10}{'Fibre':>12}{'LEO-ISL':>12}{'Winner':>10}")
+print("-" * 44)
+for d in [500, 1500, 3000, 5500, 10000]:
+    f, l = fibre_oneway_ms(d), leo_isl_oneway_ms(d)
+    print(f"{d:>8}km{f:>10.1f}ms{l:>10.1f}ms{('LEO' if l < f else 'fibre'):>10}")
+
+# 1. Roughly where is the crossover with these assumptions?
+# 2. Which assumption is the model most sensitive to? Change one, re-run.
+</pre>
+        <div class="py-challenge"><strong>EXTENSION</strong>
+            Add the five-term end-to-end budget to Exercise 1: pick a packet size and link rate for serialisation, and add fixed processing and backhaul terms. See how much the ranking between LEO and MEO narrows once the ground terms are included.
+        </div>
+    </div>
+</div>
+
+<!-- REFLECTION -->
+<div class="reflection-block" id="reflect">
+    <h2>REFLECTION PROMPTS</h2>
+    <p class="ref-intro">Not graded. Write in your own words, 200–400 words each.</p>
+
+    <div class="ref-prompt"><h3>Prompt 1 — Disqualifying vs Irrelevant</h3>
+        <p>GEO's ~600 ms round trip rules it out of interactive use but not broadcast or bulk transfer. Explain, using the application thresholds and the TCP throughput argument, exactly why the same latency is disqualifying for one and irrelevant for the other.</p></div>
+
+    <div class="ref-prompt"><h3>Prompt 2 — Trace the Budget</h3>
+        <p>Trace the full end-to-end latency budget for one application — a video call, a web page load, a file download — from terminal to content and back. Identify which of the five terms dominates, and whether the orbit choice or the ground-segment choice matters more.</p></div>
+
+    <div class="ref-prompt"><h3>Prompt 3 — Fibre vs LEO, Honestly</h3>
+        <p>Make the case for the fibre-versus-LEO-ISL crossover honestly, then list the real-world caveats the simple physics model omits — and say for which routes and customers it genuinely matters.</p></div>
+
+    <div class="ref-prompt"><h3>Prompt 4 — Latency or Jitter</h3>
+        <p>For a given service, argue whether low average latency or low jitter matters more, and design a simple rule an operator could use to decide which to optimise for a new customer segment.</p></div>
+</div>
+
+<!-- MARK COMPLETE -->
+<div class="complete-wrap">
+    <button class="complete-btn" id="completeBtn">MARK LESSON COMPLETE</button>
+    <div class="complete-msg" id="completeMsg"></div>
+</div>
+
+<div class="lesson-nav">
+    <a href="m1-2.html">← LESSON 02 — ORBITAL REGIMES COMPARED</a>
+    <a href="m1-4.html">LESSON 04 — MULTI-ORBIT HYBRID ARCHITECTURES →</a>
+</div>
+
+</div>
+
+<button class="back-to-top" id="backToTop" title="Back to top">↑</button>
+
+<footer>© 2026 LEOAF · M1 · LESSON 03 OF 7</footer>
+
+<script>
+const canvas = document.getElementById('starsCanvas');
+const ctx = canvas.getContext('2d');
+let stars = [];
+function initStars() { stars=[]; for(let i=0;i<180;i++) stars.push({x:Math.random()*canvas.width,y:Math.random()*canvas.height,size:Math.random()*1.5+0.4,speed:Math.random()*0.18+0.04,hue:Math.random()*360}); }
+function resizeCanvas() { canvas.width=window.innerWidth; canvas.height=window.innerHeight; }
+resizeCanvas(); initStars(); window.addEventListener('resize', resizeCanvas);
+function animateStars() { ctx.clearRect(0,0,canvas.width,canvas.height); stars.forEach(s=>{s.y-=s.speed;if(s.y<0){s.y=canvas.height;s.x=Math.random()*canvas.width;} ctx.beginPath();ctx.fillStyle=`hsl(${s.hue},80%,80%)`;ctx.arc(s.x,s.y,s.size,0,Math.PI*2);ctx.fill();}); requestAnimationFrame(animateStars); }
+animateStars();
+</script>
+
+<script>
+const feedbacks = {
+    1:{correct:"Correct. Propagation delay is path length divided by propagation speed — distance over c.",wrong:"Incorrect. It is distance divided by the speed of light. Packet-size-over-rate is the separate transmission (serialisation) term."},
+    2:{correct:"Correct. Up to the satellite and down to the gateway is two hops; the reply retraces them, so a round trip is four.",wrong:"Incorrect. It is four — two hops out (up then down) and two back. That is why GEO's ~119 ms hop becomes ~477 ms round-trip propagation."},
+    3:{correct:"Correct. Latency at GEO is a propagation floor fixed by distance and c; no hardware beats physics.",wrong:"Incorrect. It is a physics floor — distance over the speed of light. Better hardware reduces other terms but cannot beat propagation."},
+    4:{correct:"Correct. A low-elevation line of sight is a longer slant path, adding propagation delay.",wrong:"Incorrect. The slant range to a low satellite is longer than straight overhead, so the path — and the delay — is greater."},
+    5:{correct:"Correct. Slant range grows from ~550 km overhead to ~1,100+ km near minimum elevation, roughly doubling the delay.",wrong:"Incorrect. It roughly doubles — slant range grows from ~550 km overhead to ~1,100+ km low on the horizon."},
+    6:{correct:"Correct. LEO wins propagation in orbit, then can lose it hauling traffic over fibre to a distant peering point.",wrong:"Incorrect. It is backhaul — LEO's small propagation gain is easily erased by hauling traffic to distant content over terrestrial fibre."},
+    7:{correct:"Correct. Vacuum is faster than glass, and near-straight space paths avoid fibre's circuitous routing, so over long distances the space path wins.",wrong:"Incorrect. It is the medium — light is ~1.47× slower in fibre, and cables are not straight, so over long routes the vacuum ISL path overtakes fibre."},
+    8:{correct:"Correct. Throughput is bounded by window over RTT, and connection setup costs several round trips, so high latency throttles felt speed regardless of capacity.",wrong:"Incorrect. High RTT limits per-connection throughput (the bandwidth-delay product) and makes every handshake costly — capacity does not fix that."},
+    9:{correct:"Correct. Jitter is how much the delay varies; real-time traffic is sensitive to it, not just to the mean.",wrong:"Incorrect. Jitter is the variability of latency, not its average — it causes buffer underrun or growth in real-time streams."},
+    10:{correct:"Correct. LEO's motion changes the path length, and periodic handover changes the route, both adding delay variation a fixed GEO link avoids.",wrong:"Incorrect. It is the motion — changing path length plus periodic handover reroutes — that adds jitter, which a stationary GEO link does not experience."}
+};
+let answered = {};
+document.querySelectorAll('.quiz-opt').forEach(btn => {
+    btn.addEventListener('click', function() {
+        const q = this.dataset.q;
+        if (answered[q] !== undefined) return;
+        const correct = this.dataset.correct === 'true';
+        answered[q] = correct;
+        document.querySelectorAll(`.quiz-opt[data-q="${q}"]`).forEach(b => { b.disabled = true; if (b.dataset.correct === 'true') b.classList.add('correct'); });
+        if (!correct) this.classList.add('wrong');
+        const fb = document.getElementById(`fb${q}`);
+        fb.textContent = (correct ? '✓ ' : '✗ ') + feedbacks[q][correct ? 'correct' : 'wrong'];
+        fb.style.color = correct ? '#39ff14' : '#ff004f';
+        if (Object.keys(answered).length === 10) {
+            const total = Object.values(answered).filter(Boolean).length;
+            const el = document.getElementById('quizScore');
+            el.style.display = 'block';
+            const pct = Math.round(total / 10 * 100);
+            el.textContent = `SCORE: ${total} / 10 (${pct}%) — ${pct===100?'PERFECT.':pct>=80?'STRONG. REVIEW ANY MISSES.':pct>=60?'ADEQUATE. REVISIT WEAK SECTIONS.':'REVISIT THE LESSON BEFORE PROCEEDING.'}`;
+        }
+    });
+});
+</script>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="supabase.js"></script>
+<script src="user_progress.js"></script>
+<script>
+const LESSON_ID = 'm1-3';
+(function () {
+    function bounceToLogin(reason) {
+        console.error("Auth guard:", reason, "- redirecting to index.html");
+        window.location.replace("index.html");
+    }
+    async function init() {
+        if (typeof client === "undefined" || !client || !client.auth) {
+            return bounceToLogin("Supabase client not loaded (is supabase.js in this directory?)");
+        }
+        let session = null;
+        try { ({ data: { session } } = await client.auth.getSession()); }
+        catch (e) { return bounceToLogin("getSession threw: " + e.message); }
+        if (!session) { window.location.replace("index.html"); return; }
+
+        const btn = document.getElementById('completeBtn');
+        const msg = document.getElementById('completeMsg');
+        function setDone(done) {
+            if (done) {
+                btn.textContent = '✓ COMPLETE — CLICK TO UNDO';
+                btn.classList.add('done');
+                btn.style.cssText = 'border-color:#39ff14;color:#39ff14;background:rgba(57,255,20,0.1);cursor:pointer;opacity:1;';
+                msg.style.color = '#39ff14';
+                msg.textContent = 'Lesson marked complete. Click again to undo.';
+            } else {
+                btn.textContent = 'MARK LESSON COMPLETE';
+                btn.classList.remove('done');
+                btn.style.cssText = '';
+                msg.style.color = '#ffffff55';
+                msg.textContent = 'Not yet marked complete.';
+            }
+        }
+        let mastered = [];
+        try { mastered = await getMasteredSections(); } catch (e) { console.error(e); }
+        setDone(mastered.includes(LESSON_ID));
+        btn.addEventListener('click', async () => {
+            const isCurrentlyDone = btn.classList.contains('done');
+            msg.style.color = '#00d9ff';
+            msg.textContent = 'Saving...';
+            const ok = await upsertSection(LESSON_ID, !isCurrentlyDone);
+            if (ok) { setDone(!isCurrentlyDone); }
+            else { msg.style.color = '#ff004f'; msg.textContent = 'Error saving. Try again.'; }
+        });
+        const btt = document.getElementById('backToTop');
+        window.addEventListener('scroll', () => { btt.classList.toggle('visible', window.scrollY > 400); });
+        btt.addEventListener('click', () => window.scrollTo({ top: 0, behavior: 'smooth' }));
+    }
+    if (document.readyState === "loading") { document.addEventListener("DOMContentLoaded", init); }
+    else { init(); }
+})();
+</script>
+
+</body>
+</html>
