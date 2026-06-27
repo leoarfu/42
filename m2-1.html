@@ -1,0 +1,668 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, shrink-to-fit=no">
+<title>M2-1 — Kepler &amp; Newton: The Two-Body Foundation · LEOAF</title>
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;600;800&family=Share+Tech+Mono&family=Libre+Baskerville:ital,wght@0,400;0,700;1,400&display=swap" rel="stylesheet">
+<link rel="icon" href="favicon.ico" sizes="any" type="image/x-icon">
+<link rel="manifest" href="site.webmanifest">
+<meta name="theme-color" content="#0f0f0f">
+
+<script>
+window.leoafAbort = async function () {
+    function go() { window.location.replace("index.html?signedout=1"); }
+    try {
+        if (typeof client !== "undefined" && client && client.auth && client.auth.signOut) {
+            try { await client.auth.signOut({ scope: "local" }); } catch (e) {}
+        }
+    } catch (e) {}
+    go();
+};
+</script>
+
+<style>
+* { box-sizing:border-box; margin:0; padding:0; }
+html { height:100%; -webkit-text-size-adjust:100%; overflow-x:hidden; }
+body { font-family:'Share Tech Mono',monospace; background:#000; color:white; overflow-x:hidden; min-height:100vh; }
+#starsCanvas { position:fixed; inset:0; z-index:-1; }
+
+header { background:#000; border-bottom:1px solid #ff004f33; position:sticky; top:0; z-index:100; padding:1rem clamp(1.5rem,5vw,4rem); display:flex; justify-content:space-between; align-items:center; box-shadow:0 4px 16px #0008; }
+.logo { font-family:'Orbitron',sans-serif; font-weight:800; font-size:clamp(16px,2vw,22px); letter-spacing:3px; text-decoration:none; }
+.logo span:first-child { color:white; }
+.logo span:last-child { color:#ff004f; }
+.nav-right { display:flex; align-items:center; gap:10px; }
+.nav-btn { background:transparent; border:1px solid #ff004f44; color:#ff004f; padding:6px 14px; cursor:pointer; transition:0.3s ease; font-size:11px; font-family:'Orbitron',sans-serif; letter-spacing:1px; text-decoration:none; display:inline-block; }
+.nav-btn:hover { background:#ff004f; color:black; }
+
+.breadcrumb { padding:14px clamp(1.5rem,5vw,4rem); font-size:11px; color:#ffffff44; letter-spacing:1px; position:relative; z-index:1; }
+.breadcrumb a { color:#00d9ff66; text-decoration:none; }
+.breadcrumb a:hover { color:#00d9ff; }
+.breadcrumb span { margin:0 8px; }
+
+.lesson-wrap { max-width:820px; margin:0 auto; padding:0 clamp(1.5rem,5vw,4rem) 80px; position:relative; z-index:1; }
+
+.lesson-header { padding:30px 0 28px; border-bottom:1px solid #ffffff11; margin-bottom:36px; }
+.lesson-tag { font-family:'Orbitron',sans-serif; font-size:10px; color:#ff004f; letter-spacing:3px; margin-bottom:10px; }
+.lesson-header h1 { font-family:'Orbitron',sans-serif; font-size:clamp(20px,3.5vw,32px); font-weight:800; line-height:1.2; margin-bottom:12px; }
+.lesson-meta { display:flex; gap:10px; flex-wrap:wrap; margin-bottom:16px; }
+.l-pill { font-family:'Orbitron',sans-serif; font-size:10px; padding:3px 10px; border:1px solid; letter-spacing:1px; }
+.l-pill-q { color:#ff004f; border-color:#ff004f44; }
+.l-pill-t { color:#39ff14; border-color:#39ff1444; }
+.lesson-intro { font-size:13px; line-height:1.85; opacity:0.75; }
+
+.toc { background:rgba(0,217,255,0.06); border:1px solid #00d9ff33; padding:24px 28px; margin:30px 0; }
+.toc h4 { font-family:'Orbitron',sans-serif; font-size:10px; color:#00d9ff; letter-spacing:2px; margin-bottom:16px; }
+.toc ol { padding-left:20px; }
+.toc li { font-size:13px; line-height:2.1; opacity:1; }
+.toc li a { color:#00d9ffbb; text-decoration:none; transition:0.15s; }
+.toc li a:hover { color:#ffffff; padding-left:4px; }
+.toc li::marker { color:#ff004f; font-family:'Orbitron',sans-serif; font-size:10px; }
+
+.content-block { margin-bottom:48px; }
+.content-block h2 { font-family:'Orbitron',sans-serif; font-size:13px; color:#00d9ff; letter-spacing:2px; text-transform:uppercase; margin-bottom:18px; padding-bottom:10px; border-bottom:1px solid #00d9ff22; scroll-margin-top:80px; }
+.content-block h3 { font-family:'Orbitron',sans-serif; font-size:11px; color:#ffffff88; letter-spacing:1.5px; text-transform:uppercase; margin:28px 0 12px; }
+.content-block p { font-size:13px; line-height:1.9; opacity:0.85; margin-bottom:16px; }
+.content-block ul, .content-block ol { padding-left:0; margin-bottom:16px; }
+.content-block ul li, .content-block ol li { font-size:13px; line-height:1.85; opacity:0.85; padding-left:20px; position:relative; margin-bottom:6px; }
+.content-block ul li::before { content:'›'; position:absolute; left:0; color:#00d9ff; }
+.content-block blockquote { border-left:3px solid #39ff14; background:rgba(57,255,20,0.05); padding:14px 20px; margin:18px 0; font-size:14px; font-family:'Share Tech Mono',monospace; color:#39ff14; letter-spacing:1px; }
+
+.callout { border-left:3px solid #00d9ff; background:rgba(0,217,255,0.05); padding:16px 20px; margin:22px 0; font-size:12px; line-height:1.8; }
+.callout.red   { border-left-color:#ff004f; background:rgba(255,0,79,0.05); }
+.callout.green { border-left-color:#39ff14; background:rgba(57,255,20,0.05); }
+.callout.amber { border-left-color:#ffaa00; background:rgba(255,170,0,0.05); }
+.callout strong { font-family:'Orbitron',sans-serif; font-size:10px; letter-spacing:1px; display:block; margin-bottom:8px; color:inherit; }
+
+.key-numbers { display:grid; grid-template-columns:repeat(auto-fit,minmax(140px,1fr)); gap:12px; margin:22px 0; }
+.kn-item { background:rgba(255,255,255,0.03); border:1px solid #ffffff11; padding:16px 12px; text-align:center; }
+.kn-val { font-family:'Orbitron',sans-serif; font-size:clamp(15px,2.3vw,22px); font-weight:800; color:#00d9ff; display:block; }
+.kn-label { font-size:10px; opacity:0.5; letter-spacing:1px; margin-top:5px; display:block; line-height:1.4; }
+
+.compare-table { width:100%; border-collapse:collapse; margin:22px 0; font-size:12px; }
+.compare-table th { font-family:'Orbitron',sans-serif; font-size:10px; letter-spacing:1px; color:#00d9ff; padding:10px 12px; border-bottom:1px solid #00d9ff33; text-align:left; }
+.compare-table td { padding:10px 12px; border-bottom:1px solid #ffffff0a; line-height:1.5; opacity:0.85; vertical-align:top; }
+.compare-table tr:hover td { background:rgba(255,255,255,0.02); }
+
+.diagram-wrap { margin:24px 0; background:rgba(255,255,255,0.02); border:1px solid #ffffff11; padding:20px; overflow-x:auto; }
+.diagram-wrap figcaption { font-size:11px; color:#ffffff44; margin-top:12px; text-align:center; letter-spacing:1px; }
+
+.quiz-block { background:rgba(17,17,17,0.9); border:1px solid #ff004f33; padding:28px; margin:48px 0 32px; }
+.quiz-block h2 { font-family:'Orbitron',sans-serif; font-size:13px; color:#ff004f; letter-spacing:2px; margin-bottom:6px; }
+.quiz-intro { font-size:12px; opacity:0.6; margin-bottom:24px; padding-bottom:16px; border-bottom:1px solid #ff004f22; line-height:1.6; }
+.quiz-q { margin-bottom:28px; }
+.quiz-q p { font-size:13px; opacity:0.9; margin-bottom:12px; line-height:1.65; }
+.quiz-q p strong { color:#00d9ff; }
+.quiz-options { display:flex; flex-direction:column; gap:8px; }
+.quiz-opt { background:rgba(255,255,255,0.03); border:1px solid #ffffff1a; padding:11px 16px; cursor:pointer; font-size:12px; font-family:'Share Tech Mono',monospace; transition:0.2s ease; text-align:left; color:white; line-height:1.5; }
+.quiz-opt:hover:not(:disabled) { background:rgba(0,217,255,0.08); border-color:#00d9ff44; }
+.quiz-opt.correct  { background:rgba(57,255,20,0.1);  border-color:#39ff14; color:#39ff14; }
+.quiz-opt.wrong    { background:rgba(255,0,79,0.1);   border-color:#ff004f; color:#ff004f; }
+.quiz-opt:disabled { cursor:default; }
+.quiz-feedback { font-size:12px; margin-top:10px; min-height:18px; line-height:1.7; opacity:0.9; padding:0 4px; }
+.quiz-score { font-family:'Orbitron',sans-serif; font-size:12px; color:#39ff14; margin-top:20px; letter-spacing:1px; display:none; padding-top:16px; border-top:1px solid #39ff1433; }
+
+.py-block { background:rgba(10,10,10,0.95); border:1px solid #39ff1422; padding:28px; margin:32px 0; }
+.py-block h2 { font-family:'Orbitron',sans-serif; font-size:13px; color:#39ff14; letter-spacing:2px; margin-bottom:8px; }
+.py-block .py-intro { font-size:12px; opacity:0.7; margin-bottom:20px; padding-bottom:16px; border-bottom:1px solid #39ff1422; line-height:1.7; }
+.py-exercise { margin-bottom:32px; }
+.py-exercise:last-child { margin-bottom:0; }
+.py-exercise h3 { font-family:'Orbitron',sans-serif; font-size:11px; color:#39ff1499; letter-spacing:1.5px; text-transform:uppercase; margin-bottom:10px; }
+.py-exercise p { font-size:12px; opacity:0.8; margin-bottom:14px; line-height:1.75; }
+.py-block pre { background:#050505; border:1px solid #39ff1433; padding:20px; font-family:'Share Tech Mono',monospace; font-size:11.5px; line-height:1.75; overflow-x:auto; color:#39ff14; white-space:pre; margin-bottom:12px; }
+.py-block .py-challenge { background:rgba(57,255,20,0.04); border-left:2px solid #39ff14; padding:12px 16px; margin-top:14px; font-size:12px; line-height:1.75; opacity:0.8; }
+.py-block .py-challenge strong { font-family:'Orbitron',sans-serif; font-size:10px; color:#39ff14; display:block; margin-bottom:6px; letter-spacing:1px; }
+
+.reflection-block { background:rgba(255,170,0,0.04); border:1px solid #ffaa0033; padding:24px; margin:32px 0; }
+.reflection-block h2 { font-family:'Orbitron',sans-serif; font-size:13px; color:#ffaa00; letter-spacing:2px; margin-bottom:8px; }
+.reflection-block .ref-intro { font-size:12px; opacity:0.7; margin-bottom:20px; padding-bottom:14px; border-bottom:1px solid #ffaa0022; line-height:1.7; }
+.ref-prompt { margin-bottom:20px; }
+.ref-prompt h3 { font-family:'Orbitron',sans-serif; font-size:11px; color:#ffaa0099; letter-spacing:1px; margin-bottom:8px; }
+.ref-prompt p { font-size:12px; opacity:0.8; line-height:1.75; margin-bottom:10px; }
+
+.back-to-top { position:fixed; bottom:28px; right:28px; z-index:200; width:44px; height:44px; background:#000; border:1px solid #00d9ff55; color:#00d9ff; font-size:20px; cursor:pointer; display:flex; align-items:center; justify-content:center; opacity:0; pointer-events:none; transition:opacity 0.3s ease, border-color 0.3s ease; }
+.back-to-top.visible { opacity:1; pointer-events:auto; }
+.back-to-top:hover { border-color:#00d9ff; background:#001a2c; }
+
+.complete-wrap { margin-top:56px; padding-top:30px; border-top:1px solid #ffffff11; text-align:center; }
+.complete-btn { font-family:'Orbitron',sans-serif; font-size:13px; letter-spacing:2px; padding:14px 44px; background:transparent; border:1px solid #39ff14; color:#39ff14; cursor:pointer; transition:0.3s ease; }
+.complete-btn:hover:not(.done) { background:#39ff14; color:black; box-shadow:0 0 20px rgba(57,255,20,0.4); }
+.complete-btn.done { background:rgba(57,255,20,0.1); cursor:default; opacity:0.7; }
+.complete-msg { font-size:12px; color:#39ff14; margin-top:14px; min-height:18px; letter-spacing:1px; }
+
+.lesson-nav { display:flex; justify-content:space-between; margin-top:30px; flex-wrap:wrap; gap:10px; }
+.lesson-nav a { font-family:'Orbitron',sans-serif; font-size:11px; color:#00d9ff66; text-decoration:none; letter-spacing:1px; transition:0.2s; }
+.lesson-nav a:hover { color:#00d9ff; }
+
+footer { text-align:center; padding:30px; opacity:0.3; font-size:11px; position:relative; z-index:1; letter-spacing:1px; }
+
+@media (max-width:600px) { .key-numbers { grid-template-columns:1fr 1fr; } .compare-table { font-size:11px; } .compare-table th, .compare-table td { padding:8px 8px; } }
+
+/* ── LIGHT READING MODE ── */
+.content-block { background:#f5f2ec; color:#1a1a1a; padding:36px clamp(24px,4vw,48px); margin-bottom:24px; border-left:4px solid #00d9ff; position:relative; z-index:1; }
+.content-block h2 { font-family:'Orbitron',sans-serif; font-size:13px; color:#003d66; letter-spacing:2px; text-transform:uppercase; margin-bottom:20px; padding-bottom:10px; border-bottom:2px solid #00d9ff66; scroll-margin-top:80px; }
+.content-block h3 { font-family:'Orbitron',sans-serif; font-size:11px; color:#444; letter-spacing:1.5px; text-transform:uppercase; margin:32px 0 14px; }
+.content-block p { font-family:'Libre Baskerville', Georgia, serif; font-size:15px; line-height:1.9; color:#1a1a1a; opacity:1; margin-bottom:18px; }
+.content-block ul li { font-family:'Libre Baskerville', Georgia, serif; font-size:14px; line-height:1.85; color:#1a1a1a; opacity:1; margin-bottom:8px; }
+.content-block ul li::before { color:#0077aa; }
+.content-block blockquote { border-left:3px solid #1a7a1a; background:#eafaea; color:#0a3d0a; }
+.content-block .callout { border-left:3px solid #0088cc; background:#e8f4fb; color:#1a1a1a; }
+.content-block .callout.red   { border-left-color:#cc0033; background:#fdecea; }
+.content-block .callout.green { border-left-color:#1a7a1a; background:#eafaea; }
+.content-block .callout.amber { border-left-color:#996600; background:#fef9ec; }
+.content-block .callout strong { color:inherit; }
+.content-block .kn-item { background:#fff; border:1px solid #d0d0d0; }
+.content-block .kn-label { color:#555; opacity:1; }
+.content-block .compare-table th { color:#003d66; border-bottom:2px solid #00d9ff66; }
+.content-block .compare-table td { color:#1a1a1a; opacity:1; border-bottom:1px solid #ddd; }
+.content-block .compare-table tr:hover td { background:#f0f0f0; }
+.content-block .diagram-wrap { background:#0a0a0a; border:1px solid #333; }
+.content-block .diagram-wrap figcaption { color:#ffffff55; }
+</style>
+
+</head>
+<body>
+
+<canvas id="starsCanvas"></canvas>
+
+<header>
+    <a href="dashboard.html" class="logo"><span>LEO</span><span>AF</span></a>
+    <div class="nav-right">
+        <a href="m2.html" class="nav-btn">← M2 HUB</a>
+        <button class="nav-btn" onclick="leoafAbort()">ABORT</button>
+    </div>
+</header>
+
+<div class="breadcrumb">
+    <a href="dashboard.html">DASHBOARD</a><span>/</span>
+    <a href="m2.html">M2</a><span>/</span>
+    <span style="color:#ffffff88;">LESSON 01 — KEPLER &amp; NEWTON</span>
+</div>
+
+<div class="lesson-wrap">
+
+<div class="lesson-header">
+    <div class="lesson-tag">M2 · LESSON 01 OF 7</div>
+    <h1>Kepler &amp; Newton: The Two-Body Foundation</h1>
+    <div class="lesson-meta">
+        <div class="l-pill l-pill-q">MODULE 2</div>
+        <div class="l-pill l-pill-t">ORBITAL MECHANICS</div>
+    </div>
+    <p class="lesson-intro">Module 1 made the regime choice qualitatively. This module makes it quantitative — and that begins with describing the motion of a single satellite exactly, which is the two-body problem solved by Newton and anticipated by Kepler. The two-body model is an idealisation: one satellite, one spherical Earth, nothing else. Real orbits depart from it, and the next lesson is about those departures. But it is not a toy: it fixes the relationship between altitude, speed, and period that determines revisit, ground-track repeat, Doppler, coverage time, and launch energy. This lesson derives that relationship from first principles and ends with the master equation — vis-viva — that gives a satellite's speed anywhere on any orbit.</p>
+</div>
+
+<div class="toc">
+    <h4>CONTENTS</h4>
+    <ol>
+        <li><a href="#s1">Why the two-body model is the foundation</a></li>
+        <li><a href="#s2">Newton's gravitation &amp; the parameter μ</a></li>
+        <li><a href="#s3">The two-body problem &amp; the shape of orbits</a></li>
+        <li><a href="#s4">Kepler's three laws</a></li>
+        <li><a href="#s5">Circular orbits — speed &amp; period from altitude</a></li>
+        <li><a href="#s6">Orbital energy &amp; the vis-viva equation</a></li>
+        <li><a href="#s7">Elliptical orbits &amp; conserved quantities</a></li>
+        <li><a href="#s8">Why the mechanics fix the design tradeoffs</a></li>
+        <li><a href="#s9">What the two-body model leaves out</a></li>
+        <li><a href="#s10">Takeaway</a></li>
+        <li><a href="#quiz">Knowledge check</a></li>
+        <li><a href="#python">Python exercises — spine project begins</a></li>
+        <li><a href="#reflect">Reflection prompts</a></li>
+    </ol>
+</div>
+
+<div class="content-block" id="s1">
+    <h2>1. Why the Two-Body Model Is the Foundation</h2>
+    <p>A satellite in orbit is a projectile that keeps missing the Earth. It is pulled toward the planet by gravity and would fall straight down, but it also moves sideways fast enough that the surface curves away beneath it as quickly as it falls. The orbit is the path on which falling and curving exactly balance, and describing that path quantitatively is the whole of orbital mechanics at its base.</p>
+    <p>The two-body problem isolates the essential physics: a small satellite and a large central body, interacting only through their mutual gravity, with everything else — other bodies, the Earth's bulge, atmospheric drag, radiation pressure — set aside. Under those assumptions the motion has an exact closed-form solution, which is rare and valuable. It tells us the orbit is a conic section, that bound orbits are ellipses, and that speed, period, and size are locked together by simple laws. Because the solution is exact, it is the reference against which every real-orbit complication is measured, and because the complications are usually small, the two-body answer is most of the answer.</p>
+</div>
+
+<div class="content-block" id="s2">
+    <h2>2. Newton's Gravitation and the Standard Gravitational Parameter</h2>
+    <p>Newton's law of universal gravitation states that two masses attract along the line between them with a force proportional to each mass and inversely proportional to the square of their separation: F = G·M·m / r², where G is the universal gravitational constant, M and m the two masses, and r their separation. The inverse-square dependence is the single most important fact in the subject, because it is what makes bound orbits closed ellipses rather than drifting spirals.</p>
+    <p>For a satellite around the Earth, the satellite's own mass is negligible in setting the field, so the quantity that actually appears in every orbital equation is the product G·M. This product is given its own name and symbol, the <strong>standard gravitational parameter</strong> μ = G·M, because it is known far more precisely than G or M separately — it is measured directly from the motion of satellites. For Earth, μ ≈ 398,600 km³/s². Carrying μ rather than G and M is not a convenience only; it is how the field is actually known.</p>
+    <table class="compare-table">
+        <thead><tr><th>Quantity</th><th>Symbol</th><th>Value</th><th>Unit</th></tr></thead>
+        <tbody>
+            <tr><td>Earth standard gravitational parameter</td><td>μ</td><td>398,600</td><td>km³/s²</td></tr>
+            <tr><td>Earth equatorial radius</td><td>R⊕</td><td>6,378</td><td>km</td></tr>
+            <tr><td>Sidereal day (true rotation period)</td><td>—</td><td>86,164</td><td>s</td></tr>
+            <tr><td>Universal gravitational constant</td><td>G</td><td>6.674 × 10⁻¹¹</td><td>m³ kg⁻¹ s⁻²</td></tr>
+        </tbody>
+    </table>
+</div>
+
+<div class="content-block" id="s3">
+    <h2>3. The Two-Body Problem and the Shape of Orbits</h2>
+    <p>Applying Newton's second law to the inverse-square force and solving the resulting equations of motion yields the central result of the subject: the path of one body around another is a conic section — a circle, ellipse, parabola, or hyperbola — with the central body at a focus. Which conic results depends on the orbit's energy. Negative total energy gives a bound, closed orbit, which is an ellipse (a circle being the special case of zero eccentricity). Zero energy gives a parabola and positive energy a hyperbola, both of which are escape trajectories that never return.</p>
+    <p>Every satellite and every constellation this program considers is on a bound orbit, so the relevant conic is always the ellipse. The two parameters that fix an ellipse are its <strong>semi-major axis</strong> a, which sets its size, and its <strong>eccentricity</strong> e, which sets its shape — e = 0 is a circle, and e approaching 1 is an increasingly elongated ellipse. Most operational communications constellations fly near-circular orbits, because a circular orbit holds constant altitude and therefore constant coverage and link geometry, but the elliptical case is the general one and the equations are written for it.</p>
+</div>
+
+<div class="content-block" id="s4">
+    <h2>4. Kepler's Three Laws</h2>
+    <p>Kepler extracted three empirical laws from planetary observations decades before Newton explained them, and they remain the clearest statement of how a two-body orbit behaves.</p>
+    <p>The <strong>first law</strong> says the orbit is an ellipse with the central body at one focus. The point of closest approach is the perigee, the farthest point the apogee, and the line joining them through the focus is the major axis, whose half-length is the semi-major axis a.</p>
+    <p>The <strong>second law</strong> says the line from the central body to the satellite sweeps equal areas in equal times. This is conservation of angular momentum in disguise, and its practical meaning is that the satellite moves fastest at perigee, where it is closest, and slowest at apogee, where it is farthest. On a circular orbit the speed is therefore constant; on an eccentric one it varies continuously around the orbit.</p>
+    <p>The <strong>third law</strong> says the square of the orbital period is proportional to the cube of the semi-major axis: T² ∝ a³. Newton's mechanics make the proportionality exact, giving T = 2π·√(a³/μ). This is the equation that ties altitude to period, and through it to revisit time and ground-track repeat, and it is one of the two or three most-used results in the whole module.</p>
+
+    <div class="diagram-wrap">
+        <svg viewBox="0 0 740 320" width="100%" xmlns="http://www.w3.org/2000/svg" font-family="Share Tech Mono, monospace">
+            <rect width="740" height="320" fill="#0a0a0a"/>
+            <!-- ellipse -->
+            <ellipse cx="370" cy="160" rx="200" ry="150" fill="none" stroke="#ffffff66" stroke-width="1.5"/>
+            <!-- major axis -->
+            <line x1="170" y1="160" x2="570" y2="160" stroke="#ffffff22" stroke-width="1" stroke-dasharray="3,3"/>
+            <!-- focus = Earth (left focus, c = 132 from centre) -->
+            <circle cx="238" cy="160" r="11" fill="#00d9ff"/>
+            <text x="238" y="190" font-size="9" fill="#00d9ff" text-anchor="middle">EARTH (focus)</text>
+            <!-- centre marker -->
+            <circle cx="370" cy="160" r="2" fill="#ffffff55"/>
+            <!-- semi-major axis label -->
+            <line x1="370" y1="160" x2="570" y2="160" stroke="#39ff14" stroke-width="1.5"/>
+            <text x="470" y="152" font-size="10" fill="#39ff14" text-anchor="middle">a (semi-major axis)</text>
+            <!-- perigee & apogee -->
+            <circle cx="170" cy="160" r="4" fill="#ff004f"/>
+            <text x="150" y="164" font-size="9" fill="#ff004f" text-anchor="end">perigee</text>
+            <text x="150" y="176" font-size="7" fill="#ff004f99" text-anchor="end">fastest</text>
+            <circle cx="570" cy="160" r="4" fill="#ffaa00"/>
+            <text x="590" y="164" font-size="9" fill="#ffaa00" text-anchor="start">apogee</text>
+            <text x="590" y="176" font-size="7" fill="#ffaa0099" text-anchor="start">slowest</text>
+            <!-- equal-area sweep near perigee: fat short wedge from focus -->
+            <path d="M238,160 L182,211 A200,150 0 0,1 182,109 Z" fill="#ff004f" fill-opacity="0.18" stroke="#ff004f55" stroke-width="0.8"/>
+            <!-- equal-area sweep near apogee: long thin wedge from focus -->
+            <path d="M238,160 L563,199 A200,150 0 0,0 563,121 Z" fill="#ffaa00" fill-opacity="0.16" stroke="#ffaa0055" stroke-width="0.8"/>
+            <!-- caption text -->
+            <text x="370" y="34" font-size="11" fill="#ffffff99" text-anchor="middle">KEPLER'S 1ST &amp; 2ND LAWS</text>
+            <text x="370" y="300" font-size="9" fill="#ffffff66" text-anchor="middle">the two shaded sectors have EQUAL AREA — swept in equal time (2nd law)</text>
+        </svg>
+        <figcaption>An orbit is an ellipse with Earth at one focus (1st law). The focus-to-satellite line sweeps equal areas in equal time (2nd law), so the satellite is fast at perigee, slow at apogee.</figcaption>
+    </div>
+</div>
+
+<div class="content-block" id="s5">
+    <h2>5. Circular Orbits — Speed and Period From Altitude</h2>
+    <p>For the near-circular orbits most constellations fly, the equations simplify usefully. On a circular orbit the inward gravitational force exactly supplies the centripetal force needed to hold the satellite on its circle, and setting μm/r² equal to m·v²/r and solving gives the <strong>circular orbital speed</strong> v = √(μ/r), where r is the orbital radius — the Earth's radius plus the altitude. The speed depends only on the radius, not on the satellite's mass, and it falls as the orbit rises: a low satellite must move fast to stay up, a high one moves slowly.</p>
+    <p>The period follows from the third law with a = r, giving T = 2π·√(r³/μ). Together these two equations produce the altitude-speed-period relationship that underlies every later coverage and revisit calculation. Note one consequence worth carrying: a geostationary satellite is simply the circular orbit whose period equals the Earth's true rotation period, the sidereal day of 86,164 seconds, which works out to a radius of 42,164 km and an altitude of 35,786 km. GEO is not a special kind of orbit; it is the one altitude where the period matches the planet's spin.</p>
+    <table class="compare-table">
+        <thead><tr><th>Altitude (km)</th><th>Radius (km)</th><th>Speed (km/s)</th><th>Period</th><th>Note</th></tr></thead>
+        <tbody>
+            <tr><td>550</td><td>6,928</td><td>7.59</td><td>95.6 min</td><td>Typical LEO broadband shell</td></tr>
+            <tr><td>2,000</td><td>8,378</td><td>6.90</td><td>127 min</td><td>Upper edge of LEO</td></tr>
+            <tr><td>8,000</td><td>14,378</td><td>5.27</td><td>4.77 hr</td><td>MEO</td></tr>
+            <tr><td>20,200</td><td>26,578</td><td>3.87</td><td>11.98 hr</td><td>GPS MEO (½ sidereal day)</td></tr>
+            <tr><td>35,786</td><td>42,164</td><td>3.07</td><td>23.93 hr</td><td>GEO (one sidereal day)</td></tr>
+        </tbody>
+    </table>
+</div>
+
+<div class="content-block" id="s6">
+    <h2>6. Orbital Energy and the Vis-Viva Equation</h2>
+    <p>The deepest single result of the two-body problem is that an orbit's total specific energy — its energy per unit mass, kinetic plus potential — depends only on the semi-major axis: ε = −μ / (2a). Larger orbits have higher (less negative) energy; the energy fixes the size and the size fixes the energy. This is why raising an orbit costs energy and is the root of why higher orbits cost more to reach.</p>
+    <p>Combining the energy relation with the definition of kinetic and potential energy gives the <strong>vis-viva equation</strong>, the master equation of orbital speed:</p>
+    <blockquote>v² = μ · ( 2/r − 1/a )</blockquote>
+    <p>It gives the satellite's speed v at any point where its distance from the centre is r, on any orbit of semi-major axis a. Every speed result in the lesson is a special case of it. On a circular orbit r = a, and it reduces to v = √(μ/r). At perigee and apogee of an ellipse it gives the fastest and slowest speeds. Setting a to infinity — the boundary where the orbit is no longer bound — gives the escape speed v = √(2μ/r), which is exactly √2 times the circular speed at the same radius. Vis-viva is the equation to memorise; nearly everything kinematic in the module can be recovered from it.</p>
+    <div class="callout green">
+        <strong>THE TWO EQUATIONS TO CARRY</strong>
+        Period: T = 2π√(a³/μ). Speed anywhere: v² = μ(2/r − 1/a). Between them they convert the single choice of altitude into the period, speed, and energy that drive coverage, revisit, Doppler, and launch cost.
+    </div>
+</div>
+
+<div class="content-block" id="s7">
+    <h2>7. Elliptical Orbits — Perigee, Apogee, and Conserved Quantities</h2>
+    <p>On an elliptical orbit the second law plays out as a continuous trade between speed and distance. The perigee radius is a(1−e) and the apogee radius is a(1+e), and vis-viva gives the speed at each: fastest at perigee, slowest at apogee. The two are linked by conservation of angular momentum, which for the two extreme points takes the simple form v_p · r_p = v_a · r_a — the product of speed and distance is the same at perigee and apogee, so the closer the satellite is, the faster it moves, in exact proportion.</p>
+    <p>Although most communications constellations are near-circular, the elliptical case matters in practice for transfer orbits, for the highly elliptical orbits used at high latitudes, and for understanding what perturbations do to an orbit's shape over time. The two-body ellipse is also the exact backdrop against which the next lesson's perturbations are defined: a real orbit is described as an ellipse whose elements slowly change, so the ellipse must be understood first.</p>
+</div>
+
+<div class="content-block" id="s8">
+    <h2>8. Why the Mechanics Fix the Design Tradeoffs</h2>
+    <p>The equations of this lesson are not abstract; they are the quantitative form of the tradeoffs Module 1 described in words. Altitude sets the period through the third law, and the period sets how often a satellite passes over a given point, which drives revisit and ground-track repeat — the subject of the coverage lesson. Altitude sets the speed through vis-viva, and the speed sets how fast the satellite crosses the sky and how large its Doppler shift is — the subject of the Doppler lesson. Altitude sets the energy through ε = −μ/2a, and the energy sets how much must be spent to reach and maintain the orbit — part of the deployment lesson and, downstream, of the economics. The single choice of altitude propagates through all of these, and it does so through the equations established here.</p>
+    <p>This is why orbital mechanics is the first link the program deepens after the mental model. The regime tradeoff that Module 1 asked you to hold qualitatively is, underneath, this set of relations between a, r, v, T, and ε. Make them precise and the rest of constellation design becomes a matter of applying them.</p>
+</div>
+
+<div class="content-block" id="s9">
+    <h2>9. What the Two-Body Model Leaves Out</h2>
+    <p>Honesty about the idealisation is part of using it. The two-body model assumes a point-mass, perfectly spherical Earth and no force but mutual gravity, and the real situation violates every clause. The Earth is an oblate spheroid, bulging at the equator, and that bulge exerts a non-central force that makes orbits precess — the dominant real-world departure, and the engine behind sun-synchronous and repeat-ground-track orbits. The upper atmosphere, though thin, drags on low satellites and slowly lowers them, which is why low orbits decay and must be reboosted. The Moon and Sun pull on the orbit, and sunlight itself presses on the satellite. Each of these is a perturbation on the two-body ellipse, small over one revolution but accumulating over many.</p>
+    <p>The next lesson takes up these perturbations and the orbital-element description that makes them tractable. For now the point is that the two-body model is the correct starting point precisely because the perturbations are small: a real orbit is a two-body ellipse with slowly drifting parameters, so the ellipse and its governing equations come first, and the drift comes second.</p>
+    <div class="callout amber">
+        <strong>IDEALISATION, NOT TOY</strong>
+        The model is wrong in every clause — spherical Earth, no drag, no third bodies — yet correct as a starting point, because the perturbations are small per revolution. A real orbit is a two-body ellipse whose elements slowly drift. m2-2 takes up the drift.
+    </div>
+</div>
+
+<div class="content-block" id="s10">
+    <h2>10. Takeaway</h2>
+    <p>The two-body problem gives the exact skeleton of all orbital motion, and its results are the working tools of the whole module. Gravity follows an inverse-square law, and the quantity that matters is the standard gravitational parameter μ ≈ 398,600 km³/s². Bound orbits are ellipses with the Earth at a focus, described by semi-major axis and eccentricity, and governed by Kepler's three laws: the elliptical shape, the equal-area sweep that makes the satellite fastest at perigee, and the period law T = 2π√(a³/μ). For circular orbits, speed is √(μ/r) and falls with altitude, and GEO is just the orbit whose period is a sidereal day. The energy of an orbit depends only on its semi-major axis, and the vis-viva equation v² = μ(2/r − 1/a) gives the speed anywhere on any orbit, with circular and escape speeds as special cases.</p>
+    <p>Carry vis-viva and the period law forward as the two equations the rest of the module leans on. They convert the single design choice of altitude into the speed, period, and energy that drive coverage, revisit, Doppler, and launch cost — turning Module 1's qualitative regime tradeoff into the quantitative relations that constellation design actually uses. The next lesson takes the two-body ellipse and lets its parameters drift, which is what real orbits do.</p>
+    <div class="callout green">
+        <strong>LESSON OBJECTIVE MET</strong>
+        You can state Kepler's three laws and Newton's gravitation, compute circular speed and period from altitude, derive GEO from the sidereal day, apply vis-viva to any orbit, and relate orbital energy to the semi-major axis.
+    </div>
+</div>
+
+<!-- QUIZ -->
+<div class="quiz-block" id="quiz">
+    <h2>KNOWLEDGE CHECK</h2>
+    <p class="quiz-intro">Ten questions on the two-body foundation — gravitation, Kepler's laws, circular and elliptical orbits, energy, and vis-viva. One correct answer each.</p>
+
+    <div class="quiz-q"><p><strong>Q1.</strong> The standard gravitational parameter μ is used instead of G and M separately because:</p>
+        <div class="quiz-options">
+            <button class="quiz-opt" data-q="1" data-correct="false">A — It is a different physical quantity</button>
+            <button class="quiz-opt" data-q="1" data-correct="true">B — The product G·M is known far more precisely than either G or M alone, measured directly from satellite motion</button>
+            <button class="quiz-opt" data-q="1" data-correct="false">C — G does not apply to orbits</button>
+            <button class="quiz-opt" data-q="1" data-correct="false">D — M changes over time</button>
+        </div><div class="quiz-feedback" id="fb1"></div></div>
+
+    <div class="quiz-q"><p><strong>Q2.</strong> Bound orbits are ellipses rather than some other shape because:</p>
+        <div class="quiz-options">
+            <button class="quiz-opt" data-q="2" data-correct="false">A — The Earth is round</button>
+            <button class="quiz-opt" data-q="2" data-correct="true">B — The gravitational force follows an inverse-square law, which produces closed conic-section orbits</button>
+            <button class="quiz-opt" data-q="2" data-correct="false">C — Satellites are launched that way</button>
+            <button class="quiz-opt" data-q="2" data-correct="false">D — Of atmospheric drag</button>
+        </div><div class="quiz-feedback" id="fb2"></div></div>
+
+    <div class="quiz-q"><p><strong>Q3.</strong> Kepler's second law (equal areas in equal times) means a satellite:</p>
+        <div class="quiz-options">
+            <button class="quiz-opt" data-q="3" data-correct="false">A — Moves at constant speed always</button>
+            <button class="quiz-opt" data-q="3" data-correct="true">B — Moves fastest at perigee and slowest at apogee — it is conservation of angular momentum</button>
+            <button class="quiz-opt" data-q="3" data-correct="false">C — Moves fastest at apogee</button>
+            <button class="quiz-opt" data-q="3" data-correct="false">D — Stops at apogee</button>
+        </div><div class="quiz-feedback" id="fb3"></div></div>
+
+    <div class="quiz-q"><p><strong>Q4.</strong> Kepler's third law states:</p>
+        <div class="quiz-options">
+            <button class="quiz-opt" data-q="4" data-correct="false">A — T ∝ a</button>
+            <button class="quiz-opt" data-q="4" data-correct="true">B — T² ∝ a³, exactly T = 2π√(a³/μ)</button>
+            <button class="quiz-opt" data-q="4" data-correct="false">C — T³ ∝ a²</button>
+            <button class="quiz-opt" data-q="4" data-correct="false">D — Period is independent of size</button>
+        </div><div class="quiz-feedback" id="fb4"></div></div>
+
+    <div class="quiz-q"><p><strong>Q5.</strong> Circular orbital speed v = √(μ/r) implies that as altitude increases, orbital speed:</p>
+        <div class="quiz-options">
+            <button class="quiz-opt" data-q="5" data-correct="false">A — Increases</button>
+            <button class="quiz-opt" data-q="5" data-correct="true">B — Decreases — higher orbits move more slowly</button>
+            <button class="quiz-opt" data-q="5" data-correct="false">C — Stays the same</button>
+            <button class="quiz-opt" data-q="5" data-correct="false">D — Depends on satellite mass</button>
+        </div><div class="quiz-feedback" id="fb5"></div></div>
+
+    <div class="quiz-q"><p><strong>Q6.</strong> A geostationary orbit is special because:</p>
+        <div class="quiz-options">
+            <button class="quiz-opt" data-q="6" data-correct="false">A — It has no gravity</button>
+            <button class="quiz-opt" data-q="6" data-correct="true">B — Its period equals the Earth's sidereal rotation (86,164 s), giving a = 42,164 km, altitude 35,786 km</button>
+            <button class="quiz-opt" data-q="6" data-correct="false">C — It is the highest possible orbit</button>
+            <button class="quiz-opt" data-q="6" data-correct="false">D — It is elliptical</button>
+        </div><div class="quiz-feedback" id="fb6"></div></div>
+
+    <div class="quiz-q"><p><strong>Q7.</strong> The vis-viva equation v² = μ(2/r − 1/a) gives:</p>
+        <div class="quiz-options">
+            <button class="quiz-opt" data-q="7" data-correct="false">A — Only circular-orbit speed</button>
+            <button class="quiz-opt" data-q="7" data-correct="true">B — The speed at any point r on any orbit of semi-major axis a</button>
+            <button class="quiz-opt" data-q="7" data-correct="false">C — The orbital period</button>
+            <button class="quiz-opt" data-q="7" data-correct="false">D — The eccentricity</button>
+        </div><div class="quiz-feedback" id="fb7"></div></div>
+
+    <div class="quiz-q"><p><strong>Q8.</strong> The total specific energy of an orbit depends on:</p>
+        <div class="quiz-options">
+            <button class="quiz-opt" data-q="8" data-correct="false">A — Only the current speed</button>
+            <button class="quiz-opt" data-q="8" data-correct="true">B — Only the semi-major axis: ε = −μ/(2a)</button>
+            <button class="quiz-opt" data-q="8" data-correct="false">C — The eccentricity only</button>
+            <button class="quiz-opt" data-q="8" data-correct="false">D — The satellite's mass</button>
+        </div><div class="quiz-feedback" id="fb8"></div></div>
+
+    <div class="quiz-q"><p><strong>Q9.</strong> Escape speed relates to circular speed at the same radius as:</p>
+        <div class="quiz-options">
+            <button class="quiz-opt" data-q="9" data-correct="false">A — Equal</button>
+            <button class="quiz-opt" data-q="9" data-correct="true">B — √2 times the circular speed</button>
+            <button class="quiz-opt" data-q="9" data-correct="false">C — Twice the circular speed</button>
+            <button class="quiz-opt" data-q="9" data-correct="false">D — Half the circular speed</button>
+        </div><div class="quiz-feedback" id="fb9"></div></div>
+
+    <div class="quiz-q"><p><strong>Q10.</strong> On an elliptical orbit, perigee and apogee speeds satisfy:</p>
+        <div class="quiz-options">
+            <button class="quiz-opt" data-q="10" data-correct="false">A — v_p = v_a</button>
+            <button class="quiz-opt" data-q="10" data-correct="true">B — v_p · r_p = v_a · r_a — conserved angular momentum</button>
+            <button class="quiz-opt" data-q="10" data-correct="false">C — v_p · v_a = constant</button>
+            <button class="quiz-opt" data-q="10" data-correct="false">D — They are unrelated</button>
+        </div><div class="quiz-feedback" id="fb10"></div></div>
+
+    <div class="quiz-score" id="quizScore"></div>
+</div>
+
+<!-- PYTHON -->
+<div class="py-block" id="python">
+    <h2>PYTHON EXERCISES — SPINE PROJECT BEGINS</h2>
+    <p class="py-intro">These three exercises begin the module spine project — an orbital propagator and coverage tool that grows across Module 2 and feeds the capstone simulator. This lesson lays the propagator's foundation: speed, period, and a first position-over-time stepper. Python 3.8+ standard library only.</p>
+
+    <div class="py-exercise">
+        <h3>Exercise 1 — Altitude, speed, period table</h3>
+        <p>The circular-orbit relations as a reusable function.</p>
+<pre>
+import math
+
+MU = 398600.4418   # km^3/s^2
+RE = 6378.137      # km
+
+def circular(altitude_km):
+    r = RE + altitude_km
+    v = math.sqrt(MU / r)                    # km/s
+    T = 2 * math.pi * math.sqrt(r**3 / MU)   # s
+    return r, v, T
+
+print(f"{'alt':>7}{'v km/s':>10}{'period':>12}")
+for h in [550, 1200, 2000, 8000, 20200, 35786]:
+    r, v, T = circular(h)
+    print(f"{h:>7}{v:>10.3f}{T/60:>9.1f} min")
+
+# 1. Find, by trying altitudes, the one whose period is one sidereal day
+#    (86164 s). You should land near 35,786 km — that is GEO.
+# 2. GPS sits near 20,200 km. What is its period, and why is "half a
+#    sidereal day" a useful property for a navigation constellation?
+</pre>
+    </div>
+
+    <div class="py-exercise">
+        <h3>Exercise 2 — Vis-viva explorer</h3>
+        <p>Speed anywhere on any orbit, with circular and escape as special cases.</p>
+<pre>
+import math
+MU = 398600.4418; RE = 6378.137
+
+def vis_viva(r, a):
+    return math.sqrt(MU * (2.0/r - 1.0/a))   # km/s
+
+# Elliptical orbit: perigee 550 km, apogee 2000 km altitude
+rp = RE + 550
+ra = RE + 2000
+a  = (rp + ra) / 2
+vp = vis_viva(rp, a)
+va = vis_viva(ra, a)
+
+print(f"semi-major axis a = {a:.1f} km")
+print(f"perigee speed = {vp:.3f} km/s")
+print(f"apogee  speed = {va:.3f} km/s")
+print(f"ang. momentum check: vp*rp = {vp*rp:.0f}, va*ra = {va*ra:.0f}")
+
+# 1. Confirm vp*rp == va*ra (conserved angular momentum).
+# 2. Set a = r (circular) and check vis_viva matches sqrt(MU/r).
+# 3. Compute escape speed at 550 km as sqrt(2*MU/r) and confirm it is
+#    sqrt(2) times the circular speed there.
+</pre>
+    </div>
+
+    <div class="py-exercise">
+        <h3>Exercise 3 — Spine stage 1: a two-body propagator</h3>
+        <p>Step a circular orbit's position over time. This is the seed of the coverage tool.</p>
+<pre>
+import math
+MU = 398600.4418; RE = 6378.137
+
+def propagate_circular(altitude_km, minutes, step_s=60):
+    """Return (t, x, y) positions in the orbital plane for a circular orbit."""
+    r = RE + altitude_km
+    n = math.sqrt(MU / r**3)          # mean motion, rad/s
+    out = []
+    t = 0
+    while t <= minutes * 60:
+        theta = n * t                  # angle swept since start
+        x = r * math.cos(theta)
+        y = r * math.sin(theta)
+        out.append((t, x, y))
+        t += step_s
+    return out
+
+track = propagate_circular(550, minutes=96)   # ~one period
+print(f"steps: {len(track)}")
+print("first:", tuple(round(c,1) for c in track[0]))
+print("last :", tuple(round(c,1) for c in track[-1]))
+# After one full period (~95.6 min) the satellite returns near its start.
+
+# 1. Verify the satellite returns near its start after one period.
+# 2. STAGE-2 PREVIEW (eccentric orbits): a circular orbit advances its angle
+#    linearly (theta = n*t). An eccentric one does not — you must solve
+#    Kepler's equation M = E - e*sin(E) for E each step. Sketch how you would
+#    add that; m2-2 supplies the elements it needs.
+</pre>
+        <div class="py-challenge"><strong>SPINE PROJECT</strong>
+            Exercise 3 is stage 1 of the Module 2 spine project: a propagator. Across the module it gains eccentric orbits (m2-2), a ground track on the rotating Earth (m2-3), and full Walker-constellation geometry (m2-5), until m2-6 runs it to evaluate real designs. Keep your code — each lesson extends it.
+        </div>
+    </div>
+</div>
+
+<!-- REFLECTION -->
+<div class="reflection-block" id="reflect">
+    <h2>REFLECTION PROMPTS</h2>
+    <p class="ref-intro">Not graded. Write in your own words, 200–400 words each.</p>
+
+    <div class="ref-prompt"><h3>Prompt 1 — Falling and Missing</h3>
+        <p>A satellite is often described as "continuously falling toward the Earth and continuously missing." Explain in your own words, using the balance of gravitational and centripetal effects, why a faster sideways speed at a given altitude does not simply give a higher circular orbit but a different shape of orbit entirely.</p></div>
+
+    <div class="ref-prompt"><h3>Prompt 2 — From Period to Constellation Size</h3>
+        <p>The third law ties period to altitude alone. Trace how that single relationship propagates into constellation design: pick an altitude, reason about its period, and from the period reason qualitatively about how often a satellite revisits a point and therefore how many satellites a continuous-coverage constellation at that altitude might need.</p></div>
+
+    <div class="ref-prompt"><h3>Prompt 3 — Wrong But Right</h3>
+        <p>The two-body model assumes a spherical Earth and no force but gravity, yet it is the foundation of the whole module. Argue why an idealisation known to be wrong in every clause is nonetheless the right starting point, and identify which of its omitted effects you would expect to matter most for a 550 km constellation.</p></div>
+
+    <div class="ref-prompt"><h3>Prompt 4 — One Master Equation</h3>
+        <p>Vis-viva returns circular speed, elliptical perigee and apogee speeds, and escape speed all from one equation. Reflect on what it means that these apparently different cases are one relation, and how having a single master equation changes how you would reason about a transfer between two orbits.</p></div>
+</div>
+
+<!-- MARK COMPLETE -->
+<div class="complete-wrap">
+    <button class="complete-btn" id="completeBtn">MARK LESSON COMPLETE</button>
+    <div class="complete-msg" id="completeMsg"></div>
+</div>
+
+<div class="lesson-nav">
+    <a href="m2.html">← M2 HUB</a>
+    <a href="m2-2.html">LESSON 02 — ORBITAL ELEMENTS &amp; PERTURBATIONS →</a>
+</div>
+
+</div>
+
+<button class="back-to-top" id="backToTop" title="Back to top">↑</button>
+
+<footer>© 2026 LEOAF · M2 · LESSON 01 OF 7</footer>
+
+<script>
+const canvas = document.getElementById('starsCanvas');
+const ctx = canvas.getContext('2d');
+let stars = [];
+function initStars() { stars=[]; for(let i=0;i<180;i++) stars.push({x:Math.random()*canvas.width,y:Math.random()*canvas.height,size:Math.random()*1.5+0.4,speed:Math.random()*0.18+0.04,hue:Math.random()*360}); }
+function resizeCanvas() { canvas.width=window.innerWidth; canvas.height=window.innerHeight; }
+resizeCanvas(); initStars(); window.addEventListener('resize', resizeCanvas);
+function animateStars() { ctx.clearRect(0,0,canvas.width,canvas.height); stars.forEach(s=>{s.y-=s.speed;if(s.y<0){s.y=canvas.height;s.x=Math.random()*canvas.width;} ctx.beginPath();ctx.fillStyle=`hsl(${s.hue},80%,80%)`;ctx.arc(s.x,s.y,s.size,0,Math.PI*2);ctx.fill();}); requestAnimationFrame(animateStars); }
+animateStars();
+</script>
+
+<script>
+const feedbacks = {
+    1:{correct:"Correct. μ = G·M is measured directly and precisely from how satellites move, far better than G or M individually.",wrong:"Incorrect. It is the product G·M, known to high precision from satellite motion, whereas G and M separately are known less precisely."},
+    2:{correct:"Correct. The inverse-square force yields conic-section paths; bound (negative-energy) ones are closed ellipses.",wrong:"Incorrect. It is the inverse-square law that makes bound orbits closed ellipses — a different force law would not close the orbit."},
+    3:{correct:"Correct. Equal areas in equal times is conserved angular momentum; the satellite speeds up near perigee and slows near apogee.",wrong:"Incorrect. It means fastest at perigee, slowest at apogee — the area law is angular-momentum conservation, not constant speed."},
+    4:{correct:"Correct. The period squared scales as the semi-major axis cubed; T = 2π√(a³/μ).",wrong:"Incorrect. It is T² ∝ a³ — period grows with the 3/2 power of orbit size, T = 2π√(a³/μ)."},
+    5:{correct:"Correct. Speed falls as r grows; a low satellite must move fast, a high one slowly, independent of its mass.",wrong:"Incorrect. Speed decreases with altitude — v = √(μ/r) falls as r rises, and it does not depend on the satellite's mass."},
+    6:{correct:"Correct. GEO is the circular orbit whose period matches the sidereal day, fixing its radius and altitude exactly.",wrong:"Incorrect. It is the orbit whose period equals one sidereal day — that single condition fixes a = 42,164 km and altitude 35,786 km."},
+    7:{correct:"Correct. Vis-viva returns speed anywhere on any orbit; circular and escape speeds are special cases of it.",wrong:"Incorrect. It gives the speed at any r on any orbit — circular speed (r = a) and escape speed (a → ∞) are just special cases."},
+    8:{correct:"Correct. Orbital specific energy is set entirely by the semi-major axis; larger orbits have higher (less negative) energy.",wrong:"Incorrect. It depends only on the semi-major axis, ε = −μ/(2a) — size fixes energy, regardless of where the satellite currently is."},
+    9:{correct:"Correct. Escape speed is √(2μ/r) = √2 × √(μ/r), so it is √2 times the local circular speed.",wrong:"Incorrect. It is √2 times circular speed — escape is √(2μ/r), the circular speed scaled by √2."},
+    10:{correct:"Correct. Angular momentum conservation gives v_p·r_p = v_a·r_a, so the closer point is faster in exact proportion.",wrong:"Incorrect. They obey v_p·r_p = v_a·r_a — conserved angular momentum, so closer means proportionally faster."}
+};
+let answered = {};
+document.querySelectorAll('.quiz-opt').forEach(btn => {
+    btn.addEventListener('click', function() {
+        const q = this.dataset.q;
+        if (answered[q] !== undefined) return;
+        const correct = this.dataset.correct === 'true';
+        answered[q] = correct;
+        document.querySelectorAll(`.quiz-opt[data-q="${q}"]`).forEach(b => { b.disabled = true; if (b.dataset.correct === 'true') b.classList.add('correct'); });
+        if (!correct) this.classList.add('wrong');
+        const fb = document.getElementById(`fb${q}`);
+        fb.textContent = (correct ? '✓ ' : '✗ ') + feedbacks[q][correct ? 'correct' : 'wrong'];
+        fb.style.color = correct ? '#39ff14' : '#ff004f';
+        if (Object.keys(answered).length === 10) {
+            const total = Object.values(answered).filter(Boolean).length;
+            const el = document.getElementById('quizScore');
+            el.style.display = 'block';
+            const pct = Math.round(total / 10 * 100);
+            el.textContent = `SCORE: ${total} / 10 (${pct}%) — ${pct===100?'PERFECT.':pct>=80?'STRONG. REVIEW ANY MISSES.':pct>=60?'ADEQUATE. REVISIT WEAK SECTIONS.':'REVISIT THE LESSON BEFORE PROCEEDING.'}`;
+        }
+    });
+});
+</script>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="supabase.js"></script>
+<script src="user_progress.js"></script>
+<script>
+const LESSON_ID = 'm2-1';
+(function () {
+    function bounceToLogin(reason) {
+        console.error("Auth guard:", reason, "- redirecting to index.html");
+        window.location.replace("index.html");
+    }
+    async function init() {
+        if (typeof client === "undefined" || !client || !client.auth) {
+            return bounceToLogin("Supabase client not loaded (is supabase.js in this directory?)");
+        }
+        let session = null;
+        try { ({ data: { session } } = await client.auth.getSession()); }
+        catch (e) { return bounceToLogin("getSession threw: " + e.message); }
+        if (!session) { window.location.replace("index.html"); return; }
+
+        const btn = document.getElementById('completeBtn');
+        const msg = document.getElementById('completeMsg');
+        function setDone(done) {
+            if (done) {
+                btn.textContent = '✓ COMPLETE — CLICK TO UNDO';
+                btn.classList.add('done');
+                btn.style.cssText = 'border-color:#39ff14;color:#39ff14;background:rgba(57,255,20,0.1);cursor:pointer;opacity:1;';
+                msg.style.color = '#39ff14';
+                msg.textContent = 'Lesson marked complete. Click again to undo.';
+            } else {
+                btn.textContent = 'MARK LESSON COMPLETE';
+                btn.classList.remove('done');
+                btn.style.cssText = '';
+                msg.style.color = '#ffffff55';
+                msg.textContent = 'Not yet marked complete.';
+            }
+        }
+        let mastered = [];
+        try { mastered = await getMasteredSections(); } catch (e) { console.error(e); }
+        setDone(mastered.includes(LESSON_ID));
+        btn.addEventListener('click', async () => {
+            const isCurrentlyDone = btn.classList.contains('done');
+            msg.style.color = '#00d9ff';
+            msg.textContent = 'Saving...';
+            const ok = await upsertSection(LESSON_ID, !isCurrentlyDone);
+            if (ok) { setDone(!isCurrentlyDone); }
+            else { msg.style.color = '#ff004f'; msg.textContent = 'Error saving. Try again.'; }
+        });
+        const btt = document.getElementById('backToTop');
+        window.addEventListener('scroll', () => { btt.classList.toggle('visible', window.scrollY > 400); });
+        btt.addEventListener('click', () => window.scrollTo({ top: 0, behavior: 'smooth' }));
+    }
+    if (document.readyState === "loading") { document.addEventListener("DOMContentLoaded", init); }
+    else { init(); }
+})();
+</script>
+
+</body>
+</html>
