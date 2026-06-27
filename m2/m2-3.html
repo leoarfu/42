@@ -1,0 +1,863 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, shrink-to-fit=no">
+<title>M2-3 — Ground Tracks &amp; Doppler · LEOAF</title>
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;600;800&family=Share+Tech+Mono&family=Libre+Baskerville:ital,wght@0,400;0,700;1,400&display=swap" rel="stylesheet">
+<link rel="icon" href="favicon.ico" sizes="any" type="image/x-icon">
+<link rel="manifest" href="site.webmanifest">
+<meta name="theme-color" content="#0f0f0f">
+
+<script>
+window.leoafAbort = async function () {
+    function go() { window.location.replace("index.html?signedout=1"); }
+    try {
+        if (typeof client !== "undefined" && client && client.auth && client.auth.signOut) {
+            try { await client.auth.signOut({ scope: "local" }); } catch (e) {}
+        }
+    } catch (e) {}
+    go();
+};
+</script>
+
+<style>
+* { box-sizing:border-box; margin:0; padding:0; }
+html { height:100%; -webkit-text-size-adjust:100%; overflow-x:hidden; }
+body { font-family:'Share Tech Mono',monospace; background:#000; color:white; overflow-x:hidden; min-height:100vh; }
+#starsCanvas { position:fixed; inset:0; z-index:-1; }
+
+header { background:#000; border-bottom:1px solid #ff004f33; position:sticky; top:0; z-index:100; padding:1rem clamp(1.5rem,5vw,4rem); display:flex; justify-content:space-between; align-items:center; box-shadow:0 4px 16px #0008; }
+.logo { font-family:'Orbitron',sans-serif; font-weight:800; font-size:clamp(16px,2vw,22px); letter-spacing:3px; text-decoration:none; }
+.logo span:first-child { color:white; }
+.logo span:last-child { color:#ff004f; }
+.nav-right { display:flex; align-items:center; gap:10px; }
+.nav-btn { background:transparent; border:1px solid #ff004f44; color:#ff004f; padding:6px 14px; cursor:pointer; transition:0.3s ease; font-size:11px; font-family:'Orbitron',sans-serif; letter-spacing:1px; text-decoration:none; display:inline-block; }
+.nav-btn:hover { background:#ff004f; color:black; }
+
+.breadcrumb { padding:14px clamp(1.5rem,5vw,4rem); font-size:11px; color:#ffffff44; letter-spacing:1px; position:relative; z-index:1; }
+.breadcrumb a { color:#00d9ff66; text-decoration:none; }
+.breadcrumb a:hover { color:#00d9ff; }
+.breadcrumb span { margin:0 8px; }
+
+.lesson-wrap { max-width:820px; margin:0 auto; padding:0 clamp(1.5rem,5vw,4rem) 80px; position:relative; z-index:1; }
+
+.lesson-header { padding:30px 0 28px; border-bottom:1px solid #ffffff11; margin-bottom:36px; }
+.lesson-tag { font-family:'Orbitron',sans-serif; font-size:10px; color:#ff004f; letter-spacing:3px; margin-bottom:10px; }
+.lesson-header h1 { font-family:'Orbitron',sans-serif; font-size:clamp(20px,3.5vw,32px); font-weight:800; line-height:1.2; margin-bottom:12px; }
+.lesson-meta { display:flex; gap:10px; flex-wrap:wrap; margin-bottom:16px; }
+.l-pill { font-family:'Orbitron',sans-serif; font-size:10px; padding:3px 10px; border:1px solid; letter-spacing:1px; }
+.l-pill-q { color:#ff004f; border-color:#ff004f44; }
+.l-pill-t { color:#39ff14; border-color:#39ff1444; }
+.lesson-intro { font-size:13px; line-height:1.85; opacity:0.75; }
+
+.toc { background:rgba(0,217,255,0.06); border:1px solid #00d9ff33; padding:24px 28px; margin:30px 0; }
+.toc h4 { font-family:'Orbitron',sans-serif; font-size:10px; color:#00d9ff; letter-spacing:2px; margin-bottom:16px; }
+.toc ol { padding-left:20px; }
+.toc li { font-size:13px; line-height:2.1; }
+.toc li a { color:#00d9ffbb; text-decoration:none; transition:0.15s; }
+.toc li a:hover { color:#ffffff; padding-left:4px; }
+.toc li::marker { color:#ff004f; font-family:'Orbitron',sans-serif; font-size:10px; }
+
+.content-block { margin-bottom:48px; }
+.content-block h2 { font-family:'Orbitron',sans-serif; font-size:13px; color:#00d9ff; letter-spacing:2px; text-transform:uppercase; margin-bottom:18px; padding-bottom:10px; border-bottom:1px solid #00d9ff22; scroll-margin-top:80px; }
+.content-block h3 { font-family:'Orbitron',sans-serif; font-size:11px; color:#ffffff88; letter-spacing:1.5px; text-transform:uppercase; margin:28px 0 12px; }
+.content-block p { font-size:13px; line-height:1.9; opacity:0.85; margin-bottom:16px; }
+.content-block ul, .content-block ol { padding-left:0; margin-bottom:16px; }
+.content-block ul li, .content-block ol li { font-size:13px; line-height:1.85; opacity:0.85; padding-left:20px; position:relative; margin-bottom:6px; }
+.content-block ul li::before { content:'›'; position:absolute; left:0; color:#00d9ff; }
+.content-block blockquote { border-left:3px solid #39ff14; background:rgba(57,255,20,0.05); padding:14px 20px; margin:18px 0; font-size:14px; font-family:'Share Tech Mono',monospace; color:#39ff14; letter-spacing:1px; }
+
+.callout { border-left:3px solid #00d9ff; background:rgba(0,217,255,0.05); padding:16px 20px; margin:22px 0; font-size:12px; line-height:1.8; }
+.callout.red   { border-left-color:#ff004f; background:rgba(255,0,79,0.05); }
+.callout.green { border-left-color:#39ff14; background:rgba(57,255,20,0.05); }
+.callout.amber { border-left-color:#ffaa00; background:rgba(255,170,0,0.05); }
+.callout strong { font-family:'Orbitron',sans-serif; font-size:10px; letter-spacing:1px; display:block; margin-bottom:8px; color:inherit; }
+
+.key-numbers { display:grid; grid-template-columns:repeat(auto-fit,minmax(140px,1fr)); gap:12px; margin:22px 0; }
+.kn-item { background:rgba(255,255,255,0.03); border:1px solid #ffffff11; padding:16px 12px; text-align:center; }
+.kn-val { font-family:'Orbitron',sans-serif; font-size:clamp(15px,2.3vw,22px); font-weight:800; color:#00d9ff; display:block; }
+.kn-label { font-size:10px; opacity:0.5; letter-spacing:1px; margin-top:5px; display:block; line-height:1.4; }
+
+.compare-table { width:100%; border-collapse:collapse; margin:22px 0; font-size:12px; }
+.compare-table th { font-family:'Orbitron',sans-serif; font-size:10px; letter-spacing:1px; color:#00d9ff; padding:10px 12px; border-bottom:1px solid #00d9ff33; text-align:left; }
+.compare-table td { padding:10px 12px; border-bottom:1px solid #ffffff0a; line-height:1.5; opacity:0.85; vertical-align:top; }
+.compare-table tr:hover td { background:rgba(255,255,255,0.02); }
+
+.diagram-wrap { margin:24px 0; background:rgba(255,255,255,0.02); border:1px solid #ffffff11; padding:20px; overflow-x:auto; }
+.diagram-wrap figcaption { font-size:11px; color:#ffffff44; margin-top:12px; text-align:center; letter-spacing:1px; }
+
+.quiz-block { background:rgba(17,17,17,0.9); border:1px solid #ff004f33; padding:28px; margin:48px 0 32px; }
+.quiz-block h2 { font-family:'Orbitron',sans-serif; font-size:13px; color:#ff004f; letter-spacing:2px; margin-bottom:6px; }
+.quiz-intro { font-size:12px; opacity:0.6; margin-bottom:24px; padding-bottom:16px; border-bottom:1px solid #ff004f22; line-height:1.6; }
+.quiz-q { margin-bottom:28px; }
+.quiz-q p { font-size:13px; opacity:0.9; margin-bottom:12px; line-height:1.65; }
+.quiz-q p strong { color:#00d9ff; }
+.quiz-options { display:flex; flex-direction:column; gap:8px; }
+.quiz-opt { background:rgba(255,255,255,0.03); border:1px solid #ffffff1a; padding:11px 16px; cursor:pointer; font-size:12px; font-family:'Share Tech Mono',monospace; transition:0.2s ease; text-align:left; color:white; line-height:1.5; }
+.quiz-opt:hover:not(:disabled) { background:rgba(0,217,255,0.08); border-color:#00d9ff44; }
+.quiz-opt.correct  { background:rgba(57,255,20,0.1);  border-color:#39ff14; color:#39ff14; }
+.quiz-opt.wrong    { background:rgba(255,0,79,0.1);   border-color:#ff004f; color:#ff004f; }
+.quiz-opt:disabled { cursor:default; }
+.quiz-feedback { font-size:12px; margin-top:10px; min-height:18px; line-height:1.7; opacity:0.9; padding:0 4px; }
+.quiz-score { font-family:'Orbitron',sans-serif; font-size:12px; color:#39ff14; margin-top:20px; letter-spacing:1px; display:none; padding-top:16px; border-top:1px solid #39ff1433; }
+
+.py-block { background:rgba(10,10,10,0.95); border:1px solid #39ff1422; padding:28px; margin:32px 0; }
+.py-block h2 { font-family:'Orbitron',sans-serif; font-size:13px; color:#39ff14; letter-spacing:2px; margin-bottom:8px; }
+.py-block .py-intro { font-size:12px; opacity:0.7; margin-bottom:20px; padding-bottom:16px; border-bottom:1px solid #39ff1422; line-height:1.7; }
+.py-exercise { margin-bottom:32px; }
+.py-exercise:last-child { margin-bottom:0; }
+.py-exercise h3 { font-family:'Orbitron',sans-serif; font-size:11px; color:#39ff1499; letter-spacing:1.5px; text-transform:uppercase; margin-bottom:10px; }
+.py-exercise p { font-size:12px; opacity:0.8; margin-bottom:14px; line-height:1.75; }
+.py-block pre { background:#050505; border:1px solid #39ff1433; padding:20px; font-family:'Share Tech Mono',monospace; font-size:11.5px; line-height:1.75; overflow-x:auto; color:#39ff14; white-space:pre; margin-bottom:12px; }
+.py-block .py-challenge { background:rgba(57,255,20,0.04); border-left:2px solid #39ff14; padding:12px 16px; margin-top:14px; font-size:12px; line-height:1.75; opacity:0.8; }
+.py-block .py-challenge strong { font-family:'Orbitron',sans-serif; font-size:10px; color:#39ff14; display:block; margin-bottom:6px; letter-spacing:1px; }
+
+.reflection-block { background:rgba(255,170,0,0.04); border:1px solid #ffaa0033; padding:24px; margin:32px 0; }
+.reflection-block h2 { font-family:'Orbitron',sans-serif; font-size:13px; color:#ffaa00; letter-spacing:2px; margin-bottom:8px; }
+.reflection-block .ref-intro { font-size:12px; opacity:0.7; margin-bottom:20px; padding-bottom:14px; border-bottom:1px solid #ffaa0022; line-height:1.7; }
+.ref-prompt { margin-bottom:20px; }
+.ref-prompt h3 { font-family:'Orbitron',sans-serif; font-size:11px; color:#ffaa0099; letter-spacing:1px; margin-bottom:8px; }
+.ref-prompt p { font-size:12px; opacity:0.8; line-height:1.75; margin-bottom:10px; }
+
+.back-to-top { position:fixed; bottom:28px; right:28px; z-index:200; width:44px; height:44px; background:#000; border:1px solid #00d9ff55; color:#00d9ff; font-size:20px; cursor:pointer; display:flex; align-items:center; justify-content:center; opacity:0; pointer-events:none; transition:opacity 0.3s ease, border-color 0.3s ease; }
+.back-to-top.visible { opacity:1; pointer-events:auto; }
+.back-to-top:hover { border-color:#00d9ff; background:#001a2c; }
+
+.complete-wrap { margin-top:56px; padding-top:30px; border-top:1px solid #ffffff11; text-align:center; }
+.complete-btn { font-family:'Orbitron',sans-serif; font-size:13px; letter-spacing:2px; padding:14px 44px; background:transparent; border:1px solid #39ff14; color:#39ff14; cursor:pointer; transition:0.3s ease; }
+.complete-btn:hover:not(.done) { background:#39ff14; color:black; box-shadow:0 0 20px rgba(57,255,20,0.4); }
+.complete-btn.done { background:rgba(57,255,20,0.1); cursor:default; opacity:0.7; }
+.complete-msg { font-size:12px; color:#39ff14; margin-top:14px; min-height:18px; letter-spacing:1px; }
+
+.lesson-nav { display:flex; justify-content:space-between; margin-top:30px; flex-wrap:wrap; gap:10px; }
+.lesson-nav a { font-family:'Orbitron',sans-serif; font-size:11px; color:#00d9ff66; text-decoration:none; letter-spacing:1px; transition:0.2s; }
+.lesson-nav a:hover { color:#00d9ff; }
+
+footer { text-align:center; padding:30px; opacity:0.3; font-size:11px; position:relative; z-index:1; letter-spacing:1px; }
+
+@media (max-width:600px) { .key-numbers { grid-template-columns:1fr 1fr; } .compare-table { font-size:11px; } .compare-table th, .compare-table td { padding:8px 8px; } }
+
+/* ── LIGHT READING MODE ── */
+.content-block { background:#f5f2ec; color:#1a1a1a; padding:36px clamp(24px,4vw,48px); margin-bottom:24px; border-left:4px solid #00d9ff; position:relative; z-index:1; }
+.content-block h2 { font-family:'Orbitron',sans-serif; font-size:13px; color:#003d66; letter-spacing:2px; text-transform:uppercase; margin-bottom:20px; padding-bottom:10px; border-bottom:2px solid #00d9ff66; scroll-margin-top:80px; }
+.content-block h3 { font-family:'Orbitron',sans-serif; font-size:11px; color:#444; letter-spacing:1.5px; text-transform:uppercase; margin:32px 0 14px; }
+.content-block p { font-family:'Libre Baskerville', Georgia, serif; font-size:15px; line-height:1.9; color:#1a1a1a; opacity:1; margin-bottom:18px; }
+.content-block ul li { font-family:'Libre Baskerville', Georgia, serif; font-size:14px; line-height:1.85; color:#1a1a1a; opacity:1; margin-bottom:8px; }
+.content-block ul li::before { color:#0077aa; }
+.content-block blockquote { border-left:3px solid #1a7a1a; background:#eafaea; color:#0a3d0a; }
+.content-block .callout { border-left:3px solid #0088cc; background:#e8f4fb; color:#1a1a1a; }
+.content-block .callout.red   { border-left-color:#cc0033; background:#fdecea; }
+.content-block .callout.green { border-left-color:#1a7a1a; background:#eafaea; }
+.content-block .callout.amber { border-left-color:#996600; background:#fef9ec; }
+.content-block .callout strong { color:inherit; }
+.content-block .kn-item { background:#fff; border:1px solid #d0d0d0; }
+.content-block .kn-label { color:#555; opacity:1; }
+.content-block .compare-table th { color:#003d66; border-bottom:2px solid #00d9ff66; }
+.content-block .compare-table td { color:#1a1a1a; opacity:1; border-bottom:1px solid #ddd; }
+.content-block .compare-table tr:hover td { background:#f0f0f0; }
+.content-block .diagram-wrap { background:#0a0a0a; border:1px solid #333; }
+.content-block .diagram-wrap figcaption { color:#ffffff55; }
+</style>
+</head>
+<body>
+
+<canvas id="starsCanvas"></canvas>
+
+<header>
+    <a href="dashboard.html" class="logo"><span>LEO</span><span>AF</span></a>
+    <div class="nav-right">
+        <a href="m2.html" class="nav-btn">← M2 HUB</a>
+        <button class="nav-btn" onclick="leoafAbort()">ABORT</button>
+    </div>
+</header>
+
+<div class="breadcrumb">
+    <a href="dashboard.html">DASHBOARD</a><span>/</span>
+    <a href="m2.html">M2</a><span>/</span>
+    <span style="color:#ffffff88;">LESSON 03 — GROUND TRACKS &amp; DOPPLER</span>
+</div>
+
+<div class="lesson-wrap">
+
+<div class="lesson-header">
+    <div class="lesson-tag">M2 · LESSON 03 OF 7</div>
+    <h1>Ground Tracks &amp; Doppler</h1>
+    <div class="lesson-meta">
+        <div class="l-pill l-pill-q">MODULE 2</div>
+        <div class="l-pill l-pill-t">ORBITAL MECHANICS</div>
+    </div>
+    <p class="lesson-intro">The previous two lessons described what a satellite does in space. This lesson describes what it looks like from the ground. Two questions govern the view from the surface: where does the satellite's ground track fall as the Earth rotates beneath it, and how does the satellite's motion shift the frequency of its signals? Both follow from the same geometry — satellite position, rotating Earth, observer location. The ground track determines coverage, revisit time, and gateway contact windows. The Doppler shift is a direct consequence of orbital speed and geometry, and it drives the frequency-management problem every LEO air interface must solve. The spine project propagator gains its first Earth-fixed output here: elevation angle, slant range, and Doppler shift to a fixed observer.</p>
+</div>
+
+<div class="toc">
+    <h4>CONTENTS</h4>
+    <ol>
+        <li><a href="#s1">The sub-satellite point and the ground track</a></li>
+        <li><a href="#s2">Elevation angle and the geometry of a pass</a></li>
+        <li><a href="#s3">Pass duration and the contact window</a></li>
+        <li><a href="#s4">The Doppler effect in LEO</a></li>
+        <li><a href="#s5">Range rate calculation</a></li>
+        <li><a href="#s6">Doppler compensation in the air interface</a></li>
+        <li><a href="#s7">The geometry unified: elevation, range, and Doppler</a></li>
+        <li><a href="#s8">Visibility windows and the ground station problem</a></li>
+        <li><a href="#s9">What this lesson delivers to the design chain</a></li>
+        <li><a href="#quiz">Knowledge check</a></li>
+        <li><a href="#python">Python exercises — spine project stage 3</a></li>
+        <li><a href="#reflect">Reflection prompts</a></li>
+    </ol>
+</div>
+
+<!-- S1 -->
+<div class="content-block" id="s1">
+    <h2>1. The Sub-Satellite Point and the Ground Track</h2>
+    <p>The sub-satellite point (SSP) is the point on the Earth's surface directly below the satellite — the foot of the perpendicular from the satellite to the Earth's centre. As the satellite orbits and the Earth rotates, the SSP traces a path called the ground track. Coverage maps and revisit-time analyses are built from that path.</p>
+    <p>For a circular orbit in a fixed inertial plane, the SSP traces a sinusoidal path across the globe: latitude swings between +i and −i (where i is the inclination), and longitude shifts westward with each pass because the Earth has rotated eastward during the orbital period. The net westward longitude shift per orbit is:</p>
+    <blockquote>ΔΩ_pass = (T_orbit / T_day) × 360°  +  dΩ/dt × T_orbit</blockquote>
+    <p>The first term is Earth's rotation during the period; the second is J2 node regression. At 550 km and 53° inclination — T ≈ 95.6 min, Earth rotates ≈ 23.9° eastward per orbit, J2 shifts the node ≈ 1.04° westward — successive ascending passes fall about 24.9° west of the previous one. With 15.1 orbits per day the equatorial pass spacing is roughly 23.9°, covering the whole equatorial belt in a day.</p>
+    <p>The maximum latitude reached equals the inclination for prograde orbits (i ≤ 90°), or 180° − i for retrograde. A 53° shell reaches ±53° latitude; a 97.6° sun-synchronous orbit reaches ±82.4°; polar orbits cover all latitudes. Coverage gaps above the inclination are why high-inclination and polar constellations are chosen for global or near-global service.</p>
+
+    <div class="diagram-wrap">
+        <svg viewBox="0 0 740 300" width="100%" xmlns="http://www.w3.org/2000/svg" font-family="Share Tech Mono, monospace">
+            <rect width="740" height="300" fill="#0a0a0a"/>
+            <!-- grid lines -->
+            <line x1="0" y1="150" x2="740" y2="150" stroke="#ffffff11" stroke-width="1"/>
+            <line x1="0" y1="75"  x2="740" y2="75"  stroke="#ffffff08" stroke-width="1" stroke-dasharray="2,4"/>
+            <line x1="0" y1="225" x2="740" y2="225" stroke="#ffffff08" stroke-width="1" stroke-dasharray="2,4"/>
+            <!-- lat labels -->
+            <text x="6" y="153" font-size="9" fill="#ffffff44">0°</text>
+            <text x="6" y="78"  font-size="9" fill="#ffffff33">+53°</text>
+            <text x="6" y="228" font-size="9" fill="#ffffff33">−53°</text>
+            <!-- ground track pass 1 -->
+            <path d="M 0,150 Q 185,75 370,150 Q 555,225 740,150" fill="none" stroke="#00d9ff" stroke-width="2"/>
+            <!-- ground track pass 2 (shifted west ~25deg ~ 50px at 740px/360deg scale) -->
+            <path d="M -50,150 Q 135,75 320,150 Q 505,225 690,150" fill="none" stroke="#00d9ff88" stroke-width="1.5" stroke-dasharray="5,3"/>
+            <!-- westward shift arrow -->
+            <line x1="370" y1="150" x2="320" y2="150" stroke="#ffaa00" stroke-width="1.5" marker-end="url(#aw)"/>
+            <defs>
+                <marker id="aw" markerWidth="7" markerHeight="7" refX="3" refY="3.5" orient="auto">
+                    <polygon points="0 0, 7 3.5, 0 7" fill="#ffaa00"/>
+                </marker>
+            </defs>
+            <text x="330" y="143" font-size="9" fill="#ffaa00" text-anchor="middle">~25°/orbit</text>
+            <!-- inclination label -->
+            <text x="370" y="68" font-size="9" fill="#00d9ff99" text-anchor="middle">max lat = inclination (53°)</text>
+            <!-- caption -->
+            <text x="370" y="288" font-size="9" fill="#ffffff55" text-anchor="middle">GROUND TRACK — sinusoidal between ±i, drifting westward by ~25° each orbit at 550 km</text>
+        </svg>
+        <figcaption>Successive ground-track passes (solid = pass 1, dashed = pass 2) shift westward as the Earth rotates eastward during each orbital period. Max latitude equals the inclination.</figcaption>
+    </div>
+
+    <div class="key-numbers">
+        <div class="kn-item"><span class="kn-val">95.6 min</span><span class="kn-label">PERIOD AT 550 km</span></div>
+        <div class="kn-item"><span class="kn-val">23.9°</span><span class="kn-label">EARTH ROTATION PER ORBIT</span></div>
+        <div class="kn-item"><span class="kn-val">~24.9°</span><span class="kn-label">NET WESTWARD SHIFT PER PASS (incl. J2)</span></div>
+        <div class="kn-item"><span class="kn-val">15.1</span><span class="kn-label">DAILY ORBITS AT 550 km</span></div>
+    </div>
+</div>
+
+<!-- S2 -->
+<div class="content-block" id="s2">
+    <h2>2. Elevation Angle and the Geometry of a Pass</h2>
+    <p>From a ground observer's perspective the satellite rises, passes overhead or at some maximum elevation, then sets. The elevation angle ε — the angle between the local horizontal and the line of sight to the satellite — captures this geometry. The central relation uses the Earth-central angle ρ between observer and SSP:</p>
+    <blockquote>cos ρ = sin φ_obs · sin φ_ssp + cos φ_obs · cos φ_ssp · cos(λ_ssp − λ_obs)</blockquote>
+    <p>The elevation angle then follows from:</p>
+    <blockquote>tan ε = (cos ρ − R⊕/r) / sin ρ</blockquote>
+    <p>where r is the orbital radius. The satellite is above the horizon when ε &gt; 0°, which requires ρ &lt; ρ_max where cos ρ_max = R⊕/r. At 550 km, ρ_max ≈ 59.0°, giving a maximum ground range of about 6,540 km from SSP to horizon — the coverage circle of one satellite.</p>
+    <p>In practice a minimum elevation constraint of 25°–40° is applied at Ka-band, because low-elevation signals traverse more atmosphere and suffer greater path loss and rain fade. At 550 km with ε_min = 35°, the coverage radius shrinks to about 2,700 km — significantly smaller, substantially increasing the number of satellites needed for continuous coverage.</p>
+
+    <div class="diagram-wrap">
+        <svg viewBox="0 0 740 320" width="100%" xmlns="http://www.w3.org/2000/svg" font-family="Share Tech Mono, monospace">
+            <rect width="740" height="320" fill="#0a0a0a"/>
+            <!-- Earth -->
+            <circle cx="370" cy="290" r="120" fill="#00d9ff0a" stroke="#00d9ff44" stroke-width="1.5"/>
+            <text x="370" y="294" font-size="10" fill="#00d9ff88" text-anchor="middle">EARTH</text>
+            <!-- satellite -->
+            <circle cx="370" cy="60" r="7" fill="#ffaa00"/>
+            <text x="382" y="58" font-size="9" fill="#ffaa00">SAT (550 km)</text>
+            <!-- nadir line -->
+            <line x1="370" y1="67" x2="370" y2="170" stroke="#ffffff22" stroke-width="1" stroke-dasharray="3,3"/>
+            <!-- SSP -->
+            <circle cx="370" cy="170" r="4" fill="#00d9ff"/>
+            <text x="382" y="173" font-size="9" fill="#00d9ff">SSP</text>
+            <!-- observer at ~rho=45deg -->
+            <circle cx="455" cy="204" r="5" fill="#39ff14"/>
+            <text x="467" y="208" font-size="9" fill="#39ff14">OBS</text>
+            <!-- line of sight -->
+            <line x1="370" y1="60" x2="455" y2="204" stroke="#39ff1488" stroke-width="1.5"/>
+            <!-- horizontal at observer -->
+            <line x1="415" y1="210" x2="510" y2="198" stroke="#ffffff33" stroke-width="1" stroke-dasharray="2,3"/>
+            <!-- elevation angle arc label -->
+            <text x="498" y="196" font-size="9" fill="#39ff14">ε</text>
+            <!-- Earth-central angle arc -->
+            <path d="M 370,170 A 40,40 0 0,1 400,145" fill="none" stroke="#ff004f66" stroke-width="1.2"/>
+            <text x="394" y="152" font-size="9" fill="#ff004f88">ρ</text>
+            <!-- horizon line from satellite -->
+            <line x1="370" y1="60" x2="220" y2="195" stroke="#ffffff22" stroke-width="1" stroke-dasharray="2,4"/>
+            <text x="210" y="192" font-size="9" fill="#ffffff44" text-anchor="end">horizon (ε=0°)</text>
+            <!-- rho_max label -->
+            <text x="295" y="120" font-size="9" fill="#ffffff44" text-anchor="middle">ρ_max≈59°</text>
+            <text x="370" y="308" font-size="9" fill="#ffffff55" text-anchor="middle">ELEVATION ANGLE GEOMETRY</text>
+        </svg>
+        <figcaption>The elevation angle ε is the angle between the observer's local horizontal and the line of sight to the satellite. ρ is the Earth-central angle between observer and SSP. ε = 0° at the geometric horizon (ρ = ρ_max).</figcaption>
+    </div>
+
+    <table class="compare-table">
+        <thead><tr><th>Quantity</th><th>Value</th><th>Unit</th><th>Note</th></tr></thead>
+        <tbody>
+            <tr><td>Max Earth-central angle at 550 km (ε = 0°)</td><td>≈ 59.0</td><td>°</td><td>cos ρ_max = R⊕/r</td></tr>
+            <tr><td>Max ground range at 550 km (ε = 0°)</td><td>≈ 6,540</td><td>km</td><td>Arc R⊕ × ρ_max</td></tr>
+            <tr><td>Ground range at 550 km, ε_min = 35°</td><td>≈ 2,700</td><td>km</td><td>Typical Ka-band constraint</td></tr>
+            <tr><td>Pass duration over a fixed point (typical)</td><td>5–11</td><td>min</td><td>Depends on max elevation</td></tr>
+        </tbody>
+    </table>
+</div>
+
+<!-- S3 -->
+<div class="content-block" id="s3">
+    <h2>3. Pass Duration and the Contact Window</h2>
+    <p>The duration of a satellite pass over a fixed ground point depends on how close the ground track comes to the observer (the maximum elevation of the pass), the orbital altitude, and the minimum elevation constraint. A near-overhead pass gives the longest window and best geometry; a low-maximum-elevation pass is short and the link is poor.</p>
+    <p>For a circular orbit, the satellite is above ε_min for the arc of orbit subtending 2ρ_min at the Earth's centre, where ρ_min is the Earth-central angle corresponding to ε_min. It traverses that arc in time:</p>
+    <blockquote>t_pass ≈ (T / π) × arcsin(sin ρ_min / sin ρ_max_track)</blockquote>
+    <p>where ρ_max_track is the minimum ground range of the pass (the closest the ground track comes to the observer). Earth's rotation during the pass is a small correction for typical 5–10 minute passes and is omitted here.</p>
+    <p>Pass duration governs two distinct operational concerns. For a user terminal, a short pass means either a gap in service (if the next satellite is not yet above the threshold) or the coverage requirement that forces higher satellite density. For a ground station handling telemetry, command, or software uploads, the contact window is the total available time per day. Gateway siting and the ground segment network design — Module 8 — are both built on visibility window calculations that start from this geometry.</p>
+    <div class="callout">
+        <strong>CONTINUOUS COVERAGE CONDITION</strong>
+        A constellation provides continuous coverage when, at every point in the coverage region and at every moment in time, at least one satellite is above the minimum elevation angle. This requires the pass duration to exceed the gap to the next satellite's rise — which is determined by the satellite spacing in orbit and the number of orbital planes. The Walker lesson (m2-4) quantifies this exactly.
+    </div>
+</div>
+
+<!-- S4 -->
+<div class="content-block" id="s4">
+    <h2>4. The Doppler Effect in LEO</h2>
+    <p>A satellite moving at 7–8 km/s relative to a ground observer produces a large and rapidly varying Doppler shift on every signal it transmits and receives. The magnitude and sign depend on the range rate ṙ — the component of the satellite's velocity along the line of sight — and the Doppler shift in frequency is:</p>
+    <blockquote>Δf = −(ṙ / c) × f₀</blockquote>
+    <p>where c is the speed of light and f₀ the nominal carrier frequency. Positive ṙ (receding) gives a negative Δf; negative ṙ (approaching) gives a positive Δf — the signal shifts up when the satellite is approaching and down when it is receding.</p>
+    <p>For a direct-overhead pass at 550 km the Doppler shift starts strongly positive (satellite approaching), passes through zero at closest approach when the range rate is zero, and goes strongly negative as the satellite recedes. The total sweep takes the duration of the pass — 5–10 minutes — and the shift at the extremes reaches ±355 kHz at Ku-band (14 GHz) and ±672 kHz at Ka-band (26.5 GHz). These are large relative to typical modem subcarrier spacings and must be compensated.</p>
+
+    <div class="diagram-wrap">
+        <svg viewBox="0 0 740 240" width="100%" xmlns="http://www.w3.org/2000/svg" font-family="Share Tech Mono, monospace">
+            <rect width="740" height="240" fill="#0a0a0a"/>
+            <!-- axes -->
+            <line x1="60" y1="200" x2="700" y2="200" stroke="#ffffff33" stroke-width="1"/>
+            <line x1="60" y1="30"  x2="60"  y2="200" stroke="#ffffff33" stroke-width="1"/>
+            <!-- zero line -->
+            <line x1="60" y1="115" x2="700" y2="115" stroke="#ffffff22" stroke-width="1" stroke-dasharray="3,4"/>
+            <text x="48" y="118" font-size="9" fill="#ffffff44" text-anchor="end">0</text>
+            <!-- Doppler curve — S-shape crossing zero at center -->
+            <path d="M 60,55 C 140,52 220,80 370,115 C 520,150 600,178 700,175"
+                  fill="none" stroke="#00d9ff" stroke-width="2.5"/>
+            <!-- labels -->
+            <text x="55"  y="52"  font-size="9" fill="#39ff14" text-anchor="end">+Δf</text>
+            <text x="55"  y="180" font-size="9" fill="#ff004f" text-anchor="end">−Δf</text>
+            <text x="370" y="215" font-size="9" fill="#ffaa00" text-anchor="middle">closest approach (ε_max)</text>
+            <!-- vertical line at zero crossing -->
+            <line x1="370" y1="30" x2="370" y2="200" stroke="#ffaa0044" stroke-width="1" stroke-dasharray="3,3"/>
+            <!-- annotations -->
+            <text x="160" y="72"  font-size="9" fill="#39ff14">approaching → +Δf</text>
+            <text x="460" y="162" font-size="9" fill="#ff004f">receding → −Δf</text>
+            <!-- Ka-band label -->
+            <text x="702" y="178" font-size="9" fill="#00d9ff88">Ka: ±672 kHz</text>
+            <!-- time axis label -->
+            <text x="380" y="228" font-size="9" fill="#ffffff44" text-anchor="middle">TIME THROUGH PASS →</text>
+            <text x="30"  y="115" font-size="9" fill="#ffffff44" text-anchor="middle" transform="rotate(-90,30,115)">DOPPLER SHIFT</text>
+        </svg>
+        <figcaption>Doppler shift through a direct-overhead pass. Positive (signal frequency up) while approaching; zero at closest approach; negative while receding. Total sweep ±672 kHz at Ka-band for a 550 km pass.</figcaption>
+    </div>
+
+    <div class="key-numbers">
+        <div class="kn-item"><span class="kn-val">±355 kHz</span><span class="kn-label">MAX DOPPLER AT Ku-BAND (14 GHz)</span></div>
+        <div class="kn-item"><span class="kn-val">±672 kHz</span><span class="kn-label">MAX DOPPLER AT Ka-BAND (26.5 GHz)</span></div>
+        <div class="kn-item"><span class="kn-val">~1.5 kHz/s</span><span class="kn-label">MAX DOPPLER RATE NEAR CLOSEST APPROACH</span></div>
+        <div class="kn-item"><span class="kn-val">0</span><span class="kn-label">DOPPLER AT CLOSEST APPROACH</span></div>
+    </div>
+</div>
+
+<!-- S5 -->
+<div class="content-block" id="s5">
+    <h2>5. Range Rate Calculation</h2>
+    <p>The range rate ṙ is the time derivative of the slant range — the straight-line distance from satellite to observer. Given satellite position <strong>r_sat</strong> and observer position <strong>r_obs</strong> in the Earth-centred Earth-fixed (ECEF) frame, the slant range vector is <strong>ρ_vec</strong> = <strong>r_sat</strong> − <strong>r_obs</strong>, with magnitude ρ = |<strong>ρ_vec</strong>|. The range rate is the projection of the satellite velocity onto the unit range vector:</p>
+    <blockquote>ṙ = (ρ_vec · v_sat) / ρ</blockquote>
+    <p>The satellite velocity must be in ECEF, not ECI. The transformation from ECI to ECEF requires rotating by the Greenwich Sidereal Time angle, and in ECEF the velocity picks up an additional term from Earth's rotation: <strong>v_ECEF</strong> = <strong>v_ECI</strong> rotated − ω_Earth × <strong>r_ECEF</strong>. For a ground-fixed observer the observer's own ECEF velocity (due to Earth rotation) is up to ≈ 0.46 km/s at the equator, introducing a Doppler contribution of ≈ ±40 kHz at Ka-band — not negligible for a precision modem but manageable as a known systematic.</p>
+    <p>For a circular orbit in ECI the satellite speed is v = √(μ/r) and the velocity vector is perpendicular to the position vector in the orbital plane. Rotating to ECEF and projecting onto the unit range vector gives ṙ exactly. This is what the spine project Exercise 3 implements.</p>
+</div>
+
+<!-- S6 -->
+<div class="content-block" id="s6">
+    <h2>6. Doppler Compensation in the Air Interface</h2>
+    <p>The Doppler shifts derived above drive fundamental choices in the satellite air interface that propagate into Modules 4 and 5.</p>
+    <p><strong>Doppler pre-compensation</strong> is the standard approach for the uplink. The user terminal measures the satellite's instantaneous Doppler from its downlink signal, predicts the range rate using the satellite ephemeris, and offsets its transmit frequency so that the satellite receives the nominal centre frequency. This requires the terminal to update its frequency offset continuously — typically every fraction of a second — and to have access to the satellite's orbital state. Without pre-compensation, users across a beam would all arrive at the satellite on different frequencies, making coherent detection across the cell impractical.</p>
+    <p><strong>Inter-beam Doppler gradient</strong> arises because a phased-array satellite generates many simultaneous spot beams, each pointing at a different look angle with a different range rate. If users in different beams have different Doppler offsets, the downlink must either allocate separate frequencies per beam or the air interface must be robust to a range of Doppler offsets within a single carrier. This constraint drives beam size and subcarrier spacing in OFDM-based systems — the subject of Module 5.</p>
+    <p><strong>Doppler rate</strong> near closest approach reaches up to ~1.5 kHz/s. A modem's carrier-tracking loop must follow this without losing lock, which imposes a minimum loop bandwidth. The tradeoff with phase noise sensitivity means LEO modem tracking loops are significantly more aggressive than those designed for GEO, where the Doppler shift is almost static.</p>
+    <div class="callout amber">
+        <strong>DOPPLER AS AN AIR-INTERFACE CONSTRAINT</strong>
+        The ±672 kHz Ka-band sweep at 550 km is not a nuisance to filter away — it is a fundamental input to air-interface design. Subcarrier spacing, FFT size, guard intervals, and frequency-reference requirements all trace back to this number. Module 5 quantifies these tradeoffs.
+    </div>
+</div>
+
+<!-- S7 -->
+<div class="content-block" id="s7">
+    <h2>7. The Geometry Unified</h2>
+    <p>Elevation angle, slant range, and Doppler shift are not three separate quantities — they are all functions of the same geometric state: satellite position vector, observer position vector, and satellite velocity vector. Computing one gives the others.</p>
+    <p>The slant range ρ follows from the geometry triangle formed by Earth's centre, the satellite, and the observer: ρ = √(r² + R⊕² − 2rR⊕ cos ρ). The elevation angle follows from tan ε = (cos ρ − R⊕/r) / sin ρ. The range rate is the projection of the ECEF velocity onto the unit range vector. The Doppler shift is Δf = −ṙ/c × f₀. From one consistent state vector, all three follow.</p>
+    <p>This unification is operationally important. A link budget computed for a given elevation angle automatically implies a specific slant range (and therefore free-space path loss) and a specific Doppler offset. Treating them as independently chosen is an internal inconsistency. The link budget module (M4) builds on this: every row conditioned on elevation also has an implied range and Doppler state.</p>
+
+    <table class="compare-table">
+        <thead><tr><th>Quantity</th><th>Formula</th><th>Inputs</th></tr></thead>
+        <tbody>
+            <tr><td>Earth-central angle ρ</td><td>cos ρ = sin φ_obs sin φ_ssp + cos φ_obs cos φ_ssp cos Δλ</td><td>Observer &amp; SSP coords</td></tr>
+            <tr><td>Elevation angle ε</td><td>tan ε = (cos ρ − R⊕/r) / sin ρ</td><td>ρ, r</td></tr>
+            <tr><td>Slant range ρ_sr</td><td>√(r² + R⊕² − 2rR⊕ cos ρ)</td><td>r, ρ</td></tr>
+            <tr><td>Range rate ṙ</td><td>(ρ_vec · v_sat) / ρ_sr</td><td>Position &amp; velocity (ECEF)</td></tr>
+            <tr><td>Doppler shift Δf</td><td>−ṙ/c × f₀</td><td>ṙ, f₀</td></tr>
+        </tbody>
+    </table>
+</div>
+
+<!-- S8 -->
+<div class="content-block" id="s8">
+    <h2>8. Visibility Windows and the Ground Station Problem</h2>
+    <p>A ground station — gateway, TT&amp;C facility, or tracking site — needs to know when each satellite is visible above its minimum elevation angle. For a single satellite, daily contact time is roughly the sum of all pass durations. For a large constellation the question inverts: there are so many satellites that at least one is usually above threshold, and the question becomes how many simultaneous contacts the station must manage and the maximum gap between contacts, if any.</p>
+    <p>Visibility windows are computed by propagating all satellite state vectors and evaluating elevation to the station at each time step. The interval of ε &gt; ε_min is the contact window. For a high-inclination or polar constellation with several hundred planes, a well-placed gateway will have near-continuous visibility of multiple satellites. For a lower-inclination shell, gaps appear at latitudes above the inclination — a key architectural difference between Starlink's 53° shells (gaps at high latitudes) and OneWeb's 87.9° shell (near-global coverage from a single shell).</p>
+    <p>The full ground station network design — gateway siting, TT&amp;C coverage, feeder link capacity — is Module 8. Here the point is that the elevation geometry computed in this lesson is the direct input to that design.</p>
+</div>
+
+<!-- S9 -->
+<div class="content-block" id="s9">
+    <h2>9. What This Lesson Delivers to the Design Chain</h2>
+    <p>Ground tracks and Doppler complete the geometric picture of a single satellite as seen from the ground. Together with the two-body foundation (m2-1) and perturbations (m2-2), this lesson gives the full set of tools to answer: where is the satellite, when can I see it, what is the link geometry quality, and what frequency offset must I account for?</p>
+    <p>The next lesson steps back to the design question: given this single-satellite geometry, how many satellites and planes does a constellation need to provide continuous coverage at a target elevation angle over a target coverage region? That is the Walker and coverage-geometry lesson, which assembles the propagator, the elevation formula, and a coverage criterion into the first end-to-end constellation sizing calculation.</p>
+</div>
+
+<!-- QUIZ -->
+<div class="quiz-block" id="quiz">
+    <h2>KNOWLEDGE CHECK</h2>
+    <p class="quiz-intro">Ten questions. Select one answer per question. Feedback is immediate; the score appears when all ten are answered.</p>
+
+    <div class="quiz-q"><p><strong>Q1.</strong> The westward longitude shift of a LEO ground track per orbit is caused by:</p>
+        <div class="quiz-options">
+            <button class="quiz-opt" data-q="1" data-correct="false">A — The satellite decelerating due to drag</button>
+            <button class="quiz-opt" data-q="1" data-correct="true">B — Earth rotating eastward beneath the satellite during each orbital period, plus J2 node regression</button>
+            <button class="quiz-opt" data-q="1" data-correct="false">C — The satellite changing its orbital plane each pass</button>
+            <button class="quiz-opt" data-q="1" data-correct="false">D — The inclination decreasing over time</button>
+        </div><div class="quiz-feedback" id="fb1"></div></div>
+
+    <div class="quiz-q"><p><strong>Q2.</strong> The maximum latitude reached by the ground track of a prograde orbit equals:</p>
+        <div class="quiz-options">
+            <button class="quiz-opt" data-q="2" data-correct="false">A — 90° for all orbits</button>
+            <button class="quiz-opt" data-q="2" data-correct="true">B — The inclination</button>
+            <button class="quiz-opt" data-q="2" data-correct="false">C — 180° minus the inclination for all orbits</button>
+            <button class="quiz-opt" data-q="2" data-correct="false">D — The argument of perigee</button>
+        </div><div class="quiz-feedback" id="fb2"></div></div>
+
+    <div class="quiz-q"><p><strong>Q3.</strong> Elevation angle is zero (satellite on the geometric horizon) when:</p>
+        <div class="quiz-options">
+            <button class="quiz-opt" data-q="3" data-correct="false">A — The satellite is directly overhead</button>
+            <button class="quiz-opt" data-q="3" data-correct="true">B — cos ρ = R⊕/r, where ρ is the Earth-central angle between observer and SSP</button>
+            <button class="quiz-opt" data-q="3" data-correct="false">C — The satellite is at perigee</button>
+            <button class="quiz-opt" data-q="3" data-correct="false">D — The slant range equals the orbital radius</button>
+        </div><div class="quiz-feedback" id="fb3"></div></div>
+
+    <div class="quiz-q"><p><strong>Q4.</strong> Applying a 35° minimum elevation constraint (versus 0°) shrinks the coverage footprint because:</p>
+        <div class="quiz-options">
+            <button class="quiz-opt" data-q="4" data-correct="false">A — The satellite moves faster at higher elevation angles</button>
+            <button class="quiz-opt" data-q="4" data-correct="true">B — A higher ε_min maps to a smaller maximum Earth-central angle, cutting off the outer ring of the coverage circle</button>
+            <button class="quiz-opt" data-q="4" data-correct="false">C — The satellite's altitude decreases at high elevation</button>
+            <button class="quiz-opt" data-q="4" data-correct="false">D — Atmospheric drag reduces coverage at low elevation</button>
+        </div><div class="quiz-feedback" id="fb4"></div></div>
+
+    <div class="quiz-q"><p><strong>Q5.</strong> The Doppler shift is zero during a pass when:</p>
+        <div class="quiz-options">
+            <button class="quiz-opt" data-q="5" data-correct="false">A — The satellite is at the horizon</button>
+            <button class="quiz-opt" data-q="5" data-correct="true">B — The satellite is at closest approach, where the range rate passes through zero</button>
+            <button class="quiz-opt" data-q="5" data-correct="false">C — The carrier frequency is above Ka-band</button>
+            <button class="quiz-opt" data-q="5" data-correct="false">D — The satellite is at apogee</button>
+        </div><div class="quiz-feedback" id="fb5"></div></div>
+
+    <div class="quiz-q"><p><strong>Q6.</strong> At Ka-band (26.5 GHz) and 550 km altitude, the maximum Doppler shift is approximately:</p>
+        <div class="quiz-options">
+            <button class="quiz-opt" data-q="6" data-correct="false">A — ±10 kHz</button>
+            <button class="quiz-opt" data-q="6" data-correct="false">B — ±100 kHz</button>
+            <button class="quiz-opt" data-q="6" data-correct="true">C — ±672 kHz</button>
+            <button class="quiz-opt" data-q="6" data-correct="false">D — ±5 MHz</button>
+        </div><div class="quiz-feedback" id="fb6"></div></div>
+
+    <div class="quiz-q"><p><strong>Q7.</strong> Doppler pre-compensation means:</p>
+        <div class="quiz-options">
+            <button class="quiz-opt" data-q="7" data-correct="false">A — The gateway predicts atmospheric losses in advance</button>
+            <button class="quiz-opt" data-q="7" data-correct="true">B — The user terminal offsets its uplink transmit frequency so the satellite receives the nominal centre frequency despite the range rate</button>
+            <button class="quiz-opt" data-q="7" data-correct="false">C — The satellite corrects its own oscillator in response to Doppler</button>
+            <button class="quiz-opt" data-q="7" data-correct="false">D — A filter at the receiver removes the Doppler-shifted component</button>
+        </div><div class="quiz-feedback" id="fb7"></div></div>
+
+    <div class="quiz-q"><p><strong>Q8.</strong> The Doppler rate (rate of change of Doppler shift) is highest:</p>
+        <div class="quiz-options">
+            <button class="quiz-opt" data-q="8" data-correct="false">A — When the satellite is at the horizon, moving parallel to the ground</button>
+            <button class="quiz-opt" data-q="8" data-correct="true">B — Near closest approach, where the look-angle geometry changes fastest</button>
+            <button class="quiz-opt" data-q="8" data-correct="false">C — At the midpoint between rise and set regardless of elevation</button>
+            <button class="quiz-opt" data-q="8" data-correct="false">D — When the satellite is at apogee</button>
+        </div><div class="quiz-feedback" id="fb8"></div></div>
+
+    <div class="quiz-q"><p><strong>Q9.</strong> A 550 km constellation at 53° inclination has coverage gaps above 53° latitude from a single shell because:</p>
+        <div class="quiz-options">
+            <button class="quiz-opt" data-q="9" data-correct="false">A — The atmosphere is thicker at high latitudes</button>
+            <button class="quiz-opt" data-q="9" data-correct="true">B — The ground track never reaches latitudes above the inclination, so no satellite rises above the minimum elevation from those locations</button>
+            <button class="quiz-opt" data-q="9" data-correct="false">C — The satellite slows down over the poles</button>
+            <button class="quiz-opt" data-q="9" data-correct="false">D — J2 regression removes coverage at high latitudes</button>
+        </div><div class="quiz-feedback" id="fb9"></div></div>
+
+    <div class="quiz-q"><p><strong>Q10.</strong> Elevation angle, slant range, and Doppler shift must be treated as a consistent set because:</p>
+        <div class="quiz-options">
+            <button class="quiz-opt" data-q="10" data-correct="false">A — They are three independent measurements that happen to correlate</button>
+            <button class="quiz-opt" data-q="10" data-correct="true">B — They all derive from the same satellite and observer position and velocity state vectors — computing one implicitly fixes the others</button>
+            <button class="quiz-opt" data-q="10" data-correct="false">C — They are defined identically in ITU Radio Regulations</button>
+            <button class="quiz-opt" data-q="10" data-correct="false">D — They are only related for geostationary satellites</button>
+        </div><div class="quiz-feedback" id="fb10"></div></div>
+
+    <div class="quiz-score" id="quizScore"></div>
+</div>
+
+<!-- PYTHON -->
+<div class="py-block" id="python">
+    <h2>PYTHON EXERCISES — SPINE PROJECT STAGE 3</h2>
+    <p class="py-intro">Stage 3 extends the J2 propagator with Earth-fixed geometry. Exercise 1 implements the elevation angle and slant range formulas. Exercise 2 computes Doppler shift through a pass. Exercise 3 integrates both into the propagator to output visibility contacts with elevation and Doppler at each step. Python 3.8+ standard library only.</p>
+
+    <div class="py-exercise">
+        <h3>Exercise 1 — Elevation Angle and Pass Geometry</h3>
+        <p>Compute elevation angle and slant range given satellite SSP and observer coordinates.</p>
+<pre>
+import math
+
+RE = 6378.137   # km
+
+def earth_central_angle(lat_obs, lon_obs, lat_ssp, lon_ssp):
+    """Earth-central angle in degrees between observer and SSP."""
+    phi_o = math.radians(lat_obs); lam_o = math.radians(lon_obs)
+    phi_s = math.radians(lat_ssp); lam_s = math.radians(lon_ssp)
+    cos_rho = (math.sin(phi_o)*math.sin(phi_s)
+               + math.cos(phi_o)*math.cos(phi_s)*math.cos(lam_s - lam_o))
+    cos_rho = max(-1.0, min(1.0, cos_rho))
+    return math.degrees(math.acos(cos_rho))
+
+def elevation_angle(rho_deg, orbital_radius_km):
+    """Elevation angle in degrees given Earth-central angle and orbital radius."""
+    rho = math.radians(rho_deg); r = orbital_radius_km
+    tan_eps = (math.cos(rho) - RE/r) / math.sin(rho)
+    return math.degrees(math.atan(tan_eps))
+
+def slant_range(rho_deg, orbital_radius_km):
+    """Slant range in km."""
+    rho = math.radians(rho_deg); r = orbital_radius_km
+    return math.sqrt(r**2 + RE**2 - 2*r*RE*math.cos(rho))
+
+obs = (43.6, 1.4)   # Toulouse, France
+alt = 550; r = RE + alt
+
+print(f"Observer: {obs[0]}N {obs[1]}E   Altitude: {alt} km\n")
+print(f"{'SSP lat':>8}{'SSP lon':>9}{'rho':>8}{'elev':>9}{'range (km)':>12}{'vis@35°':>9}")
+print("-" * 58)
+for lat_s, lon_s in [(43.6,1.4),(43.6,10.0),(43.6,20.0),
+                      (53.0,1.4),(20.0,1.4),(0.0,1.4)]:
+    rho  = earth_central_angle(*obs, lat_s, lon_s)
+    elev = elevation_angle(rho, r)
+    sr   = slant_range(rho, r)
+    vis  = "YES" if elev >= 35 else "no"
+    print(f"{lat_s:>8.1f}{lon_s:>9.1f}{rho:>7.1f}°{elev:>8.1f}°{sr:>11.0f} km{vis:>8}")
+
+# 1. At what Earth-central angle does elevation reach exactly 0°?
+#    Verify with cos(rho_max) = RE/r.
+# 2. At rho = 0 (SSP directly over observer) elevation is 90°. Confirm this.
+# 3. Reduce min elevation to 25° and list which rows become visible.
+</pre>
+    </div>
+
+    <div class="py-exercise">
+        <h3>Exercise 2 — Doppler Shift Through a Pass</h3>
+        <p>Compute the Doppler shift as a satellite sweeps from horizon to horizon over an observer directly below the ground track.</p>
+<pre>
+import math
+
+MU = 398600.4418; RE = 6378.137; C = 299792.458   # km/s
+
+def pass_doppler(altitude_km, freq_ghz=26.5, steps=200):
+    """
+    Doppler through a direct-overhead pass (max elevation = 90 deg).
+    Returns list of (t_s, elev_deg, range_rate_km_s, doppler_khz).
+    """
+    r  = RE + altitude_km
+    v  = math.sqrt(MU / r)       # orbital speed km/s
+    n  = math.sqrt(MU / r**3)    # mean motion rad/s
+    f0 = freq_ghz * 1e9          # Hz
+    rho_max = math.acos(RE / r)  # horizon Earth-central angle, rad
+    results = []
+    for k in range(steps + 1):
+        theta = -rho_max + 2*rho_max*k/steps  # rad, -rho_max to +rho_max
+        t     = theta / n                      # s from overhead
+        sr    = math.sqrt(r**2 + RE**2 - 2*r*RE*math.cos(theta))
+        if abs(theta) < 1e-9:
+            elev = 90.0
+        else:
+            sin_t = math.sin(abs(theta))
+            tan_e = (math.cos(theta) - RE/r) / sin_t
+            elev  = math.degrees(math.atan(tan_e))
+        rr  = r*RE*math.sin(theta)*n / sr    # range rate km/s (+ve = receding)
+        dop = -(rr / C) * f0                  # Hz
+        results.append((t, elev, rr, dop/1000))
+    return results
+
+data = pass_doppler(550, freq_ghz=26.5)
+print("Ka-band (26.5 GHz) — 550 km — direct overhead pass\n")
+print(f"{'t (s)':>8}{'elev':>9}{'rr (km/s)':>12}{'Doppler (kHz)':>15}")
+print("-" * 46)
+indices = [0, len(data)//4, len(data)//2, 3*len(data)//4, -1]
+for idx in indices:
+    t, e, rr, dk = data[idx]
+    print(f"{t:>8.0f}{e:>8.1f}°{rr:>12.4f}{dk:>14.1f}")
+
+# 1. Confirm Doppler is zero (or near zero) at t=0. What is the physical reason?
+# 2. Compute the total sweep (max - min Doppler) in kHz.
+#    Repeat at Ku-band (14 GHz) and L-band (1.6 GHz).
+# 3. Estimate the Doppler rate (kHz/s) near t=0 from adjacent samples.
+#    Confirm it is near the expected ~1.5 kHz/s.
+</pre>
+    </div>
+
+    <div class="py-exercise">
+        <h3>Exercise 3 — Spine Stage 3: Visibility and Doppler from the J2 Propagator</h3>
+        <p>Integrate elevation angle and Doppler shift into the J2 propagator, outputting contact windows with full link geometry at each step.</p>
+<pre>
+import math
+
+MU          = 398600.4418
+RE          = 6378.137
+J2          = 1.08263e-3
+EARTH_ROT_S = 7.2921150e-5   # rad/s
+C           = 299792.458      # km/s
+
+def propagate_with_visibility(altitude_km, inc_deg,
+                               obs_lat, obs_lon,
+                               duration_min, step_s=30,
+                               min_elev_deg=10.0, freq_ghz=26.5):
+    """
+    J2 propagator with elevation, slant range, and Doppler to a fixed observer.
+    Returns list of contact-step dicts where satellite is above min_elev_deg.
+    """
+    r  = RE + altitude_km
+    n  = math.sqrt(MU / r**3)
+    i  = math.radians(inc_deg)
+    nr = -(3/2)*n*J2*(RE/r)**2*math.cos(i)   # node rate rad/s
+    v  = math.sqrt(MU / r)                    # orbital speed km/s
+    f0 = freq_ghz * 1e9
+
+    phi_o = math.radians(obs_lat); lam_o = math.radians(obs_lon)
+    obs_e = (RE*math.cos(phi_o)*math.cos(lam_o),
+             RE*math.cos(phi_o)*math.sin(lam_o),
+             RE*math.sin(phi_o))
+
+    contacts = []; t = 0.0
+    while t <= duration_min * 60:
+        raan = nr * t; theta = n * t
+        xo = r*math.cos(theta); yo = r*math.sin(theta)
+        xi = xo*math.cos(raan) - yo*math.cos(i)*math.sin(raan)
+        yi = xo*math.sin(raan) + yo*math.cos(i)*math.cos(raan)
+        zi = yo*math.sin(i)
+        vxo = -v*math.sin(theta); vyo = v*math.cos(theta)
+        vxi = vxo*math.cos(raan) - vyo*math.cos(i)*math.sin(raan)
+        vyi = vxo*math.sin(raan) + vyo*math.cos(i)*math.cos(raan)
+        vzi = vyo*math.sin(i)
+        gst = EARTH_ROT_S * t
+        cg = math.cos(gst); sg = math.sin(gst)
+        xe = xi*cg + yi*sg;  ye = -xi*sg + yi*cg;  ze = zi
+        vxe = vxi*cg + vyi*sg - EARTH_ROT_S*ye
+        vye = -vxi*sg + vyi*cg + EARTH_ROT_S*xe
+        vze = vzi
+        lat_s = math.degrees(math.asin(ze/r))
+        lon_s = math.degrees(math.atan2(ye, xe))
+        phi_s = math.radians(lat_s); lam_s = math.radians(lon_s)
+        cos_r = max(-1.0, min(1.0,
+            math.sin(phi_o)*math.sin(phi_s)
+            + math.cos(phi_o)*math.cos(phi_s)*math.cos(lam_s - lam_o)))
+        rho = math.acos(cos_r); sin_r = math.sin(rho)
+        if sin_r < 1e-9:
+            elev = 90.0
+        else:
+            elev = math.degrees(math.atan((math.cos(rho) - RE/r) / sin_r))
+        if elev >= min_elev_deg:
+            dx = xe-obs_e[0]; dy = ye-obs_e[1]; dz = ze-obs_e[2]
+            sr = math.sqrt(dx**2+dy**2+dz**2)
+            rr = (dx*vxe + dy*vye + dz*vze) / sr
+            dop = -(rr/C)*f0
+            contacts.append({"t_min": t/60, "elev": elev,
+                              "range_km": sr, "doppler_khz": dop/1000})
+        t += step_s
+    return contacts
+
+# Toulouse observer, 6-hour window, 10-deg min elevation
+ctcts = propagate_with_visibility(550, 53, 43.6, 1.4,
+                                   360, step_s=30,
+                                   min_elev_deg=10.0, freq_ghz=26.5)
+print(f"Steps above 10° elev in 6 hr: {len(ctcts)}")
+if ctcts:
+    best = max(ctcts, key=lambda x: x["elev"])
+    print(f"Peak elev {best['elev']:.1f}° at t={best['t_min']:.1f} min  "
+          f"range={best['range_km']:.0f} km  "
+          f"Doppler={best['doppler_khz']:.1f} kHz")
+    print(f"\n{'t (min)':>9}{'elev':>8}{'range(km)':>11}{'Doppler(kHz)':>14}")
+    print("-" * 44)
+    stride = max(1, len(ctcts)//8)
+    for c in ctcts[::stride]:
+        print(f"{c['t_min']:>9.1f}{c['elev']:>8.1f}°"
+              f"{c['range_km']:>10.0f} {c['doppler_khz']:>13.1f}")
+
+# 1. Count distinct passes by finding gaps where no contacts are reported.
+# 2. For each pass, compute the max Doppler sweep (max - min kHz).
+# 3. STAGE-4 PREVIEW: m2-4 (Walker & coverage geometry) will call this
+#    propagator for every satellite in a constellation and evaluate the
+#    fraction of time at least one is above 35° over a coverage region.
+</pre>
+        <div class="py-challenge"><strong>SPINE PROJECT — STAGE 3</strong>
+            Stage 1 (m2-1) propagated a circular orbit in the orbital plane. Stage 2 (m2-2) added J2 and produced Earth-fixed lat/lon. Stage 3 adds elevation, slant range, and Doppler to a fixed observer — the first ground-view of the orbit. Stage 4 (m2-4) will run this for every satellite in a Walker constellation and evaluate coverage. Keep your propagator.
+        </div>
+    </div>
+</div>
+
+<!-- REFLECTION -->
+<div class="reflection-block" id="reflect">
+    <h2>REFLECTION PROMPTS</h2>
+    <p class="ref-intro">Not graded. Write in your own words, 200–400 words each.</p>
+
+    <div class="ref-prompt"><h3>Prompt 1 — From Pass Duration to Satellite Count</h3>
+        <p>The westward march of the ground track means a single LEO satellite never provides continuous coverage over a fixed point. Trace how this geometric fact connects to the minimum number of satellites in a constellation: start from the pass duration over a given location, reason through the gap between passes, and arrive at a lower bound on satellite count for continuous coverage. What assumptions does your argument require, and where does it break down?</p></div>
+
+    <div class="ref-prompt"><h3>Prompt 2 — Ephemeris Staleness and Doppler Error</h3>
+        <p>Doppler pre-compensation requires the user terminal to know the satellite's ephemeris and predict its range rate in real time. Trace the failure modes: what happens if the ephemeris is stale, if the terminal's oscillator is imprecise, or if two satellites from different planes are simultaneously visible? How do current LEO systems handle these cases?</p></div>
+
+    <div class="ref-prompt"><h3>Prompt 3 — Spherical Earth Error</h3>
+        <p>The elevation angle formula assumes a spherical Earth. Estimate the error this introduces for a satellite at 5° elevation when the true Earth radius at that latitude differs from 6,378 km by up to 21 km (the oblateness). Is this error operationally significant for coverage analysis? For a precision Doppler model?</p></div>
+
+    <div class="ref-prompt"><h3>Prompt 4 — Doppler Rate and Altitude</h3>
+        <p>The Doppler rate near closest approach is highest because the look-angle geometry changes fastest. Relate this rate to the apparent angular velocity of the satellite across the sky. Why does a satellite at higher altitude produce a lower Doppler rate even though the pass is slower? What implication does this have for modem design at different altitudes?</p></div>
+</div>
+
+<!-- MARK COMPLETE -->
+<div class="complete-wrap">
+    <button class="complete-btn" id="completeBtn">MARK LESSON COMPLETE</button>
+    <div class="complete-msg" id="completeMsg"></div>
+</div>
+
+<div class="lesson-nav">
+    <a href="m2-2.html">← LESSON 02 — PERTURBATIONS &amp; ORBITAL ELEMENTS</a>
+    <a href="m2-4.html">LESSON 04 — WALKER PATTERNS &amp; COVERAGE GEOMETRY →</a>
+</div>
+
+</div><!-- /lesson-wrap -->
+
+<button class="back-to-top" id="backToTop" title="Back to top">↑</button>
+
+<footer>© 2026 LEOAF · M2 · LESSON 03 OF 7</footer>
+
+<script>
+const canvas = document.getElementById('starsCanvas');
+const ctx = canvas.getContext('2d');
+let stars = [];
+function initStars() { stars=[]; for(let i=0;i<180;i++) stars.push({x:Math.random()*canvas.width,y:Math.random()*canvas.height,size:Math.random()*1.5+0.4,speed:Math.random()*0.18+0.04,hue:Math.random()*360}); }
+function resizeCanvas() { canvas.width=window.innerWidth; canvas.height=window.innerHeight; }
+resizeCanvas(); initStars(); window.addEventListener('resize', resizeCanvas);
+function animateStars() { ctx.clearRect(0,0,canvas.width,canvas.height); stars.forEach(s=>{s.y-=s.speed;if(s.y<0){s.y=canvas.height;s.x=Math.random()*canvas.width;} ctx.beginPath();ctx.fillStyle=`hsl(${s.hue},80%,80%)`;ctx.arc(s.x,s.y,s.size,0,Math.PI*2);ctx.fill();}); requestAnimationFrame(animateStars); }
+animateStars();
+</script>
+
+<script>
+const feedbacks = {
+    1:{correct:"Correct. During each ~96-minute orbit Earth rotates ~23.9° eastward, so the next ascending crossing falls ~23.9° west; J2 node regression adds a further small westward shift.",wrong:"Incorrect. The westward shift is purely geometric — Earth rotates east during the orbit — plus the J2 node regression. No deceleration or plane change is involved."},
+    2:{correct:"Correct. For a prograde orbit the ground track swings between +i and −i in latitude. Retrograde orbits reach 180° − i; the argument of perigee sets the ellipse orientation, not the latitude coverage.",wrong:"Incorrect. The latitude limit equals the inclination for prograde orbits. Retrograde orbits reach 180° − i. The argument of perigee orients the ellipse within the orbital plane and does not set the latitude coverage."},
+    3:{correct:"Correct. ε = 0° means tan ε = 0, which requires cos ρ = R⊕/r — the geometry where the line of sight is tangent to the Earth's surface.",wrong:"Incorrect. ε = 0° is the horizon, occurring when cos ρ = R⊕/r. Directly overhead gives ε = 90°. Perigee and apogee are orbital-plane concepts unrelated to the observer's elevation."},
+    4:{correct:"Correct. A higher ε_min maps to a smaller maximum Earth-central angle ρ, reducing the coverage circle radius from ~6,540 km (ε = 0°) to ~2,700 km (ε = 35°) at 550 km.",wrong:"Incorrect. The elevation constraint is purely geometric — it cuts off the outer ring of the footprint where the line of sight is oblique. Satellite altitude, speed, and drag do not change with the constraint."},
+    5:{correct:"Correct. Doppler = −ṙ/c × f₀; at closest approach the range rate passes through zero because the satellite transitions from approaching to receding, so Δf = 0.",wrong:"Incorrect. Doppler depends on the range rate ṙ, which is zero at closest approach. At the horizon ṙ is at its maximum magnitude, not zero — that is where Doppler is largest."},
+    6:{correct:"Correct. Δf_max ≈ v/c × f₀ ≈ (7.6/299,792) × 26,500 MHz ≈ 672 kHz when the satellite moves directly toward or away from the observer.",wrong:"Incorrect. Δf = v_r/c × f₀; with v_r up to ~7.6 km/s and f₀ = 26.5 GHz, the maximum is about 672 kHz — much larger than 100 kHz and well below 5 MHz."},
+    7:{correct:"Correct. The terminal predicts the Doppler shift and biases its transmit frequency so that the satellite receives the nominal centre frequency, compensating before the signal arrives.",wrong:"Incorrect. Pre-compensation is done by the transmitting terminal, not a filter. The terminal adjusts transmit frequency; the satellite receives the compensated signal at the nominal centre frequency."},
+    8:{correct:"Correct. The range rate changes fastest when the satellite is near closest approach — the geometry is changing most rapidly in angle per unit time — producing Doppler rates up to ~1.5 kHz/s at 550 km.",wrong:"Incorrect. The Doppler rate is highest near closest approach, not at the horizon. At the horizon the satellite moves mostly tangentially and ṙ is near its maximum magnitude but changing slowly."},
+    9:{correct:"Correct. The ground track cannot reach latitudes above the inclination for a prograde orbit. A station at 60°N with a 53° shell is outside the ground-track envelope, so no satellite rises above a useful elevation.",wrong:"Incorrect. Coverage gaps above the inclination are purely geometric — the ground track cannot reach latitudes above i. Atmospheric thickness, satellite speed, and J2 regression are not the cause."},
+    10:{correct:"Correct. All three derive from the same satellite and observer position and velocity state vectors. A link budget that picks one elevation angle but a different Doppler assumption is internally inconsistent.",wrong:"Incorrect. They are not independent — all three follow from the same position and velocity vectors. Treating them as separately assumed values introduces hidden inconsistencies into any link budget."}
+};
+let answered = {};
+document.querySelectorAll('.quiz-opt').forEach(btn => {
+    btn.addEventListener('click', function() {
+        const q = this.dataset.q;
+        if (answered[q] !== undefined) return;
+        const correct = this.dataset.correct === 'true';
+        answered[q] = correct;
+        document.querySelectorAll(`.quiz-opt[data-q="${q}"]`).forEach(b => { b.disabled = true; if (b.dataset.correct === 'true') b.classList.add('correct'); });
+        if (!correct) this.classList.add('wrong');
+        const fb = document.getElementById(`fb${q}`);
+        fb.textContent = (correct ? '✓ ' : '✗ ') + feedbacks[q][correct ? 'correct' : 'wrong'];
+        fb.style.color = correct ? '#39ff14' : '#ff004f';
+        if (Object.keys(answered).length === 10) {
+            const total = Object.values(answered).filter(Boolean).length;
+            const el = document.getElementById('quizScore');
+            el.style.display = 'block';
+            const pct = Math.round(total/10*100);
+            el.textContent = `SCORE: ${total} / 10 (${pct}%) — ${pct===100?'PERFECT.':pct>=80?'STRONG. REVIEW ANY MISSES.':pct>=60?'ADEQUATE. REVISIT WEAK SECTIONS.':'REVISIT THE LESSON BEFORE PROCEEDING.'}`;
+        }
+    });
+});
+</script>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="supabase.js"></script>
+<script src="user_progress.js"></script>
+<script>
+const LESSON_ID = 'm2-3';
+(function () {
+    function bounceToLogin(reason) {
+        console.error("Auth guard:", reason, "- redirecting to index.html");
+        window.location.replace("index.html");
+    }
+    async function init() {
+        if (typeof client === "undefined" || !client || !client.auth) {
+            return bounceToLogin("Supabase client not loaded (is supabase.js in this directory?)");
+        }
+        let session = null;
+        try { ({ data: { session } } = await client.auth.getSession()); }
+        catch (e) { return bounceToLogin("getSession threw: " + e.message); }
+        if (!session) { window.location.replace("index.html"); return; }
+
+        const btn = document.getElementById('completeBtn');
+        const msg = document.getElementById('completeMsg');
+        function setDone(done) {
+            if (done) {
+                btn.textContent = '✓ COMPLETE — CLICK TO UNDO';
+                btn.classList.add('done');
+                btn.style.cssText = 'border-color:#39ff14;color:#39ff14;background:rgba(57,255,20,0.1);cursor:pointer;opacity:1;';
+                msg.style.color = '#39ff14';
+                msg.textContent = 'Lesson marked complete. Click again to undo.';
+            } else {
+                btn.textContent = 'MARK LESSON COMPLETE';
+                btn.classList.remove('done');
+                btn.style.cssText = '';
+                msg.style.color = '#ffffff55';
+                msg.textContent = 'Not yet marked complete.';
+            }
+        }
+        let mastered = [];
+        try { mastered = await getMasteredSections(); } catch (e) { console.error(e); }
+        setDone(mastered.includes(LESSON_ID));
+        btn.addEventListener('click', async () => {
+            const isCurrentlyDone = btn.classList.contains('done');
+            msg.style.color = '#00d9ff';
+            msg.textContent = 'Saving...';
+            const ok = await upsertSection(LESSON_ID, !isCurrentlyDone);
+            if (ok) { setDone(!isCurrentlyDone); }
+            else { msg.style.color = '#ff004f'; msg.textContent = 'Error saving. Try again.'; }
+        });
+        const btt = document.getElementById('backToTop');
+        window.addEventListener('scroll', () => { btt.classList.toggle('visible', window.scrollY > 400); });
+        btt.addEventListener('click', () => window.scrollTo({ top: 0, behavior: 'smooth' }));
+    }
+    if (document.readyState === "loading") { document.addEventListener("DOMContentLoaded", init); }
+    else { init(); }
+})();
+</script>
+
+</body>
+</html>
