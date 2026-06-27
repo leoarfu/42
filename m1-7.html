@@ -1,0 +1,713 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, shrink-to-fit=no">
+<title>M1-7 — Module 1 Synthesis: The Architect's Mental Model · LEOAF</title>
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;600;800&family=Share+Tech+Mono&family=Libre+Baskerville:ital,wght@0,400;0,700;1,400&display=swap" rel="stylesheet">
+<link rel="icon" href="favicon.ico" sizes="any" type="image/x-icon">
+<link rel="manifest" href="site.webmanifest">
+<meta name="theme-color" content="#0f0f0f">
+
+<script>
+window.leoafAbort = async function () {
+    function go() { window.location.replace("index.html?signedout=1"); }
+    try {
+        if (typeof client !== "undefined" && client && client.auth && client.auth.signOut) {
+            try { await client.auth.signOut({ scope: "local" }); } catch (e) {}
+        }
+    } catch (e) {}
+    go();
+};
+</script>
+
+<style>
+* { box-sizing:border-box; margin:0; padding:0; }
+html { height:100%; -webkit-text-size-adjust:100%; overflow-x:hidden; }
+body { font-family:'Share Tech Mono',monospace; background:#000; color:white; overflow-x:hidden; min-height:100vh; }
+#starsCanvas { position:fixed; inset:0; z-index:-1; }
+
+header { background:#000; border-bottom:1px solid #ff004f33; position:sticky; top:0; z-index:100; padding:1rem clamp(1.5rem,5vw,4rem); display:flex; justify-content:space-between; align-items:center; box-shadow:0 4px 16px #0008; }
+.logo { font-family:'Orbitron',sans-serif; font-weight:800; font-size:clamp(16px,2vw,22px); letter-spacing:3px; text-decoration:none; }
+.logo span:first-child { color:white; }
+.logo span:last-child { color:#ff004f; }
+.nav-right { display:flex; align-items:center; gap:10px; }
+.nav-btn { background:transparent; border:1px solid #ff004f44; color:#ff004f; padding:6px 14px; cursor:pointer; transition:0.3s ease; font-size:11px; font-family:'Orbitron',sans-serif; letter-spacing:1px; text-decoration:none; display:inline-block; }
+.nav-btn:hover { background:#ff004f; color:black; }
+
+.breadcrumb { padding:14px clamp(1.5rem,5vw,4rem); font-size:11px; color:#ffffff44; letter-spacing:1px; position:relative; z-index:1; }
+.breadcrumb a { color:#00d9ff66; text-decoration:none; }
+.breadcrumb a:hover { color:#00d9ff; }
+.breadcrumb span { margin:0 8px; }
+
+.lesson-wrap { max-width:820px; margin:0 auto; padding:0 clamp(1.5rem,5vw,4rem) 80px; position:relative; z-index:1; }
+
+.lesson-header { padding:30px 0 28px; border-bottom:1px solid #ffffff11; margin-bottom:36px; }
+.lesson-tag { font-family:'Orbitron',sans-serif; font-size:10px; color:#ff004f; letter-spacing:3px; margin-bottom:10px; }
+.lesson-header h1 { font-family:'Orbitron',sans-serif; font-size:clamp(20px,3.5vw,32px); font-weight:800; line-height:1.2; margin-bottom:12px; }
+.lesson-meta { display:flex; gap:10px; flex-wrap:wrap; margin-bottom:16px; }
+.l-pill { font-family:'Orbitron',sans-serif; font-size:10px; padding:3px 10px; border:1px solid; letter-spacing:1px; }
+.l-pill-q { color:#ff004f; border-color:#ff004f44; }
+.l-pill-t { color:#39ff14; border-color:#39ff1444; }
+.lesson-intro { font-size:13px; line-height:1.85; opacity:0.75; }
+
+.toc { background:rgba(0,217,255,0.06); border:1px solid #00d9ff33; padding:24px 28px; margin:30px 0; }
+.toc h4 { font-family:'Orbitron',sans-serif; font-size:10px; color:#00d9ff; letter-spacing:2px; margin-bottom:16px; }
+.toc ol { padding-left:20px; }
+.toc li { font-size:13px; line-height:2.1; opacity:1; }
+.toc li a { color:#00d9ffbb; text-decoration:none; transition:0.15s; }
+.toc li a:hover { color:#ffffff; padding-left:4px; }
+.toc li::marker { color:#ff004f; font-family:'Orbitron',sans-serif; font-size:10px; }
+
+.content-block { margin-bottom:48px; }
+.content-block h2 { font-family:'Orbitron',sans-serif; font-size:13px; color:#00d9ff; letter-spacing:2px; text-transform:uppercase; margin-bottom:18px; padding-bottom:10px; border-bottom:1px solid #00d9ff22; scroll-margin-top:80px; }
+.content-block h3 { font-family:'Orbitron',sans-serif; font-size:11px; color:#ffffff88; letter-spacing:1.5px; text-transform:uppercase; margin:28px 0 12px; }
+.content-block p { font-size:13px; line-height:1.9; opacity:0.85; margin-bottom:16px; }
+.content-block ul, .content-block ol { padding-left:0; margin-bottom:16px; }
+.content-block ul li, .content-block ol li { font-size:13px; line-height:1.85; opacity:0.85; padding-left:20px; position:relative; margin-bottom:6px; }
+.content-block ul li::before { content:'›'; position:absolute; left:0; color:#00d9ff; }
+.content-block blockquote { border-left:3px solid #39ff14; background:rgba(57,255,20,0.05); padding:14px 20px; margin:18px 0; font-size:14px; font-family:'Share Tech Mono',monospace; color:#39ff14; letter-spacing:1px; }
+
+.callout { border-left:3px solid #00d9ff; background:rgba(0,217,255,0.05); padding:16px 20px; margin:22px 0; font-size:12px; line-height:1.8; }
+.callout.red   { border-left-color:#ff004f; background:rgba(255,0,79,0.05); }
+.callout.green { border-left-color:#39ff14; background:rgba(57,255,20,0.05); }
+.callout.amber { border-left-color:#ffaa00; background:rgba(255,170,0,0.05); }
+.callout strong { font-family:'Orbitron',sans-serif; font-size:10px; letter-spacing:1px; display:block; margin-bottom:8px; color:inherit; }
+
+.key-numbers { display:grid; grid-template-columns:repeat(auto-fit,minmax(140px,1fr)); gap:12px; margin:22px 0; }
+.kn-item { background:rgba(255,255,255,0.03); border:1px solid #ffffff11; padding:16px 12px; text-align:center; }
+.kn-val { font-family:'Orbitron',sans-serif; font-size:clamp(15px,2.3vw,22px); font-weight:800; color:#00d9ff; display:block; }
+.kn-label { font-size:10px; opacity:0.5; letter-spacing:1px; margin-top:5px; display:block; line-height:1.4; }
+
+.compare-table { width:100%; border-collapse:collapse; margin:22px 0; font-size:12px; }
+.compare-table th { font-family:'Orbitron',sans-serif; font-size:10px; letter-spacing:1px; color:#00d9ff; padding:10px 12px; border-bottom:1px solid #00d9ff33; text-align:left; }
+.compare-table td { padding:10px 12px; border-bottom:1px solid #ffffff0a; line-height:1.5; opacity:0.85; vertical-align:top; }
+.compare-table tr:hover td { background:rgba(255,255,255,0.02); }
+
+.diagram-wrap { margin:24px 0; background:rgba(255,255,255,0.02); border:1px solid #ffffff11; padding:20px; overflow-x:auto; }
+.diagram-wrap figcaption { font-size:11px; color:#ffffff44; margin-top:12px; text-align:center; letter-spacing:1px; }
+
+.quiz-block { background:rgba(17,17,17,0.9); border:1px solid #ff004f33; padding:28px; margin:48px 0 32px; }
+.quiz-block h2 { font-family:'Orbitron',sans-serif; font-size:13px; color:#ff004f; letter-spacing:2px; margin-bottom:6px; }
+.quiz-intro { font-size:12px; opacity:0.6; margin-bottom:24px; padding-bottom:16px; border-bottom:1px solid #ff004f22; line-height:1.6; }
+.quiz-q { margin-bottom:28px; }
+.quiz-q p { font-size:13px; opacity:0.9; margin-bottom:12px; line-height:1.65; }
+.quiz-q p strong { color:#00d9ff; }
+.quiz-options { display:flex; flex-direction:column; gap:8px; }
+.quiz-opt { background:rgba(255,255,255,0.03); border:1px solid #ffffff1a; padding:11px 16px; cursor:pointer; font-size:12px; font-family:'Share Tech Mono',monospace; transition:0.2s ease; text-align:left; color:white; line-height:1.5; }
+.quiz-opt:hover:not(:disabled) { background:rgba(0,217,255,0.08); border-color:#00d9ff44; }
+.quiz-opt.correct  { background:rgba(57,255,20,0.1);  border-color:#39ff14; color:#39ff14; }
+.quiz-opt.wrong    { background:rgba(255,0,79,0.1);   border-color:#ff004f; color:#ff004f; }
+.quiz-opt:disabled { cursor:default; }
+.quiz-feedback { font-size:12px; margin-top:10px; min-height:18px; line-height:1.7; opacity:0.9; padding:0 4px; }
+.quiz-score { font-family:'Orbitron',sans-serif; font-size:12px; color:#39ff14; margin-top:20px; letter-spacing:1px; display:none; padding-top:16px; border-top:1px solid #39ff1433; }
+
+.py-block { background:rgba(10,10,10,0.95); border:1px solid #39ff1422; padding:28px; margin:32px 0; }
+.py-block h2 { font-family:'Orbitron',sans-serif; font-size:13px; color:#39ff14; letter-spacing:2px; margin-bottom:8px; }
+.py-block .py-intro { font-size:12px; opacity:0.7; margin-bottom:20px; padding-bottom:16px; border-bottom:1px solid #39ff1422; line-height:1.7; }
+.py-exercise { margin-bottom:32px; }
+.py-exercise:last-child { margin-bottom:0; }
+.py-exercise h3 { font-family:'Orbitron',sans-serif; font-size:11px; color:#39ff1499; letter-spacing:1.5px; text-transform:uppercase; margin-bottom:10px; }
+.py-exercise p { font-size:12px; opacity:0.8; margin-bottom:14px; line-height:1.75; }
+.py-block pre { background:#050505; border:1px solid #39ff1433; padding:20px; font-family:'Share Tech Mono',monospace; font-size:11.5px; line-height:1.75; overflow-x:auto; color:#39ff14; white-space:pre; margin-bottom:12px; }
+.py-block .py-challenge { background:rgba(57,255,20,0.04); border-left:2px solid #39ff14; padding:12px 16px; margin-top:14px; font-size:12px; line-height:1.75; opacity:0.8; }
+.py-block .py-challenge strong { font-family:'Orbitron',sans-serif; font-size:10px; color:#39ff14; display:block; margin-bottom:6px; letter-spacing:1px; }
+
+.reflection-block { background:rgba(255,170,0,0.04); border:1px solid #ffaa0033; padding:24px; margin:32px 0; }
+.reflection-block h2 { font-family:'Orbitron',sans-serif; font-size:13px; color:#ffaa00; letter-spacing:2px; margin-bottom:8px; }
+.reflection-block .ref-intro { font-size:12px; opacity:0.7; margin-bottom:20px; padding-bottom:14px; border-bottom:1px solid #ffaa0022; line-height:1.7; }
+.ref-prompt { margin-bottom:20px; }
+.ref-prompt h3 { font-family:'Orbitron',sans-serif; font-size:11px; color:#ffaa0099; letter-spacing:1px; margin-bottom:8px; }
+.ref-prompt p { font-size:12px; opacity:0.8; line-height:1.75; margin-bottom:10px; }
+
+.back-to-top { position:fixed; bottom:28px; right:28px; z-index:200; width:44px; height:44px; background:#000; border:1px solid #00d9ff55; color:#00d9ff; font-size:20px; cursor:pointer; display:flex; align-items:center; justify-content:center; opacity:0; pointer-events:none; transition:opacity 0.3s ease, border-color 0.3s ease; }
+.back-to-top.visible { opacity:1; pointer-events:auto; }
+.back-to-top:hover { border-color:#00d9ff; background:#001a2c; }
+
+.complete-wrap { margin-top:56px; padding-top:30px; border-top:1px solid #ffffff11; text-align:center; }
+.complete-btn { font-family:'Orbitron',sans-serif; font-size:13px; letter-spacing:2px; padding:14px 44px; background:transparent; border:1px solid #39ff14; color:#39ff14; cursor:pointer; transition:0.3s ease; }
+.complete-btn:hover:not(.done) { background:#39ff14; color:black; box-shadow:0 0 20px rgba(57,255,20,0.4); }
+.complete-btn.done { background:rgba(57,255,20,0.1); cursor:default; opacity:0.7; }
+.complete-msg { font-size:12px; color:#39ff14; margin-top:14px; min-height:18px; letter-spacing:1px; }
+
+.module-done { margin-top:28px; text-align:center; padding:22px; border:1px solid #39ff1433; background:rgba(57,255,20,0.04); }
+.module-done .md-tag { font-family:'Orbitron',sans-serif; font-size:11px; color:#39ff14; letter-spacing:2px; margin-bottom:8px; }
+.module-done p { font-size:12px; opacity:0.75; line-height:1.7; }
+
+.lesson-nav { display:flex; justify-content:space-between; margin-top:30px; flex-wrap:wrap; gap:10px; }
+.lesson-nav a { font-family:'Orbitron',sans-serif; font-size:11px; color:#00d9ff66; text-decoration:none; letter-spacing:1px; transition:0.2s; }
+.lesson-nav a:hover { color:#00d9ff; }
+
+footer { text-align:center; padding:30px; opacity:0.3; font-size:11px; position:relative; z-index:1; letter-spacing:1px; }
+
+@media (max-width:600px) { .key-numbers { grid-template-columns:1fr 1fr; } .compare-table { font-size:11px; } .compare-table th, .compare-table td { padding:8px 8px; } }
+
+/* ── LIGHT READING MODE ── */
+.content-block { background:#f5f2ec; color:#1a1a1a; padding:36px clamp(24px,4vw,48px); margin-bottom:24px; border-left:4px solid #00d9ff; position:relative; z-index:1; }
+.content-block h2 { font-family:'Orbitron',sans-serif; font-size:13px; color:#003d66; letter-spacing:2px; text-transform:uppercase; margin-bottom:20px; padding-bottom:10px; border-bottom:2px solid #00d9ff66; scroll-margin-top:80px; }
+.content-block h3 { font-family:'Orbitron',sans-serif; font-size:11px; color:#444; letter-spacing:1.5px; text-transform:uppercase; margin:32px 0 14px; }
+.content-block p { font-family:'Libre Baskerville', Georgia, serif; font-size:15px; line-height:1.9; color:#1a1a1a; opacity:1; margin-bottom:18px; }
+.content-block ul li { font-family:'Libre Baskerville', Georgia, serif; font-size:14px; line-height:1.85; color:#1a1a1a; opacity:1; margin-bottom:8px; }
+.content-block ul li::before { color:#0077aa; }
+.content-block blockquote { border-left:3px solid #1a7a1a; background:#eafaea; color:#0a3d0a; }
+.content-block .callout { border-left:3px solid #0088cc; background:#e8f4fb; color:#1a1a1a; }
+.content-block .callout.red   { border-left-color:#cc0033; background:#fdecea; }
+.content-block .callout.green { border-left-color:#1a7a1a; background:#eafaea; }
+.content-block .callout.amber { border-left-color:#996600; background:#fef9ec; }
+.content-block .callout strong { color:inherit; }
+.content-block .kn-item { background:#fff; border:1px solid #d0d0d0; }
+.content-block .kn-label { color:#555; opacity:1; }
+.content-block .compare-table th { color:#003d66; border-bottom:2px solid #00d9ff66; }
+.content-block .compare-table td { color:#1a1a1a; opacity:1; border-bottom:1px solid #ddd; }
+.content-block .compare-table tr:hover td { background:#f0f0f0; }
+.content-block .diagram-wrap { background:#0a0a0a; border:1px solid #333; }
+.content-block .diagram-wrap figcaption { color:#ffffff55; }
+</style>
+
+</head>
+<body>
+
+<canvas id="starsCanvas"></canvas>
+
+<header>
+    <a href="dashboard.html" class="logo"><span>LEO</span><span>AF</span></a>
+    <div class="nav-right">
+        <a href="m1.html" class="nav-btn">← M1 HUB</a>
+        <button class="nav-btn" onclick="leoafAbort()">ABORT</button>
+    </div>
+</header>
+
+<div class="breadcrumb">
+    <a href="dashboard.html">DASHBOARD</a><span>/</span>
+    <a href="m1.html">M1</a><span>/</span>
+    <span style="color:#ffffff88;">LESSON 07 — MODULE 1 SYNTHESIS</span>
+</div>
+
+<div class="lesson-wrap">
+
+<div class="lesson-header">
+    <div class="lesson-tag">M1 · LESSON 07 OF 7</div>
+    <h1>Module 1 Synthesis: The Architect's Mental Model</h1>
+    <div class="lesson-meta">
+        <div class="l-pill l-pill-q">MODULE 1</div>
+        <div class="l-pill l-pill-t">SYNTHESIS</div>
+    </div>
+    <p class="lesson-intro">This lesson is different from the six before it. It introduces no new facts. Every idea it uses was established in an earlier lesson, and its only job is to assemble those ideas into a single mental model — the lens an architect carries into every later module and every real system. The previous lessons built the landscape piece by piece; this one turns the landscape into a tool. The reason a synthesis is worth a lesson of its own is that the six threads are not six independent topics — they form a connected chain, and the value of Module 1 is not the individual facts but the way they lock together into a way of reasoning. This lesson makes the connections explicit, gives the framework that uses them, names the recurring tradeoffs and the recurring errors, and maps what still has to be learned.</p>
+</div>
+
+<div class="toc">
+    <h4>CONTENTS</h4>
+    <ol>
+        <li><a href="#s1">What the synthesis is, and is not</a></li>
+        <li><a href="#s2">The six threads, in one place</a></li>
+        <li><a href="#s3">The causal chain — how they connect</a></li>
+        <li><a href="#s4">The decision framework — the model as a tool</a></li>
+        <li><a href="#s5">The invariant tradeoff axes</a></li>
+        <li><a href="#s6">The generalised evaluation lens</a></li>
+        <li><a href="#s7">The framework applied</a></li>
+        <li><a href="#s8">Common reasoning errors</a></li>
+        <li><a href="#s9">What the landscape does not yet tell you</a></li>
+        <li><a href="#s10">The architect's mental model</a></li>
+        <li><a href="#quiz">Knowledge check</a></li>
+        <li><a href="#python">Python exercises</a></li>
+        <li><a href="#reflect">Reflection prompts</a></li>
+    </ol>
+</div>
+
+<div class="content-block" id="s1">
+    <h2>1. What the Synthesis Is, and Is Not</h2>
+    <p>The synthesis is the assembly, not a summary. A summary would restate each lesson; this lesson instead shows how the lessons depend on one another and how to reason across them. So nothing here re-derives latency, re-compares regimes, or re-explains the commercial models — those remain owned by their lessons, and this one references them. What it adds is the structure that holds them together: the causal chain, the decision framework, the invariant tradeoffs, and the failure modes.</p>
+    <p>Read this lesson as the point where the module's separate competencies become one competence. By the end you should not be thinking "I know six things about LEO." You should be thinking "I have a way to reason from a demand to an architecture, and to judge whether a given architecture makes sense," which is what an architect actually does.</p>
+</div>
+
+<div class="content-block" id="s2">
+    <h2>2. The Six Threads, in One Place</h2>
+    <p>Before connecting them, recall what each lesson owns and the single idea it contributes. This is the spine, not the content.</p>
+    <ul>
+        <li><strong>Why LEO Now</strong> owns the convergence argument: LEO became viable when five supply-side enablers met durable demand, and the opening was taken by a newcomer because incumbency was a handicap. Its contribution is a three-question test for any "this time is different" claim.</li>
+        <li><strong>Orbital Regimes Compared</strong> owns the master tradeoff: altitude buys coverage at the cost of latency, link strength, satellite count, and more. Its contribution is that orbit choice is a position on a multi-axis tradeoff, not a single best answer.</li>
+        <li><strong>The Physics of Latency</strong> owns the delay floor: latency is distance over the speed of light, counted over a round trip, and it ranks the orbits by altitude. Its contribution is that latency is fixed by physics, that bandwidth cannot fix it, and that the figure that matters is end-to-end.</li>
+        <li><strong>Multi-Orbit Hybrid Architectures</strong> owns the combination question: when demand is heterogeneous, each service rides the layer that suits it, steered across layers. Its contribution is that orbit choice is per-service, and that hybrid is justified by the breadth of demand.</li>
+        <li><strong>GEO vs LEO: The Commercial Delta</strong> owns the business-model comparison: the two orbits have cost structures and revenue models that differ in kind, and each wins different segments. Its contribution is that the orbit choice is inseparable from the business-model choice.</li>
+        <li><strong>Spectrum &amp; Regulatory Orientation</strong> owns the right to transmit: spectrum is finite, shared, regulated through a two-tier system, and a strategic moat. Its contribution is that spectrum and market access gate everything else, however good it is.</li>
+    </ul>
+</div>
+
+<div class="content-block" id="s3">
+    <h2>3. The Causal Chain — How the Threads Connect</h2>
+    <p>The integrative insight of the module is that these six are arranged in a chain of dependence, and reasoning flows along it in a definite direction.</p>
+    <p>It starts with <strong>demand</strong>: who the users are, where they are, what service they need, how sensitive that service is to delay, how dense the demand is, and how much it is worth. Demand sets a <strong>latency and coverage requirement</strong> — the latency lesson's thresholds decide what delay the service can tolerate, and the geography decides what must be covered. That requirement selects a <strong>regime</strong>, because the regimes lesson's tradeoff maps a latency-and-coverage requirement onto an altitude band. The regime in turn commits the operator to a <strong>cost structure and business model</strong>, because the commercial lesson showed that choosing LEO means accepting the replenishment treadmill and the retail model, while choosing GEO means the incremental, wholesale model. All of this is then <strong>gated by spectrum and market access</strong>, because the spectrum lesson showed that without the right to transmit in a band, in a market, none of the rest can operate. And where the demand is heterogeneous rather than uniform, the chain does not terminate in a single regime but in a <strong>hybrid</strong>, the multi-orbit lesson's resolution.</p>
+
+    <div class="diagram-wrap">
+        <svg viewBox="0 0 740 320" width="100%" xmlns="http://www.w3.org/2000/svg" font-family="Share Tech Mono, monospace">
+            <rect width="740" height="320" fill="#0a0a0a"/>
+            <text x="370" y="28" font-size="11" fill="#ffffff99" text-anchor="middle">REASONING FLOWS DEMAND → ARCHITECTURE (orbit is the output, not the input)</text>
+
+            <!-- helper: boxes -->
+            <!-- DEMAND -->
+            <rect x="18" y="70" width="104" height="56" fill="none" stroke="#00d9ff" stroke-width="1.5"/>
+            <text x="70" y="94" font-size="10" fill="#00d9ff" text-anchor="middle">DEMAND</text>
+            <text x="70" y="110" font-size="7" fill="#00d9ff99" text-anchor="middle">who/where/service</text>
+            <text x="70" y="120" font-size="7" fill="#00d9ff99" text-anchor="middle">latency/density/value</text>
+            <text x="70" y="146" font-size="7" fill="#ffffff44" text-anchor="middle">framing</text>
+
+            <!-- REQUIREMENT -->
+            <rect x="148" y="70" width="104" height="56" fill="none" stroke="#00d9ff" stroke-width="1.5"/>
+            <text x="200" y="92" font-size="10" fill="#00d9ff" text-anchor="middle">REQUIREMENT</text>
+            <text x="200" y="108" font-size="7" fill="#00d9ff99" text-anchor="middle">latency class +</text>
+            <text x="200" y="118" font-size="7" fill="#00d9ff99" text-anchor="middle">coverage</text>
+            <text x="200" y="146" font-size="7" fill="#ffffff44" text-anchor="middle">m1-2 · m1-3</text>
+
+            <!-- REGIME -->
+            <rect x="278" y="70" width="104" height="56" fill="none" stroke="#39ff14" stroke-width="1.5"/>
+            <text x="330" y="94" font-size="10" fill="#39ff14" text-anchor="middle">REGIME</text>
+            <text x="330" y="110" font-size="7" fill="#39ff1499" text-anchor="middle">altitude band</text>
+            <text x="330" y="120" font-size="7" fill="#39ff1499" text-anchor="middle">meeting requirement</text>
+            <text x="330" y="146" font-size="7" fill="#ffffff44" text-anchor="middle">m1-2</text>
+
+            <!-- BUSINESS MODEL -->
+            <rect x="408" y="70" width="104" height="56" fill="none" stroke="#ffaa00" stroke-width="1.5"/>
+            <text x="460" y="92" font-size="10" fill="#ffaa00" text-anchor="middle">BUSINESS</text>
+            <text x="460" y="104" font-size="10" fill="#ffaa00" text-anchor="middle">MODEL</text>
+            <text x="460" y="120" font-size="7" fill="#ffaa0099" text-anchor="middle">cost + revenue</text>
+            <text x="460" y="146" font-size="7" fill="#ffffff44" text-anchor="middle">m1-5</text>
+
+            <!-- SPECTRUM GATE -->
+            <rect x="538" y="70" width="104" height="56" fill="none" stroke="#ff004f" stroke-width="1.5"/>
+            <text x="590" y="92" font-size="10" fill="#ff004f" text-anchor="middle">SPECTRUM</text>
+            <text x="590" y="104" font-size="10" fill="#ff004f" text-anchor="middle">GATE</text>
+            <text x="590" y="120" font-size="7" fill="#ff004f99" text-anchor="middle">band·priority·access</text>
+            <text x="590" y="146" font-size="7" fill="#ffffff44" text-anchor="middle">m1-6</text>
+
+            <!-- ARCHITECTURE -->
+            <rect x="648" y="70" width="78" height="56" fill="none" stroke="#ffffff" stroke-width="1.5"/>
+            <text x="687" y="98" font-size="9" fill="#ffffff" text-anchor="middle">ARCH-</text>
+            <text x="687" y="110" font-size="9" fill="#ffffff" text-anchor="middle">ITECTURE</text>
+
+            <!-- arrows between -->
+            <g stroke-width="1.5" fill="none">
+                <line x1="122" y1="98" x2="146" y2="98" stroke="#666"/><polygon points="148,98 140,94 140,102" fill="#666"/>
+                <line x1="252" y1="98" x2="276" y2="98" stroke="#666"/><polygon points="278,98 270,94 270,102" fill="#666"/>
+                <line x1="382" y1="98" x2="406" y2="98" stroke="#666"/><polygon points="408,98 400,94 400,102" fill="#666"/>
+                <line x1="512" y1="98" x2="536" y2="98" stroke="#666"/><polygon points="538,98 530,94 530,102" fill="#666"/>
+                <line x1="642" y1="98" x2="646" y2="98" stroke="#666"/><polygon points="648,98 640,94 640,102" fill="#666"/>
+            </g>
+
+            <!-- HYBRID branch off REGIME -->
+            <line x1="330" y1="126" x2="330" y2="226" stroke="#39ff14" stroke-width="1.2" stroke-dasharray="4,3"/>
+            <polygon points="330,228 326,220 334,220" fill="#39ff14"/>
+            <rect x="262" y="228" width="136" height="46" fill="none" stroke="#39ff14" stroke-width="1.3"/>
+            <text x="330" y="248" font-size="9" fill="#39ff14" text-anchor="middle">HYBRID (multi-orbit)</text>
+            <text x="330" y="263" font-size="7" fill="#39ff1499" text-anchor="middle">when demand is heterogeneous · m1-4</text>
+            <text x="330" y="290" font-size="7" fill="#ffffff44" text-anchor="middle">each service steered to its layer</text>
+        </svg>
+        <figcaption>THE DECISION CHAIN — demand sets the requirement, the requirement selects the regime, the regime commits the business model, spectrum gates all of it; heterogeneous demand branches to a hybrid</figcaption>
+    </div>
+
+    <p>The direction matters. Reasoning runs from demand to architecture, not the other way. An architect does not start by liking an orbit; the orbit is the output of the chain, produced by the demand passing through physics, then architecture, then economics, then regulation. Every later module deepens one link in this chain, but the chain itself is the module's contribution.</p>
+</div>
+
+<div class="content-block" id="s4">
+    <h2>4. The Decision Framework — the Mental Model as a Tool</h2>
+    <p>Made operational, the chain becomes a sequence of questions an architect asks to reason from a demand to an architecture. This is the mental model in usable form.</p>
+    <p>First, <strong>characterise the demand</strong>: who, where, what service, what latency class, what density, what value per user, and whether the demand is uniform or mixed. Second, <strong>derive the requirement</strong>: from the service and its latency class, what round-trip delay is tolerable; from the geography, what must be covered and at what minimum elevation. Third, <strong>select the regime or regimes</strong>: map the latency-and-coverage requirement onto the regime tradeoff, choosing the altitude band that meets the requirement at least cost, and deciding at this step whether one regime suffices or the demand's breadth forces a hybrid. Fourth, <strong>check the implied business model</strong>: confirm that the cost structure and revenue model the regime commits you to can be financed and can earn against this demand, and that the fill rate or contract base closes the economics. Fifth, <strong>clear the spectrum and regulatory gate</strong>: confirm a usable band can be secured with adequate priority, that deployment milestones can be met, that EPFD can be satisfied, and that market access exists in the target countries. Only a demand that passes all five yields a buildable architecture.</p>
+    <p>The framework is also an evaluation tool run in reverse: given an existing system, ask whether its regime matches its demand's latency and coverage, whether its business model fits its cost structure, and whether its spectrum and market-access position is secure. A system that fails any link is a system with a hidden flaw, and the framework finds it.</p>
+    <div class="callout green">
+        <strong>THE FRAMEWORK, IN FIVE STEPS</strong>
+        (1) Characterise demand → (2) derive latency &amp; coverage requirement → (3) select regime, or hybrid if demand is mixed → (4) check the business model the regime commits you to → (5) clear the spectrum &amp; market-access gate. Run it forward to design; run it backward to evaluate.
+    </div>
+</div>
+
+<div class="content-block" id="s5">
+    <h2>5. The Invariant Tradeoff Axes</h2>
+    <p>Underneath the chain sit a small number of tradeoffs that reappear in every lesson, and recognising them as the same axes seen from different angles is part of the synthesis. The architect is always trading among: <strong>coverage</strong> (how much of the Earth, how persistently), <strong>latency</strong> (the delay floor the orbit sets), <strong>capacity</strong> (throughput, and its density over an area), <strong>cost</strong> (to build, launch, sustain, and finance), <strong>robustness</strong> (link margin, rain fade, resilience), and <strong>regulatory access</strong> (spectrum and market rights).</p>
+    <p>No architecture maximises all of them; every real system is a chosen point in this space, and most of the module's specific lessons are studies of one face of it. Altitude trades coverage against latency and link strength. Band choice trades capacity against robustness. Single-orbit-versus-hybrid trades simplicity and cost against the breadth of demand served. The commercial models trade predictability against direct revenue. Holding these axes in mind at once, and knowing that improving one usually costs another, is the difference between reasoning about a system and merely reciting its parameters.</p>
+    <div class="key-numbers">
+        <div class="kn-item"><span class="kn-val">Coverage</span><span class="kn-label">how much Earth, how persistently</span></div>
+        <div class="kn-item"><span class="kn-val">Latency</span><span class="kn-label">the delay floor the orbit sets</span></div>
+        <div class="kn-item"><span class="kn-val">Capacity</span><span class="kn-label">throughput &amp; density over area</span></div>
+        <div class="kn-item"><span class="kn-val">Cost</span><span class="kn-label">build, launch, sustain, finance</span></div>
+        <div class="kn-item"><span class="kn-val">Robustness</span><span class="kn-label">margin, rain fade, resilience</span></div>
+        <div class="kn-item"><span class="kn-val">Reg. access</span><span class="kn-label">spectrum &amp; market rights</span></div>
+    </div>
+</div>
+
+<div class="content-block" id="s6">
+    <h2>6. The Generalised Evaluation Lens</h2>
+    <p>The first lesson offered a three-question test for whether a venture makes sense: have the supply-side costs closed, is the demand large and durable enough to justify the capital, and does the actor's cost structure and incentive position fit. The synthesis lets that test deepen, because the other five lessons supply the detail each question now carries.</p>
+    <p>"Have the costs closed" is no longer only about hardware; it includes the replenishment treadmill, the financing model the cost structure demands, and the spectrum milestones the deployment must hit. "Is the demand durable" now means demand of a specific latency class and density that the chosen regime can serve and the chosen business model can monetise at an achievable fill rate. "Does the actor fit" now includes the spectrum and market-access position, the vertical-integration cost edge, and whether the actor is fighting the incumbent's dilemma or exploiting it. The same three questions, asked with the whole module behind them, become a genuine evaluation lens rather than a heuristic — and the binding constraint, the one question most likely to fail, is usually the most informative thing to find.</p>
+</div>
+
+<div class="content-block" id="s7">
+    <h2>7. The Framework Applied</h2>
+    <p>The model is best understood in motion, so trace it across a few archetypes, using only what the module established.</p>
+    <p>Consider <strong>rural consumer broadband in an underserved region</strong>. The demand is interactive and latency-sensitive, low-density, modest value per user. The requirement is low round-trip latency and coverage of a sparse area. That selects LEO, because only its low orbit meets the latency threshold. The implied business model is the retail, fill-rate-dependent LEO structure, and the open question is immediately visible — whether sparse, modest-ARPU demand can fill the capacity the constellation costs the same to provide. Spectrum and market access in the target countries gate it. The framework surfaces both the natural regime and the central risk in one pass.</p>
+    <p>Consider <strong>national broadcast television distribution</strong>. The demand is one-to-many, delay-tolerant, wide-area. The requirement has no latency constraint and wants persistent wide coverage. That selects GEO, whose broadcast economics are unmatched and whose latency is irrelevant here. The business model is the wholesale, contracted GEO structure, which fits. The framework lands on GEO not by preference but because the demand's shape points there.</p>
+    <p>Consider a <strong>mobility operator serving aircraft that need both interactive passenger broadband and bulk operational data</strong>. The demand is heterogeneous — one service latency-bound, another delay-tolerant. The chain does not terminate in one regime; it terminates in a hybrid, each service steered to its layer, which is exactly the multi-orbit lesson's resolution and exactly why such operators run more than one orbit. In every case the architecture is the output of the demand passing through the chain, not a starting assumption.</p>
+</div>
+
+<div class="content-block" id="s8">
+    <h2>8. Common Reasoning Errors the Module Guards Against</h2>
+    <p>A synthesis is also a list of the mistakes the integrated model prevents, each traceable to a thread.</p>
+    <p>The most common is <strong>confusing bandwidth with latency</strong> — believing more capacity fixes a high-latency link. The latency lesson's bandwidth-delay-product argument is the antidote. Nearly as common is <strong>choosing an orbit before characterising the demand</strong>, reasoning from a preferred technology backward instead of from demand forward; the causal chain forbids it. A third is <strong>ignoring the business model</strong>, treating the orbit as an engineering choice with no commercial consequence, when the commercial lesson showed the two are inseparable. A fourth is <strong>treating spectrum as an afterthought</strong>, designing a system and assuming the right to transmit will follow, when it gates everything. A fifth is <strong>over-provisioning latency</strong>, putting a delay-tolerant service on the lowest-latency layer because lower seems better, when the multi-orbit lesson showed the rule is the cheapest layer that meets the requirement. A sixth is <strong>conflating multi-shell with multi-orbit</strong>, mistaking several shells of one regime for genuine regime diversity. Each error is a failure to hold the whole chain in view, and naming them is part of learning to.</p>
+    <div class="callout red">
+        <strong>SIX ERRORS THE CHAIN PREVENTS</strong>
+        Bandwidth ≠ latency · orbit-before-demand · ignoring the business model · spectrum as an afterthought · over-provisioning latency · multi-shell mistaken for multi-orbit. Each is a failure to hold the whole chain at once.
+    </div>
+</div>
+
+<div class="content-block" id="s9">
+    <h2>9. What the Landscape Does Not Yet Tell You</h2>
+    <p>Honesty about scope is part of the model. Module 1 gives the mental map and the reasoning, but deliberately not the engineering that turns reasoning into a built system. The chain has links this module only sketched, and the rest of the program deepens each.</p>
+    <p>Orbital mechanics and constellation design make the regime choice precise — how many satellites, in what planes, to hold the coverage the chain demanded. The space-segment and RF modules turn "link strength" and "band choice" into real link budgets and payloads. The air-interface and terminal modules turn "capacity" and "the terminal stopped killing the business" into access schemes and antennas. The networking module turns "steering" and "the path that beats fibre" into routing, inter-satellite links, and handover. The ground module turns "backhaul" and "where gateways go" into the segment that often dominates the latency budget. The resilience module turns "diversity" into safety, debris, and security. The economics-and-regulation module turns the commercial and spectrum sketches into real models and procedure. The applications module turns the archetypes into worked case studies, including the post-mortems of the failures the first lesson invoked. And the capstone turns the whole chain into a system you design and defend. Module 1 is the lens; the rest of the program is the depth seen through it.</p>
+</div>
+
+<div class="content-block" id="s10">
+    <h2>10. The Architect's Mental Model</h2>
+    <p>The model, stated whole, is this. A satellite system is the output of a chain that begins with demand and passes through physics, architecture, economics, and regulation, and an architect reasons along that chain rather than starting from a favoured answer. Demand sets a latency and coverage requirement; the requirement selects a regime or, where demand is heterogeneous, a hybrid; the regime commits a cost structure and business model; and spectrum and market access gate the whole. Beneath the chain run the invariant tradeoffs — coverage, latency, capacity, cost, robustness, regulatory access — and no architecture maximises all of them, so every real system is a chosen point in that space. The architect holds all of it at once, reasons from demand forward, and judges any system by whether its links hold together.</p>
+    <p>That is the contribution of Module 1, and it is a contribution of structure rather than fact: not a stock of things known about LEO, but a way of thinking that turns those things into evaluation and design. Carry it into every module that follows. Each will deepen one link — the mechanics, the RF, the networking, the ground, the economics — and each will be easier to place because you already hold the chain it belongs to. The landscape is now a lens; the rest of the program is what you see through it.</p>
+    <div class="callout green">
+        <strong>MODULE 1 OBJECTIVE MET</strong>
+        You can reason from a demand to an architecture along the chain, hold the six invariant tradeoffs at once, evaluate an existing system by whether its links cohere, and name the errors the model prevents. The landscape is now a tool.
+    </div>
+</div>
+
+<!-- QUIZ -->
+<div class="quiz-block" id="quiz">
+    <h2>KNOWLEDGE CHECK</h2>
+    <p class="quiz-intro">Ten questions on the integrated model — the chain, the framework, the tradeoffs, and the errors. One correct answer each.</p>
+
+    <div class="quiz-q"><p><strong>Q1.</strong> The purpose of this synthesis lesson is to:</p>
+        <div class="quiz-options">
+            <button class="quiz-opt" data-q="1" data-correct="false">A — Introduce new facts not covered earlier</button>
+            <button class="quiz-opt" data-q="1" data-correct="true">B — Assemble the six threads into a single decision framework, adding structure rather than facts</button>
+            <button class="quiz-opt" data-q="1" data-correct="false">C — Replace the earlier lessons</button>
+            <button class="quiz-opt" data-q="1" data-correct="false">D — Test memorisation of numbers</button>
+        </div><div class="quiz-feedback" id="fb1"></div></div>
+
+    <div class="quiz-q"><p><strong>Q2.</strong> The correct direction of the architect's reasoning chain is:</p>
+        <div class="quiz-options">
+            <button class="quiz-opt" data-q="2" data-correct="false">A — Orbit first, then find a use for it</button>
+            <button class="quiz-opt" data-q="2" data-correct="true">B — Demand → latency/coverage requirement → regime → business model → spectrum gate, with hybrid where demand is mixed</button>
+            <button class="quiz-opt" data-q="2" data-correct="false">C — Spectrum first, then demand</button>
+            <button class="quiz-opt" data-q="2" data-correct="false">D — Business model first, then demand</button>
+        </div><div class="quiz-feedback" id="fb2"></div></div>
+
+    <div class="quiz-q"><p><strong>Q3.</strong> Which thread gates all the others, regardless of how good the rest is?</p>
+        <div class="quiz-options">
+            <button class="quiz-opt" data-q="3" data-correct="false">A — Latency</button>
+            <button class="quiz-opt" data-q="3" data-correct="true">B — Spectrum and market access</button>
+            <button class="quiz-opt" data-q="3" data-correct="false">C — Coverage</button>
+            <button class="quiz-opt" data-q="3" data-correct="false">D — Capacity</button>
+        </div><div class="quiz-feedback" id="fb3"></div></div>
+
+    <div class="quiz-q"><p><strong>Q4.</strong> Choosing LEO to meet a low-latency requirement also commits the operator to:</p>
+        <div class="quiz-options">
+            <button class="quiz-opt" data-q="4" data-correct="false">A — The wholesale broadcast model</button>
+            <button class="quiz-opt" data-q="4" data-correct="true">B — The replenishment-treadmill cost structure and the retail, fill-rate-dependent business model</button>
+            <button class="quiz-opt" data-q="4" data-correct="false">C — No business model at all</button>
+            <button class="quiz-opt" data-q="4" data-correct="false">D — The GEO cost structure</button>
+        </div><div class="quiz-feedback" id="fb4"></div></div>
+
+    <div class="quiz-q"><p><strong>Q5.</strong> The chain terminates in a hybrid architecture specifically when:</p>
+        <div class="quiz-options">
+            <button class="quiz-opt" data-q="5" data-correct="false">A — The operator wants more satellites</button>
+            <button class="quiz-opt" data-q="5" data-correct="true">B — The demand is heterogeneous, spanning latency classes and service types</button>
+            <button class="quiz-opt" data-q="5" data-correct="false">C — Spectrum is unavailable</button>
+            <button class="quiz-opt" data-q="5" data-correct="false">D — Latency does not matter</button>
+        </div><div class="quiz-feedback" id="fb5"></div></div>
+
+    <div class="quiz-q"><p><strong>Q6.</strong> The invariant tradeoff axes the module returns to are:</p>
+        <div class="quiz-options">
+            <button class="quiz-opt" data-q="6" data-correct="false">A — Only cost and latency</button>
+            <button class="quiz-opt" data-q="6" data-correct="true">B — Coverage, latency, capacity, cost, robustness, and regulatory access — and no architecture maximises all</button>
+            <button class="quiz-opt" data-q="6" data-correct="false">C — Only coverage and capacity</button>
+            <button class="quiz-opt" data-q="6" data-correct="false">D — There are no recurring tradeoffs</button>
+        </div><div class="quiz-feedback" id="fb6"></div></div>
+
+    <div class="quiz-q"><p><strong>Q7.</strong> "Adding bandwidth will fix our high-latency link" is which classic error?</p>
+        <div class="quiz-options">
+            <button class="quiz-opt" data-q="7" data-correct="false">A — Confusing multi-shell with multi-orbit</button>
+            <button class="quiz-opt" data-q="7" data-correct="true">B — Confusing bandwidth with latency — the bandwidth-delay-product argument is the antidote</button>
+            <button class="quiz-opt" data-q="7" data-correct="false">C — Over-provisioning latency</button>
+            <button class="quiz-opt" data-q="7" data-correct="false">D — Ignoring the business model</button>
+        </div><div class="quiz-feedback" id="fb7"></div></div>
+
+    <div class="quiz-q"><p><strong>Q8.</strong> Putting a delay-tolerant bulk service on the lowest-latency layer "because lower is better" is:</p>
+        <div class="quiz-options">
+            <button class="quiz-opt" data-q="8" data-correct="false">A — Correct practice</button>
+            <button class="quiz-opt" data-q="8" data-correct="true">B — Over-provisioning latency — the rule is the cheapest layer that meets the requirement</button>
+            <button class="quiz-opt" data-q="8" data-correct="false">C — Required by regulation</button>
+            <button class="quiz-opt" data-q="8" data-correct="false">D — The bandwidth-latency error</button>
+        </div><div class="quiz-feedback" id="fb8"></div></div>
+
+    <div class="quiz-q"><p><strong>Q9.</strong> Module 1 deliberately does NOT provide:</p>
+        <div class="quiz-options">
+            <button class="quiz-opt" data-q="9" data-correct="false">A — The mental model for reasoning about systems</button>
+            <button class="quiz-opt" data-q="9" data-correct="true">B — The engineering depth — link budgets, routing, mechanics — that later modules supply</button>
+            <button class="quiz-opt" data-q="9" data-correct="false">C — The landscape of the field</button>
+            <button class="quiz-opt" data-q="9" data-correct="false">D — The causal chain</button>
+        </div><div class="quiz-feedback" id="fb9"></div></div>
+
+    <div class="quiz-q"><p><strong>Q10.</strong> The single best description of the architect's mental model is:</p>
+        <div class="quiz-options">
+            <button class="quiz-opt" data-q="10" data-correct="false">A — A list of facts about LEO</button>
+            <button class="quiz-opt" data-q="10" data-correct="true">B — A way of reasoning from demand through physics, architecture, economics, and regulation to an architecture, holding the invariant tradeoffs at once</button>
+            <button class="quiz-opt" data-q="10" data-correct="false">C — A preference for the newest orbit</button>
+            <button class="quiz-opt" data-q="10" data-correct="false">D — A link budget</button>
+        </div><div class="quiz-feedback" id="fb10"></div></div>
+
+    <div class="quiz-score" id="quizScore"></div>
+</div>
+
+<!-- PYTHON -->
+<div class="py-block" id="python">
+    <h2>PYTHON EXERCISES</h2>
+    <p class="py-intro">Three integrative exercises — encoding the decision chain, scoring a system across the invariant axes, and the deepened viability test. Python 3.8+ standard library only.</p>
+
+    <div class="py-exercise">
+        <h3>Exercise 1 — Demand-to-architecture recommender</h3>
+        <p>Encode the decision chain: from a demand profile, recommend a regime or a hybrid.</p>
+<pre>
+def recommend(latency_class, coverage, mixed_demand):
+    # latency_class: "interactive" | "tolerant"
+    # coverage: "wide_sparse" | "dense_local" | "global"
+    if mixed_demand:
+        return "HYBRID (steer each service to its layer)"
+    if latency_class == "interactive":
+        return "LEO (only low orbit meets the latency threshold)"
+    if coverage == "wide_sparse":
+        return "GEO (wide beam, low density sufficient, latency irrelevant)"
+    return "GEO or MEO (delay-tolerant; choose on capacity vs cost)"
+
+cases = [
+    ("Rural broadband",  "interactive", "dense_local", False),
+    ("Broadcast TV",     "tolerant",    "wide_sparse", False),
+    ("Aero: pax + ops",  "interactive", "global",      True),
+    ("Bulk backup",      "tolerant",    "global",      False),
+]
+
+print(f"{'Case':<20}{'Recommendation'}")
+print("-" * 60)
+for name, lat, cov, mixed in cases:
+    print(f"{name:<20}{recommend(lat, cov, mixed)}")
+
+# 1. The recommender stops at the regime. Extend it to also print the
+#    implied business model (LEO retail/fill-rate vs GEO wholesale).
+# 2. Add the spectrum gate: a flag 'market_access' that overrides any
+#    recommendation with "BLOCKED — no market access" when False.
+</pre>
+    </div>
+
+    <div class="py-exercise">
+        <h3>Exercise 2 — Weakest-link system scorer</h3>
+        <p>Score a proposed system across the invariant axes and surface the binding constraint.</p>
+<pre>
+axes = ["coverage", "latency", "capacity", "cost", "robustness", "reg_access"]
+
+def evaluate(system_name, scores):
+    weakest = min(scores, key=scores.get)
+    print(f"\n{system_name}")
+    for a in axes:
+        bar = "#" * scores[a]
+        flag = "  <-- binding" if a == weakest else ""
+        print(f"  {a:<11}{scores[a]:>2} {bar}{flag}")
+
+evaluate("LEO consumer broadband", {
+    "coverage": 7, "latency": 9, "capacity": 8,
+    "cost": 4, "robustness": 6, "reg_access": 5,
+})
+evaluate("GEO broadcast", {
+    "coverage": 9, "latency": 2, "capacity": 6,
+    "cost": 7, "robustness": 7, "reg_access": 8,
+})
+
+# 1. For each system, is the binding constraint one you can engineer away,
+#    or one fixed by physics or regulation?
+# 2. The scores are judgements, not measurements. Which axes could you make
+#    objective with the later modules (link budget, economics)?
+</pre>
+    </div>
+
+    <div class="py-exercise">
+        <h3>Exercise 3 — Generalised viability evaluator</h3>
+        <p>The deepened three-question test as a go / no-go with the binding reason.</p>
+<pre>
+def viable(supply_costs_closed, demand_durable, actor_fits, spectrum_secured):
+    checks = {
+        "supply costs closed":  supply_costs_closed,
+        "demand durable":       demand_durable,
+        "actor fits":           actor_fits,
+        "spectrum secured":     spectrum_secured,
+    }
+    failing = [k for k, v in checks.items() if not v]
+    verdict = "GO" if not failing else "NO-GO"
+    return verdict, failing
+
+ventures = [
+    ("Well-funded LEO entrant", True,  True,  True,  False),
+    ("1990s-style venture",     False, True,  True,  True),
+    ("Sound modern operator",   True,  True,  True,  True),
+]
+
+for name, s, d, a, sp in ventures:
+    verdict, failing = viable(s, d, a, sp)
+    reason = "" if verdict == "GO" else f" (binding: {', '.join(failing)})"
+    print(f"{name:<26}{verdict}{reason}")
+
+# 1. The first venture fails only on spectrum. Why is that as fatal as
+#    failing on cost or demand (recall: spectrum gates everything)?
+# 2. The most informative output is usually the binding constraint, not the
+#    verdict. Why does the module emphasise finding it?
+</pre>
+        <div class="py-challenge"><strong>EXTENSION</strong>
+            Chain all three exercises into one pipeline: a demand profile feeds the recommender, the recommendation seeds the axis scores, and the scores plus a spectrum flag feed the viability test — a single function that takes a demand and returns a verdict with its binding constraint.
+        </div>
+    </div>
+</div>
+
+<!-- REFLECTION -->
+<div class="reflection-block" id="reflect">
+    <h2>REFLECTION PROMPTS</h2>
+    <p class="ref-intro">Not graded. Write in your own words, 200–400 words each.</p>
+
+    <div class="ref-prompt"><h3>Prompt 1 — Run a Real System Through the Chain</h3>
+        <p>Take a real constellation you know something about and run it end to end through the decision framework: characterise its demand, derive its requirement, confirm its regime matches, judge whether its business model fits its cost structure, and assess its spectrum and market-access position. Where, if anywhere, do the links fail to hold together?</p></div>
+
+    <div class="ref-prompt"><h3>Prompt 2 — Is the Chain Too Linear?</h3>
+        <p>The causal chain runs demand → requirement → regime → business model → spectrum gate. Construct the strongest case that this linear ordering is too simple — a real situation where the links feed back on each other or where reasoning must run in more than one direction at once — and say how you would adapt the framework.</p></div>
+
+    <div class="ref-prompt"><h3>Prompt 3 — Which Thread Is Decisive?</h3>
+        <p>Of the six threads, choose the one you would weight most heavily when evaluating a brand-new entrant's chance of success, and defend the choice against the others. Then argue the case for a different thread being decisive, and say what evidence would settle it.</p></div>
+
+    <div class="ref-prompt"><h3>Prompt 4 — Build Your Own Rubric</h3>
+        <p>Build your own one-page evaluation rubric for satellite systems out of this module — the questions you would ask, in order, and the red flags that would stop you at each. Defend why your ordering and your red flags are the right ones, and identify the single question you would never skip.</p></div>
+</div>
+
+<!-- MARK COMPLETE -->
+<div class="complete-wrap">
+    <button class="complete-btn" id="completeBtn">MARK LESSON COMPLETE</button>
+    <div class="complete-msg" id="completeMsg"></div>
+</div>
+
+<div class="module-done">
+    <div class="md-tag">▤ MODULE 1 COMPLETE — LANDSCAPE &amp; THE ARCHITECT'S MENTAL MODEL</div>
+    <p>Seven lessons: why LEO now, the orbital regimes, the physics of latency, multi-orbit hybrids, the commercial delta, spectrum &amp; regulation, and this synthesis. You now hold the lens. Module 2 deepens the first link of the chain — orbital mechanics &amp; constellation design.</p>
+</div>
+
+<div class="lesson-nav">
+    <a href="m1-6.html">← LESSON 06 — SPECTRUM &amp; REGULATORY ORIENTATION</a>
+    <a href="m1.html">MODULE 1 COMPLETE — RETURN TO M1 HUB →</a>
+</div>
+
+</div>
+
+<button class="back-to-top" id="backToTop" title="Back to top">↑</button>
+
+<footer>© 2026 LEOAF · M1 · LESSON 07 OF 7 · MODULE COMPLETE</footer>
+
+<script>
+const canvas = document.getElementById('starsCanvas');
+const ctx = canvas.getContext('2d');
+let stars = [];
+function initStars() { stars=[]; for(let i=0;i<180;i++) stars.push({x:Math.random()*canvas.width,y:Math.random()*canvas.height,size:Math.random()*1.5+0.4,speed:Math.random()*0.18+0.04,hue:Math.random()*360}); }
+function resizeCanvas() { canvas.width=window.innerWidth; canvas.height=window.innerHeight; }
+resizeCanvas(); initStars(); window.addEventListener('resize', resizeCanvas);
+function animateStars() { ctx.clearRect(0,0,canvas.width,canvas.height); stars.forEach(s=>{s.y-=s.speed;if(s.y<0){s.y=canvas.height;s.x=Math.random()*canvas.width;} ctx.beginPath();ctx.fillStyle=`hsl(${s.hue},80%,80%)`;ctx.arc(s.x,s.y,s.size,0,Math.PI*2);ctx.fill();}); requestAnimationFrame(animateStars); }
+animateStars();
+</script>
+
+<script>
+const feedbacks = {
+    1:{correct:"Correct. The synthesis adds the connections — the causal chain, framework, tradeoffs, and errors — not new content.",wrong:"Incorrect. It introduces no new facts; its job is to connect the six threads into one way of reasoning."},
+    2:{correct:"Correct. Reasoning runs from demand to architecture; the orbit is the output of the chain, not the starting point.",wrong:"Incorrect. It runs demand-first — demand sets the requirement, which selects the regime and commits the business model, all gated by spectrum. Orbit is the output."},
+    3:{correct:"Correct. Without the right to transmit in a band and a market, no otherwise-sound system can operate — spectrum gates everything.",wrong:"Incorrect. Spectrum and market access gate the chain — a perfect design that cannot secure a band or market access is unbuildable."},
+    4:{correct:"Correct. The regime selects the business model — LEO commits the operator to the short-life replenishment treadmill and retail revenue.",wrong:"Incorrect. Selecting LEO commits its cost structure and revenue model — the replenishment treadmill and fill-rate-dependent retail, not GEO's wholesale model."},
+    5:{correct:"Correct. Heterogeneous demand cannot be served well by one regime, so the chain ends in a multi-orbit blend.",wrong:"Incorrect. It is heterogeneous demand — mixed latency classes and service types — that forces the hybrid, not a preference for more layers."},
+    6:{correct:"Correct. Every system is a chosen point across these six axes; improving one usually costs another.",wrong:"Incorrect. The recurring axes are coverage, latency, capacity, cost, robustness, and regulatory access — every architecture trades among them."},
+    7:{correct:"Correct. Bandwidth and latency are independent; the latency lesson's bandwidth-delay-product argument shows capacity cannot fix delay.",wrong:"Incorrect. It is the bandwidth-vs-latency confusion — capacity does not lower a physics-set delay floor."},
+    8:{correct:"Correct. Latency not needed is capacity overpaid for; assign to the cheapest layer that meets the actual requirement.",wrong:"Incorrect. It over-provisions latency — the rule is the cheapest layer that meets the requirement, not the lowest latency available."},
+    9:{correct:"Correct. M1 gives the lens; the later modules turn each sketched link into real engineering.",wrong:"Incorrect. It gives the model and landscape but not the engineering depth — link budgets, mechanics, routing — which the rest of the program provides."},
+    10:{correct:"Correct. The model is structure, not fact — reasoning along the chain while holding the tradeoff axes, to evaluate or design any system.",wrong:"Incorrect. It is a way of reasoning from demand to architecture across the chain, holding the tradeoffs together — not a stock of facts or a single calculation."}
+};
+let answered = {};
+document.querySelectorAll('.quiz-opt').forEach(btn => {
+    btn.addEventListener('click', function() {
+        const q = this.dataset.q;
+        if (answered[q] !== undefined) return;
+        const correct = this.dataset.correct === 'true';
+        answered[q] = correct;
+        document.querySelectorAll(`.quiz-opt[data-q="${q}"]`).forEach(b => { b.disabled = true; if (b.dataset.correct === 'true') b.classList.add('correct'); });
+        if (!correct) this.classList.add('wrong');
+        const fb = document.getElementById(`fb${q}`);
+        fb.textContent = (correct ? '✓ ' : '✗ ') + feedbacks[q][correct ? 'correct' : 'wrong'];
+        fb.style.color = correct ? '#39ff14' : '#ff004f';
+        if (Object.keys(answered).length === 10) {
+            const total = Object.values(answered).filter(Boolean).length;
+            const el = document.getElementById('quizScore');
+            el.style.display = 'block';
+            const pct = Math.round(total / 10 * 100);
+            el.textContent = `SCORE: ${total} / 10 (${pct}%) — ${pct===100?'PERFECT.':pct>=80?'STRONG. REVIEW ANY MISSES.':pct>=60?'ADEQUATE. REVISIT WEAK SECTIONS.':'REVISIT THE LESSON BEFORE PROCEEDING.'}`;
+        }
+    });
+});
+</script>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="supabase.js"></script>
+<script src="user_progress.js"></script>
+<script>
+const LESSON_ID = 'm1-7';
+(function () {
+    function bounceToLogin(reason) {
+        console.error("Auth guard:", reason, "- redirecting to index.html");
+        window.location.replace("index.html");
+    }
+    async function init() {
+        if (typeof client === "undefined" || !client || !client.auth) {
+            return bounceToLogin("Supabase client not loaded (is supabase.js in this directory?)");
+        }
+        let session = null;
+        try { ({ data: { session } } = await client.auth.getSession()); }
+        catch (e) { return bounceToLogin("getSession threw: " + e.message); }
+        if (!session) { window.location.replace("index.html"); return; }
+
+        const btn = document.getElementById('completeBtn');
+        const msg = document.getElementById('completeMsg');
+        function setDone(done) {
+            if (done) {
+                btn.textContent = '✓ COMPLETE — CLICK TO UNDO';
+                btn.classList.add('done');
+                btn.style.cssText = 'border-color:#39ff14;color:#39ff14;background:rgba(57,255,20,0.1);cursor:pointer;opacity:1;';
+                msg.style.color = '#39ff14';
+                msg.textContent = 'Lesson marked complete. Click again to undo.';
+            } else {
+                btn.textContent = 'MARK LESSON COMPLETE';
+                btn.classList.remove('done');
+                btn.style.cssText = '';
+                msg.style.color = '#ffffff55';
+                msg.textContent = 'Not yet marked complete.';
+            }
+        }
+        let mastered = [];
+        try { mastered = await getMasteredSections(); } catch (e) { console.error(e); }
+        setDone(mastered.includes(LESSON_ID));
+        btn.addEventListener('click', async () => {
+            const isCurrentlyDone = btn.classList.contains('done');
+            msg.style.color = '#00d9ff';
+            msg.textContent = 'Saving...';
+            const ok = await upsertSection(LESSON_ID, !isCurrentlyDone);
+            if (ok) { setDone(!isCurrentlyDone); }
+            else { msg.style.color = '#ff004f'; msg.textContent = 'Error saving. Try again.'; }
+        });
+        const btt = document.getElementById('backToTop');
+        window.addEventListener('scroll', () => { btt.classList.toggle('visible', window.scrollY > 400); });
+        btt.addEventListener('click', () => window.scrollTo({ top: 0, behavior: 'smooth' }));
+    }
+    if (document.readyState === "loading") { document.addEventListener("DOMContentLoaded", init); }
+    else { init(); }
+})();
+</script>
+
+</body>
+</html>
