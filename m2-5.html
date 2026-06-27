@@ -1,0 +1,792 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, shrink-to-fit=no">
+<title>M2-5 — Station-Keeping &amp; Orbital Decay · LEOAF</title>
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;600;800&family=Share+Tech+Mono&family=Libre+Baskerville:ital,wght@0,400;0,700;1,400&display=swap" rel="stylesheet">
+<link rel="icon" href="favicon.ico" sizes="any" type="image/x-icon">
+<link rel="manifest" href="site.webmanifest">
+<meta name="theme-color" content="#0f0f0f">
+
+<script>
+window.leoafAbort = async function () {
+    function go() { window.location.replace("index.html?signedout=1"); }
+    try {
+        if (typeof client !== "undefined" && client && client.auth && client.auth.signOut) {
+            try { await client.auth.signOut({ scope: "local" }); } catch (e) {}
+        }
+    } catch (e) {}
+    go();
+};
+</script>
+
+<style>
+* { box-sizing:border-box; margin:0; padding:0; }
+html { height:100%; -webkit-text-size-adjust:100%; overflow-x:hidden; }
+body { font-family:'Share Tech Mono',monospace; background:#000; color:white; overflow-x:hidden; min-height:100vh; }
+#starsCanvas { position:fixed; inset:0; z-index:-1; }
+
+header { background:#000; border-bottom:1px solid #ff004f33; position:sticky; top:0; z-index:100; padding:1rem clamp(1.5rem,5vw,4rem); display:flex; justify-content:space-between; align-items:center; box-shadow:0 4px 16px #0008; }
+.logo { font-family:'Orbitron',sans-serif; font-weight:800; font-size:clamp(16px,2vw,22px); letter-spacing:3px; text-decoration:none; }
+.logo span:first-child { color:white; }
+.logo span:last-child { color:#ff004f; }
+.nav-right { display:flex; align-items:center; gap:10px; }
+.nav-btn { background:transparent; border:1px solid #ff004f44; color:#ff004f; padding:6px 14px; cursor:pointer; transition:0.3s ease; font-size:11px; font-family:'Orbitron',sans-serif; letter-spacing:1px; text-decoration:none; display:inline-block; }
+.nav-btn:hover { background:#ff004f; color:black; }
+
+.breadcrumb { padding:14px clamp(1.5rem,5vw,4rem); font-size:11px; color:#ffffff44; letter-spacing:1px; position:relative; z-index:1; }
+.breadcrumb a { color:#00d9ff66; text-decoration:none; }
+.breadcrumb a:hover { color:#00d9ff; }
+.breadcrumb span { margin:0 8px; }
+
+.lesson-wrap { max-width:820px; margin:0 auto; padding:0 clamp(1.5rem,5vw,4rem) 80px; position:relative; z-index:1; }
+
+.lesson-header { padding:30px 0 28px; border-bottom:1px solid #ffffff11; margin-bottom:36px; }
+.lesson-tag { font-family:'Orbitron',sans-serif; font-size:10px; color:#ff004f; letter-spacing:3px; margin-bottom:10px; }
+.lesson-header h1 { font-family:'Orbitron',sans-serif; font-size:clamp(20px,3.5vw,32px); font-weight:800; line-height:1.2; margin-bottom:12px; }
+.lesson-meta { display:flex; gap:10px; flex-wrap:wrap; margin-bottom:16px; }
+.l-pill { font-family:'Orbitron',sans-serif; font-size:10px; padding:3px 10px; border:1px solid; letter-spacing:1px; }
+.l-pill-q { color:#ff004f; border-color:#ff004f44; }
+.l-pill-t { color:#39ff14; border-color:#39ff1444; }
+.lesson-intro { font-size:13px; line-height:1.85; opacity:0.75; }
+
+.toc { background:rgba(0,217,255,0.06); border:1px solid #00d9ff33; padding:24px 28px; margin:30px 0; }
+.toc h4 { font-family:'Orbitron',sans-serif; font-size:10px; color:#00d9ff; letter-spacing:2px; margin-bottom:16px; }
+.toc ol { padding-left:20px; }
+.toc li { font-size:13px; line-height:2.1; }
+.toc li a { color:#00d9ffbb; text-decoration:none; transition:0.15s; }
+.toc li a:hover { color:#ffffff; padding-left:4px; }
+.toc li::marker { color:#ff004f; font-family:'Orbitron',sans-serif; font-size:10px; }
+
+.content-block { margin-bottom:48px; }
+.content-block h2 { font-family:'Orbitron',sans-serif; font-size:13px; color:#00d9ff; letter-spacing:2px; text-transform:uppercase; margin-bottom:18px; padding-bottom:10px; border-bottom:1px solid #00d9ff22; scroll-margin-top:80px; }
+.content-block h3 { font-family:'Orbitron',sans-serif; font-size:11px; color:#ffffff88; letter-spacing:1.5px; text-transform:uppercase; margin:28px 0 12px; }
+.content-block p { font-size:13px; line-height:1.9; opacity:0.85; margin-bottom:16px; }
+.content-block ul, .content-block ol { padding-left:0; margin-bottom:16px; }
+.content-block ul li, .content-block ol li { font-size:13px; line-height:1.85; opacity:0.85; padding-left:20px; position:relative; margin-bottom:6px; }
+.content-block ul li::before { content:'›'; position:absolute; left:0; color:#00d9ff; }
+.content-block blockquote { border-left:3px solid #39ff14; background:rgba(57,255,20,0.05); padding:14px 20px; margin:18px 0; font-size:14px; font-family:'Share Tech Mono',monospace; color:#39ff14; letter-spacing:1px; }
+
+.callout { border-left:3px solid #00d9ff; background:rgba(0,217,255,0.05); padding:16px 20px; margin:22px 0; font-size:12px; line-height:1.8; }
+.callout.red   { border-left-color:#ff004f; background:rgba(255,0,79,0.05); }
+.callout.green { border-left-color:#39ff14; background:rgba(57,255,20,0.05); }
+.callout.amber { border-left-color:#ffaa00; background:rgba(255,170,0,0.05); }
+.callout strong { font-family:'Orbitron',sans-serif; font-size:10px; letter-spacing:1px; display:block; margin-bottom:8px; color:inherit; }
+
+.key-numbers { display:grid; grid-template-columns:repeat(auto-fit,minmax(140px,1fr)); gap:12px; margin:22px 0; }
+.kn-item { background:rgba(255,255,255,0.03); border:1px solid #ffffff11; padding:16px 12px; text-align:center; }
+.kn-val { font-family:'Orbitron',sans-serif; font-size:clamp(15px,2.3vw,22px); font-weight:800; color:#00d9ff; display:block; }
+.kn-label { font-size:10px; opacity:0.5; letter-spacing:1px; margin-top:5px; display:block; line-height:1.4; }
+
+.compare-table { width:100%; border-collapse:collapse; margin:22px 0; font-size:12px; }
+.compare-table th { font-family:'Orbitron',sans-serif; font-size:10px; letter-spacing:1px; color:#00d9ff; padding:10px 12px; border-bottom:1px solid #00d9ff33; text-align:left; }
+.compare-table td { padding:10px 12px; border-bottom:1px solid #ffffff0a; line-height:1.5; opacity:0.85; vertical-align:top; }
+.compare-table tr:hover td { background:rgba(255,255,255,0.02); }
+
+.diagram-wrap { margin:24px 0; background:rgba(255,255,255,0.02); border:1px solid #ffffff11; padding:20px; overflow-x:auto; }
+.diagram-wrap figcaption { font-size:11px; color:#ffffff44; margin-top:12px; text-align:center; letter-spacing:1px; }
+
+.quiz-block { background:rgba(17,17,17,0.9); border:1px solid #ff004f33; padding:28px; margin:48px 0 32px; }
+.quiz-block h2 { font-family:'Orbitron',sans-serif; font-size:13px; color:#ff004f; letter-spacing:2px; margin-bottom:6px; }
+.quiz-intro { font-size:12px; opacity:0.6; margin-bottom:24px; padding-bottom:16px; border-bottom:1px solid #ff004f22; line-height:1.6; }
+.quiz-q { margin-bottom:28px; }
+.quiz-q p { font-size:13px; opacity:0.9; margin-bottom:12px; line-height:1.65; }
+.quiz-q p strong { color:#00d9ff; }
+.quiz-options { display:flex; flex-direction:column; gap:8px; }
+.quiz-opt { background:rgba(255,255,255,0.03); border:1px solid #ffffff1a; padding:11px 16px; cursor:pointer; font-size:12px; font-family:'Share Tech Mono',monospace; transition:0.2s ease; text-align:left; color:white; line-height:1.5; }
+.quiz-opt:hover:not(:disabled) { background:rgba(0,217,255,0.08); border-color:#00d9ff44; }
+.quiz-opt.correct  { background:rgba(57,255,20,0.1);  border-color:#39ff14; color:#39ff14; }
+.quiz-opt.wrong    { background:rgba(255,0,79,0.1);   border-color:#ff004f; color:#ff004f; }
+.quiz-opt:disabled { cursor:default; }
+.quiz-feedback { font-size:12px; margin-top:10px; min-height:18px; line-height:1.7; opacity:0.9; padding:0 4px; }
+.quiz-score { font-family:'Orbitron',sans-serif; font-size:12px; color:#39ff14; margin-top:20px; letter-spacing:1px; display:none; padding-top:16px; border-top:1px solid #39ff1433; }
+
+.py-block { background:rgba(10,10,10,0.95); border:1px solid #39ff1422; padding:28px; margin:32px 0; }
+.py-block h2 { font-family:'Orbitron',sans-serif; font-size:13px; color:#39ff14; letter-spacing:2px; margin-bottom:8px; }
+.py-block .py-intro { font-size:12px; opacity:0.7; margin-bottom:20px; padding-bottom:16px; border-bottom:1px solid #39ff1422; line-height:1.7; }
+.py-exercise { margin-bottom:32px; }
+.py-exercise:last-child { margin-bottom:0; }
+.py-exercise h3 { font-family:'Orbitron',sans-serif; font-size:11px; color:#39ff1499; letter-spacing:1.5px; text-transform:uppercase; margin-bottom:10px; }
+.py-exercise p { font-size:12px; opacity:0.8; margin-bottom:14px; line-height:1.75; }
+.py-block pre { background:#050505; border:1px solid #39ff1433; padding:20px; font-family:'Share Tech Mono',monospace; font-size:11.5px; line-height:1.75; overflow-x:auto; color:#39ff14; white-space:pre; margin-bottom:12px; }
+.py-block .py-challenge { background:rgba(57,255,20,0.04); border-left:2px solid #39ff14; padding:12px 16px; margin-top:14px; font-size:12px; line-height:1.75; opacity:0.8; }
+.py-block .py-challenge strong { font-family:'Orbitron',sans-serif; font-size:10px; color:#39ff14; display:block; margin-bottom:6px; letter-spacing:1px; }
+
+.reflection-block { background:rgba(255,170,0,0.04); border:1px solid #ffaa0033; padding:24px; margin:32px 0; }
+.reflection-block h2 { font-family:'Orbitron',sans-serif; font-size:13px; color:#ffaa00; letter-spacing:2px; margin-bottom:8px; }
+.reflection-block .ref-intro { font-size:12px; opacity:0.7; margin-bottom:20px; padding-bottom:14px; border-bottom:1px solid #ffaa0022; line-height:1.7; }
+.ref-prompt { margin-bottom:20px; }
+.ref-prompt h3 { font-family:'Orbitron',sans-serif; font-size:11px; color:#ffaa0099; letter-spacing:1px; margin-bottom:8px; }
+.ref-prompt p { font-size:12px; opacity:0.8; line-height:1.75; margin-bottom:10px; }
+
+.back-to-top { position:fixed; bottom:28px; right:28px; z-index:200; width:44px; height:44px; background:#000; border:1px solid #00d9ff55; color:#00d9ff; font-size:20px; cursor:pointer; display:flex; align-items:center; justify-content:center; opacity:0; pointer-events:none; transition:opacity 0.3s ease; }
+.back-to-top.visible { opacity:1; pointer-events:auto; }
+.back-to-top:hover { border-color:#00d9ff; background:#001a2c; }
+
+.complete-wrap { margin-top:56px; padding-top:30px; border-top:1px solid #ffffff11; text-align:center; }
+.complete-btn { font-family:'Orbitron',sans-serif; font-size:13px; letter-spacing:2px; padding:14px 44px; background:transparent; border:1px solid #39ff14; color:#39ff14; cursor:pointer; transition:0.3s ease; }
+.complete-btn:hover:not(.done) { background:#39ff14; color:black; box-shadow:0 0 20px rgba(57,255,20,0.4); }
+.complete-btn.done { background:rgba(57,255,20,0.1); cursor:default; opacity:0.7; }
+.complete-msg { font-size:12px; color:#39ff14; margin-top:14px; min-height:18px; letter-spacing:1px; }
+
+.lesson-nav { display:flex; justify-content:space-between; margin-top:30px; flex-wrap:wrap; gap:10px; }
+.lesson-nav a { font-family:'Orbitron',sans-serif; font-size:11px; color:#00d9ff66; text-decoration:none; letter-spacing:1px; transition:0.2s; }
+.lesson-nav a:hover { color:#00d9ff; }
+
+footer { text-align:center; padding:30px; opacity:0.3; font-size:11px; position:relative; z-index:1; letter-spacing:1px; }
+
+@media (max-width:600px) { .key-numbers { grid-template-columns:1fr 1fr; } .compare-table { font-size:11px; } .compare-table th, .compare-table td { padding:8px; } }
+
+.content-block { background:#f5f2ec; color:#1a1a1a; padding:36px clamp(24px,4vw,48px); margin-bottom:24px; border-left:4px solid #00d9ff; position:relative; z-index:1; }
+.content-block h2 { font-family:'Orbitron',sans-serif; font-size:13px; color:#003d66; letter-spacing:2px; text-transform:uppercase; margin-bottom:20px; padding-bottom:10px; border-bottom:2px solid #00d9ff66; scroll-margin-top:80px; }
+.content-block h3 { font-family:'Orbitron',sans-serif; font-size:11px; color:#444; letter-spacing:1.5px; text-transform:uppercase; margin:32px 0 14px; }
+.content-block p { font-family:'Libre Baskerville',Georgia,serif; font-size:15px; line-height:1.9; color:#1a1a1a; opacity:1; margin-bottom:18px; }
+.content-block ul li { font-family:'Libre Baskerville',Georgia,serif; font-size:14px; line-height:1.85; color:#1a1a1a; opacity:1; margin-bottom:8px; }
+.content-block ul li::before { color:#0077aa; }
+.content-block blockquote { border-left:3px solid #1a7a1a; background:#eafaea; color:#0a3d0a; }
+.content-block .callout { border-left:3px solid #0088cc; background:#e8f4fb; color:#1a1a1a; }
+.content-block .callout.red   { border-left-color:#cc0033; background:#fdecea; }
+.content-block .callout.green { border-left-color:#1a7a1a; background:#eafaea; }
+.content-block .callout.amber { border-left-color:#996600; background:#fef9ec; }
+.content-block .callout strong { color:inherit; }
+.content-block .kn-item { background:#fff; border:1px solid #d0d0d0; }
+.content-block .kn-label { color:#555; opacity:1; }
+.content-block .compare-table th { color:#003d66; border-bottom:2px solid #00d9ff66; }
+.content-block .compare-table td { color:#1a1a1a; opacity:1; border-bottom:1px solid #ddd; }
+.content-block .compare-table tr:hover td { background:#f0f0f0; }
+.content-block .diagram-wrap { background:#0a0a0a; border:1px solid #333; }
+.content-block .diagram-wrap figcaption { color:#ffffff55; }
+</style>
+</head>
+<body>
+
+<canvas id="starsCanvas"></canvas>
+
+<header>
+    <a href="dashboard.html" class="logo"><span>LEO</span><span>AF</span></a>
+    <div class="nav-right">
+        <a href="m2.html" class="nav-btn">← M2 HUB</a>
+        <button class="nav-btn" onclick="leoafAbort()">ABORT</button>
+    </div>
+</header>
+
+<div class="breadcrumb">
+    <a href="dashboard.html">DASHBOARD</a><span>/</span>
+    <a href="m2.html">M2</a><span>/</span>
+    <span style="color:#ffffff88;">LESSON 05 — STATION-KEEPING &amp; ORBITAL DECAY</span>
+</div>
+
+<div class="lesson-wrap">
+
+<div class="lesson-header">
+    <div class="lesson-tag">M2 · LESSON 05 OF 7</div>
+    <h1>Station-Keeping &amp; Orbital Decay</h1>
+    <div class="lesson-meta">
+        <div class="l-pill l-pill-q">MODULE 2</div>
+        <div class="l-pill l-pill-t">PROPULSION &amp; LIFETIME</div>
+    </div>
+    <p class="lesson-intro">The previous lesson sized a constellation geometrically — how many satellites, in how many planes. That sizing assumed satellites stay where they are placed. They do not. Atmospheric drag removes energy continuously; J2 precession shifts each plane; solar activity drives unpredictable density variations; and manufacturing tolerances introduce deviations from the ideal Walker geometry. Station-keeping is the set of manoeuvres that corrects these deviations. Orbital decay is the endpoint when station-keeping ends. This lesson quantifies both: the Δv budget per axis, the propellant mass from the rocket equation, propulsion system tradeoffs, lifetime limits, and the regulatory deorbit landscape. The spine project adds propellant mass to the satellite model here.</p>
+</div>
+
+<div class="toc">
+    <h4>CONTENTS</h4>
+    <ol>
+        <li><a href="#s1">What station-keeping must correct</a></li>
+        <li><a href="#s2">The Δv budget</a></li>
+        <li><a href="#s3">The rocket equation and propellant mass</a></li>
+        <li><a href="#s4">Orbital lifetime and the decay curve</a></li>
+        <li><a href="#s5">Collision avoidance and the conjunction problem</a></li>
+        <li><a href="#s6">Propellant as a mission lifetime constraint</a></li>
+        <li><a href="#s7">End-of-life and the deorbit imperative</a></li>
+        <li><a href="#s8">What this lesson delivers to the design chain</a></li>
+        <li><a href="#quiz">Knowledge check</a></li>
+        <li><a href="#python">Python exercises — spine project stage 5</a></li>
+        <li><a href="#reflect">Reflection prompts</a></li>
+    </ol>
+</div>
+
+<!-- S1 -->
+<div class="content-block" id="s1">
+    <h2>1. What Station-Keeping Must Correct</h2>
+    <p>A satellite in a LEO constellation deviates from its nominal slot in three ways that station-keeping must address.</p>
+    <p><strong>Along-track drift</strong> arises from differential perturbations that change the orbital period relative to the nominal. Drag is the primary driver: a satellite with a slightly higher ballistic coefficient decays more slowly than its neighbours, falls behind in mean anomaly, and eventually creates a gap in the constellation pattern. Station-keeping corrects this by periodically boosting the orbit to restore along-track position within a deadband.</p>
+    <p><strong>Cross-track drift</strong> arises from differential inclination perturbations due to luni-solar gravity, accumulating slowly over years. If uncorrected, satellites in the same plane diverge in inclination, widening the plane and creating coverage gaps. Inclination changes require thrust perpendicular to the velocity vector — the most expensive station-keeping axis in Δv terms.</p>
+    <p><strong>Radial drift</strong> arises from differential drag and J2 effects on the semi-major axis. For LEO constellations at nearly identical altitudes, radial separation is small and is usually managed as part of along-track correction rather than as a separate axis.</p>
+    <p>In practice operators set a <strong>station-keeping deadband</strong> — a box in along-track and cross-track position within which the satellite is allowed to drift before a correction manoeuvre is triggered. Tighter deadbands require more frequent manoeuvres and more propellant; looser deadbands reduce propellant use but permit larger coverage gaps at constellation boundaries.</p>
+
+    <div class="callout">
+        <strong>DEADBAND AS DESIGN VARIABLE</strong>
+        A ±0.05° along-track deadband at 550 km corresponds to roughly ±6 km. That is the box within which along-track position is maintained. Every correction manoeuvre consumes propellant and perturbs the orbit; every widened deadband risks a coverage gap. The deadband is set by the coverage specification and the propellant budget simultaneously.
+    </div>
+</div>
+
+<!-- S2 -->
+<div class="content-block" id="s2">
+    <h2>2. The Δv Budget</h2>
+    <p>The propellant cost of station-keeping is expressed as Δv per year. The total mission Δv budget has three main components:</p>
+    <blockquote>ΔV_total = ΔV_drag + ΔV_SK_incl + ΔV_deorbit   (+ CAM budget)</blockquote>
+    <p><strong>Drag makeup (ΔV_drag)</strong> restores semi-major axis lost to atmospheric drag. At 550 km with a Starlink-class ballistic coefficient (β ≈ 27 kg/m²), drag makeup costs roughly 3–9 m/s/yr depending on the phase of the solar cycle.</p>
+    <p><strong>Inclination station-keeping (ΔV_SK_incl)</strong> corrects slow secular inclination drift due to luni-solar gravity (~0.5°/yr). The Δv cost is:</p>
+    <blockquote>ΔV_incl ≈ v · Δi   (for small Δi, in radians)</blockquote>
+    <p>At 550 km, v ≈ 7.6 km/s, so correcting 0.5°/yr costs approximately 66 m/s/yr. This is the largest single station-keeping cost — more than drag makeup and deorbit combined for a multi-year mission. Most operators deliberately omit inclination correction, accepting slow drift in exchange for dramatically lower propellant mass.</p>
+    <p><strong>Deorbit (ΔV_deorbit)</strong> lowers the orbit to an altitude with a compliant natural re-entry time. From 550 km, lowering perigee to achieve a 5-year natural re-entry costs approximately 25–30 m/s — a one-time end-of-life expense.</p>
+
+    <div class="key-numbers">
+        <div class="kn-item"><span class="kn-val">3–9 m/s/yr</span><span class="kn-label">DRAG MAKEUP AT 550 km (solar range)</span></div>
+        <div class="kn-item"><span class="kn-val">~66 m/s/yr</span><span class="kn-label">INCLINATION SK COST AT 550 km</span></div>
+        <div class="kn-item"><span class="kn-val">~25–30 m/s</span><span class="kn-label">DEORBIT FROM 550 km (one-time)</span></div>
+        <div class="kn-item"><span class="kn-val">~5 m/s/yr</span><span class="kn-label">CAM BUDGET (industry estimate)</span></div>
+    </div>
+
+    <table class="compare-table">
+        <thead><tr><th>Component</th><th>Δv (5-yr mission)</th><th>Notes</th></tr></thead>
+        <tbody>
+            <tr><td>Drag makeup (solar mean)</td><td>~15–25 m/s</td><td>3–5 m/s/yr × 5 yr</td></tr>
+            <tr><td>Drag makeup (solar max case)</td><td>~40–50 m/s</td><td>Budget must cover worst case</td></tr>
+            <tr><td>Inclination SK (if corrected)</td><td>~300–350 m/s</td><td>~65 m/s/yr × 5 yr</td></tr>
+            <tr><td>Collision avoidance (CAM)</td><td>~25 m/s</td><td>~5 m/s/yr × 5 yr</td></tr>
+            <tr><td>Deorbit</td><td>~25–30 m/s</td><td>One-time at EOL</td></tr>
+            <tr><td><strong>Total (no incl SK)</strong></td><td><strong>~70–105 m/s</strong></td><td>Typical operational budget</td></tr>
+            <tr><td><strong>Total (with incl SK)</strong></td><td><strong>~370–455 m/s</strong></td><td>If inclination corrected</td></tr>
+        </tbody>
+    </table>
+</div>
+
+<!-- S3 -->
+<div class="content-block" id="s3">
+    <h2>3. The Rocket Equation and Propellant Mass</h2>
+    <p>The Tsiolkovsky rocket equation gives the propellant mass required for a given Δv:</p>
+    <blockquote>m_prop = m_dry × (exp(ΔV / (g₀ · Isp)) − 1)</blockquote>
+    <p>where m_dry is the satellite dry mass, g₀ = 9.80665 m/s², and Isp is the specific impulse in seconds. Higher Isp means less propellant for the same Δv — the fundamental advantage of electric propulsion for station-keeping.</p>
+
+    <div class="diagram-wrap">
+        <svg viewBox="0 0 740 260" width="100%" xmlns="http://www.w3.org/2000/svg" font-family="Share Tech Mono, monospace">
+            <rect width="740" height="260" fill="#0a0a0a"/>
+            <!-- axes -->
+            <line x1="70" y1="220" x2="700" y2="220" stroke="#ffffff33" stroke-width="1"/>
+            <line x1="70" y1="20"  x2="70"  y2="220" stroke="#ffffff33" stroke-width="1"/>
+            <!-- y-axis label -->
+            <text x="18" y="125" font-size="9" fill="#ffffff44" text-anchor="middle" transform="rotate(-90,18,125)">m_prop / m_dry</text>
+            <!-- x-axis label -->
+            <text x="385" y="245" font-size="9" fill="#ffffff44" text-anchor="middle">ΔV (m/s)</text>
+            <!-- x ticks -->
+            <text x="70"  y="233" font-size="8" fill="#ffffff44" text-anchor="middle">0</text>
+            <text x="228" y="233" font-size="8" fill="#ffffff44" text-anchor="middle">100</text>
+            <text x="385" y="233" font-size="8" fill="#ffffff44" text-anchor="middle">200</text>
+            <text x="543" y="233" font-size="8" fill="#ffffff44" text-anchor="middle">300</text>
+            <text x="700" y="233" font-size="8" fill="#ffffff44" text-anchor="middle">400</text>
+            <!-- curves: Isp=230 (hydrazine), Isp=1600 (Hall) -->
+            <!-- Isp=230: m_prop/m_dry = exp(dv/(9.81*230))-1 -->
+            <!-- Scale: dv 0-400 maps x 70-700; ratio 0-2 maps y 220-20 -->
+            <!-- Pre-computed points for Isp=230 -->
+            <polyline points="70,220 228,182 385,141 543,96 700,48" fill="none" stroke="#ff004f" stroke-width="2"/>
+            <text x="706" y="48" font-size="9" fill="#ff004f">Isp=230s (hydrazine)</text>
+            <!-- Pre-computed points for Isp=1600 -->
+            <polyline points="70,220 228,217 385,214 543,210 700,207" fill="none" stroke="#39ff14" stroke-width="2"/>
+            <text x="706" y="210" font-size="9" fill="#39ff14">Isp=1600s (Hall)</text>
+            <!-- marker at 90 m/s -->
+            <line x1="213" y1="20" x2="213" y2="220" stroke="#ffaa0044" stroke-width="1" stroke-dasharray="3,3"/>
+            <text x="216" y="30" font-size="8" fill="#ffaa00">90 m/s</text>
+            <!-- caption -->
+            <text x="370" y="258" font-size="9" fill="#ffffff44" text-anchor="middle">ROCKET EQUATION — propellant fraction vs ΔV for two propulsion systems (m_dry = 300 kg)</text>
+        </svg>
+        <figcaption>Propellant mass ratio versus total ΔV for hydrazine (Isp = 230 s) and a Hall thruster (Isp = 1,600 s). At 90 m/s the Hall thruster requires ~0.6% of dry mass in propellant versus ~15% for hydrazine.</figcaption>
+    </div>
+
+    <table class="compare-table">
+        <thead><tr><th>System</th><th>Isp (s)</th><th>Thrust</th><th>m_prop for 100 m/s, 300 kg dry</th><th>Notes</th></tr></thead>
+        <tbody>
+            <tr><td>Cold gas (N₂)</td><td>50–70</td><td>mN–N</td><td>~50 kg</td><td>Simple, cheap, low ΔV only</td></tr>
+            <tr><td>Monoprop hydrazine</td><td>220–240</td><td>0.1–22 N</td><td>~14 kg</td><td>Heritage, toxic</td></tr>
+            <tr><td>Bipropellant (MMH/NTO)</td><td>300–330</td><td>10–400 N</td><td>~10 kg</td><td>Higher Isp, complex</td></tr>
+            <tr><td>Hall-effect thruster</td><td>1,200–2,000</td><td>10–200 mN</td><td>~3–4 kg</td><td>Low thrust; long burn times</td></tr>
+            <tr><td>Gridded ion</td><td>2,000–3,500</td><td>1–200 mN</td><td>~2 kg</td><td>Highest Isp; very low thrust</td></tr>
+        </tbody>
+    </table>
+
+    <p>The tradeoff between Isp and thrust is critical. Chemical propulsion delivers high thrust — manoeuvres complete in minutes — but carries heavy propellant. Electric propulsion (Hall thrusters, gridded ion) delivers very high Isp — propellant mass is small — but thrust is low, so manoeuvres take hours to days. For Starlink, SpaceX uses krypton-propellant Hall thrusters at Isp ≈ 1,500–1,700 s, requiring only a few kilograms of propellant per satellite for a five-year mission.</p>
+</div>
+
+<!-- S4 -->
+<div class="content-block" id="s4">
+    <h2>4. Orbital Lifetime and the Decay Curve</h2>
+    <p>The natural orbital lifetime of a satellite that has exhausted its propellant is determined by integrating the drag-decay equation from the current altitude to re-entry (~80 km). Lifetime is extremely sensitive to altitude near the boundary of IADC compliance.</p>
+    <p>At 550 km with solar-mean activity, a Starlink-class satellite (β ≈ 27 kg/m²) has a natural lifetime of roughly 7–12 years. At 600 km the same satellite takes 15–25 years — close to the IADC 25-year limit. At 650 km it exceeds 25 years under solar-minimum conditions, violating the guideline. This nonlinearity is why operators cluster at 540–600 km: small altitude differences produce large lifetime changes.</p>
+    <p>Solar activity introduces a factor of 2–3× uncertainty in lifetime at any given altitude. Satellites are designed to ensure that even at solar minimum, the deorbit manoeuvre is completed before the 25-year limit — or that natural re-entry occurs within the limit without a burn. This is more conservative than designing to the solar-mean case and is the correct engineering approach.</p>
+
+    <table class="compare-table">
+        <thead><tr><th>Altitude</th><th>Solar min</th><th>Solar mean</th><th>Solar max</th><th>IADC 25yr?</th></tr></thead>
+        <tbody>
+            <tr><td>400 km</td><td>2–3 yr</td><td>1–2 yr</td><td>&lt; 1 yr</td><td style="color:#39ff14">Yes, easily</td></tr>
+            <tr><td>500 km</td><td>10–20 yr</td><td>5–8 yr</td><td>2–4 yr</td><td style="color:#39ff14">Yes</td></tr>
+            <tr><td>550 km</td><td>15–25 yr</td><td>7–12 yr</td><td>3–5 yr</td><td style="color:#ffaa00">Marginal at solar min</td></tr>
+            <tr><td>600 km</td><td>30–50 yr</td><td>15–25 yr</td><td>5–10 yr</td><td style="color:#ff004f">Requires deorbit burn</td></tr>
+            <tr><td>700 km</td><td>&gt; 100 yr</td><td>&gt; 50 yr</td><td>15–25 yr</td><td style="color:#ff004f">Deorbit burn mandatory</td></tr>
+            <tr><td>1,200 km</td><td>centuries</td><td>centuries</td><td>&gt; 100 yr</td><td style="color:#ff004f">Natural re-entry not viable</td></tr>
+        </tbody>
+    </table>
+
+    <div class="callout amber">
+        <strong>600 km — THE PRACTICAL REGULATORY BOUNDARY</strong>
+        At 600 km under solar-minimum conditions, natural re-entry takes 30–50 years. A satellite that loses propulsion at 600 km without a deorbit burn becomes debris for decades. The operational response is to target 540–570 km and execute a controlled deorbit burn to ~350 km at end of life, ensuring re-entry within weeks regardless of solar activity.
+    </div>
+</div>
+
+<!-- S5 -->
+<div class="content-block" id="s5">
+    <h2>5. Collision Avoidance and the Conjunction Problem</h2>
+    <p>Station-keeping is not only about maintaining the designed slot — it is also about avoiding collisions. When a conjunction is predicted with a probability of collision above the operator's threshold (typically 1 in 10,000 to 1 in 1,000), the satellite performs a collision avoidance manoeuvre (CAM) — a small Δv (typically 0.1–1 m/s) that moves it out of the predicted conjunction corridor. For a large constellation, CAMs happen at high frequency: Starlink reportedly executes thousands per year across its fleet.</p>
+    <p>The Δv cost of CAMs is small per event but non-trivial in aggregate, and each CAM perturbs the along-track position, requiring subsequent routine station-keeping to restore the nominal slot. Operators budget for CAM propellant separately from drag makeup and inclination station-keeping.</p>
+    <p>As more constellations are deployed, the number of tracked objects increases, the number of conjunction predictions grows, and the operational burden of CAM screening escalates. This is one of the motivations for inter-operator coordination and the ITU coordination framework discussed in Modules 9 and 10.</p>
+</div>
+
+<!-- S6 -->
+<div class="content-block" id="s6">
+    <h2>6. Propellant as a Mission Lifetime Constraint</h2>
+    <p>The total propellant mass on the satellite is fixed at launch. It determines the maximum achievable ΔV_total and, through the Δv budget, the maximum mission lifetime. This creates a hard coupling between design life and propellant allocation that drives the constellation business case.</p>
+    <p>A five-year design life requires a certain ΔV_total (drag + CAM + deorbit + margin). This Δv sets the required propellant mass via the rocket equation. The propellant mass adds to the launch mass, increasing the per-satellite launch cost. The lifetime sets the replacement rate — a five-year satellite requires fleet replacement every five years, driving manufacturing cadence and recurring cost. Longer design lives reduce replacement costs but require heavier satellites with more propellant.</p>
+    <p>Starlink targets approximately five years of operational life per satellite, minimising satellite complexity while keeping propellant mass modest. The combination of high-Isp electric propulsion and a modest design life is the dominant cost architecture for first-generation LEO broadband constellations.</p>
+
+    <table class="compare-table">
+        <thead><tr><th>Design life</th><th>ΔV budget (no incl SK)</th><th>m_prop, HET Isp=1,600s, 300 kg dry</th><th>Replacement cycle</th></tr></thead>
+        <tbody>
+            <tr><td>3 yr</td><td>~35–50 m/s</td><td>~0.7–1.0 kg</td><td>Aggressive</td></tr>
+            <tr><td>5 yr</td><td>~70–105 m/s</td><td>~1.4–2.0 kg</td><td>Moderate</td></tr>
+            <tr><td>7 yr</td><td>~100–150 m/s</td><td>~1.9–2.9 kg</td><td>Relaxed</td></tr>
+            <tr><td>10 yr</td><td>~140–210 m/s</td><td>~2.7–4.0 kg</td><td>Long-cycle</td></tr>
+        </tbody>
+    </table>
+</div>
+
+<!-- S7 -->
+<div class="content-block" id="s7">
+    <h2>7. End-of-Life and the Deorbit Imperative</h2>
+    <p>Every satellite in a LEO constellation must have a credible deorbit plan before launch. The regulatory landscape is tightening: the FCC now requires US-licensed LEO operators to deorbit within 5 years of end of mission for constellations approved after 2022 — a major tightening from the IADC's 25-year guideline. The ESA Zero Debris Charter sets a goal of zero debris added to the orbital environment from new missions.</p>
+    <p>Achieving five-year deorbit compliance from 550 km requires either a controlled deorbit burn or an initial altitude low enough for natural re-entry within five years. At 550 km natural re-entry takes 7–25 years depending on solar activity — too variable to rely on without a burn — making a controlled deorbit manoeuvre effectively mandatory for five-year compliance.</p>
+    <p>The design implications are three. First, enough propellant must remain at end of life to execute the deorbit burn; this is a reserved portion of the total budget. Second, the deorbit burn must be reliable, which argues for redundant propulsion or propellant margin. Third, satellites that lose propulsion early must still re-enter within the compliance period — which at 550 km they will do under solar-mean and solar-max conditions, but not necessarily at solar minimum, a residual risk operators mitigate by targeting operational altitudes at 540–560 km rather than 590–600 km.</p>
+
+    <div class="callout red">
+        <strong>FCC 5-YEAR DEORBIT RULE (2022)</strong>
+        For new US-licensed LEO systems authorised after September 2022, the FCC requires disposal within 5 years of end of mission. This applies to the largest constellation operators and effectively makes a controlled deorbit burn mandatory for most architectures above 500 km. Non-compliant satellites cannot be relicensed.
+    </div>
+</div>
+
+<!-- S8 -->
+<div class="content-block" id="s8">
+    <h2>8. What This Lesson Delivers to the Design Chain</h2>
+    <p>Station-keeping and decay complete the satellite-level physics for this module. The Walker lesson told us how many satellites are needed. This lesson tells us how massive and how long-lived each must be, what propulsion system it needs, and what happens at end of life. Together, the two lessons produce the first version of the constellation-level mass and launch-cost budget — which is what Exercise 3 computes.</p>
+    <p>The next lesson — launch and deployment logistics — takes the satellite count and wet mass from these two lessons and asks how the constellation gets from the ground to its operational slots, how long that takes, and what it costs per launch. That lesson completes the engineering picture of Module 2; the final lesson (m2-7) synthesises the full module into the constellation architecture decision framework used in Module 11's case studies.</p>
+</div>
+
+<!-- QUIZ -->
+<div class="quiz-block" id="quiz">
+    <h2>KNOWLEDGE CHECK</h2>
+    <p class="quiz-intro">Ten questions. Select one answer per question. Feedback is immediate; score appears when all ten are answered.</p>
+
+    <div class="quiz-q"><p><strong>Q1.</strong> The largest single station-keeping Δv cost for a LEO constellation is typically:</p>
+        <div class="quiz-options">
+            <button class="quiz-opt" data-q="1" data-correct="false">A — Drag makeup</button>
+            <button class="quiz-opt" data-q="1" data-correct="false">B — Collision avoidance manoeuvres</button>
+            <button class="quiz-opt" data-q="1" data-correct="true">C — Inclination correction due to luni-solar gravity</button>
+            <button class="quiz-opt" data-q="1" data-correct="false">D — Deorbit</button>
+        </div><div class="quiz-feedback" id="fb1"></div></div>
+
+    <div class="quiz-q"><p><strong>Q2.</strong> The Tsiolkovsky rocket equation says that for a given ΔV, using a higher-Isp thruster:</p>
+        <div class="quiz-options">
+            <button class="quiz-opt" data-q="2" data-correct="false">A — Requires more propellant</button>
+            <button class="quiz-opt" data-q="2" data-correct="true">B — Requires less propellant</button>
+            <button class="quiz-opt" data-q="2" data-correct="false">C — Has no effect on propellant mass</button>
+            <button class="quiz-opt" data-q="2" data-correct="false">D — Always requires a larger satellite</button>
+        </div><div class="quiz-feedback" id="fb2"></div></div>
+
+    <div class="quiz-q"><p><strong>Q3.</strong> Hall-effect thrusters are preferred over chemical propulsion for LEO station-keeping primarily because:</p>
+        <div class="quiz-options">
+            <button class="quiz-opt" data-q="3" data-correct="false">A — They produce higher thrust and manoeuvre faster</button>
+            <button class="quiz-opt" data-q="3" data-correct="true">B — Their much higher Isp (1,200–2,000 s vs 220–330 s) drastically reduces propellant mass</button>
+            <button class="quiz-opt" data-q="3" data-correct="false">C — They require no propellant</button>
+            <button class="quiz-opt" data-q="3" data-correct="false">D — They are always cheaper to manufacture</button>
+        </div><div class="quiz-feedback" id="fb3"></div></div>
+
+    <div class="quiz-q"><p><strong>Q4.</strong> Most LEO broadband operators avoid inclination station-keeping because:</p>
+        <div class="quiz-options">
+            <button class="quiz-opt" data-q="4" data-correct="false">A — Inclination cannot be changed once in orbit</button>
+            <button class="quiz-opt" data-q="4" data-correct="true">B — The Δv cost (~65 m/s/yr) dominates the propellant budget and makes it uneconomical</button>
+            <button class="quiz-opt" data-q="4" data-correct="false">C — Inclination drift does not affect coverage</button>
+            <button class="quiz-opt" data-q="4" data-correct="false">D — The manoeuvre requires a launch vehicle</button>
+        </div><div class="quiz-feedback" id="fb4"></div></div>
+
+    <div class="quiz-q"><p><strong>Q5.</strong> The natural orbital lifetime of a Starlink-class satellite at 600 km under solar-mean conditions is approximately:</p>
+        <div class="quiz-options">
+            <button class="quiz-opt" data-q="5" data-correct="false">A — 1–2 years</button>
+            <button class="quiz-opt" data-q="5" data-correct="false">B — 5–8 years</button>
+            <button class="quiz-opt" data-q="5" data-correct="true">C — 15–25 years</button>
+            <button class="quiz-opt" data-q="5" data-correct="false">D — Over 100 years</button>
+        </div><div class="quiz-feedback" id="fb5"></div></div>
+
+    <div class="quiz-q"><p><strong>Q6.</strong> The FCC's post-2022 deorbit requirement for US-licensed LEO operators is:</p>
+        <div class="quiz-options">
+            <button class="quiz-opt" data-q="6" data-correct="false">A — 25 years (unchanged from IADC)</button>
+            <button class="quiz-opt" data-q="6" data-correct="false">B — 10 years</button>
+            <button class="quiz-opt" data-q="6" data-correct="true">C — 5 years</button>
+            <button class="quiz-opt" data-q="6" data-correct="false">D — 1 year</button>
+        </div><div class="quiz-feedback" id="fb6"></div></div>
+
+    <div class="quiz-q"><p><strong>Q7.</strong> The propellant mass for a 300 kg dry-mass satellite using a Hall thruster (Isp = 1,600 s) for ΔV = 100 m/s is approximately:</p>
+        <div class="quiz-options">
+            <button class="quiz-opt" data-q="7" data-correct="false">A — 20 kg</button>
+            <button class="quiz-opt" data-q="7" data-correct="false">B — 10 kg</button>
+            <button class="quiz-opt" data-q="7" data-correct="true">C — 2 kg</button>
+            <button class="quiz-opt" data-q="7" data-correct="false">D — 0.2 kg</button>
+        </div><div class="quiz-feedback" id="fb7"></div></div>
+
+    <div class="quiz-q"><p><strong>Q8.</strong> The station-keeping deadband is a design choice that primarily trades:</p>
+        <div class="quiz-options">
+            <button class="quiz-opt" data-q="8" data-correct="false">A — Orbital altitude against inclination</button>
+            <button class="quiz-opt" data-q="8" data-correct="true">B — Coverage quality and propellant consumption against operational complexity</button>
+            <button class="quiz-opt" data-q="8" data-correct="false">C — Launch mass against orbital lifetime</button>
+            <button class="quiz-opt" data-q="8" data-correct="false">D — Inclination correction against drag makeup</button>
+        </div><div class="quiz-feedback" id="fb8"></div></div>
+
+    <div class="quiz-q"><p><strong>Q9.</strong> A satellite at 600 km loses propulsion at end of life and cannot deorbit. Under solar-minimum conditions it will:</p>
+        <div class="quiz-options">
+            <button class="quiz-opt" data-q="9" data-correct="false">A — Re-enter within 5 years naturally</button>
+            <button class="quiz-opt" data-q="9" data-correct="false">B — Re-enter within 25 years under all conditions</button>
+            <button class="quiz-opt" data-q="9" data-correct="true">C — Remain in orbit for 30–50 years, violating the IADC guideline</button>
+            <button class="quiz-opt" data-q="9" data-correct="false">D — Be removed by drag within 2 years</button>
+        </div><div class="quiz-feedback" id="fb9"></div></div>
+
+    <div class="quiz-q"><p><strong>Q10.</strong> The propulsion parameter that most determines whether inclination correction is practical for a 5-year mission is:</p>
+        <div class="quiz-options">
+            <button class="quiz-opt" data-q="10" data-correct="false">A — Thrust level</button>
+            <button class="quiz-opt" data-q="10" data-correct="true">B — Isp, because it sets the propellant mass cost for the large inclination-correction ΔV</button>
+            <button class="quiz-opt" data-q="10" data-correct="false">C — Propellant type</button>
+            <button class="quiz-opt" data-q="10" data-correct="false">D — Number of thrusters</button>
+        </div><div class="quiz-feedback" id="fb10"></div></div>
+
+    <div class="quiz-score" id="quizScore"></div>
+</div>
+
+<!-- PYTHON -->
+<div class="py-block" id="python">
+    <h2>PYTHON EXERCISES — SPINE PROJECT STAGE 5</h2>
+    <p class="py-intro">Stage 5 adds propulsion physics to the constellation model. Exercise 1 applies the rocket equation across propulsion systems. Exercise 2 integrates the drag-decay equation to compute orbital lifetimes. Exercise 3 adds station-keeping Δv and propellant mass to the Walker constellation model, producing the first constellation-level mass and launch-cost budget. Python 3.8+ standard library only.</p>
+
+    <div class="py-exercise">
+        <h3>Exercise 1 — Rocket Equation and Propulsion Comparison</h3>
+        <p>Compute propellant mass for typical mission Δv budgets across several propulsion systems.</p>
+<pre>
+import math
+
+G0 = 9.80665   # m/s^2
+
+def prop_mass(dry_kg, dv_m_s, isp_s):
+    """Propellant mass from Tsiolkovsky rocket equation."""
+    return dry_kg * (math.exp(dv_m_s / (G0 * isp_s)) - 1)
+
+def mass_frac(dry_kg, dv_m_s, isp_s):
+    """Propellant mass fraction."""
+    mp = prop_mass(dry_kg, dv_m_s, isp_s)
+    return mp / (dry_kg + mp)
+
+dry = 300.0   # kg
+
+systems = [
+    ("Cold gas (N2)",        65),
+    ("Monoprop hydrazine",  230),
+    ("Bipropellant",        320),
+    ("Hall thruster (Kr)", 1600),
+    ("Gridded ion",        3000),
+]
+
+cases = [
+    ("Drag + deorbit (no incl SK)",   90),
+    ("Drag + incl SK + deorbit 5yr", 430),
+]
+
+for label, dv in cases:
+    print(f"\nΔV = {dv} m/s  —  {label}")
+    print(f"{'System':>22}{'m_prop (kg)':>13}{'Mass frac':>11}")
+    print("-" * 48)
+    for name, isp in systems:
+        mp = prop_mass(dry, dv, isp)
+        mf = mass_frac(dry, dv, isp) * 100
+        print(f"{name:>22}{mp:>12.1f} kg{mf:>9.1f}%")
+
+# 1. At DV=430 m/s, which systems keep mass fraction below 30%?
+# 2. At what DV does hydrazine mass fraction exceed 50%?
+# 3. At DV=90 m/s, if launch cost is $6,000/kg, how much does
+#    choosing a Hall thruster save versus hydrazine per satellite?
+#    For a 1,584-satellite constellation?
+</pre>
+    </div>
+
+    <div class="py-exercise">
+        <h3>Exercise 2 — Orbital Lifetime Integrator</h3>
+        <p>Estimate natural re-entry time as a function of altitude and solar activity by integrating the drag-decay equation.</p>
+<pre>
+import math
+
+MU      = 398600.4418
+RE      = 6378.137
+RHO_REF = 2.0e-10   # kg/m^3 at 400 km, solar mean
+H_SCALE = 70.0      # km scale height
+
+SOLAR = {"min": 0.35, "mean": 1.0, "max": 2.8}
+
+def density(alt_km, factor):
+    return RHO_REF * factor * math.exp(-(alt_km - 400) / H_SCALE)
+
+def decay_rate_km_day(alt_km, beta, factor):
+    r   = (RE + alt_km) * 1e3
+    rho = density(alt_km, factor)
+    v   = math.sqrt(MU * 1e9 / r)
+    da  = -2 * rho * v * r / beta   # m/s
+    return da * 86400 / 1e3         # km/day
+
+def lifetime_yr(start_alt, beta, factor, reentry=80, step=1.0):
+    h = start_alt; days = 0.0
+    while h > reentry:
+        rate = decay_rate_km_day(h, beta, factor)
+        if rate >= 0: return float('inf')
+        days -= step / rate
+        h -= step
+    return days / 365.25
+
+beta = 300 / (2.2 * 5)   # Starlink-class, ~27 kg/m^2
+
+print(f"Natural lifetime (beta={beta:.0f} kg/m^2)\n")
+print(f"{'Alt':>6}", end="")
+for s in SOLAR: print(f"  {s:>10}", end="")
+print(f"  {'IADC 25yr?':>12}")
+print("-" * 58)
+
+for alt in [400, 500, 550, 575, 600, 650, 700]:
+    lifetimes = {s: lifetime_yr(alt, beta, f)
+                 for s, f in SOLAR.items()}
+    comply = ("YES" if all(v < 25 for v in lifetimes.values())
+              else "MARGINAL" if any(v < 25 for v in lifetimes.values())
+              else "NO")
+    print(f"{alt:>5} km", end="")
+    for s in SOLAR:
+        lt = lifetimes[s]
+        tag = f"{lt:.0f} yr" if lt < 200 else "> 200 yr"
+        print(f"  {tag:>10}", end="")
+    print(f"  {comply:>12}")
+
+# 1. Which altitudes comply under ALL solar conditions without a burn?
+# 2. At 600 km solar min, does the 25-year limit apply?
+# 3. At 550 km solar min, does a failed satellite re-enter in 25 years?
+#    In 5 years (FCC rule)?
+</pre>
+    </div>
+
+    <div class="py-exercise">
+        <h3>Exercise 3 — Spine Stage 5: Constellation Mass Budget</h3>
+        <p>Add station-keeping Δv and propellant mass to the Walker constellation model to produce the first fleet-level mass and launch-cost budget.</p>
+<pre>
+import math
+
+G0     = 9.80665
+MU     = 398600.4418
+RE     = 6378.137
+RHO0   = 2.0e-10
+H_SC   = 70.0
+SOLAR  = {"min": 0.35, "mean": 1.0, "max": 2.8}
+
+def drag_dv_yr(alt_km, beta_kg_m2, solar_case="mean"):
+    """Approximate annual drag makeup Δv in m/s."""
+    r   = (RE + alt_km) * 1e3
+    rho = RHO0 * SOLAR[solar_case] * math.exp(-(alt_km - 400) / H_SC)
+    v   = math.sqrt(MU * 1e9 / r)
+    return rho * v**2 / beta_kg_m2 * 365.25 * 86400   # m/s/yr
+
+def mission_dv(alt, life_yr, beta,
+               incl_sk=False, cam_yr=5.0,
+               deorbit=28.0, solar="mean"):
+    """Total mission ΔV budget."""
+    dv_drag  = drag_dv_yr(alt, beta, solar) * life_yr
+    dv_incl  = (7600 * math.radians(0.5) * life_yr) if incl_sk else 0
+    dv_cam   = cam_yr * life_yr
+    return dv_drag + dv_incl + dv_cam + deorbit
+
+def prop_mass(dry, dv, isp):
+    return dry * (math.exp(dv / (G0 * isp)) - 1)
+
+LAUNCH_KG = 6000   # $/kg
+
+configs = [
+    # name, alt, life_yr, beta, incl_sk, solar, dry_kg, isp, n_sats
+    ("Starlink-like",    550, 5, 27, False, "mean", 300, 1600, 1584),
+    ("OneWeb-like",      600, 5, 25, False, "mean", 150, 1600,  648),
+    ("High-perf 7yr",   550, 7, 30, True,  "max",  250, 1600,  400),
+]
+
+print(f"{'Config':>16}{'ΔV (m/s)':>10}{'m_prop':>9}{'wet(kg)':>9}"
+      f"{'fleet(t)':>10}{'cost $M':>10}")
+print("-" * 66)
+for name, alt, life, beta, isk, sol, dry, isp, n in configs:
+    dv  = mission_dv(alt, life, beta, isk, solar=sol)
+    mp  = prop_mass(dry, dv, isp)
+    wet = dry + mp
+    ft  = wet * n / 1e3
+    cost= wet * n * LAUNCH_KG / 1e6
+    print(f"{name:>16}{dv:>9.0f} m/s{mp:>8.1f}kg"
+          f"{wet:>8.0f}kg{ft:>8.1f}t  ${cost:>7.0f}M")
+
+print("\nBreakdown — Starlink-like:")
+dv_s = mission_dv(550, 5, 27, False, solar="mean")
+print(f"  Drag makeup:  {drag_dv_yr(550,27,'mean')*5:.1f} m/s")
+print(f"  CAM budget:   {5*5:.1f} m/s")
+print(f"  Deorbit:      28.0 m/s")
+print(f"  Total:        {dv_s:.1f} m/s")
+print(f"  m_prop (HET): {prop_mass(300, dv_s, 1600):.2f} kg")
+
+# 1. Switch solar case to 'max' for the Starlink-like config.
+#    How much does propellant mass increase?
+# 2. Double design life from 5 to 10 years. Is fleet launch cost
+#    increase proportional to life extension?
+# 3. STAGE-6 PREVIEW: m2-6 (launch & deployment logistics) takes
+#    fleet wet mass from this model and computes the number of launches,
+#    deployment timeline, and launch cost breakdown by vehicle.
+</pre>
+        <div class="py-challenge"><strong>SPINE PROJECT — STAGE 5</strong>
+            Stage 5 adds propulsion physics: rocket equation, drag Δv, and propellant sizing. Combined with Stage 4's coverage model, the spine project now has both a geometric and a mass description of the constellation. Stage 6 (m2-6) adds launch logistics: how many vehicles, what cadence, and what the deployment timeline looks like for a realistic constellation build-out.
+        </div>
+    </div>
+</div>
+
+<!-- REFLECTION -->
+<div class="reflection-block" id="reflect">
+    <h2>REFLECTION PROMPTS</h2>
+    <p class="ref-intro">Not graded. Write in your own words, 200–400 words each.</p>
+
+    <div class="ref-prompt"><h3>Prompt 1 — Consequences of Skipping Inclination Correction</h3>
+        <p>The decision to omit inclination station-keeping saves a large fraction of the propellant budget but allows orbital planes to slowly drift in inclination. Trace the operational consequences over a ten-year constellation life: how do coverage gaps evolve, how does the conjunction geometry change, and what operational responses are available to an operator whose planes have drifted by 2° from nominal?</p></div>
+
+    <div class="ref-prompt"><h3>Prompt 2 — The 5-Year vs 25-Year Deorbit Rule</h3>
+        <p>The FCC's 5-year deorbit rule versus the IADC's 25-year guideline represents a twenty-fold difference in what regulators consider acceptable. Argue the technical, commercial, and debris-environment cases for and against the 5-year rule, and identify which stakeholders benefit from each position.</p></div>
+
+    <div class="ref-prompt"><h3>Prompt 3 — Deadband in Physical Units</h3>
+        <p>A typical station-keeping deadband is ±0.05° in both along-track and cross-track position. Translate this into kilometres at 550 km altitude. Compare it to the dimensions of a Starlink satellite, the conjunction screening threshold used by space surveillance networks, and the minimum safe separation standard in constellation operations. Is ±0.05° tight or loose in operational terms?</p></div>
+
+    <div class="ref-prompt"><h3>Prompt 4 — Five-Year Life vs Fifteen-Year GEO</h3>
+        <p>Mass-produced LEO broadband satellites are designed for approximately five years and then replaced. Traditional GEO satellites are designed for fifteen years with high reliability and no replacement plan. What does the LEO replacement model imply for manufacturing cost structures, launch cadence, spectrum management, and debris generation over a 20-year programme horizon? Which model produces a better long-term outcome for the orbital environment?</p></div>
+</div>
+
+<!-- MARK COMPLETE -->
+<div class="complete-wrap">
+    <button class="complete-btn" id="completeBtn">MARK LESSON COMPLETE</button>
+    <div class="complete-msg" id="completeMsg"></div>
+</div>
+
+<div class="lesson-nav">
+    <a href="m2-4.html">← LESSON 04 — WALKER PATTERNS &amp; COVERAGE GEOMETRY</a>
+    <a href="m2-6.html">LESSON 06 — LAUNCH &amp; DEPLOYMENT LOGISTICS →</a>
+</div>
+
+</div><!-- /lesson-wrap -->
+
+<button class="back-to-top" id="backToTop" title="Back to top">↑</button>
+
+<footer>© 2026 LEOAF · M2 · LESSON 05 OF 7</footer>
+
+<script>
+const canvas = document.getElementById('starsCanvas');
+const ctx = canvas.getContext('2d');
+let stars = [];
+function initStars() { stars=[]; for(let i=0;i<180;i++) stars.push({x:Math.random()*canvas.width,y:Math.random()*canvas.height,size:Math.random()*1.5+0.4,speed:Math.random()*0.18+0.04,hue:Math.random()*360}); }
+function resizeCanvas() { canvas.width=window.innerWidth; canvas.height=window.innerHeight; }
+resizeCanvas(); initStars(); window.addEventListener('resize', resizeCanvas);
+function animateStars() { ctx.clearRect(0,0,canvas.width,canvas.height); stars.forEach(s=>{s.y-=s.speed;if(s.y<0){s.y=canvas.height;s.x=Math.random()*canvas.width;} ctx.beginPath();ctx.fillStyle=`hsl(${s.hue},80%,80%)`;ctx.arc(s.x,s.y,s.size,0,Math.PI*2);ctx.fill();}); requestAnimationFrame(animateStars); }
+animateStars();
+</script>
+
+<script>
+const feedbacks = {
+    1:{correct:"Correct. Correcting 0.5°/yr of inclination drift at 550 km costs about 66 m/s/yr — ΔV = v·Δi ≈ 7,600 × 0.00873 ≈ 66 m/s. Over 5 years that is ~330 m/s, dwarfing drag makeup (~25 m/s) and deorbit (~28 m/s).",wrong:"Incorrect. Inclination correction requires thrust perpendicular to the velocity vector at orbital speed, making it extremely expensive: ~66 m/s/yr. Drag makeup is only 3–9 m/s/yr and deorbit is a one-time 25–30 m/s. Inclination correction dominates if performed."},
+    2:{correct:"Correct. m_prop = m_dry × (exp(ΔV/(g₀·Isp)) − 1). Higher Isp reduces the exponent, shrinking the required propellant mass. This is the fundamental advantage of electric propulsion.",wrong:"Incorrect. Higher Isp means the thruster extracts more momentum per unit propellant. The rocket equation makes this explicit: propellant mass decreases as Isp increases for the same ΔV."},
+    3:{correct:"Correct. HETs have Isp of 1,200–2,000 s versus 220–330 s for chemical systems — a 5–8× advantage that translates directly into 5–8× less propellant for the same ΔV, significantly reducing satellite launch mass.",wrong:"Incorrect. HETs produce far less thrust (millinewtons) than chemical systems (newtons), making manoeuvres much slower. The advantage is entirely in Isp — propellant efficiency. Manufacturing cost is not reliably lower."},
+    4:{correct:"Correct. At ~66 m/s/yr, five years of inclination correction costs ~330 m/s — more than all other station-keeping combined. Accepting inclination drift within operational tolerance is far more propellant-efficient.",wrong:"Incorrect. Inclination can be changed with onboard propulsion — it is feasible but very expensive in ΔV. The cost, not the feasibility, is the reason most operators omit it. ~66 m/s/yr competes with drag makeup of only 3–9 m/s/yr."},
+    5:{correct:"Correct. At 600 km under solar-mean conditions, natural re-entry takes 15–25 years — close to the IADC 25-year limit but not reliably within it under solar-minimum conditions, making a controlled deorbit burn necessary.",wrong:"Incorrect. 600 km is near the IADC compliance boundary. Natural re-entry under solar-mean is 15–25 years. Under solar minimum it rises to 30–50 years — exceeding the limit. A controlled deorbit burn is required for reliable compliance."},
+    6:{correct:"Correct. The FCC updated its deorbit rule in September 2022 to require disposal within 5 years of end of mission for new US-licensed LEO constellation authorisations — a significant tightening from the 25-year IADC guideline.",wrong:"Incorrect. The IADC 25-year standard is the older international guideline. The FCC tightened this to 5 years for new US-licensed LEO systems authorised after 2022, making 5 years the operative constraint for most new large constellations."},
+    7:{correct:"Correct. m_prop = 300 × (exp(100/(9.81×1600)) − 1) = 300 × (exp(0.00638) − 1) ≈ 300 × 0.00640 ≈ 1.9 kg ≈ 2 kg. The high Isp of Hall thrusters makes propellant mass a tiny fraction of dry mass for modest ΔV.",wrong:"Incorrect. Apply the rocket equation: m_prop = 300 × (exp(100/15698) − 1) ≈ 300 × 0.0064 ≈ 1.9 kg. At Isp = 1,600 s, even 100 m/s of ΔV requires less than 2 kg of propellant for a 300 kg satellite."},
+    8:{correct:"Correct. A tighter deadband keeps coverage geometry closer to ideal (better service quality) but requires more frequent manoeuvres consuming more propellant and imposing more complex operations scheduling. Wider deadband saves propellant at the cost of larger gaps.",wrong:"Incorrect. The deadband defines the allowed position error before a correction is triggered. Tighter = better coverage quality, more propellant, more operations; looser = degraded coverage quality, less propellant, simpler operations."},
+    9:{correct:"Correct. At 600 km under solar-minimum conditions, natural re-entry takes 30–50 years — exceeding the IADC 25-year guideline. A failed satellite at 600 km without deorbit capability becomes long-lived debris.",wrong:"Incorrect. 600 km solar-minimum lifetime is 30–50 years. Five-year compliance requires a controlled deorbit burn. Even 25-year IADC compliance is not guaranteed at 600 km under solar minimum without active deorbit."},
+    10:{correct:"Correct. Inclination correction costs ~325 m/s over 5 years. At Isp = 230 s (hydrazine), this requires ~40% of dry mass in propellant — prohibitive. At Isp = 1,600 s (Hall), the same ΔV requires ~2% of dry mass — viable. Isp is the deciding factor.",wrong:"Incorrect. Thrust level affects manoeuvre duration, not propellant mass. The rocket equation depends only on ΔV, Isp, and dry mass. Higher Isp is what makes large ΔV (like inclination correction) affordable in propellant terms — that is the key parameter."}
+};
+let answered = {};
+document.querySelectorAll('.quiz-opt').forEach(btn => {
+    btn.addEventListener('click', function() {
+        const q = this.dataset.q;
+        if (answered[q] !== undefined) return;
+        const correct = this.dataset.correct === 'true';
+        answered[q] = correct;
+        document.querySelectorAll(`.quiz-opt[data-q="${q}"]`).forEach(b => { b.disabled=true; if(b.dataset.correct==='true') b.classList.add('correct'); });
+        if (!correct) this.classList.add('wrong');
+        const fb = document.getElementById(`fb${q}`);
+        fb.textContent = (correct?'✓ ':'✗ ') + feedbacks[q][correct?'correct':'wrong'];
+        fb.style.color = correct ? '#39ff14' : '#ff004f';
+        if (Object.keys(answered).length === 10) {
+            const total = Object.values(answered).filter(Boolean).length;
+            const el = document.getElementById('quizScore');
+            el.style.display = 'block';
+            const pct = Math.round(total/10*100);
+            el.textContent = `SCORE: ${total} / 10 (${pct}%) — ${pct===100?'PERFECT.':pct>=80?'STRONG. REVIEW ANY MISSES.':pct>=60?'ADEQUATE. REVISIT WEAK SECTIONS.':'REVISIT THE LESSON BEFORE PROCEEDING.'}`;
+        }
+    });
+});
+</script>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="supabase.js"></script>
+<script src="user_progress.js"></script>
+<script>
+const LESSON_ID = 'm2-5';
+(function () {
+    function bounceToLogin(r) { console.error("Auth guard:",r); window.location.replace("index.html"); }
+    async function init() {
+        if (typeof client === "undefined" || !client || !client.auth)
+            return bounceToLogin("Supabase client not loaded");
+        let session = null;
+        try { ({ data: { session } } = await client.auth.getSession()); }
+        catch (e) { return bounceToLogin("getSession threw: " + e.message); }
+        if (!session) { window.location.replace("index.html"); return; }
+        const btn = document.getElementById('completeBtn');
+        const msg = document.getElementById('completeMsg');
+        function setDone(done) {
+            if (done) {
+                btn.textContent = '✓ COMPLETE — CLICK TO UNDO';
+                btn.classList.add('done');
+                btn.style.cssText = 'border-color:#39ff14;color:#39ff14;background:rgba(57,255,20,0.1);cursor:pointer;opacity:1;';
+                msg.style.color = '#39ff14';
+                msg.textContent = 'Lesson marked complete. Click again to undo.';
+            } else {
+                btn.textContent = 'MARK LESSON COMPLETE';
+                btn.classList.remove('done');
+                btn.style.cssText = '';
+                msg.style.color = '#ffffff55';
+                msg.textContent = 'Not yet marked complete.';
+            }
+        }
+        let mastered = [];
+        try { mastered = await getMasteredSections(); } catch (e) { console.error(e); }
+        setDone(mastered.includes(LESSON_ID));
+        btn.addEventListener('click', async () => {
+            const isCurrentlyDone = btn.classList.contains('done');
+            msg.style.color = '#00d9ff'; msg.textContent = 'Saving...';
+            const ok = await upsertSection(LESSON_ID, !isCurrentlyDone);
+            if (ok) { setDone(!isCurrentlyDone); }
+            else { msg.style.color = '#ff004f'; msg.textContent = 'Error saving. Try again.'; }
+        });
+        const btt = document.getElementById('backToTop');
+        window.addEventListener('scroll', () => { btt.classList.toggle('visible', window.scrollY > 400); });
+        btt.addEventListener('click', () => window.scrollTo({ top: 0, behavior: 'smooth' }));
+    }
+    if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", init);
+    else init();
+})();
+</script>
+
+</body>
+</html>
