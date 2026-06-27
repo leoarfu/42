@@ -1,0 +1,682 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, shrink-to-fit=no">
+<title>M1-6 — Spectrum &amp; Regulatory Orientation · LEOAF</title>
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;600;800&family=Share+Tech+Mono&family=Libre+Baskerville:ital,wght@0,400;0,700;1,400&display=swap" rel="stylesheet">
+<link rel="icon" href="favicon.ico" sizes="any" type="image/x-icon">
+<link rel="manifest" href="site.webmanifest">
+<meta name="theme-color" content="#0f0f0f">
+
+<script>
+window.leoafAbort = async function () {
+    function go() { window.location.replace("index.html?signedout=1"); }
+    try {
+        if (typeof client !== "undefined" && client && client.auth && client.auth.signOut) {
+            try { await client.auth.signOut({ scope: "local" }); } catch (e) {}
+        }
+    } catch (e) {}
+    go();
+};
+</script>
+
+<style>
+* { box-sizing:border-box; margin:0; padding:0; }
+html { height:100%; -webkit-text-size-adjust:100%; overflow-x:hidden; }
+body { font-family:'Share Tech Mono',monospace; background:#000; color:white; overflow-x:hidden; min-height:100vh; }
+#starsCanvas { position:fixed; inset:0; z-index:-1; }
+
+header { background:#000; border-bottom:1px solid #ff004f33; position:sticky; top:0; z-index:100; padding:1rem clamp(1.5rem,5vw,4rem); display:flex; justify-content:space-between; align-items:center; box-shadow:0 4px 16px #0008; }
+.logo { font-family:'Orbitron',sans-serif; font-weight:800; font-size:clamp(16px,2vw,22px); letter-spacing:3px; text-decoration:none; }
+.logo span:first-child { color:white; }
+.logo span:last-child { color:#ff004f; }
+.nav-right { display:flex; align-items:center; gap:10px; }
+.nav-btn { background:transparent; border:1px solid #ff004f44; color:#ff004f; padding:6px 14px; cursor:pointer; transition:0.3s ease; font-size:11px; font-family:'Orbitron',sans-serif; letter-spacing:1px; text-decoration:none; display:inline-block; }
+.nav-btn:hover { background:#ff004f; color:black; }
+
+.breadcrumb { padding:14px clamp(1.5rem,5vw,4rem); font-size:11px; color:#ffffff44; letter-spacing:1px; position:relative; z-index:1; }
+.breadcrumb a { color:#00d9ff66; text-decoration:none; }
+.breadcrumb a:hover { color:#00d9ff; }
+.breadcrumb span { margin:0 8px; }
+
+.lesson-wrap { max-width:820px; margin:0 auto; padding:0 clamp(1.5rem,5vw,4rem) 80px; position:relative; z-index:1; }
+
+.lesson-header { padding:30px 0 28px; border-bottom:1px solid #ffffff11; margin-bottom:36px; }
+.lesson-tag { font-family:'Orbitron',sans-serif; font-size:10px; color:#ff004f; letter-spacing:3px; margin-bottom:10px; }
+.lesson-header h1 { font-family:'Orbitron',sans-serif; font-size:clamp(20px,3.5vw,32px); font-weight:800; line-height:1.2; margin-bottom:12px; }
+.lesson-meta { display:flex; gap:10px; flex-wrap:wrap; margin-bottom:16px; }
+.l-pill { font-family:'Orbitron',sans-serif; font-size:10px; padding:3px 10px; border:1px solid; letter-spacing:1px; }
+.l-pill-q { color:#ff004f; border-color:#ff004f44; }
+.l-pill-t { color:#39ff14; border-color:#39ff1444; }
+.lesson-intro { font-size:13px; line-height:1.85; opacity:0.75; }
+
+.toc { background:rgba(0,217,255,0.06); border:1px solid #00d9ff33; padding:24px 28px; margin:30px 0; }
+.toc h4 { font-family:'Orbitron',sans-serif; font-size:10px; color:#00d9ff; letter-spacing:2px; margin-bottom:16px; }
+.toc ol { padding-left:20px; }
+.toc li { font-size:13px; line-height:2.1; opacity:1; }
+.toc li a { color:#00d9ffbb; text-decoration:none; transition:0.15s; }
+.toc li a:hover { color:#ffffff; padding-left:4px; }
+.toc li::marker { color:#ff004f; font-family:'Orbitron',sans-serif; font-size:10px; }
+
+.content-block { margin-bottom:48px; }
+.content-block h2 { font-family:'Orbitron',sans-serif; font-size:13px; color:#00d9ff; letter-spacing:2px; text-transform:uppercase; margin-bottom:18px; padding-bottom:10px; border-bottom:1px solid #00d9ff22; scroll-margin-top:80px; }
+.content-block h3 { font-family:'Orbitron',sans-serif; font-size:11px; color:#ffffff88; letter-spacing:1.5px; text-transform:uppercase; margin:28px 0 12px; }
+.content-block p { font-size:13px; line-height:1.9; opacity:0.85; margin-bottom:16px; }
+.content-block ul, .content-block ol { padding-left:0; margin-bottom:16px; }
+.content-block ul li, .content-block ol li { font-size:13px; line-height:1.85; opacity:0.85; padding-left:20px; position:relative; margin-bottom:6px; }
+.content-block ul li::before { content:'›'; position:absolute; left:0; color:#00d9ff; }
+.content-block blockquote { border-left:3px solid #39ff14; background:rgba(57,255,20,0.05); padding:14px 20px; margin:18px 0; font-size:14px; font-family:'Share Tech Mono',monospace; color:#39ff14; letter-spacing:1px; }
+
+.callout { border-left:3px solid #00d9ff; background:rgba(0,217,255,0.05); padding:16px 20px; margin:22px 0; font-size:12px; line-height:1.8; }
+.callout.red   { border-left-color:#ff004f; background:rgba(255,0,79,0.05); }
+.callout.green { border-left-color:#39ff14; background:rgba(57,255,20,0.05); }
+.callout.amber { border-left-color:#ffaa00; background:rgba(255,170,0,0.05); }
+.callout strong { font-family:'Orbitron',sans-serif; font-size:10px; letter-spacing:1px; display:block; margin-bottom:8px; color:inherit; }
+
+.key-numbers { display:grid; grid-template-columns:repeat(auto-fit,minmax(140px,1fr)); gap:12px; margin:22px 0; }
+.kn-item { background:rgba(255,255,255,0.03); border:1px solid #ffffff11; padding:16px 12px; text-align:center; }
+.kn-val { font-family:'Orbitron',sans-serif; font-size:clamp(15px,2.3vw,22px); font-weight:800; color:#00d9ff; display:block; }
+.kn-label { font-size:10px; opacity:0.5; letter-spacing:1px; margin-top:5px; display:block; line-height:1.4; }
+
+.compare-table { width:100%; border-collapse:collapse; margin:22px 0; font-size:12px; }
+.compare-table th { font-family:'Orbitron',sans-serif; font-size:10px; letter-spacing:1px; color:#00d9ff; padding:10px 12px; border-bottom:1px solid #00d9ff33; text-align:left; }
+.compare-table td { padding:10px 12px; border-bottom:1px solid #ffffff0a; line-height:1.5; opacity:0.85; vertical-align:top; }
+.compare-table tr:hover td { background:rgba(255,255,255,0.02); }
+
+.diagram-wrap { margin:24px 0; background:rgba(255,255,255,0.02); border:1px solid #ffffff11; padding:20px; overflow-x:auto; }
+.diagram-wrap figcaption { font-size:11px; color:#ffffff44; margin-top:12px; text-align:center; letter-spacing:1px; }
+
+.quiz-block { background:rgba(17,17,17,0.9); border:1px solid #ff004f33; padding:28px; margin:48px 0 32px; }
+.quiz-block h2 { font-family:'Orbitron',sans-serif; font-size:13px; color:#ff004f; letter-spacing:2px; margin-bottom:6px; }
+.quiz-intro { font-size:12px; opacity:0.6; margin-bottom:24px; padding-bottom:16px; border-bottom:1px solid #ff004f22; line-height:1.6; }
+.quiz-q { margin-bottom:28px; }
+.quiz-q p { font-size:13px; opacity:0.9; margin-bottom:12px; line-height:1.65; }
+.quiz-q p strong { color:#00d9ff; }
+.quiz-options { display:flex; flex-direction:column; gap:8px; }
+.quiz-opt { background:rgba(255,255,255,0.03); border:1px solid #ffffff1a; padding:11px 16px; cursor:pointer; font-size:12px; font-family:'Share Tech Mono',monospace; transition:0.2s ease; text-align:left; color:white; line-height:1.5; }
+.quiz-opt:hover:not(:disabled) { background:rgba(0,217,255,0.08); border-color:#00d9ff44; }
+.quiz-opt.correct  { background:rgba(57,255,20,0.1);  border-color:#39ff14; color:#39ff14; }
+.quiz-opt.wrong    { background:rgba(255,0,79,0.1);   border-color:#ff004f; color:#ff004f; }
+.quiz-opt:disabled { cursor:default; }
+.quiz-feedback { font-size:12px; margin-top:10px; min-height:18px; line-height:1.7; opacity:0.9; padding:0 4px; }
+.quiz-score { font-family:'Orbitron',sans-serif; font-size:12px; color:#39ff14; margin-top:20px; letter-spacing:1px; display:none; padding-top:16px; border-top:1px solid #39ff1433; }
+
+.py-block { background:rgba(10,10,10,0.95); border:1px solid #39ff1422; padding:28px; margin:32px 0; }
+.py-block h2 { font-family:'Orbitron',sans-serif; font-size:13px; color:#39ff14; letter-spacing:2px; margin-bottom:8px; }
+.py-block .py-intro { font-size:12px; opacity:0.7; margin-bottom:20px; padding-bottom:16px; border-bottom:1px solid #39ff1422; line-height:1.7; }
+.py-exercise { margin-bottom:32px; }
+.py-exercise:last-child { margin-bottom:0; }
+.py-exercise h3 { font-family:'Orbitron',sans-serif; font-size:11px; color:#39ff1499; letter-spacing:1.5px; text-transform:uppercase; margin-bottom:10px; }
+.py-exercise p { font-size:12px; opacity:0.8; margin-bottom:14px; line-height:1.75; }
+.py-block pre { background:#050505; border:1px solid #39ff1433; padding:20px; font-family:'Share Tech Mono',monospace; font-size:11.5px; line-height:1.75; overflow-x:auto; color:#39ff14; white-space:pre; margin-bottom:12px; }
+.py-block .py-challenge { background:rgba(57,255,20,0.04); border-left:2px solid #39ff14; padding:12px 16px; margin-top:14px; font-size:12px; line-height:1.75; opacity:0.8; }
+.py-block .py-challenge strong { font-family:'Orbitron',sans-serif; font-size:10px; color:#39ff14; display:block; margin-bottom:6px; letter-spacing:1px; }
+
+.reflection-block { background:rgba(255,170,0,0.04); border:1px solid #ffaa0033; padding:24px; margin:32px 0; }
+.reflection-block h2 { font-family:'Orbitron',sans-serif; font-size:13px; color:#ffaa00; letter-spacing:2px; margin-bottom:8px; }
+.reflection-block .ref-intro { font-size:12px; opacity:0.7; margin-bottom:20px; padding-bottom:14px; border-bottom:1px solid #ffaa0022; line-height:1.7; }
+.ref-prompt { margin-bottom:20px; }
+.ref-prompt h3 { font-family:'Orbitron',sans-serif; font-size:11px; color:#ffaa0099; letter-spacing:1px; margin-bottom:8px; }
+.ref-prompt p { font-size:12px; opacity:0.8; line-height:1.75; margin-bottom:10px; }
+
+.back-to-top { position:fixed; bottom:28px; right:28px; z-index:200; width:44px; height:44px; background:#000; border:1px solid #00d9ff55; color:#00d9ff; font-size:20px; cursor:pointer; display:flex; align-items:center; justify-content:center; opacity:0; pointer-events:none; transition:opacity 0.3s ease, border-color 0.3s ease; }
+.back-to-top.visible { opacity:1; pointer-events:auto; }
+.back-to-top:hover { border-color:#00d9ff; background:#001a2c; }
+
+.complete-wrap { margin-top:56px; padding-top:30px; border-top:1px solid #ffffff11; text-align:center; }
+.complete-btn { font-family:'Orbitron',sans-serif; font-size:13px; letter-spacing:2px; padding:14px 44px; background:transparent; border:1px solid #39ff14; color:#39ff14; cursor:pointer; transition:0.3s ease; }
+.complete-btn:hover:not(.done) { background:#39ff14; color:black; box-shadow:0 0 20px rgba(57,255,20,0.4); }
+.complete-btn.done { background:rgba(57,255,20,0.1); cursor:default; opacity:0.7; }
+.complete-msg { font-size:12px; color:#39ff14; margin-top:14px; min-height:18px; letter-spacing:1px; }
+
+.lesson-nav { display:flex; justify-content:space-between; margin-top:30px; flex-wrap:wrap; gap:10px; }
+.lesson-nav a { font-family:'Orbitron',sans-serif; font-size:11px; color:#00d9ff66; text-decoration:none; letter-spacing:1px; transition:0.2s; }
+.lesson-nav a:hover { color:#00d9ff; }
+
+footer { text-align:center; padding:30px; opacity:0.3; font-size:11px; position:relative; z-index:1; letter-spacing:1px; }
+
+@media (max-width:600px) { .key-numbers { grid-template-columns:1fr 1fr; } .compare-table { font-size:11px; } .compare-table th, .compare-table td { padding:8px 8px; } }
+
+/* ── LIGHT READING MODE ── */
+.content-block { background:#f5f2ec; color:#1a1a1a; padding:36px clamp(24px,4vw,48px); margin-bottom:24px; border-left:4px solid #00d9ff; position:relative; z-index:1; }
+.content-block h2 { font-family:'Orbitron',sans-serif; font-size:13px; color:#003d66; letter-spacing:2px; text-transform:uppercase; margin-bottom:20px; padding-bottom:10px; border-bottom:2px solid #00d9ff66; scroll-margin-top:80px; }
+.content-block h3 { font-family:'Orbitron',sans-serif; font-size:11px; color:#444; letter-spacing:1.5px; text-transform:uppercase; margin:32px 0 14px; }
+.content-block p { font-family:'Libre Baskerville', Georgia, serif; font-size:15px; line-height:1.9; color:#1a1a1a; opacity:1; margin-bottom:18px; }
+.content-block ul li { font-family:'Libre Baskerville', Georgia, serif; font-size:14px; line-height:1.85; color:#1a1a1a; opacity:1; margin-bottom:8px; }
+.content-block ul li::before { color:#0077aa; }
+.content-block blockquote { border-left:3px solid #1a7a1a; background:#eafaea; color:#0a3d0a; }
+.content-block .callout { border-left:3px solid #0088cc; background:#e8f4fb; color:#1a1a1a; }
+.content-block .callout.red   { border-left-color:#cc0033; background:#fdecea; }
+.content-block .callout.green { border-left-color:#1a7a1a; background:#eafaea; }
+.content-block .callout.amber { border-left-color:#996600; background:#fef9ec; }
+.content-block .callout strong { color:inherit; }
+.content-block .kn-item { background:#fff; border:1px solid #d0d0d0; }
+.content-block .kn-label { color:#555; opacity:1; }
+.content-block .compare-table th { color:#003d66; border-bottom:2px solid #00d9ff66; }
+.content-block .compare-table td { color:#1a1a1a; opacity:1; border-bottom:1px solid #ddd; }
+.content-block .compare-table tr:hover td { background:#f0f0f0; }
+.content-block .diagram-wrap { background:#0a0a0a; border:1px solid #333; }
+.content-block .diagram-wrap figcaption { color:#ffffff55; }
+</style>
+
+</head>
+<body>
+
+<canvas id="starsCanvas"></canvas>
+
+<header>
+    <a href="dashboard.html" class="logo"><span>LEO</span><span>AF</span></a>
+    <div class="nav-right">
+        <a href="m1.html" class="nav-btn">← M1 HUB</a>
+        <button class="nav-btn" onclick="leoafAbort()">ABORT</button>
+    </div>
+</header>
+
+<div class="breadcrumb">
+    <a href="dashboard.html">DASHBOARD</a><span>/</span>
+    <a href="m1.html">M1</a><span>/</span>
+    <span style="color:#ffffff88;">LESSON 06 — SPECTRUM &amp; REGULATORY ORIENTATION</span>
+</div>
+
+<div class="lesson-wrap">
+
+<div class="lesson-header">
+    <div class="lesson-tag">M1 · LESSON 06 OF 7</div>
+    <h1>Spectrum &amp; Regulatory Orientation</h1>
+    <div class="lesson-meta">
+        <div class="l-pill l-pill-q">MODULE 1</div>
+        <div class="l-pill l-pill-t">FOUNDATIONS</div>
+    </div>
+    <p class="lesson-intro">Every lesson so far has treated a satellite system as a problem of orbits, latency, architecture, and economics. This one introduces the constraint that sits underneath all of them and is easy to forget until it stops a project dead: the right to transmit. A constellation is useless without spectrum to use and permission to use it, and spectrum is finite, shared, and governed by an international and national regulatory system that an architect must treat as a first-class design input. This lesson is orientation, not mastery — the mental map of which bands exist and what they trade off, how the two-tier regulatory system works, how priority is won and kept, the rule that makes new constellations protect old ones, and why spectrum is a strategic moat. It defers the link-budget physics to the RF module and the deep regulatory procedure and interference math to the economics-and-regulation module.</p>
+</div>
+
+<div class="toc">
+    <h4>CONTENTS</h4>
+    <ol>
+        <li><a href="#s1">Spectrum as a first-class constraint</a></li>
+        <li><a href="#s2">The bands at a glance</a></li>
+        <li><a href="#s3">The two-tier regulatory system</a></li>
+        <li><a href="#s4">Filing, priority &amp; the first-come dynamic</a></li>
+        <li><a href="#s5">Bringing into use &amp; deployment milestones</a></li>
+        <li><a href="#s6">EPFD — new protects old</a></li>
+        <li><a href="#s7">Market access &amp; landing rights</a></li>
+        <li><a href="#s8">Spectrum as a competitive moat</a></li>
+        <li><a href="#s9">How band choice flows into the architecture</a></li>
+        <li><a href="#s10">The architect's takeaway</a></li>
+        <li><a href="#quiz">Knowledge check</a></li>
+        <li><a href="#python">Python exercises</a></li>
+        <li><a href="#reflect">Reflection prompts</a></li>
+    </ol>
+</div>
+
+<div class="content-block" id="s1">
+    <h2>1. Spectrum as a First-Class Constraint</h2>
+    <p>Spectrum is unlike the other resources a constellation consumes. Capital can be raised, satellites can be manufactured, launch can be bought, but the radio-frequency spectrum is fixed by physics and cannot be made more of. It is also shared: one system's transmission is another's interference, so the same frequencies cannot be used freely by everyone everywhere. And it is regulated, because a shared finite resource with international reach can only be managed by agreement between nations.</p>
+    <p>The consequence for an architect is that spectrum access is as fundamental as orbit access, and often harder to secure. A system can have perfect orbits, cheap satellites, and a sound business model and still be unbuildable because it cannot obtain rights to a usable band in the markets it wants to serve. Spectrum is therefore a design input from the start: the band a system can secure shapes its terminals, its capacity, its coverage, and its competitiveness, and the regulatory rights it can win determine where it may operate at all.</p>
+    <div class="callout red">
+        <strong>THE CONSTRAINT BENEATH THE OTHERS</strong>
+        You can raise capital and buy launch. You cannot manufacture spectrum. A system without the right to transmit on a usable band, in the markets it wants, is unbuildable — however good everything else is.
+    </div>
+</div>
+
+<div class="content-block" id="s2">
+    <h2>2. The Bands at a Glance</h2>
+    <p>Satellite communications use radio bands named by letter, running from around 1 GHz up into the tens of gigahertz, and the choice of band is governed by a single dominant tradeoff: lower frequencies are robust but narrow, higher frequencies are capacious but fragile.</p>
+    <p>Lower-frequency bands resist rain and atmospheric loss, penetrate obstacles better, and work with smaller, simpler antennas, but they offer little bandwidth and are congested from decades of use. Higher-frequency bands offer wide bandwidth, and therefore high capacity, with small antennas forming tight beams, but they suffer badly from rain fade and atmospheric attenuation and demand fade-mitigation techniques. The band an architect chooses is a position on that capacity-versus-robustness ladder, constrained by what is actually available to license.</p>
+
+    <div class="diagram-wrap">
+        <svg viewBox="0 0 700 250" width="100%" xmlns="http://www.w3.org/2000/svg" font-family="Share Tech Mono, monospace">
+            <rect width="700" height="250" fill="#0a0a0a"/>
+            <!-- frequency axis -->
+            <line x1="60" y1="150" x2="650" y2="150" stroke="#ffffff55" stroke-width="1.5"/>
+            <text x="60" y="172" font-size="9" fill="#ffffff66">1 GHz</text>
+            <text x="612" y="172" font-size="9" fill="#ffffff66">~75 GHz</text>
+            <text x="355" y="172" font-size="9" fill="#ffffff44" text-anchor="middle">frequency (log) →</text>
+            <!-- band ticks (log-spaced) -->
+            <!-- L/S ~2 -->
+            <line x1="122" y1="144" x2="122" y2="156" stroke="#39ff14" stroke-width="2"/>
+            <text x="122" y="138" font-size="10" fill="#39ff14" text-anchor="middle">L / S</text>
+            <text x="122" y="192" font-size="8" fill="#39ff1499" text-anchor="middle">mobile · IoT · D2D</text>
+            <!-- C ~6 -->
+            <line x1="299" y1="144" x2="299" y2="156" stroke="#00d9ff" stroke-width="2"/>
+            <text x="299" y="138" font-size="10" fill="#00d9ff" text-anchor="middle">C</text>
+            <text x="299" y="192" font-size="8" fill="#00d9ff99" text-anchor="middle">GEO FSS · TV · trunking</text>
+            <!-- Ku ~14 -->
+            <line x1="408" y1="144" x2="408" y2="156" stroke="#00d9ff" stroke-width="2"/>
+            <text x="408" y="138" font-size="10" fill="#00d9ff" text-anchor="middle">Ku</text>
+            <text x="408" y="206" font-size="8" fill="#00d9ff99" text-anchor="middle">broadcast · VSAT · LEO user</text>
+            <!-- Ka ~30 -->
+            <line x1="505" y1="144" x2="505" y2="156" stroke="#ffaa00" stroke-width="2"/>
+            <text x="505" y="138" font-size="10" fill="#ffaa00" text-anchor="middle">Ka</text>
+            <text x="505" y="192" font-size="8" fill="#ffaa0099" text-anchor="middle">HTS · LEO · gateways</text>
+            <!-- V ~50 -->
+            <line x1="571" y1="144" x2="571" y2="156" stroke="#ff004f" stroke-width="2"/>
+            <text x="571" y="138" font-size="10" fill="#ff004f" text-anchor="middle">V / Q</text>
+            <text x="571" y="206" font-size="8" fill="#ff004f99" text-anchor="middle">feeders · frontier</text>
+            <!-- gradient arrows -->
+            <line x1="60" y1="40" x2="650" y2="40" stroke="#39ff14" stroke-width="1.2"/>
+            <polygon points="60,40 70,36 70,44" fill="#39ff14"/>
+            <text x="80" y="36" font-size="9" fill="#39ff14">← ROBUSTNESS (rain, penetration, small antenna)</text>
+            <line x1="60" y1="64" x2="650" y2="64" stroke="#ffaa00" stroke-width="1.2"/>
+            <polygon points="650,64 640,60 640,68" fill="#ffaa00"/>
+            <text x="630" y="60" font-size="9" fill="#ffaa00" text-anchor="end">CAPACITY (bandwidth, tight beams) →</text>
+        </svg>
+        <figcaption>THE BAND LADDER — robustness falls and capacity rises with frequency; band choice is a position on this trade. Ranges approximate; conventions vary.</figcaption>
+    </div>
+
+    <p>The working ladder, with approximate ranges that vary by convention:</p>
+    <ul>
+        <li><strong>L-band (~1–2 GHz)</strong> and <strong>S-band (~2–4 GHz)</strong>: low data rate, very robust, penetrate weather and foliage, work with small omnidirectional antennas. The home of mobile satellite services — handheld voice, IoT, telemetry — and of growing direct-to-device interest. Scarce and narrow.</li>
+        <li><strong>C-band (~4–8 GHz)</strong>: rain-robust, wide beams, large dishes. The traditional band for GEO fixed services, television distribution, and telco trunking, now partly being repurposed for terrestrial 5G.</li>
+        <li><strong>X-band (~8–12 GHz)</strong>: largely reserved for government and military use.</li>
+        <li><strong>Ku-band (~12–18 GHz)</strong>: the long-time workhorse for GEO broadcast (direct-to-home television) and VSAT, and a primary user-link band for modern LEO broadband. More rain fade than C, smaller dishes, heavily used.</li>
+        <li><strong>Ka-band (~17–40 GHz)</strong>: wide bandwidth and high capacity with small terminals — the band of modern high-throughput systems and much of LEO broadband, especially gateway and feeder links. Significant rain fade requiring mitigation.</li>
+        <li><strong>V-band / Q-band (~40–75 GHz)</strong>: emerging, enormous bandwidth, used for feeder and gateway links where capacity must be concentrated. Severe atmospheric attenuation; the current frontier.</li>
+    </ul>
+    <p>A practical pattern follows from the ladder: many systems put user links on a more robust band like Ku and concentrate gateway and feeder traffic on a higher band like Ka or V, trading the gateway's fade risk (manageable with site diversity) for the capacity that a few high-band feeder links can carry. The physics of why higher frequency buys bandwidth but costs margin is the RF module's; here it is enough to know the ladder and the tradeoff.</p>
+    <table class="compare-table">
+        <thead><tr><th>Band</th><th>Approx range</th><th>Typical use</th><th>Character</th></tr></thead>
+        <tbody>
+            <tr><td>L / S</td><td>~1–4 GHz</td><td>Mobile, handheld, IoT, D2D</td><td>Robust, narrow, scarce</td></tr>
+            <tr><td>C</td><td>~4–8 GHz</td><td>GEO FSS, TV distribution, trunking</td><td>Rain-robust, large dishes</td></tr>
+            <tr><td>Ku</td><td>~12–18 GHz</td><td>GEO broadcast, VSAT, LEO user links</td><td>Workhorse, congested</td></tr>
+            <tr><td>Ka</td><td>~17–40 GHz</td><td>HTS, LEO broadband, gateways</td><td>High capacity, rain fade</td></tr>
+            <tr><td>V / Q</td><td>~40–75 GHz</td><td>Feeder/gateway links, frontier</td><td>Huge bandwidth, severe fade</td></tr>
+        </tbody>
+    </table>
+</div>
+
+<div class="content-block" id="s3">
+    <h2>3. The Two-Tier Regulatory System</h2>
+    <p>Spectrum is governed at two levels that an architect must keep distinct, because confusing them is a common and costly error.</p>
+    <p>The international level is the <strong>International Telecommunication Union (ITU)</strong>, a United Nations agency. The ITU maintains the Radio Regulations, allocates frequency bands to services across world regions, and runs the coordination process by which satellite networks are filed and deconflicted between countries. Crucially, the ITU does not license operators. It coordinates between <strong>administrations</strong> — member states — to prevent one country's systems from interfering with another's, and it maintains the master register of who has rights to what.</p>
+    <p>The national level is each country's own regulator — the FCC in the United States, Ofcom in the United Kingdom, the national administrations across Europe and elsewhere. A national regulator licenses operators to transmit within its territory, and it brings an operator's filing to the ITU on that operator's behalf, acting as the sponsoring administration. An operator does not file with the ITU directly; it files through a country.</p>
+    <p>The result is that spectrum access is two-tier and an operator must clear both. It needs international coordination through the ITU to establish its rights against other systems globally, and it needs national licensing and market access in every country where it wants to operate. A perfect ITU filing grants nothing in a country that refuses market access, and a national licence is worth little if the underlying frequencies are not coordinated internationally.</p>
+    <table class="compare-table">
+        <thead><tr><th>Tier</th><th>Body</th><th>Role</th></tr></thead>
+        <tbody>
+            <tr><td>International</td><td>ITU (UN agency)</td><td>Allocates bands, coordinates between countries, maintains the register — does not license operators</td></tr>
+            <tr><td>National</td><td>FCC, Ofcom, etc.</td><td>Licenses operators to transmit, grants market access, sponsors filings to the ITU</td></tr>
+        </tbody>
+    </table>
+</div>
+
+<div class="content-block" id="s4">
+    <h2>4. Filing, Priority, and the First-Come Dynamic</h2>
+    <p>The ITU coordination process turns on a simple and consequential principle: priority by date. A satellite network is filed through an administration, and that filing carries a date. Coordination is largely first-come, first-served by that date — an earlier filing has priority, and later systems must coordinate around it, meaning they must adjust their own designs to avoid causing unacceptable interference to the system that filed first.</p>
+    <p>This priority dynamic drives the behaviour an observer of the industry actually sees. Because an earlier date is a durable advantage, operators file early, broadly, and sometimes speculatively, racing to secure priority over spectrum and orbital resources they may not yet be able to use. The result has been a surge of filings — far more than will ever fly — as operators stake claims. The competitive battle over spectrum is fought partly at the ITU and national regulators, years before any satellite reaches orbit, and an architect evaluating a system should ask not only what band it uses but what priority date it holds, because that determines whether it sets the constraints others coordinate around or must itself coordinate around everyone earlier.</p>
+</div>
+
+<div class="content-block" id="s5">
+    <h2>5. Bringing Into Use and the Deployment Milestones</h2>
+    <p>A pure date-priority system invites abuse: an operator could file for vast spectrum, sit on the priority, and warehouse it without ever building anything, blocking others. The regulations counter this with the requirement to actually deploy, and the modern rules tightened that requirement specifically for the mega-constellation era.</p>
+    <p>Historically an operator had to bring a filing into use by launching and operating a single satellite within a deadline, which a constellation could satisfy trivially while still warehousing the spectrum for thousands of satellites it had not built. The WRC-19 conference replaced that with a milestone-based schedule for non-geostationary systems: after the end of the bringing-into-use period, an operator must deploy at least 10% of its constellation within 2 years, 50% within 5 years, and 100% within 7 years. An operator that misses the milestones does not simply get more time — its recognised spectrum rights are limited in proportion to the number of satellites actually launched. The purpose is to keep the international register reflecting real deployments rather than paper constellations, balancing the prevention of spectrum warehousing against the genuine operational time a large constellation needs to build.</p>
+    <p>For an architect, the milestones are a real design and financing constraint, not a footnote. They couple the spectrum claim to a deployment schedule, which interacts with the capital and replenishment pressures of the previous lesson: the system must launch at a pace that holds its spectrum rights, or watch those rights shrink.</p>
+    <table class="compare-table">
+        <thead><tr><th>Milestone</th><th>Deadline after BIU period</th><th>Source</th></tr></thead>
+        <tbody>
+            <tr><td>10% of constellation deployed</td><td>2 years</td><td>WRC-19 Res. 35</td></tr>
+            <tr><td>50% of constellation deployed</td><td>5 years</td><td>WRC-19 Res. 35</td></tr>
+            <tr><td>100% of constellation deployed</td><td>7 years</td><td>WRC-19 Res. 35</td></tr>
+            <tr><td>Penalty for missing</td><td>Rights limited to satellites actually launched</td><td>WRC-19 Res. 35</td></tr>
+        </tbody>
+    </table>
+</div>
+
+<div class="content-block" id="s6">
+    <h2>6. EPFD — Why New Constellations Must Protect the Old</h2>
+    <p>When NGSO systems share a frequency band with established geostationary networks — as they do in the Ku and Ka bands — a sharing rule decides who must yield, and the rule favours the incumbent. The geostationary services were there first and are protected, so the burden falls on the newcomer: an NGSO constellation must not cause unacceptable interference into GSO networks.</p>
+    <p>The technical expression of that rule is the <strong>Equivalent Power Flux Density (EPFD)</strong> limit, defined in the ITU Radio Regulations. EPFD limits cap the aggregate interference an NGSO system may produce toward GSO earth stations and satellites, and an NGSO operator must demonstrate that its constellation stays within them. The constraint shapes NGSO design directly: because the worst interference into GSO happens when an NGSO satellite's beam points along the line toward the geostationary arc, NGSO systems impose exclusion angles, reducing power or switching beams so that they avoid transmitting straight at the arc, handing a user off to another satellite whose geometry is safe. The protection of the incumbent is thus baked into how the new constellation points its beams.</p>
+    <div class="callout amber">
+        <strong>CONTESTED &amp; EVOLVING</strong>
+        EPFD is actively debated. NGSO operators argue the limits, written in an earlier era, are too conservative and cost capacity; GSO operators argue they must be preserved to protect existing services. The deep math and the debate are the economics-and-regulation module's; the orientation point is that EPFD exists and embodies "the new constellation protects the old."
+    </div>
+</div>
+
+<div class="content-block" id="s7">
+    <h2>7. Market Access and Landing Rights — the National Gate</h2>
+    <p>ITU coordination establishes a system's spectrum rights against other systems internationally, but it does not grant the right to serve any particular country's users. That requires <strong>market access</strong> — landing rights — from each country individually, and this national gate is where commercial, security, and sovereignty considerations enter.</p>
+    <p>A country may grant market access freely, or condition it, or withhold it. It may require a foreign operator to land its traffic through a gateway on national soil, to partner with a domestic entity, to submit to lawful-intercept and security requirements, or to meet local-presence rules — or it may bar a foreign constellation entirely in favour of a domestic or allied system. These decisions are made for reasons that range from consumer protection to national security to industrial policy, and they mean that a constellation's real addressable market is not the globe its orbits cover but the set of countries that have granted it access. An architect must therefore treat market access as a distinct layer of the problem: a system can have impeccable ITU priority and a sound design and still be locked out of the markets that matter most to it. The deeper geopolitics of this belongs to later modules; here it is the orientation that spectrum coordination and market access are two different permissions, and a system needs both.</p>
+</div>
+
+<div class="content-block" id="s8">
+    <h2>8. Spectrum as a Competitive Moat</h2>
+    <p>Pulling the regulatory threads together gives one of the most durable strategic facts of the business: spectrum rights are a moat. Because spectrum is finite, because priority runs by filing date, and because market access is granted country by country, an operator that has secured early priority in good bands and broad market access holds an advantage a competitor cannot simply buy or build around. A latecomer must coordinate around the incumbent's priority, accept worse spectrum, or negotiate access the incumbent already has — frictions that raise the cost and lower the competitiveness of entry.</p>
+    <p>This connects the regulatory picture back to the commercial one. The earlier lessons named launch cost, capital, and vertical integration as moats; spectrum is another, and arguably the hardest for a well-funded newcomer to overcome, because it cannot be manufactured and its priority cannot be back-dated. It is why incumbents defend their spectrum positions fiercely, why new entrants file early and aggressively, and why a serious assessment of any constellation's prospects must weigh its spectrum and regulatory position alongside its technology and its balance sheet. Spectrum strategy is competitive strategy.</p>
+    <div class="callout green">
+        <strong>THE HARDEST MOAT TO CROSS</strong>
+        Spectrum cannot be manufactured and its priority cannot be back-dated. Early rights in good bands, plus broad market access, are an advantage a well-funded latecomer cannot simply buy — which is why the competitive fight starts at the regulator, years before orbit.
+    </div>
+</div>
+
+<div class="content-block" id="s9">
+    <h2>9. How Band Choice Flows Into the Architecture</h2>
+    <p>The spectrum decisions above are not abstract permissions; they propagate into the concrete design of the system. The band an operator secures sets the size and type of the user terminal, the achievable capacity, the rain-fade mitigation the system must carry, and the design of the gateways.</p>
+    <p>A higher-capacity band like Ka delivers more throughput from a small terminal but forces the system to handle deep rain fades, typically through gateway site diversity — placing feeder stations far enough apart that rain over one does not take down the link — and through adaptive coding and power control. A more robust band like Ku gives steadier links and simpler fade handling at the cost of capacity. The common split of robust user links and high-band feeder links is a direct architectural consequence of the ladder. Even coverage strategy is touched, because the markets a system can access and the bands it holds there determine where its capacity can actually be sold. The link-budget mathematics that quantifies all of this is the RF module's subject; the orientation point is that the spectrum and regulatory choices made early flow downstream into nearly every part of the architecture.</p>
+</div>
+
+<div class="content-block" id="s10">
+    <h2>10. The Architect's Takeaway</h2>
+    <p>Spectrum is the constraint beneath the others, and this lesson's job is to make it a permanent part of how you read a system. It is finite, shared, and regulated, and the right to transmit is as fundamental as the right to orbit. The bands run from robust-and-narrow at low frequencies to capacious-and-fragile at high ones, and the band choice is a position on that ladder. Access is two-tier — ITU international coordination plus national licensing and market access — and an operator must clear both. Priority runs by filing date, kept honest by deployment milestones that tie the spectrum claim to a real launch schedule. NGSO systems share bands with GSO under EPFD limits that protect the incumbent and shape how the newcomer points its beams. And through all of it, spectrum and market-access rights are a strategic moat that competitive strategy is built on.</p>
+    <p>Carry forward a habit: before judging any constellation, ask the spectrum questions. What bands does it use, and where is it on the capacity-robustness ladder? What priority date does it hold, and is it setting constraints or coordinating around others? Does it meet its deployment milestones? How does it handle EPFD? And in which markets does it actually have access? Those questions, answered, locate a system in the regulatory landscape as precisely as a link budget locates it in the RF one. The deep math and procedure come in the RF and economics-and-regulation modules; this orientation is the map you read them onto. The module's synthesis, next, pulls every thread of the landscape into a single mental model.</p>
+    <div class="callout green">
+        <strong>LESSON OBJECTIVE MET</strong>
+        You can now place a system on the band ladder, distinguish ITU coordination from national licensing and market access, explain priority-by-date and the deployment milestones, state what EPFD protects and why, and argue why spectrum is a competitive moat.
+    </div>
+</div>
+
+<!-- QUIZ -->
+<div class="quiz-block" id="quiz">
+    <h2>KNOWLEDGE CHECK</h2>
+    <p class="quiz-intro">Ten questions on spectrum and regulation — the band ladder, the two-tier system, priority and milestones, EPFD, market access, and the moat. One correct answer each.</p>
+
+    <div class="quiz-q"><p><strong>Q1.</strong> Why is spectrum a more fundamental constraint than capital or launch?</p>
+        <div class="quiz-options">
+            <button class="quiz-opt" data-q="1" data-correct="false">A — It is cheaper</button>
+            <button class="quiz-opt" data-q="1" data-correct="true">B — It is finite, shared, and regulated — it cannot be manufactured, and a system without rights to transmit is unbuildable regardless of its other resources</button>
+            <button class="quiz-opt" data-q="1" data-correct="false">C — It is owned by one company</button>
+            <button class="quiz-opt" data-q="1" data-correct="false">D — It is unlimited</button>
+        </div><div class="quiz-feedback" id="fb1"></div></div>
+
+    <div class="quiz-q"><p><strong>Q2.</strong> The dominant tradeoff across the satcom band ladder is:</p>
+        <div class="quiz-options">
+            <button class="quiz-opt" data-q="2" data-correct="false">A — Colour versus weight</button>
+            <button class="quiz-opt" data-q="2" data-correct="true">B — Lower frequencies are robust but narrow; higher frequencies are capacious but suffer rain fade and atmospheric loss</button>
+            <button class="quiz-opt" data-q="2" data-correct="false">C — Higher frequencies are always better</button>
+            <button class="quiz-opt" data-q="2" data-correct="false">D — All bands behave identically</button>
+        </div><div class="quiz-feedback" id="fb2"></div></div>
+
+    <div class="quiz-q"><p><strong>Q3.</strong> Which band is the traditional workhorse for GEO direct-to-home television and a primary LEO user-link band?</p>
+        <div class="quiz-options">
+            <button class="quiz-opt" data-q="3" data-correct="false">A — L-band</button>
+            <button class="quiz-opt" data-q="3" data-correct="true">B — Ku-band</button>
+            <button class="quiz-opt" data-q="3" data-correct="false">C — V-band</button>
+            <button class="quiz-opt" data-q="3" data-correct="false">D — X-band</button>
+        </div><div class="quiz-feedback" id="fb3"></div></div>
+
+    <div class="quiz-q"><p><strong>Q4.</strong> The ITU's role in spectrum is to:</p>
+        <div class="quiz-options">
+            <button class="quiz-opt" data-q="4" data-correct="false">A — License individual operators directly</button>
+            <button class="quiz-opt" data-q="4" data-correct="true">B — Allocate bands and coordinate between countries to prevent interference — it does not license operators</button>
+            <button class="quiz-opt" data-q="4" data-correct="false">C — Build satellites</button>
+            <button class="quiz-opt" data-q="4" data-correct="false">D — Set consumer prices</button>
+        </div><div class="quiz-feedback" id="fb4"></div></div>
+
+    <div class="quiz-q"><p><strong>Q5.</strong> An operator files with the ITU:</p>
+        <div class="quiz-options">
+            <button class="quiz-opt" data-q="5" data-correct="false">A — Directly, on its own</button>
+            <button class="quiz-opt" data-q="5" data-correct="true">B — Through a sponsoring national administration</button>
+            <button class="quiz-opt" data-q="5" data-correct="false">C — Through another operator</button>
+            <button class="quiz-opt" data-q="5" data-correct="false">D — It does not need to file</button>
+        </div><div class="quiz-feedback" id="fb5"></div></div>
+
+    <div class="quiz-q"><p><strong>Q6.</strong> ITU coordination priority is determined mainly by:</p>
+        <div class="quiz-options">
+            <button class="quiz-opt" data-q="6" data-correct="false">A — Satellite size</button>
+            <button class="quiz-opt" data-q="6" data-correct="true">B — Filing date — earlier filings have priority and later systems must coordinate around them</button>
+            <button class="quiz-opt" data-q="6" data-correct="false">C — Operator revenue</button>
+            <button class="quiz-opt" data-q="6" data-correct="false">D — Number of countries served</button>
+        </div><div class="quiz-feedback" id="fb6"></div></div>
+
+    <div class="quiz-q"><p><strong>Q7.</strong> The WRC-19 deployment milestones require an NGSO constellation to deploy, after the bringing-into-use period:</p>
+        <div class="quiz-options">
+            <button class="quiz-opt" data-q="7" data-correct="false">A — 100% within 1 year</button>
+            <button class="quiz-opt" data-q="7" data-correct="true">B — 10% within 2 years, 50% within 5 years, 100% within 7 years, with spectrum rights cut proportionally if missed</button>
+            <button class="quiz-opt" data-q="7" data-correct="false">C — A single satellite, ever</button>
+            <button class="quiz-opt" data-q="7" data-correct="false">D — Nothing — there are no milestones</button>
+        </div><div class="quiz-feedback" id="fb7"></div></div>
+
+    <div class="quiz-q"><p><strong>Q8.</strong> EPFD limits exist to:</p>
+        <div class="quiz-options">
+            <button class="quiz-opt" data-q="8" data-correct="false">A — Limit how fast satellites move</button>
+            <button class="quiz-opt" data-q="8" data-correct="true">B — Cap the interference NGSO systems may cause into the established GSO systems they share bands with</button>
+            <button class="quiz-opt" data-q="8" data-correct="false">C — Set the price of spectrum</button>
+            <button class="quiz-opt" data-q="8" data-correct="false">D — Protect NGSO from GSO</button>
+        </div><div class="quiz-feedback" id="fb8"></div></div>
+
+    <div class="quiz-q"><p><strong>Q9.</strong> Market access (landing rights) is:</p>
+        <div class="quiz-options">
+            <button class="quiz-opt" data-q="9" data-correct="false">A — The same as an ITU filing</button>
+            <button class="quiz-opt" data-q="9" data-correct="true">B — A separate national permission to serve a country's users, granted or withheld for commercial, security, and sovereignty reasons</button>
+            <button class="quiz-opt" data-q="9" data-correct="false">C — Granted automatically worldwide</button>
+            <button class="quiz-opt" data-q="9" data-correct="false">D — Issued by the ITU</button>
+        </div><div class="quiz-feedback" id="fb9"></div></div>
+
+    <div class="quiz-q"><p><strong>Q10.</strong> Why is spectrum a competitive moat?</p>
+        <div class="quiz-options">
+            <button class="quiz-opt" data-q="10" data-correct="false">A — It can be manufactured cheaply</button>
+            <button class="quiz-opt" data-q="10" data-correct="true">B — It is finite, priority runs by filing date, and access is country-by-country, so early rights are an advantage a latecomer cannot simply buy or build around</button>
+            <button class="quiz-opt" data-q="10" data-correct="false">C — Every operator has equal spectrum</button>
+            <button class="quiz-opt" data-q="10" data-correct="false">D — It does not affect competition</button>
+        </div><div class="quiz-feedback" id="fb10"></div></div>
+
+    <div class="quiz-score" id="quizScore"></div>
+</div>
+
+<!-- PYTHON -->
+<div class="py-block" id="python">
+    <h2>PYTHON EXERCISES</h2>
+    <p class="py-intro">Three exercises on the spectrum landscape — the band ladder tradeoff, the deployment-milestone check, and EPFD exclusion-angle intuition. Python 3.8+ standard library only.</p>
+
+    <div class="py-exercise">
+        <h3>Exercise 1 — The band ladder and the capacity–robustness tradeoff</h3>
+        <p>Sort candidate bands and reason about the tradeoff using simple proxies.</p>
+<pre>
+# Indicative only: relative bandwidth (capacity proxy) and rain-fade
+# susceptibility rise together with frequency.
+bands = [
+    ("L",  1.5,   1,  1),   # name, centre GHz, rel bandwidth, rel rain-fade
+    ("C",  6.0,   3,  2),
+    ("Ku", 14.0,  8,  5),
+    ("Ka", 30.0, 20,  9),
+    ("V",  50.0, 40, 14),
+]
+
+print(f"{'Band':<5}{'GHz':>7}{'BW':>6}{'Fade':>6}{'BW/Fade':>9}")
+print("-" * 33)
+for name, ghz, bw, fade in sorted(bands, key=lambda b: b[1]):
+    print(f"{name:<5}{ghz:>7.1f}{bw:>6}{fade:>6}{bw/fade:>9.2f}")
+
+# 1. Which band gives the best bandwidth-per-unit-fade by this crude proxy,
+#    and why is "best ratio" still not the whole story (availability,
+#    licensing, terminal size)?
+# 2. A system needs maximum capacity AND can build gateway site diversity.
+#    Which band fits, and which links would you put on it?
+</pre>
+    </div>
+
+    <div class="py-exercise">
+        <h3>Exercise 2 — Deployment-milestone tracker</h3>
+        <p>Check a constellation's launch plan against the WRC-19 milestones.</p>
+<pre>
+TARGET = 4000  # full constellation size
+
+# milestone: (label, year after BIU period, required fraction)
+milestones = [("10%", 2, 0.10), ("50%", 5, 0.50), ("100%", 7, 1.00)]
+
+# planned cumulative satellites launched by year-after-BIU
+plan = {1: 200, 2: 500, 3: 1200, 4: 1800, 5: 2300, 6: 3200, 7: 4000}
+
+print(f"{'Milestone':<10}{'By yr':>6}{'Need':>8}{'Planned':>9}{'Status':>9}")
+print("-" * 42)
+for label, year, frac in milestones:
+    need = int(TARGET * frac)
+    have = plan.get(year, 0)
+    status = "OK" if have >= need else "MISS"
+    print(f"{label:<10}{year:>6}{need:>8}{have:>9}{status:>9}")
+
+# 1. Does this plan hold full spectrum rights at every milestone?
+# 2. If the year-5 number slips to 1900, the operator misses 50%. Recall the
+#    penalty: rights limited to satellites launched. What share would it keep?
+</pre>
+    </div>
+
+    <div class="py-exercise">
+        <h3>Exercise 3 — EPFD exclusion-angle intuition</h3>
+        <p>Model, very simply, when an NGSO satellite must avoid transmitting toward the GSO arc.</p>
+<pre>
+# If the angle between the NGSO beam and the direction of the GSO arc is
+# below a threshold, the satellite must hand off / reduce power to protect GSO.
+EXCLUSION_DEG = 10.0   # illustrative protection angle
+
+def must_avoid(angle_to_gso_arc_deg):
+    return angle_to_gso_arc_deg < EXCLUSION_DEG
+
+samples = [3, 8, 10, 15, 30, 60]
+print(f"{'Angle to GSO arc':>18}{'Action':>15}")
+print("-" * 33)
+for a in samples:
+    print(f"{a:>16}deg{('AVOID/handoff' if must_avoid(a) else 'OK'):>15}")
+
+# 1. As the exclusion angle grows, what happens to how often a satellite must
+#    hand a user off, and therefore to usable capacity?
+# 2. This is the design cost of protecting GSO. Why might NGSO and GSO
+#    operators disagree about the right value of EXCLUSION_DEG?
+</pre>
+        <div class="py-challenge"><strong>EXTENSION</strong>
+            Combine Exercises 2 and the previous lesson: if missing the 50% milestone cuts spectrum rights to the launched fraction, model how that lost spectrum reduces sellable capacity and therefore revenue. The regulatory penalty becomes a direct commercial hit.
+        </div>
+    </div>
+</div>
+
+<!-- REFLECTION -->
+<div class="reflection-block" id="reflect">
+    <h2>REFLECTION PROMPTS</h2>
+    <p class="ref-intro">Not graded. Write in your own words, 200–400 words each.</p>
+
+    <div class="ref-prompt"><h3>Prompt 1 — Design Around a Band</h3>
+        <p>Pick a band from the ladder and design the outline of a system around it: who its users are, what terminal they carry, what capacity and robustness they get, and what the gateway must do. Then argue why a competitor serving the same market might rationally choose a different band, and what they trade away.</p></div>
+
+    <div class="ref-prompt"><h3>Prompt 2 — Milestones Meet Financing</h3>
+        <p>The deployment milestones tie spectrum rights to a launch schedule. Combine this with the previous lesson's replenishment and financing pressures: argue how the milestones change the financing and deployment strategy of a new constellation, and whether they help or hurt a well-funded entrant versus a thinly-funded one.</p></div>
+
+    <div class="ref-prompt"><h3>Prompt 3 — EPFD: Strict or Relaxed?</h3>
+        <p>EPFD makes the new constellation protect the incumbent. Make the strongest case for keeping the limits strict, then the strongest case for relaxing them, and take a position on where the public interest actually lies — weighing the value of existing GSO services against the capacity NGSO could deliver.</p></div>
+
+    <div class="ref-prompt"><h3>Prompt 4 — Grant, Condition, or Withhold?</h3>
+        <p>Market access lets a country gate a foreign constellation for commercial, security, or sovereignty reasons. Take a single country's perspective and reason through when it should grant, condition, or withhold access to a foreign LEO system — and what conditions (gateways, partners, security terms) it might reasonably impose.</p></div>
+</div>
+
+<!-- MARK COMPLETE -->
+<div class="complete-wrap">
+    <button class="complete-btn" id="completeBtn">MARK LESSON COMPLETE</button>
+    <div class="complete-msg" id="completeMsg"></div>
+</div>
+
+<div class="lesson-nav">
+    <a href="m1-5.html">← LESSON 05 — GEO VS LEO: THE COMMERCIAL DELTA</a>
+    <a href="m1-7.html">LESSON 07 — MODULE 1 SYNTHESIS →</a>
+</div>
+
+</div>
+
+<button class="back-to-top" id="backToTop" title="Back to top">↑</button>
+
+<footer>© 2026 LEOAF · M1 · LESSON 06 OF 7</footer>
+
+<script>
+const canvas = document.getElementById('starsCanvas');
+const ctx = canvas.getContext('2d');
+let stars = [];
+function initStars() { stars=[]; for(let i=0;i<180;i++) stars.push({x:Math.random()*canvas.width,y:Math.random()*canvas.height,size:Math.random()*1.5+0.4,speed:Math.random()*0.18+0.04,hue:Math.random()*360}); }
+function resizeCanvas() { canvas.width=window.innerWidth; canvas.height=window.innerHeight; }
+resizeCanvas(); initStars(); window.addEventListener('resize', resizeCanvas);
+function animateStars() { ctx.clearRect(0,0,canvas.width,canvas.height); stars.forEach(s=>{s.y-=s.speed;if(s.y<0){s.y=canvas.height;s.x=Math.random()*canvas.width;} ctx.beginPath();ctx.fillStyle=`hsl(${s.hue},80%,80%)`;ctx.arc(s.x,s.y,s.size,0,Math.PI*2);ctx.fill();}); requestAnimationFrame(animateStars); }
+animateStars();
+</script>
+
+<script>
+const feedbacks = {
+    1:{correct:"Correct. Spectrum cannot be made more of, is shared so one system's use is another's interference, and is regulated — without rights to a usable band, nothing else matters.",wrong:"Incorrect. It is finite, shared, and regulated — unlike capital or launch it cannot be manufactured, so the right to transmit is a hard prerequisite."},
+    2:{correct:"Correct. Lower bands resist weather and penetrate but offer little bandwidth; higher bands offer capacity but are fragile — the band choice is a position on that ladder.",wrong:"Incorrect. It is capacity versus robustness — low frequencies are robust but narrow, high frequencies capacious but rain-fade-prone."},
+    3:{correct:"Correct. Ku is the long-time broadcast and VSAT workhorse and a primary LEO user-link band — a balance of capacity and robustness.",wrong:"Incorrect. It is Ku — the broadcast and VSAT workhorse, also a primary LEO user-link band. L is mobile/IoT; V is feeder frontier; X is government."},
+    4:{correct:"Correct. The ITU coordinates between administrations and maintains the register; it does not license operators — national regulators do that.",wrong:"Incorrect. The ITU coordinates between countries and allocates bands; it does not license operators. National regulators license and grant market access."},
+    5:{correct:"Correct. Operators file through a country, which acts as the sponsoring administration bringing the filing to the ITU.",wrong:"Incorrect. Filings go through a sponsoring national administration, not directly — the operator does not deal with the ITU on its own."},
+    6:{correct:"Correct. Priority runs by date; an earlier filing constrains later ones, which drives the early-and-broad filing land rush.",wrong:"Incorrect. It is the filing date — earlier filings hold priority and later systems must coordinate around them, hence operators file early and speculatively."},
+    7:{correct:"Correct. The milestones are 10%/50%/100% at 2/5/7 years, and missing them limits recognised spectrum to the satellites actually launched — the anti-warehousing rule.",wrong:"Incorrect. It is 10% at 2 years, 50% at 5, 100% at 7, with rights limited to what was actually launched if missed — designed to stop paper constellations."},
+    8:{correct:"Correct. EPFD caps NGSO-into-GSO interference — the newcomer protects the incumbent, shaping NGSO power and exclusion angles near the GSO arc.",wrong:"Incorrect. EPFD caps the interference NGSO may cause into GSO, protecting the incumbent — it is why NGSO satellites avoid pointing along the geostationary arc."},
+    9:{correct:"Correct. ITU coordination does not grant the right to serve a country; market access is a distinct national permission, and a system needs both.",wrong:"Incorrect. Market access is a separate national permission to serve users, distinct from ITU coordination — a system can have priority yet be locked out of a market."},
+    10:{correct:"Correct. Finite supply, date priority, and national market access make early spectrum rights durable — latecomers coordinate around them, accept worse bands, or negotiate access the incumbent already holds.",wrong:"Incorrect. Spectrum cannot be made or back-dated, priority is by date, and access is national, so early rights are a moat a newcomer cannot replicate easily."}
+};
+let answered = {};
+document.querySelectorAll('.quiz-opt').forEach(btn => {
+    btn.addEventListener('click', function() {
+        const q = this.dataset.q;
+        if (answered[q] !== undefined) return;
+        const correct = this.dataset.correct === 'true';
+        answered[q] = correct;
+        document.querySelectorAll(`.quiz-opt[data-q="${q}"]`).forEach(b => { b.disabled = true; if (b.dataset.correct === 'true') b.classList.add('correct'); });
+        if (!correct) this.classList.add('wrong');
+        const fb = document.getElementById(`fb${q}`);
+        fb.textContent = (correct ? '✓ ' : '✗ ') + feedbacks[q][correct ? 'correct' : 'wrong'];
+        fb.style.color = correct ? '#39ff14' : '#ff004f';
+        if (Object.keys(answered).length === 10) {
+            const total = Object.values(answered).filter(Boolean).length;
+            const el = document.getElementById('quizScore');
+            el.style.display = 'block';
+            const pct = Math.round(total / 10 * 100);
+            el.textContent = `SCORE: ${total} / 10 (${pct}%) — ${pct===100?'PERFECT.':pct>=80?'STRONG. REVIEW ANY MISSES.':pct>=60?'ADEQUATE. REVISIT WEAK SECTIONS.':'REVISIT THE LESSON BEFORE PROCEEDING.'}`;
+        }
+    });
+});
+</script>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="supabase.js"></script>
+<script src="user_progress.js"></script>
+<script>
+const LESSON_ID = 'm1-6';
+(function () {
+    function bounceToLogin(reason) {
+        console.error("Auth guard:", reason, "- redirecting to index.html");
+        window.location.replace("index.html");
+    }
+    async function init() {
+        if (typeof client === "undefined" || !client || !client.auth) {
+            return bounceToLogin("Supabase client not loaded (is supabase.js in this directory?)");
+        }
+        let session = null;
+        try { ({ data: { session } } = await client.auth.getSession()); }
+        catch (e) { return bounceToLogin("getSession threw: " + e.message); }
+        if (!session) { window.location.replace("index.html"); return; }
+
+        const btn = document.getElementById('completeBtn');
+        const msg = document.getElementById('completeMsg');
+        function setDone(done) {
+            if (done) {
+                btn.textContent = '✓ COMPLETE — CLICK TO UNDO';
+                btn.classList.add('done');
+                btn.style.cssText = 'border-color:#39ff14;color:#39ff14;background:rgba(57,255,20,0.1);cursor:pointer;opacity:1;';
+                msg.style.color = '#39ff14';
+                msg.textContent = 'Lesson marked complete. Click again to undo.';
+            } else {
+                btn.textContent = 'MARK LESSON COMPLETE';
+                btn.classList.remove('done');
+                btn.style.cssText = '';
+                msg.style.color = '#ffffff55';
+                msg.textContent = 'Not yet marked complete.';
+            }
+        }
+        let mastered = [];
+        try { mastered = await getMasteredSections(); } catch (e) { console.error(e); }
+        setDone(mastered.includes(LESSON_ID));
+        btn.addEventListener('click', async () => {
+            const isCurrentlyDone = btn.classList.contains('done');
+            msg.style.color = '#00d9ff';
+            msg.textContent = 'Saving...';
+            const ok = await upsertSection(LESSON_ID, !isCurrentlyDone);
+            if (ok) { setDone(!isCurrentlyDone); }
+            else { msg.style.color = '#ff004f'; msg.textContent = 'Error saving. Try again.'; }
+        });
+        const btt = document.getElementById('backToTop');
+        window.addEventListener('scroll', () => { btt.classList.toggle('visible', window.scrollY > 400); });
+        btt.addEventListener('click', () => window.scrollTo({ top: 0, behavior: 'smooth' }));
+    }
+    if (document.readyState === "loading") { document.addEventListener("DOMContentLoaded", init); }
+    else { init(); }
+})();
+</script>
+
+</body>
+</html>
