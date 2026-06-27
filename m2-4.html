@@ -1,0 +1,769 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, shrink-to-fit=no">
+<title>M2-4 — Walker Patterns &amp; Coverage Geometry · LEOAF</title>
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;600;800&family=Share+Tech+Mono&family=Libre+Baskerville:ital,wght@0,400;0,700;1,400&display=swap" rel="stylesheet">
+<link rel="icon" href="favicon.ico" sizes="any" type="image/x-icon">
+<link rel="manifest" href="site.webmanifest">
+<meta name="theme-color" content="#0f0f0f">
+
+<script>
+window.leoafAbort = async function () {
+    function go() { window.location.replace("index.html?signedout=1"); }
+    try {
+        if (typeof client !== "undefined" && client && client.auth && client.auth.signOut) {
+            try { await client.auth.signOut({ scope: "local" }); } catch (e) {}
+        }
+    } catch (e) {}
+    go();
+};
+</script>
+
+<style>
+* { box-sizing:border-box; margin:0; padding:0; }
+html { height:100%; -webkit-text-size-adjust:100%; overflow-x:hidden; }
+body { font-family:'Share Tech Mono',monospace; background:#000; color:white; overflow-x:hidden; min-height:100vh; }
+#starsCanvas { position:fixed; inset:0; z-index:-1; }
+
+header { background:#000; border-bottom:1px solid #ff004f33; position:sticky; top:0; z-index:100; padding:1rem clamp(1.5rem,5vw,4rem); display:flex; justify-content:space-between; align-items:center; box-shadow:0 4px 16px #0008; }
+.logo { font-family:'Orbitron',sans-serif; font-weight:800; font-size:clamp(16px,2vw,22px); letter-spacing:3px; text-decoration:none; }
+.logo span:first-child { color:white; }
+.logo span:last-child { color:#ff004f; }
+.nav-right { display:flex; align-items:center; gap:10px; }
+.nav-btn { background:transparent; border:1px solid #ff004f44; color:#ff004f; padding:6px 14px; cursor:pointer; transition:0.3s ease; font-size:11px; font-family:'Orbitron',sans-serif; letter-spacing:1px; text-decoration:none; display:inline-block; }
+.nav-btn:hover { background:#ff004f; color:black; }
+
+.breadcrumb { padding:14px clamp(1.5rem,5vw,4rem); font-size:11px; color:#ffffff44; letter-spacing:1px; position:relative; z-index:1; }
+.breadcrumb a { color:#00d9ff66; text-decoration:none; }
+.breadcrumb a:hover { color:#00d9ff; }
+.breadcrumb span { margin:0 8px; }
+
+.lesson-wrap { max-width:820px; margin:0 auto; padding:0 clamp(1.5rem,5vw,4rem) 80px; position:relative; z-index:1; }
+
+.lesson-header { padding:30px 0 28px; border-bottom:1px solid #ffffff11; margin-bottom:36px; }
+.lesson-tag { font-family:'Orbitron',sans-serif; font-size:10px; color:#ff004f; letter-spacing:3px; margin-bottom:10px; }
+.lesson-header h1 { font-family:'Orbitron',sans-serif; font-size:clamp(20px,3.5vw,32px); font-weight:800; line-height:1.2; margin-bottom:12px; }
+.lesson-meta { display:flex; gap:10px; flex-wrap:wrap; margin-bottom:16px; }
+.l-pill { font-family:'Orbitron',sans-serif; font-size:10px; padding:3px 10px; border:1px solid; letter-spacing:1px; }
+.l-pill-q { color:#ff004f; border-color:#ff004f44; }
+.l-pill-t { color:#39ff14; border-color:#39ff1444; }
+.lesson-intro { font-size:13px; line-height:1.85; opacity:0.75; }
+
+.toc { background:rgba(0,217,255,0.06); border:1px solid #00d9ff33; padding:24px 28px; margin:30px 0; }
+.toc h4 { font-family:'Orbitron',sans-serif; font-size:10px; color:#00d9ff; letter-spacing:2px; margin-bottom:16px; }
+.toc ol { padding-left:20px; }
+.toc li { font-size:13px; line-height:2.1; }
+.toc li a { color:#00d9ffbb; text-decoration:none; transition:0.15s; }
+.toc li a:hover { color:#ffffff; padding-left:4px; }
+.toc li::marker { color:#ff004f; font-family:'Orbitron',sans-serif; font-size:10px; }
+
+.content-block { margin-bottom:48px; }
+.content-block h2 { font-family:'Orbitron',sans-serif; font-size:13px; color:#00d9ff; letter-spacing:2px; text-transform:uppercase; margin-bottom:18px; padding-bottom:10px; border-bottom:1px solid #00d9ff22; scroll-margin-top:80px; }
+.content-block h3 { font-family:'Orbitron',sans-serif; font-size:11px; color:#ffffff88; letter-spacing:1.5px; text-transform:uppercase; margin:28px 0 12px; }
+.content-block p { font-size:13px; line-height:1.9; opacity:0.85; margin-bottom:16px; }
+.content-block ul, .content-block ol { padding-left:0; margin-bottom:16px; }
+.content-block ul li, .content-block ol li { font-size:13px; line-height:1.85; opacity:0.85; padding-left:20px; position:relative; margin-bottom:6px; }
+.content-block ul li::before { content:'›'; position:absolute; left:0; color:#00d9ff; }
+.content-block blockquote { border-left:3px solid #39ff14; background:rgba(57,255,20,0.05); padding:14px 20px; margin:18px 0; font-size:14px; font-family:'Share Tech Mono',monospace; color:#39ff14; letter-spacing:1px; }
+
+.callout { border-left:3px solid #00d9ff; background:rgba(0,217,255,0.05); padding:16px 20px; margin:22px 0; font-size:12px; line-height:1.8; }
+.callout.red   { border-left-color:#ff004f; background:rgba(255,0,79,0.05); }
+.callout.green { border-left-color:#39ff14; background:rgba(57,255,20,0.05); }
+.callout.amber { border-left-color:#ffaa00; background:rgba(255,170,0,0.05); }
+.callout strong { font-family:'Orbitron',sans-serif; font-size:10px; letter-spacing:1px; display:block; margin-bottom:8px; color:inherit; }
+
+.key-numbers { display:grid; grid-template-columns:repeat(auto-fit,minmax(140px,1fr)); gap:12px; margin:22px 0; }
+.kn-item { background:rgba(255,255,255,0.03); border:1px solid #ffffff11; padding:16px 12px; text-align:center; }
+.kn-val { font-family:'Orbitron',sans-serif; font-size:clamp(15px,2.3vw,22px); font-weight:800; color:#00d9ff; display:block; }
+.kn-label { font-size:10px; opacity:0.5; letter-spacing:1px; margin-top:5px; display:block; line-height:1.4; }
+
+.compare-table { width:100%; border-collapse:collapse; margin:22px 0; font-size:12px; }
+.compare-table th { font-family:'Orbitron',sans-serif; font-size:10px; letter-spacing:1px; color:#00d9ff; padding:10px 12px; border-bottom:1px solid #00d9ff33; text-align:left; }
+.compare-table td { padding:10px 12px; border-bottom:1px solid #ffffff0a; line-height:1.5; opacity:0.85; vertical-align:top; }
+.compare-table tr:hover td { background:rgba(255,255,255,0.02); }
+
+.diagram-wrap { margin:24px 0; background:rgba(255,255,255,0.02); border:1px solid #ffffff11; padding:20px; overflow-x:auto; }
+.diagram-wrap figcaption { font-size:11px; color:#ffffff44; margin-top:12px; text-align:center; letter-spacing:1px; }
+
+.quiz-block { background:rgba(17,17,17,0.9); border:1px solid #ff004f33; padding:28px; margin:48px 0 32px; }
+.quiz-block h2 { font-family:'Orbitron',sans-serif; font-size:13px; color:#ff004f; letter-spacing:2px; margin-bottom:6px; }
+.quiz-intro { font-size:12px; opacity:0.6; margin-bottom:24px; padding-bottom:16px; border-bottom:1px solid #ff004f22; line-height:1.6; }
+.quiz-q { margin-bottom:28px; }
+.quiz-q p { font-size:13px; opacity:0.9; margin-bottom:12px; line-height:1.65; }
+.quiz-q p strong { color:#00d9ff; }
+.quiz-options { display:flex; flex-direction:column; gap:8px; }
+.quiz-opt { background:rgba(255,255,255,0.03); border:1px solid #ffffff1a; padding:11px 16px; cursor:pointer; font-size:12px; font-family:'Share Tech Mono',monospace; transition:0.2s ease; text-align:left; color:white; line-height:1.5; }
+.quiz-opt:hover:not(:disabled) { background:rgba(0,217,255,0.08); border-color:#00d9ff44; }
+.quiz-opt.correct  { background:rgba(57,255,20,0.1);  border-color:#39ff14; color:#39ff14; }
+.quiz-opt.wrong    { background:rgba(255,0,79,0.1);   border-color:#ff004f; color:#ff004f; }
+.quiz-opt:disabled { cursor:default; }
+.quiz-feedback { font-size:12px; margin-top:10px; min-height:18px; line-height:1.7; opacity:0.9; padding:0 4px; }
+.quiz-score { font-family:'Orbitron',sans-serif; font-size:12px; color:#39ff14; margin-top:20px; letter-spacing:1px; display:none; padding-top:16px; border-top:1px solid #39ff1433; }
+
+.py-block { background:rgba(10,10,10,0.95); border:1px solid #39ff1422; padding:28px; margin:32px 0; }
+.py-block h2 { font-family:'Orbitron',sans-serif; font-size:13px; color:#39ff14; letter-spacing:2px; margin-bottom:8px; }
+.py-block .py-intro { font-size:12px; opacity:0.7; margin-bottom:20px; padding-bottom:16px; border-bottom:1px solid #39ff1422; line-height:1.7; }
+.py-exercise { margin-bottom:32px; }
+.py-exercise:last-child { margin-bottom:0; }
+.py-exercise h3 { font-family:'Orbitron',sans-serif; font-size:11px; color:#39ff1499; letter-spacing:1.5px; text-transform:uppercase; margin-bottom:10px; }
+.py-exercise p { font-size:12px; opacity:0.8; margin-bottom:14px; line-height:1.75; }
+.py-block pre { background:#050505; border:1px solid #39ff1433; padding:20px; font-family:'Share Tech Mono',monospace; font-size:11.5px; line-height:1.75; overflow-x:auto; color:#39ff14; white-space:pre; margin-bottom:12px; }
+.py-block .py-challenge { background:rgba(57,255,20,0.04); border-left:2px solid #39ff14; padding:12px 16px; margin-top:14px; font-size:12px; line-height:1.75; opacity:0.8; }
+.py-block .py-challenge strong { font-family:'Orbitron',sans-serif; font-size:10px; color:#39ff14; display:block; margin-bottom:6px; letter-spacing:1px; }
+
+.reflection-block { background:rgba(255,170,0,0.04); border:1px solid #ffaa0033; padding:24px; margin:32px 0; }
+.reflection-block h2 { font-family:'Orbitron',sans-serif; font-size:13px; color:#ffaa00; letter-spacing:2px; margin-bottom:8px; }
+.reflection-block .ref-intro { font-size:12px; opacity:0.7; margin-bottom:20px; padding-bottom:14px; border-bottom:1px solid #ffaa0022; line-height:1.7; }
+.ref-prompt { margin-bottom:20px; }
+.ref-prompt h3 { font-family:'Orbitron',sans-serif; font-size:11px; color:#ffaa0099; letter-spacing:1px; margin-bottom:8px; }
+.ref-prompt p { font-size:12px; opacity:0.8; line-height:1.75; margin-bottom:10px; }
+
+.back-to-top { position:fixed; bottom:28px; right:28px; z-index:200; width:44px; height:44px; background:#000; border:1px solid #00d9ff55; color:#00d9ff; font-size:20px; cursor:pointer; display:flex; align-items:center; justify-content:center; opacity:0; pointer-events:none; transition:opacity 0.3s ease, border-color 0.3s ease; }
+.back-to-top.visible { opacity:1; pointer-events:auto; }
+.back-to-top:hover { border-color:#00d9ff; background:#001a2c; }
+
+.complete-wrap { margin-top:56px; padding-top:30px; border-top:1px solid #ffffff11; text-align:center; }
+.complete-btn { font-family:'Orbitron',sans-serif; font-size:13px; letter-spacing:2px; padding:14px 44px; background:transparent; border:1px solid #39ff14; color:#39ff14; cursor:pointer; transition:0.3s ease; }
+.complete-btn:hover:not(.done) { background:#39ff14; color:black; box-shadow:0 0 20px rgba(57,255,20,0.4); }
+.complete-btn.done { background:rgba(57,255,20,0.1); cursor:default; opacity:0.7; }
+.complete-msg { font-size:12px; color:#39ff14; margin-top:14px; min-height:18px; letter-spacing:1px; }
+
+.lesson-nav { display:flex; justify-content:space-between; margin-top:30px; flex-wrap:wrap; gap:10px; }
+.lesson-nav a { font-family:'Orbitron',sans-serif; font-size:11px; color:#00d9ff66; text-decoration:none; letter-spacing:1px; transition:0.2s; }
+.lesson-nav a:hover { color:#00d9ff; }
+
+footer { text-align:center; padding:30px; opacity:0.3; font-size:11px; position:relative; z-index:1; letter-spacing:1px; }
+
+@media (max-width:600px) { .key-numbers { grid-template-columns:1fr 1fr; } .compare-table { font-size:11px; } .compare-table th, .compare-table td { padding:8px 8px; } }
+
+/* ── LIGHT READING MODE ── */
+.content-block { background:#f5f2ec; color:#1a1a1a; padding:36px clamp(24px,4vw,48px); margin-bottom:24px; border-left:4px solid #00d9ff; position:relative; z-index:1; }
+.content-block h2 { font-family:'Orbitron',sans-serif; font-size:13px; color:#003d66; letter-spacing:2px; text-transform:uppercase; margin-bottom:20px; padding-bottom:10px; border-bottom:2px solid #00d9ff66; scroll-margin-top:80px; }
+.content-block h3 { font-family:'Orbitron',sans-serif; font-size:11px; color:#444; letter-spacing:1.5px; text-transform:uppercase; margin:32px 0 14px; }
+.content-block p { font-family:'Libre Baskerville', Georgia, serif; font-size:15px; line-height:1.9; color:#1a1a1a; opacity:1; margin-bottom:18px; }
+.content-block ul li { font-family:'Libre Baskerville', Georgia, serif; font-size:14px; line-height:1.85; color:#1a1a1a; opacity:1; margin-bottom:8px; }
+.content-block ul li::before { color:#0077aa; }
+.content-block blockquote { border-left:3px solid #1a7a1a; background:#eafaea; color:#0a3d0a; }
+.content-block .callout { border-left:3px solid #0088cc; background:#e8f4fb; color:#1a1a1a; }
+.content-block .callout.red   { border-left-color:#cc0033; background:#fdecea; }
+.content-block .callout.green { border-left-color:#1a7a1a; background:#eafaea; }
+.content-block .callout.amber { border-left-color:#996600; background:#fef9ec; }
+.content-block .callout strong { color:inherit; }
+.content-block .kn-item { background:#fff; border:1px solid #d0d0d0; }
+.content-block .kn-label { color:#555; opacity:1; }
+.content-block .compare-table th { color:#003d66; border-bottom:2px solid #00d9ff66; }
+.content-block .compare-table td { color:#1a1a1a; opacity:1; border-bottom:1px solid #ddd; }
+.content-block .compare-table tr:hover td { background:#f0f0f0; }
+.content-block .diagram-wrap { background:#0a0a0a; border:1px solid #333; }
+.content-block .diagram-wrap figcaption { color:#ffffff55; }
+</style>
+</head>
+<body>
+
+<canvas id="starsCanvas"></canvas>
+
+<header>
+    <a href="dashboard.html" class="logo"><span>LEO</span><span>AF</span></a>
+    <div class="nav-right">
+        <a href="m2.html" class="nav-btn">← M2 HUB</a>
+        <button class="nav-btn" onclick="leoafAbort()">ABORT</button>
+    </div>
+</header>
+
+<div class="breadcrumb">
+    <a href="dashboard.html">DASHBOARD</a><span>/</span>
+    <a href="m2.html">M2</a><span>/</span>
+    <span style="color:#ffffff88;">LESSON 04 — WALKER PATTERNS &amp; COVERAGE GEOMETRY</span>
+</div>
+
+<div class="lesson-wrap">
+
+<div class="lesson-header">
+    <div class="lesson-tag">M2 · LESSON 04 OF 7</div>
+    <h1>Walker Patterns &amp; Coverage Geometry</h1>
+    <div class="lesson-meta">
+        <div class="l-pill l-pill-q">MODULE 2</div>
+        <div class="l-pill l-pill-t">CONSTELLATION DESIGN</div>
+    </div>
+    <p class="lesson-intro">The previous lessons built the geometric tools for a single satellite. This lesson uses them to answer the first constellation design question: how many satellites, in how many orbital planes, at what inclination, provide continuous coverage of a target region at a given minimum elevation angle? The answer is structured around the Walker constellation — a family of regular multi-plane arrangements described by three integers — and a coverage criterion that guarantees at least one satellite above the minimum elevation at every point in the region at every moment. The spine project propagator reaches its first end-to-end milestone here: seeded with Walker initial conditions, it evaluates coverage fraction over a latitude band.</p>
+</div>
+
+<div class="toc">
+    <h4>CONTENTS</h4>
+    <ol>
+        <li><a href="#s1">The coverage problem stated precisely</a></li>
+        <li><a href="#s2">Walker constellation notation</a></li>
+        <li><a href="#s3">The single-satellite coverage cap</a></li>
+        <li><a href="#s4">In-plane coverage: spacing between satellites</a></li>
+        <li><a href="#s5">Multi-plane coverage: the inter-plane gap</a></li>
+        <li><a href="#s6">Inclination selection</a></li>
+        <li><a href="#s7">Coverage fraction and the sizing loop</a></li>
+        <li><a href="#s8">The Walker phasing parameter F</a></li>
+        <li><a href="#s9">Continuous coverage threshold</a></li>
+        <li><a href="#quiz">Knowledge check</a></li>
+        <li><a href="#python">Python exercises — spine project stage 4</a></li>
+        <li><a href="#reflect">Reflection prompts</a></li>
+    </ol>
+</div>
+
+<!-- S1 -->
+<div class="content-block" id="s1">
+    <h2>1. The Coverage Problem Stated Precisely</h2>
+    <p>Continuous coverage of a region requires that at every point P in the region and at every time t, at least one satellite in the constellation is above the minimum elevation angle ε_min as seen from P. This is a geometric condition on the positions of all satellites relative to all surface points, and it must hold for all times — not just at the moment of a favourable pass.</p>
+    <p>The condition is hardest to satisfy at the points farthest from any orbital plane — typically the equatorial gaps between adjacent planes' ascending nodes, or the high-latitude regions beyond the inclination of a non-polar constellation. Those worst-case points determine the required constellation size: if the geometry works at the hardest point, it works everywhere in the coverage region.</p>
+    <p>Three parameters capture most of the problem: the orbital altitude h (which sets the coverage radius per satellite), the inclination i (which sets which latitudes the constellation can reach), and the minimum elevation angle ε_min (which shrinks the effective coverage radius). Given these three, the question becomes how many satellites N in how many planes P with what in-plane spacing are needed.</p>
+</div>
+
+<!-- S2 -->
+<div class="content-block" id="s2">
+    <h2>2. Walker Constellation Notation</h2>
+    <p>Walker's 1977 parametrisation of symmetric multi-plane constellations has become the industry standard. A Walker constellation is described by three integers:</p>
+    <blockquote>T / P / F</blockquote>
+    <p>T is the total number of satellites, P is the number of orbital planes, and F (0 to P−1) is the phasing parameter that sets the relative mean anomaly offset between adjacent planes. All planes share the same altitude and inclination. The T/P satellites per plane are equally spaced in mean anomaly (360°/S where S = T/P). Adjacent planes are separated by 360°/P in RAAN.</p>
+    <p>A <strong>Walker delta</strong> is any Walker constellation at inclination i &lt; 90°; a <strong>Walker star</strong> has planes arranged near-symmetrically around the pole (i near 90°, with alternating ascending and descending nodes). Walker delta constellations have coverage gaps above the inclination latitude but no polar seam; Walker star constellations cover polar regions but create a high-relative-velocity node crossing near the poles where conjunction risk is elevated.</p>
+
+    <div class="diagram-wrap">
+        <svg viewBox="0 0 740 300" width="100%" xmlns="http://www.w3.org/2000/svg" font-family="Share Tech Mono, monospace">
+            <rect width="740" height="300" fill="#0a0a0a"/>
+            <!-- Earth sphere hint -->
+            <circle cx="370" cy="150" r="80" fill="#00d9ff08" stroke="#00d9ff22" stroke-width="1"/>
+            <text x="370" y="154" font-size="10" fill="#00d9ff44" text-anchor="middle">EARTH</text>
+            <!-- Walker delta: 3 planes at ~53 deg, offset RAANs -->
+            <!-- Plane 1: RAAN=0 -->
+            <ellipse cx="370" cy="150" rx="180" ry="55" fill="none" stroke="#00d9ff" stroke-width="1.8" transform="rotate(0,370,150)"/>
+            <text x="558" y="148" font-size="9" fill="#00d9ff" text-anchor="start">P1 Ω=0°</text>
+            <!-- Plane 2: RAAN=120 -->
+            <ellipse cx="370" cy="150" rx="180" ry="55" fill="none" stroke="#39ff14" stroke-width="1.8" transform="rotate(40,370,150)"/>
+            <text x="400" y="225" font-size="9" fill="#39ff14" text-anchor="start">P2 Ω=120°</text>
+            <!-- Plane 3: RAAN=240 -->
+            <ellipse cx="370" cy="150" rx="180" ry="55" fill="none" stroke="#ffaa00" stroke-width="1.8" transform="rotate(80,370,150)"/>
+            <text x="175" y="148" font-size="9" fill="#ffaa00" text-anchor="end">P3 Ω=240°</text>
+            <!-- satellites: 2 per plane for illustration -->
+            <circle cx="550" cy="150" r="5" fill="#00d9ff"/>
+            <circle cx="190" cy="150" r="5" fill="#00d9ff"/>
+            <circle cx="460" cy="204" r="5" fill="#39ff14"/>
+            <circle cx="280" cy="96"  r="5" fill="#39ff14"/>
+            <circle cx="310" cy="210" r="5" fill="#ffaa00"/>
+            <circle cx="430" cy="90"  r="5" fill="#ffaa00"/>
+            <!-- caption -->
+            <text x="370" y="288" font-size="9" fill="#ffffff55" text-anchor="middle">WALKER 6/3/1 — 3 planes, 2 satellites each, equally spaced in RAAN and mean anomaly</text>
+        </svg>
+        <figcaption>A Walker 6/3/1 constellation: 3 orbital planes (cyan, green, amber) spaced 120° apart in RAAN, each carrying 2 satellites. The phasing parameter F=1 staggers the mean anomalies between planes.</figcaption>
+    </div>
+
+    <table class="compare-table">
+        <thead><tr><th>Constellation</th><th>Walker T/P/F</th><th>Inclination</th><th>Sats/plane</th><th>Type</th></tr></thead>
+        <tbody>
+            <tr><td>Starlink v1 (primary)</td><td>1,584/72/1</td><td>53°</td><td>22</td><td>Walker delta</td></tr>
+            <tr><td>OneWeb</td><td>648/18/0</td><td>87.9°</td><td>36</td><td>Near Walker star</td></tr>
+            <tr><td>Kuiper (primary)</td><td>1,156/98/0</td><td>51.9°</td><td>~12</td><td>Walker delta</td></tr>
+            <tr><td>Telesat Lightspeed</td><td>298/40/F</td><td>98.98°</td><td>~7</td><td>Near-polar</td></tr>
+            <tr><td>GPS</td><td>24/6/2</td><td>55°</td><td>4</td><td>Walker delta (MEO)</td></tr>
+        </tbody>
+    </table>
+</div>
+
+<!-- S3 -->
+<div class="content-block" id="s3">
+    <h2>3. The Single-Satellite Coverage Cap</h2>
+    <p>A satellite at altitude h is visible above ε_min from a spherical cap of the Earth's surface with Earth-central half-angle:</p>
+    <blockquote>ρ_cap = arccos(R⊕ · cos ε_min / r) − ε_min</blockquote>
+    <p>The fractional area of Earth's surface within this cap is (1 − cos ρ_cap) / 2. At 550 km with ε_min = 0°, ρ_cap ≈ 59.0° and the cap covers about 21.5% of the surface. With ε_min = 35°, ρ_cap ≈ 33.4° and the cap covers 8.3%. The ratio (21.5/8.3 ≈ 2.6) means a 35° minimum elevation constraint requires roughly 2.6× as many satellites as a 0° constraint for the same coverage fraction — before accounting for geometry and overlap.</p>
+    <p>The theoretical minimum satellite count is roughly 1/A_cap. At 550 km with ε_min = 35° this gives about 12. Real constellations need 3–6× this theoretical minimum because fixed orbital planes cannot tile a sphere perfectly, J2 precession continuously evolves the phasing, and link-budget margin requirements raise the effective elevation floor.</p>
+
+    <div class="key-numbers">
+        <div class="kn-item"><span class="kn-val">59.0°</span><span class="kn-label">ρ_cap AT 550 km, ε_min = 0°</span></div>
+        <div class="kn-item"><span class="kn-val">33.4°</span><span class="kn-label">ρ_cap AT 550 km, ε_min = 35°</span></div>
+        <div class="kn-item"><span class="kn-val">21.5%</span><span class="kn-label">CAP AREA AT ε_min = 0°</span></div>
+        <div class="kn-item"><span class="kn-val">8.3%</span><span class="kn-label">CAP AREA AT ε_min = 35°</span></div>
+    </div>
+
+    <table class="compare-table">
+        <thead><tr><th>Altitude</th><th>ε_min</th><th>ρ_cap</th><th>Cap area (% Earth)</th><th>Theory N_min</th></tr></thead>
+        <tbody>
+            <tr><td>550 km</td><td>0°</td><td>59.0°</td><td>21.5%</td><td>~5</td></tr>
+            <tr><td>550 km</td><td>25°</td><td>38.5°</td><td>11.3%</td><td>~9</td></tr>
+            <tr><td>550 km</td><td>35°</td><td>33.4°</td><td>8.3%</td><td>~12</td></tr>
+            <tr><td>550 km</td><td>40°</td><td>30.6°</td><td>7.0%</td><td>~15</td></tr>
+            <tr><td>1,200 km</td><td>10°</td><td>57.5°</td><td>20.4%</td><td>~5</td></tr>
+        </tbody>
+    </table>
+</div>
+
+<!-- S4 -->
+<div class="content-block" id="s4">
+    <h2>4. In-Plane Coverage: Spacing Between Satellites</h2>
+    <p>Within a single orbital plane, adjacent satellites provide continuous in-track coverage when their caps overlap. The condition is that the in-plane spacing 360°/S (where S = T/P) is less than twice the cap half-angle:</p>
+    <blockquote>2ρ_cap ≥ 360° / S</blockquote>
+    <p>Rearranging, the minimum number of satellites per plane is:</p>
+    <blockquote>S_min = ⌈180° / ρ_cap⌉</blockquote>
+    <p>At 550 km with ε_min = 35°, ρ_cap ≈ 33.4°, so S_min = ⌈180/33.4⌉ = 6. At ε_min = 0°, S_min = ⌈180/59⌉ = 4. A single plane with this many satellites provides a continuous covered corridor, but the corridor sweeps westward pass by pass — multiple planes are still required for area coverage.</p>
+</div>
+
+<!-- S5 -->
+<div class="content-block" id="s5">
+    <h2>5. Multi-Plane Coverage: The Inter-Plane Gap</h2>
+    <p>Adjacent planes are separated by ΔΩ = 360°/P in RAAN. For full coverage of a latitude band ±φ, adjacent planes must each contribute a cap that closes the gap at the worst-case point between them. The approximate condition at the equator is:</p>
+    <blockquote>ρ_cap ≥ (ΔΩ/2) · cos i</blockquote>
+    <p>This gives the minimum number of planes:</p>
+    <blockquote>P_min = ⌈180° / (ρ_cap / cos i)⌉   (approximate, equatorial gap)</blockquote>
+    <p>For a Walker delta at 53° and 550 km with ε_min = 35°: ρ_cap/cos(53°) ≈ 33.4/0.602 ≈ 55.5°, so P_min = ⌈180/55.5⌉ = 4 planes. Combined with S_min = 6, this gives a theoretical minimum of 24 satellites for continuous mid-latitude coverage. Real constellations need more, but this is the analytic floor.</p>
+    <p>In a Walker star (near-polar) constellation there is a seam near the poles where adjacent planes cross at high relative velocity. The two planes on either side move in opposite directions; positional errors produce conjunctions at closing speeds that can exceed 15 km/s. This is why Walker star constellations carry elevated debris risk near the poles — and why Starlink chose 53° for its primary shell rather than a polar orbit, despite the coverage tradeoff above 53° latitude.</p>
+
+    <div class="callout red">
+        <strong>THE POLAR SEAM</strong>
+        In a Walker star the ascending and descending planes cross near the poles at relative velocities up to 15 km/s. A collision at that speed converts two functioning satellites into thousands of debris fragments, each of which poses further conjunction risk. This is not a theoretical concern: it is the main reason near-polar constellations must operate at slightly different altitudes per plane or use manoeuvring protocols near the crossing zones.
+    </div>
+</div>
+
+<!-- S6 -->
+<div class="content-block" id="s6">
+    <h2>6. Inclination Selection</h2>
+    <p>Inclination is the single most important architectural choice after altitude, and the tradeoffs are sharp.</p>
+    <p><strong>Coverage reach</strong>: the ground track reaches ±i. A 53° shell leaves everything above 53° uncovered from that shell; an 87.9° shell covers virtually the whole globe from one shell.</p>
+    <p><strong>Dwell time distribution</strong>: for a Walker delta at inclination i, the satellite spends proportionally more time near ±i latitude (the ground track turns around there). Coverage density is higher at latitudes near i than at lower latitudes — the opposite of most commercial demand distributions. A higher inclination wastes capacity over sparsely populated high-latitude ocean.</p>
+    <p><strong>Launch Δv</strong>: reaching a high inclination costs more Δv from most launch sites. From Cape Canaveral (28.5°N), a 53° inclination costs more than 28.5°; a 97.6° retrograde orbit costs more still. This couples inclination to launch site and vehicle selection.</p>
+    <p><strong>Inter-plane seam and conjunction risk</strong>: Walker star constellations have the polar seam; Walker delta at moderate inclination do not.</p>
+    <p><strong>Gateway siting</strong>: a lower-inclination constellation is best served by gateways in the mid-latitude populated band; a polar one requires gateways at diverse latitudes including high-latitude sites with adverse conditions.</p>
+
+    <table class="compare-table">
+        <thead><tr><th>Inclination</th><th>Max latitude</th><th>Seam risk</th><th>Dwell emphasis</th><th>Best for</th></tr></thead>
+        <tbody>
+            <tr><td>53°</td><td>±53°</td><td>None</td><td>Mid-latitude</td><td>Dense mid-lat service</td></tr>
+            <tr><td>70°</td><td>±70°</td><td>Low</td><td>High-latitude bias</td><td>Arctic supplement</td></tr>
+            <tr><td>87.9°</td><td>±82.4°</td><td>Polar seam</td><td>High-latitude</td><td>Global single-shell</td></tr>
+            <tr><td>97.6°</td><td>±82.4° (retro)</td><td>Polar seam</td><td>High-latitude</td><td>Sun-synchronous (EO)</td></tr>
+        </tbody>
+    </table>
+
+    <div class="callout amber">
+        <strong>WHY STARLINK CHOSE 53°</strong>
+        The 53° primary shell prioritises the mid-latitude populated band where the addressable market is concentrated. The coverage gap above 53° is filled by supplementary shells at 70° and 97.6°. The alternative — a single polar shell — would waste capacity over oceans and polar regions while introducing the polar seam risk at much higher total satellite count. The multi-shell architecture allows each shell to be optimised for its market segment.
+    </div>
+</div>
+
+<!-- S7 -->
+<div class="content-block" id="s7">
+    <h2>7. Coverage Fraction and the Sizing Loop</h2>
+    <p>In practice, constellation sizing is an iterative loop:</p>
+    <ul>
+        <li>Choose altitude h and ε_min (driven by link budget and latency requirements).</li>
+        <li>Compute ρ_cap.</li>
+        <li>Choose inclination i (driven by coverage requirement and market geography).</li>
+        <li>Choose number of planes P to close the inter-plane gap at the worst-case latitude.</li>
+        <li>Choose satellites per plane S to close the in-track gap.</li>
+        <li>Set T = P × S and check both conditions simultaneously, accounting for Walker phasing F.</li>
+        <li>Simulate the full constellation with the J2 propagator and evaluate coverage fraction over the target region at a representative surface point grid.</li>
+    </ul>
+    <p>Step 7 is not optional. The analytic conditions are necessary but not sufficient: J2 precession continuously changes the relative phasing between planes, the elevation condition must hold for all times, and the worst-case geometry may not occur at the equator for all inclinations. Simulation validates the analytic estimate and reveals coverage holes the formulas miss. Exercise 3 in this lesson runs this loop.</p>
+</div>
+
+<!-- S8 -->
+<div class="content-block" id="s8">
+    <h2>8. The Walker Phasing Parameter F</h2>
+    <p>The phasing parameter F (0 to P−1) sets the mean anomaly offset between adjacent planes. If plane 1 has a satellite at mean anomaly M, the satellite in plane 2 at the next RAAN is at M + F × (360°/T). F = 0 means all planes start with a satellite at the same mean anomaly; F = 1 offsets adjacent planes by one satellite slot.</p>
+    <p>F matters for two reasons. First, it affects coverage uniformity: a well-chosen F distributes worst-case gaps more evenly, often reducing the required satellite count for a given coverage level. Second, it affects deployment sequencing: a launch vehicle seeding one plane at a time must plan the constellation's evolution from partial to full configuration, and F determines which service regions are covered at each deployment step. For most real constellations F = 0 or F = 1 are used; the difference in coverage is usually small compared to the choice of T and P.</p>
+</div>
+
+<!-- S9 -->
+<div class="content-block" id="s9">
+    <h2>9. Continuous Coverage Threshold</h2>
+    <p>The minimum constellation size for continuous coverage above ε_min is approximately:</p>
+    <blockquote>N_min ≈ (1 / A_cap) × k_geometry</blockquote>
+    <p>where k_geometry is a geometry factor typically between 3 and 6. For a 550 km Walker delta at 53° with ε_min = 35°, k_geometry ≈ 4–5, giving N_min ≈ 50–60 satellites for continuous mid-latitude coverage (up to 53°). For full global coverage at the same parameters from a single shell, N_min rises to several hundred because the caps must tile a full sphere rather than a latitude band.</p>
+    <p>The industry numbers bear this out. Starlink's 1,584-satellite first shell gives dense, continuous global coverage up to 53° with high minimum elevation angles (often 40°+). OneWeb's 648 satellites at 87.9° give global coverage at a lower minimum elevation. Both numbers are far above the theoretical minimum because real constellations must handle J2 precession, phasing evolution during deployment, satellite outages, and link-budget margin.</p>
+
+    <div class="callout green">
+        <strong>THE KEY DESIGN NUMBER</strong>
+        N_min ≈ ⌈1/A_cap⌉ × k_geometry, where k_geometry = 3–6. At 550 km, ε_min = 35°: theoretical floor ~12, practical minimum ~50–60 for mid-latitude continuous coverage, several hundred for global. The gap between theory and practice is not waste — it is the cost of regularity, reliability, and margin.
+    </div>
+</div>
+
+<!-- QUIZ -->
+<div class="quiz-block" id="quiz">
+    <h2>KNOWLEDGE CHECK</h2>
+    <p class="quiz-intro">Ten questions. Select one answer per question. Feedback is immediate; score appears when all ten are answered.</p>
+
+    <div class="quiz-q"><p><strong>Q1.</strong> In Walker notation T/P/F, F controls:</p>
+        <div class="quiz-options">
+            <button class="quiz-opt" data-q="1" data-correct="false">A — The total number of frequencies allocated to the constellation</button>
+            <button class="quiz-opt" data-q="1" data-correct="true">B — The mean anomaly offset between adjacent orbital planes</button>
+            <button class="quiz-opt" data-q="1" data-correct="false">C — The altitude of the highest orbital plane</button>
+            <button class="quiz-opt" data-q="1" data-correct="false">D — The minimum elevation angle for coverage</button>
+        </div><div class="quiz-feedback" id="fb1"></div></div>
+
+    <div class="quiz-q"><p><strong>Q2.</strong> A Walker star differs from a Walker delta primarily because:</p>
+        <div class="quiz-options">
+            <button class="quiz-opt" data-q="2" data-correct="false">A — Walker star uses elliptical orbits and Walker delta uses circular ones</button>
+            <button class="quiz-opt" data-q="2" data-correct="true">B — Walker star planes are near-polar, giving global coverage but creating a high-relative-velocity seam near the poles</button>
+            <button class="quiz-opt" data-q="2" data-correct="false">C — Walker star always has more satellites per plane</button>
+            <button class="quiz-opt" data-q="2" data-correct="false">D — Walker star uses a different minimum elevation angle</button>
+        </div><div class="quiz-feedback" id="fb2"></div></div>
+
+    <div class="quiz-q"><p><strong>Q3.</strong> The coverage cap half-angle ρ_cap shrinks when ε_min increases because:</p>
+        <div class="quiz-options">
+            <button class="quiz-opt" data-q="3" data-correct="true">A — A steeper minimum line of sight intersects a smaller spherical cap on the Earth's surface</button>
+            <button class="quiz-opt" data-q="3" data-correct="false">B — Atmospheric drag reduces coverage at high elevation</button>
+            <button class="quiz-opt" data-q="3" data-correct="false">C — Satellite altitude decreases when elevation is constrained</button>
+            <button class="quiz-opt" data-q="3" data-correct="false">D — Higher elevation angles increase the orbital period</button>
+        </div><div class="quiz-feedback" id="fb3"></div></div>
+
+    <div class="quiz-q"><p><strong>Q4.</strong> The in-plane condition 2ρ_cap ≥ 360°/S means:</p>
+        <div class="quiz-options">
+            <button class="quiz-opt" data-q="4" data-correct="true">A — Adjacent satellites' coverage caps must reach each other to close the in-track gap</button>
+            <button class="quiz-opt" data-q="4" data-correct="false">B — Adjacent satellites must be in the same orbital plane</button>
+            <button class="quiz-opt" data-q="4" data-correct="false">C — The coverage cap radius must be less than the orbital altitude</button>
+            <button class="quiz-opt" data-q="4" data-correct="false">D — Adjacent satellites must be at the same mean anomaly</button>
+        </div><div class="quiz-feedback" id="fb4"></div></div>
+
+    <div class="quiz-q"><p><strong>Q5.</strong> A Walker delta at 53° inclination cannot cover latitudes above 53° from that shell because:</p>
+        <div class="quiz-options">
+            <button class="quiz-opt" data-q="5" data-correct="false">A — The shell is covered by a different constellation above 53°</button>
+            <button class="quiz-opt" data-q="5" data-correct="true">B — The ground track never reaches beyond ±53° latitude, so no satellite ever rises above the minimum elevation from higher latitudes</button>
+            <button class="quiz-opt" data-q="5" data-correct="false">C — Atmospheric absorption blocks the signal above 53°</button>
+            <button class="quiz-opt" data-q="5" data-correct="false">D — Satellites slow down above 53° latitude</button>
+        </div><div class="quiz-feedback" id="fb5"></div></div>
+
+    <div class="quiz-q"><p><strong>Q6.</strong> The polar seam in a Walker star constellation is a debris risk because:</p>
+        <div class="quiz-options">
+            <button class="quiz-opt" data-q="6" data-correct="true">A — Adjacent ascending and descending planes cross near the poles at relative velocities up to 15 km/s, making conjunctions highly energetic</button>
+            <button class="quiz-opt" data-q="6" data-correct="false">B — Solar radiation pressure is stronger near the poles</button>
+            <button class="quiz-opt" data-q="6" data-correct="false">C — Atmospheric drag is higher near the poles</button>
+            <button class="quiz-opt" data-q="6" data-correct="false">D — GPS navigation is unreliable near the poles</button>
+        </div><div class="quiz-feedback" id="fb6"></div></div>
+
+    <div class="quiz-q"><p><strong>Q7.</strong> The geometry factor k_geometry (3–6) by which real constellations exceed the theoretical minimum satellite count reflects:</p>
+        <div class="quiz-options">
+            <button class="quiz-opt" data-q="7" data-correct="false">A — The number of frequency bands used</button>
+            <button class="quiz-opt" data-q="7" data-correct="true">B — The need for cap overlap, J2 phasing evolution, satellite outages, and link-budget margin</button>
+            <button class="quiz-opt" data-q="7" data-correct="false">C — The number of launch vehicles required</button>
+            <button class="quiz-opt" data-q="7" data-correct="false">D — Regulatory filing overhead per satellite</button>
+        </div><div class="quiz-feedback" id="fb7"></div></div>
+
+    <div class="quiz-q"><p><strong>Q8.</strong> Starlink uses multiple shells at different inclinations rather than one shell because:</p>
+        <div class="quiz-options">
+            <button class="quiz-opt" data-q="8" data-correct="false">A — Different inclinations allow different frequency bands per shell</button>
+            <button class="quiz-opt" data-q="8" data-correct="true">B — A single 53° shell cannot reach polar latitudes; higher-inclination shells extend coverage toward the poles</button>
+            <button class="quiz-opt" data-q="8" data-correct="false">C — Multiple inclinations reduce inter-satellite link latency</button>
+            <button class="quiz-opt" data-q="8" data-correct="false">D — ITU regulations require multiple shells</button>
+        </div><div class="quiz-feedback" id="fb8"></div></div>
+
+    <div class="quiz-q"><p><strong>Q9.</strong> At 550 km with ε_min = 35° (ρ_cap ≈ 33.4°), the minimum satellites per plane for continuous in-track coverage is:</p>
+        <div class="quiz-options">
+            <button class="quiz-opt" data-q="9" data-correct="false">A — 3</button>
+            <button class="quiz-opt" data-q="9" data-correct="false">B — 4</button>
+            <button class="quiz-opt" data-q="9" data-correct="true">C — 6</button>
+            <button class="quiz-opt" data-q="9" data-correct="false">D — 12</button>
+        </div><div class="quiz-feedback" id="fb9"></div></div>
+
+    <div class="quiz-q"><p><strong>Q10.</strong> The Walker phasing parameter F primarily affects:</p>
+        <div class="quiz-options">
+            <button class="quiz-opt" data-q="10" data-correct="false">A — The orbital altitude of each plane</button>
+            <button class="quiz-opt" data-q="10" data-correct="true">B — The uniformity of satellite distribution in the rotating frame, affecting coverage gap locations and deployment sequencing</button>
+            <button class="quiz-opt" data-q="10" data-correct="false">C — The number of ground stations required</button>
+            <button class="quiz-opt" data-q="10" data-correct="false">D — The minimum elevation angle achievable</button>
+        </div><div class="quiz-feedback" id="fb10"></div></div>
+
+    <div class="quiz-score" id="quizScore"></div>
+</div>
+
+<!-- PYTHON -->
+<div class="py-block" id="python">
+    <h2>PYTHON EXERCISES — SPINE PROJECT STAGE 4</h2>
+    <p class="py-intro">Stage 4 extends the propagator to full constellation geometry. Exercise 1 computes coverage cap parameters. Exercise 2 generates Walker initial conditions. Exercise 3 seeds the J2 propagator with a complete Walker constellation and evaluates coverage fraction over a latitude band — the first end-to-end constellation performance calculation. Python 3.8+ standard library only.</p>
+
+    <div class="py-exercise">
+        <h3>Exercise 1 — Coverage Cap and Satellite Count Estimate</h3>
+        <p>Compute ρ_cap, cap area fraction, and theoretical minimum satellite count across altitude and elevation combinations.</p>
+<pre>
+import math
+
+RE = 6378.137   # km
+
+def coverage_cap(altitude_km, min_elev_deg):
+    """Coverage cap half-angle (deg) and fractional Earth area for one satellite."""
+    r   = RE + altitude_km
+    eps = math.radians(min_elev_deg)
+    arg = max(-1.0, min(1.0, RE * math.cos(eps) / r))
+    rho = math.acos(arg) - eps
+    area_frac = (1 - math.cos(rho)) / 2
+    return math.degrees(rho), area_frac
+
+print(f"{'Alt':>6}{'ε_min':>7}{'ρ_cap':>8}{'Area%':>7}{'N_min':>7}{'S_min':>7}")
+print("-" * 46)
+for alt in [550, 700, 1200]:
+    for eps in [0, 10, 25, 35]:
+        rho, af = coverage_cap(alt, eps)
+        n_min   = math.ceil(1 / af)
+        s_min   = math.ceil(180 / rho)
+        print(f"{alt:>6}{eps:>6}°{rho:>7.1f}°{af*100:>6.1f}%{n_min:>7}{s_min:>7}")
+    print()
+
+# 1. At 550 km, ε_min = 35°: S_min = ceil(180/rho_cap). Verify it equals 6.
+# 2. At 550 km, ε_min = 35°, inclination 53°: estimate P_min for equatorial
+#    gap closure: P_min = ceil(180 / (rho_cap / cos(53°))).
+# 3. Compare N_min at 550 km vs 1200 km for ε_min = 35°. Which is more
+#    satellite-efficient per km² of coverage?
+</pre>
+    </div>
+
+    <div class="py-exercise">
+        <h3>Exercise 2 — Walker Initial Conditions Generator</h3>
+        <p>Generate the RAAN and mean anomaly for every satellite in a Walker T/P/F constellation.</p>
+<pre>
+def walker_elements(T, P, F, altitude_km, inclination_deg,
+                    raan0_deg=0.0, m0_deg=0.0):
+    """
+    Walker T/P/F initial conditions.
+    Returns list of dicts: plane, sat index, RAAN (deg), M (deg).
+    """
+    S    = T // P
+    dR   = 360.0 / P     # RAAN spacing between planes
+    dM   = 360.0 / S     # mean anomaly spacing within a plane
+    dF   = F * 360.0 / T # phasing offset per plane
+
+    sats = []
+    for p in range(P):
+        raan = (raan0_deg + p * dR) % 360.0
+        for s in range(S):
+            M = (m0_deg + s * dM + p * dF) % 360.0
+            sats.append({"plane": p, "sat": s, "RAAN": raan,
+                          "M": M, "alt": altitude_km,
+                          "inc": inclination_deg})
+    return sats
+
+# Small Starlink-like example
+sats = walker_elements(36, 6, 1, 550, 53.0)
+print(f"Walker 36/6/1  550 km  53°  ({len(sats)} satellites)\n")
+print(f"{'Plane':>6}{'Sat':>5}{'RAAN':>9}{'M':>9}")
+print("-" * 32)
+for s in sats[:12]:
+    print(f"{s['plane']:>6}{s['sat']:>5}{s['RAAN']:>8.1f}°{s['M']:>8.1f}°")
+print(f"  ... ({len(sats)-12} more)")
+
+# 1. Change F from 1 to 0. How does M distribution change across planes?
+# 2. Set T=1584, P=72, F=1, inc=53°. Print RAAN of each plane.
+#    Confirm they are spaced 5° apart (360/72).
+# 3. Generate a Walker star: 648/18/0 at 87.9°. What is the RAAN spacing?
+</pre>
+    </div>
+
+    <div class="py-exercise">
+        <h3>Exercise 3 — Spine Stage 4: Coverage Fraction Over a Latitude Band</h3>
+        <p>Seed the J2 propagator with Walker initial conditions and evaluate the fraction of time at least one satellite is above ε_min at test points across the coverage region.</p>
+<pre>
+import math
+
+MU          = 398600.4418
+RE          = 6378.137
+J2          = 1.08263e-3
+EARTH_ROT_S = 7.2921150e-5
+
+def sat_elev(alt, inc_deg, raan0_deg, m0_deg, obs_lat, obs_lon, t):
+    """Elevation angle from one satellite to an observer at time t."""
+    r  = RE + alt
+    n  = math.sqrt(MU / r**3)
+    i  = math.radians(inc_deg)
+    nr = -(3/2)*n*J2*(RE/r)**2*math.cos(i)
+    raan  = math.radians(raan0_deg) + nr*t
+    theta = math.radians(m0_deg)   + n*t
+    xo = r*math.cos(theta); yo = r*math.sin(theta)
+    xi = xo*math.cos(raan) - yo*math.cos(i)*math.sin(raan)
+    yi = xo*math.sin(raan) + yo*math.cos(i)*math.cos(raan)
+    zi = yo*math.sin(i)
+    gst = EARTH_ROT_S*t
+    xe = xi*math.cos(gst)+yi*math.sin(gst)
+    ye = -xi*math.sin(gst)+yi*math.cos(gst)
+    ze = zi
+    phi_o = math.radians(obs_lat); lam_o = math.radians(obs_lon)
+    phi_s = math.asin(ze/r)
+    lam_s = math.atan2(ye, xe)
+    cos_r = max(-1.0, min(1.0,
+        math.sin(phi_o)*math.sin(phi_s)
+        + math.cos(phi_o)*math.cos(phi_s)*math.cos(lam_s-lam_o)))
+    rho = math.acos(cos_r); sr = math.sin(rho)
+    if sr < 1e-9: return 90.0
+    return math.degrees(math.atan((math.cos(rho)-RE/r)/sr))
+
+def walker_list(T, P, F, alt, inc):
+    S = T//P; dR = 360/P; dM = 360/S; dF = F*360/T
+    return [(p*dR, (s*dM+p*dF)%360)
+            for p in range(P) for s in range(S)]
+
+# Walker 24/6/1 at 550 km, 53°
+T, P, F, alt, inc = 24, 6, 1, 550, 53.0
+min_elev = 35.0
+sats = walker_list(T, P, F, alt, inc)   # list of (RAAN, M)
+
+test_pts  = [(-50,0),(-30,0),(0,0),(30,0),(50,0),(60,0)]
+dur_s     = 3 * 3600
+step_s    = 60
+times     = range(0, dur_s+1, step_s)
+
+print(f"Walker {T}/{P}/{F}  {alt}km  {inc}°  ε_min={min_elev}°  {len(sats)} sats\n")
+print(f"{'Lat':>6}  {'Coverage %':>11}  {'Note'}")
+print("-" * 38)
+for lat, lon in test_pts:
+    hits = sum(
+        1 for t in times
+        if max(sat_elev(alt, inc, r, m, lat, lon, t)
+               for r, m in sats) >= min_elev
+    )
+    pct  = hits / len(times) * 100
+    note = "CONTINUOUS" if pct >= 99.9 else ("GOOD" if pct >= 90 else "GAP")
+    print(f"{lat:>+5}°  {pct:>10.1f}%  {note}")
+
+# 1. Latitude 60° is above the 53° inclination — confirm it shows gaps.
+# 2. Increase T to 48 (8 sats/plane, same P). How does coverage change?
+# 3. Switch to inc=87.9°. What happens at lat=60°?
+# 4. STAGE-5 PREVIEW: m2-5 (station-keeping & decay) adds propellant mass
+#    and lifetime to the satellite model, turning this geometry into a full
+#    mission design with mass and cost implications.
+</pre>
+        <div class="py-challenge"><strong>SPINE PROJECT — STAGE 4</strong>
+            Stage 4 is the first end-to-end constellation performance calculation: Walker geometry + J2 propagator + elevation criterion → coverage fraction. Stage 5 (m2-5) adds station-keeping, decay, and propellant budgets. Stage 6 (m2-6) runs the full model against real constellation parameters and produces a sizing comparison table.
+        </div>
+    </div>
+</div>
+
+<!-- REFLECTION -->
+<div class="reflection-block" id="reflect">
+    <h2>REFLECTION PROMPTS</h2>
+    <p class="ref-intro">Not graded. Write in your own words, 200–400 words each.</p>
+
+    <div class="ref-prompt"><h3>Prompt 1 — Sizing a Maritime Constellation</h3>
+        <p>Identify a realistic operational requirement — continuous broadband coverage for maritime users between 70°S and 70°N at a minimum elevation of 30° — and walk through the sizing loop (altitude, ε_min, inclination, planes, satellites per plane) to arrive at a rough satellite count. State every assumption explicitly and identify which one dominates the answer.</p></div>
+
+    <div class="ref-prompt"><h3>Prompt 2 — Delta vs Star for Aviation</h3>
+        <p>Walker delta at moderate inclination leaves polar regions uncovered but has no polar seam. Walker star covers the poles but creates a high-relative-velocity crossing zone. Argue which approach is better for a 500-satellite constellation serving the global aviation market, and identify the key tradeoffs aviation imposes that might differ from consumer broadband.</p></div>
+
+    <div class="ref-prompt"><h3>Prompt 3 — Decomposing k_geometry</h3>
+        <p>The theoretical minimum satellite count N_min = ⌈1/A_cap⌉ is never achieved in practice, with real constellations needing 3–6× more. Decompose the k_geometry factor into its contributors — J2 phasing evolution, satellite outages, link margin, deployment gaps — and estimate the fraction of k_geometry attributable to each. Where does the largest gap between theory and practice lie?</p></div>
+
+    <div class="ref-prompt"><h3>Prompt 4 — Phasing and Early Service</h3>
+        <p>Sketch the deployment sequence for Walker 36/6/1 versus 36/6/0, launched one plane at a time. For each, describe the coverage the system can offer after 1, 2, 3, and 6 planes are in place. Which is preferable for a commercial operator trying to achieve minimum viable coverage as early as possible?</p></div>
+</div>
+
+<!-- MARK COMPLETE -->
+<div class="complete-wrap">
+    <button class="complete-btn" id="completeBtn">MARK LESSON COMPLETE</button>
+    <div class="complete-msg" id="completeMsg"></div>
+</div>
+
+<div class="lesson-nav">
+    <a href="m2-3.html">← LESSON 03 — GROUND TRACKS &amp; DOPPLER</a>
+    <a href="m2-5.html">LESSON 05 — STATION-KEEPING &amp; ORBITAL DECAY →</a>
+</div>
+
+</div><!-- /lesson-wrap -->
+
+<button class="back-to-top" id="backToTop" title="Back to top">↑</button>
+
+<footer>© 2026 LEOAF · M2 · LESSON 04 OF 7</footer>
+
+<script>
+const canvas = document.getElementById('starsCanvas');
+const ctx = canvas.getContext('2d');
+let stars = [];
+function initStars() { stars=[]; for(let i=0;i<180;i++) stars.push({x:Math.random()*canvas.width,y:Math.random()*canvas.height,size:Math.random()*1.5+0.4,speed:Math.random()*0.18+0.04,hue:Math.random()*360}); }
+function resizeCanvas() { canvas.width=window.innerWidth; canvas.height=window.innerHeight; }
+resizeCanvas(); initStars(); window.addEventListener('resize', resizeCanvas);
+function animateStars() { ctx.clearRect(0,0,canvas.width,canvas.height); stars.forEach(s=>{s.y-=s.speed;if(s.y<0){s.y=canvas.height;s.x=Math.random()*canvas.width;} ctx.beginPath();ctx.fillStyle=`hsl(${s.hue},80%,80%)`;ctx.arc(s.x,s.y,s.size,0,Math.PI*2);ctx.fill();}); requestAnimationFrame(animateStars); }
+animateStars();
+</script>
+
+<script>
+const feedbacks = {
+    1:{correct:"Correct. F is the phasing parameter: adjacent planes are offset by F×(360°/T) in mean anomaly, distributing satellites in the rotating frame. It has nothing to do with frequency, altitude, or elevation.",wrong:"Incorrect. F is the phasing parameter — it sets the mean anomaly offset between adjacent planes. Frequency allocation, orbital altitude, and elevation angles are independent parameters."},
+    2:{correct:"Correct. Walker star refers to near-polar (i ≈ 90°) configurations where ascending and descending planes cross near the poles at high relative velocity — a polar seam not present in mid-inclination Walker delta constellations.",wrong:"Incorrect. The distinction is inclination and the resulting polar seam, not orbit shape, satellites per plane, or elevation angle. Both Walker star and delta constellations use circular orbits and can have any number of satellites per plane."},
+    3:{correct:"Correct. A higher ε_min requires a steeper line of sight, which intersects the Earth's surface at a smaller Earth-central angle, cutting a smaller coverage cap. Satellite altitude and period are unaffected.",wrong:"Incorrect. The coverage cap shrinks because the geometric constraint is stricter — the minimum line of sight at 35° elevation cuts a smaller Earth-central angle than at 0°. Neither drag nor altitude changes with the elevation constraint."},
+    4:{correct:"Correct. Two adjacent satellites each contribute a cap of half-angle ρ_cap; for continuous coverage their caps must reach each other across the 360°/S arc between them, requiring 2ρ_cap ≥ 360°/S.",wrong:"Incorrect. The condition states that adjacent caps must overlap or at minimum touch to close the in-track gap. It requires them to be in the same plane (that is implicit in 'in-plane coverage') but does not require the same mean anomaly — they are equally spaced."},
+    5:{correct:"Correct. The inclination sets a hard ceiling on the ground track latitude. A satellite at 53° inclination never passes over a point at 60°N, so no coverage is possible from that shell at that latitude regardless of satellite density.",wrong:"Incorrect. The latitude limit is geometric and absolute: the ground track cannot exceed ±i. Adding more satellites at 53° does not extend the coverage latitude — a shell at a higher inclination is the only solution."},
+    6:{correct:"Correct. Ascending and descending planes in a Walker star cross near the poles at relative velocities up to 15 km/s. A collision at that speed is catastrophic, fragmenting both satellites into thousands of debris objects.",wrong:"Incorrect. The polar seam risk is from high-relative-velocity orbital crossings. Adjacent planes travel in opposite directions near the poles, and any conjunction occurs at extreme closing speed — a debris-generation risk unrelated to radiation, atmosphere, or GPS."},
+    7:{correct:"Correct. The theoretical minimum assumes perfect tiling, no J2 drift, no outages, and no margin. Real constellations need overlap for robustness, extra satellites to maintain coverage during phasing evolution and failures, and margin for link performance.",wrong:"Incorrect. k_geometry captures the gap between ideal geometric theory and operational reality: cap overlap, J2-driven phasing drift, satellite outages, and link-budget margin. Frequency plans, launch vehicles, and regulatory filings are separate cost drivers."},
+    8:{correct:"Correct. A single 53° shell has a hard latitude ceiling at ±53°. Supplementary shells at 70° and 97.6° fill the polar coverage gap, allowing global service without replacing the primary shell.",wrong:"Incorrect. The multi-shell architecture is driven by coverage latitude. A 53° shell cannot reach polar latitudes; higher-inclination shells extend service there. Frequency plans, ISL latency, and ITU rules are not the reason for the multi-shell approach."},
+    9:{correct:"Correct. S_min = ⌈180°/ρ_cap⌉ = ⌈180/33.4⌉ = ⌈5.39⌉ = 6. With 6 satellites the in-plane spacing is 60°; two adjacent caps of 33.4° span 66.8° > 60°, so they overlap and close the gap.",wrong:"Incorrect. S_min = ⌈180°/ρ_cap⌉ = ⌈180/33.4⌉ = 6. With fewer the in-plane spacing 360°/S exceeds 2×33.4° = 66.8°, leaving an uncovered gap between adjacent satellites."},
+    10:{correct:"Correct. F shifts the mean anomaly of satellites in adjacent planes, redistributing where worst-case coverage gaps fall and controlling how coverage evolves during incremental deployment. Altitude, ground station count, and elevation are independent of F.",wrong:"Incorrect. F controls mean anomaly phasing between planes, affecting where the constellation's worst-case gaps appear and how coverage evolves as planes are added during deployment. It does not set altitude, ground station requirements, or achievable elevation."}
+};
+let answered = {};
+document.querySelectorAll('.quiz-opt').forEach(btn => {
+    btn.addEventListener('click', function() {
+        const q = this.dataset.q;
+        if (answered[q] !== undefined) return;
+        const correct = this.dataset.correct === 'true';
+        answered[q] = correct;
+        document.querySelectorAll(`.quiz-opt[data-q="${q}"]`).forEach(b => { b.disabled=true; if(b.dataset.correct==='true') b.classList.add('correct'); });
+        if (!correct) this.classList.add('wrong');
+        const fb = document.getElementById(`fb${q}`);
+        fb.textContent = (correct?'✓ ':'✗ ') + feedbacks[q][correct?'correct':'wrong'];
+        fb.style.color = correct ? '#39ff14' : '#ff004f';
+        if (Object.keys(answered).length === 10) {
+            const total = Object.values(answered).filter(Boolean).length;
+            const el = document.getElementById('quizScore');
+            el.style.display = 'block';
+            const pct = Math.round(total/10*100);
+            el.textContent = `SCORE: ${total} / 10 (${pct}%) — ${pct===100?'PERFECT.':pct>=80?'STRONG. REVIEW ANY MISSES.':pct>=60?'ADEQUATE. REVISIT WEAK SECTIONS.':'REVISIT THE LESSON BEFORE PROCEEDING.'}`;
+        }
+    });
+});
+</script>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="supabase.js"></script>
+<script src="user_progress.js"></script>
+<script>
+const LESSON_ID = 'm2-4';
+(function () {
+    function bounceToLogin(reason) {
+        console.error("Auth guard:", reason, "- redirecting to index.html");
+        window.location.replace("index.html");
+    }
+    async function init() {
+        if (typeof client === "undefined" || !client || !client.auth) {
+            return bounceToLogin("Supabase client not loaded (is supabase.js in this directory?)");
+        }
+        let session = null;
+        try { ({ data: { session } } = await client.auth.getSession()); }
+        catch (e) { return bounceToLogin("getSession threw: " + e.message); }
+        if (!session) { window.location.replace("index.html"); return; }
+        const btn = document.getElementById('completeBtn');
+        const msg = document.getElementById('completeMsg');
+        function setDone(done) {
+            if (done) {
+                btn.textContent = '✓ COMPLETE — CLICK TO UNDO';
+                btn.classList.add('done');
+                btn.style.cssText = 'border-color:#39ff14;color:#39ff14;background:rgba(57,255,20,0.1);cursor:pointer;opacity:1;';
+                msg.style.color = '#39ff14';
+                msg.textContent = 'Lesson marked complete. Click again to undo.';
+            } else {
+                btn.textContent = 'MARK LESSON COMPLETE';
+                btn.classList.remove('done');
+                btn.style.cssText = '';
+                msg.style.color = '#ffffff55';
+                msg.textContent = 'Not yet marked complete.';
+            }
+        }
+        let mastered = [];
+        try { mastered = await getMasteredSections(); } catch (e) { console.error(e); }
+        setDone(mastered.includes(LESSON_ID));
+        btn.addEventListener('click', async () => {
+            const isCurrentlyDone = btn.classList.contains('done');
+            msg.style.color = '#00d9ff';
+            msg.textContent = 'Saving...';
+            const ok = await upsertSection(LESSON_ID, !isCurrentlyDone);
+            if (ok) { setDone(!isCurrentlyDone); }
+            else { msg.style.color = '#ff004f'; msg.textContent = 'Error saving. Try again.'; }
+        });
+        const btt = document.getElementById('backToTop');
+        window.addEventListener('scroll', () => { btt.classList.toggle('visible', window.scrollY > 400); });
+        btt.addEventListener('click', () => window.scrollTo({ top: 0, behavior: 'smooth' }));
+    }
+    if (document.readyState === "loading") { document.addEventListener("DOMContentLoaded", init); }
+    else { init(); }
+})();
+</script>
+
+</body>
+</html>
