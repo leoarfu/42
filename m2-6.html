@@ -1,0 +1,757 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, shrink-to-fit=no">
+<title>M2-6 — Launch &amp; Deployment Logistics · LEOAF</title>
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;600;800&family=Share+Tech+Mono&family=Libre+Baskerville:ital,wght@0,400;0,700;1,400&display=swap" rel="stylesheet">
+<link rel="icon" href="favicon.ico" sizes="any" type="image/x-icon">
+<link rel="manifest" href="site.webmanifest">
+<meta name="theme-color" content="#0f0f0f">
+
+<script>
+window.leoafAbort = async function () {
+    function go() { window.location.replace("index.html?signedout=1"); }
+    try {
+        if (typeof client !== "undefined" && client && client.auth && client.auth.signOut) {
+            try { await client.auth.signOut({ scope: "local" }); } catch (e) {}
+        }
+    } catch (e) {}
+    go();
+};
+</script>
+
+<style>
+* { box-sizing:border-box; margin:0; padding:0; }
+html { height:100%; -webkit-text-size-adjust:100%; overflow-x:hidden; }
+body { font-family:'Share Tech Mono',monospace; background:#000; color:white; overflow-x:hidden; min-height:100vh; }
+#starsCanvas { position:fixed; inset:0; z-index:-1; }
+
+header { background:#000; border-bottom:1px solid #ff004f33; position:sticky; top:0; z-index:100; padding:1rem clamp(1.5rem,5vw,4rem); display:flex; justify-content:space-between; align-items:center; box-shadow:0 4px 16px #0008; }
+.logo { font-family:'Orbitron',sans-serif; font-weight:800; font-size:clamp(16px,2vw,22px); letter-spacing:3px; text-decoration:none; }
+.logo span:first-child { color:white; }
+.logo span:last-child { color:#ff004f; }
+.nav-right { display:flex; align-items:center; gap:10px; }
+.nav-btn { background:transparent; border:1px solid #ff004f44; color:#ff004f; padding:6px 14px; cursor:pointer; transition:0.3s ease; font-size:11px; font-family:'Orbitron',sans-serif; letter-spacing:1px; text-decoration:none; display:inline-block; }
+.nav-btn:hover { background:#ff004f; color:black; }
+
+.breadcrumb { padding:14px clamp(1.5rem,5vw,4rem); font-size:11px; color:#ffffff44; letter-spacing:1px; position:relative; z-index:1; }
+.breadcrumb a { color:#00d9ff66; text-decoration:none; }
+.breadcrumb a:hover { color:#00d9ff; }
+.breadcrumb span { margin:0 8px; }
+
+.lesson-wrap { max-width:820px; margin:0 auto; padding:0 clamp(1.5rem,5vw,4rem) 80px; position:relative; z-index:1; }
+
+.lesson-header { padding:30px 0 28px; border-bottom:1px solid #ffffff11; margin-bottom:36px; }
+.lesson-tag { font-family:'Orbitron',sans-serif; font-size:10px; color:#ff004f; letter-spacing:3px; margin-bottom:10px; }
+.lesson-header h1 { font-family:'Orbitron',sans-serif; font-size:clamp(20px,3.5vw,32px); font-weight:800; line-height:1.2; margin-bottom:12px; }
+.lesson-meta { display:flex; gap:10px; flex-wrap:wrap; margin-bottom:16px; }
+.l-pill { font-family:'Orbitron',sans-serif; font-size:10px; padding:3px 10px; border:1px solid; letter-spacing:1px; }
+.l-pill-q { color:#ff004f; border-color:#ff004f44; }
+.l-pill-t { color:#39ff14; border-color:#39ff1444; }
+.lesson-intro { font-size:13px; line-height:1.85; opacity:0.75; }
+
+.toc { background:rgba(0,217,255,0.06); border:1px solid #00d9ff33; padding:24px 28px; margin:30px 0; }
+.toc h4 { font-family:'Orbitron',sans-serif; font-size:10px; color:#00d9ff; letter-spacing:2px; margin-bottom:16px; }
+.toc ol { padding-left:20px; }
+.toc li { font-size:13px; line-height:2.1; }
+.toc li a { color:#00d9ffbb; text-decoration:none; transition:0.15s; }
+.toc li a:hover { color:#ffffff; padding-left:4px; }
+.toc li::marker { color:#ff004f; font-family:'Orbitron',sans-serif; font-size:10px; }
+
+.content-block { margin-bottom:48px; }
+.content-block h2 { font-family:'Orbitron',sans-serif; font-size:13px; color:#00d9ff; letter-spacing:2px; text-transform:uppercase; margin-bottom:18px; padding-bottom:10px; border-bottom:1px solid #00d9ff22; scroll-margin-top:80px; }
+.content-block h3 { font-family:'Orbitron',sans-serif; font-size:11px; color:#ffffff88; letter-spacing:1.5px; text-transform:uppercase; margin:28px 0 12px; }
+.content-block p { font-size:13px; line-height:1.9; opacity:0.85; margin-bottom:16px; }
+.content-block ul, .content-block ol { padding-left:0; margin-bottom:16px; }
+.content-block ul li, .content-block ol li { font-size:13px; line-height:1.85; opacity:0.85; padding-left:20px; position:relative; margin-bottom:6px; }
+.content-block ul li::before { content:'›'; position:absolute; left:0; color:#00d9ff; }
+.content-block blockquote { border-left:3px solid #39ff14; background:rgba(57,255,20,0.05); padding:14px 20px; margin:18px 0; font-size:14px; font-family:'Share Tech Mono',monospace; color:#39ff14; letter-spacing:1px; }
+
+.callout { border-left:3px solid #00d9ff; background:rgba(0,217,255,0.05); padding:16px 20px; margin:22px 0; font-size:12px; line-height:1.8; }
+.callout.red   { border-left-color:#ff004f; background:rgba(255,0,79,0.05); }
+.callout.green { border-left-color:#39ff14; background:rgba(57,255,20,0.05); }
+.callout.amber { border-left-color:#ffaa00; background:rgba(255,170,0,0.05); }
+.callout strong { font-family:'Orbitron',sans-serif; font-size:10px; letter-spacing:1px; display:block; margin-bottom:8px; color:inherit; }
+
+.key-numbers { display:grid; grid-template-columns:repeat(auto-fit,minmax(140px,1fr)); gap:12px; margin:22px 0; }
+.kn-item { background:rgba(255,255,255,0.03); border:1px solid #ffffff11; padding:16px 12px; text-align:center; }
+.kn-val { font-family:'Orbitron',sans-serif; font-size:clamp(15px,2.3vw,22px); font-weight:800; color:#00d9ff; display:block; }
+.kn-label { font-size:10px; opacity:0.5; letter-spacing:1px; margin-top:5px; display:block; line-height:1.4; }
+
+.compare-table { width:100%; border-collapse:collapse; margin:22px 0; font-size:12px; }
+.compare-table th { font-family:'Orbitron',sans-serif; font-size:10px; letter-spacing:1px; color:#00d9ff; padding:10px 12px; border-bottom:1px solid #00d9ff33; text-align:left; }
+.compare-table td { padding:10px 12px; border-bottom:1px solid #ffffff0a; line-height:1.5; opacity:0.85; vertical-align:top; }
+.compare-table tr:hover td { background:rgba(255,255,255,0.02); }
+
+.diagram-wrap { margin:24px 0; background:rgba(255,255,255,0.02); border:1px solid #ffffff11; padding:20px; overflow-x:auto; }
+.diagram-wrap figcaption { font-size:11px; color:#ffffff44; margin-top:12px; text-align:center; letter-spacing:1px; }
+
+.quiz-block { background:rgba(17,17,17,0.9); border:1px solid #ff004f33; padding:28px; margin:48px 0 32px; }
+.quiz-block h2 { font-family:'Orbitron',sans-serif; font-size:13px; color:#ff004f; letter-spacing:2px; margin-bottom:6px; }
+.quiz-intro { font-size:12px; opacity:0.6; margin-bottom:24px; padding-bottom:16px; border-bottom:1px solid #ff004f22; line-height:1.6; }
+.quiz-q { margin-bottom:28px; }
+.quiz-q p { font-size:13px; opacity:0.9; margin-bottom:12px; line-height:1.65; }
+.quiz-q p strong { color:#00d9ff; }
+.quiz-options { display:flex; flex-direction:column; gap:8px; }
+.quiz-opt { background:rgba(255,255,255,0.03); border:1px solid #ffffff1a; padding:11px 16px; cursor:pointer; font-size:12px; font-family:'Share Tech Mono',monospace; transition:0.2s ease; text-align:left; color:white; line-height:1.5; }
+.quiz-opt:hover:not(:disabled) { background:rgba(0,217,255,0.08); border-color:#00d9ff44; }
+.quiz-opt.correct  { background:rgba(57,255,20,0.1);  border-color:#39ff14; color:#39ff14; }
+.quiz-opt.wrong    { background:rgba(255,0,79,0.1);   border-color:#ff004f; color:#ff004f; }
+.quiz-opt:disabled { cursor:default; }
+.quiz-feedback { font-size:12px; margin-top:10px; min-height:18px; line-height:1.7; opacity:0.9; padding:0 4px; }
+.quiz-score { font-family:'Orbitron',sans-serif; font-size:12px; color:#39ff14; margin-top:20px; letter-spacing:1px; display:none; padding-top:16px; border-top:1px solid #39ff1433; }
+
+.py-block { background:rgba(10,10,10,0.95); border:1px solid #39ff1422; padding:28px; margin:32px 0; }
+.py-block h2 { font-family:'Orbitron',sans-serif; font-size:13px; color:#39ff14; letter-spacing:2px; margin-bottom:8px; }
+.py-block .py-intro { font-size:12px; opacity:0.7; margin-bottom:20px; padding-bottom:16px; border-bottom:1px solid #39ff1422; line-height:1.7; }
+.py-exercise { margin-bottom:32px; }
+.py-exercise:last-child { margin-bottom:0; }
+.py-exercise h3 { font-family:'Orbitron',sans-serif; font-size:11px; color:#39ff1499; letter-spacing:1.5px; text-transform:uppercase; margin-bottom:10px; }
+.py-exercise p { font-size:12px; opacity:0.8; margin-bottom:14px; line-height:1.75; }
+.py-block pre { background:#050505; border:1px solid #39ff1433; padding:20px; font-family:'Share Tech Mono',monospace; font-size:11.5px; line-height:1.75; overflow-x:auto; color:#39ff14; white-space:pre; margin-bottom:12px; }
+.py-block .py-challenge { background:rgba(57,255,20,0.04); border-left:2px solid #39ff14; padding:12px 16px; margin-top:14px; font-size:12px; line-height:1.75; opacity:0.8; }
+.py-block .py-challenge strong { font-family:'Orbitron',sans-serif; font-size:10px; color:#39ff14; display:block; margin-bottom:6px; letter-spacing:1px; }
+
+.reflection-block { background:rgba(255,170,0,0.04); border:1px solid #ffaa0033; padding:24px; margin:32px 0; }
+.reflection-block h2 { font-family:'Orbitron',sans-serif; font-size:13px; color:#ffaa00; letter-spacing:2px; margin-bottom:8px; }
+.reflection-block .ref-intro { font-size:12px; opacity:0.7; margin-bottom:20px; padding-bottom:14px; border-bottom:1px solid #ffaa0022; line-height:1.7; }
+.ref-prompt { margin-bottom:20px; }
+.ref-prompt h3 { font-family:'Orbitron',sans-serif; font-size:11px; color:#ffaa0099; letter-spacing:1px; margin-bottom:8px; }
+.ref-prompt p { font-size:12px; opacity:0.8; line-height:1.75; margin-bottom:10px; }
+
+.back-to-top { position:fixed; bottom:28px; right:28px; z-index:200; width:44px; height:44px; background:#000; border:1px solid #00d9ff55; color:#00d9ff; font-size:20px; cursor:pointer; display:flex; align-items:center; justify-content:center; opacity:0; pointer-events:none; transition:opacity 0.3s ease; }
+.back-to-top.visible { opacity:1; pointer-events:auto; }
+.back-to-top:hover { border-color:#00d9ff; background:#001a2c; }
+
+.complete-wrap { margin-top:56px; padding-top:30px; border-top:1px solid #ffffff11; text-align:center; }
+.complete-btn { font-family:'Orbitron',sans-serif; font-size:13px; letter-spacing:2px; padding:14px 44px; background:transparent; border:1px solid #39ff14; color:#39ff14; cursor:pointer; transition:0.3s ease; }
+.complete-btn:hover:not(.done) { background:#39ff14; color:black; box-shadow:0 0 20px rgba(57,255,20,0.4); }
+.complete-btn.done { background:rgba(57,255,20,0.1); cursor:default; opacity:0.7; }
+.complete-msg { font-size:12px; color:#39ff14; margin-top:14px; min-height:18px; letter-spacing:1px; }
+
+.lesson-nav { display:flex; justify-content:space-between; margin-top:30px; flex-wrap:wrap; gap:10px; }
+.lesson-nav a { font-family:'Orbitron',sans-serif; font-size:11px; color:#00d9ff66; text-decoration:none; letter-spacing:1px; transition:0.2s; }
+.lesson-nav a:hover { color:#00d9ff; }
+
+footer { text-align:center; padding:30px; opacity:0.3; font-size:11px; position:relative; z-index:1; letter-spacing:1px; }
+
+@media (max-width:600px) { .key-numbers { grid-template-columns:1fr 1fr; } .compare-table { font-size:11px; } .compare-table th, .compare-table td { padding:8px; } }
+
+.content-block { background:#f5f2ec; color:#1a1a1a; padding:36px clamp(24px,4vw,48px); margin-bottom:24px; border-left:4px solid #00d9ff; position:relative; z-index:1; }
+.content-block h2 { font-family:'Orbitron',sans-serif; font-size:13px; color:#003d66; letter-spacing:2px; text-transform:uppercase; margin-bottom:20px; padding-bottom:10px; border-bottom:2px solid #00d9ff66; scroll-margin-top:80px; }
+.content-block h3 { font-family:'Orbitron',sans-serif; font-size:11px; color:#444; letter-spacing:1.5px; text-transform:uppercase; margin:32px 0 14px; }
+.content-block p { font-family:'Libre Baskerville',Georgia,serif; font-size:15px; line-height:1.9; color:#1a1a1a; opacity:1; margin-bottom:18px; }
+.content-block ul li { font-family:'Libre Baskerville',Georgia,serif; font-size:14px; line-height:1.85; color:#1a1a1a; opacity:1; margin-bottom:8px; }
+.content-block ul li::before { color:#0077aa; }
+.content-block blockquote { border-left:3px solid #1a7a1a; background:#eafaea; color:#0a3d0a; }
+.content-block .callout { border-left:3px solid #0088cc; background:#e8f4fb; color:#1a1a1a; }
+.content-block .callout.red   { border-left-color:#cc0033; background:#fdecea; }
+.content-block .callout.green { border-left-color:#1a7a1a; background:#eafaea; }
+.content-block .callout.amber { border-left-color:#996600; background:#fef9ec; }
+.content-block .callout strong { color:inherit; }
+.content-block .kn-item { background:#fff; border:1px solid #d0d0d0; }
+.content-block .kn-label { color:#555; opacity:1; }
+.content-block .compare-table th { color:#003d66; border-bottom:2px solid #00d9ff66; }
+.content-block .compare-table td { color:#1a1a1a; opacity:1; border-bottom:1px solid #ddd; }
+.content-block .compare-table tr:hover td { background:#f0f0f0; }
+.content-block .diagram-wrap { background:#0a0a0a; border:1px solid #333; }
+.content-block .diagram-wrap figcaption { color:#ffffff55; }
+</style>
+</head>
+<body>
+
+<canvas id="starsCanvas"></canvas>
+
+<header>
+    <a href="dashboard.html" class="logo"><span>LEO</span><span>AF</span></a>
+    <div class="nav-right">
+        <a href="m2.html" class="nav-btn">← M2 HUB</a>
+        <button class="nav-btn" onclick="leoafAbort()">ABORT</button>
+    </div>
+</header>
+
+<div class="breadcrumb">
+    <a href="dashboard.html">DASHBOARD</a><span>/</span>
+    <a href="m2.html">M2</a><span>/</span>
+    <span style="color:#ffffff88;">LESSON 06 — LAUNCH &amp; DEPLOYMENT LOGISTICS</span>
+</div>
+
+<div class="lesson-wrap">
+
+<div class="lesson-header">
+    <div class="lesson-tag">M2 · LESSON 06 OF 7</div>
+    <h1>Launch &amp; Deployment Logistics</h1>
+    <div class="lesson-meta">
+        <div class="l-pill l-pill-q">MODULE 2</div>
+        <div class="l-pill l-pill-t">DEPLOYMENT &amp; ECONOMICS</div>
+    </div>
+    <p class="lesson-intro">The previous lesson computed the wet mass of each satellite and the total fleet mass. This lesson asks what it takes to get that fleet from factory to operational slots: how many launches, from which vehicles, on what cadence, and what the deployment sequence produces in terms of service capability during build-out. Launch logistics sets the time-to-service for the business case, the minimum viable constellation size, the Δv cost of raising from staging orbits, and the orbital mechanics constraints on which planes can be populated from a single launch. The spine project completes here with a full constellation sizing table comparable to real published parameters.</p>
+</div>
+
+<div class="toc">
+    <h4>CONTENTS</h4>
+    <ol>
+        <li><a href="#s1">Launch vehicle capacity and satellites per launch</a></li>
+        <li><a href="#s2">Inclination and the J2 drift technique</a></li>
+        <li><a href="#s3">The staging orbit and the raise manoeuvre</a></li>
+        <li><a href="#s4">Deployment cadence and time to full constellation</a></li>
+        <li><a href="#s5">Minimum viable constellation and partial coverage</a></li>
+        <li><a href="#s6">Multi-shell deployment and conjunction risk</a></li>
+        <li><a href="#s7">Launch cost and the constellation economics</a></li>
+        <li><a href="#s8">What this lesson delivers to the design chain</a></li>
+        <li><a href="#quiz">Knowledge check</a></li>
+        <li><a href="#python">Python exercises — spine project stage 6</a></li>
+        <li><a href="#reflect">Reflection prompts</a></li>
+    </ol>
+</div>
+
+<!-- S1 -->
+<div class="content-block" id="s1">
+    <h2>1. Launch Vehicle Capacity and Satellites Per Launch</h2>
+    <p>The number of satellites that can be delivered in a single launch is governed by launch vehicle payload mass to the target orbit and fairing volume constraints. The manifest formula is:</p>
+    <blockquote>N_per_launch = ⌊m_lv / m_sat⌋   (subject to fairing volume)</blockquote>
+    <p>For a Starlink-class satellite (~300 kg wet) on Falcon 9 (~17,400 kg to LEO), the mass limit suggests ~58 satellites, but the actual manifest is ~53 per launch, constrained by stacking geometry. For a OneWeb-class satellite (~150 kg) on Soyuz-2 (~7,000 kg to LEO), the manifest is approximately 36 per launch — exactly the OneWeb number.</p>
+    <p>Total launches required:</p>
+    <blockquote>N_launches = ⌈N_total / N_per_launch⌉</blockquote>
+    <p>For Starlink's 1,584-satellite first shell at ~53 per Falcon 9: ⌈1584/53⌉ = 30 launches. For OneWeb's 648 satellites at 36 per launch: ⌈648/36⌉ = 18 launches.</p>
+
+    <div class="key-numbers">
+        <div class="kn-item"><span class="kn-val">~53</span><span class="kn-label">STARLINK SATS PER FALCON 9</span></div>
+        <div class="kn-item"><span class="kn-val">~30</span><span class="kn-label">LAUNCHES FOR STARLINK FIRST SHELL</span></div>
+        <div class="kn-item"><span class="kn-val">36</span><span class="kn-label">ONEWEB SATS PER SOYUZ-2</span></div>
+        <div class="kn-item"><span class="kn-val">18</span><span class="kn-label">LAUNCHES FOR ONEWEB 648-SAT CONSTELLATION</span></div>
+    </div>
+
+    <table class="compare-table">
+        <thead><tr><th>Constellation</th><th>Total sats</th><th>Sat wet mass</th><th>Sats/launch</th><th>Launches</th><th>Vehicle</th></tr></thead>
+        <tbody>
+            <tr><td>Starlink v1 primary</td><td>1,584</td><td>~300 kg</td><td>~53</td><td>~30</td><td>Falcon 9</td></tr>
+            <tr><td>OneWeb</td><td>648</td><td>~150 kg</td><td>~36</td><td>18</td><td>Soyuz-2 / Ariane</td></tr>
+            <tr><td>Kuiper</td><td>1,156</td><td>~500 kg (est.)</td><td>~45 (est.)</td><td>~26 (est.)</td><td>New Glenn / Atlas V / Ariane 6</td></tr>
+            <tr><td>Telesat Lightspeed</td><td>298</td><td>~700 kg</td><td>~15 (est.)</td><td>~20 (est.)</td><td>Falcon 9 / Ariane 6</td></tr>
+        </tbody>
+    </table>
+</div>
+
+<!-- S2 -->
+<div class="content-block" id="s2">
+    <h2>2. Inclination and the J2 Drift Technique</h2>
+    <p>A single launch vehicle delivers all its payload to one inclination per launch. Changing inclination after separation costs large Δv, so satellites are delivered to the target inclination directly by the vehicle. This constrains how multiple planes of a Walker constellation can be populated.</p>
+    <p><strong>Plane-by-plane deployment</strong> fills one plane completely before starting the next. It is launch-efficient but produces highly uneven coverage during build-out — dense in some longitude sectors, absent in others.</p>
+    <p><strong>Distributed deployment using J2 drift</strong> exploits differential node regression. Two batches at slightly different altitudes have different J2 rates; their RAANs drift apart at a predictable rate without any plane-change burns. By choosing the altitude difference, an operator uses J2 precession to achieve the correct inter-plane RAAN spacing passively. This is the Starlink approach.</p>
+    <p>The drift time is:</p>
+    <blockquote>t_drift = ΔΩ_target / |ΔdΩ/dt|</blockquote>
+    <p>At 550 km, a 5 km altitude difference gives a node rate difference of ~0.01°/day. To achieve 5° of RAAN separation (needed for a 72-plane constellation) takes 500 days. Starlink uses a much lower staging orbit — higher J2 rate, much larger altitude difference — to reduce this to weeks.</p>
+
+    <div class="diagram-wrap">
+        <svg viewBox="0 0 740 260" width="100%" xmlns="http://www.w3.org/2000/svg" font-family="Share Tech Mono, monospace">
+            <rect width="740" height="260" fill="#0a0a0a"/>
+            <!-- Earth centre dot -->
+            <circle cx="120" cy="130" r="30" fill="#00d9ff0a" stroke="#00d9ff22" stroke-width="1"/>
+            <text x="120" y="134" font-size="8" fill="#00d9ff44" text-anchor="middle">EARTH</text>
+            <!-- Batch 1: staging at h1 -->
+            <ellipse cx="120" cy="130" rx="120" ry="50" fill="none" stroke="#00d9ff" stroke-width="1.5"/>
+            <text x="248" y="128" font-size="9" fill="#00d9ff" text-anchor="start">h₁ (staging)</text>
+            <!-- Batch 2: operational at h2 -->
+            <ellipse cx="120" cy="130" rx="140" ry="65" fill="none" stroke="#39ff14" stroke-width="1.5" stroke-dasharray="4,3"/>
+            <text x="268" y="142" font-size="9" fill="#39ff14" text-anchor="start">h₂ (operational)</text>
+            <!-- RAAN drift arrow -->
+            <text x="120" y="20" font-size="9" fill="#ffaa00" text-anchor="middle">different altitudes → different dΩ/dt → RAAN drifts apart</text>
+            <!-- Timeline -->
+            <line x1="360" y1="50" x2="720" y2="50" stroke="#ffffff22" stroke-width="1"/>
+            <line x1="360" y1="45" x2="360" y2="55" stroke="#ffffff44" stroke-width="1"/>
+            <line x1="720" y1="45" x2="720" y2="55" stroke="#ffffff44" stroke-width="1"/>
+            <text x="360" y="40" font-size="9" fill="#ffffff66" text-anchor="middle">t=0 (launch)</text>
+            <text x="720" y="40" font-size="9" fill="#ffffff66" text-anchor="middle">t = ΔΩ / |ΔdΩ/dt|</text>
+            <!-- orbit 1 RAAN=0 -->
+            <ellipse cx="490" cy="150" rx="80" ry="35" fill="none" stroke="#00d9ff" stroke-width="1.5"/>
+            <text x="490" y="200" font-size="9" fill="#00d9ff" text-anchor="middle">Plane 1 (Ω₁)</text>
+            <!-- orbit 2 drifted -->
+            <ellipse cx="590" cy="150" rx="80" ry="35" fill="none" stroke="#ff004f" stroke-width="1.5" stroke-dasharray="4,3"/>
+            <text x="590" y="200" font-size="9" fill="#ff004f" text-anchor="middle">Plane 2 (Ω₁+ΔΩ)</text>
+            <!-- drift arrow -->
+            <line x1="430" y1="150" x2="510" y2="150" stroke="#ffaa0066" stroke-width="1.5" marker-end="url(#aw2)"/>
+            <defs><marker id="aw2" markerWidth="7" markerHeight="7" refX="3" refY="3.5" orient="auto"><polygon points="0 0,7 3.5,0 7" fill="#ffaa0066"/></marker></defs>
+            <text x="470" y="143" font-size="8" fill="#ffaa00" text-anchor="middle">J2 drift</text>
+            <text x="370" y="245" font-size="9" fill="#ffffff44" text-anchor="start">J2 DRIFT PHASING — differential altitude → differential dΩ/dt → planes spread to target RAAN spacing</text>
+        </svg>
+        <figcaption>The J2 drift technique: two batches at slightly different altitudes drift apart in RAAN at predictable rates. No plane-change Δv needed — the orbital environment does the work.</figcaption>
+    </div>
+
+    <div class="callout amber">
+        <strong>500 DAYS AT 5 km ALTITUDE DIFFERENCE</strong>
+        At 550 km, a 5 km altitude difference gives only 0.01°/day differential node rate. Achieving 5° of RAAN separation takes 500 days — impractically long for a commercial deployment. Starlink's solution: use a ~350 km staging orbit where the J2 rate is significantly higher and the differential rate for a given altitude offset is much larger, reducing the drift time to weeks.
+    </div>
+</div>
+
+<!-- S3 -->
+<div class="content-block" id="s3">
+    <h2>3. The Staging Orbit and the Raise Manoeuvre</h2>
+    <p>Most large LEO constellations deploy via a staging orbit — a lower altitude where satellites are commissioned before raising to the operational shell. The reasons: failed satellites at 350 km re-enter within weeks (debris safety); lower altitude allows more payload mass per launch; and operators have time to verify each satellite before committing it to a high-altitude slot.</p>
+    <p>The raise from staging to operational altitude uses a two-burn Hohmann transfer:</p>
+    <blockquote>ΔV_raise = ΔV₁ (perigee) + ΔV₂ (apogee circularisation)</blockquote>
+    <p>For 350 km → 550 km: ΔV_raise ≈ 64 m/s. For 450 km → 550 km: ΔV_raise ≈ 32 m/s. This must be included in the satellite's total Δv budget from m2-5. At Isp = 1,600 s, 64 m/s costs approximately 1.2 kg of propellant for a 300 kg satellite — modest but not negligible at fleet scale.</p>
+
+    <table class="compare-table">
+        <thead><tr><th>Staging altitude</th><th>Operational altitude</th><th>ΔV_raise</th><th>Natural re-entry from staging</th></tr></thead>
+        <tbody>
+            <tr><td>350 km</td><td>550 km</td><td>≈ 64 m/s</td><td>Weeks to months</td></tr>
+            <tr><td>400 km</td><td>550 km</td><td>≈ 48 m/s</td><td>1–3 years</td></tr>
+            <tr><td>450 km</td><td>550 km</td><td>≈ 32 m/s</td><td>3–8 years</td></tr>
+            <tr><td>350 km</td><td>600 km</td><td>≈ 97 m/s</td><td>Weeks to months</td></tr>
+        </tbody>
+    </table>
+
+    <div class="callout red">
+        <strong>THE FEBRUARY 2022 LESSON REVISITED</strong>
+        The ~210 km Starlink staging orbit (even lower than 350 km, used briefly for initial checks) demonstrated the vulnerability of low staging altitudes to geomagnetic storms. The ~38 satellites lost could not raise quickly enough when atmospheric density surged. The lesson: staging altitude must be high enough that even a worst-case geomagnetic event cannot decay the satellite faster than it can raise to safety.
+    </div>
+</div>
+
+<!-- S4 -->
+<div class="content-block" id="s4">
+    <h2>4. Deployment Cadence and Time to Full Constellation</h2>
+    <p>Time to full constellation:</p>
+    <blockquote>T_deploy = N_launches / cadence_per_year</blockquote>
+    <p>Starlink at 30 launches and ~15 dedicated launches per year reached 1,584 satellites in roughly two years. OneWeb at 18 launches on Soyuz-2 with limited cadence took longer and was further disrupted by the 2022 Russia-Ukraine conflict, forcing a pivot to Ariane 6 and other vehicles.</p>
+    <p>Launch cadence is not only a production rate problem — it is a supply chain problem. A satellite manufacturing rate of ~1,000/year combined with 15 Falcon 9 launches at 53 per launch gives ~800 satellites deployed per year. Imbalance in either direction creates satellite backlogs (factories ahead of rockets) or launch vehicle backlogs (rockets ready before satellites). Real deployment programmes must manage both simultaneously, making cadence planning a critical part of constellation programme management.</p>
+</div>
+
+<!-- S5 -->
+<div class="content-block" id="s5">
+    <h2>5. Minimum Viable Constellation and Partial Coverage</h2>
+    <p>The minimum viable constellation (MVC) is the smallest configuration that generates revenue — not an arbitrary fraction of the total. Coverage from a partially deployed Walker is non-uniform: populated planes provide corridor coverage along their ground track; unpopulated planes leave gaps.</p>
+    <p>For a Walker delta at 53°, filling the first 12 of 72 planes gives continuous coverage over a longitude strip one-sixth around the Earth — useful for maritime or aviation corridors before global coverage exists. Spreading satellites evenly across all planes gives global but sparse coverage earlier, at lower minimum elevation.</p>
+    <p>Starlink began beta service ("Better Than Nothing Beta") at approximately 800 satellites — roughly half its first shell — providing continuous coverage over most of the mid-latitude populated band. Both operators structured deployment to prioritise the highest-revenue markets first, illustrating that the MVC is a business decision as much as a technical one.</p>
+
+    <div class="callout green">
+        <strong>MVC IS MARKET-DEFINED</strong>
+        The MVC depends on what the market will pay for. For maritime shipping, 100 satellites covering major ocean lanes may suffice. For a consumer broadband service requiring continuous global coverage, the MVC is much larger. Designing deployment sequence for the right MVC is the link between constellation engineering and the business plan.
+    </div>
+</div>
+
+<!-- S6 -->
+<div class="content-block" id="s6">
+    <h2>6. Multi-Shell Deployment and Conjunction Risk</h2>
+    <p>Satellites raising from staging orbits to their operational shell pass through altitude bands occupied by existing operational shells. This creates temporary conjunction exposure that must be screened continuously. Operators manage this by constraining raise trajectories to avoid occupied altitude bands during transit, choosing raise epochs that minimise conjunction probability, and maintaining CAM capability throughout the raise.</p>
+    <p>Multi-shell deployment also complicates J2 drift tracking. If two shells are being populated simultaneously, their RAAN evolution is independent (different altitudes and inclinations give different J2 rates), and both must reach their correct configurations simultaneously. This requires parallel tracking of both drift timelines and can constrain the order in which shells are populated.</p>
+</div>
+
+<!-- S7 -->
+<div class="content-block" id="s7">
+    <h2>7. Launch Cost and the Constellation Economics</h2>
+    <p>Total launch cost:</p>
+    <blockquote>C_launch_total = N_launches × C_per_launch</blockquote>
+    <p>Launch cost is typically 30–50% of total constellation deployment cost, with the remainder split between satellite manufacturing, ground segment, and regulatory compliance. For Starlink's first shell at ~30 launches at an estimated internal cost of ~$20M each, total launch cost is approximately $600M — a concentrated cash flow event in a 2–3 year window.</p>
+
+    <table class="compare-table">
+        <thead><tr><th>Vehicle</th><th>Est. cost/launch</th><th>Payload to LEO</th><th>Sats/launch (300 kg)</th></tr></thead>
+        <tbody>
+            <tr><td>Falcon 9 (reused)</td><td>$15–30M</td><td>~17,400 kg</td><td>~53</td></tr>
+            <tr><td>Soyuz-2.1b</td><td>$60–70M</td><td>~7,000 kg</td><td>~23</td></tr>
+            <tr><td>Ariane 6 (A62)</td><td>$75–105M</td><td>~10,350 kg</td><td>~34</td></tr>
+            <tr><td>New Glenn</td><td>$60–80M (est.)</td><td>~45,000 kg</td><td>~150</td></tr>
+            <tr><td>Starship (target)</td><td>$10M (target)</td><td>~100,000+ kg</td><td>~330+</td></tr>
+        </tbody>
+    </table>
+
+    <p>Starship at its $10M target cost would reduce Starlink's per-satellite launch cost by roughly 5–10× compared to Falcon 9, enabling constellations far denser than current economics allow. This would shift the binding constraint from launch cost to satellite manufacturing cost and spectrum coordination — a qualitatively different design regime.</p>
+</div>
+
+<!-- S8 -->
+<div class="content-block" id="s8">
+    <h2>8. What This Lesson Delivers to the Design Chain</h2>
+    <p>Launch and deployment logistics complete the Module 2 picture of a LEO constellation from orbital mechanics through to operational service. The module has now established: the physics of individual orbits (m2-1, m2-2), the geometry as seen from the ground (m2-3), the multi-satellite coverage geometry (m2-4), the propellant and lifetime budget (m2-5), and the launch and deployment sequence (this lesson).</p>
+    <p>The spine project is now complete: starting from the two-body propagator in m2-1 and adding J2, ground geometry, Walker initial conditions, coverage fraction, propellant mass, and launch logistics in successive stages, it now produces a sizing table that covers the key parameters of any LEO broadband constellation — comparable to published figures from FCC and ITU filings.</p>
+    <p>The final lesson in this module (m2-7) synthesises all of these into the constellation architecture decision framework: a structured method for making the altitude, inclination, Walker geometry, propulsion, and deployment choices coherently, illustrated with the real decisions of Starlink, OneWeb, and Kuiper.</p>
+</div>
+
+<!-- QUIZ -->
+<div class="quiz-block" id="quiz">
+    <h2>KNOWLEDGE CHECK</h2>
+    <p class="quiz-intro">Ten questions. Select one answer per question. Feedback is immediate; score appears when all ten are answered.</p>
+
+    <div class="quiz-q"><p><strong>Q1.</strong> The number of satellites per launch is primarily constrained by:</p>
+        <div class="quiz-options">
+            <button class="quiz-opt" data-q="1" data-correct="false">A — The orbital mechanics of the target inclination</button>
+            <button class="quiz-opt" data-q="1" data-correct="true">B — The launch vehicle's payload mass capacity to the target orbit and satellite wet mass, subject to fairing volume</button>
+            <button class="quiz-opt" data-q="1" data-correct="false">C — Regulatory limits on satellites per launch</button>
+            <button class="quiz-opt" data-q="1" data-correct="false">D — The number of orbital planes in the constellation</button>
+        </div><div class="quiz-feedback" id="fb1"></div></div>
+
+    <div class="quiz-q"><p><strong>Q2.</strong> The J2 drift technique allows operators to populate multiple planes without plane-change burns because:</p>
+        <div class="quiz-options">
+            <button class="quiz-opt" data-q="2" data-correct="false">A — J2 precession moves satellites to different inclinations over time</button>
+            <button class="quiz-opt" data-q="2" data-correct="true">B — Two batches at slightly different altitudes have different J2 node regression rates, causing their RAANs to drift apart at a predictable rate</button>
+            <button class="quiz-opt" data-q="2" data-correct="false">C — The launch vehicle deploys to different inclinations in one pass</button>
+            <button class="quiz-opt" data-q="2" data-correct="false">D — J2 drift corrects RAAN errors introduced by the launch vehicle</button>
+        </div><div class="quiz-feedback" id="fb2"></div></div>
+
+    <div class="quiz-q"><p><strong>Q3.</strong> The primary reason for using a staging orbit lower than the operational altitude is:</p>
+        <div class="quiz-options">
+            <button class="quiz-opt" data-q="3" data-correct="false">A — Lower orbits have stronger commissioning signals</button>
+            <button class="quiz-opt" data-q="3" data-correct="true">B — Failed satellites at the staging orbit re-enter quickly (debris safety) and the lower altitude increases payload mass per launch</button>
+            <button class="quiz-opt" data-q="3" data-correct="false">C — The launch vehicle cannot reach operational altitude directly</button>
+            <button class="quiz-opt" data-q="3" data-correct="false">D — Radiation is lower at the staging orbit</button>
+        </div><div class="quiz-feedback" id="fb3"></div></div>
+
+    <div class="quiz-q"><p><strong>Q4.</strong> The Hohmann raise Δv from 350 km to 550 km is approximately:</p>
+        <div class="quiz-options">
+            <button class="quiz-opt" data-q="4" data-correct="false">A — 5 m/s</button>
+            <button class="quiz-opt" data-q="4" data-correct="true">B — 64 m/s</button>
+            <button class="quiz-opt" data-q="4" data-correct="false">C — 300 m/s</button>
+            <button class="quiz-opt" data-q="4" data-correct="false">D — 1,000 m/s</button>
+        </div><div class="quiz-feedback" id="fb4"></div></div>
+
+    <div class="quiz-q"><p><strong>Q5.</strong> The minimum viable constellation (MVC) is defined as:</p>
+        <div class="quiz-options">
+            <button class="quiz-opt" data-q="5" data-correct="false">A — Exactly half the total planned satellite count</button>
+            <button class="quiz-opt" data-q="5" data-correct="true">B — The configuration providing commercially useful coverage over the highest-value market regions, enabling revenue before full constellation</button>
+            <button class="quiz-opt" data-q="5" data-correct="false">C — The constellation after the first launch only</button>
+            <button class="quiz-opt" data-q="5" data-correct="false">D — The smallest satellite count regardless of coverage quality</button>
+        </div><div class="quiz-feedback" id="fb5"></div></div>
+
+    <div class="quiz-q"><p><strong>Q6.</strong> Multi-shell deployment creates temporary conjunction risk during satellite raises because:</p>
+        <div class="quiz-options">
+            <button class="quiz-opt" data-q="6" data-correct="false">A — Multiple shells at the same altitude cause radio interference</button>
+            <button class="quiz-opt" data-q="6" data-correct="true">B — Satellites raising from staging orbits pass through altitude bands already occupied by operational shells</button>
+            <button class="quiz-opt" data-q="6" data-correct="false">C — Different inclination shells collide near the equator</button>
+            <button class="quiz-opt" data-q="6" data-correct="false">D — Propulsion firings create debris clouds</button>
+        </div><div class="quiz-feedback" id="fb6"></div></div>
+
+    <div class="quiz-q"><p><strong>Q7.</strong> Starlink's ~350 km staging orbit is motivated primarily by:</p>
+        <div class="quiz-options">
+            <button class="quiz-opt" data-q="7" data-correct="false">A — Falcon 9 cannot reach 550 km directly</button>
+            <button class="quiz-opt" data-q="7" data-correct="true">B — Debris safety (rapid decay of failed satellites) and accelerated J2 drift phasing at the lower altitude</button>
+            <button class="quiz-opt" data-q="7" data-correct="false">C — Lower Doppler shift during commissioning</button>
+            <button class="quiz-opt" data-q="7" data-correct="false">D — Regulatory requirements that all satellites must stage below 400 km</button>
+        </div><div class="quiz-feedback" id="fb7"></div></div>
+
+    <div class="quiz-q"><p><strong>Q8.</strong> For a 72-plane Walker needing 5° inter-plane spacing, at 0.01°/day differential J2 rate, the drift time is approximately:</p>
+        <div class="quiz-options">
+            <button class="quiz-opt" data-q="8" data-correct="false">A — 5 days</button>
+            <button class="quiz-opt" data-q="8" data-correct="false">B — 50 days</button>
+            <button class="quiz-opt" data-q="8" data-correct="true">C — 500 days</button>
+            <button class="quiz-opt" data-q="8" data-correct="false">D — 5,000 days</button>
+        </div><div class="quiz-feedback" id="fb8"></div></div>
+
+    <div class="quiz-q"><p><strong>Q9.</strong> The deployment sequence that provides service over the largest area earliest is:</p>
+        <div class="quiz-options">
+            <button class="quiz-opt" data-q="9" data-correct="false">A — Filling one plane completely before starting the next</button>
+            <button class="quiz-opt" data-q="9" data-correct="true">B — Spreading satellites evenly across all planes simultaneously</button>
+            <button class="quiz-opt" data-q="9" data-correct="false">C — Starting with polar planes and working toward the equator</button>
+            <button class="quiz-opt" data-q="9" data-correct="false">D — Deploying the highest-altitude shell first</button>
+        </div><div class="quiz-feedback" id="fb9"></div></div>
+
+    <div class="quiz-q"><p><strong>Q10.</strong> Launch cost as a fraction of total constellation deployment cost for first-generation LEO systems is typically:</p>
+        <div class="quiz-options">
+            <button class="quiz-opt" data-q="10" data-correct="false">A — 5–10%</button>
+            <button class="quiz-opt" data-q="10" data-correct="true">B — 30–50%</button>
+            <button class="quiz-opt" data-q="10" data-correct="false">C — 70–80%</button>
+            <button class="quiz-opt" data-q="10" data-correct="false">D — Over 90%</button>
+        </div><div class="quiz-feedback" id="fb10"></div></div>
+
+    <div class="quiz-score" id="quizScore"></div>
+</div>
+
+<!-- PYTHON -->
+<div class="py-block" id="python">
+    <h2>PYTHON EXERCISES — SPINE PROJECT STAGE 6</h2>
+    <p class="py-intro">Stage 6 completes the spine project. Exercise 1 computes launch manifests. Exercise 2 computes raise Δv via Hohmann transfers. Exercise 3 integrates all six spine stages into a constellation sizing table comparable to real published parameters. Python 3.8+ standard library only.</p>
+
+    <div class="py-exercise">
+        <h3>Exercise 1 — Launch Manifest Calculator</h3>
+        <p>Compute satellites per launch, total launches, deployment timeline, and launch cost for given constellation configurations.</p>
+<pre>
+import math
+
+def manifest(n_total, sat_wet_kg, lv_cap_kg,
+             lv_cost_m, cadence_yr, name=""):
+    spl  = math.floor(lv_cap_kg / sat_wet_kg)
+    nlch = math.ceil(n_total / spl)
+    yrs  = nlch / cadence_yr
+    cost = nlch * lv_cost_m
+    cpsk = cost * 1e6 / n_total / 1e3   # $k per sat
+    return dict(name=name, spl=spl, nlch=nlch,
+                yrs=yrs, cost_m=cost, cpsk=cpsk)
+
+# name, n, sat_kg, lv_kg, lv_cost_m, cadence/yr
+configs = [
+    ("Starlink v1",    1584, 300, 17400, 20, 15),
+    ("OneWeb",          648, 150,  7000, 65,  8),
+    ("Kuiper",         1156, 500, 45000, 70, 10),
+    ("Small demo",       24,  50,  5000, 60,  4),
+]
+
+print(f"{'Name':>14}{'Sats/lch':>10}{'Launches':>10}"
+      f"{'Yrs':>6}{'Cost $M':>9}{'$/sat $k':>10}")
+print("-" * 61)
+for c in configs:
+    r = manifest(*c)
+    print(f"{r['name']:>14}{r['spl']:>10}{r['nlch']:>10}"
+          f"{r['yrs']:>6.1f}{r['cost_m']:>8.0f}M{r['cpsk']:>9.0f}k")
+
+# 1. Starship: $10M/launch, 100,000 kg to LEO.
+#    Rerun Starlink v1 with these parameters.
+# 2. If Starlink cadence doubles to 30/yr, what is the new deploy time?
+# 3. Which config has the lowest launch cost per satellite?
+</pre>
+    </div>
+
+    <div class="py-exercise">
+        <h3>Exercise 2 — Hohmann Raise Δv</h3>
+        <p>Compute the two-burn Hohmann transfer Δv from staging orbit to operational altitude, and the propellant cost.</p>
+<pre>
+import math
+
+MU = 398600.4418; RE = 6378.137; G0 = 9.80665
+
+def hohmann(h1, h2):
+    r1=(RE+h1)*1e3; r2=(RE+h2)*1e3
+    v1=math.sqrt(MU*1e9/r1); v2=math.sqrt(MU*1e9/r2)
+    vta=math.sqrt(MU*1e9*2*r2/(r1*(r1+r2)))
+    vtp=math.sqrt(MU*1e9*2*r1/(r2*(r1+r2)))
+    return vta-v1, v2-vtp, (vta-v1)+(v2-vtp)
+
+def pmass(dry, dv, isp=1600):
+    return dry * (math.exp(dv / (G0 * isp)) - 1)
+
+print(f"{'Staging':>8}{'Oper.':>7}{'ΔV1':>9}{'ΔV2':>9}"
+      f"{'ΔV_tot':>9}{'m_prop':>10}")
+print("-" * 55)
+for h1, h2 in [(350,550),(400,550),(450,550),(350,600),(500,600)]:
+    dv1,dv2,dvt = hohmann(h1,h2)
+    mp = pmass(300, dvt)
+    print(f"{h1:>6}km{h2:>6}km{dv1:>8.1f}m/s{dv2:>8.1f}m/s"
+          f"{dvt:>8.1f}m/s{mp:>9.2f}kg")
+
+# 1. Single perigee-lowering burn to deorbit from 550 km to 350 km:
+#    ΔV = v_circ(550) - v_transfer_peri (Hohmann 550->350, first burn only).
+# 2. Add 350->550 km raise to the m2-5 Starlink mission ΔV budget.
+#    What fraction of total mission ΔV does the raise contribute?
+# 3. Why does Starlink stage at ~210 km before raising to ~350 km?
+#    What ΔV does the 210->350 km raise cost?
+</pre>
+    </div>
+
+    <div class="py-exercise">
+        <h3>Exercise 3 — Spine Stage 6: Complete Constellation Sizing Table</h3>
+        <p>All six spine project stages integrated into a single model producing a sizing table for real constellation configurations.</p>
+<pre>
+import math
+
+MU=398600.4418; RE=6378.137; G0=9.80665
+RHO0=2.0e-10; HSC=70.0
+SOL={"min":0.35,"mean":1.0,"max":2.8}
+
+def cap_area(alt,eps):
+    r=RE+alt; e=math.radians(eps)
+    a=max(-1.,min(1.,RE*math.cos(e)/r))
+    rho=math.acos(a)-e
+    return (1-math.cos(rho))/2
+
+def drag_yr(alt,beta,s="mean"):
+    r=(RE+alt)*1e3; rho=RHO0*SOL[s]*math.exp(-(alt-400)/HSC)
+    v=math.sqrt(MU*1e9/r)
+    return rho*v**2/beta*365.25*86400
+
+def hohm(h1,h2):
+    r1=(RE+h1)*1e3;r2=(RE+h2)*1e3
+    v1=math.sqrt(MU*1e9/r1);v2=math.sqrt(MU*1e9/r2)
+    vta=math.sqrt(MU*1e9*2*r2/(r1*(r1+r2)))
+    vtp=math.sqrt(MU*1e9*2*r1/(r2*(r1+r2)))
+    return (vta-v1)+(v2-vtp)
+
+def tot_dv(alt,life,beta,stg=350,cam=5,deorbit=28,s="mean"):
+    return drag_yr(alt,beta,s)*life+hohm(stg,alt)+cam*life+deorbit
+
+def pm(dry,dv,isp): return dry*(math.exp(dv/(G0*isp))-1)
+
+# name,n,alt,inc,eps,beta,life,dry,isp,stg,lv_kg,lv_cost,cad
+data=[
+    ("Starlink v1", 1584,550,53,  35,27,5,260,1600,350,17400,20,15),
+    ("OneWeb",       648,600,87.9,30,25,5,130,1600,450, 7000,65, 8),
+    ("Kuiper",      1156,590,51.9,35,30,7,430,1600,400,45000,70,10),
+]
+
+rows,cols=[],["Starlink v1","OneWeb","Kuiper"]
+def add(lbl,vals): rows.append((lbl,vals))
+
+ns   =[c[1]  for c in data]
+alts =[c[2]  for c in data]
+incs =[c[3]  for c in data]
+epss =[c[4]  for c in data]
+caps =[cap_area(c[2],c[4])*100 for c in data]
+nmins=[math.ceil(1/cap_area(c[2],c[4])) for c in data]
+kgs  =[data[i][1]/nmins[i] for i in range(3)]
+dvs  =[tot_dv(c[2],c[6],c[5],c[9]) for c in data]
+drys =[c[7]  for c in data]
+isps =[c[8]  for c in data]
+mps  =[pm(drys[i],dvs[i],isps[i]) for i in range(3)]
+wets =[drys[i]+mps[i] for i in range(3)]
+spls =[math.floor(c[11]*1000/wets[i]) for i,c in enumerate(data)]
+nlchs=[math.ceil(data[i][1]/spls[i]) for i in range(3)]
+dyrs =[nlchs[i]/data[i][12] for i in range(3)]
+lcs  =[nlchs[i]*data[i][11] for i in range(3)]
+fmts =[data[i][1]*wets[i]/1e3 for i in range(3)]
+
+add("Total satellites",     [f"{v:.0f}"    for v in ns])
+add("Altitude (km)",        [f"{v:.0f}"    for v in alts])
+add("Inclination (°)",      [f"{v:.1f}"    for v in incs])
+add("Min elevation (°)",    [f"{v:.0f}"    for v in epss])
+add("Cap area (% Earth)",   [f"{v:.1f}%"   for v in caps])
+add("Theory N_min",         [f"{v:.0f}"    for v in nmins])
+add("k_geometry",           [f"{v:.1f}"    for v in kgs])
+add("Mission ΔV (m/s)",     [f"{v:.0f}"    for v in dvs])
+add("Propellant (kg)",      [f"{v:.1f}"    for v in mps])
+add("Sat wet mass (kg)",    [f"{v:.0f}"    for v in wets])
+add("Sats per launch",      [f"{v:.0f}"    for v in spls])
+add("Launches",             [f"{v:.0f}"    for v in nlchs])
+add("Deploy time (yr)",     [f"{v:.1f}"    for v in dyrs])
+add("Launch cost ($M)",     [f"${v:.0f}M"  for v in lcs])
+add("Fleet mass (t)",       [f"{v:.0f}t"   for v in fmts])
+
+W=28
+print("MODULE 2 SPINE PROJECT — COMPLETE SIZING TABLE\n")
+print(f"{'Metric':<{W}}", end="")
+for c in cols: print(f"{c:>14}", end="")
+print(); print("-"*(W+14*3))
+for lbl,vals in rows:
+    print(f"{lbl:<{W}}", end="")
+    for v in vals: print(f"{v:>14}", end="")
+    print()
+print("\n* Indicative; based on public data and model estimates.")
+
+# 1. Which constellation has the highest k_geometry factor? Why?
+# 2. Switch Starlink to solar='max' in tot_dv. How does propellant change?
+# 3. Write a paragraph summarising what each spine stage (1-6) added
+#    and what the final model can compute from first principles.
+</pre>
+        <div class="py-challenge"><strong>SPINE PROJECT — COMPLETE</strong>
+            Stage 1 (m2-1): two-body circular propagator. Stage 2 (m2-2): J2 node regression + drag decay. Stage 3 (m2-3): elevation, slant range, Doppler to a fixed observer. Stage 4 (m2-4): Walker initial conditions + coverage fraction. Stage 5 (m2-5): rocket equation + propellant mass. Stage 6 (m2-6): launch manifest + Hohmann raise + full sizing table. The spine project is complete. Module 2's synthesis lesson (m2-7) applies this framework to real constellation decisions.
+        </div>
+    </div>
+</div>
+
+<!-- REFLECTION -->
+<div class="reflection-block" id="reflect">
+    <h2>REFLECTION PROMPTS</h2>
+    <p class="ref-intro">Not graded. Write in your own words, 200–400 words each.</p>
+
+    <div class="ref-prompt"><h3>Prompt 1 — J2 Drift vs Dedicated Plane-Change</h3>
+        <p>The J2 drift technique populates multiple planes without expensive plane-change burns but requires months to years at operational altitude. For a startup operator with a limited launch budget, evaluate whether it is better to tolerate the long drift time or pay for dedicated plane-change burns to reach revenue faster. What assumptions drive your conclusion?</p></div>
+
+    <div class="ref-prompt"><h3>Prompt 2 — Staging Orbit Tradeoffs</h3>
+        <p>Starlink's ~350 km staging orbit imposes a raise Δv budget on every satellite and introduces temporary conjunction risk during the raise. Argue whether this is a sound architectural decision: weigh the debris safety benefit against propellant cost, operational complexity, and the demonstrated geomagnetic storm risk at staging altitudes (recall the February 2022 event from m2-2).</p></div>
+
+    <div class="ref-prompt"><h3>Prompt 3 — MVC Across Three Markets</h3>
+        <p>Sketch the MVC for three market segments: maritime vessel tracking (low data rate, continuous coverage needed), broadband consumer service (high data rate, continuous needed), and government Earth observation (high data rate, non-continuous acceptable). How does the MVC differ across these three, and what does the difference imply for phased deployment strategy?</p></div>
+
+    <div class="ref-prompt"><h3>Prompt 4 — Starship Economics</h3>
+        <p>If Starship achieves $10M per launch at ~100,000 kg payload, trace the second-order effects on optimal constellation design: how does the optimal satellite size, design life, inclination strategy, and propellant budget change when launch cost falls by 10×? Which assumptions in the Module 2 sizing model would need to be revisited?</p></div>
+</div>
+
+<!-- MARK COMPLETE -->
+<div class="complete-wrap">
+    <button class="complete-btn" id="completeBtn">MARK LESSON COMPLETE</button>
+    <div class="complete-msg" id="completeMsg"></div>
+</div>
+
+<div class="lesson-nav">
+    <a href="m2-5.html">← LESSON 05 — STATION-KEEPING &amp; ORBITAL DECAY</a>
+    <a href="m2-7.html">LESSON 07 — CONSTELLATION ARCHITECTURE SYNTHESIS →</a>
+</div>
+
+</div><!-- /lesson-wrap -->
+
+<button class="back-to-top" id="backToTop" title="Back to top">↑</button>
+
+<footer>© 2026 LEOAF · M2 · LESSON 06 OF 7</footer>
+
+<script>
+const canvas = document.getElementById('starsCanvas');
+const ctx = canvas.getContext('2d');
+let stars = [];
+function initStars(){ stars=[]; for(let i=0;i<180;i++) stars.push({x:Math.random()*canvas.width,y:Math.random()*canvas.height,size:Math.random()*1.5+0.4,speed:Math.random()*0.18+0.04,hue:Math.random()*360}); }
+function resizeCanvas(){ canvas.width=window.innerWidth; canvas.height=window.innerHeight; }
+resizeCanvas(); initStars(); window.addEventListener('resize', resizeCanvas);
+function animateStars(){ ctx.clearRect(0,0,canvas.width,canvas.height); stars.forEach(s=>{s.y-=s.speed;if(s.y<0){s.y=canvas.height;s.x=Math.random()*canvas.width;} ctx.beginPath();ctx.fillStyle=`hsl(${s.hue},80%,80%)`;ctx.arc(s.x,s.y,s.size,0,Math.PI*2);ctx.fill();}); requestAnimationFrame(animateStars); }
+animateStars();
+</script>
+
+<script>
+const feedbacks = {
+    1:{correct:"Correct. N_per_launch = ⌊m_lv / m_sat⌋ subject to fairing volume. Inclination, regulations, and plane count are independent parameters that do not directly set the per-launch manifest.",wrong:"Incorrect. The manifest is set by how much mass and volume the fairing can carry to the target orbit. Inclination, plane count, and regulations do not directly limit how many satellites fit on one vehicle."},
+    2:{correct:"Correct. Different altitudes give different J2 rates. Differential altitude drift produces differential RAAN drift, passively spreading planes to the target spacing without any plane-change Δv.",wrong:"Incorrect. J2 precession changes RAAN, not inclination. The technique exploits altitude-dependent node regression rates so that RAAN spacing grows passively over time — no costly plane-change burn required."},
+    3:{correct:"Correct. At 350 km, failed uncommissioned satellites re-enter within weeks, avoiding long-lived debris. The lower altitude also allows the launch vehicle to carry more mass, increasing the satellites-per-launch count.",wrong:"Incorrect. Signal strength, reach-ability, and radiation are not the primary drivers. Debris safety (rapid re-entry of failures) and launch efficiency (more mass at lower orbit) are the key motivations."},
+    4:{correct:"Correct. A two-burn Hohmann transfer between those circular orbits costs approximately 64 m/s total. At Isp = 1,600 s this requires only ~1.2 kg of propellant for a 300 kg satellite.",wrong:"Incorrect. The Hohmann between two circular LEO orbits separated by ~200 km costs tens of m/s. 300 m/s and 1,000 m/s are plane-change or deorbit-scale costs; 5 m/s is far too small."},
+    5:{correct:"Correct. The MVC is defined by the coverage requirement sufficient to generate initial revenue — not a fixed fraction. Starlink began beta service at ~800 satellites covering the mid-latitude populated band.",wrong:"Incorrect. Half the constellation does not guarantee useful coverage if planes are concentrated. The MVC depends on market requirements, not an arbitrary satellite count fraction."},
+    6:{correct:"Correct. A satellite raising from 350 km to 550 km must transit every altitude in between, passing through the bands already occupied by operational shells. This creates temporary conjunction exposure that must be screened and managed.",wrong:"Incorrect. The risk is geometric — the raising satellite crosses occupied altitude bands during transit. Radio interference, equatorial crossings between inclined shells, and propulsion debris are separate concerns."},
+    7:{correct:"Correct. At 350 km, failed satellites re-enter within weeks (debris safety). The higher J2 rate at lower altitude also accelerates differential RAAN drift, reducing the plane-phasing time compared to doing the same drift at 550 km.",wrong:"Incorrect. Falcon 9 can reach 550 km directly. Doppler reduction and regulatory staging requirements are not primary drivers. The staging orbit is chosen for debris safety and J2 drift acceleration."},
+    8:{correct:"Correct. t_drift = ΔΩ / |ΔdΩ/dt| = 5° / 0.01°/day = 500 days. This is why Starlink uses a much lower staging orbit — the much larger altitude difference gives a much higher differential J2 rate, reducing drift time to weeks.",wrong:"Incorrect. At 0.01°/day differential rate, 5° of RAAN separation takes 500 days. Starlink's lower staging altitude gives a much larger altitude difference, a much higher rate difference, and therefore a much shorter drift time."},
+    9:{correct:"Correct. Even distribution across planes gives sparse but geographically broad coverage earlier. Plane-by-plane deployment concentrates coverage in one longitude strip, leaving the rest uncovered for much longer.",wrong:"Incorrect. Filling one plane at a time concentrates coverage in a narrow longitude corridor — useful for a specific corridor application but not for providing the broadest possible geographic service early in deployment."},
+    10:{correct:"Correct. Launch cost is typically 30–50% of total deployment cost. Satellite manufacturing is the other major cost centre, with ground segment and regulatory compliance making up the remainder.",wrong:"Incorrect. At 30–50%, launch is significant but not dominant. Satellite manufacturing accounts for a comparable fraction. Neither alone approaches 70%+ of total cost for first-generation systems."}
+};
+let answered = {};
+document.querySelectorAll('.quiz-opt').forEach(btn => {
+    btn.addEventListener('click', function(){
+        const q = this.dataset.q;
+        if(answered[q]!==undefined) return;
+        const correct = this.dataset.correct==='true';
+        answered[q]=correct;
+        document.querySelectorAll(`.quiz-opt[data-q="${q}"]`).forEach(b=>{b.disabled=true;if(b.dataset.correct==='true')b.classList.add('correct');});
+        if(!correct) this.classList.add('wrong');
+        const fb=document.getElementById(`fb${q}`);
+        fb.textContent=(correct?'✓ ':'✗ ')+feedbacks[q][correct?'correct':'wrong'];
+        fb.style.color=correct?'#39ff14':'#ff004f';
+        if(Object.keys(answered).length===10){
+            const total=Object.values(answered).filter(Boolean).length;
+            const el=document.getElementById('quizScore');
+            el.style.display='block';
+            const pct=Math.round(total/10*100);
+            el.textContent=`SCORE: ${total} / 10 (${pct}%) — ${pct===100?'PERFECT.':pct>=80?'STRONG. REVIEW ANY MISSES.':pct>=60?'ADEQUATE. REVISIT WEAK SECTIONS.':'REVISIT THE LESSON BEFORE PROCEEDING.'}`;
+        }
+    });
+});
+</script>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="supabase.js"></script>
+<script src="user_progress.js"></script>
+<script>
+const LESSON_ID='m2-6';
+(function(){
+    function bounceToLogin(r){console.error("Auth guard:",r);window.location.replace("index.html");}
+    async function init(){
+        if(typeof client==="undefined"||!client||!client.auth) return bounceToLogin("Supabase client not loaded");
+        let session=null;
+        try{({data:{session}}=await client.auth.getSession());}
+        catch(e){return bounceToLogin("getSession threw: "+e.message);}
+        if(!session){window.location.replace("index.html");return;}
+        const btn=document.getElementById('completeBtn');
+        const msg=document.getElementById('completeMsg');
+        function setDone(done){
+            if(done){btn.textContent='✓ COMPLETE — CLICK TO UNDO';btn.classList.add('done');btn.style.cssText='border-color:#39ff14;color:#39ff14;background:rgba(57,255,20,0.1);cursor:pointer;opacity:1;';msg.style.color='#39ff14';msg.textContent='Lesson marked complete. Click again to undo.';}
+            else{btn.textContent='MARK LESSON COMPLETE';btn.classList.remove('done');btn.style.cssText='';msg.style.color='#ffffff55';msg.textContent='Not yet marked complete.';}
+        }
+        let mastered=[];
+        try{mastered=await getMasteredSections();}catch(e){console.error(e);}
+        setDone(mastered.includes(LESSON_ID));
+        btn.addEventListener('click',async()=>{
+            const isDone=btn.classList.contains('done');
+            msg.style.color='#00d9ff';msg.textContent='Saving...';
+            const ok=await upsertSection(LESSON_ID,!isDone);
+            if(ok){setDone(!isDone);}else{msg.style.color='#ff004f';msg.textContent='Error saving. Try again.';}
+        });
+        const btt=document.getElementById('backToTop');
+        window.addEventListener('scroll',()=>{btt.classList.toggle('visible',window.scrollY>400);});
+        btt.addEventListener('click',()=>window.scrollTo({top:0,behavior:'smooth'}));
+    }
+    if(document.readyState==="loading") document.addEventListener("DOMContentLoaded",init);
+    else init();
+})();
+</script>
+
+</body>
+</html>
