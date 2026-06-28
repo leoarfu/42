@@ -1,0 +1,698 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, shrink-to-fit=no">
+<title>M3-1 — Bus Architecture: Power, Structure &amp; Thermal · LEOAF</title>
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;600;800&family=Share+Tech+Mono&family=Libre+Baskerville:ital,wght@0,400;0,700;1,400&display=swap" rel="stylesheet">
+<link rel="icon" href="favicon.ico" sizes="any" type="image/x-icon">
+<link rel="manifest" href="site.webmanifest">
+<meta name="theme-color" content="#0f0f0f">
+
+<script>
+window.leoafAbort = async function () {
+    function go() { window.location.replace("index.html?signedout=1"); }
+    try {
+        if (typeof client !== "undefined" && client && client.auth && client.auth.signOut) {
+            try { await client.auth.signOut({ scope: "local" }); } catch (e) {}
+        }
+    } catch (e) {}
+    go();
+};
+</script>
+
+<style>
+* { box-sizing:border-box; margin:0; padding:0; }
+html { height:100%; -webkit-text-size-adjust:100%; overflow-x:hidden; }
+body { font-family:'Share Tech Mono',monospace; background:#000; color:white; overflow-x:hidden; min-height:100vh; }
+#starsCanvas { position:fixed; inset:0; z-index:-1; }
+
+header { background:#000; border-bottom:1px solid #ff004f33; position:sticky; top:0; z-index:100; padding:1rem clamp(1.5rem,5vw,4rem); display:flex; justify-content:space-between; align-items:center; box-shadow:0 4px 16px #0008; }
+.logo { font-family:'Orbitron',sans-serif; font-weight:800; font-size:clamp(16px,2vw,22px); letter-spacing:3px; text-decoration:none; }
+.logo span:first-child { color:white; }
+.logo span:last-child { color:#ff004f; }
+.nav-right { display:flex; align-items:center; gap:10px; }
+.nav-btn { background:transparent; border:1px solid #ff004f44; color:#ff004f; padding:6px 14px; cursor:pointer; transition:0.3s ease; font-size:11px; font-family:'Orbitron',sans-serif; letter-spacing:1px; text-decoration:none; display:inline-block; }
+.nav-btn:hover { background:#ff004f; color:black; }
+
+.breadcrumb { padding:14px clamp(1.5rem,5vw,4rem); font-size:11px; color:#ffffff44; letter-spacing:1px; position:relative; z-index:1; }
+.breadcrumb a { color:#00d9ff66; text-decoration:none; }
+.breadcrumb a:hover { color:#00d9ff; }
+.breadcrumb span { margin:0 8px; }
+
+.lesson-wrap { max-width:820px; margin:0 auto; padding:0 clamp(1.5rem,5vw,4rem) 80px; position:relative; z-index:1; }
+
+.lesson-header { padding:30px 0 28px; border-bottom:1px solid #ffffff11; margin-bottom:36px; }
+.lesson-tag { font-family:'Orbitron',sans-serif; font-size:10px; color:#ff004f; letter-spacing:3px; margin-bottom:10px; }
+.lesson-header h1 { font-family:'Orbitron',sans-serif; font-size:clamp(20px,3.5vw,32px); font-weight:800; line-height:1.2; margin-bottom:12px; }
+.lesson-meta { display:flex; gap:10px; flex-wrap:wrap; margin-bottom:16px; }
+.l-pill { font-family:'Orbitron',sans-serif; font-size:10px; padding:3px 10px; border:1px solid; letter-spacing:1px; }
+.l-pill-q { color:#ff004f; border-color:#ff004f44; }
+.l-pill-t { color:#39ff14; border-color:#39ff1444; }
+.lesson-intro { font-size:13px; line-height:1.85; opacity:0.75; }
+
+.toc { background:rgba(0,217,255,0.06); border:1px solid #00d9ff33; padding:24px 28px; margin:30px 0; }
+.toc h4 { font-family:'Orbitron',sans-serif; font-size:10px; color:#00d9ff; letter-spacing:2px; margin-bottom:16px; }
+.toc ol { padding-left:20px; }
+.toc li { font-size:13px; line-height:2.1; }
+.toc li a { color:#00d9ffbb; text-decoration:none; transition:0.15s; }
+.toc li a:hover { color:#ffffff; padding-left:4px; }
+.toc li::marker { color:#ff004f; font-family:'Orbitron',sans-serif; font-size:10px; }
+
+.content-block { margin-bottom:48px; }
+.content-block h2 { font-family:'Orbitron',sans-serif; font-size:13px; color:#00d9ff; letter-spacing:2px; text-transform:uppercase; margin-bottom:18px; padding-bottom:10px; border-bottom:1px solid #00d9ff22; scroll-margin-top:80px; }
+.content-block h3 { font-family:'Orbitron',sans-serif; font-size:11px; color:#ffffff88; letter-spacing:1.5px; text-transform:uppercase; margin:28px 0 12px; }
+.content-block p { font-size:13px; line-height:1.9; opacity:0.85; margin-bottom:16px; }
+.content-block ul, .content-block ol { padding-left:0; margin-bottom:16px; }
+.content-block ul li, .content-block ol li { font-size:13px; line-height:1.85; opacity:0.85; padding-left:20px; position:relative; margin-bottom:6px; }
+.content-block ul li::before { content:'›'; position:absolute; left:0; color:#00d9ff; }
+.content-block blockquote { border-left:3px solid #39ff14; background:rgba(57,255,20,0.05); padding:14px 20px; margin:18px 0; font-size:14px; font-family:'Share Tech Mono',monospace; color:#39ff14; letter-spacing:1px; }
+
+.callout { border-left:3px solid #00d9ff; background:rgba(0,217,255,0.05); padding:16px 20px; margin:22px 0; font-size:12px; line-height:1.8; }
+.callout.red   { border-left-color:#ff004f; background:rgba(255,0,79,0.05); }
+.callout.green { border-left-color:#39ff14; background:rgba(57,255,20,0.05); }
+.callout.amber { border-left-color:#ffaa00; background:rgba(255,170,0,0.05); }
+.callout strong { font-family:'Orbitron',sans-serif; font-size:10px; letter-spacing:1px; display:block; margin-bottom:8px; color:inherit; }
+
+.key-numbers { display:grid; grid-template-columns:repeat(auto-fit,minmax(140px,1fr)); gap:12px; margin:22px 0; }
+.kn-item { background:rgba(255,255,255,0.03); border:1px solid #ffffff11; padding:16px 12px; text-align:center; }
+.kn-val { font-family:'Orbitron',sans-serif; font-size:clamp(15px,2.3vw,22px); font-weight:800; color:#00d9ff; display:block; }
+.kn-label { font-size:10px; opacity:0.5; letter-spacing:1px; margin-top:5px; display:block; line-height:1.4; }
+
+.compare-table { width:100%; border-collapse:collapse; margin:22px 0; font-size:12px; }
+.compare-table th { font-family:'Orbitron',sans-serif; font-size:10px; letter-spacing:1px; color:#00d9ff; padding:10px 12px; border-bottom:1px solid #00d9ff33; text-align:left; }
+.compare-table td { padding:10px 12px; border-bottom:1px solid #ffffff0a; line-height:1.5; opacity:0.85; vertical-align:top; }
+.compare-table tr:hover td { background:rgba(255,255,255,0.02); }
+
+.diagram-wrap { margin:24px 0; background:rgba(255,255,255,0.02); border:1px solid #ffffff11; padding:20px; overflow-x:auto; }
+.diagram-wrap figcaption { font-size:11px; color:#ffffff44; margin-top:12px; text-align:center; letter-spacing:1px; }
+
+.quiz-block { background:rgba(17,17,17,0.9); border:1px solid #ff004f33; padding:28px; margin:48px 0 32px; }
+.quiz-block h2 { font-family:'Orbitron',sans-serif; font-size:13px; color:#ff004f; letter-spacing:2px; margin-bottom:6px; }
+.quiz-intro { font-size:12px; opacity:0.6; margin-bottom:24px; padding-bottom:16px; border-bottom:1px solid #ff004f22; line-height:1.6; }
+.quiz-q { margin-bottom:28px; }
+.quiz-q p { font-size:13px; opacity:0.9; margin-bottom:12px; line-height:1.65; }
+.quiz-q p strong { color:#00d9ff; }
+.quiz-options { display:flex; flex-direction:column; gap:8px; }
+.quiz-opt { background:rgba(255,255,255,0.03); border:1px solid #ffffff1a; padding:11px 16px; cursor:pointer; font-size:12px; font-family:'Share Tech Mono',monospace; transition:0.2s ease; text-align:left; color:white; line-height:1.5; }
+.quiz-opt:hover:not(:disabled) { background:rgba(0,217,255,0.08); border-color:#00d9ff44; }
+.quiz-opt.correct  { background:rgba(57,255,20,0.1);  border-color:#39ff14; color:#39ff14; }
+.quiz-opt.wrong    { background:rgba(255,0,79,0.1);   border-color:#ff004f; color:#ff004f; }
+.quiz-opt:disabled { cursor:default; }
+.quiz-feedback { font-size:12px; margin-top:10px; min-height:18px; line-height:1.7; opacity:0.9; padding:0 4px; }
+.quiz-score { font-family:'Orbitron',sans-serif; font-size:12px; color:#39ff14; margin-top:20px; letter-spacing:1px; display:none; padding-top:16px; border-top:1px solid #39ff1433; }
+
+.py-block { background:rgba(10,10,10,0.95); border:1px solid #39ff1422; padding:28px; margin:32px 0; }
+.py-block h2 { font-family:'Orbitron',sans-serif; font-size:13px; color:#39ff14; letter-spacing:2px; margin-bottom:8px; }
+.py-block .py-intro { font-size:12px; opacity:0.7; margin-bottom:20px; padding-bottom:16px; border-bottom:1px solid #39ff1422; line-height:1.7; }
+.py-exercise { margin-bottom:32px; }
+.py-exercise:last-child { margin-bottom:0; }
+.py-exercise h3 { font-family:'Orbitron',sans-serif; font-size:11px; color:#39ff1499; letter-spacing:1.5px; text-transform:uppercase; margin-bottom:10px; }
+.py-exercise p { font-size:12px; opacity:0.8; margin-bottom:14px; line-height:1.75; }
+.py-block pre { background:#050505; border:1px solid #39ff1433; padding:20px; font-family:'Share Tech Mono',monospace; font-size:11.5px; line-height:1.75; overflow-x:auto; color:#39ff14; white-space:pre; margin-bottom:12px; }
+
+.reflection-block { background:rgba(255,170,0,0.04); border:1px solid #ffaa0033; padding:24px; margin:32px 0; }
+.reflection-block h2 { font-family:'Orbitron',sans-serif; font-size:13px; color:#ffaa00; letter-spacing:2px; margin-bottom:8px; }
+.reflection-block .ref-intro { font-size:12px; opacity:0.7; margin-bottom:20px; padding-bottom:14px; border-bottom:1px solid #ffaa0022; line-height:1.7; }
+.ref-prompt { margin-bottom:20px; }
+.ref-prompt h3 { font-family:'Orbitron',sans-serif; font-size:11px; color:#ffaa0099; letter-spacing:1px; margin-bottom:8px; }
+.ref-prompt p { font-size:12px; opacity:0.8; line-height:1.75; margin-bottom:10px; }
+
+.back-to-top { position:fixed; bottom:28px; right:28px; z-index:200; width:44px; height:44px; background:#000; border:1px solid #00d9ff55; color:#00d9ff; font-size:20px; cursor:pointer; display:flex; align-items:center; justify-content:center; opacity:0; pointer-events:none; transition:opacity 0.3s ease; }
+.back-to-top.visible { opacity:1; pointer-events:auto; }
+.back-to-top:hover { border-color:#00d9ff; background:#001a2c; }
+
+.complete-wrap { margin-top:56px; padding-top:30px; border-top:1px solid #ffffff11; text-align:center; }
+.complete-btn { font-family:'Orbitron',sans-serif; font-size:13px; letter-spacing:2px; padding:14px 44px; background:transparent; border:1px solid #39ff14; color:#39ff14; cursor:pointer; transition:0.3s ease; }
+.complete-btn:hover:not(.done) { background:#39ff14; color:black; box-shadow:0 0 20px rgba(57,255,20,0.4); }
+.complete-btn.done { background:rgba(57,255,20,0.1); cursor:default; opacity:0.7; }
+.complete-msg { font-size:12px; color:#39ff14; margin-top:14px; min-height:18px; letter-spacing:1px; }
+
+.lesson-nav { display:flex; justify-content:space-between; margin-top:30px; flex-wrap:wrap; gap:10px; }
+.lesson-nav a { font-family:'Orbitron',sans-serif; font-size:11px; color:#00d9ff66; text-decoration:none; letter-spacing:1px; transition:0.2s; }
+.lesson-nav a:hover { color:#00d9ff; }
+
+footer { text-align:center; padding:30px; opacity:0.3; font-size:11px; position:relative; z-index:1; letter-spacing:1px; }
+
+@media (max-width:600px) { .key-numbers { grid-template-columns:1fr 1fr; } .compare-table { font-size:11px; } .compare-table th, .compare-table td { padding:8px; } }
+
+.content-block { background:#f5f2ec; color:#1a1a1a; padding:36px clamp(24px,4vw,48px); margin-bottom:24px; border-left:4px solid #00d9ff; position:relative; z-index:1; }
+.content-block h2 { font-family:'Orbitron',sans-serif; font-size:13px; color:#003d66; letter-spacing:2px; text-transform:uppercase; margin-bottom:20px; padding-bottom:10px; border-bottom:2px solid #00d9ff66; scroll-margin-top:80px; }
+.content-block h3 { font-family:'Orbitron',sans-serif; font-size:11px; color:#444; letter-spacing:1.5px; text-transform:uppercase; margin:32px 0 14px; }
+.content-block p { font-family:'Libre Baskerville',Georgia,serif; font-size:15px; line-height:1.9; color:#1a1a1a; opacity:1; margin-bottom:18px; }
+.content-block ul li { font-family:'Libre Baskerville',Georgia,serif; font-size:14px; line-height:1.85; color:#1a1a1a; opacity:1; margin-bottom:8px; }
+.content-block ul li::before { color:#0077aa; }
+.content-block blockquote { border-left:3px solid #1a7a1a; background:#eafaea; color:#0a3d0a; }
+.content-block .callout { border-left:3px solid #0088cc; background:#e8f4fb; color:#1a1a1a; }
+.content-block .callout.red   { border-left-color:#cc0033; background:#fdecea; }
+.content-block .callout.amber { border-left-color:#996600; background:#fef9ec; }
+.content-block .callout.green { border-left-color:#1a7a1a; background:#eafaea; }
+.content-block .callout strong { color:inherit; }
+.content-block .kn-item { background:#fff; border:1px solid #d0d0d0; }
+.content-block .kn-label { color:#555; opacity:1; }
+.content-block .compare-table th { color:#003d66; border-bottom:2px solid #00d9ff66; }
+.content-block .compare-table td { color:#1a1a1a; opacity:1; border-bottom:1px solid #ddd; }
+.content-block .compare-table tr:hover td { background:#f0f0f0; }
+.content-block .diagram-wrap { background:#0a0a0a; border:1px solid #333; }
+.content-block .diagram-wrap figcaption { color:#ffffff55; }
+</style>
+</head>
+<body>
+
+<canvas id="starsCanvas"></canvas>
+
+<header>
+    <a href="dashboard.html" class="logo"><span>LEO</span><span>AF</span></a>
+    <div class="nav-right">
+        <a href="m3.html" class="nav-btn">← M3 HUB</a>
+        <button class="nav-btn" onclick="leoafAbort()">ABORT</button>
+    </div>
+</header>
+
+<div class="breadcrumb">
+    <a href="dashboard.html">DASHBOARD</a><span>/</span>
+    <a href="m3.html">M3</a><span>/</span>
+    <span style="color:#ffffff88;">LESSON 01 — BUS ARCHITECTURE: POWER, STRUCTURE &amp; THERMAL</span>
+</div>
+
+<div class="lesson-wrap">
+
+<div class="lesson-header">
+    <div class="lesson-tag">M3 · LESSON 01 OF 6</div>
+    <h1>Bus Architecture: Power, Structure &amp; Thermal</h1>
+    <div class="lesson-meta">
+        <div class="l-pill l-pill-q">MODULE 3</div>
+        <div class="l-pill l-pill-t">SPACE SEGMENT</div>
+    </div>
+    <p class="lesson-intro">The satellite bus is the platform on which the communications payload operates. It provides electrical power, a stable mechanical structure, and a controlled thermal environment. A bus that fails to deliver power at the right voltage, that allows the payload to overheat, or that loses attitude control is a loss of service regardless of payload capability. This lesson covers the three subsystems that most directly determine whether the four objectives of mass, cost, performance, and reliability can be simultaneously met: power generation and storage, structural design, and thermal control.</p>
+</div>
+
+<div class="toc">
+    <h4>CONTENTS</h4>
+    <ol>
+        <li><a href="#s1">The power subsystem</a></li>
+        <li><a href="#s2">The structure subsystem</a></li>
+        <li><a href="#s3">The thermal subsystem</a></li>
+        <li><a href="#s4">Power-structure-thermal as an integrated design</a></li>
+        <li><a href="#s5">Mass-production implications</a></li>
+        <li><a href="#quiz">Knowledge check</a></li>
+        <li><a href="#python">Python exercises</a></li>
+        <li><a href="#reflect">Reflection prompts</a></li>
+    </ol>
+</div>
+
+<!-- S1 -->
+<div class="content-block" id="s1">
+    <h2>1. The Power Subsystem</h2>
+    <p>Every function on the satellite — payload, computers, heaters, thrusters, radio — runs on electrical power. The power subsystem generates it, stores it, regulates it, and distributes it. Getting the power budget right is one of the first and most fundamental acts of satellite design: undersize it and the payload is power-limited; oversize it and the satellite is too heavy and too expensive.</p>
+
+    <h3>Solar array generation</h3>
+    <p>The primary power source for LEO satellites is photovoltaic solar arrays. Each square metre of panel exposed to the Sun at 1 AU receives approximately 1,361 W (the solar constant). Commercial silicon cells convert this at roughly 18–22% efficiency; high-efficiency triple-junction gallium arsenide (GaAs/Ge) cells reach 28–32%. At the system level — accounting for panel angle, interconnect losses, temperature derating (~0.4–0.5%/°C), and end-of-life radiation degradation — useful power at the panel is typically 140–200 W/m² for triple-junction cells.</p>
+    <p>For a LEO broadband satellite requiring 3–7 kW of payload power plus 1–2 kW of bus loads, total power is roughly 4–9 kW. At 150 W/m², this requires 25–60 m² of deployed panel area. Starlink v1 reportedly carried approximately 10 m² per satellite, generating ~1.5–2 kW — consistent with a relatively modest early payload. Later generations deploy significantly more area.</p>
+
+    <h3>Eclipse and battery storage</h3>
+    <p>At 550 km the orbital period is 95.6 minutes and the maximum eclipse duration is approximately 37 minutes — roughly 39% of each orbit. During eclipse the arrays produce nothing and the satellite runs on battery.</p>
+    <p>The required stored energy is:</p>
+    <blockquote>E_storage = P_eclipse × t_eclipse</blockquote>
+    <p>For 5 kW over 37 minutes: E = 5,000 × (37/60) = 3.1 kWh. At 120 Wh/kg (Li-ion module level), this requires approximately 26 kg of battery — a significant fraction of a 300 kg satellite's dry mass. The depth of discharge (DoD) is a key design parameter: shallower DoD extends battery cycle life but increases required battery capacity and mass.</p>
+    <p>At LEO, the satellite sees approximately 15 orbits per day — 15 charge-discharge cycles — roughly 5,475 per year. A battery rated to 20,000 cycles at 30% DoD survives approximately 3.7 years; 30,000 cycles covers a 5-year mission with margin.</p>
+
+    <h3>Power regulation and distribution</h3>
+    <p>A power conditioning unit (PCU) regulates the array voltage (which varies with temperature and illumination), charges the batteries, and distributes regulated power to satellite loads at the required bus voltages (commonly 28 V or 50 V for small satellites). Distribution harnesses can account for several kilograms and percent-level power losses in a large satellite.</p>
+
+    <div class="key-numbers">
+        <div class="kn-item"><span class="kn-val">1,361 W/m²</span><span class="kn-label">SOLAR CONSTANT AT 1 AU</span></div>
+        <div class="kn-item"><span class="kn-val">28–32%</span><span class="kn-label">TRIPLE-JUNCTION GaAs CELL EFFICIENCY (BOL)</span></div>
+        <div class="kn-item"><span class="kn-val">~37 min</span><span class="kn-label">MAX ECLIPSE DURATION AT 550 km</span></div>
+        <div class="kn-item"><span class="kn-val">~5,475/yr</span><span class="kn-label">ECLIPSE CHARGE-DISCHARGE CYCLES AT 550 km</span></div>
+    </div>
+
+    <table class="compare-table">
+        <thead><tr><th>Quantity</th><th>Value</th><th>Unit</th><th>Note</th></tr></thead>
+        <tbody>
+            <tr><td>Solar constant at 1 AU</td><td>1,361</td><td>W/m²</td><td>±3.4% seasonal variation</td></tr>
+            <tr><td>Triple-junction GaAs efficiency BOL</td><td>28–32</td><td>%</td><td>At 28°C reference</td></tr>
+            <tr><td>System power density (panel, EOL)</td><td>140–200</td><td>W/m²</td><td>Accounting for all losses</td></tr>
+            <tr><td>Max eclipse at 550 km</td><td>~37</td><td>min</td><td>Worst-case geometry</td></tr>
+            <tr><td>Eclipse fraction at 550 km</td><td>35–40</td><td>%</td><td></td></tr>
+            <tr><td>Li-ion cell energy density</td><td>150–200</td><td>Wh/kg</td><td>Cell level, space-grade</td></tr>
+            <tr><td>Li-ion module energy density</td><td>100–130</td><td>Wh/kg</td><td>With packaging and thermal management</td></tr>
+        </tbody>
+    </table>
+</div>
+
+<!-- S2 -->
+<div class="content-block" id="s2">
+    <h2>2. The Structure Subsystem</h2>
+    <p>The structural subsystem must withstand launch loads (vibration, acoustic, shock, quasi-static acceleration), provide mounting points for all other subsystems, maintain geometric relationships between components, and do all of this at minimum mass and cost.</p>
+
+    <h3>Launch loads</h3>
+    <p>A Falcon 9 second stage subjects payloads to quasi-static accelerations of approximately 6 g axially and 2 g laterally, sinusoidal vibration up to 1 g across 5–100 Hz, random vibration on the order of 0.02–0.1 g²/Hz, and acoustic levels of approximately 140–145 dB OASPL inside the fairing. For mass-produced LEO broadband satellites stacked flat in the fairing, the structural design is dominated by the stacking load path — the satellite must be stiff enough in the stacking direction to transfer loads between neighbours without interface failure, and deployed-panel hinges must survive the acoustic environment.</p>
+
+    <h3>Materials and mass fraction</h3>
+    <p>Primary structural materials are aluminium alloys (Al 6061, Al 7075) for machined and extruded members, CFRP panels and booms where stiffness-to-mass ratio matters most, and titanium alloys for high-stress fittings. For mass-produced constellations, aluminium dominates because it machines well and enables high manufacturing rates. CFRP saves mass but requires expensive autoclave tooling incompatible with high-volume production.</p>
+    <p>The structural mass fraction is typically 15–25% of dry mass — approximately 45–75 kg for a 300 kg satellite. This is a first-order design driver, not a residual after payload sizing.</p>
+
+    <h3>Fundamental frequency requirement</h3>
+    <p>The satellite's first structural mode must exceed the launch vehicle's frequency exclusion zone — typically above 35–50 Hz axially and 10–15 Hz laterally — to avoid dynamic coupling that would amplify loads and risk structural failure. Meeting this while minimising mass requires finite element modelling (FEM) validated against structural test data.</p>
+
+    <table class="compare-table">
+        <thead><tr><th>Quantity</th><th>Value</th><th>Unit</th><th>Note</th></tr></thead>
+        <tbody>
+            <tr><td>Falcon 9 quasi-static load, axial</td><td>~6</td><td>g</td><td>Design limit</td></tr>
+            <tr><td>Falcon 9 quasi-static load, lateral</td><td>~2</td><td>g</td><td>Design limit</td></tr>
+            <tr><td>Acoustic level inside fairing</td><td>~140–145</td><td>dB OASPL</td><td></td></tr>
+            <tr><td>Typical structural mass fraction</td><td>15–25</td><td>% dry mass</td><td></td></tr>
+            <tr><td>Required fundamental freq., axial</td><td>&gt; 35–50</td><td>Hz</td><td>Vehicle-dependent</td></tr>
+        </tbody>
+    </table>
+</div>
+
+<!-- S3 -->
+<div class="content-block" id="s3">
+    <h2>3. The Thermal Subsystem</h2>
+    <p>A LEO satellite cycles between direct solar illumination (unprotected surfaces can reach +120°C) and eclipse (−150°C) every 95 minutes. Internally, electronics must be kept within operating limits; batteries require −20°C to +40°C; and high-power amplifiers must reject heat efficiently to avoid exceeding their junction temperature limits.</p>
+
+    <h3>Passive thermal control</h3>
+    <p>The dominant tool is surface optical properties: absorptivity α (fraction of incident solar radiation absorbed) and emissivity ε (efficiency of infrared re-radiation). White paint (α ≈ 0.2, ε ≈ 0.9) absorbs little sunlight and radiates efficiently. Black anodising (α ≈ 0.9, ε ≈ 0.9) absorbs solar radiation and re-radiates nearly as efficiently. Multi-layer insulation (MLI) — alternating aluminised Mylar and netting — minimises radiative heat loss to space with an effective emittance of 0.01–0.03.</p>
+    <p>The primary heat rejection path is conduction through the bus structure to dedicated radiator panels on the anti-Sun face. Radiator power density follows the Stefan-Boltzmann law:</p>
+    <blockquote>Q_rad = ε · σ · A_rad · (T_rad⁴ − T_sink⁴)</blockquote>
+    <p>At T_rad = 60°C (333 K), ε = 0.85, facing deep space: Q_rad ≈ 600 W/m². To reject 3 kW of payload waste heat requires approximately 5 m² of radiator — a significant claim on satellite surface area that competes directly with solar array real estate.</p>
+
+    <h3>Active thermal control</h3>
+    <p>Electric heaters maintain batteries above their minimum operating temperature during cold eclipse phases. Heat pipes carry heat from high-dissipation components (power amplifiers, digital processors) to radiating surfaces without mechanical pumps. For high-power payloads, the thermal path from amplifier junction to radiating panel is a critical design constraint: junction temperatures of 150°C–200°C must not be exceeded, requiring low-resistance thermal paths through direct-bonded copper substrates and high-conductance thermal interface materials.</p>
+
+    <h3>Atomic oxygen erosion</h3>
+    <p>Below approximately 600 km, solar UV photodissociates molecular O₂ into atomic oxygen — a highly reactive species that attacks organic materials, carbon composites, and certain coatings on the ram (leading) face of the satellite. Surfaces must use atomic-oxygen-resistant materials (inorganic coatings: SiO₂, Al₂O₃) or be protected against direct exposure. This is a non-trivial materials qualification requirement for operational altitudes below 600 km.</p>
+
+    <div class="diagram-wrap">
+        <svg viewBox="0 0 740 240" width="100%" xmlns="http://www.w3.org/2000/svg" font-family="Share Tech Mono, monospace">
+            <rect width="740" height="240" fill="#0a0a0a"/>
+            <!-- Satellite body -->
+            <rect x="280" y="80" width="180" height="100" fill="#1a1a1a" stroke="#00d9ff44" stroke-width="1.5"/>
+            <text x="370" y="135" font-size="10" fill="#00d9ff88" text-anchor="middle">SATELLITE BUS</text>
+            <!-- Solar panels -->
+            <rect x="100" y="100" width="160" height="60" fill="#003366" stroke="#00d9ff" stroke-width="1.5"/>
+            <text x="180" y="135" font-size="9" fill="#00d9ff" text-anchor="middle">SOLAR ARRAY</text>
+            <text x="180" y="148" font-size="8" fill="#00d9ff88" text-anchor="middle">~150 W/m² EOL</text>
+            <rect x="480" y="100" width="160" height="60" fill="#003366" stroke="#00d9ff" stroke-width="1.5"/>
+            <text x="560" y="135" font-size="9" fill="#00d9ff" text-anchor="middle">SOLAR ARRAY</text>
+            <!-- Radiator -->
+            <rect x="340" y="190" width="60" height="20" fill="#330000" stroke="#ff004f" stroke-width="1.5"/>
+            <text x="370" y="205" font-size="9" fill="#ff004f" text-anchor="middle">RADIATOR</text>
+            <!-- Sun arrow -->
+            <line x1="30" y1="130" x2="95" y2="130" stroke="#ffaa00" stroke-width="2" marker-end="url(#sun)"/>
+            <defs><marker id="sun" markerWidth="7" markerHeight="7" refX="3" refY="3.5" orient="auto"><polygon points="0 0,7 3.5,0 7" fill="#ffaa00"/></marker></defs>
+            <text x="15" y="122" font-size="9" fill="#ffaa00">☀</text>
+            <!-- Heat rejection arrow -->
+            <line x1="370" y1="185" x2="370" y2="216" stroke="#ff004f66" stroke-width="1.5"/>
+            <line x1="370" y1="220" x2="370" y2="235" stroke="#ff004f66" stroke-width="1" stroke-dasharray="2,3"/>
+            <text x="420" y="210" font-size="8" fill="#ff004f88">~600 W/m² at 60°C</text>
+            <!-- Battery inside bus -->
+            <rect x="300" y="90" width="50" height="30" fill="#001a00" stroke="#39ff1444" stroke-width="1"/>
+            <text x="325" y="109" font-size="8" fill="#39ff14" text-anchor="middle">BATT</text>
+            <!-- PCU -->
+            <rect x="390" y="90" width="50" height="30" fill="#001a00" stroke="#ffaa0044" stroke-width="1"/>
+            <text x="415" y="109" font-size="8" fill="#ffaa00" text-anchor="middle">PCU</text>
+            <!-- caption -->
+            <text x="370" y="228" font-size="8" fill="#ffffff33" text-anchor="middle">POWER FLOW: solar array → PCU → battery (storage) + loads; waste heat → radiator → deep space</text>
+        </svg>
+        <figcaption>Simplified satellite power and thermal architecture. Solar arrays generate power regulated by the PCU; batteries store energy for eclipse; waste heat is rejected via radiator panels.</figcaption>
+    </div>
+
+    <table class="compare-table">
+        <thead><tr><th>Quantity</th><th>Value</th><th>Unit</th><th>Note</th></tr></thead>
+        <tbody>
+            <tr><td>External surface temp, sunlit unprotected</td><td>up to +120</td><td>°C</td><td></td></tr>
+            <tr><td>External surface temp, eclipse unprotected</td><td>down to −150</td><td>°C</td><td></td></tr>
+            <tr><td>Li-ion battery operating range</td><td>−20 to +40</td><td>°C</td><td></td></tr>
+            <tr><td>Radiator power density at 60°C, ε=0.85</td><td>~600</td><td>W/m²</td><td>Deep space view</td></tr>
+            <tr><td>White paint: α / ε</td><td>0.2 / 0.9</td><td>—</td><td>Common thermal control coating</td></tr>
+            <tr><td>MLI effective emittance</td><td>0.01–0.03</td><td>—</td><td>Multi-layer, well-made</td></tr>
+            <tr><td>Stefan-Boltzmann constant σ</td><td>5.67 × 10⁻⁸</td><td>W/m²/K⁴</td><td></td></tr>
+        </tbody>
+    </table>
+</div>
+
+<!-- S4 -->
+<div class="content-block" id="s4">
+    <h2>4. Power-Structure-Thermal as an Integrated Design</h2>
+    <p>The three subsystems are not designed independently. Solar array area is simultaneously a structural element (surviving launch loads and deploying reliably) and a thermal element (cell temperature affecting efficiency and degradation). Larger arrays generate more power but add structural mass, deployment complexity, and atomic oxygen exposure area.</p>
+    <p>The satellite body is simultaneously the structural backbone, the thermal spreader, and the mounting surface for all subsystems. Its material selection — aluminium versus CFRP — affects stiffness (structural), thermal conductivity (thermal), and machinability (manufacturing cost). A highly conductive aluminium structure spreads heat effectively but couples warm electronics to cold panels during eclipse, which can be helpful or harmful depending on the subsystem requirements.</p>
+    <p>Radiator panels must be sized for worst-case heat dissipation, but placement is constrained by the structural layout (short conductive paths to heat sources) and orbital geometry (avoiding Sun illumination over most of the orbit). For a 53° inclination LEO satellite, the Sun angle varies continuously and the radiator placement must account for the worst-case illumination geometry across all orbital phases.</p>
+
+    <div class="callout amber">
+        <strong>THE AREA COMPETITION</strong>
+        A high-power payload simultaneously requires large solar arrays (power) and large radiators (heat rejection). Both compete for the same satellite surface area. A 5 kW system may need 30–40 m² of solar array and 8 m² of radiator. These geometries must be reconciled with the stacking configuration in the fairing — a concrete three-dimensional constraint that shapes every bus design.
+    </div>
+</div>
+
+<!-- S5 -->
+<div class="content-block" id="s5">
+    <h2>5. Mass-Production Implications</h2>
+    <p>For a constellation of hundreds to thousands of satellites, every kilogram of bus mass multiplied by fleet size is a concrete launch cost. Every hour of manufacturing time multiplied by fleet size is a factory floor cost. These multipliers make mass-production design philosophy fundamentally different from traditional one-off or small-batch spacecraft design.</p>
+    <p>Traditional spacecraft design produces one or two flight units from a qualification unit, using heritage components with long lead times, extensive unit-level testing, and high cost. LEO broadband constellation design targets hundreds of units per year from a production line, using commercial off-the-shelf (COTS) components, statistical process control rather than 100% unit-level acceptance testing, and design-for-manufacturability principles that sacrifice some performance margin for repeatability and throughput.</p>
+    <p>Structurally: bolted assemblies rather than bonded joints — faster to make and inspect. Thermally: standardised radiator panels and interface materials across all units rather than custom-routed heat pipes. In power: standardised battery modules and PCU boards that can be inserted and tested in minutes.</p>
+    <p>The shift from unit-level to fleet-level reliability thinking is the deepest change. A GEO satellite cannot be replenished and must be highly reliable for 15 years. A LEO constellation satellite that fails is replaced by the next launch; the fleet provides system-level redundancy. This allows lower component-level reliability margins, simplified redundancy architectures, and lower cost per satellite — at the price of accepting a non-zero loss rate in normal fleet operations.</p>
+
+    <div class="callout green">
+        <strong>FLEET REDUNDANCY VS UNIT RELIABILITY</strong>
+        For a 1,584-satellite constellation, a 1% annual failure rate means ~16 satellites lost per year — absorbed by the constellation without significant coverage impact. Designing each satellite to the reliability standard of a single irreplaceable GEO asset would cost orders of magnitude more per unit. The constellation architecture changes what reliability specification is rational.
+    </div>
+</div>
+
+<!-- QUIZ -->
+<div class="quiz-block" id="quiz">
+    <h2>KNOWLEDGE CHECK</h2>
+    <p class="quiz-intro">Ten questions. Select one answer per question. Feedback is immediate; score appears when all ten are answered.</p>
+
+    <div class="quiz-q"><p><strong>Q1.</strong> The battery energy storage requirement for a LEO satellite is primarily determined by:</p>
+        <div class="quiz-options">
+            <button class="quiz-opt" data-q="1" data-correct="false">A — The total power draw over the full orbital period</button>
+            <button class="quiz-opt" data-q="1" data-correct="true">B — The satellite's power draw during eclipse multiplied by the eclipse duration (E = P × t_eclipse)</button>
+            <button class="quiz-opt" data-q="1" data-correct="false">C — The peak power demand of the payload only</button>
+            <button class="quiz-opt" data-q="1" data-correct="false">D — The number of charge-discharge cycles per year</button>
+        </div><div class="quiz-feedback" id="fb1"></div></div>
+
+    <div class="quiz-q"><p><strong>Q2.</strong> Triple-junction GaAs solar cells are preferred over silicon cells for satellite applications primarily because:</p>
+        <div class="quiz-options">
+            <button class="quiz-opt" data-q="2" data-correct="false">A — They are cheaper to manufacture</button>
+            <button class="quiz-opt" data-q="2" data-correct="true">B — Higher efficiency (28–32% vs 18–22%) generates more power per unit area, reducing required panel area and mass</button>
+            <button class="quiz-opt" data-q="2" data-correct="false">C — They are more resistant to atomic oxygen</button>
+            <button class="quiz-opt" data-q="2" data-correct="false">D — They work at lower temperatures than silicon</button>
+        </div><div class="quiz-feedback" id="fb2"></div></div>
+
+    <div class="quiz-q"><p><strong>Q3.</strong> For a satellite drawing 5 kW during a 37-minute eclipse, the required battery energy storage is:</p>
+        <div class="quiz-options">
+            <button class="quiz-opt" data-q="3" data-correct="false">A — 185 kWh</button>
+            <button class="quiz-opt" data-q="3" data-correct="true">B — 3.1 kWh</button>
+            <button class="quiz-opt" data-q="3" data-correct="false">C — 7.9 kWh</button>
+            <button class="quiz-opt" data-q="3" data-correct="false">D — 0.3 kWh</button>
+        </div><div class="quiz-feedback" id="fb3"></div></div>
+
+    <div class="quiz-q"><p><strong>Q4.</strong> The structural fundamental frequency requirement (axial mode > ~35–50 Hz) exists to:</p>
+        <div class="quiz-options">
+            <button class="quiz-opt" data-q="4" data-correct="false">A — Prevent solar array vibration during eclipse</button>
+            <button class="quiz-opt" data-q="4" data-correct="true">B — Avoid dynamic coupling with the launch vehicle's resonant frequencies, which would amplify loads and risk structural failure</button>
+            <button class="quiz-opt" data-q="4" data-correct="false">C — Ensure the satellite can manoeuvre quickly</button>
+            <button class="quiz-opt" data-q="4" data-correct="false">D — Match the frequency of the payload RF signal</button>
+        </div><div class="quiz-feedback" id="fb4"></div></div>
+
+    <div class="quiz-q"><p><strong>Q5.</strong> Multi-layer insulation (MLI) achieves its insulating effect in space primarily by:</p>
+        <div class="quiz-options">
+            <button class="quiz-opt" data-q="5" data-correct="false">A — Providing a thick foam layer to block heat conduction</button>
+            <button class="quiz-opt" data-q="5" data-correct="true">B — Using alternating aluminised layers separated by netting to minimise radiative heat transfer, with effective emittance of 0.01–0.03</button>
+            <button class="quiz-opt" data-q="5" data-correct="false">C — Reflecting all solar radiation from exposed surfaces</button>
+            <button class="quiz-opt" data-q="5" data-correct="false">D — Conducting heat away from hot components to cold radiators</button>
+        </div><div class="quiz-feedback" id="fb5"></div></div>
+
+    <div class="quiz-q"><p><strong>Q6.</strong> At 60°C radiator temperature with ε = 0.85 facing deep space, rejecting 3 kW of waste heat requires approximately:</p>
+        <div class="quiz-options">
+            <button class="quiz-opt" data-q="6" data-correct="false">A — 0.5 m²</button>
+            <button class="quiz-opt" data-q="6" data-correct="false">B — 1 m²</button>
+            <button class="quiz-opt" data-q="6" data-correct="true">C — 5 m²</button>
+            <button class="quiz-opt" data-q="6" data-correct="false">D — 50 m²</button>
+        </div><div class="quiz-feedback" id="fb6"></div></div>
+
+    <div class="quiz-q"><p><strong>Q7.</strong> Atomic oxygen erosion is most significant for LEO satellites:</p>
+        <div class="quiz-options">
+            <button class="quiz-opt" data-q="7" data-correct="false">A — Above 700 km where the atmosphere is denser</button>
+            <button class="quiz-opt" data-q="7" data-correct="true">B — Below approximately 600 km, particularly on ram-direction surfaces facing the velocity vector</button>
+            <button class="quiz-opt" data-q="7" data-correct="false">C — At high latitudes where solar flux is lower</button>
+            <button class="quiz-opt" data-q="7" data-correct="false">D — Only during geomagnetic storms</button>
+        </div><div class="quiz-feedback" id="fb7"></div></div>
+
+    <div class="quiz-q"><p><strong>Q8.</strong> The structural mass fraction of a 300 kg LEO broadband satellite is typically:</p>
+        <div class="quiz-options">
+            <button class="quiz-opt" data-q="8" data-correct="false">A — 3–7 kg</button>
+            <button class="quiz-opt" data-q="8" data-correct="true">B — 45–75 kg</button>
+            <button class="quiz-opt" data-q="8" data-correct="false">C — 150–200 kg</button>
+            <button class="quiz-opt" data-q="8" data-correct="false">D — 2–5 kg</button>
+        </div><div class="quiz-feedback" id="fb8"></div></div>
+
+    <div class="quiz-q"><p><strong>Q9.</strong> Fleet-level reliability strategy for LEO broadband constellations means individual satellites can accept lower component reliability because:</p>
+        <div class="quiz-options">
+            <button class="quiz-opt" data-q="9" data-correct="false">A — Individual satellites are more reliable than GEO satellites</button>
+            <button class="quiz-opt" data-q="9" data-correct="true">B — Failed satellites are replaced by the next launch, and the fleet provides system-level redundancy so individual failures have small coverage impact</button>
+            <button class="quiz-opt" data-q="9" data-correct="false">C — No testing is required before launch</button>
+            <button class="quiz-opt" data-q="9" data-correct="false">D — All satellites must operate indefinitely without replacement</button>
+        </div><div class="quiz-feedback" id="fb9"></div></div>
+
+    <div class="quiz-q"><p><strong>Q10.</strong> Power, structure, and thermal subsystems are treated as an integrated design rather than independent systems because:</p>
+        <div class="quiz-options">
+            <button class="quiz-opt" data-q="10" data-correct="false">A — They are manufactured in the same factory</button>
+            <button class="quiz-opt" data-q="10" data-correct="true">B — Design decisions in each subsystem propagate constraints into the others — solar array size, structural layout, and radiator placement are physically coupled</button>
+            <button class="quiz-opt" data-q="10" data-correct="false">C — They all use the same material (aluminium)</button>
+            <button class="quiz-opt" data-q="10" data-correct="false">D — They are all supplied by the same vendor</button>
+        </div><div class="quiz-feedback" id="fb10"></div></div>
+
+    <div class="quiz-score" id="quizScore"></div>
+</div>
+
+<!-- PYTHON -->
+<div class="py-block" id="python">
+    <h2>PYTHON EXERCISES</h2>
+    <p class="py-intro">Three exercises covering the main quantitative sizing tasks in this lesson. Python 3.8+ standard library only.</p>
+
+    <div class="py-exercise">
+        <h3>Exercise 1 — Power Budget and Solar Array Sizing</h3>
+        <p>Size the solar array area and battery for a given total satellite power requirement and eclipse fraction.</p>
+<pre>
+import math
+
+SOLAR_CONST   = 1361.0   # W/m^2 at 1 AU
+CELL_EFF_EOL  = 0.27     # triple-junction GaAs, 5-yr EOL
+PACKING       = 0.90     # cell-to-panel packing efficiency
+COSINE_LOSS   = 0.85     # average cosine of Sun angle
+TEMP_DERATE   = 0.95     # temperature derating
+PERIOD_MIN    = 95.6     # minutes, 550 km orbit
+ECLIPSE_MIN   = 37.0     # minutes, max eclipse at 550 km
+
+P_DENSITY = SOLAR_CONST * CELL_EFF_EOL * PACKING * COSINE_LOSS * TEMP_DERATE
+SUNLIT_MIN = PERIOD_MIN - ECLIPSE_MIN
+
+def size_power(P_total_w, dod=0.30, batt_kwh_kg=0.12):
+    """
+    Size solar array (m^2) and battery (kWh, kg) for P_total_w.
+    dod: depth of discharge for battery sizing.
+    batt_kwh_kg: battery module energy density in kWh/kg.
+    """
+    # Array must supply load AND recharge battery during sunlit phase
+    P_array = P_total_w * PERIOD_MIN / SUNLIT_MIN
+    area_m2 = P_array / P_DENSITY
+    E_kwh   = P_total_w * ECLIPSE_MIN / 60 / 1000   # kWh
+    mass_kg = E_kwh / (batt_kwh_kg * dod)
+    return area_m2, E_kwh, mass_kg
+
+print(f"Panel power density: {P_DENSITY:.1f} W/m² (EOL)\n")
+print(f"{'P_total (W)':>12}{'Array (m²)':>12}{'Battery (kWh)':>15}{'Batt mass (kg)':>16}")
+print("-" * 57)
+for p in [1500, 3000, 5000, 8000, 12000]:
+    a, e, m = size_power(p)
+    print(f"{p:>12}{a:>11.1f} m²{e:>13.2f} kWh{m:>14.1f} kg")
+
+# 1. At what total power does battery mass exceed 50 kg?
+# 2. Reduce eclipse_fraction to 25% (lower altitude). How does
+#    battery mass change for a 5,000 W satellite?
+# 3. Recalculate with CELL_EFF_EOL = 0.20 (silicon cells).
+#    How much larger does the array need to be for 5,000 W?
+</pre>
+    </div>
+
+    <div class="py-exercise">
+        <h3>Exercise 2 — Radiator Sizing</h3>
+        <p>Compute the radiator area required to reject a given heat load for different temperatures and view factors.</p>
+<pre>
+import math
+
+SIGMA     = 5.670374419e-8   # W/m^2/K^4
+T_SPACE   = 3.0              # K, deep space
+T_EARTH   = 255.0            # K, Earth IR equivalent
+
+def radiator_area(Q_w, T_c, emissivity=0.85, earth_view=0.0):
+    """
+    Radiator area (m^2) to reject Q_w watts at T_c degrees Celsius.
+    earth_view: fraction of hemisphere seeing Earth blackbody (0=deep space).
+    """
+    T_k    = T_c + 273.15
+    T_sink = (earth_view * T_EARTH**4
+              + (1 - earth_view) * T_SPACE**4) ** 0.25
+    q_m2   = emissivity * SIGMA * (T_k**4 - T_sink**4)
+    return Q_w / q_m2, q_m2
+
+print("Radiator area to reject 3 kW of waste heat\n")
+print(f"{'T_rad (°C)':>11}{'View factor':>13}{'W/m²':>9}{'Area (m²)':>12}")
+print("-" * 47)
+for t in [20, 40, 60, 80]:
+    for fv, lbl in [(0.0, "deep space"), (0.3, "30% Earth")]:
+        area, qm2 = radiator_area(3000, t, earth_view=fv)
+        print(f"{t:>9}°C  {lbl:>11}{qm2:>8.0f}  {area:>10.2f} m²")
+    print()
+
+# 1. At what temperature does 3 kW area drop below 3 m² (deep space)?
+# 2. A 53-deg LEO satellite has its radiator facing 30% Earth on average.
+#    How much larger must it be vs a pure deep-space view at 60°C?
+# 3. Total waste heat is 6 kW (5 kW payload + 1 kW bus) at 50°C.
+#    What area is needed?
+</pre>
+    </div>
+
+    <div class="py-exercise">
+        <h3>Exercise 3 — Battery Cycle Life Check</h3>
+        <p>Compute charge-discharge cycles over the satellite lifetime and check against rated battery life.</p>
+<pre>
+import math
+
+def cycle_check(life_yr, alt_km=550, dod=0.30, rated_cycles=20000):
+    """
+    Compute eclipse cycles over mission life and compare to rated cycle count.
+    """
+    MU = 398600.4418; RE = 6378.137
+    r  = (RE + alt_km) * 1e3
+    T_min = 2 * math.pi * math.sqrt(r**3 / (MU * 1e9)) / 60
+    orbits_per_day = 1440 / T_min
+    total_cycles   = orbits_per_day * 365.25 * life_yr   # 1 eclipse per orbit
+    margin         = rated_cycles / total_cycles
+    ok = margin >= 1.0
+    print(f"Alt {alt_km}km  Life {life_yr}yr  DoD {dod*100:.0f}%  "
+          f"Rated {rated_cycles:,} cycles")
+    print(f"  Period: {T_min:.1f} min  |  Cycles/yr: {orbits_per_day*365.25:.0f}  "
+          f"|  Total: {total_cycles:.0f}  |  Margin: {margin:.2f}x  "
+          f"|  {'OK' if ok else 'FAIL'}\n")
+    return total_cycles, margin
+
+cycle_check(5,  alt_km=550, dod=0.30, rated_cycles=20000)
+cycle_check(7,  alt_km=550, dod=0.30, rated_cycles=20000)
+cycle_check(5,  alt_km=400, dod=0.30, rated_cycles=20000)
+cycle_check(10, alt_km=550, dod=0.30, rated_cycles=30000)
+
+# 1. What rated cycle count at 30% DoD is needed for a 7-year mission
+#    at 550 km with a 1.5x margin?
+# 2. A new Li-ion is rated to 40,000 cycles at 50% DoD. Does it
+#    survive 10 years at 550 km? What is the DoD savings vs 30% DoD?
+# 3. How does altitude 550 km vs 700 km change cycle count per year?
+</pre>
+    </div>
+</div>
+
+<!-- REFLECTION -->
+<div class="reflection-block" id="reflect">
+    <h2>REFLECTION PROMPTS</h2>
+    <p class="ref-intro">Not graded. Write in your own words, 200–400 words each.</p>
+
+    <div class="ref-prompt"><h3>Prompt 1 — Aluminium vs CFRP</h3>
+        <p>A bus engineer argues for all-aluminium structure to reduce manufacturing cost. A payload engineer argues for CFRP to save 8 kg allowing an additional amplifier chain. Walk through the tradeoffs both face, identify which decision you would make and why, and describe what additional information you would need to be confident in that choice.</p></div>
+
+    <div class="ref-prompt"><h3>Prompt 2 — Battery Design Life</h3>
+        <p>The battery must survive approximately 5,475 charge-discharge cycles per year at 550 km. Describe the engineering decisions that result from this constraint — choice of depth of discharge, required battery capacity, and feedback into total satellite mass. How does this constraint change if design life extends from 5 to 10 years?</p></div>
+
+    <div class="ref-prompt"><h3>Prompt 3 — Altitude Trade on Bus Subsystems</h3>
+        <p>A LEO broadband operator is considering moving its operational altitude from 550 km to 450 km. Trace all the consequences for the power subsystem (eclipse fraction, battery mass), the thermal subsystem (atomic oxygen exposure, solar array temperature), and the structural subsystem (launch loads unchanged, but different deployment geometry). Would you recommend the altitude change on bus subsystem grounds alone?</p></div>
+
+    <div class="ref-prompt"><h3>Prompt 4 — Fleet Redundancy Limits</h3>
+        <p>Mass-produced satellites accept lower unit-level reliability because the fleet provides system-level redundancy. Identify the point at which this logic breaks down — when is the individual satellite failure rate too high even for a large constellation? Express your answer in terms of failure rate per year and fleet size, and identify what coverage or service quality metric crosses an unacceptable threshold.</p></div>
+</div>
+
+<!-- MARK COMPLETE -->
+<div class="complete-wrap">
+    <button class="complete-btn" id="completeBtn">MARK LESSON COMPLETE</button>
+    <div class="complete-msg" id="completeMsg"></div>
+</div>
+
+<div class="lesson-nav">
+    <a href="m3.html">← M3 HUB</a>
+    <a href="m3-2.html">LESSON 02 — ADCS &amp; PROPULSION →</a>
+</div>
+
+</div><!-- /lesson-wrap -->
+
+<button class="back-to-top" id="backToTop" title="Back to top">↑</button>
+
+<footer>© 2026 LEOAF · M3 · LESSON 01 OF 6</footer>
+
+<script>
+const canvas = document.getElementById('starsCanvas');
+const ctx = canvas.getContext('2d');
+let stars = [];
+function initStars(){ stars=[]; for(let i=0;i<180;i++) stars.push({x:Math.random()*canvas.width,y:Math.random()*canvas.height,size:Math.random()*1.5+0.4,speed:Math.random()*0.18+0.04,hue:Math.random()*360}); }
+function resizeCanvas(){ canvas.width=window.innerWidth; canvas.height=window.innerHeight; }
+resizeCanvas(); initStars(); window.addEventListener('resize', resizeCanvas);
+function animateStars(){ ctx.clearRect(0,0,canvas.width,canvas.height); stars.forEach(s=>{s.y-=s.speed;if(s.y<0){s.y=canvas.height;s.x=Math.random()*canvas.width;} ctx.beginPath();ctx.fillStyle=`hsl(${s.hue},80%,80%)`;ctx.arc(s.x,s.y,s.size,0,Math.PI*2);ctx.fill();}); requestAnimationFrame(animateStars); }
+animateStars();
+</script>
+
+<script>
+const feedbacks = {
+    1:{correct:"Correct. E = P × t_eclipse = 5,000 W × (37/60) hr = 3.08 kWh. The eclipse duration and power draw together set the required battery capacity, which at ~120 Wh/kg (module level) translates directly into battery mass.",wrong:"Incorrect. The battery only needs to cover the eclipse period, not the full orbit. E = P_eclipse × t_eclipse (in hours) = 5,000 × (37/60) = 3.1 kWh. The cycle count affects battery life but not the energy requirement per eclipse."},
+    2:{correct:"Correct. Higher efficiency directly reduces the panel area needed for the same power output, saving mass and stowed volume. The cost premium over silicon is accepted because mass is the binding constraint in satellite design.",wrong:"Incorrect. GaAs cells are more expensive than silicon — not cheaper. Atomic oxygen resistance is a property of the cover glass, not the cell. Both cell types operate at similar temperatures. The key advantage is efficiency: more watts per square metre."},
+    3:{correct:"Correct. E = P × t = 5,000 W × (37/60) hr = 3.083 kWh ≈ 3.1 kWh. The eclipse duration is 37 minutes = 37/60 hours.",wrong:"Incorrect. Convert units carefully: 37 minutes = 37/60 hours. E = 5,000 W × (37/60) hr = 3.08 kWh. 185 kWh would be the result of using 37 hours instead of 37 minutes."},
+    4:{correct:"Correct. If the satellite's structural mode frequency is close to the launch vehicle's excitation frequencies, dynamic coupling amplifies loads — potentially catastrophically. The frequency requirement creates separation to prevent resonant amplification.",wrong:"Incorrect. Solar array vibration during eclipse, manoeuvrability, and RF signal frequencies are all unrelated to structural mode frequencies. The requirement prevents resonant coupling between the satellite structure and the launch vehicle excitation spectrum."},
+    5:{correct:"Correct. In vacuum, heat transfer is almost entirely radiative. MLI exploits the fact that many low-emittance layers in series multiply the effective thermal resistance. With effective emittance of 0.01–0.03, it is an extremely efficient radiative insulator.",wrong:"Incorrect. There is no gas-phase conduction in vacuum — foam insulation works by trapping gas, which doesn't apply in space. MLI is a radiative insulator, using alternating metallic layers to block infrared radiation, not conduction."},
+    6:{correct:"Correct. Q_rad/m² = 0.85 × 5.67×10⁻⁸ × (333⁴ − 3⁴) ≈ 600 W/m². Area = 3,000/600 = 5 m². This is a significant surface area claim on the satellite bus.",wrong:"Incorrect. Apply the Stefan-Boltzmann law: Q/m² = ε × σ × T⁴ ≈ 0.85 × 5.67×10⁻⁸ × 333⁴ ≈ 600 W/m². Therefore Area = 3,000/600 = 5 m²."},
+    7:{correct:"Correct. Atomic oxygen is produced at 200–500 km altitude by solar UV photodissociation of O₂. It attacks the leading (ram) face of the satellite at its highest flux. Surfaces must use inorganic coatings (SiO₂, Al₂O₃) for protection.",wrong:"Incorrect. The atmosphere thins with increasing altitude — atomic oxygen is most significant below ~600 km, not above 700 km. Latitude and geomagnetic activity are secondary factors; the altitude and ram-face exposure are the primary drivers."},
+    8:{correct:"Correct. 15–25% × 300 kg = 45–75 kg. Structure is a first-order mass driver, not a residual. This is why structural mass fraction is one of the first parameters established in a satellite mass budget.",wrong:"Incorrect. 15–25% of 300 kg = 45–75 kg. The mass fraction applies to the full dry mass. 3–7 kg would be 1–2%, far below the typical structural fraction."},
+    9:{correct:"Correct. A fleet of hundreds of satellites provides statistical redundancy: a 1–2% annual failure rate has a small fractional impact on coverage. This permits lower unit-level reliability specifications and therefore lower unit cost — a fundamentally different design philosophy from a single irreplaceable GEO satellite.",wrong:"Incorrect. LEO broadband satellites are designed to lower reliability than GEO — the opposite. Testing is still performed, but often statistically rather than 100% acceptance-tested. And replacement is explicitly planned — the fleet model depends on regular replenishment."},
+    10:{correct:"Correct. Solar array area determines both power (generation) and thermal behaviour (cell temperature, atomic oxygen area). Structural layout constrains where radiators can be placed. Battery sizing interacts with the mass budget for all subsystems. These physical couplings mean the subsystems must be designed jointly.",wrong:"Incorrect. Manufacturing location, materials, and vendor are not the reason for integrated design. The coupling is physical: the same satellite body serves simultaneously as structure, thermal spreader, and mounting surface, so choices in one domain constrain the others."}
+};
+let answered = {};
+document.querySelectorAll('.quiz-opt').forEach(btn => {
+    btn.addEventListener('click', function(){
+        const q=this.dataset.q;
+        if(answered[q]!==undefined) return;
+        const correct=this.dataset.correct==='true';
+        answered[q]=correct;
+        document.querySelectorAll(`.quiz-opt[data-q="${q}"]`).forEach(b=>{b.disabled=true;if(b.dataset.correct==='true')b.classList.add('correct');});
+        if(!correct) this.classList.add('wrong');
+        const fb=document.getElementById(`fb${q}`);
+        fb.textContent=(correct?'✓ ':'✗ ')+feedbacks[q][correct?'correct':'wrong'];
+        fb.style.color=correct?'#39ff14':'#ff004f';
+        if(Object.keys(answered).length===10){
+            const total=Object.values(answered).filter(Boolean).length;
+            const el=document.getElementById('quizScore');
+            el.style.display='block';
+            const pct=Math.round(total/10*100);
+            el.textContent=`SCORE: ${total} / 10 (${pct}%) — ${pct===100?'PERFECT.':pct>=80?'STRONG. REVIEW ANY MISSES.':pct>=60?'ADEQUATE. REVISIT WEAK SECTIONS.':'REVISIT THE LESSON BEFORE PROCEEDING.'}`;
+        }
+    });
+});
+</script>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="supabase.js"></script>
+<script src="user_progress.js"></script>
+<script>
+const LESSON_ID='m3-1';
+(function(){
+    function bounceToLogin(r){console.error("Auth guard:",r);window.location.replace("index.html");}
+    async function init(){
+        if(typeof client==="undefined"||!client||!client.auth) return bounceToLogin("Supabase client not loaded");
+        let session=null;
+        try{({data:{session}}=await client.auth.getSession());}
+        catch(e){return bounceToLogin("getSession threw: "+e.message);}
+        if(!session){window.location.replace("index.html");return;}
+        const btn=document.getElementById('completeBtn');
+        const msg=document.getElementById('completeMsg');
+        function setDone(done){
+            if(done){btn.textContent='✓ COMPLETE — CLICK TO UNDO';btn.classList.add('done');btn.style.cssText='border-color:#39ff14;color:#39ff14;background:rgba(57,255,20,0.1);cursor:pointer;opacity:1;';msg.style.color='#39ff14';msg.textContent='Lesson marked complete. Click again to undo.';}
+            else{btn.textContent='MARK LESSON COMPLETE';btn.classList.remove('done');btn.style.cssText='';msg.style.color='#ffffff55';msg.textContent='Not yet marked complete.';}
+        }
+        let mastered=[];
+        try{mastered=await getMasteredSections();}catch(e){console.error(e);}
+        setDone(mastered.includes(LESSON_ID));
+        btn.addEventListener('click',async()=>{
+            const isDone=btn.classList.contains('done');
+            msg.style.color='#00d9ff';msg.textContent='Saving...';
+            const ok=await upsertSection(LESSON_ID,!isDone);
+            if(ok){setDone(!isDone);}else{msg.style.color='#ff004f';msg.textContent='Error saving. Try again.';}
+        });
+        const btt=document.getElementById('backToTop');
+        window.addEventListener('scroll',()=>{btt.classList.toggle('visible',window.scrollY>400);});
+        btt.addEventListener('click',()=>window.scrollTo({top:0,behavior:'smooth'}));
+    }
+    if(document.readyState==="loading") document.addEventListener("DOMContentLoaded",init);
+    else init();
+})();
+</script>
+
+</body>
+</html>
