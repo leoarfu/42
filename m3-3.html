@@ -1,0 +1,604 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, shrink-to-fit=no">
+<title>M3-3 — Payload Architectures: Transparent vs Regenerative · LEOAF</title>
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;600;800&family=Share+Tech+Mono&family=Libre+Baskerville:ital,wght@0,400;0,700;1,400&display=swap" rel="stylesheet">
+<link rel="icon" href="favicon.ico" sizes="any" type="image/x-icon">
+<link rel="manifest" href="site.webmanifest">
+<meta name="theme-color" content="#0f0f0f">
+<script>
+window.leoafAbort = async function () {
+    function go() { window.location.replace("index.html?signedout=1"); }
+    try { if (typeof client !== "undefined" && client && client.auth && client.auth.signOut) { try { await client.auth.signOut({ scope: "local" }); } catch (e) {} } } catch (e) {}
+    go();
+};
+</script>
+<style>
+* { box-sizing:border-box; margin:0; padding:0; }
+html { height:100%; -webkit-text-size-adjust:100%; overflow-x:hidden; }
+body { font-family:'Share Tech Mono',monospace; background:#000; color:white; overflow-x:hidden; min-height:100vh; }
+#starsCanvas { position:fixed; inset:0; z-index:-1; }
+header { background:#000; border-bottom:1px solid #ff004f33; position:sticky; top:0; z-index:100; padding:1rem clamp(1.5rem,5vw,4rem); display:flex; justify-content:space-between; align-items:center; box-shadow:0 4px 16px #0008; }
+.logo { font-family:'Orbitron',sans-serif; font-weight:800; font-size:clamp(16px,2vw,22px); letter-spacing:3px; text-decoration:none; }
+.logo span:first-child { color:white; } .logo span:last-child { color:#ff004f; }
+.nav-right { display:flex; align-items:center; gap:10px; }
+.nav-btn { background:transparent; border:1px solid #ff004f44; color:#ff004f; padding:6px 14px; cursor:pointer; transition:0.3s ease; font-size:11px; font-family:'Orbitron',sans-serif; letter-spacing:1px; text-decoration:none; display:inline-block; }
+.nav-btn:hover { background:#ff004f; color:black; }
+.breadcrumb { padding:14px clamp(1.5rem,5vw,4rem); font-size:11px; color:#ffffff44; letter-spacing:1px; position:relative; z-index:1; }
+.breadcrumb a { color:#00d9ff66; text-decoration:none; } .breadcrumb a:hover { color:#00d9ff; }
+.breadcrumb span { margin:0 8px; }
+.lesson-wrap { max-width:820px; margin:0 auto; padding:0 clamp(1.5rem,5vw,4rem) 80px; position:relative; z-index:1; }
+.lesson-header { padding:30px 0 28px; border-bottom:1px solid #ffffff11; margin-bottom:36px; }
+.lesson-tag { font-family:'Orbitron',sans-serif; font-size:10px; color:#ff004f; letter-spacing:3px; margin-bottom:10px; }
+.lesson-header h1 { font-family:'Orbitron',sans-serif; font-size:clamp(20px,3.5vw,32px); font-weight:800; line-height:1.2; margin-bottom:12px; }
+.lesson-meta { display:flex; gap:10px; flex-wrap:wrap; margin-bottom:16px; }
+.l-pill { font-family:'Orbitron',sans-serif; font-size:10px; padding:3px 10px; border:1px solid; letter-spacing:1px; }
+.l-pill-q { color:#ff004f; border-color:#ff004f44; } .l-pill-t { color:#39ff14; border-color:#39ff1444; }
+.lesson-intro { font-size:13px; line-height:1.85; opacity:0.75; }
+.toc { background:rgba(0,217,255,0.06); border:1px solid #00d9ff33; padding:24px 28px; margin:30px 0; }
+.toc h4 { font-family:'Orbitron',sans-serif; font-size:10px; color:#00d9ff; letter-spacing:2px; margin-bottom:16px; }
+.toc ol { padding-left:20px; } .toc li { font-size:13px; line-height:2.1; }
+.toc li a { color:#00d9ffbb; text-decoration:none; transition:0.15s; } .toc li a:hover { color:#ffffff; padding-left:4px; }
+.toc li::marker { color:#ff004f; font-family:'Orbitron',sans-serif; font-size:10px; }
+.content-block { margin-bottom:48px; }
+.content-block h2 { font-family:'Orbitron',sans-serif; font-size:13px; color:#00d9ff; letter-spacing:2px; text-transform:uppercase; margin-bottom:18px; padding-bottom:10px; border-bottom:1px solid #00d9ff22; scroll-margin-top:80px; }
+.content-block h3 { font-family:'Orbitron',sans-serif; font-size:11px; color:#ffffff88; letter-spacing:1.5px; text-transform:uppercase; margin:28px 0 12px; }
+.content-block p { font-size:13px; line-height:1.9; opacity:0.85; margin-bottom:16px; }
+.content-block ul,.content-block ol { padding-left:0; margin-bottom:16px; }
+.content-block ul li,.content-block ol li { font-size:13px; line-height:1.85; opacity:0.85; padding-left:20px; position:relative; margin-bottom:6px; }
+.content-block ul li::before { content:'›'; position:absolute; left:0; color:#00d9ff; }
+.content-block blockquote { border-left:3px solid #39ff14; background:rgba(57,255,20,0.05); padding:14px 20px; margin:18px 0; font-size:14px; font-family:'Share Tech Mono',monospace; color:#39ff14; letter-spacing:1px; }
+.callout { border-left:3px solid #00d9ff; background:rgba(0,217,255,0.05); padding:16px 20px; margin:22px 0; font-size:12px; line-height:1.8; }
+.callout.red { border-left-color:#ff004f; background:rgba(255,0,79,0.05); }
+.callout.green { border-left-color:#39ff14; background:rgba(57,255,20,0.05); }
+.callout.amber { border-left-color:#ffaa00; background:rgba(255,170,0,0.05); }
+.callout strong { font-family:'Orbitron',sans-serif; font-size:10px; letter-spacing:1px; display:block; margin-bottom:8px; color:inherit; }
+.compare-table { width:100%; border-collapse:collapse; margin:22px 0; font-size:12px; }
+.compare-table th { font-family:'Orbitron',sans-serif; font-size:10px; letter-spacing:1px; color:#00d9ff; padding:10px 12px; border-bottom:1px solid #00d9ff33; text-align:left; }
+.compare-table td { padding:10px 12px; border-bottom:1px solid #ffffff0a; line-height:1.5; opacity:0.85; vertical-align:top; }
+.compare-table tr:hover td { background:rgba(255,255,255,0.02); }
+.signal-flow { display:flex; align-items:center; gap:0; margin:20px 0; flex-wrap:wrap; }
+.sf-step { background:rgba(0,217,255,0.07); border:1px solid #00d9ff33; padding:8px 12px; font-size:11px; text-align:center; min-width:80px; flex:1; }
+.sf-arrow { color:#00d9ff44; font-size:18px; padding:0 4px; flex-shrink:0; }
+.sf-step.highlight { background:rgba(57,255,20,0.08); border-color:#39ff1444; color:#39ff14; }
+.quiz-block { background:rgba(17,17,17,0.9); border:1px solid #ff004f33; padding:28px; margin:48px 0 32px; }
+.quiz-block h2 { font-family:'Orbitron',sans-serif; font-size:13px; color:#ff004f; letter-spacing:2px; margin-bottom:6px; }
+.quiz-intro { font-size:12px; opacity:0.6; margin-bottom:24px; padding-bottom:16px; border-bottom:1px solid #ff004f22; line-height:1.6; }
+.quiz-q { margin-bottom:28px; }
+.quiz-q p { font-size:13px; opacity:0.9; margin-bottom:12px; line-height:1.65; }
+.quiz-q p strong { color:#00d9ff; }
+.quiz-options { display:flex; flex-direction:column; gap:8px; }
+.quiz-opt { background:rgba(255,255,255,0.03); border:1px solid #ffffff1a; padding:11px 16px; cursor:pointer; font-size:12px; font-family:'Share Tech Mono',monospace; transition:0.2s ease; text-align:left; color:white; line-height:1.5; }
+.quiz-opt:hover:not(:disabled) { background:rgba(0,217,255,0.08); border-color:#00d9ff44; }
+.quiz-opt.correct { background:rgba(57,255,20,0.1); border-color:#39ff14; color:#39ff14; }
+.quiz-opt.wrong { background:rgba(255,0,79,0.1); border-color:#ff004f; color:#ff004f; }
+.quiz-opt:disabled { cursor:default; }
+.quiz-feedback { font-size:12px; margin-top:10px; min-height:18px; line-height:1.7; opacity:0.9; padding:0 4px; }
+.quiz-score { font-family:'Orbitron',sans-serif; font-size:12px; color:#39ff14; margin-top:20px; letter-spacing:1px; display:none; padding-top:16px; border-top:1px solid #39ff1433; }
+.py-block { background:rgba(10,10,10,0.95); border:1px solid #39ff1422; padding:28px; margin:32px 0; }
+.py-block h2 { font-family:'Orbitron',sans-serif; font-size:13px; color:#39ff14; letter-spacing:2px; margin-bottom:8px; }
+.py-block .py-intro { font-size:12px; opacity:0.7; margin-bottom:20px; padding-bottom:16px; border-bottom:1px solid #39ff1422; line-height:1.7; }
+.py-exercise { margin-bottom:32px; } .py-exercise:last-child { margin-bottom:0; }
+.py-exercise h3 { font-family:'Orbitron',sans-serif; font-size:11px; color:#39ff1499; letter-spacing:1.5px; text-transform:uppercase; margin-bottom:10px; }
+.py-exercise p { font-size:12px; opacity:0.8; margin-bottom:14px; line-height:1.75; }
+.py-block pre { background:#050505; border:1px solid #39ff1433; padding:20px; font-family:'Share Tech Mono',monospace; font-size:11.5px; line-height:1.75; overflow-x:auto; color:#39ff14; white-space:pre; margin-bottom:12px; }
+.reflection-block { background:rgba(255,170,0,0.04); border:1px solid #ffaa0033; padding:24px; margin:32px 0; }
+.reflection-block h2 { font-family:'Orbitron',sans-serif; font-size:13px; color:#ffaa00; letter-spacing:2px; margin-bottom:8px; }
+.reflection-block .ref-intro { font-size:12px; opacity:0.7; margin-bottom:20px; padding-bottom:14px; border-bottom:1px solid #ffaa0022; line-height:1.7; }
+.ref-prompt { margin-bottom:20px; }
+.ref-prompt h3 { font-family:'Orbitron',sans-serif; font-size:11px; color:#ffaa0099; letter-spacing:1px; margin-bottom:8px; }
+.ref-prompt p { font-size:12px; opacity:0.8; line-height:1.75; margin-bottom:10px; }
+.back-to-top { position:fixed; bottom:28px; right:28px; z-index:200; width:44px; height:44px; background:#000; border:1px solid #00d9ff55; color:#00d9ff; font-size:20px; cursor:pointer; display:flex; align-items:center; justify-content:center; opacity:0; pointer-events:none; transition:opacity 0.3s ease; }
+.back-to-top.visible { opacity:1; pointer-events:auto; } .back-to-top:hover { border-color:#00d9ff; background:#001a2c; }
+.complete-wrap { margin-top:56px; padding-top:30px; border-top:1px solid #ffffff11; text-align:center; }
+.complete-btn { font-family:'Orbitron',sans-serif; font-size:13px; letter-spacing:2px; padding:14px 44px; background:transparent; border:1px solid #39ff14; color:#39ff14; cursor:pointer; transition:0.3s ease; }
+.complete-btn:hover:not(.done) { background:#39ff14; color:black; box-shadow:0 0 20px rgba(57,255,20,0.4); }
+.complete-btn.done { background:rgba(57,255,20,0.1); cursor:default; opacity:0.7; }
+.complete-msg { font-size:12px; color:#39ff14; margin-top:14px; min-height:18px; letter-spacing:1px; }
+.lesson-nav { display:flex; justify-content:space-between; margin-top:30px; flex-wrap:wrap; gap:10px; }
+.lesson-nav a { font-family:'Orbitron',sans-serif; font-size:11px; color:#00d9ff66; text-decoration:none; letter-spacing:1px; transition:0.2s; }
+.lesson-nav a:hover { color:#00d9ff; }
+footer { text-align:center; padding:30px; opacity:0.3; font-size:11px; position:relative; z-index:1; letter-spacing:1px; }
+@media(max-width:600px) { .compare-table { font-size:11px; } .compare-table th,.compare-table td { padding:8px; } .signal-flow { flex-direction:column; } .sf-arrow { transform:rotate(90deg); } }
+.content-block { background:#f5f2ec; color:#1a1a1a; padding:36px clamp(24px,4vw,48px); margin-bottom:24px; border-left:4px solid #00d9ff; position:relative; z-index:1; }
+.content-block h2 { font-family:'Orbitron',sans-serif; font-size:13px; color:#003d66; letter-spacing:2px; text-transform:uppercase; margin-bottom:20px; padding-bottom:10px; border-bottom:2px solid #00d9ff66; scroll-margin-top:80px; }
+.content-block h3 { font-family:'Orbitron',sans-serif; font-size:11px; color:#444; letter-spacing:1.5px; text-transform:uppercase; margin:32px 0 14px; }
+.content-block p { font-family:'Libre Baskerville',Georgia,serif; font-size:15px; line-height:1.9; color:#1a1a1a; opacity:1; margin-bottom:18px; }
+.content-block ul li { font-family:'Libre Baskerville',Georgia,serif; font-size:14px; line-height:1.85; color:#1a1a1a; opacity:1; margin-bottom:8px; }
+.content-block ul li::before { color:#0077aa; }
+.content-block blockquote { border-left:3px solid #1a7a1a; background:#eafaea; color:#0a3d0a; }
+.content-block .callout { border-left:3px solid #0088cc; background:#e8f4fb; color:#1a1a1a; }
+.content-block .callout.red { border-left-color:#cc0033; background:#fdecea; }
+.content-block .callout.amber { border-left-color:#996600; background:#fef9ec; }
+.content-block .callout.green { border-left-color:#1a7a1a; background:#eafaea; }
+.content-block .callout strong { color:inherit; }
+.content-block .compare-table th { color:#003d66; border-bottom:2px solid #00d9ff66; }
+.content-block .compare-table td { color:#1a1a1a; opacity:1; border-bottom:1px solid #ddd; }
+.content-block .compare-table tr:hover td { background:#f0f0f0; }
+.content-block .signal-flow .sf-step { background:#e8f4fb; border-color:#0088cc44; color:#003d66; }
+.content-block .signal-flow .sf-step.highlight { background:#eafaea; border-color:#1a7a1a44; color:#1a7a1a; }
+.content-block .signal-flow .sf-arrow { color:#0088cc66; }
+</style>
+</head>
+<body>
+<canvas id="starsCanvas"></canvas>
+<header>
+    <a href="dashboard.html" class="logo"><span>LEO</span><span>AF</span></a>
+    <div class="nav-right">
+        <a href="m3.html" class="nav-btn">← M3 HUB</a>
+        <button class="nav-btn" onclick="leoafAbort()">ABORT</button>
+    </div>
+</header>
+<div class="breadcrumb">
+    <a href="dashboard.html">DASHBOARD</a><span>/</span>
+    <a href="m3.html">M3</a><span>/</span>
+    <span style="color:#ffffff88;">LESSON 03 — PAYLOAD ARCHITECTURES</span>
+</div>
+
+<div class="lesson-wrap">
+
+<div class="lesson-header">
+    <div class="lesson-tag">M3 · LESSON 03 OF 6</div>
+    <h1>Payload Architectures:<br>Transparent vs Regenerative</h1>
+    <div class="lesson-meta">
+        <div class="l-pill l-pill-q">MODULE 3</div>
+        <div class="l-pill l-pill-t">COMMS PAYLOAD</div>
+    </div>
+    <p class="lesson-intro">The communications payload is the reason the satellite exists. The payload architecture — how it handles the signal between receive and transmit — is the single decision with the largest downstream consequences for capacity, latency, flexibility, and cost. This lesson maps the spectrum from transparent bent-pipe through digital channeliser to fully regenerative processing, explains what each architecture can and cannot do, and identifies where LEO broadband constellations sit on it and why.</p>
+</div>
+
+<div class="toc">
+    <h4>CONTENTS</h4>
+    <ol>
+        <li><a href="#s1">The transparent (bent-pipe) repeater</a></li>
+        <li><a href="#s2">The regenerative (processing) payload</a></li>
+        <li><a href="#s3">The digital channeliser</a></li>
+        <li><a href="#s4">Where LEO broadband constellations sit</a></li>
+        <li><a href="#s5">The software-defined payload</a></li>
+        <li><a href="#s6">On-board processing power requirements</a></li>
+        <li><a href="#quiz">Knowledge check</a></li>
+        <li><a href="#python">Python exercises</a></li>
+        <li><a href="#reflect">Reflection prompts</a></li>
+    </ol>
+</div>
+
+<!-- S1 -->
+<div class="content-block" id="s1">
+    <h2>1. The Transparent (Bent-Pipe) Repeater</h2>
+    <p>The transparent payload amplifies and frequency-converts the signal without demodulating it — the satellite sees RF power, not bits. Whatever modulation, coding, and data format the ground transmits passes through unchanged.</p>
+
+    <h3>Signal path</h3>
+    <div class="signal-flow">
+        <div class="sf-step">Receive<br>antenna</div><div class="sf-arrow">›</div>
+        <div class="sf-step">LNA</div><div class="sf-arrow">›</div>
+        <div class="sf-step">Freq. converter</div><div class="sf-arrow">›</div>
+        <div class="sf-step">IMUX</div><div class="sf-arrow">›</div>
+        <div class="sf-step">HPA<br>(TWTA/SSPA)</div><div class="sf-arrow">›</div>
+        <div class="sf-step">OMUX</div><div class="sf-arrow">›</div>
+        <div class="sf-step">Transmit<br>antenna</div>
+    </div>
+    <p style="font-size:12px;opacity:0.6;margin-top:-10px;">No demodulation at any stage. The satellite amplifies and frequency-shifts; the signal content is never inspected.</p>
+
+    <h3>Strengths</h3>
+    <p><strong>Simplicity and heritage</strong>: transparent payloads have been the standard for GEO commercial satellites for 60 years — well-understood, reliable, straightforwardly testable. <strong>Waveform agnosticism</strong>: because the satellite never demodulates, it is compatible with any modulation and coding scheme the ground uses. Upgrading the air interface requires only ground terminal software changes, not satellite hardware changes.</p>
+
+    <h3>Limitations</h3>
+    <p><strong>No on-board switching</strong>: traffic received on one beam must go to a predetermined downlink channel — the payload cannot route between beams. <strong>Noise accumulation</strong>: uplink noise is amplified and transmitted on the downlink; the noise budgets are coupled. <strong>Gateway colocation dependency</strong>: every user link must be paired with a gateway link within the same satellite footprint at the same time. No gateway visible to the satellite means no service.</p>
+
+    <div class="callout red">
+        <strong>THE GATEWAY COLOCATION PROBLEM</strong>
+        For a transparent LEO constellation, user traffic comes down to a nearby gateway, routes through the ground network, and goes back up to the satellite for retransmission to the user. If no gateway is within the satellite's coverage cap when the user needs service — over an ocean, for example — the link cannot be established. This is the architectural constraint that regenerative payloads with ISLs eliminate.
+    </div>
+</div>
+
+<!-- S2 -->
+<div class="content-block" id="s2">
+    <h2>2. The Regenerative (Processing) Payload</h2>
+    <p>A regenerative payload demodulates the received signal, processes the bits, and remodulates a new signal for transmission. The satellite operates as a full network node rather than a transparent relay.</p>
+
+    <h3>Signal path</h3>
+    <div class="signal-flow">
+        <div class="sf-step">Receive<br>antenna + LNA</div><div class="sf-arrow">›</div>
+        <div class="sf-step highlight">Demodulator<br>+ FEC decode</div><div class="sf-arrow">›</div>
+        <div class="sf-step highlight">Digital Baseband<br>Processor (DBP)</div><div class="sf-arrow">›</div>
+        <div class="sf-step highlight">Modulator<br>+ FEC encode</div><div class="sf-arrow">›</div>
+        <div class="sf-step">HPA +<br>Tx antenna</div>
+    </div>
+    <p style="font-size:12px;opacity:0.6;margin-top:-10px;">Highlighted stages convert signal to bits and back — the satellite sees and processes digital data.</p>
+
+    <h3>Strengths</h3>
+    <p><strong>On-board switching and routing</strong>: the DBP can switch traffic between any uplink and downlink beam, and forward traffic via ISL to the next satellite. <strong>Noise decoupling</strong>: demodulation regenerates a clean signal; the downlink starts with a fresh noise budget independent of uplink noise. <strong>Flexible capacity allocation</strong>: the DBP can dynamically reallocate bandwidth, power, and beam pointing across beams in response to real-time demand.</p>
+
+    <h3>Limitations</h3>
+    <p><strong>Complexity and cost</strong>: a high-throughput DBP is a demanding, power-hungry piece of radiation-hardened hardware. <strong>Waveform lock-in</strong>: changing the air interface post-launch requires changing on-board software at minimum, which is more constrained than a ground-only change. <strong>Development and test burden</strong>: verifying a DBP under all traffic patterns and interference conditions is significantly harder than verifying a transparent amplifier chain.</p>
+</div>
+
+<!-- S3 -->
+<div class="content-block" id="s3">
+    <h2>3. The Digital Channeliser</h2>
+    <p>Between the two poles lies the digital channeliser: the received signal is digitised by an ADC, processed by an FFT filter bank into narrowband sub-channels that can be routed and recombined independently, then converted back to analogue by a DAC and amplified. No full demodulation to bits — the satellite sees frequency sub-bands, not packets.</p>
+    <p>Advantages over a traditional transparent payload: <strong>flexible bandwidth allocation</strong> (sub-channels can be combined in software to create beams of any width); <strong>sub-band routing</strong> (frequency sub-bands from one uplink beam can go to a different downlink beam); <strong>interference notching</strong> (known interfering signals can be digitally suppressed before re-amplification). This is the architecture used by SES O3b mPower and several VHTS GEO platforms.</p>
+
+    <table class="compare-table">
+        <thead><tr><th>Architecture</th><th>On-board switching</th><th>ISL compatible</th><th>Noise decoupled</th><th>Gateway dependency</th><th>Flexibility</th></tr></thead>
+        <tbody>
+            <tr><td>Transparent (bent-pipe)</td><td style="color:#ff004f">No</td><td style="color:#ff004f">No</td><td style="color:#ff004f">No</td><td style="color:#ff004f">High</td><td style="color:#ff004f">Low</td></tr>
+            <tr><td>Digital channeliser</td><td style="color:#ffaa00">Partial (freq.)</td><td style="color:#ff004f">No</td><td style="color:#ff004f">No</td><td style="color:#ffaa00">Medium</td><td style="color:#ffaa00">Medium</td></tr>
+            <tr><td>Regenerative (full)</td><td style="color:#39ff14">Yes</td><td style="color:#39ff14">Yes</td><td style="color:#39ff14">Yes</td><td style="color:#39ff14">Low</td><td style="color:#39ff14">High</td></tr>
+        </tbody>
+    </table>
+</div>
+
+<!-- S4 -->
+<div class="content-block" id="s4">
+    <h2>4. Where LEO Broadband Constellations Sit</h2>
+    <p><strong>Starlink</strong> uses a regenerative payload with on-board routing. This enables the ISL mesh routing that is central to Starlink's architecture — without regeneration, ISL routing is essentially impossible because you cannot switch bitstreams at the satellite if you never convert to bits. The DBP is a proprietary SpaceX design.</p>
+    <p><strong>OneWeb</strong> (first generation) uses a transparent payload. All routing is performed on the ground through the gateway network. Simpler and cheaper in the space segment but creates a tight gateway colocation dependency over oceanic and remote coverage areas.</p>
+    <p><strong>Telesat Lightspeed</strong> is designed as fully regenerative from the outset, with on-board switching, dynamic beam management, and optical ISLs. The MDA Aurora platform is software-defined — payload functionality is programmable on orbit — representing the leading edge of commercial regenerative payload design.</p>
+    <p><strong>Kuiper</strong> has not publicly confirmed its on-board processing architecture in detail, but its FCC filings indicate advanced digital processing capability and ISL support.</p>
+
+    <div class="callout amber">
+        <strong>THE ARCHITECTURE CHOICE FOLLOWS THE NETWORK DESIGN</strong>
+        Starlink's ISL mesh requires regeneration — you can't route across an ISL without bits. OneWeb's gateway-centric ground network makes a transparent payload viable, at the cost of geographic gateway density. The payload architecture is not chosen independently; it is determined by the network topology decision made at the system level.
+    </div>
+</div>
+
+<!-- S5 -->
+<div class="content-block" id="s5">
+    <h2>5. The Software-Defined Payload</h2>
+    <p>The most recent development is the software-defined satellite (SDS) — a regenerative architecture where payload functionality is defined in software running on radiation-hardened programmable hardware (FPGAs or general-purpose processors), rather than fixed ASICs. Post-launch software uploads can change the waveform, channel plan, beam configuration, and routing logic without any physical change to the satellite.</p>
+    <p>This provides post-launch reconfigurability (respond to market changes, interference environments, or technology upgrades), multi-mission capability (same hardware serves different customers by changing software), and rapid iteration (software updates replace hardware re-spins). Telesat's MDA Aurora and Airbus's OneSat GEO platform both take this approach.</p>
+    <p>The fundamental limitation: the programmable hardware must be specified at launch with enough capacity to support future software functionality. You cannot add processing capacity that was not physically present. Designing in sufficient headroom without massively oversizing the hardware is the key architectural challenge.</p>
+</div>
+
+<!-- S6 -->
+<div class="content-block" id="s6">
+    <h2>6. On-Board Processing Power Requirements</h2>
+    <p>The digital baseband processor in a regenerative satellite is the payload's most power-hungry component after the high-power amplifiers. A DBP handling 100 Gbps of aggregate throughput requires on the order of 500 W–2 kW depending on architecture efficiency — a significant fraction of the satellite's total power budget and a direct driver of solar array area and battery sizing.</p>
+    <p>The trend is toward more capable, lower-power ASICs, driven by the same semiconductor technology improvements that drove terrestrial data centre efficiency gains. Each generation of radiation-hardened ASIC technology (typically 1–2 generations behind commercial process nodes due to qualification requirements) delivers more compute per watt. This trend is what made fully regenerative architectures practical for mass-produced LEO constellation satellites in the early 2020s — a decade earlier, the power and mass budget for a high-capacity DBP was prohibitive at the 150–500 kg satellite mass point that LEO broadband economics require.</p>
+
+    <div class="callout green">
+        <strong>COMPUTE PER WATT — THE ENABLING TREND</strong>
+        The same Moore's Law curve that drove smartphone processing into wearables is driving satellite on-board processing into mass-produced LEO spacecraft. Radiation-hardened ASICs lag the commercial frontier by 5–10 years, but the direction is the same: more function per watt per dollar per gram. This is why regenerative payloads that were impractical at 100 kg satellites in 2015 are standard on 300 kg satellites in 2025.
+    </div>
+</div>
+
+<!-- QUIZ -->
+<div class="quiz-block" id="quiz">
+    <h2>KNOWLEDGE CHECK</h2>
+    <p class="quiz-intro">Ten questions. Select one answer per question. Feedback is immediate; score appears when all ten are answered.</p>
+
+    <div class="quiz-q"><p><strong>Q1.</strong> The defining characteristic of a transparent (bent-pipe) payload is:</p>
+        <div class="quiz-options">
+            <button class="quiz-opt" data-q="1" data-correct="false">A — It demodulates the signal to bits and remodulates a new signal</button>
+            <button class="quiz-opt" data-q="1" data-correct="true">B — It amplifies and frequency-converts the signal without demodulating — the satellite never converts the signal to bits</button>
+            <button class="quiz-opt" data-q="1" data-correct="false">C — It routes traffic between beams using a switch matrix</button>
+            <button class="quiz-opt" data-q="1" data-correct="false">D — It requires no high-power amplifiers</button>
+        </div><div class="quiz-feedback" id="fb1"></div></div>
+
+    <div class="quiz-q"><p><strong>Q2.</strong> A transparent payload cannot switch traffic between beams because:</p>
+        <div class="quiz-options">
+            <button class="quiz-opt" data-q="2" data-correct="false">A — It lacks sufficient power</button>
+            <button class="quiz-opt" data-q="2" data-correct="true">B — Switching requires knowledge of the bitstream, which the transparent payload never obtains — it only sees RF power</button>
+            <button class="quiz-opt" data-q="2" data-correct="false">C — Beam switching requires mechanical antennas</button>
+            <button class="quiz-opt" data-q="2" data-correct="false">D — ITU regulations prohibit on-board switching for transparent payloads</button>
+        </div><div class="quiz-feedback" id="fb2"></div></div>
+
+    <div class="quiz-q"><p><strong>Q3.</strong> The gateway colocation dependency of a transparent LEO constellation means:</p>
+        <div class="quiz-options">
+            <button class="quiz-opt" data-q="3" data-correct="false">A — All gateways must be at the same geographic location</button>
+            <button class="quiz-opt" data-q="3" data-correct="true">B — A gateway must be within the satellite's coverage footprint at the same time the user is being served, because all traffic must return to ground for routing</button>
+            <button class="quiz-opt" data-q="3" data-correct="false">C — The user terminal must be co-located with the gateway</button>
+            <button class="quiz-opt" data-q="3" data-correct="false">D — Transparent payloads always require more gateways than regenerative payloads</button>
+        </div><div class="quiz-feedback" id="fb3"></div></div>
+
+    <div class="quiz-q"><p><strong>Q4.</strong> The primary advantage of a regenerative payload for an ISL-connected constellation is:</p>
+        <div class="quiz-options">
+            <button class="quiz-opt" data-q="4" data-correct="false">A — Lower power consumption</button>
+            <button class="quiz-opt" data-q="4" data-correct="true">B — On-board switching allows traffic to be routed between beams and across ISL hops without returning to a gateway</button>
+            <button class="quiz-opt" data-q="4" data-correct="false">C — Simpler ground terminal design</button>
+            <button class="quiz-opt" data-q="4" data-correct="false">D — Lower satellite cost</button>
+        </div><div class="quiz-feedback" id="fb4"></div></div>
+
+    <div class="quiz-q"><p><strong>Q5.</strong> A digital channeliser differs from a traditional transparent payload in that:</p>
+        <div class="quiz-options">
+            <button class="quiz-opt" data-q="5" data-correct="false">A — It fully demodulates the signal to bits</button>
+            <button class="quiz-opt" data-q="5" data-correct="true">B — It digitises the received signal and uses an FFT filter bank to flexibly route frequency sub-bands without full demodulation</button>
+            <button class="quiz-opt" data-q="5" data-correct="false">C — It eliminates the need for high-power amplifiers</button>
+            <button class="quiz-opt" data-q="5" data-correct="false">D — It is only used in MEO constellations</button>
+        </div><div class="quiz-feedback" id="fb5"></div></div>
+
+    <div class="quiz-q"><p><strong>Q6.</strong> Noise decoupling in a regenerative payload means:</p>
+        <div class="quiz-options">
+            <button class="quiz-opt" data-q="6" data-correct="false">A — The payload contains no noise sources</button>
+            <button class="quiz-opt" data-q="6" data-correct="true">B — Demodulation and remodulation regenerates a clean downlink signal, so uplink noise is not amplified and transmitted</button>
+            <button class="quiz-opt" data-q="6" data-correct="false">C — The uplink and downlink simply use different frequency bands</button>
+            <button class="quiz-opt" data-q="6" data-correct="false">D — Error correction is not needed on regenerative payloads</button>
+        </div><div class="quiz-feedback" id="fb6"></div></div>
+
+    <div class="quiz-q"><p><strong>Q7.</strong> The key limitation of a software-defined payload is:</p>
+        <div class="quiz-options">
+            <button class="quiz-opt" data-q="7" data-correct="false">A — It cannot be updated after launch</button>
+            <button class="quiz-opt" data-q="7" data-correct="true">B — The programmable hardware capacity must be specified at launch — you cannot add compute that was not physically present</button>
+            <button class="quiz-opt" data-q="7" data-correct="false">C — It is incompatible with Ka-band frequencies</button>
+            <button class="quiz-opt" data-q="7" data-correct="false">D — It requires a dedicated ground station for software uploads</button>
+        </div><div class="quiz-feedback" id="fb7"></div></div>
+
+    <div class="quiz-q"><p><strong>Q8.</strong> OneWeb's first-generation transparent payload creates a gateway dependency that Starlink's regenerative payload avoids because:</p>
+        <div class="quiz-options">
+            <button class="quiz-opt" data-q="8" data-correct="false">A — OneWeb has fewer satellites than Starlink</button>
+            <button class="quiz-opt" data-q="8" data-correct="true">B — Without on-board switching, all OneWeb traffic must pass through a gateway in the satellite's footprint; Starlink's regenerative ISL mesh can route to a satellite that does have a gateway</button>
+            <button class="quiz-opt" data-q="8" data-correct="false">C — OneWeb uses a different frequency band</button>
+            <button class="quiz-opt" data-q="8" data-correct="false">D — Starlink has more gateways than OneWeb</button>
+        </div><div class="quiz-feedback" id="fb8"></div></div>
+
+    <div class="quiz-q"><p><strong>Q9.</strong> The trend toward lower-power ASICs matters for regenerative LEO satellite payloads because:</p>
+        <div class="quiz-options">
+            <button class="quiz-opt" data-q="9" data-correct="false">A — Lower power means smaller solar arrays, reducing structural mass</button>
+            <button class="quiz-opt" data-q="9" data-correct="true">B — A high-capacity DBP can consume 500 W–2 kW; reducing this makes the required processing budget achievable within the mass-constrained LEO satellite bus</button>
+            <button class="quiz-opt" data-q="9" data-correct="false">C — ASICs are always cheaper than FPGAs</button>
+            <button class="quiz-opt" data-q="9" data-correct="false">D — Lower power eliminates the need for radiators</button>
+        </div><div class="quiz-feedback" id="fb9"></div></div>
+
+    <div class="quiz-q"><p><strong>Q10.</strong> The waveform agnosticism of a transparent payload is an advantage because:</p>
+        <div class="quiz-options">
+            <button class="quiz-opt" data-q="10" data-correct="false">A — It allows the satellite to serve multiple operators simultaneously</button>
+            <button class="quiz-opt" data-q="10" data-correct="true">B — The air interface can be upgraded by ground terminal software changes alone, without modifying the satellite hardware</button>
+            <button class="quiz-opt" data-q="10" data-correct="false">C — It eliminates interference between users in adjacent beams</button>
+            <button class="quiz-opt" data-q="10" data-correct="false">D — It allows the payload to operate without a channel plan</button>
+        </div><div class="quiz-feedback" id="fb10"></div></div>
+
+    <div class="quiz-score" id="quizScore"></div>
+</div>
+
+<!-- PYTHON -->
+<div class="py-block" id="python">
+    <h2>PYTHON EXERCISES</h2>
+    <p class="py-intro">Three exercises covering transparent relay noise budgets, digital channeliser allocation, and gateway colocation analysis. Python 3.8+ standard library only.</p>
+
+    <div class="py-exercise">
+        <h3>Exercise 1 — Transparent vs Regenerative Noise Budget</h3>
+        <p>Compare end-to-end C/N for a transparent relay versus a regenerative relay where the downlink noise budget is independent of the uplink.</p>
+<pre>
+import math
+
+def db_to_lin(db): return 10 ** (db / 10)
+def lin_to_db(x):  return 10 * math.log10(x)
+
+def transparent_cn(ul_db, dl_db):
+    """End-to-end C/N for a transparent relay: 1/(1/CN_ul + 1/CN_dl)."""
+    return lin_to_db(1 / (1/db_to_lin(ul_db) + 1/db_to_lin(dl_db)))
+
+print("Transparent relay — end-to-end C/N (downlink fixed at 15 dB)\n")
+print(f"{'Uplink C/N':>12}{'End-to-end C/N':>16}{'Penalty vs DL':>16}")
+print("-" * 46)
+for ul in [5, 8, 10, 12, 15, 20, 25]:
+    e2e = transparent_cn(ul, 15.0)
+    print(f"{ul:>10}dB{e2e:>14.1f}dB{15-e2e:>14.1f}dB")
+
+print("\nRegenerative relay: downlink C/N = 15 dB regardless of uplink")
+print("(provided uplink closes above demod threshold ~5-7 dB with FEC)")
+
+# 1. At what uplink C/N does the transparent relay reach within 0.5 dB
+#    of the downlink C/N?
+# 2. During rain fade the downlink C/N drops to 8 dB. Compute end-to-end
+#    C/N for a transparent relay with uplink at 12 dB.
+#    A regenerative relay just sees the 8 dB downlink. What is the
+#    advantage of regeneration here?
+# 3. For a 3-hop transparent chain (all links at 12 dB), write the
+#    formula and compute the total end-to-end C/N.
+</pre>
+    </div>
+
+    <div class="py-exercise">
+        <h3>Exercise 2 — Digital Channeliser Sub-Band Allocation</h3>
+        <p>Model demand-proportional sub-band allocation and compare efficiency against a fixed transparent channel plan.</p>
+<pre>
+def channeliser(total_mhz, n_sc, demands):
+    sc_bw = total_mhz / n_sc
+    total = sum(demands)
+    allocs = []
+    for i, d in enumerate(demands):
+        n = round(d / total * n_sc)
+        allocs.append((i+1, d, n, n*sc_bw))
+    return allocs, sc_bw
+
+demands = [10, 30, 15, 5, 25, 15]   # relative demand, 6 beams
+allocs, sc_bw = channeliser(500, 20, demands)
+
+print(f"Digital Channeliser: 500 MHz / 20 sub-channels of {sc_bw:.0f} MHz\n")
+print(f"{'Beam':>5}{'Demand':>9}{'Sub-chans':>11}{'Alloc (MHz)':>13}{'%':>7}")
+print("-" * 47)
+for beam, dem, nsc, bw in allocs:
+    print(f"{beam:>5}{dem:>9}{nsc:>11}{bw:>12.0f} {bw/500*100:>6.1f}%")
+
+# Fixed transparent payload: 6 equal channels of 83.3 MHz each
+fixed_bw = 500 / 6
+print(f"\nFixed transparent: each beam gets {fixed_bw:.1f} MHz regardless of demand")
+total_demand = sum(demands)
+for i, d in enumerate(demands):
+    want = d / total_demand * 500
+    waste = fixed_bw - want if fixed_bw > want else 0
+    unmet = want - fixed_bw if want > fixed_bw else 0
+    print(f"Beam {i+1}: demand wants {want:.0f} MHz, gets {fixed_bw:.0f} MHz "
+          f"→ {'waste' if waste>0 else 'UNMET'} {max(waste,unmet):.0f} MHz")
+
+# 1. Beam 2 demand drops from 30 to 5. Reallocate freed sub-channels
+#    proportionally to the remaining beams.
+# 2. What minimum sub-channel granularity (MHz) is needed to serve
+#    8 beams with at minimum 25 MHz each from 500 MHz total?
+</pre>
+    </div>
+
+    <div class="py-exercise">
+        <h3>Exercise 3 — Gateway Colocation Analysis</h3>
+        <p>For a transparent LEO constellation, check which gateways are simultaneously visible to the same satellite serving a given user location.</p>
+<pre>
+import math
+
+RE = 6378.137
+
+def cap_angle(alt_km, min_elev_deg):
+    r = RE + alt_km
+    e = math.radians(min_elev_deg)
+    return math.degrees(math.acos(max(-1., min(1., RE*math.cos(e)/r))) - e)
+
+def arc_deg(lat1, lon1, lat2, lon2):
+    p1=math.radians(lat1); l1=math.radians(lon1)
+    p2=math.radians(lat2); l2=math.radians(lon2)
+    c=math.sin(p1)*math.sin(p2)+math.cos(p1)*math.cos(p2)*math.cos(l2-l1)
+    return math.degrees(math.acos(max(-1., min(1., c))))
+
+gateways = [
+    ("UK-Goonhilly",     50.0,  -5.2),
+    ("US-Virginia",      38.9, -77.5),
+    ("Portugal-Lisbon",  38.7,  -9.1),
+    ("Brazil-Sao Paulo",-23.5, -46.6),
+    ("Canada-Montreal",  45.5, -73.6),
+]
+
+for user_lat, user_lon, label in [
+    (45.0, -35.0, "Mid-Atlantic"),
+    (60.0, -20.0, "North Atlantic"),
+    (51.5,  -0.1, "London"),
+]:
+    rho = cap_angle(550, 10)
+    visible = [(n, arc_deg(user_lat, user_lon, gl, glo))
+               for n, gl, glo in gateways
+               if arc_deg(user_lat, user_lon, gl, glo) <= rho]
+    print(f"User: {label} ({user_lat}°N {abs(user_lon)}°W)  "
+          f"Cap radius: {rho:.1f}°")
+    if visible:
+        for n, d in visible:
+            print(f"  ✓ {n}  ({d:.1f}° away)")
+    else:
+        print("  ✗ No gateway visible — transparent payload cannot serve this user")
+        print("    Regenerative + ISL would route to satellite with gateway in view")
+    print()
+
+# 1. How many gateways would need to be added, and where roughly, to
+#    ensure the mid-Atlantic location always has at least one visible?
+# 2. Repeat for a user at 70°N 10°W (Arctic). Does the gateway network
+#    above cover them at all? What inclination shell is needed?
+</pre>
+    </div>
+</div>
+
+<!-- REFLECTION -->
+<div class="reflection-block" id="reflect">
+    <h2>REFLECTION PROMPTS</h2>
+    <p class="ref-intro">Not graded. Write in your own words, 200–400 words each.</p>
+
+    <div class="ref-prompt"><h3>Prompt 1 — The 2016 Architecture Decision</h3>
+        <p>Starlink chose regenerative; OneWeb chose transparent. Both were rational decisions given the technology, target customer, and network architecture at the time. Argue the case for each decision from the engineer's perspective in 2015–2017, then evaluate which looks better in retrospect from 2026.</p></div>
+
+    <div class="ref-prompt"><h3>Prompt 2 — Software-Defined Headroom</h3>
+        <p>A software-defined payload can be updated post-launch, but only within the limits of the hardware launched. Identify three scenarios where a post-launch software update would provide real commercial value, and three scenarios where the hardware constraints would prevent the intended outcome. What does this tension imply for how much headroom to design in at launch?</p></div>
+
+    <div class="ref-prompt"><h3>Prompt 3 — Channeliser for Maritime</h3>
+        <p>The digital channeliser sits between transparent and regenerative. For a maritime mobility operator with highly variable demand by sea route and season, is the channeliser a good compromise? Evaluate the tradeoffs specifically for this application, identifying what capability it provides that the operator needs and what capability it still lacks.</p></div>
+
+    <div class="ref-prompt"><h3>Prompt 4 — Gateway Count for a Transparent Constellation</h3>
+        <p>Quantify the gateway colocation dependency: how many gateways, at what geographic spacing, would a transparent LEO constellation at 550 km with ε_min = 10° need globally to ensure at least one gateway is always visible to the same satellite serving any user? Compare this to the gateway count of a regenerative ISL-connected constellation.</p></div>
+</div>
+
+<div class="complete-wrap">
+    <button class="complete-btn" id="completeBtn">MARK LESSON COMPLETE</button>
+    <div class="complete-msg" id="completeMsg"></div>
+</div>
+
+<div class="lesson-nav">
+    <a href="m3-2.html">← LESSON 02 — ADCS &amp; PROPULSION</a>
+    <a href="m3-4.html">LESSON 04 — MULTIBEAM ANTENNAS &amp; PHASED ARRAYS →</a>
+</div>
+
+</div><!-- /lesson-wrap -->
+
+<button class="back-to-top" id="backToTop" title="Back to top">↑</button>
+<footer>© 2026 LEOAF · M3 · LESSON 03 OF 6</footer>
+
+<script>
+const canvas=document.getElementById('starsCanvas'),ctx=canvas.getContext('2d');
+let stars=[];
+function initStars(){stars=[];for(let i=0;i<180;i++)stars.push({x:Math.random()*canvas.width,y:Math.random()*canvas.height,size:Math.random()*1.5+0.4,speed:Math.random()*0.18+0.04,hue:Math.random()*360});}
+function resizeCanvas(){canvas.width=window.innerWidth;canvas.height=window.innerHeight;}
+resizeCanvas();initStars();window.addEventListener('resize',resizeCanvas);
+function animateStars(){ctx.clearRect(0,0,canvas.width,canvas.height);stars.forEach(s=>{s.y-=s.speed;if(s.y<0){s.y=canvas.height;s.x=Math.random()*canvas.width;}ctx.beginPath();ctx.fillStyle=`hsl(${s.hue},80%,80%)`;ctx.arc(s.x,s.y,s.size,0,Math.PI*2);ctx.fill();});requestAnimationFrame(animateStars);}
+animateStars();
+</script>
+
+<script>
+const feedbacks={
+    1:{correct:"Correct. A transparent payload amplifies, frequency-shifts, and retransmits without ever demodulating to bits. Whatever modulation the ground uses passes through unchanged — the satellite sees only RF power.",wrong:"Incorrect. Demodulation and remodulation define a regenerative payload. Beam switching requires bit-level processing not present in a transparent payload. All payloads require high-power amplifiers to close the link."},
+    2:{correct:"Correct. Routing and switching decisions require inspecting the bitstream. A transparent payload never demodulates to bits, so it cannot make routing decisions — traffic received on one beam must go to a predetermined downlink channel.",wrong:"Incorrect. Power is not the constraint. Beam switching can be electronic (phased array). There are no ITU rules against on-board switching. The constraint is architectural: no bits, no routing."},
+    3:{correct:"Correct. A transparent satellite cannot route traffic between beams. User traffic comes down to a gateway within the satellite footprint, routes via the ground network, and goes back up from the same gateway for the response. No gateway in the footprint means no service.",wrong:"Incorrect. Gateways are distributed globally, not co-located with each other. The user terminal is remote from the gateway. A regenerative satellite with ISLs eliminates or reduces the colocation dependency by routing across the mesh."},
+    4:{correct:"Correct. ISL routing requires the satellite to decide where to forward each traffic flow — a switching decision that requires access to the bitstream. Only a regenerative payload provides this, enabling true mesh routing across the constellation.",wrong:"Incorrect. Regenerative payloads consume more power than transparent ones. Ground terminals are if anything more complex. Regenerative satellites typically cost more. The key advantage is on-board switching, not power or cost."},
+    5:{correct:"Correct. A digital channeliser digitises the received signal and uses FFT-based filtering to partition and route frequency sub-bands, providing flexible bandwidth allocation and partial routing without the complexity of full bit-level processing.",wrong:"Incorrect. Full demodulation defines a regenerative payload. HPAs are always required regardless of channelisation. Digital channelisers are used across all orbit regimes including GEO (O3b mPower) and LEO."},
+    6:{correct:"Correct. When a regenerative payload demodulates the uplink to bits, it recovers the original data (within FEC capability). The remodulated downlink starts with clean recovered data — the downlink noise budget is independent of uplink noise.",wrong:"Incorrect. Every payload has noise sources. Using different frequency bands is frequency translation present in both architectures. FEC is always needed — regenerative payloads apply it on both uplink demodulation and downlink modulation."},
+    7:{correct:"Correct. Software-defined means the functionality is in software, but that software runs on hardware that was launched. Future functionality requiring more processing capacity than launched hardware provides cannot be added — the satellite must be replaced.",wrong:"Incorrect. The point of a software-defined payload is precisely that it can be updated after launch. Ka-band compatibility is independent of whether the payload is software-defined. Software uploads use the standard TT&C link."},
+    8:{correct:"Correct. A transparent payload cannot route traffic between beams. OneWeb traffic must always touch a gateway in the satellite's footprint. Starlink's regenerative payload with ISLs can forward traffic across the constellation to a satellite with a gateway in view.",wrong:"Incorrect. Satellite count affects capacity but not the routing architecture constraint. Frequency band is independent of gateway dependency. Gateway count is a consequence of the architectural dependency, not the cause."},
+    9:{correct:"Correct. At 500 W–2 kW, the DBP is a major fraction of the satellite's power budget. Reducing DBP power through more efficient ASICs allows a higher-capability processor to fit within the power budget of a mass-produced LEO broadband satellite at the 150–500 kg mass point.",wrong:"Incorrect. The relationship between power and structural mass is indirect. The ASIC vs FPGA tradeoff involves cost and flexibility, not a universal rule. Lower power reduces thermal load but the HPAs still generate kilowatts of waste heat requiring radiators."},
+    10:{correct:"Correct. Because the transparent payload never demodulates, it is compatible with any modulation and coding scheme. An operator can upgrade from DVB-S2 to DVB-S2X by updating ground terminal software only — no satellite hardware change required.",wrong:"Incorrect. Multiple operators is a spectrum and business arrangement, not a consequence of transparency. Adjacent beam interference depends on antenna isolation. A channel plan is still required in a transparent payload — it just cannot be flexibly changed without hardware modification."}
+};
+let answered={};
+document.querySelectorAll('.quiz-opt').forEach(btn=>{
+    btn.addEventListener('click',function(){
+        const q=this.dataset.q;
+        if(answered[q]!==undefined)return;
+        const correct=this.dataset.correct==='true';
+        answered[q]=correct;
+        document.querySelectorAll(`.quiz-opt[data-q="${q}"]`).forEach(b=>{b.disabled=true;if(b.dataset.correct==='true')b.classList.add('correct');});
+        if(!correct)this.classList.add('wrong');
+        const fb=document.getElementById(`fb${q}`);
+        fb.textContent=(correct?'✓ ':'✗ ')+feedbacks[q][correct?'correct':'wrong'];
+        fb.style.color=correct?'#39ff14':'#ff004f';
+        if(Object.keys(answered).length===10){
+            const total=Object.values(answered).filter(Boolean).length;
+            const el=document.getElementById('quizScore');
+            el.style.display='block';
+            const pct=Math.round(total/10*100);
+            el.textContent=`SCORE: ${total} / 10 (${pct}%) — ${pct===100?'PERFECT.':pct>=80?'STRONG. REVIEW ANY MISSES.':pct>=60?'ADEQUATE. REVISIT WEAK SECTIONS.':'REVISIT THE LESSON BEFORE PROCEEDING.'}`;
+        }
+    });
+});
+</script>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="supabase.js"></script>
+<script src="user_progress.js"></script>
+<script>
+const LESSON_ID='m3-3';
+(function(){
+    function bounceToLogin(r){console.error("Auth guard:",r);window.location.replace("index.html");}
+    async function init(){
+        if(typeof client==="undefined"||!client||!client.auth)return bounceToLogin("Supabase client not loaded");
+        let session=null;
+        try{({data:{session}}=await client.auth.getSession());}
+        catch(e){return bounceToLogin("getSession threw: "+e.message);}
+        if(!session){window.location.replace("index.html");return;}
+        const btn=document.getElementById('completeBtn'),msg=document.getElementById('completeMsg');
+        function setDone(done){
+            if(done){btn.textContent='✓ COMPLETE — CLICK TO UNDO';btn.classList.add('done');btn.style.cssText='border-color:#39ff14;color:#39ff14;background:rgba(57,255,20,0.1);cursor:pointer;opacity:1;';msg.style.color='#39ff14';msg.textContent='Lesson marked complete. Click again to undo.';}
+            else{btn.textContent='MARK LESSON COMPLETE';btn.classList.remove('done');btn.style.cssText='';msg.style.color='#ffffff55';msg.textContent='Not yet marked complete.';}
+        }
+        let mastered=[];
+        try{mastered=await getMasteredSections();}catch(e){console.error(e);}
+        setDone(mastered.includes(LESSON_ID));
+        btn.addEventListener('click',async()=>{
+            const isDone=btn.classList.contains('done');
+            msg.style.color='#00d9ff';msg.textContent='Saving...';
+            const ok=await upsertSection(LESSON_ID,!isDone);
+            if(ok){setDone(!isDone);}else{msg.style.color='#ff004f';msg.textContent='Error saving. Try again.';}
+        });
+        const btt=document.getElementById('backToTop');
+        window.addEventListener('scroll',()=>{btt.classList.toggle('visible',window.scrollY>400);});
+        btt.addEventListener('click',()=>window.scrollTo({top:0,behavior:'smooth'}));
+    }
+    if(document.readyState==="loading")document.addEventListener("DOMContentLoaded",init);
+    else init();
+})();
+</script>
+</body>
+</html>
