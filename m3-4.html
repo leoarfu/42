@@ -1,0 +1,632 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, shrink-to-fit=no">
+<title>M3-4 — Multibeam Antennas &amp; Phased Arrays · LEOAF</title>
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;600;800&family=Share+Tech+Mono&family=Libre+Baskerville:ital,wght@0,400;0,700;1,400&display=swap" rel="stylesheet">
+<link rel="icon" href="favicon.ico" sizes="any" type="image/x-icon">
+<link rel="manifest" href="site.webmanifest">
+<meta name="theme-color" content="#0f0f0f">
+<script>
+window.leoafAbort = async function () {
+    function go() { window.location.replace("index.html?signedout=1"); }
+    try { if (typeof client !== "undefined" && client && client.auth && client.auth.signOut) { try { await client.auth.signOut({ scope: "local" }); } catch (e) {} } } catch (e) {}
+    go();
+};
+</script>
+<style>
+* { box-sizing:border-box; margin:0; padding:0; }
+html { height:100%; -webkit-text-size-adjust:100%; overflow-x:hidden; }
+body { font-family:'Share Tech Mono',monospace; background:#000; color:white; overflow-x:hidden; min-height:100vh; }
+#starsCanvas { position:fixed; inset:0; z-index:-1; }
+header { background:#000; border-bottom:1px solid #ff004f33; position:sticky; top:0; z-index:100; padding:1rem clamp(1.5rem,5vw,4rem); display:flex; justify-content:space-between; align-items:center; box-shadow:0 4px 16px #0008; }
+.logo { font-family:'Orbitron',sans-serif; font-weight:800; font-size:clamp(16px,2vw,22px); letter-spacing:3px; text-decoration:none; }
+.logo span:first-child { color:white; } .logo span:last-child { color:#ff004f; }
+.nav-right { display:flex; align-items:center; gap:10px; }
+.nav-btn { background:transparent; border:1px solid #ff004f44; color:#ff004f; padding:6px 14px; cursor:pointer; transition:0.3s ease; font-size:11px; font-family:'Orbitron',sans-serif; letter-spacing:1px; text-decoration:none; display:inline-block; }
+.nav-btn:hover { background:#ff004f; color:black; }
+.breadcrumb { padding:14px clamp(1.5rem,5vw,4rem); font-size:11px; color:#ffffff44; letter-spacing:1px; position:relative; z-index:1; }
+.breadcrumb a { color:#00d9ff66; text-decoration:none; } .breadcrumb a:hover { color:#00d9ff; }
+.breadcrumb span { margin:0 8px; }
+.lesson-wrap { max-width:820px; margin:0 auto; padding:0 clamp(1.5rem,5vw,4rem) 80px; position:relative; z-index:1; }
+.lesson-header { padding:30px 0 28px; border-bottom:1px solid #ffffff11; margin-bottom:36px; }
+.lesson-tag { font-family:'Orbitron',sans-serif; font-size:10px; color:#ff004f; letter-spacing:3px; margin-bottom:10px; }
+.lesson-header h1 { font-family:'Orbitron',sans-serif; font-size:clamp(20px,3.5vw,32px); font-weight:800; line-height:1.2; margin-bottom:12px; }
+.lesson-meta { display:flex; gap:10px; flex-wrap:wrap; margin-bottom:16px; }
+.l-pill { font-family:'Orbitron',sans-serif; font-size:10px; padding:3px 10px; border:1px solid; letter-spacing:1px; }
+.l-pill-q { color:#ff004f; border-color:#ff004f44; } .l-pill-t { color:#39ff14; border-color:#39ff1444; }
+.lesson-intro { font-size:13px; line-height:1.85; opacity:0.75; }
+.toc { background:rgba(0,217,255,0.06); border:1px solid #00d9ff33; padding:24px 28px; margin:30px 0; }
+.toc h4 { font-family:'Orbitron',sans-serif; font-size:10px; color:#00d9ff; letter-spacing:2px; margin-bottom:16px; }
+.toc ol { padding-left:20px; } .toc li { font-size:13px; line-height:2.1; }
+.toc li a { color:#00d9ffbb; text-decoration:none; transition:0.15s; } .toc li a:hover { color:#fff; padding-left:4px; }
+.toc li::marker { color:#ff004f; font-family:'Orbitron',sans-serif; font-size:10px; }
+.content-block { margin-bottom:48px; }
+.content-block h2 { font-family:'Orbitron',sans-serif; font-size:13px; color:#00d9ff; letter-spacing:2px; text-transform:uppercase; margin-bottom:18px; padding-bottom:10px; border-bottom:1px solid #00d9ff22; scroll-margin-top:80px; }
+.content-block h3 { font-family:'Orbitron',sans-serif; font-size:11px; color:#ffffff88; letter-spacing:1.5px; text-transform:uppercase; margin:28px 0 12px; }
+.content-block p { font-size:13px; line-height:1.9; opacity:0.85; margin-bottom:16px; }
+.content-block ul,.content-block ol { padding-left:0; margin-bottom:16px; }
+.content-block ul li,.content-block ol li { font-size:13px; line-height:1.85; opacity:0.85; padding-left:20px; position:relative; margin-bottom:6px; }
+.content-block ul li::before { content:'›'; position:absolute; left:0; color:#00d9ff; }
+.content-block blockquote { border-left:3px solid #39ff14; background:rgba(57,255,20,0.05); padding:14px 20px; margin:18px 0; font-size:14px; font-family:'Share Tech Mono',monospace; color:#39ff14; letter-spacing:1px; }
+.callout { border-left:3px solid #00d9ff; background:rgba(0,217,255,0.05); padding:16px 20px; margin:22px 0; font-size:12px; line-height:1.8; }
+.callout.red { border-left-color:#ff004f; background:rgba(255,0,79,0.05); }
+.callout.green { border-left-color:#39ff14; background:rgba(57,255,20,0.05); }
+.callout.amber { border-left-color:#ffaa00; background:rgba(255,170,0,0.05); }
+.callout strong { font-family:'Orbitron',sans-serif; font-size:10px; letter-spacing:1px; display:block; margin-bottom:8px; color:inherit; }
+.key-numbers { display:grid; grid-template-columns:repeat(auto-fit,minmax(140px,1fr)); gap:12px; margin:22px 0; }
+.kn-item { background:rgba(255,255,255,0.03); border:1px solid #ffffff11; padding:16px 12px; text-align:center; }
+.kn-val { font-family:'Orbitron',sans-serif; font-size:clamp(15px,2.3vw,22px); font-weight:800; color:#00d9ff; display:block; }
+.kn-label { font-size:10px; opacity:0.5; letter-spacing:1px; margin-top:5px; display:block; line-height:1.4; }
+.compare-table { width:100%; border-collapse:collapse; margin:22px 0; font-size:12px; }
+.compare-table th { font-family:'Orbitron',sans-serif; font-size:10px; letter-spacing:1px; color:#00d9ff; padding:10px 12px; border-bottom:1px solid #00d9ff33; text-align:left; }
+.compare-table td { padding:10px 12px; border-bottom:1px solid #ffffff0a; line-height:1.5; opacity:0.85; vertical-align:top; }
+.compare-table tr:hover td { background:rgba(255,255,255,0.02); }
+.diagram-wrap { margin:24px 0; background:rgba(255,255,255,0.02); border:1px solid #ffffff11; padding:20px; overflow-x:auto; }
+.diagram-wrap figcaption { font-size:11px; color:#ffffff44; margin-top:12px; text-align:center; letter-spacing:1px; }
+.quiz-block { background:rgba(17,17,17,0.9); border:1px solid #ff004f33; padding:28px; margin:48px 0 32px; }
+.quiz-block h2 { font-family:'Orbitron',sans-serif; font-size:13px; color:#ff004f; letter-spacing:2px; margin-bottom:6px; }
+.quiz-intro { font-size:12px; opacity:0.6; margin-bottom:24px; padding-bottom:16px; border-bottom:1px solid #ff004f22; line-height:1.6; }
+.quiz-q { margin-bottom:28px; }
+.quiz-q p { font-size:13px; opacity:0.9; margin-bottom:12px; line-height:1.65; }
+.quiz-q p strong { color:#00d9ff; }
+.quiz-options { display:flex; flex-direction:column; gap:8px; }
+.quiz-opt { background:rgba(255,255,255,0.03); border:1px solid #ffffff1a; padding:11px 16px; cursor:pointer; font-size:12px; font-family:'Share Tech Mono',monospace; transition:0.2s ease; text-align:left; color:white; line-height:1.5; }
+.quiz-opt:hover:not(:disabled) { background:rgba(0,217,255,0.08); border-color:#00d9ff44; }
+.quiz-opt.correct { background:rgba(57,255,20,0.1); border-color:#39ff14; color:#39ff14; }
+.quiz-opt.wrong { background:rgba(255,0,79,0.1); border-color:#ff004f; color:#ff004f; }
+.quiz-opt:disabled { cursor:default; }
+.quiz-feedback { font-size:12px; margin-top:10px; min-height:18px; line-height:1.7; opacity:0.9; padding:0 4px; }
+.quiz-score { font-family:'Orbitron',sans-serif; font-size:12px; color:#39ff14; margin-top:20px; letter-spacing:1px; display:none; padding-top:16px; border-top:1px solid #39ff1433; }
+.py-block { background:rgba(10,10,10,0.95); border:1px solid #39ff1422; padding:28px; margin:32px 0; }
+.py-block h2 { font-family:'Orbitron',sans-serif; font-size:13px; color:#39ff14; letter-spacing:2px; margin-bottom:8px; }
+.py-block .py-intro { font-size:12px; opacity:0.7; margin-bottom:20px; padding-bottom:16px; border-bottom:1px solid #39ff1422; line-height:1.7; }
+.py-exercise { margin-bottom:32px; } .py-exercise:last-child { margin-bottom:0; }
+.py-exercise h3 { font-family:'Orbitron',sans-serif; font-size:11px; color:#39ff1499; letter-spacing:1.5px; text-transform:uppercase; margin-bottom:10px; }
+.py-exercise p { font-size:12px; opacity:0.8; margin-bottom:14px; line-height:1.75; }
+.py-block pre { background:#050505; border:1px solid #39ff1433; padding:20px; font-family:'Share Tech Mono',monospace; font-size:11.5px; line-height:1.75; overflow-x:auto; color:#39ff14; white-space:pre; margin-bottom:12px; }
+.reflection-block { background:rgba(255,170,0,0.04); border:1px solid #ffaa0033; padding:24px; margin:32px 0; }
+.reflection-block h2 { font-family:'Orbitron',sans-serif; font-size:13px; color:#ffaa00; letter-spacing:2px; margin-bottom:8px; }
+.reflection-block .ref-intro { font-size:12px; opacity:0.7; margin-bottom:20px; padding-bottom:14px; border-bottom:1px solid #ffaa0022; line-height:1.7; }
+.ref-prompt { margin-bottom:20px; }
+.ref-prompt h3 { font-family:'Orbitron',sans-serif; font-size:11px; color:#ffaa0099; letter-spacing:1px; margin-bottom:8px; }
+.ref-prompt p { font-size:12px; opacity:0.8; line-height:1.75; margin-bottom:10px; }
+.back-to-top { position:fixed; bottom:28px; right:28px; z-index:200; width:44px; height:44px; background:#000; border:1px solid #00d9ff55; color:#00d9ff; font-size:20px; cursor:pointer; display:flex; align-items:center; justify-content:center; opacity:0; pointer-events:none; transition:opacity 0.3s ease; }
+.back-to-top.visible { opacity:1; pointer-events:auto; } .back-to-top:hover { border-color:#00d9ff; background:#001a2c; }
+.complete-wrap { margin-top:56px; padding-top:30px; border-top:1px solid #ffffff11; text-align:center; }
+.complete-btn { font-family:'Orbitron',sans-serif; font-size:13px; letter-spacing:2px; padding:14px 44px; background:transparent; border:1px solid #39ff14; color:#39ff14; cursor:pointer; transition:0.3s ease; }
+.complete-btn:hover:not(.done) { background:#39ff14; color:black; box-shadow:0 0 20px rgba(57,255,20,0.4); }
+.complete-btn.done { background:rgba(57,255,20,0.1); cursor:default; opacity:0.7; }
+.complete-msg { font-size:12px; color:#39ff14; margin-top:14px; min-height:18px; letter-spacing:1px; }
+.lesson-nav { display:flex; justify-content:space-between; margin-top:30px; flex-wrap:wrap; gap:10px; }
+.lesson-nav a { font-family:'Orbitron',sans-serif; font-size:11px; color:#00d9ff66; text-decoration:none; letter-spacing:1px; transition:0.2s; }
+.lesson-nav a:hover { color:#00d9ff; }
+footer { text-align:center; padding:30px; opacity:0.3; font-size:11px; position:relative; z-index:1; letter-spacing:1px; }
+@media(max-width:600px) { .key-numbers{grid-template-columns:1fr 1fr;} .compare-table{font-size:11px;} .compare-table th,.compare-table td{padding:8px;} }
+.content-block { background:#f5f2ec; color:#1a1a1a; padding:36px clamp(24px,4vw,48px); margin-bottom:24px; border-left:4px solid #00d9ff; position:relative; z-index:1; }
+.content-block h2 { font-family:'Orbitron',sans-serif; font-size:13px; color:#003d66; letter-spacing:2px; text-transform:uppercase; margin-bottom:20px; padding-bottom:10px; border-bottom:2px solid #00d9ff66; scroll-margin-top:80px; }
+.content-block h3 { font-family:'Orbitron',sans-serif; font-size:11px; color:#444; letter-spacing:1.5px; text-transform:uppercase; margin:32px 0 14px; }
+.content-block p { font-family:'Libre Baskerville',Georgia,serif; font-size:15px; line-height:1.9; color:#1a1a1a; opacity:1; margin-bottom:18px; }
+.content-block ul li { font-family:'Libre Baskerville',Georgia,serif; font-size:14px; line-height:1.85; color:#1a1a1a; opacity:1; margin-bottom:8px; }
+.content-block ul li::before { color:#0077aa; }
+.content-block blockquote { border-left:3px solid #1a7a1a; background:#eafaea; color:#0a3d0a; }
+.content-block .callout { border-left:3px solid #0088cc; background:#e8f4fb; color:#1a1a1a; }
+.content-block .callout.red { border-left-color:#cc0033; background:#fdecea; }
+.content-block .callout.amber { border-left-color:#996600; background:#fef9ec; }
+.content-block .callout.green { border-left-color:#1a7a1a; background:#eafaea; }
+.content-block .callout strong { color:inherit; }
+.content-block .kn-item { background:#fff; border:1px solid #d0d0d0; }
+.content-block .kn-label { color:#555; opacity:1; }
+.content-block .compare-table th { color:#003d66; border-bottom:2px solid #00d9ff66; }
+.content-block .compare-table td { color:#1a1a1a; opacity:1; border-bottom:1px solid #ddd; }
+.content-block .compare-table tr:hover td { background:#f0f0f0; }
+.content-block .diagram-wrap { background:#0a0a0a; border:1px solid #333; }
+.content-block .diagram-wrap figcaption { color:#ffffff55; }
+</style>
+</head>
+<body>
+<canvas id="starsCanvas"></canvas>
+<header>
+    <a href="dashboard.html" class="logo"><span>LEO</span><span>AF</span></a>
+    <div class="nav-right">
+        <a href="m3.html" class="nav-btn">← M3 HUB</a>
+        <button class="nav-btn" onclick="leoafAbort()">ABORT</button>
+    </div>
+</header>
+<div class="breadcrumb">
+    <a href="dashboard.html">DASHBOARD</a><span>/</span>
+    <a href="m3.html">M3</a><span>/</span>
+    <span style="color:#ffffff88;">LESSON 04 — MULTIBEAM ANTENNAS &amp; PHASED ARRAYS</span>
+</div>
+
+<div class="lesson-wrap">
+
+<div class="lesson-header">
+    <div class="lesson-tag">M3 · LESSON 04 OF 6</div>
+    <h1>Multibeam Antennas &amp; Phased Arrays</h1>
+    <div class="lesson-meta">
+        <div class="l-pill l-pill-q">MODULE 3</div>
+        <div class="l-pill l-pill-t">COMMS PAYLOAD</div>
+    </div>
+    <p class="lesson-intro">The antenna is the interface between the satellite and the world it serves. Everything computed in Module 2 — coverage geometry, elevation angles, Doppler shifts — arrives at the antenna as a demand on its performance: generate a beam of a specific width, pointed at a specific ground cell, with a specific gain, while simultaneously generating dozens or hundreds of other beams. This lesson covers the physics of that progression — from single-beam reflector to multibeam array to electronically steered phased array — and the array theory (gain, beam steering, grating lobes, sidelobe control) that underlies the link budget in Module 4.</p>
+</div>
+
+<div class="toc">
+    <h4>CONTENTS</h4>
+    <ol>
+        <li><a href="#s1">The single-beam reflector: the baseline</a></li>
+        <li><a href="#s2">From single-beam to multibeam: the reflector array feed</a></li>
+        <li><a href="#s3">The phased array: principle of operation</a></li>
+        <li><a href="#s4">Active phased arrays: the T/R module</a></li>
+        <li><a href="#s5">Digital beamforming</a></li>
+        <li><a href="#s6">User-link and feeder-link antennas</a></li>
+        <li><a href="#s7">Beam scan coverage over the orbital arc</a></li>
+        <li><a href="#s8">Pointing within the beam: electronic correction</a></li>
+        <li><a href="#quiz">Knowledge check</a></li>
+        <li><a href="#python">Python exercises</a></li>
+        <li><a href="#reflect">Reflection prompts</a></li>
+    </ol>
+</div>
+
+<!-- S1 -->
+<div class="content-block" id="s1">
+    <h2>1. The Single-Beam Reflector: The Baseline</h2>
+    <p>The parabolic reflector has been the workhorse of satellite communications since the beginning. A feed at the focal point illuminates a dish; the dish collimates the energy into a narrow beam. The two governing relationships are:</p>
+    <blockquote>G = η · (π D / λ)²   &nbsp;·&nbsp;   HPBW ≈ 70λ / D  (degrees)</blockquote>
+    <p>where η is aperture efficiency (0.55–0.70), D is dish diameter, and λ is wavelength. Larger aperture gives higher gain and narrower beam. At Ka-band (28 GHz, λ = 10.7 mm), a 1-metre dish achieves approximately 42 dBi gain and 0.75° beamwidth.</p>
+    <p>On a GEO satellite a reflector points at a fixed region and stays there. On a LEO satellite moving at 7.6 km/s, a mechanically steered reflector must rotate continuously — feasible for single-beam applications but impractical for a multibeam payload generating dozens of simultaneous spot beams.</p>
+
+    <div class="key-numbers">
+        <div class="kn-item"><span class="kn-val">G ∝ D²</span><span class="kn-label">GAIN SCALES AS APERTURE AREA</span></div>
+        <div class="kn-item"><span class="kn-val">HPBW ∝ λ/D</span><span class="kn-label">BEAMWIDTH INVERSELY PROPORTIONAL TO APERTURE</span></div>
+        <div class="kn-item"><span class="kn-val">~42 dBi</span><span class="kn-label">1m DISH AT Ka-BAND (28 GHz)</span></div>
+        <div class="kn-item"><span class="kn-val">~0.75°</span><span class="kn-label">HPBW, 1m DISH AT Ka-BAND</span></div>
+    </div>
+</div>
+
+<!-- S2 -->
+<div class="content-block" id="s2">
+    <h2>2. From Single-Beam to Multibeam: The Reflector Array Feed</h2>
+    <p>The first step toward multibeam operation is the <strong>multibeam reflector</strong>: a single large reflector dish illuminated by a focal-plane array of feed elements. Each feed element generates one beam; displaced from the reflector axis, its beam points at a different ground location. N feed elements generate N simultaneous spot beams from a single reflector aperture.</p>
+    <p>This approach — used on first-generation HTS GEO satellites (ViaSat-1, Jupiter, SES O3b) — shares a single mechanical structure across all beams and requires no moving parts for normal operation. The limitation: beams cannot be steered. Each feed position maps to a fixed ground position. For LEO, the satellite's motion means the ground coverage region moves continuously — requiring either rotation of the whole dish or a different architecture.</p>
+</div>
+
+<!-- S3 -->
+<div class="content-block" id="s3">
+    <h2>3. The Phased Array: Principle of Operation</h2>
+    <p>The phased array replaces the reflector with an array of radiating elements, each connected to a module that independently controls the amplitude and phase of its signal. By adjusting phases across the array, element contributions add constructively in the beam direction and destructively elsewhere.</p>
+    <p>For a linear array of N elements spaced d apart, the phase shift applied to element n to steer the beam to angle θ₀ from broadside is:</p>
+    <blockquote>φₙ = −n · k · d · sin θ₀   &nbsp;&nbsp;&nbsp;where k = 2π/λ</blockquote>
+    <p>This compensates for the path-length difference n·d·sin θ₀ between elements, making all contributions arrive in phase at the desired direction.</p>
+
+    <h3>Array gain</h3>
+    <p>The maximum gain of a uniformly illuminated planar array of N elements is G_array = N · G_element. For a half-wavelength spaced patch array (G_element ≈ 6 dBi), a 256-element array achieves 6 + 24 = 30 dBi; a 2,048-element array achieves 6 + 33 = 39 dBi. Real arrays achieve approximately 60–70% of the theoretical maximum due to element pattern roll-off, mutual coupling, and quantisation errors.</p>
+
+    <h3>Grating lobes and sidelobe control</h3>
+    <p>Element spacing d must satisfy d ≤ λ/2 to avoid <strong>grating lobes</strong> — secondary maxima at angles satisfying d·sin θ = nλ for n ≠ 0, appearing at the same gain as the main beam. Wider spacing reduces element count for a given aperture but limits the usable scan range.</p>
+    <p><strong>Sidelobe level</strong> depends on the amplitude weighting: uniform illumination gives sidelobes at approximately −13 dB relative to peak. Taylor or Chebyshev amplitude tapering reduces sidelobes to −25 to −40 dB at the cost of slightly wider beamwidth and ~1–2 dB gain reduction.</p>
+
+    <div class="diagram-wrap">
+        <svg viewBox="0 0 740 280" width="100%" xmlns="http://www.w3.org/2000/svg" font-family="Share Tech Mono, monospace">
+            <rect width="740" height="280" fill="#0a0a0a"/>
+            <!-- Array elements -->
+            <text x="30" y="200" font-size="9" fill="#ffffff44">elements</text>
+            <line x1="80" y1="185" x2="80" y2="215" stroke="#00d9ff" stroke-width="2"/>
+            <line x1="150" y1="185" x2="150" y2="215" stroke="#00d9ff" stroke-width="2"/>
+            <line x1="220" y1="185" x2="220" y2="215" stroke="#00d9ff" stroke-width="2"/>
+            <line x1="290" y1="185" x2="290" y2="215" stroke="#00d9ff" stroke-width="2"/>
+            <line x1="360" y1="185" x2="360" y2="215" stroke="#00d9ff" stroke-width="2"/>
+            <!-- phase shifters -->
+            <rect x="65" y="220" width="30" height="16" fill="#00d9ff22" stroke="#00d9ff44" stroke-width="1"/>
+            <rect x="135" y="220" width="30" height="16" fill="#00d9ff22" stroke="#00d9ff44" stroke-width="1"/>
+            <rect x="205" y="220" width="30" height="16" fill="#00d9ff22" stroke="#00d9ff44" stroke-width="1"/>
+            <rect x="275" y="220" width="30" height="16" fill="#00d9ff22" stroke="#00d9ff44" stroke-width="1"/>
+            <rect x="345" y="220" width="30" height="16" fill="#00d9ff22" stroke="#00d9ff44" stroke-width="1"/>
+            <text x="80"  y="232" font-size="7" fill="#00d9ff" text-anchor="middle">φ₀</text>
+            <text x="150" y="232" font-size="7" fill="#00d9ff" text-anchor="middle">φ₁</text>
+            <text x="220" y="232" font-size="7" fill="#00d9ff" text-anchor="middle">φ₂</text>
+            <text x="290" y="232" font-size="7" fill="#00d9ff" text-anchor="middle">φ₃</text>
+            <text x="360" y="232" font-size="7" fill="#00d9ff" text-anchor="middle">φ₄</text>
+            <text x="220" y="260" font-size="9" fill="#ffffff33" text-anchor="middle">φₙ = −n·k·d·sin θ₀  (linear phase gradient → beam at θ₀)</text>
+            <!-- Beam pattern sketch (right side) -->
+            <text x="500" y="30" font-size="9" fill="#ffffff44" text-anchor="middle">BEAM PATTERN</text>
+            <!-- main lobe -->
+            <path d="M 500,200 L 460,80 L 500,60 L 540,80 Z" fill="none" stroke="#00d9ff" stroke-width="2"/>
+            <!-- sidelobes -->
+            <path d="M 500,200 L 420,130 L 440,120 L 460,130 Z" fill="none" stroke="#00d9ff55" stroke-width="1"/>
+            <path d="M 500,200 L 540,130 L 560,120 L 580,130 Z" fill="none" stroke="#00d9ff55" stroke-width="1"/>
+            <text x="500" y="55" font-size="9" fill="#00d9ff" text-anchor="middle">main beam (θ₀)</text>
+            <text x="420" y="115" font-size="8" fill="#00d9ff55" text-anchor="middle">sidelobes</text>
+            <text x="500" y="145" font-size="8" fill="#ffaa0088" text-anchor="middle">−13 dB (uniform)</text>
+            <!-- arrow at bottom -->
+            <line x1="500" y1="200" x2="500" y2="205" stroke="#ffffff33" stroke-width="1"/>
+            <text x="500" y="215" font-size="8" fill="#ffffff33" text-anchor="middle">array boresight</text>
+        </svg>
+        <figcaption>Linear phased array with phase shifters at each element. A linear phase gradient φₙ = −n·k·d·sin θ₀ steers the main beam to θ₀. Sidelobes appear at approximately −13 dB for uniform illumination.</figcaption>
+    </div>
+
+    <table class="compare-table">
+        <thead><tr><th>Quantity</th><th>Formula / Value</th><th>Note</th></tr></thead>
+        <tbody>
+            <tr><td>Array gain (max)</td><td>G_elem + 10·log₁₀(N)</td><td>Uniform illumination, lossless</td></tr>
+            <tr><td>HPBW</td><td>≈ 51°·λ/L (degrees)</td><td>L = aperture size; same as reflector</td></tr>
+            <tr><td>Steering phase shift</td><td>φₙ = −n·k·d·sin θ₀</td><td>Linear gradient for beam at θ₀</td></tr>
+            <tr><td>Grating lobe free condition</td><td>d ≤ λ/2</td><td>Ensures |sin θ| ≤ 1 for all grating lobes</td></tr>
+            <tr><td>Uniform illumination sidelobe</td><td>≈ −13 dB</td><td>Relative to main beam</td></tr>
+            <tr><td>Taylor taper sidelobe</td><td>−25 to −40 dB</td><td>Cost: slight beam broadening, ~1–2 dB gain loss</td></tr>
+            <tr><td>Scan loss at angle θ</td><td>10·log₁₀(cos θ) dB</td><td>Element pattern roll-off (patch antenna)</td></tr>
+        </tbody>
+    </table>
+</div>
+
+<!-- S4 -->
+<div class="content-block" id="s4">
+    <h2>4. Active Phased Arrays: The T/R Module</h2>
+    <p>In an active phased array (AESA), each element (or small group) has its own transmit/receive (T/R) module containing an LNA, power amplifier (PA), phase shifter, and amplitude control. Distributed amplification eliminates the central TWTA, provides graceful degradation (losing 5% of elements reduces gain by less than 0.5 dB for a 1,000-element array), and enables precise per-element amplitude and phase control for sidelobe shaping and null steering.</p>
+    <p>The disadvantage: each T/R module adds cost, mass, and power. A 1,000-element Ka-band AESA may have T/R modules consuming 2–5 W each — 2–5 kW total for transmit. GaN (gallium nitride) power amplifiers at Ka-band achieve 30–40% power-added efficiency (PAE), meaning 60–70% of the DC input power is dissipated as heat in the T/R modules. This is the dominant thermal load on the payload and directly drives the radiator area computed in m3-1.</p>
+
+    <div class="callout amber">
+        <strong>THE POWER-THERMAL COUPLING</strong>
+        A 1,000-element Ka-band AESA at 3 W per T/R module = 3 kW DC input. At 35% PAE, the radiated RF power is 1.05 kW and the waste heat is 1.95 kW — plus HPA heat. The payload thermal subsystem must reject roughly 2–3 kW of heat from the T/R module array alone, requiring multiple square metres of dedicated radiator area as computed in m3-1.
+    </div>
+</div>
+
+<!-- S5 -->
+<div class="content-block" id="s5">
+    <h2>5. Digital Beamforming</h2>
+    <p>In a <strong>digital beamforming (DBF)</strong> array, the received signal at each element is digitised by an ADC, and beams are formed in the digital domain by applying complex weights and summing — equivalent to analogue phase-shifting and combining, but in software. The key advantage: once signals are digitised, any number of beams can be formed simultaneously by applying different weight vectors to the same element samples, limited only by available processing power.</p>
+    <p>Additional DBF advantages: adaptive beamforming (weights updated millisecond-by-millisecond in response to interference or demand), and precision calibration of element amplitude and phase in the digital domain, correcting manufacturing tolerances that would degrade analogue array performance.</p>
+    <p>The principal challenge is ADC data rate: a 1,000-element array at Ka-band with 500 MHz per element generates many Tbps of digital data that must be processed before beam formation. Managing this data volume — through subarray grouping, reduced sampling, and efficient interconnect — is the key DBF engineering problem. Telesat Lightspeed (MDA Aurora), and likely Starlink v2 and Kuiper, all incorporate some form of DBF.</p>
+
+    <div class="callout green">
+        <strong>DBF vs ANALOGUE: THE BEAM COUNT DIFFERENCE</strong>
+        An analogue phased array forming N simultaneous beams requires N complete analogue receive chains — one per beam. A DBF array needs only one ADC per element; additional beams are formed in software with no additional RF hardware. For a 100-beam LEO broadband satellite, this difference is decisive in terms of mass and cost.
+    </div>
+</div>
+
+<!-- S6 -->
+<div class="content-block" id="s6">
+    <h2>6. User-Link and Feeder-Link Antennas</h2>
+    <p><strong>User-link antennas</strong> face nadir and generate the spot beams serving user terminals. For Ka-band LEO broadband with 0.3°–0.7° spot beams, the user-link aperture is typically 1–3 metres effective diameter. Active phased arrays with DBF are the current architecture of choice: many simultaneous beams, electronic steering as the satellite moves, and adaptive capacity allocation across beams.</p>
+    <p><strong>Feeder-link antennas</strong> connect to gateways (at higher frequencies — V-band: 47.2–51.4 GHz uplink, 37.5–42.5 GHz downlink — to access additional bandwidth) or to other satellites via ISL. Optical ISL terminals use laser beams with very narrow divergence, providing 10–100 Gbps per link with no RF spectrum coordination requirement. This is why optical ISLs are strongly preferred over RF ISLs for high-throughput constellation mesh networking.</p>
+</div>
+
+<!-- S7 -->
+<div class="content-block" id="s7">
+    <h2>7. Beam Scan Coverage Over the Orbital Arc</h2>
+    <p>At 550 km with ε_min = 10°, the maximum Earth-central angle is approximately 59°, meaning the user-link antenna must scan to within 59° of nadir. The element pattern scan loss at 59° is cos(59°) ≈ 0.52, a loss of approximately −2.8 dB. At ε_min = 35° (typical Ka-band operational minimum), the scan angle is ~33° and the scan loss is cos(33°) ≈ 0.84, or about −0.75 dB — manageable.</p>
+    <p>Increasing ε_min actually improves link-budget uniformity: users near the edge of coverage see better elevation geometry, lower atmospheric path, and the scan loss is smaller. The cost is a smaller coverage footprint per satellite, requiring more satellites for continuous coverage — the fundamental tradeoff quantified in m2-4.</p>
+
+    <div class="callout">
+        <strong>SCAN LOSS IN THE LINK BUDGET</strong>
+        The ~2.8 dB scan loss at the edge of coverage (ε = 10°) must appear as a satellite antenna gain reduction in the link budget for edge users. This is one reason LEO broadband systems typically specify ε_min = 25°–40° in practice: the scan loss at lower elevations degrades link margin enough that the extra coverage area is not worth the cost of additional satellite power to compensate.
+    </div>
+</div>
+
+<!-- S8 -->
+<div class="content-block" id="s8">
+    <h2>8. Pointing Within the Beam: Electronic Correction</h2>
+    <p>As established in m3-2, the satellite has a residual mechanical pointing error of 0.03°–0.10° three-sigma. An active phased array with DBF corrects this electronically: a small differential phase gradient across the array shifts the beam direction by a fraction of the beamwidth, correcting the pointing offset in the RF domain without any mechanical adjustment. This electronic correction loop — fed by the attitude error from the ADCS star tracker — is standard on modern LEO broadband active array payloads and is one reason why the 0.1° three-sigma mechanical pointing requirement is achievable despite structural flex, thermal deformation, and control loop residuals.</p>
+    <p>For next-generation V-band and E-band systems with beamwidths of 0.1°–0.2°, this electronic correction becomes the primary pointing mechanism — the mechanical pointing system provides only coarse stabilisation, and the antenna electronics provide the fine correction needed to hold a 0.05° beam on target.</p>
+</div>
+
+<!-- QUIZ -->
+<div class="quiz-block" id="quiz">
+    <h2>KNOWLEDGE CHECK</h2>
+    <p class="quiz-intro">Ten questions. Select one answer per question. Feedback is immediate; score appears when all ten are answered.</p>
+
+    <div class="quiz-q"><p><strong>Q1.</strong> Doubling the aperture diameter D of an antenna at fixed frequency:</p>
+        <div class="quiz-options">
+            <button class="quiz-opt" data-q="1" data-correct="false">A — Doubles the gain and halves the beamwidth</button>
+            <button class="quiz-opt" data-q="1" data-correct="true">B — Quadruples the gain and halves the beamwidth</button>
+            <button class="quiz-opt" data-q="1" data-correct="false">C — Doubles the gain and doubles the beamwidth</button>
+            <button class="quiz-opt" data-q="1" data-correct="false">D — Quadruples the gain and quarters the beamwidth</button>
+        </div><div class="quiz-feedback" id="fb1"></div></div>
+
+    <div class="quiz-q"><p><strong>Q2.</strong> To steer a phased array beam to angle θ₀, the phase shift applied to element n is:</p>
+        <div class="quiz-options">
+            <button class="quiz-opt" data-q="2" data-correct="false">A — φₙ = +n · k · d · sin θ₀</button>
+            <button class="quiz-opt" data-q="2" data-correct="true">B — φₙ = −n · k · d · sin θ₀</button>
+            <button class="quiz-opt" data-q="2" data-correct="false">C — φₙ = n · k · d · cos θ₀</button>
+            <button class="quiz-opt" data-q="2" data-correct="false">D — φₙ = −n · λ · d · sin θ₀</button>
+        </div><div class="quiz-feedback" id="fb2"></div></div>
+
+    <div class="quiz-q"><p><strong>Q3.</strong> Grating lobes appear when:</p>
+        <div class="quiz-options">
+            <button class="quiz-opt" data-q="3" data-correct="false">A — The beam is steered close to broadside</button>
+            <button class="quiz-opt" data-q="3" data-correct="true">B — Element spacing d exceeds λ/2, creating secondary gain maxima at other angles</button>
+            <button class="quiz-opt" data-q="3" data-correct="false">C — The array has more than 1,000 elements</button>
+            <button class="quiz-opt" data-q="3" data-correct="false">D — The array operates below −40°C</button>
+        </div><div class="quiz-feedback" id="fb3"></div></div>
+
+    <div class="quiz-q"><p><strong>Q4.</strong> Amplitude tapering (e.g. Taylor weighting) on a phased array produces:</p>
+        <div class="quiz-options">
+            <button class="quiz-opt" data-q="4" data-correct="false">A — Higher maximum gain</button>
+            <button class="quiz-opt" data-q="4" data-correct="true">B — Reduced sidelobe levels (−25 to −40 dB vs −13 dB) at the cost of slight beam broadening and ~1–2 dB gain reduction</button>
+            <button class="quiz-opt" data-q="4" data-correct="false">C — Faster beam steering</button>
+            <button class="quiz-opt" data-q="4" data-correct="false">D — Reduced power consumption</button>
+        </div><div class="quiz-feedback" id="fb4"></div></div>
+
+    <div class="quiz-q"><p><strong>Q5.</strong> Active phased arrays (AESAs) are preferred over passive arrays for LEO broadband because:</p>
+        <div class="quiz-options">
+            <button class="quiz-opt" data-q="5" data-correct="false">A — They require fewer elements for the same gain</button>
+            <button class="quiz-opt" data-q="5" data-correct="true">B — Distributed T/R modules provide graceful degradation, eliminate the central TWTA, and enable independent per-element amplitude and phase control</button>
+            <button class="quiz-opt" data-q="5" data-correct="false">C — They consume less total power</button>
+            <button class="quiz-opt" data-q="5" data-correct="false">D — They are cheaper to manufacture per element</button>
+        </div><div class="quiz-feedback" id="fb5"></div></div>
+
+    <div class="quiz-q"><p><strong>Q6.</strong> Digital beamforming enables multiple simultaneous beams from the same aperture because:</p>
+        <div class="quiz-options">
+            <button class="quiz-opt" data-q="6" data-correct="false">A — It uses multiple transmitters at different frequencies</button>
+            <button class="quiz-opt" data-q="6" data-correct="true">B — Once element signals are digitised, different complex weight vectors can be applied simultaneously to form independent beams in software</button>
+            <button class="quiz-opt" data-q="6" data-correct="false">C — It physically divides the aperture into sections, one per beam</button>
+            <button class="quiz-opt" data-q="6" data-correct="false">D — It doubles the element count to support additional beams</button>
+        </div><div class="quiz-feedback" id="fb6"></div></div>
+
+    <div class="quiz-q"><p><strong>Q7.</strong> The scan loss at the edge of a 550 km coverage arc (scan angle ~59°, ε = 10°) is approximately:</p>
+        <div class="quiz-options">
+            <button class="quiz-opt" data-q="7" data-correct="false">A — 0 dB</button>
+            <button class="quiz-opt" data-q="7" data-correct="true">B — ~2.8 dB, from element pattern roll-off ∝ cos(59°) ≈ 0.52</button>
+            <button class="quiz-opt" data-q="7" data-correct="false">C — ~6 dB</button>
+            <button class="quiz-opt" data-q="7" data-correct="false">D — ~13 dB</button>
+        </div><div class="quiz-feedback" id="fb7"></div></div>
+
+    <div class="quiz-q"><p><strong>Q8.</strong> The user-link antenna is an active phased array with DBF; the feeder-link antenna is a simpler high-gain pointing antenna. This distinction exists because:</p>
+        <div class="quiz-options">
+            <button class="quiz-opt" data-q="8" data-correct="false">A — They use different polarisation</button>
+            <button class="quiz-opt" data-q="8" data-correct="true">B — The user link must generate dozens to hundreds of simultaneous steered spot beams; the feeder link connects to a small number of gateways or ISL peers where a single high-gain beam suffices</button>
+            <button class="quiz-opt" data-q="8" data-correct="false">C — They operate at the same frequency in opposite directions</button>
+            <button class="quiz-opt" data-q="8" data-correct="false">D — The user link is passive and the feeder link is active</button>
+        </div><div class="quiz-feedback" id="fb8"></div></div>
+
+    <div class="quiz-q"><p><strong>Q9.</strong> Electronic beam steering corrects residual mechanical pointing errors because:</p>
+        <div class="quiz-options">
+            <button class="quiz-opt" data-q="9" data-correct="false">A — It physically moves the antenna</button>
+            <button class="quiz-opt" data-q="9" data-correct="true">B — A small differential phase gradient across the array shifts the beam direction by a fraction of the beamwidth, correcting the pointing offset in the RF domain</button>
+            <button class="quiz-opt" data-q="9" data-correct="false">C — It widens the beamwidth to accommodate pointing uncertainty</button>
+            <button class="quiz-opt" data-q="9" data-correct="false">D — It reduces the satellite's angular rotation rate</button>
+        </div><div class="quiz-feedback" id="fb9"></div></div>
+
+    <div class="quiz-q"><p><strong>Q10.</strong> At Ka-band (28 GHz), a 512-element array with 6 dBi element gain achieves a maximum theoretical gain of approximately:</p>
+        <div class="quiz-options">
+            <button class="quiz-opt" data-q="10" data-correct="false">A — 6 dBi</button>
+            <button class="quiz-opt" data-q="10" data-correct="false">B — 27 dBi</button>
+            <button class="quiz-opt" data-q="10" data-correct="true">C — 33 dBi</button>
+            <button class="quiz-opt" data-q="10" data-correct="false">D — 39 dBi</button>
+        </div><div class="quiz-feedback" id="fb10"></div></div>
+
+    <div class="quiz-score" id="quizScore"></div>
+</div>
+
+<!-- PYTHON -->
+<div class="py-block" id="python">
+    <h2>PYTHON EXERCISES</h2>
+    <p class="py-intro">Three exercises covering array gain and beamwidth, beam steering and scan loss, and multibeam coverage tiling. Python 3.8+ standard library only.</p>
+
+    <div class="py-exercise">
+        <h3>Exercise 1 — Array Gain and Beamwidth</h3>
+        <p>Compute gain and HPBW for phased arrays of different element counts at Ka-band.</p>
+<pre>
+import math
+
+def array_gain(n, g_elem_dbi, efficiency=0.65):
+    """Array gain in dBi, with efficiency factor."""
+    return g_elem_dbi + 10*math.log10(n) + 10*math.log10(efficiency)
+
+def hpbw(aperture_m, freq_ghz):
+    """HPBW in degrees for a uniformly illuminated aperture."""
+    lam = 0.3 / freq_ghz
+    return math.degrees(0.886 * lam / aperture_m)
+
+freq = 28.0; g_elem = 6.0   # Ka-band, patch element
+lam  = 0.3 / freq            # wavelength in metres
+
+print(f"Ka-band {freq} GHz  λ={lam*1000:.1f} mm  element gain={g_elem} dBi\n")
+print(f"{'N':>6}{'Aperture':>12}{'Gain (dBi)':>12}{'HPBW (°)':>10}")
+print("-" * 42)
+for n in [64, 256, 512, 1024, 2048, 4096]:
+    side = math.sqrt(n) * lam / 2   # square array, λ/2 spacing
+    g    = array_gain(n, g_elem)
+    bw   = hpbw(side, freq)
+    print(f"{n:>6}{side:>11.2f}m{g:>11.1f} dBi{bw:>9.2f}°")
+
+# 1. What element count gives HPBW = 0.5° at Ka-band with λ/2 spacing?
+# 2. A 1-m aperture at Ka-band: how many λ/2 elements fit?
+#    What gain does it achieve at 65% efficiency?
+# 3. Efficiency drops from 65% to 50% due to manufacturing tolerances.
+#    How many dB of gain is lost?
+</pre>
+    </div>
+
+    <div class="py-exercise">
+        <h3>Exercise 2 — Beam Steering and Scan Loss</h3>
+        <p>Compute element phase shifts for beam steering and scan loss as a function of steering angle.</p>
+<pre>
+import math
+
+def steer_phases(n, d_over_lam, theta_deg):
+    """Phase shifts (rad) to steer n-element array to theta_deg."""
+    t = math.radians(theta_deg)
+    kd = 2 * math.pi * d_over_lam
+    return [-i * kd * math.sin(t) for i in range(n)]
+
+def scan_loss_db(theta_deg):
+    """Patch element pattern scan loss in dB."""
+    return 10 * math.log10(max(math.cos(math.radians(theta_deg)), 1e-9))
+
+print("Scan loss vs steering angle (patch element pattern)\n")
+print(f"{'Angle':>8}{'Scan loss':>12}{'Notes':>28}")
+print("-" * 50)
+for t in [0, 10, 20, 30, 33, 40, 50, 59, 65, 70]:
+    loss = scan_loss_db(t)
+    note = ""
+    if t == 33: note = "← ε_min=35° edge"
+    if t == 59: note = "← ε_min=10° edge"
+    print(f"{t:>6}°{loss:>11.2f} dB{note:>28}")
+
+print("\n8-element array steered to 30° (λ/2 spacing):")
+phases = steer_phases(8, 0.5, 30.0)
+for i, p in enumerate(phases):
+    print(f"  elem {i}: {p:+.3f} rad ({math.degrees(p):+.1f}°)")
+
+# 1. At ε_min = 35° (scan ~33°), what is the scan loss?
+#    Compare to ε_min = 10° (scan ~59°).
+# 2. At what scan angle does the loss exceed 3 dB?
+# 3. Grating lobes for d = 0.6λ, steered to 30°:
+#    condition: sin(θ_gl) = sin(θ₀) + n·λ/d for integer n.
+#    Find all visible grating lobe angles (|sin θ_gl| ≤ 1).
+</pre>
+    </div>
+
+    <div class="py-exercise">
+        <h3>Exercise 3 — Multibeam Coverage Tiling</h3>
+        <p>Compute how many simultaneous beams are needed to tile the coverage footprint for different minimum elevation angles and beam sizes.</p>
+<pre>
+import math
+
+RE = 6378.137
+
+def cap_radius_km(alt_km, eps_deg):
+    r = RE + alt_km; e = math.radians(eps_deg)
+    rho = math.acos(max(-1.,min(1., RE*math.cos(e)/r))) - e
+    return RE * rho
+
+def beam_radius_km(alt_km, hpbw_deg):
+    return alt_km * math.tan(math.radians(hpbw_deg / 2))
+
+def n_beams(cap_r, beam_r, overlap=0.7):
+    return math.ceil(math.pi * cap_r**2 / (math.pi * (beam_r*overlap)**2))
+
+alt = 550
+print(f"Beam tiling at {alt} km altitude\n")
+print(f"{'ε_min':>7}{'Cap (km)':>10}{'HPBW':>8}{'Beam r (km)':>13}{'Beams':>8}")
+print("-" * 48)
+for eps in [10, 25, 35]:
+    cap_r = cap_radius_km(alt, eps)
+    for hpbw in [0.3, 0.5, 1.0]:
+        br = beam_radius_km(alt, hpbw)
+        nb = n_beams(cap_r, br)
+        print(f"{eps:>6}°{cap_r:>9.0f} km{hpbw:>7.1f}°{br:>12.0f} km{nb:>8}")
+    print()
+
+# 1. At ε_min=35°, 0.5° HPBW: each beam needs 1 W RF. At 35% PAE,
+#    total DC power for all beams?
+# 2. Reducing ε_min from 35° to 10° with 0.5° beams: by what factor
+#    does beam count increase?
+# 3. What HPBW keeps beam count below 200 at ε_min=25°?
+</pre>
+    </div>
+</div>
+
+<!-- REFLECTION -->
+<div class="reflection-block" id="reflect">
+    <h2>REFLECTION PROMPTS</h2>
+    <p class="ref-intro">Not graded. Write in your own words, 200–400 words each.</p>
+    <div class="ref-prompt"><h3>Prompt 1 — Scaling from 512 to 2,048 Elements</h3>
+        <p>A satellite engineer proposes increasing the user-link antenna from 512 to 2,048 elements to improve link margin. Trace the full chain of consequences: gain improvement, beamwidth change, beam count change, power consumption change, thermal implications, and mass budget impact. Is the upgrade worth it?</p></div>
+    <div class="ref-prompt"><h3>Prompt 2 — Subarray Architectures for DBF</h3>
+        <p>Digital beamforming creates a massive ADC data rate problem. Describe two subarray architectures that reduce data rate, and analyse what each sacrifices in beam count, sidelobe control, and scan range. Which is better suited for a 1,000-element LEO broadband payload?</p></div>
+    <div class="ref-prompt"><h3>Prompt 3 — Scan Loss Mitigation</h3>
+        <p>Three approaches to the scan loss problem at coverage-arc edges: (1) increase ε_min to reduce scan range, (2) use wider-pattern elements sacrificing element gain, (3) increase transmit power toward the edge. Evaluate all three for a Ka-band LEO broadband system at 550 km, and identify the combination a systems engineer would likely choose.</p></div>
+    <div class="ref-prompt"><h3>Prompt 4 — Electronic vs Mechanical Pointing</h3>
+        <p>Electronic beam steering corrects residual mechanical pointing errors, allowing the ADCS requirement to be relaxed. How far can the requirement be relaxed (from 0.1° to 0.3° three-sigma) before the electronic correction range becomes the binding constraint? What are the ADCS cost and complexity implications?</p></div>
+</div>
+
+<div class="complete-wrap">
+    <button class="complete-btn" id="completeBtn">MARK LESSON COMPLETE</button>
+    <div class="complete-msg" id="completeMsg"></div>
+</div>
+
+<div class="lesson-nav">
+    <a href="m3-3.html">← LESSON 03 — PAYLOAD ARCHITECTURES</a>
+    <a href="m3-5.html">LESSON 05 — FREQUENCY REUSE &amp; BEAM-HOPPING →</a>
+</div>
+
+</div>
+<button class="back-to-top" id="backToTop" title="Back to top">↑</button>
+<footer>© 2026 LEOAF · M3 · LESSON 04 OF 6</footer>
+
+<script>
+const canvas=document.getElementById('starsCanvas'),ctx=canvas.getContext('2d');
+let stars=[];
+function initStars(){stars=[];for(let i=0;i<180;i++)stars.push({x:Math.random()*canvas.width,y:Math.random()*canvas.height,size:Math.random()*1.5+0.4,speed:Math.random()*0.18+0.04,hue:Math.random()*360});}
+function resizeCanvas(){canvas.width=window.innerWidth;canvas.height=window.innerHeight;}
+resizeCanvas();initStars();window.addEventListener('resize',resizeCanvas);
+function animateStars(){ctx.clearRect(0,0,canvas.width,canvas.height);stars.forEach(s=>{s.y-=s.speed;if(s.y<0){s.y=canvas.height;s.x=Math.random()*canvas.width;}ctx.beginPath();ctx.fillStyle=`hsl(${s.hue},80%,80%)`;ctx.arc(s.x,s.y,s.size,0,Math.PI*2);ctx.fill();});requestAnimationFrame(animateStars);}
+animateStars();
+</script>
+
+<script>
+const feedbacks={
+    1:{correct:"Correct. Gain ∝ D² (aperture area) and HPBW ∝ λ/D. Doubling D quadruples the area and the gain, while halving the beamwidth. These are the two key aperture relationships.",wrong:"Incorrect. Gain scales as D² (area), not D. So doubling D gives 4× gain (+6 dB), not 2×. Beamwidth scales as 1/D, so it halves. The combination is ×4 gain and ×½ beamwidth."},
+    2:{correct:"Correct. The negative sign compensates for the extra path length n·d·sin θ₀ that element n must travel relative to element 0. With this phase progression, all element contributions arrive in phase at the target angle θ₀.",wrong:"Incorrect. A positive sign would steer the beam in the opposite direction. cos θ₀ is not the correct factor — path length difference between adjacent elements is d·sin θ₀. λ in the exponent is dimensionally wrong; the correct quantity is k = 2π/λ."},
+    3:{correct:"Correct. Grating lobes appear when d·(sin θ_gl − sin θ₀) = n·λ for integer n ≠ 0. For d ≤ λ/2, this equation has no solution with |sin θ_gl| ≤ 1 and n ≠ 0, so no visible grating lobes appear.",wrong:"Incorrect. Broadside steering is the most benign condition. Element count affects gain but not grating lobes. Temperature affects hardware reliability, not radiation pattern. Grating lobes are a spacing phenomenon."},
+    4:{correct:"Correct. Tapering reduces edge illumination, suppressing the sidelobe-generating discontinuity. Result: −25 to −40 dB sidelobes vs −13 dB uniform, at the cost of slightly wider beam and ~1–2 dB gain reduction.",wrong:"Incorrect. Tapering reduces gain relative to uniform illumination — not increases it. Beam steering speed depends on phase shifter switching time, not amplitude weighting. Power consumption is set by total transmitted power, not the taper."},
+    5:{correct:"Correct. Distributed T/R modules eliminate single-point failures, provide graceful degradation (5% element loss → less than 0.5 dB gain loss for 1,000 elements), and enable precise per-element control for sidelobe shaping and null steering.",wrong:"Incorrect. Element count is set by aperture and wavelength, not active vs passive. Active arrays typically consume more total power due to T/R module standby overhead. Active arrays with T/R modules cost more per element than passive arrays."},
+    6:{correct:"Correct. In DBF, all element samples exist as digital data. Different complex weight vectors (amplitude and phase per element) applied to the same samples and summed in parallel produce independent beams with no additional RF hardware.",wrong:"Incorrect. Multiple frequencies is FDM, not DBF. Physical aperture sections are subarrays. DBF does not require additional elements — additional beams are a software operation on the same digitised element data."},
+    7:{correct:"Correct. Scan loss = 10·log₁₀(cos 59°) = 10·log₁₀(0.515) ≈ −2.9 dB. This must appear as a satellite antenna gain reduction in the link budget for users at the coverage edge.",wrong:"Incorrect. Array gain decreases with scan angle due to element pattern roll-off. 0 dB would mean no rolloff — true only at broadside. −6 dB ≈ cos⁻¹(0.25) ≈ 75°. −13 dB is the uniform sidelobe level, not scan loss."},
+    8:{correct:"Correct. The user link must generate many simultaneous steered spot beams across the full Earth coverage arc, requiring DBF capability. The feeder link connects to a small number of fixed gateways or ISL peers where a single high-gain beam suffices.",wrong:"Incorrect. Both links often share the same polarisation within a band. User and feeder links use different frequency bands. Both can be active or passive — the architecture difference is driven by beam count and steering requirements."},
+    9:{correct:"Correct. Applying a phase slope (differential phase gradient) across the array elements shifts the angle of constructive interference — steering the beam by a controlled amount. A 0.05° mechanical error is corrected by commanding a 0.05° electronic offset.",wrong:"Incorrect. Electronic steering moves the beam direction, not the physical antenna. Widening the beamwidth would reduce gain — not a useful correction. Rotation rate is controlled by ADCS, not the antenna. The RF domain correction is a phase-gradient adjustment."},
+    10:{correct:"Correct. G = G_elem + 10·log₁₀(N) = 6 + 10·log₁₀(512) = 6 + 27.1 = 33.1 dBi. This is the theoretical maximum at 100% efficiency; real arrays at 65% efficiency would be ~1.9 dB lower.",wrong:"Incorrect. 6 dBi is element gain only — ignores the N-element array factor. 27 dBi omits the 6 dBi element gain. 39 dBi requires 2,048 elements (10·log₁₀(2048) ≈ 33.1, plus 6 dBi = 39.1 dBi)."}
+};
+let answered={};
+document.querySelectorAll('.quiz-opt').forEach(btn=>{
+    btn.addEventListener('click',function(){
+        const q=this.dataset.q;
+        if(answered[q]!==undefined)return;
+        const correct=this.dataset.correct==='true';
+        answered[q]=correct;
+        document.querySelectorAll(`.quiz-opt[data-q="${q}"]`).forEach(b=>{b.disabled=true;if(b.dataset.correct==='true')b.classList.add('correct');});
+        if(!correct)this.classList.add('wrong');
+        const fb=document.getElementById(`fb${q}`);
+        fb.textContent=(correct?'✓ ':'✗ ')+feedbacks[q][correct?'correct':'wrong'];
+        fb.style.color=correct?'#39ff14':'#ff004f';
+        if(Object.keys(answered).length===10){
+            const total=Object.values(answered).filter(Boolean).length;
+            const el=document.getElementById('quizScore');
+            el.style.display='block';
+            const pct=Math.round(total/10*100);
+            el.textContent=`SCORE: ${total} / 10 (${pct}%) — ${pct===100?'PERFECT.':pct>=80?'STRONG. REVIEW ANY MISSES.':pct>=60?'ADEQUATE. REVISIT WEAK SECTIONS.':'REVISIT THE LESSON BEFORE PROCEEDING.'}`;
+        }
+    });
+});
+</script>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="supabase.js"></script>
+<script src="user_progress.js"></script>
+<script>
+const LESSON_ID='m3-4';
+(function(){
+    function bounceToLogin(r){console.error("Auth guard:",r);window.location.replace("index.html");}
+    async function init(){
+        if(typeof client==="undefined"||!client||!client.auth)return bounceToLogin("Supabase client not loaded");
+        let session=null;
+        try{({data:{session}}=await client.auth.getSession());}
+        catch(e){return bounceToLogin("getSession threw: "+e.message);}
+        if(!session){window.location.replace("index.html");return;}
+        const btn=document.getElementById('completeBtn'),msg=document.getElementById('completeMsg');
+        function setDone(done){
+            if(done){btn.textContent='✓ COMPLETE — CLICK TO UNDO';btn.classList.add('done');btn.style.cssText='border-color:#39ff14;color:#39ff14;background:rgba(57,255,20,0.1);cursor:pointer;opacity:1;';msg.style.color='#39ff14';msg.textContent='Lesson marked complete. Click again to undo.';}
+            else{btn.textContent='MARK LESSON COMPLETE';btn.classList.remove('done');btn.style.cssText='';msg.style.color='#ffffff55';msg.textContent='Not yet marked complete.';}
+        }
+        let mastered=[];
+        try{mastered=await getMasteredSections();}catch(e){console.error(e);}
+        setDone(mastered.includes(LESSON_ID));
+        btn.addEventListener('click',async()=>{
+            const isDone=btn.classList.contains('done');
+            msg.style.color='#00d9ff';msg.textContent='Saving...';
+            const ok=await upsertSection(LESSON_ID,!isDone);
+            if(ok){setDone(!isDone);}else{msg.style.color='#ff004f';msg.textContent='Error saving. Try again.';}
+        });
+        const btt=document.getElementById('backToTop');
+        window.addEventListener('scroll',()=>{btt.classList.toggle('visible',window.scrollY>400);});
+        btt.addEventListener('click',()=>window.scrollTo({top:0,behavior:'smooth'}));
+    }
+    if(document.readyState==="loading")document.addEventListener("DOMContentLoaded",init);
+    else init();
+})();
+</script>
+</body>
+</html>
