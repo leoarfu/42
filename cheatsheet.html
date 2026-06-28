@@ -1,0 +1,966 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>LEOAF — Cheat Sheet · M1 &amp; M2</title>
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Share+Tech+Mono&family=Libre+Baskerville:ital@1&display=swap" rel="stylesheet">
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+:root {
+  --bg:    #08090c;
+  --panel: #0d0f14;
+  --line:  rgba(255,255,255,0.09);
+  --ink:   #dde0e8;
+  --soft:  #8a8fa0;
+  --cyan:  #00d9ff;
+  --red:   #ff004f;
+  --green: #39ff14;
+  --amber: #ffaa00;
+}
+html { scroll-behavior: smooth; }
+body {
+  font-family: 'Share Tech Mono', monospace;
+  background: var(--bg);
+  color: var(--ink);
+  font-size: 13px;
+  line-height: 1.6;
+  min-height: 100vh;
+}
+
+/* ── HEADER ── */
+header {
+  background: #000;
+  border-bottom: 1px solid var(--red);
+  padding: 14px 32px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  position: sticky;
+  top: 0;
+  z-index: 100;
+}
+.logo { font-family: 'Orbitron', sans-serif; font-weight: 700; font-size: 18px; letter-spacing: 3px; text-decoration: none; }
+.logo span:first-child { color: #fff; }
+.logo span:last-child  { color: var(--red); }
+.header-tag { font-size: 10px; color: var(--soft); letter-spacing: 2px; }
+.home-btn { font-family: 'Orbitron', sans-serif; font-size: 10px; letter-spacing: 1px; color: var(--red); border: 1px solid #ff004f44; padding: 5px 12px; text-decoration: none; transition: .2s; }
+.home-btn:hover { background: var(--red); color: #000; }
+
+/* ── NAV JUMP BAR ── */
+.jump-bar {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  padding: 12px 32px;
+  background: var(--panel);
+  border-bottom: 1px solid var(--line);
+  position: sticky;
+  top: 49px;
+  z-index: 90;
+}
+.jump-btn {
+  font-family: 'Orbitron', sans-serif;
+  font-size: 10px;
+  letter-spacing: 1px;
+  padding: 4px 12px;
+  border: 1px solid var(--line);
+  color: var(--soft);
+  text-decoration: none;
+  transition: .2s;
+}
+.jump-btn:hover, .jump-btn.m1 { border-color: var(--cyan); color: var(--cyan); }
+.jump-btn.m2 { border-color: var(--amber); color: var(--amber); }
+
+/* ── MAIN LAYOUT ── */
+main {
+  max-width: 1060px;
+  margin: 0 auto;
+  padding: 32px 24px 80px;
+}
+
+/* ── MODULE HEADER ── */
+.module-header {
+  display: flex;
+  align-items: baseline;
+  gap: 16px;
+  margin: 40px 0 20px;
+  padding-bottom: 10px;
+  border-bottom: 2px solid;
+}
+.module-header.m1 { border-color: var(--cyan); }
+.module-header.m2 { border-color: var(--amber); }
+.module-label {
+  font-family: 'Orbitron', sans-serif;
+  font-size: 18px;
+  font-weight: 700;
+}
+.module-header.m1 .module-label { color: var(--cyan); }
+.module-header.m2 .module-label { color: var(--amber); }
+.module-title { font-size: 12px; color: var(--soft); letter-spacing: 1px; text-transform: uppercase; }
+.module-link {
+  margin-left: auto;
+  font-size: 10px;
+  font-family: 'Orbitron', sans-serif;
+  letter-spacing: 1px;
+  text-decoration: none;
+  padding: 3px 10px;
+  border: 1px solid;
+  transition: .2s;
+}
+.m1 .module-link { color: var(--cyan); border-color: #00d9ff44; }
+.m1 .module-link:hover { background: var(--cyan); color: #000; }
+.m2 .module-link { color: var(--amber); border-color: #ffaa0044; }
+.m2 .module-link:hover { background: var(--amber); color: #000; }
+
+/* ── LESSON BLOCK ── */
+.lesson-block {
+  background: var(--panel);
+  border-left: 3px solid var(--line);
+  margin-bottom: 12px;
+  transition: border-color .2s;
+}
+.lesson-block:hover { border-left-color: var(--cyan); }
+.lesson-top {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 16px 8px;
+  cursor: pointer;
+  user-select: none;
+}
+.lesson-num { font-family: 'Orbitron', sans-serif; font-size: 10px; color: var(--soft); min-width: 24px; }
+.lesson-title { font-family: 'Orbitron', sans-serif; font-size: 11px; letter-spacing: 1px; color: var(--ink); text-transform: uppercase; flex: 1; }
+.lesson-goto {
+  font-size: 10px;
+  font-family: 'Orbitron', sans-serif;
+  letter-spacing: 1px;
+  color: var(--cyan);
+  text-decoration: none;
+  padding: 2px 8px;
+  border: 1px solid #00d9ff33;
+  white-space: nowrap;
+  transition: .2s;
+}
+.lesson-goto:hover { background: var(--cyan); color: #000; }
+.toggle-icon { color: var(--soft); font-size: 12px; transition: transform .2s; }
+.lesson-block.open .toggle-icon { transform: rotate(90deg); }
+
+/* ── CONTENT GRID ── */
+.lesson-content {
+  display: none;
+  padding: 0 16px 16px;
+  border-top: 1px solid var(--line);
+  margin-top: 4px;
+}
+.lesson-block.open .lesson-content { display: block; }
+
+.content-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+  margin-top: 12px;
+}
+@media (max-width: 680px) { .content-grid { grid-template-columns: 1fr; } }
+
+.card {
+  background: rgba(255,255,255,0.025);
+  border: 1px solid var(--line);
+  padding: 12px 14px;
+}
+.card-head {
+  font-family: 'Orbitron', sans-serif;
+  font-size: 9px;
+  letter-spacing: 2px;
+  color: var(--soft);
+  text-transform: uppercase;
+  margin-bottom: 8px;
+  padding-bottom: 6px;
+  border-bottom: 1px solid var(--line);
+}
+.card-head.cyan  { color: var(--cyan);  border-bottom-color: #00d9ff33; }
+.card-head.amber { color: var(--amber); border-bottom-color: #ffaa0033; }
+.card-head.green { color: var(--green); border-bottom-color: #39ff1433; }
+.card-head.red   { color: var(--red);   border-bottom-color: #ff004f33; }
+
+/* ── TERM LIST ── */
+.terms { list-style: none; }
+.terms li {
+  padding: 5px 0;
+  border-bottom: 1px solid rgba(255,255,255,0.04);
+  line-height: 1.5;
+}
+.terms li:last-child { border-bottom: none; }
+.kw {
+  color: var(--cyan);
+  font-weight: 600;
+}
+.kw.amber { color: var(--amber); }
+.kw.green { color: var(--green); }
+.kw.red   { color: var(--red);   }
+
+/* ── FORMULA BLOCK ── */
+.formula-list { list-style: none; }
+.formula-list li {
+  padding: 6px 0;
+  border-bottom: 1px solid rgba(255,255,255,0.04);
+  font-size: 12px;
+}
+.formula-list li:last-child { border-bottom: none; }
+.fmla {
+  display: block;
+  color: var(--green);
+  font-size: 12px;
+  margin-bottom: 2px;
+}
+.fdesc { color: var(--soft); font-size: 11px; }
+
+/* ── NUMBER TABLE ── */
+.num-table { width: 100%; border-collapse: collapse; font-size: 12px; }
+.num-table td { padding: 5px 6px; border-bottom: 1px solid rgba(255,255,255,0.04); vertical-align: top; }
+.num-table td:last-child { color: var(--soft); text-align: right; font-size: 11px; }
+.num-table tr:last-child td { border-bottom: none; }
+
+/* ── RULE BOX ── */
+.rule-box {
+  background: rgba(0,217,255,0.04);
+  border-left: 2px solid var(--cyan);
+  padding: 10px 12px;
+  margin-top: 8px;
+  font-size: 12px;
+  line-height: 1.7;
+  color: var(--ink);
+}
+.rule-box.amber { border-left-color: var(--amber); background: rgba(255,170,0,0.04); }
+.rule-box.red   { border-left-color: var(--red);   background: rgba(255,0,79,0.04); }
+.rule-box.green { border-left-color: var(--green); background: rgba(57,255,20,0.04); }
+
+/* ── FOOTER ── */
+footer { text-align: center; padding: 24px; color: var(--soft); font-size: 11px; letter-spacing: 1px; border-top: 1px solid var(--line); }
+</style>
+</head>
+<body>
+
+<header>
+  <div style="display:flex;align-items:center;gap:20px;">
+    <a href="dashboard.html" class="logo"><span>LEO</span><span>AF</span></a>
+    <span class="header-tag">CHEAT SHEET · M1 &amp; M2</span>
+  </div>
+  <a href="dashboard.html" class="home-btn">← DASHBOARD</a>
+</header>
+
+<div class="jump-bar">
+  <span style="font-size:10px;color:var(--soft);letter-spacing:1px;align-self:center;">JUMP →</span>
+  <a href="#m1" class="jump-btn m1">M1 LANDSCAPE</a>
+  <a href="#m1-1" class="jump-btn m1">M1-1 Why LEO Now</a>
+  <a href="#m1-2" class="jump-btn m1">M1-2 Regimes</a>
+  <a href="#m1-3" class="jump-btn m1">M1-3 Latency</a>
+  <a href="#m1-4" class="jump-btn m1">M1-4 Multi-Orbit</a>
+  <a href="#m1-6" class="jump-btn m1">M1-6 Spectrum</a>
+  <a href="#m1-7" class="jump-btn m1">M1-7 Mental Model</a>
+  <a href="#m2" class="jump-btn m2">M2 ORBITAL MECH</a>
+  <a href="#m2-1" class="jump-btn m2">M2-1 Kepler</a>
+  <a href="#m2-2" class="jump-btn m2">M2-2 Perturbations</a>
+  <a href="#m2-3" class="jump-btn m2">M2-3 Ground Tracks</a>
+  <a href="#m2-4" class="jump-btn m2">M2-4 Walker</a>
+  <a href="#m2-5" class="jump-btn m2">M2-5 Station-Keeping</a>
+  <a href="#m2-6" class="jump-btn m2">M2-6 Launch</a>
+  <a href="#m2-7" class="jump-btn m2">M2-7 Synthesis</a>
+</div>
+
+<main>
+
+<!-- ═══════════════════════════════════════════════════════════ M1 -->
+<div id="m1" class="module-header m1">
+  <span class="module-label">M1</span>
+  <span class="module-title">Landscape &amp; The Architect's Mental Model</span>
+  <a href="m1.html" class="module-link">→ HUB</a>
+</div>
+
+<!-- M1-1 -->
+<div id="m1-1" class="lesson-block open">
+  <div class="lesson-top" onclick="toggle(this)">
+    <span class="lesson-num">01</span>
+    <span class="lesson-title">Why LEO Now — The Enabling Conditions</span>
+    <a href="m1-1.html" class="lesson-goto" onclick="event.stopPropagation()">→ LESSON</a>
+    <span class="toggle-icon">›</span>
+  </div>
+  <div class="lesson-content">
+    <div class="content-grid">
+      <div class="card">
+        <div class="card-head cyan">The Four Enablers</div>
+        <ul class="terms">
+          <li><span class="kw">Smartphone supply chain</span> — MEMS, Li-ion, CMOS cameras, commodity RF chips drove unit cost from $500k → $500k → sub-$1M → $1k range</li>
+          <li><span class="kw">Reusable launch</span> — Falcon 9 booster reuse cut cost/kg to LEO by ~10×; Starship targets another 10×</li>
+          <li><span class="kw">Flat-panel phased-array terminal</span> — electronically steered, no moving parts, mass-producible; replaced 60cm dish + motor</li>
+          <li><span class="kw">Cheap capital + software ops</span> — autonomous satellite operations; machine-learning scheduling; low headcount per satellite</li>
+        </ul>
+      </div>
+      <div class="card">
+        <div class="card-head amber">Why the 1990s Failed</div>
+        <ul class="terms">
+          <li><span class="kw amber">Iridium / Teledesic</span> — same concept, $5B–$9B capex; no smartphone components; no reusable launch; dish terminals</li>
+          <li>Unit satellite cost was 100–1000× higher</li>
+          <li>Terminal cost was $3,000+ with bulky mechanical tracking</li>
+          <li>Operations required armies of staff per satellite</li>
+          <li><span class="kw">Incumbency as handicap</span> — telcos couldn't cannibalise GEO revenue; startups lacked capital</li>
+        </ul>
+      </div>
+      <div class="card">
+        <div class="card-head amber">Three Demand Pillars</div>
+        <ul class="terms">
+          <li><span class="kw amber">Enterprise/gov remote</span> — mining, oil & gas, utilities; pays premium; low elasticity</li>
+          <li><span class="kw amber">Aero/maritime</span> — inflight Wi-Fi, ship crew; duty-of-care driver; existing Ku-band base</li>
+          <li><span class="kw amber">Consumer rural/suburban</span> — "no alternative" broadband; large addressable market; price-sensitive</li>
+        </ul>
+      </div>
+      <div class="card">
+        <div class="card-head red">GEO Could Not Answer</div>
+        <ul class="terms">
+          <li>Latency ~600 ms RTT — kills real-time applications</li>
+          <li>Rain fade at Ka/Ku band degrades availability</li>
+          <li>Small, high-cost geostationary slots — ITU coordination years</li>
+          <li>HTS GEO partially closed the capacity gap but not the latency gap</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- M1-2 -->
+<div id="m1-2" class="lesson-block">
+  <div class="lesson-top" onclick="toggle(this)">
+    <span class="lesson-num">02</span>
+    <span class="lesson-title">Orbital Regimes Compared</span>
+    <a href="m1-2.html" class="lesson-goto" onclick="event.stopPropagation()">→ LESSON</a>
+    <span class="toggle-icon">›</span>
+  </div>
+  <div class="lesson-content">
+    <div class="content-grid">
+      <div class="card">
+        <div class="card-head cyan">Regime Map</div>
+        <table class="num-table">
+          <tr><td><span class="kw">VLEO</span></td><td>&lt; 450 km</td><td>weeks–months lifetime; very high drag</td></tr>
+          <tr><td><span class="kw">LEO</span></td><td>200–2,000 km</td><td>Starlink 550, OneWeb 600, ISS 400</td></tr>
+          <tr><td><span class="kw">MEO</span></td><td>2,000–35,786 km</td><td>GPS/Galileo ~20,200 km; O3b ~8,000 km</td></tr>
+          <tr><td><span class="kw">GEO</span></td><td>35,786 km</td><td>Fixed in sky; period = 1 sidereal day</td></tr>
+          <tr><td><span class="kw">HEO</span></td><td>Eccentric</td><td>Molniya — high-latitude coverage</td></tr>
+        </table>
+      </div>
+      <div class="card">
+        <div class="card-head amber">Key Numbers by Regime</div>
+        <table class="num-table">
+          <tr><td>LEO one-way delay</td><td>1.8–8 ms</td></tr>
+          <tr><td>MEO (O3b) one-way delay</td><td>~70 ms</td></tr>
+          <tr><td>GEO one-way delay</td><td>~119 ms</td></tr>
+          <tr><td>GEO RTT</td><td>~480–600 ms</td></tr>
+          <tr><td>Inner rad belt</td><td>~2,000 km start</td></tr>
+          <tr><td>Van Allen outer belt</td><td>~15,000–25,000 km</td></tr>
+        </table>
+      </div>
+      <div class="card">
+        <div class="card-head green">Master Tradeoff</div>
+        <ul class="terms">
+          <li><span class="kw green">Lower altitude</span> → lower latency, lower path loss, more drag, shorter lifetime, more satellites needed</li>
+          <li><span class="kw green">Higher altitude</span> → fewer satellites, longer lifetime, higher latency, more path loss, bigger terminal</li>
+          <li>LEO broadband sweet spot: <span class="kw">540–600 km</span> — all five constraints satisfied simultaneously</li>
+        </ul>
+      </div>
+      <div class="card">
+        <div class="card-head red">Radiation &amp; Environment</div>
+        <ul class="terms">
+          <li><span class="kw red">South Atlantic Anomaly (SAA)</span> — dip in inner belt; elevated proton/electron flux; upsets electronics</li>
+          <li><span class="kw red">Atomic oxygen</span> — below ~600 km; erodes organics on ram face</li>
+          <li><span class="kw red">Thermal cycling</span> — every 95 min at 550 km; −150°C to +120°C on unprotected surfaces</li>
+          <li>Doppler: ±30 kHz (L), ±355 kHz (Ku), ±672 kHz (Ka) at 550 km</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- M1-3 -->
+<div id="m1-3" class="lesson-block">
+  <div class="lesson-top" onclick="toggle(this)">
+    <span class="lesson-num">03</span>
+    <span class="lesson-title">The Physics of Latency</span>
+    <a href="m1-3.html" class="lesson-goto" onclick="event.stopPropagation()">→ LESSON</a>
+    <span class="toggle-icon">›</span>
+  </div>
+  <div class="lesson-content">
+    <div class="content-grid">
+      <div class="card">
+        <div class="card-head green">Core Formulas</div>
+        <ul class="formula-list">
+          <li><span class="fmla">d = c/n ≈ 2×10⁸ m/s (fibre)</span><span class="fdesc">speed of light in glass; n ≈ 1.5</span></li>
+          <li><span class="fmla">t_prop = range / c</span><span class="fdesc">one-way propagation delay</span></li>
+          <li><span class="fmla">RTT_GEO ≈ 4 × 119 ms ≈ 480 ms</span><span class="fdesc">two-way with 2 segments up + 2 down</span></li>
+          <li><span class="fmla">Slant range = √(r² + R⊕² − 2rR⊕ cos ρ)</span><span class="fdesc">ρ = Earth-central angle to observer</span></li>
+        </ul>
+      </div>
+      <div class="card">
+        <div class="card-head amber">Numbers to Know</div>
+        <table class="num-table">
+          <tr><td>Speed of light in vacuum</td><td>3×10⁸ m/s</td></tr>
+          <tr><td>Speed of light in fibre</td><td>~2×10⁸ m/s</td></tr>
+          <tr><td>LEO overhead one-way</td><td>~1.8 ms</td></tr>
+          <tr><td>LEO at 35° elev. one-way</td><td>~6–8 ms</td></tr>
+          <tr><td>GEO one-way</td><td>~119 ms</td></tr>
+          <tr><td>NY–London fibre RTT</td><td>~70 ms (≈ 5,500 km / 2×10⁸)</td></tr>
+        </table>
+      </div>
+      <div class="card">
+        <div class="card-head cyan">Latency Budget Terms</div>
+        <ul class="terms">
+          <li><span class="kw">Propagation delay</span> — physical distance / speed; irreducible floor</li>
+          <li><span class="kw">Queuing delay</span> — packet wait time at congested nodes; variable</li>
+          <li><span class="kw">Processing delay</span> — modem, IP stack, encryption</li>
+          <li><span class="kw">Jitter</span> — variation in delay; worse than mean latency for real-time (VoIP, gaming)</li>
+          <li><span class="kw">Hop count</span> — every bent-pipe relay adds a full propagation leg</li>
+        </ul>
+      </div>
+      <div class="card">
+        <div class="card-head red">Application Sensitivity</div>
+        <ul class="terms">
+          <li><span class="kw red">Interactive voice / gaming</span> — RTT &lt; 150 ms needed; GEO excluded</li>
+          <li><span class="kw">Video streaming</span> — latency-insensitive; buffering; GEO acceptable</li>
+          <li><span class="kw">Financial trading HFT</span> — microseconds; LEO still not fast enough vs. dark fibre</li>
+          <li><span class="kw">TCP throughput</span> — degrades on high-RTT links; bandwidth-delay product limits window</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- M1-4 -->
+<div id="m1-4" class="lesson-block">
+  <div class="lesson-top" onclick="toggle(this)">
+    <span class="lesson-num">04</span>
+    <span class="lesson-title">Multi-Orbit Hybrid Architectures</span>
+    <a href="m1-4.html" class="lesson-goto" onclick="event.stopPropagation()">→ LESSON</a>
+    <span class="toggle-icon">›</span>
+  </div>
+  <div class="lesson-content">
+    <div class="content-grid">
+      <div class="card">
+        <div class="card-head cyan">Why Hybrid?</div>
+        <ul class="terms">
+          <li><span class="kw">Complementarity</span> — GEO: broadcast/wide coverage; MEO: balanced; LEO: latency + capacity</li>
+          <li><span class="kw">Resilience</span> — diversity of orbital regimes; no single point of failure</li>
+          <li><span class="kw">Traffic steering</span> — route latency-sensitive traffic to LEO; broadcast to GEO; polar to MEO</li>
+        </ul>
+        <div class="rule-box">Multi-orbit only pays when the traffic mix genuinely benefits from regime diversity. A pure consumer broadband case has no reason to add GEO latency.</div>
+      </div>
+      <div class="card">
+        <div class="card-head amber">Regime Division of Labour</div>
+        <table class="num-table">
+          <tr><td>GEO</td><td>Broadcast, weather, wide-area backup</td></tr>
+          <tr><td>MEO (O3b)</td><td>Mid-lat enterprise; balanced latency/coverage</td></tr>
+          <tr><td>LEO</td><td>Broadband, interactive, aero/maritime</td></tr>
+          <tr><td>HEO (Molniya)</td><td>High-latitude coverage; niche</td></tr>
+        </table>
+      </div>
+      <div class="card">
+        <div class="card-head green">Key Distinctions</div>
+        <ul class="terms">
+          <li><span class="kw green">Multi-orbit</span> — different orbital regimes (LEO + GEO)</li>
+          <li><span class="kw green">Multi-shell</span> — same regime, different inclinations (Starlink 53° + 70° + 97.6°)</li>
+          <li><span class="kw">Managed service</span> — operator controls steering; user sees unified service</li>
+          <li><span class="kw">Multi-orbit terminal</span> — single dish steering across regimes; adds cost/complexity</li>
+        </ul>
+      </div>
+      <div class="card">
+        <div class="card-head red">When Hybrid Breaks Down</div>
+        <ul class="terms">
+          <li>Terminal cost of multi-orbit capability may not be justified if one regime serves 95% of traffic</li>
+          <li>Spectrum coordination between regimes adds regulatory complexity</li>
+          <li>Interference between co-frequency LEO and GEO requires <span class="kw red">EPFD limits</span></li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- M1-6 -->
+<div id="m1-6" class="lesson-block">
+  <div class="lesson-top" onclick="toggle(this)">
+    <span class="lesson-num">06</span>
+    <span class="lesson-title">Spectrum &amp; Regulatory Orientation</span>
+    <a href="m1-6.html" class="lesson-goto" onclick="event.stopPropagation()">→ LESSON</a>
+    <span class="toggle-icon">›</span>
+  </div>
+  <div class="lesson-content">
+    <div class="content-grid">
+      <div class="card">
+        <div class="card-head cyan">The Band Ladder</div>
+        <table class="num-table">
+          <tr><td><span class="kw">L-band</span></td><td>1–2 GHz</td><td>Mobile, Iridium; robust; low capacity</td></tr>
+          <tr><td><span class="kw">S-band</span></td><td>2–4 GHz</td><td>Mobile sat; D2D candidates</td></tr>
+          <tr><td><span class="kw">Ku-band</span></td><td>12–18 GHz</td><td>HTS GEO; maritime; most VSAT</td></tr>
+          <tr><td><span class="kw">Ka-band</span></td><td>26.5–40 GHz</td><td>LEO broadband (Starlink, Kuiper)</td></tr>
+          <tr><td><span class="kw">V-band</span></td><td>40–75 GHz</td><td>Feeder links; future user links</td></tr>
+          <tr><td><span class="kw">E-band</span></td><td>60–90 GHz</td><td>Next-gen; O2 absorption at 60 GHz</td></tr>
+        </table>
+      </div>
+      <div class="card">
+        <div class="card-head amber">Two-Tier Regulatory System</div>
+        <ul class="terms">
+          <li><span class="kw amber">ITU</span> — International Telecommunication Union; global coordination; Radio Regulations; WRC every 4 yrs</li>
+          <li><span class="kw amber">National regulator</span> (FCC, Ofcom, ARCEP…) — licences operators within ITU framework</li>
+          <li><span class="kw">Filing priority</span> — first to file at ITU gets coordination priority; drives "paper satellite" filings</li>
+          <li><span class="kw">Landing rights</span> — national gate for market access; separate from ITU slot</li>
+        </ul>
+      </div>
+      <div class="card">
+        <div class="card-head green">Critical Regulatory Concepts</div>
+        <ul class="terms">
+          <li><span class="kw green">NGSO</span> — Non-Geostationary Orbit; Starlink, OneWeb, Kuiper all NGSO</li>
+          <li><span class="kw green">EPFD</span> — Equivalent Power Flux Density; limits NGSO interference into GEO beams</li>
+          <li><span class="kw green">Bringing into use (BIU)</span> — must launch ≥1 satellite in the filed band within 7 years or filing lapses</li>
+          <li><span class="kw green">WRC-19 milestone</span> — NGSO must deploy ≥10% of constellation in 2 yr, ≥50% in 5 yr, 100% in 7 yr</li>
+          <li><span class="kw">Spectrum moat</span> — first operator to coordinate and deploy locks out later entrants from same frequencies</li>
+        </ul>
+      </div>
+      <div class="card">
+        <div class="card-head red">Band Choice → Architecture</div>
+        <ul class="terms">
+          <li>Ka-band → small terminals possible; rain fade ↑; higher capacity</li>
+          <li>Ku-band → legacy compatibility; larger terminals; lower rain fade risk</li>
+          <li>Higher frequency → more bandwidth available; smaller antennas; more rain fade</li>
+          <li>Frequency reuse across spot beams is the capacity multiplier — covered in M3-5</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- M1-7 -->
+<div id="m1-7" class="lesson-block">
+  <div class="lesson-top" onclick="toggle(this)">
+    <span class="lesson-num">07</span>
+    <span class="lesson-title">The Architect's Mental Model (Synthesis)</span>
+    <a href="m1-7.html" class="lesson-goto" onclick="event.stopPropagation()">→ LESSON</a>
+    <span class="toggle-icon">›</span>
+  </div>
+  <div class="lesson-content">
+    <div class="content-grid">
+      <div class="card" style="grid-column:1/-1">
+        <div class="card-head cyan">The Six Threads</div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:4px;">
+          <div><span class="kw">1. Why now</span> — four enablers; timing matters</div>
+          <div><span class="kw">2. Regime physics</span> — altitude fixes latency, coverage, lifetime</div>
+          <div><span class="kw">3. Latency floor</span> — propagation is irreducible; application determines need</div>
+          <div><span class="kw">4. Multi-orbit</span> — complementarity only; not always needed</div>
+          <div><span class="kw">5. Commercial delta</span> — GEO limitations opened the market</div>
+          <div><span class="kw">6. Spectrum &amp; regulation</span> — ITU priority determines competitive moat</div>
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-head amber">The Causal Chain</div>
+        <ul class="terms">
+          <li>Enablers → cost reduction → viable business case</li>
+          <li>GEO latency gap → LEO demand → constellation sizing</li>
+          <li>Altitude → latency + lifetime + drag</li>
+          <li>Inclination → coverage reach + conjunction risk</li>
+          <li>Spectrum filing → competitive moat</li>
+        </ul>
+      </div>
+      <div class="card">
+        <div class="card-head green">Invariant Tradeoff Axes</div>
+        <ul class="terms">
+          <li><span class="kw green">Altitude</span> — latency vs satellites needed vs lifetime</li>
+          <li><span class="kw green">Inclination</span> — coverage reach vs polar seam risk vs market fit</li>
+          <li><span class="kw green">Frequency</span> — capacity vs rain fade vs terminal size</li>
+          <li><span class="kw green">Design life</span> — unit cost vs replacement cadence</li>
+        </ul>
+      </div>
+      <div class="card">
+        <div class="card-head red">Common Reasoning Errors</div>
+        <ul class="terms">
+          <li>Confusing multi-orbit with multi-shell</li>
+          <li>Treating GEO latency as a solvable engineering problem (it is not)</li>
+          <li>Ignoring regulatory timing as a first-mover advantage</li>
+          <li>Assuming lower altitude is always better</li>
+          <li>Ignoring the four enablers — cost advantage is not permanent</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════════ M2 -->
+<div id="m2" class="module-header m2">
+  <span class="module-label">M2</span>
+  <span class="module-title">Orbital Mechanics &amp; Constellation Design</span>
+  <a href="m2.html" class="module-link">→ HUB</a>
+</div>
+
+<!-- M2-1 -->
+<div id="m2-1" class="lesson-block">
+  <div class="lesson-top" onclick="toggle(this)">
+    <span class="lesson-num">01</span>
+    <span class="lesson-title">Kepler &amp; Newton — The Two-Body Foundation</span>
+    <a href="m2-1.html" class="lesson-goto" onclick="event.stopPropagation()">→ LESSON</a>
+    <span class="toggle-icon">›</span>
+  </div>
+  <div class="lesson-content">
+    <div class="content-grid">
+      <div class="card">
+        <div class="card-head green">Core Formulas</div>
+        <ul class="formula-list">
+          <li><span class="fmla">v_circ = √(μ/r)</span><span class="fdesc">circular orbital speed; μ = 398,600 km³/s²</span></li>
+          <li><span class="fmla">T = 2π√(r³/μ)</span><span class="fdesc">Kepler's third law; r = R⊕ + altitude</span></li>
+          <li><span class="fmla">v² = μ(2/r − 1/a)</span><span class="fdesc">vis-viva equation; a = semi-major axis</span></li>
+          <li><span class="fmla">E = −μ/(2a)</span><span class="fdesc">specific orbital energy; more negative = lower orbit</span></li>
+        </ul>
+      </div>
+      <div class="card">
+        <div class="card-head amber">Numbers at 550 km</div>
+        <table class="num-table">
+          <tr><td>Orbital radius r</td><td>6,928 km</td></tr>
+          <tr><td>Circular speed v</td><td>7.61 km/s</td></tr>
+          <tr><td>Period T</td><td>95.6 min</td></tr>
+          <tr><td>Orbits per day</td><td>~15.1</td></tr>
+          <tr><td>R⊕</td><td>6,378 km</td></tr>
+          <tr><td>μ</td><td>398,600 km³/s²</td></tr>
+        </table>
+      </div>
+      <div class="card">
+        <div class="card-head cyan">Kepler's Three Laws</div>
+        <ul class="terms">
+          <li><span class="kw">1st law</span> — orbits are ellipses; Earth at one focus</li>
+          <li><span class="kw">2nd law</span> — equal areas in equal times; faster at perigee</li>
+          <li><span class="kw">3rd law</span> — T² ∝ a³; period from semi-major axis</li>
+        </ul>
+      </div>
+      <div class="card">
+        <div class="card-head red">Key Concepts</div>
+        <ul class="terms">
+          <li><span class="kw">Semi-major axis a</span> — defines orbit size, energy, period</li>
+          <li><span class="kw">Perigee / apogee</span> — closest / farthest point</li>
+          <li><span class="kw">Circular orbit</span> — e = 0; a = r at all points</li>
+          <li><span class="kw">Raising orbit costs Δv</span> — energy must increase; thrust in direction of motion</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- M2-2 -->
+<div id="m2-2" class="lesson-block">
+  <div class="lesson-top" onclick="toggle(this)">
+    <span class="lesson-num">02</span>
+    <span class="lesson-title">Real Orbits — Perturbations &amp; Orbital Elements</span>
+    <a href="m2-2.html" class="lesson-goto" onclick="event.stopPropagation()">→ LESSON</a>
+    <span class="toggle-icon">›</span>
+  </div>
+  <div class="lesson-content">
+    <div class="content-grid">
+      <div class="card">
+        <div class="card-head cyan">The Six Elements</div>
+        <table class="num-table">
+          <tr><td><span class="kw">a</span></td><td>Semi-major axis</td><td>size, energy, period</td></tr>
+          <tr><td><span class="kw">e</span></td><td>Eccentricity</td><td>shape (0 = circle)</td></tr>
+          <tr><td><span class="kw">i</span></td><td>Inclination</td><td>tilt of plane</td></tr>
+          <tr><td><span class="kw">Ω</span></td><td>RAAN</td><td>rotation of plane around pole</td></tr>
+          <tr><td><span class="kw">ω</span></td><td>Arg. of perigee</td><td>orientation of ellipse in plane</td></tr>
+          <tr><td><span class="kw">M / ν</span></td><td>Mean / true anomaly</td><td>position in orbit</td></tr>
+        </table>
+      </div>
+      <div class="card">
+        <div class="card-head green">J2 Effects (Dominant Perturbation)</div>
+        <ul class="formula-list">
+          <li><span class="fmla">dΩ/dt = −(3/2)·n·J2·(R⊕/a)²·cos i</span><span class="fdesc">Node regression; ~−6.6°/day at 550 km, 53°</span></li>
+          <li><span class="fmla">J2 = 1.083×10⁻³</span><span class="fdesc">dominant zonal harmonic coefficient</span></li>
+          <li><span class="fmla">Sun-sync: i ≈ 97.6° at 550 km</span><span class="fdesc">node drifts +0.9856°/day = Earth's orbital rate</span></li>
+          <li><span class="fmla">Critical inclination: 63.43°</span><span class="fdesc">apsidal precession = 0; Molniya orbit</span></li>
+        </ul>
+      </div>
+      <div class="card">
+        <div class="card-head amber">Atmospheric Drag</div>
+        <ul class="terms">
+          <li><span class="kw">Ballistic coefficient β = m/(C_D·A)</span> — high β = slower decay</li>
+          <li><span class="kw amber">Feb 2022 Starlink event</span> — ~38 sats lost; geomagnetic storm at 210 km staging orbit</li>
+          <li>Density at 550 km: ~10⁻¹³ kg/m³; doubles/triples at solar max</li>
+          <li><span class="kw">IADC 25-yr guideline</span> — natural re-entry within 25 yr; FCC now requires 5 yr</li>
+          <li>Natural re-entry: 550 km → 7–12 yr (solar mean); 600 km → 15–25 yr</li>
+        </ul>
+      </div>
+      <div class="card">
+        <div class="card-head red">Concepts</div>
+        <ul class="terms">
+          <li><span class="kw">Osculating elements</span> — instantaneous two-body ellipse matching true state</li>
+          <li><span class="kw">Mean elements (TLE)</span> — averaged; short-period oscillations removed</li>
+          <li><span class="kw">SGP4</span> — standard TLE propagator; mean → osculating → position</li>
+          <li><span class="kw">Repeat ground track</span> — K orbits in D days; J2 must be included</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- M2-3 -->
+<div id="m2-3" class="lesson-block">
+  <div class="lesson-top" onclick="toggle(this)">
+    <span class="lesson-num">03</span>
+    <span class="lesson-title">Ground Tracks &amp; Doppler</span>
+    <a href="m2-3.html" class="lesson-goto" onclick="event.stopPropagation()">→ LESSON</a>
+    <span class="toggle-icon">›</span>
+  </div>
+  <div class="lesson-content">
+    <div class="content-grid">
+      <div class="card">
+        <div class="card-head green">Geometry Formulas</div>
+        <ul class="formula-list">
+          <li><span class="fmla">cos ρ = sin φ_obs·sin φ_ssp + cos φ_obs·cos φ_ssp·cos Δλ</span><span class="fdesc">Earth-central angle ρ between observer and SSP</span></li>
+          <li><span class="fmla">tan ε = (cos ρ − R⊕/r) / sin ρ</span><span class="fdesc">elevation angle; ε = 0° at horizon when cos ρ = R⊕/r</span></li>
+          <li><span class="fmla">Δf = −(ṙ/c) · f₀</span><span class="fdesc">Doppler shift; ṙ = range rate (+ = receding)</span></li>
+          <li><span class="fmla">ṙ = (ρ_vec · v_sat) / |ρ|</span><span class="fdesc">range rate from ECEF position and velocity</span></li>
+        </ul>
+      </div>
+      <div class="card">
+        <div class="card-head amber">Key Numbers at 550 km</div>
+        <table class="num-table">
+          <tr><td>Westward pass shift per orbit</td><td>~24.9°</td></tr>
+          <tr><td>Max Earth-central angle (ε=0°)</td><td>~59°</td></tr>
+          <tr><td>Coverage radius (ε=0°)</td><td>~6,540 km</td></tr>
+          <tr><td>Coverage radius (ε=35°)</td><td>~2,700 km</td></tr>
+          <tr><td>Max Doppler at Ka (26.5 GHz)</td><td>±672 kHz</td></tr>
+          <tr><td>Max Doppler at Ku (14 GHz)</td><td>±355 kHz</td></tr>
+          <tr><td>Max Doppler rate near overhead</td><td>~1.5 kHz/s</td></tr>
+          <tr><td>Typical pass duration</td><td>5–11 min</td></tr>
+        </table>
+      </div>
+      <div class="card">
+        <div class="card-head cyan">Concepts</div>
+        <ul class="terms">
+          <li><span class="kw">Sub-satellite point (SSP)</span> — ground point directly below satellite</li>
+          <li><span class="kw">Ground track</span> — path of SSP; sinusoidal between ±inclination</li>
+          <li><span class="kw">Elevation angle ε</span> — angle between horizon and line of sight; zero at horizon</li>
+          <li><span class="kw">Doppler pre-compensation</span> — terminal offsets uplink frequency to cancel Doppler at satellite</li>
+          <li><span class="kw">Doppler rate</span> — highest near closest approach; ~1.5 kHz/s at LEO</li>
+        </ul>
+      </div>
+      <div class="card">
+        <div class="card-head red">Unified Rule</div>
+        <div class="rule-box red">Elevation angle, slant range, and Doppler shift all derive from the same satellite+observer state vector. A link budget must treat them consistently — you cannot assume one elevation angle and a different Doppler.</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- M2-4 -->
+<div id="m2-4" class="lesson-block">
+  <div class="lesson-top" onclick="toggle(this)">
+    <span class="lesson-num">04</span>
+    <span class="lesson-title">Walker Patterns &amp; Coverage Geometry</span>
+    <a href="m2-4.html" class="lesson-goto" onclick="event.stopPropagation()">→ LESSON</a>
+    <span class="toggle-icon">›</span>
+  </div>
+  <div class="lesson-content">
+    <div class="content-grid">
+      <div class="card">
+        <div class="card-head cyan">Walker T/P/F Notation</div>
+        <ul class="terms">
+          <li><span class="kw">T</span> — total satellites</li>
+          <li><span class="kw">P</span> — orbital planes; RAAN spacing = 360°/P</li>
+          <li><span class="kw">F</span> — phasing; mean anomaly offset between adjacent planes = F × 360°/T</li>
+          <li><span class="kw">Walker delta</span> — i &lt; 90°; mid-latitude; no polar seam</li>
+          <li><span class="kw">Walker star</span> — i ≈ 90°; global coverage; polar seam (high-velocity crossings)</li>
+          <li>Starlink v1: <span class="kw">1,584/72/1</span> at 53° | OneWeb: <span class="kw">648/18/0</span> at 87.9°</li>
+        </ul>
+      </div>
+      <div class="card">
+        <div class="card-head green">Coverage Formulas</div>
+        <ul class="formula-list">
+          <li><span class="fmla">ρ_cap = arccos(R⊕·cos ε_min / r) − ε_min</span><span class="fdesc">Coverage cap half-angle</span></li>
+          <li><span class="fmla">A_cap = (1 − cos ρ_cap) / 2</span><span class="fdesc">Fractional Earth area per satellite</span></li>
+          <li><span class="fmla">S_min = ⌈180° / ρ_cap⌉</span><span class="fdesc">Min sats per plane (in-track gap closure)</span></li>
+          <li><span class="fmla">N_min ≈ ⌈1 / A_cap⌉ × k_geo</span><span class="fdesc">k_geo = 3–6 (margin, J2, outages)</span></li>
+        </ul>
+        <table class="num-table" style="margin-top:8px;">
+          <tr><td>550 km, ε=35°</td><td>ρ_cap ≈ 33.4°</td><td>A_cap ≈ 8.3%</td></tr>
+          <tr><td>550 km, ε=0°</td><td>ρ_cap ≈ 59°</td><td>A_cap ≈ 21.5%</td></tr>
+        </table>
+      </div>
+      <div class="card">
+        <div class="card-head amber">Inclination Tradeoffs</div>
+        <ul class="terms">
+          <li><span class="kw">Coverage reach</span> — max lat = inclination (prograde)</li>
+          <li><span class="kw amber">Polar seam</span> — Walker star: ascending/descending planes cross at ≤15 km/s relative velocity; debris risk</li>
+          <li><span class="kw">Dwell time</span> — more time near ±i; wastes capacity over polar ocean for commercial service</li>
+          <li><span class="kw">Why 53°</span> — Starlink: market in ±53°; no seam; Falcon 9 direct from Cape Canaveral</li>
+          <li><span class="kw">Why 87.9°</span> — OneWeb: global enterprise/maritime customer; one shell = global coverage</li>
+        </ul>
+      </div>
+      <div class="card">
+        <div class="card-head red">k_geometry</div>
+        <div class="rule-box red">Starlink first shell (1,584 sats) vs theoretical minimum at ε=35° (24 sats) → k_geometry ≈ 66. Not waste: higher effective elevation target (40–45°), J2 phasing margin, outage tolerance, commercial density. k_geo = 3–6 for a basic design; 60+ for a commercial product.</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- M2-5 -->
+<div id="m2-5" class="lesson-block">
+  <div class="lesson-top" onclick="toggle(this)">
+    <span class="lesson-num">05</span>
+    <span class="lesson-title">Station-Keeping &amp; Orbital Decay</span>
+    <a href="m2-5.html" class="lesson-goto" onclick="event.stopPropagation()">→ LESSON</a>
+    <span class="toggle-icon">›</span>
+  </div>
+  <div class="lesson-content">
+    <div class="content-grid">
+      <div class="card">
+        <div class="card-head green">Δv Budget (5-yr, 550 km, solar mean)</div>
+        <table class="num-table">
+          <tr><td>Drag makeup</td><td>~15–50 m/s</td><td>3–10 m/s/yr; solar-dependent</td></tr>
+          <tr><td>Inclination SK (if corrected)</td><td>~300–350 m/s</td><td>~65 m/s/yr; most omit this</td></tr>
+          <tr><td>CAM budget</td><td>~25 m/s</td><td>~5 m/s/yr</td></tr>
+          <tr><td>Deorbit (one-time)</td><td>~25–30 m/s</td><td>from 550 km to 350 km perigee</td></tr>
+          <tr><td><strong>Total (no incl SK)</strong></td><td><strong>~70–105 m/s</strong></td><td>typical budget</td></tr>
+        </table>
+      </div>
+      <div class="card">
+        <div class="card-head cyan">Rocket Equation</div>
+        <ul class="formula-list">
+          <li><span class="fmla">m_prop = m_dry × (exp(ΔV / g₀·Isp) − 1)</span><span class="fdesc">g₀ = 9.807 m/s²</span></li>
+          <li><span class="fmla">Hall HET: Isp ≈ 1,600 s, F ≈ 50 mN</span><span class="fdesc">~2 kg propellant for 100 m/s, 300 kg sat</span></li>
+          <li><span class="fmla">Hydrazine: Isp ≈ 230 s, F ≈ 5 N</span><span class="fdesc">~14 kg propellant for same Δv</span></li>
+          <li><span class="fmla">CAM time = m·Δv / F</span><span class="fdesc">50 mN HET: 0.2 m/s on 300 kg → 20 min</span></li>
+        </ul>
+      </div>
+      <div class="card">
+        <div class="card-head amber">Station-Keeping Axes</div>
+        <ul class="terms">
+          <li><span class="kw">Along-track</span> — differential drag; corrected by orbit boosts; cheap (2–10 m/s/yr)</li>
+          <li><span class="kw amber">Cross-track (inclination)</span> — luni-solar drift ~0.5°/yr; ΔV ≈ v·Δi ≈ 66 m/s/yr; most operators skip</li>
+          <li><span class="kw">Radial</span> — managed as along-track; small for near-circular LEO</li>
+          <li><span class="kw">Deadband</span> — tolerance before correction triggered; ±0.05° ≈ ±6 km at 550 km</li>
+        </ul>
+      </div>
+      <div class="card">
+        <div class="card-head red">Deorbit Rules</div>
+        <ul class="terms">
+          <li><span class="kw red">IADC 25-yr guideline</span> — international standard; natural or active deorbit</li>
+          <li><span class="kw red">FCC 5-yr rule</span> — US-licensed post-2022 constellations must deorbit within 5 yr of EOM</li>
+          <li>600 km solar-min natural lifetime: 30–50 yr → deorbit burn mandatory</li>
+          <li>550 km solar-min: 15–25 yr → marginal; active deorbit needed for FCC compliance</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- M2-6 -->
+<div id="m2-6" class="lesson-block">
+  <div class="lesson-top" onclick="toggle(this)">
+    <span class="lesson-num">06</span>
+    <span class="lesson-title">Launch &amp; Deployment Logistics</span>
+    <a href="m2-6.html" class="lesson-goto" onclick="event.stopPropagation()">→ LESSON</a>
+    <span class="toggle-icon">›</span>
+  </div>
+  <div class="lesson-content">
+    <div class="content-grid">
+      <div class="card">
+        <div class="card-head cyan">Launch Manifest Formulas</div>
+        <ul class="formula-list">
+          <li><span class="fmla">N_per_launch = ⌊m_lv / m_sat⌋</span><span class="fdesc">subject to fairing volume</span></li>
+          <li><span class="fmla">N_launches = ⌈N_total / N_per_launch⌉</span></li>
+          <li><span class="fmla">ΔV_raise = ΔV₁ + ΔV₂</span><span class="fdesc">Hohmann; 350→550 km ≈ 64 m/s</span></li>
+          <li><span class="fmla">T_deploy = N_launches / cadence_per_yr</span></li>
+        </ul>
+      </div>
+      <div class="card">
+        <div class="card-head amber">Real Numbers</div>
+        <table class="num-table">
+          <tr><td>Starlink / Falcon 9</td><td>~53 sats/launch</td><td>~30 launches for 1,584-sat shell</td></tr>
+          <tr><td>OneWeb / Soyuz-2</td><td>~36 sats/launch</td><td>18 launches for 648 sats</td></tr>
+          <tr><td>Falcon 9 internal cost</td><td>~$15–20M</td><td>reused booster</td></tr>
+          <tr><td>Ariane 6 (A62)</td><td>~€80–90M</td><td>expendable</td></tr>
+          <tr><td>Starship target</td><td>~$10M</td><td>~100,000 kg to LEO</td></tr>
+        </table>
+      </div>
+      <div class="card">
+        <div class="card-head green">J2 Drift Phasing</div>
+        <ul class="terms">
+          <li><span class="kw green">J2 drift technique</span> — two batches at slightly different altitudes drift apart in RAAN at rate |ΔdΩ/dt|</li>
+          <li><span class="fmla" style="color:var(--green);font-size:12px;">t_drift = ΔΩ_target / |ΔdΩ/dt|</span></li>
+          <li>5 km altitude diff at 550 km → ~0.01°/day diff → 500 days to drift 5°</li>
+          <li>Starlink uses ~350 km staging orbit: much higher J2 rate → weeks, not years</li>
+          <li><span class="kw">Staging orbit</span> — ~350 km; failed sats re-enter in weeks; accelerates J2 drift</li>
+        </ul>
+      </div>
+      <div class="card">
+        <div class="card-head red">MVC &amp; Deployment Strategy</div>
+        <ul class="terms">
+          <li><span class="kw">MVC</span> — minimum viable constellation; not half the total; market-defined</li>
+          <li>Starlink beta at ~800 sats: continuous mid-latitude coverage</li>
+          <li><span class="kw">Plane-by-plane</span> — dense corridor fast; global coverage late</li>
+          <li><span class="kw">Distributed</span> — broad but sparse coverage early</li>
+          <li>Launch cost ≈ 30–50% of total deployment cost</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- M2-7 -->
+<div id="m2-7" class="lesson-block">
+  <div class="lesson-top" onclick="toggle(this)">
+    <span class="lesson-num">07</span>
+    <span class="lesson-title">Constellation Architecture Synthesis</span>
+    <a href="m2-7.html" class="lesson-goto" onclick="event.stopPropagation()">→ LESSON</a>
+    <span class="toggle-icon">›</span>
+  </div>
+  <div class="lesson-content">
+    <div class="content-grid">
+      <div class="card" style="grid-column:1/-1">
+        <div class="card-head cyan">The Five-Tier Design Hierarchy</div>
+        <div style="display:grid;grid-template-columns:repeat(5,1fr);gap:6px;margin-top:6px;">
+          <div style="background:rgba(255,0,79,0.08);border:1px solid #ff004f44;padding:8px;font-size:11px;"><span style="color:var(--red);font-family:'Orbitron',sans-serif;font-size:9px;display:block;margin-bottom:4px;">TIER 1</span>Service requirements<br><span style="color:var(--soft)">coverage, latency, data rate</span></div>
+          <div style="background:rgba(255,170,0,0.08);border:1px solid #ffaa0044;padding:8px;font-size:11px;"><span style="color:var(--amber);font-family:'Orbitron',sans-serif;font-size:9px;display:block;margin-bottom:4px;">TIER 2</span>Orbit selection<br><span style="color:var(--soft)">altitude h, inclination i</span></div>
+          <div style="background:rgba(0,217,255,0.06);border:1px solid #00d9ff33;padding:8px;font-size:11px;"><span style="color:var(--cyan);font-family:'Orbitron',sans-serif;font-size:9px;display:block;margin-bottom:4px;">TIER 3</span>Walker geometry<br><span style="color:var(--soft)">T, P, F, ε_min</span></div>
+          <div style="background:rgba(57,255,20,0.05);border:1px solid #39ff1433;padding:8px;font-size:11px;"><span style="color:var(--green);font-family:'Orbitron',sans-serif;font-size:9px;display:block;margin-bottom:4px;">TIER 4</span>Satellite design<br><span style="color:var(--soft)">mass, Isp, life</span></div>
+          <div style="background:rgba(255,255,255,0.03);border:1px solid #ffffff22;padding:8px;font-size:11px;"><span style="color:var(--soft);font-family:'Orbitron',sans-serif;font-size:9px;display:block;margin-bottom:4px;">TIER 5</span>Deployment plan<br><span style="color:var(--soft)">vehicle, staging, cadence</span></div>
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-head amber">Why 540–600 km? — Five Constraints</div>
+        <ul class="terms">
+          <li>Latency &lt; 50 ms → alt &lt; ~1,200 km</li>
+          <li>IADC/FCC deorbit → alt ≤ ~600 km</li>
+          <li>Manageable drag → alt ≥ ~500 km</li>
+          <li>Ka-band path loss acceptable → alt &lt; ~700 km</li>
+          <li>Launch vehicle payload → alt ≤ ~600 km without mass penalty</li>
+        </ul>
+      </div>
+      <div class="card">
+        <div class="card-head cyan">The Three Constellations</div>
+        <table class="num-table">
+          <tr><td><span class="kw">Starlink</span></td><td>53° 550 km 1,584</td><td>Consumer; mid-lat; HET Kr</td></tr>
+          <tr><td><span class="kw">OneWeb</span></td><td>87.9° 600 km 648</td><td>Global; maritime/gov; HET Xe</td></tr>
+          <tr><td><span class="kw">Kuiper</span></td><td>51.9° 590 km 1,156</td><td>Consumer; mid-lat; AWS integration</td></tr>
+        </table>
+      </div>
+      <div class="card">
+        <div class="card-head red">Key Coupling: Tier 3 → Tier 4</div>
+        <div class="rule-box red">Satellite count (T3) sets cost pressure per satellite → satellite complexity → satellite mass → satellites per launch → total launch cost → business case. Designers who pick T and P without thinking about downstream mass produce unaffordable constellations on paper.</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+</main>
+
+<footer>LEOAF CHEAT SHEET · M1 &amp; M2 · PERSONAL REFERENCE · leoarfu.github.io/42/</footer>
+
+<script>
+function toggle(top) {
+    const block = top.closest('.lesson-block');
+    block.classList.toggle('open');
+}
+// Open M1-1 by default (already has class 'open')
+</script>
+</body>
+</html>
