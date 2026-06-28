@@ -1,0 +1,650 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, shrink-to-fit=no">
+<title>M3-2 — ADCS &amp; Propulsion · LEOAF</title>
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;600;800&family=Share+Tech+Mono&family=Libre+Baskerville:ital,wght@0,400;0,700;1,400&display=swap" rel="stylesheet">
+<link rel="icon" href="favicon.ico" sizes="any" type="image/x-icon">
+<link rel="manifest" href="site.webmanifest">
+<meta name="theme-color" content="#0f0f0f">
+
+<script>
+window.leoafAbort = async function () {
+    function go() { window.location.replace("index.html?signedout=1"); }
+    try {
+        if (typeof client !== "undefined" && client && client.auth && client.auth.signOut) {
+            try { await client.auth.signOut({ scope: "local" }); } catch (e) {}
+        }
+    } catch (e) {}
+    go();
+};
+</script>
+
+<style>
+* { box-sizing:border-box; margin:0; padding:0; }
+html { height:100%; -webkit-text-size-adjust:100%; overflow-x:hidden; }
+body { font-family:'Share Tech Mono',monospace; background:#000; color:white; overflow-x:hidden; min-height:100vh; }
+#starsCanvas { position:fixed; inset:0; z-index:-1; }
+
+header { background:#000; border-bottom:1px solid #ff004f33; position:sticky; top:0; z-index:100; padding:1rem clamp(1.5rem,5vw,4rem); display:flex; justify-content:space-between; align-items:center; box-shadow:0 4px 16px #0008; }
+.logo { font-family:'Orbitron',sans-serif; font-weight:800; font-size:clamp(16px,2vw,22px); letter-spacing:3px; text-decoration:none; }
+.logo span:first-child { color:white; }
+.logo span:last-child { color:#ff004f; }
+.nav-right { display:flex; align-items:center; gap:10px; }
+.nav-btn { background:transparent; border:1px solid #ff004f44; color:#ff004f; padding:6px 14px; cursor:pointer; transition:0.3s ease; font-size:11px; font-family:'Orbitron',sans-serif; letter-spacing:1px; text-decoration:none; display:inline-block; }
+.nav-btn:hover { background:#ff004f; color:black; }
+
+.breadcrumb { padding:14px clamp(1.5rem,5vw,4rem); font-size:11px; color:#ffffff44; letter-spacing:1px; position:relative; z-index:1; }
+.breadcrumb a { color:#00d9ff66; text-decoration:none; }
+.breadcrumb a:hover { color:#00d9ff; }
+.breadcrumb span { margin:0 8px; }
+
+.lesson-wrap { max-width:820px; margin:0 auto; padding:0 clamp(1.5rem,5vw,4rem) 80px; position:relative; z-index:1; }
+
+.lesson-header { padding:30px 0 28px; border-bottom:1px solid #ffffff11; margin-bottom:36px; }
+.lesson-tag { font-family:'Orbitron',sans-serif; font-size:10px; color:#ff004f; letter-spacing:3px; margin-bottom:10px; }
+.lesson-header h1 { font-family:'Orbitron',sans-serif; font-size:clamp(20px,3.5vw,32px); font-weight:800; line-height:1.2; margin-bottom:12px; }
+.lesson-meta { display:flex; gap:10px; flex-wrap:wrap; margin-bottom:16px; }
+.l-pill { font-family:'Orbitron',sans-serif; font-size:10px; padding:3px 10px; border:1px solid; letter-spacing:1px; }
+.l-pill-q { color:#ff004f; border-color:#ff004f44; }
+.l-pill-t { color:#39ff14; border-color:#39ff1444; }
+.lesson-intro { font-size:13px; line-height:1.85; opacity:0.75; }
+
+.toc { background:rgba(0,217,255,0.06); border:1px solid #00d9ff33; padding:24px 28px; margin:30px 0; }
+.toc h4 { font-family:'Orbitron',sans-serif; font-size:10px; color:#00d9ff; letter-spacing:2px; margin-bottom:16px; }
+.toc ol { padding-left:20px; }
+.toc li { font-size:13px; line-height:2.1; }
+.toc li a { color:#00d9ffbb; text-decoration:none; transition:0.15s; }
+.toc li a:hover { color:#ffffff; padding-left:4px; }
+.toc li::marker { color:#ff004f; font-family:'Orbitron',sans-serif; font-size:10px; }
+
+.content-block { margin-bottom:48px; }
+.content-block h2 { font-family:'Orbitron',sans-serif; font-size:13px; color:#00d9ff; letter-spacing:2px; text-transform:uppercase; margin-bottom:18px; padding-bottom:10px; border-bottom:1px solid #00d9ff22; scroll-margin-top:80px; }
+.content-block h3 { font-family:'Orbitron',sans-serif; font-size:11px; color:#ffffff88; letter-spacing:1.5px; text-transform:uppercase; margin:28px 0 12px; }
+.content-block p { font-size:13px; line-height:1.9; opacity:0.85; margin-bottom:16px; }
+.content-block ul, .content-block ol { padding-left:0; margin-bottom:16px; }
+.content-block ul li, .content-block ol li { font-size:13px; line-height:1.85; opacity:0.85; padding-left:20px; position:relative; margin-bottom:6px; }
+.content-block ul li::before { content:'›'; position:absolute; left:0; color:#00d9ff; }
+.content-block blockquote { border-left:3px solid #39ff14; background:rgba(57,255,20,0.05); padding:14px 20px; margin:18px 0; font-size:14px; font-family:'Share Tech Mono',monospace; color:#39ff14; letter-spacing:1px; }
+
+.callout { border-left:3px solid #00d9ff; background:rgba(0,217,255,0.05); padding:16px 20px; margin:22px 0; font-size:12px; line-height:1.8; }
+.callout.red   { border-left-color:#ff004f; background:rgba(255,0,79,0.05); }
+.callout.green { border-left-color:#39ff14; background:rgba(57,255,20,0.05); }
+.callout.amber { border-left-color:#ffaa00; background:rgba(255,170,0,0.05); }
+.callout strong { font-family:'Orbitron',sans-serif; font-size:10px; letter-spacing:1px; display:block; margin-bottom:8px; color:inherit; }
+
+.key-numbers { display:grid; grid-template-columns:repeat(auto-fit,minmax(140px,1fr)); gap:12px; margin:22px 0; }
+.kn-item { background:rgba(255,255,255,0.03); border:1px solid #ffffff11; padding:16px 12px; text-align:center; }
+.kn-val { font-family:'Orbitron',sans-serif; font-size:clamp(15px,2.3vw,22px); font-weight:800; color:#00d9ff; display:block; }
+.kn-label { font-size:10px; opacity:0.5; letter-spacing:1px; margin-top:5px; display:block; line-height:1.4; }
+
+.compare-table { width:100%; border-collapse:collapse; margin:22px 0; font-size:12px; }
+.compare-table th { font-family:'Orbitron',sans-serif; font-size:10px; letter-spacing:1px; color:#00d9ff; padding:10px 12px; border-bottom:1px solid #00d9ff33; text-align:left; }
+.compare-table td { padding:10px 12px; border-bottom:1px solid #ffffff0a; line-height:1.5; opacity:0.85; vertical-align:top; }
+.compare-table tr:hover td { background:rgba(255,255,255,0.02); }
+
+.quiz-block { background:rgba(17,17,17,0.9); border:1px solid #ff004f33; padding:28px; margin:48px 0 32px; }
+.quiz-block h2 { font-family:'Orbitron',sans-serif; font-size:13px; color:#ff004f; letter-spacing:2px; margin-bottom:6px; }
+.quiz-intro { font-size:12px; opacity:0.6; margin-bottom:24px; padding-bottom:16px; border-bottom:1px solid #ff004f22; line-height:1.6; }
+.quiz-q { margin-bottom:28px; }
+.quiz-q p { font-size:13px; opacity:0.9; margin-bottom:12px; line-height:1.65; }
+.quiz-q p strong { color:#00d9ff; }
+.quiz-options { display:flex; flex-direction:column; gap:8px; }
+.quiz-opt { background:rgba(255,255,255,0.03); border:1px solid #ffffff1a; padding:11px 16px; cursor:pointer; font-size:12px; font-family:'Share Tech Mono',monospace; transition:0.2s ease; text-align:left; color:white; line-height:1.5; }
+.quiz-opt:hover:not(:disabled) { background:rgba(0,217,255,0.08); border-color:#00d9ff44; }
+.quiz-opt.correct  { background:rgba(57,255,20,0.1);  border-color:#39ff14; color:#39ff14; }
+.quiz-opt.wrong    { background:rgba(255,0,79,0.1);   border-color:#ff004f; color:#ff004f; }
+.quiz-opt:disabled { cursor:default; }
+.quiz-feedback { font-size:12px; margin-top:10px; min-height:18px; line-height:1.7; opacity:0.9; padding:0 4px; }
+.quiz-score { font-family:'Orbitron',sans-serif; font-size:12px; color:#39ff14; margin-top:20px; letter-spacing:1px; display:none; padding-top:16px; border-top:1px solid #39ff1433; }
+
+.py-block { background:rgba(10,10,10,0.95); border:1px solid #39ff1422; padding:28px; margin:32px 0; }
+.py-block h2 { font-family:'Orbitron',sans-serif; font-size:13px; color:#39ff14; letter-spacing:2px; margin-bottom:8px; }
+.py-block .py-intro { font-size:12px; opacity:0.7; margin-bottom:20px; padding-bottom:16px; border-bottom:1px solid #39ff1422; line-height:1.7; }
+.py-exercise { margin-bottom:32px; }
+.py-exercise:last-child { margin-bottom:0; }
+.py-exercise h3 { font-family:'Orbitron',sans-serif; font-size:11px; color:#39ff1499; letter-spacing:1.5px; text-transform:uppercase; margin-bottom:10px; }
+.py-exercise p { font-size:12px; opacity:0.8; margin-bottom:14px; line-height:1.75; }
+.py-block pre { background:#050505; border:1px solid #39ff1433; padding:20px; font-family:'Share Tech Mono',monospace; font-size:11.5px; line-height:1.75; overflow-x:auto; color:#39ff14; white-space:pre; margin-bottom:12px; }
+
+.reflection-block { background:rgba(255,170,0,0.04); border:1px solid #ffaa0033; padding:24px; margin:32px 0; }
+.reflection-block h2 { font-family:'Orbitron',sans-serif; font-size:13px; color:#ffaa00; letter-spacing:2px; margin-bottom:8px; }
+.reflection-block .ref-intro { font-size:12px; opacity:0.7; margin-bottom:20px; padding-bottom:14px; border-bottom:1px solid #ffaa0022; line-height:1.7; }
+.ref-prompt { margin-bottom:20px; }
+.ref-prompt h3 { font-family:'Orbitron',sans-serif; font-size:11px; color:#ffaa0099; letter-spacing:1px; margin-bottom:8px; }
+.ref-prompt p { font-size:12px; opacity:0.8; line-height:1.75; margin-bottom:10px; }
+
+.back-to-top { position:fixed; bottom:28px; right:28px; z-index:200; width:44px; height:44px; background:#000; border:1px solid #00d9ff55; color:#00d9ff; font-size:20px; cursor:pointer; display:flex; align-items:center; justify-content:center; opacity:0; pointer-events:none; transition:opacity 0.3s ease; }
+.back-to-top.visible { opacity:1; pointer-events:auto; }
+.back-to-top:hover { border-color:#00d9ff; background:#001a2c; }
+
+.complete-wrap { margin-top:56px; padding-top:30px; border-top:1px solid #ffffff11; text-align:center; }
+.complete-btn { font-family:'Orbitron',sans-serif; font-size:13px; letter-spacing:2px; padding:14px 44px; background:transparent; border:1px solid #39ff14; color:#39ff14; cursor:pointer; transition:0.3s ease; }
+.complete-btn:hover:not(.done) { background:#39ff14; color:black; box-shadow:0 0 20px rgba(57,255,20,0.4); }
+.complete-btn.done { background:rgba(57,255,20,0.1); cursor:default; opacity:0.7; }
+.complete-msg { font-size:12px; color:#39ff14; margin-top:14px; min-height:18px; letter-spacing:1px; }
+
+.lesson-nav { display:flex; justify-content:space-between; margin-top:30px; flex-wrap:wrap; gap:10px; }
+.lesson-nav a { font-family:'Orbitron',sans-serif; font-size:11px; color:#00d9ff66; text-decoration:none; letter-spacing:1px; transition:0.2s; }
+.lesson-nav a:hover { color:#00d9ff; }
+
+footer { text-align:center; padding:30px; opacity:0.3; font-size:11px; position:relative; z-index:1; letter-spacing:1px; }
+
+@media (max-width:600px) { .key-numbers { grid-template-columns:1fr 1fr; } .compare-table { font-size:11px; } .compare-table th, .compare-table td { padding:8px; } }
+
+.content-block { background:#f5f2ec; color:#1a1a1a; padding:36px clamp(24px,4vw,48px); margin-bottom:24px; border-left:4px solid #00d9ff; position:relative; z-index:1; }
+.content-block h2 { font-family:'Orbitron',sans-serif; font-size:13px; color:#003d66; letter-spacing:2px; text-transform:uppercase; margin-bottom:20px; padding-bottom:10px; border-bottom:2px solid #00d9ff66; scroll-margin-top:80px; }
+.content-block h3 { font-family:'Orbitron',sans-serif; font-size:11px; color:#444; letter-spacing:1.5px; text-transform:uppercase; margin:32px 0 14px; }
+.content-block p { font-family:'Libre Baskerville',Georgia,serif; font-size:15px; line-height:1.9; color:#1a1a1a; opacity:1; margin-bottom:18px; }
+.content-block ul li { font-family:'Libre Baskerville',Georgia,serif; font-size:14px; line-height:1.85; color:#1a1a1a; opacity:1; margin-bottom:8px; }
+.content-block ul li::before { color:#0077aa; }
+.content-block blockquote { border-left:3px solid #1a7a1a; background:#eafaea; color:#0a3d0a; }
+.content-block .callout { border-left:3px solid #0088cc; background:#e8f4fb; color:#1a1a1a; }
+.content-block .callout.red   { border-left-color:#cc0033; background:#fdecea; }
+.content-block .callout.amber { border-left-color:#996600; background:#fef9ec; }
+.content-block .callout.green { border-left-color:#1a7a1a; background:#eafaea; }
+.content-block .callout strong { color:inherit; }
+.content-block .kn-item { background:#fff; border:1px solid #d0d0d0; }
+.content-block .kn-label { color:#555; opacity:1; }
+.content-block .compare-table th { color:#003d66; border-bottom:2px solid #00d9ff66; }
+.content-block .compare-table td { color:#1a1a1a; opacity:1; border-bottom:1px solid #ddd; }
+.content-block .compare-table tr:hover td { background:#f0f0f0; }
+</style>
+</head>
+<body>
+
+<canvas id="starsCanvas"></canvas>
+
+<header>
+    <a href="dashboard.html" class="logo"><span>LEO</span><span>AF</span></a>
+    <div class="nav-right">
+        <a href="m3.html" class="nav-btn">← M3 HUB</a>
+        <button class="nav-btn" onclick="leoafAbort()">ABORT</button>
+    </div>
+</header>
+
+<div class="breadcrumb">
+    <a href="dashboard.html">DASHBOARD</a><span>/</span>
+    <a href="m3.html">M3</a><span>/</span>
+    <span style="color:#ffffff88;">LESSON 02 — ADCS &amp; PROPULSION</span>
+</div>
+
+<div class="lesson-wrap">
+
+<div class="lesson-header">
+    <div class="lesson-tag">M3 · LESSON 02 OF 6</div>
+    <h1>ADCS &amp; Propulsion</h1>
+    <div class="lesson-meta">
+        <div class="l-pill l-pill-q">MODULE 3</div>
+        <div class="l-pill l-pill-t">SPACE SEGMENT</div>
+    </div>
+    <p class="lesson-intro">A Ka-band multibeam antenna with 0.5° spot beams requires the satellite body to be pointed to within 0.1° three-sigma while moving at 7.6 km/s under continuous external disturbance torques. The subsystem that achieves this is the attitude determination and control system (ADCS). Tightly coupled to it is the propulsion subsystem, which executes the Δv budget computed in Module 2 — drag makeup, station-keeping, collision avoidance, and deorbit. This lesson covers both together, because in a modern LEO broadband satellite they share sensors, actuators, and operational modes.</p>
+</div>
+
+<div class="toc">
+    <h4>CONTENTS</h4>
+    <ol>
+        <li><a href="#s1">Attitude determination: sensors</a></li>
+        <li><a href="#s2">Attitude control: actuators</a></li>
+        <li><a href="#s3">The pointing error budget</a></li>
+        <li><a href="#s4">Orbital maintenance propulsion</a></li>
+        <li><a href="#s5">GPS-based orbit determination</a></li>
+        <li><a href="#s6">ADCS-propulsion interface in operations</a></li>
+        <li><a href="#quiz">Knowledge check</a></li>
+        <li><a href="#python">Python exercises</a></li>
+        <li><a href="#reflect">Reflection prompts</a></li>
+    </ol>
+</div>
+
+<!-- S1 -->
+<div class="content-block" id="s1">
+    <h2>1. Attitude Determination: Sensors</h2>
+    <p>Attitude determination answers: given all sensor measurements at this moment, what is the satellite's orientation in inertial space? The answer — typically expressed as a quaternion or rotation matrix — is the input to the attitude control law.</p>
+
+    <h3>Star trackers</h3>
+    <p>The most accurate attitude sensor for LEO satellites is the star tracker, which images a patch of sky, identifies the star pattern against a stored catalog, and produces an attitude measurement with accuracy of 1–10 arcseconds (0.0003°–0.003°) at 1–10 Hz. Two trackers are flown for redundancy and to eliminate ambiguity when one is blinded by the Sun, Moon, or Earth limb. During normal nadir-pointing operation the satellite rotates at the orbital rate (~0.06°/s at 550 km), well within the typical 1–3°/s slew rate limit imposed by the tracker's exposure time.</p>
+
+    <h3>Inertial measurement units</h3>
+    <p>An IMU contains gyroscopes measuring angular rate at high bandwidth (100–1,000 Hz). The IMU provides short-term attitude propagation between star tracker updates — the star tracker provides absolute attitude; the IMU provides high-rate, low-latency angular rate for the control loop. MEMS gyroscopes dominate modern LEO satellites: smaller, cheaper, and lower-power than ring-laser or fibre-optic designs, though with higher bias drift. Over minutes to hours the IMU drifts from truth; star tracker updates correct this. The combined system is the attitude reference system (ARS).</p>
+
+    <h3>Sun and Earth sensors</h3>
+    <p>Coarser but simpler sensors serve safe mode, initial acquisition, and backup. Sun sensors measure the Sun angle to 0.1°–2° at very low power. Earth (horizon) sensors measure the direction to the Earth's IR limb to 0.1°–0.5°. Both are essential for attitude acquisition after separation from the launch vehicle, before star trackers have acquired their catalog match.</p>
+
+    <table class="compare-table">
+        <thead><tr><th>Sensor</th><th>Accuracy</th><th>Update rate</th><th>Use case</th></tr></thead>
+        <tbody>
+            <tr><td>Star tracker</td><td>1–10 arcsec (0.0003–0.003°)</td><td>1–10 Hz</td><td>Primary absolute reference</td></tr>
+            <tr><td>MEMS IMU</td><td>0.01–0.1°/hr bias drift</td><td>100–1,000 Hz</td><td>Short-term propagation, control loop</td></tr>
+            <tr><td>Sun sensor</td><td>0.1–2°</td><td>10–100 Hz</td><td>Safe mode, acquisition</td></tr>
+            <tr><td>Earth (horizon) sensor</td><td>0.1–0.5°</td><td>1–10 Hz</td><td>Nadir pointing backup</td></tr>
+        </tbody>
+    </table>
+</div>
+
+<!-- S2 -->
+<div class="content-block" id="s2">
+    <h2>2. Attitude Control: Actuators</h2>
+    <p>The control law takes the attitude error (estimated vs commanded attitude) and the angular rate from the IMU, and computes the torque to apply. The torque is produced by actuators.</p>
+
+    <h3>Reaction wheels</h3>
+    <p>The dominant actuator for LEO broadband satellites is the reaction wheel (RW) — a flywheel driven by an electric motor. Spinning faster exchanges angular momentum with the satellite body, producing a torque. Three wheels aligned with the three body axes (or a pyramid of four for redundancy) provide full three-axis control with no propellant consumed. The limitation is <strong>saturation</strong>: a wheel can only store angular momentum up to its maximum spin speed. External disturbance torques (gravity gradient, solar pressure, magnetic residuals) continuously add momentum to the wheel set, which must be periodically <strong>desaturated</strong> — the stored momentum dumped to the environment via magnetic torquers or thrusters.</p>
+
+    <h3>Magnetic torquers</h3>
+    <p>Magnetorquers generate a magnetic dipole moment that interacts with the Earth's field to produce a torque: T = M × B. The cross-product means the torque is always perpendicular to the local field direction — the component parallel to B is always zero — so full three-axis control requires time-averaging over multiple orbits as the field rotates. They are simple, cheap, and propellant-free, making them the preferred desaturation method at LEO altitudes where the Earth's field (~30 µT at 550 km) is strong enough to be useful.</p>
+
+    <h3>Thruster-based attitude control</h3>
+    <p>For large slews or fast collision avoidance manoeuvres, thrusters provide torque far beyond what reaction wheels can supply. The Hall thruster clusters used on Starlink fire asymmetrically — differential thrust between thruster pairs produces net torque — or accept coupled force and torque, with the trajectory correction computed separately. This dual use of the propulsion system for both attitude and orbit control is characteristic of modern LEO broadband constellation satellites.</p>
+
+    <div class="callout">
+        <strong>THE DESATURATION BUDGET</strong>
+        Routine magnetic desaturation is propellant-free and covers most LEO scenarios. But when the combined disturbance torque exceeds the magnetic torquer's capability — or during large manoeuvres that the torquers cannot respond to quickly enough — thrusters must desaturate. This adds to the propellant budget. At 550 km and 53° inclination, magnetic desaturation typically handles all routine operations; thruster desaturation is reserved for contingency.
+    </div>
+</div>
+
+<!-- S3 -->
+<div class="content-block" id="s3">
+    <h2>3. The Pointing Error Budget</h2>
+    <p>The payload places a pointing accuracy requirement on the satellite: the angular error between actual and commanded pointing must be small enough that the antenna beam covers the intended ground cell with acceptable gain. For a 0.5° Ka-band spot beam requiring no more than −3 dB of gain loss at the beam edge, the pointing error must be within roughly 0.1° three-sigma.</p>
+    <p>The total pointing error is the root-sum-square (RSS) of independent contributors:</p>
+    <blockquote>σ_total = √(σ_det² + σ_ctrl² + σ_flex² + σ_align²)</blockquote>
+
+    <table class="compare-table">
+        <thead><tr><th>Error contributor</th><th>Typical 3σ</th><th>Note</th></tr></thead>
+        <tbody>
+            <tr><td>Star tracker attitude determination</td><td>~0.003°</td><td>Per axis</td></tr>
+            <tr><td>Control loop residual</td><td>0.01–0.05°</td><td>Bandwidth and actuator noise</td></tr>
+            <tr><td>Structural thermal flex</td><td>0.01–0.05°</td><td>Orbit-period thermal cycling</td></tr>
+            <tr><td>Boresight alignment uncertainty</td><td>0.01–0.03°</td><td>Ground calibration quality</td></tr>
+            <tr><td><strong>Total RSS 3σ</strong></td><td><strong>0.03–0.10°</strong></td><td>Typical LEO Ka-band satellite</td></tr>
+        </tbody>
+    </table>
+
+    <p>The structural thermal flex contribution is often the binding constraint — it arises from the satellite body thermally cycling on the orbital period (every 95 min from sunlit to eclipse and back), which causes differential expansion between the antenna panel and the star tracker mounting bracket. Reducing it requires careful thermal design of the load path between these elements, not improvements to the control electronics.</p>
+    <p>For smaller beamwidths — emerging at V-band and E-band — the pointing requirement tightens proportionally, and electronic beam steering in the antenna (covered in m3-4) becomes the practical solution: the residual mechanical pointing error is corrected in the RF domain rather than requiring tighter mechanical pointing.</p>
+
+    <div class="key-numbers">
+        <div class="kn-item"><span class="kn-val">1–10 arcsec</span><span class="kn-label">STAR TRACKER ACCURACY</span></div>
+        <div class="kn-item"><span class="kn-val">~0.1°</span><span class="kn-label">TYPICAL LEO Ka-BAND POINTING REQUIREMENT (3σ)</span></div>
+        <div class="kn-item"><span class="kn-val">0.03–0.10°</span><span class="kn-label">ACHIEVABLE RSS POINTING ERROR</span></div>
+        <div class="kn-item"><span class="kn-val">~0.06°/s</span><span class="kn-label">ORBITAL RATE AT 550 km (nadir-pointing rotation rate)</span></div>
+    </div>
+</div>
+
+<!-- S4 -->
+<div class="content-block" id="s4">
+    <h2>4. Orbital Maintenance Propulsion</h2>
+    <p>The Δv budget from Module 2 (m2-5) translates into hardware here. For LEO broadband constellations, Hall-effect thrusters (HETs) dominate: krypton (Starlink) or xenon (OneWeb) at Isp ≈ 1,200–2,000 s. The propellant mass saving over chemical propulsion at fleet scale is decisive, as computed in the spine project.</p>
+
+    <h3>Power-thrust tradeoff</h3>
+    <p>A Hall thruster at 50 mN requires approximately 3.2 kW of input power (at ~50% efficiency). On a satellite with 5–8 kW total bus power, running the thruster at full payload power is not possible. Drag makeup burns therefore occur during eclipse (battery-powered) or during day passes when the payload is deliberately derated — scheduling the manoeuvre outside peak service windows.</p>
+
+    <h3>CAM timing with Hall thrusters</h3>
+    <p>A collision avoidance manoeuvre of 0.2 m/s on a 300 kg satellite with a 50 mN thruster takes:</p>
+    <blockquote>t_CAM = m · Δv / F = 300 × 0.2 / 0.050 = 1,200 s ≈ 20 minutes</blockquote>
+    <p>This is acceptable given the typical 72-hour conjunction warning time from the US Space Surveillance Network. It is planned and executed autonomously by the satellite's on-board system.</p>
+
+    <h3>Thruster configuration</h3>
+    <p>Two to four Hall thrusters are typically mounted on the anti-nadir (zenith-facing) panel, canted to provide along-track, cross-track, and radial force components. This canting allows a single thruster firing to simultaneously produce the Δv for drag makeup and a torque for attitude control — saving both propellant and time. The layout must satisfy three constraints: thrust vector near the centre of mass (minimise torque coupling), plume directed away from solar arrays and payload (plume impingement erodes surfaces), and sufficient symmetry for differential attitude control.</p>
+
+    <table class="compare-table">
+        <thead><tr><th>System</th><th>Isp (s)</th><th>Thrust</th><th>m_prop for 100 m/s, 300 kg dry</th><th>CAM t (0.2 m/s)</th></tr></thead>
+        <tbody>
+            <tr><td>Monoprop hydrazine</td><td>230</td><td>5 N</td><td>~14 kg</td><td>12 s</td></tr>
+            <tr><td>Hall thruster (50 mN)</td><td>1,600</td><td>50 mN</td><td>~2 kg</td><td>20 min</td></tr>
+            <tr><td>Hall thruster (200 mN)</td><td>1,600</td><td>200 mN</td><td>~2 kg</td><td>5 min</td></tr>
+            <tr><td>Gridded ion (5 mN)</td><td>3,000</td><td>5 mN</td><td>~1 kg</td><td>200 min</td></tr>
+        </tbody>
+    </table>
+
+    <div class="callout amber">
+        <strong>PROPELLANT VS RESPONSE TIME</strong>
+        The Hall thruster fleet-mass advantage is decisive at scale (45–60 tonnes saved for Starlink's first shell). The slow response is managed operationally — pre-planned CAMs based on 72-hour warnings, scheduled burns during eclipse windows. For satellite designs where rapid response is safety-critical (crewed proximity operations, for example), chemical propulsion remains necessary.
+    </div>
+</div>
+
+<!-- S5 -->
+<div class="content-block" id="s5">
+    <h2>5. GPS-Based Orbit Determination</h2>
+    <p>A GPS receiver on a LEO satellite provides continuous position (5–20 m, 3σ) and velocity (2–5 cm/s) at every point in the orbit, enabling autonomous manoeuvre planning without dependence on ground station contact windows. At LEO altitudes the satellite is below the GPS constellation (MEO at ~20,200 km), so GPS signals arrive from above — the GPS antenna must have hemisphere coverage above the satellite body. The large Doppler shifts from the ~7.6 km/s orbital velocity (up to ±45 kHz on L1) are well within modern space-qualified GPS receivers' acquisition range.</p>
+    <p>The same GPS receiver provides nanosecond-level time synchronisation — essential for TDMA air interfaces where all satellites in the constellation must be time-synchronised to sub-microsecond accuracy. This dual use (navigation + timing) makes the GPS receiver one of the most mission-critical components on the satellite bus, which is why two receivers are typically flown for redundancy.</p>
+</div>
+
+<!-- S6 -->
+<div class="content-block" id="s6">
+    <h2>6. ADCS-Propulsion Interface in Operations</h2>
+    <p>In normal operations the satellite is in nadir-pointing mode: the payload face points toward Earth, solar arrays track the Sun, and the attitude control loop holds pointing within budget using reaction wheels with magnetic desaturation. The GPS receiver provides continuous orbit determination. The on-board manoeuvre planner monitors along-track position against the nominal slot; when the error exceeds a threshold (typically 1–3 km), it schedules a drag makeup burn for the next available eclipse or reduced-payload window.</p>
+    <p>When a conjunction warning arrives from the ground, the satellite evaluates whether a CAM is required (probability of collision above threshold, typically 1 in 10,000), computes the required Δv, and executes autonomously or requests ground approval depending on the operator's policy. Starlink reportedly operates fully autonomously for conjunction avoidance at fleet scale.</p>
+    <p>At end of life: propellant remaining is verified, a deorbit burn is computed to lower perigee to ~350 km (natural re-entry within weeks), the burn is executed over one or more passes, and the satellite is passivated (propellant vented, batteries discharged) before re-entry.</p>
+
+    <div class="callout green">
+        <strong>AUTONOMOUS OPERATIONS AT SCALE</strong>
+        With 1,584 satellites each executing ~5,475 eclipse cycles, ~16 drag makeup burns, and potentially hundreds of conjunction screenings per year, manual ground commanding of every event is impossible. The ADCS-propulsion system must be a largely autonomous loop, with the ground providing policy, configuration, and anomaly resolution — not per-event commands.
+    </div>
+</div>
+
+<!-- QUIZ -->
+<div class="quiz-block" id="quiz">
+    <h2>KNOWLEDGE CHECK</h2>
+    <p class="quiz-intro">Ten questions. Select one answer per question. Feedback is immediate; score appears when all ten are answered.</p>
+
+    <div class="quiz-q"><p><strong>Q1.</strong> The primary attitude sensor in LEO broadband satellites is the star tracker because:</p>
+        <div class="quiz-options">
+            <button class="quiz-opt" data-q="1" data-correct="false">A — It is the cheapest sensor available</button>
+            <button class="quiz-opt" data-q="1" data-correct="true">B — It provides absolute inertial attitude with arcsecond-level accuracy, correcting the drift of lower-accuracy sensors</button>
+            <button class="quiz-opt" data-q="1" data-correct="false">C — It works during eclipse when other sensors fail</button>
+            <button class="quiz-opt" data-q="1" data-correct="false">D — It measures angular rate directly</button>
+        </div><div class="quiz-feedback" id="fb1"></div></div>
+
+    <div class="quiz-q"><p><strong>Q2.</strong> Reaction wheels achieve attitude control without consuming propellant by:</p>
+        <div class="quiz-options">
+            <button class="quiz-opt" data-q="2" data-correct="false">A — Generating magnetic fields that interact with the Earth</button>
+            <button class="quiz-opt" data-q="2" data-correct="true">B — Exchanging angular momentum with the satellite body through electrically driven flywheels</button>
+            <button class="quiz-opt" data-q="2" data-correct="false">C — Using solar radiation pressure on adjustable vanes</button>
+            <button class="quiz-opt" data-q="2" data-correct="false">D — Firing micro-thrusters in reaction pairs</button>
+        </div><div class="quiz-feedback" id="fb2"></div></div>
+
+    <div class="quiz-q"><p><strong>Q3.</strong> Magnetic torquers cannot provide instantaneous full three-axis attitude control because:</p>
+        <div class="quiz-options">
+            <button class="quiz-opt" data-q="3" data-correct="false">A — They are too slow for any useful attitude control</button>
+            <button class="quiz-opt" data-q="3" data-correct="true">B — The torque T = M × B is always perpendicular to the local field B — the component along B is always zero</button>
+            <button class="quiz-opt" data-q="3" data-correct="false">C — They only work at high latitudes where the field is strongest</button>
+            <button class="quiz-opt" data-q="3" data-correct="false">D — Their power consumption is too high for continuous use</button>
+        </div><div class="quiz-feedback" id="fb3"></div></div>
+
+    <div class="quiz-q"><p><strong>Q4.</strong> A Ka-band spot beam of 0.5° beamwidth typically requires a pointing accuracy of:</p>
+        <div class="quiz-options">
+            <button class="quiz-opt" data-q="4" data-correct="false">A — ±5°</button>
+            <button class="quiz-opt" data-q="4" data-correct="false">B — ±0.5° (the full beamwidth)</button>
+            <button class="quiz-opt" data-q="4" data-correct="true">C — ~0.1° three-sigma</button>
+            <button class="quiz-opt" data-q="4" data-correct="false">D — ±0.001° (arcsecond-level)</button>
+        </div><div class="quiz-feedback" id="fb4"></div></div>
+
+    <div class="quiz-q"><p><strong>Q5.</strong> A 0.2 m/s CAM executed by a 50 mN Hall thruster on a 300 kg satellite takes approximately:</p>
+        <div class="quiz-options">
+            <button class="quiz-opt" data-q="5" data-correct="false">A — 1 second</button>
+            <button class="quiz-opt" data-q="5" data-correct="true">B — 20 minutes</button>
+            <button class="quiz-opt" data-q="5" data-correct="false">C — 3 hours</button>
+            <button class="quiz-opt" data-q="5" data-correct="false">D — Hall thrusters cannot perform CAMs</button>
+        </div><div class="quiz-feedback" id="fb5"></div></div>
+
+    <div class="quiz-q"><p><strong>Q6.</strong> Hall thrusters on LEO satellites typically fire during eclipse or reduced-payload passes because:</p>
+        <div class="quiz-options">
+            <button class="quiz-opt" data-q="6" data-correct="false">A — The magnetic field is stronger during eclipse</button>
+            <button class="quiz-opt" data-q="6" data-correct="true">B — A 3+ kW Hall thruster competes with the communications payload for the limited solar array power budget</button>
+            <button class="quiz-opt" data-q="6" data-correct="false">C — Atmospheric drag is higher on the dayside</button>
+            <button class="quiz-opt" data-q="6" data-correct="false">D — GPS reception is better during eclipse</button>
+        </div><div class="quiz-feedback" id="fb6"></div></div>
+
+    <div class="quiz-q"><p><strong>Q7.</strong> On-board GPS receivers on LEO broadband satellites serve two primary functions:</p>
+        <div class="quiz-options">
+            <button class="quiz-opt" data-q="7" data-correct="false">A — Communications signal tracking and weather monitoring</button>
+            <button class="quiz-opt" data-q="7" data-correct="true">B — Continuous orbit determination (position and velocity) and nanosecond-level time synchronisation for TDMA air interfaces</button>
+            <button class="quiz-opt" data-q="7" data-correct="false">C — Inter-satellite ranging and attitude determination</button>
+            <button class="quiz-opt" data-q="7" data-correct="false">D — Ground station contact scheduling and collision avoidance detection</button>
+        </div><div class="quiz-feedback" id="fb7"></div></div>
+
+    <div class="quiz-q"><p><strong>Q8.</strong> The on-board manoeuvre planner executes drag makeup burns autonomously because:</p>
+        <div class="quiz-options">
+            <button class="quiz-opt" data-q="8" data-correct="false">A — The ground station cannot compute drag rates accurately</button>
+            <button class="quiz-opt" data-q="8" data-correct="true">B — With only a few contact windows per day, waiting for ground commands would allow the along-track position to drift outside its deadband</button>
+            <button class="quiz-opt" data-q="8" data-correct="false">C — Burn durations are too short for a ground command to be uplinked</button>
+            <button class="quiz-opt" data-q="8" data-correct="false">D — Ground stations cannot see LEO satellites at 550 km altitude</button>
+        </div><div class="quiz-feedback" id="fb8"></div></div>
+
+    <div class="quiz-q"><p><strong>Q9.</strong> The pointing error budget uses root-sum-square (RSS) combination because:</p>
+        <div class="quiz-options">
+            <button class="quiz-opt" data-q="9" data-correct="false">A — All error sources are perfectly correlated and add linearly</button>
+            <button class="quiz-opt" data-q="9" data-correct="true">B — The error sources are statistically independent — their combined variance is the sum of individual variances, giving a total 3σ of √(σ₁² + σ₂² + ...)</button>
+            <button class="quiz-opt" data-q="9" data-correct="false">C — RSS always gives a smaller result, making requirements easier to meet</button>
+            <button class="quiz-opt" data-q="9" data-correct="false">D — It is an ITU regulatory requirement</button>
+        </div><div class="quiz-feedback" id="fb9"></div></div>
+
+    <div class="quiz-q"><p><strong>Q10.</strong> Electronic beam steering (m3-4) can relax the mechanical pointing requirement because:</p>
+        <div class="quiz-options">
+            <button class="quiz-opt" data-q="10" data-correct="false">A — It replaces reaction wheels entirely</button>
+            <button class="quiz-opt" data-q="10" data-correct="true">B — The RF beam can be steered electronically to correct for residual mechanical pointing error within the antenna's scan range</button>
+            <button class="quiz-opt" data-q="10" data-correct="false">C — Electronic beams are intrinsically wider than mechanically pointed beams</button>
+            <button class="quiz-opt" data-q="10" data-correct="false">D — It reduces the number of star trackers needed</button>
+        </div><div class="quiz-feedback" id="fb10"></div></div>
+
+    <div class="quiz-score" id="quizScore"></div>
+</div>
+
+<!-- PYTHON -->
+<div class="py-block" id="python">
+    <h2>PYTHON EXERCISES</h2>
+    <p class="py-intro">Three exercises covering pointing error budgets, CAM timing, and reaction wheel saturation. Python 3.8+ standard library only.</p>
+
+    <div class="py-exercise">
+        <h3>Exercise 1 — Pointing Error Budget (RSS)</h3>
+        <p>Compute the combined pointing error from subsystem contributors and check against the payload beamwidth requirement.</p>
+<pre>
+import math
+
+def pointing_budget(contributors, beamwidth_deg, fraction=0.20):
+    req = beamwidth_deg * fraction
+    rss = math.sqrt(sum(v**2 for _, v in contributors))
+    margin = req / rss
+    print(f"Beamwidth {beamwidth_deg}°  →  Req: {req:.4f}° (3σ)\n")
+    print(f"{'Contributor':<30}{'3σ (°)':>10}")
+    print("-" * 42)
+    for name, s in contributors:
+        print(f"{name:<30}{s:>10.4f}")
+    print("-" * 42)
+    print(f"{'RSS total':<30}{rss:>10.4f}")
+    print(f"Margin: {margin:.2f}x  ({'PASS' if margin>=1.0 else 'FAIL'})\n")
+    return rss, margin
+
+contributors = [
+    ("Star tracker (attitude det.)", 0.003),
+    ("Control loop residual",        0.030),
+    ("Structural thermal flex",      0.030),
+    ("Boresight alignment error",    0.020),
+]
+
+print("=== Ka-band, 0.5° beam ===")
+pointing_budget(contributors, 0.5)
+print("=== Ka-band, 0.3° beam ===")
+pointing_budget(contributors, 0.3)
+
+# 1. Which contributor dominates the RSS? Why does this matter for
+#    where engineering effort should be focused?
+# 2. Halve the structural flex (0.03 → 0.015°). Does the 0.3° beam
+#    budget now pass? Is the improvement worth the complexity?
+# 3. A V-band system needs 0.1° beamwidth at 20% fraction.
+#    What maximum RSS is allowed? Can it be achieved?
+</pre>
+    </div>
+
+    <div class="py-exercise">
+        <h3>Exercise 2 — CAM Duration vs Propulsion System</h3>
+        <p>Compare the time required to execute a CAM using different propulsion systems, and check against the available warning time.</p>
+<pre>
+import math
+
+G0 = 9.80665
+
+def cam_table(dry_kg, dv_m_s, systems, min_warning_hr=24):
+    print(f"CAM ΔV={dv_m_s} m/s  Dry mass={dry_kg} kg\n")
+    print(f"{'System':<22}{'Isp':>6}{'F(N)':>8}{'m_prop(g)':>11}"
+          f"{'t_burn':>11}{'OK?':>8}")
+    print("-" * 68)
+    for name, isp, F in systems:
+        mp = dry_kg * (math.exp(dv_m_s/(G0*isp)) - 1) * 1000  # grams
+        t_s = (dry_kg * dv_m_s) / F
+        t_min = t_s / 60
+        ok = "YES" if t_s < min_warning_hr * 3600 else "NO"
+        print(f"{name:<22}{isp:>6}{F:>8.3f}{mp:>10.1f}g"
+              f"{t_min:>9.1f}min{ok:>8}")
+
+systems = [
+    ("Monoprop hydrazine",    230,  5.000),
+    ("Hall HET 50mN",        1600,  0.050),
+    ("Hall HET 200mN",       1600,  0.200),
+    ("Gridded ion 5mN",      3000,  0.005),
+]
+cam_table(300, 0.20, systems, min_warning_hr=24)
+
+# 1. Which systems execute a 0.5 m/s CAM in under 60 minutes?
+# 2. For the 50 mN Hall thruster, what is the minimum warning time
+#    needed for a 0.3 m/s CAM?
+# 3. If warning arrives only 2 hours before conjunction, which
+#    systems can still execute the required 0.2 m/s in time?
+</pre>
+    </div>
+
+    <div class="py-exercise">
+        <h3>Exercise 3 — Reaction Wheel Saturation and Desaturation</h3>
+        <p>Estimate wheel saturation frequency from a disturbance torque and compute the annual desaturation propellant cost.</p>
+<pre>
+import math
+
+def wheel_desat(disturbance_nm, capacity_nms, desat_dv_m_s=5e-4,
+                period_min=95.6, life_yr=5):
+    t_sat_hr = capacity_nms / disturbance_nm / 3600
+    desat_yr = (365.25 * 24) / t_sat_hr
+    total_dv = desat_yr * life_yr * desat_dv_m_s
+    print(f"Disturbance: {disturbance_nm*1e6:.0f} µN·m  "
+          f"Capacity: {capacity_nms:.0f} N·m·s")
+    print(f"  Saturation time: {t_sat_hr:.1f} hr  "
+          f"Desats/yr: {desat_yr:.0f}  "
+          f"Total desat ΔV ({life_yr}yr): {total_dv*1000:.2f} mm/s\n")
+
+print("=== Typical LEO broadband (50 µN·m disturbance) ===")
+wheel_desat(50e-6, 5.0)
+print("=== Stronger disturbance (500 µN·m) ===")
+wheel_desat(500e-6, 20.0)
+
+# 1. At what disturbance torque level does a 5 N·m·s wheel saturate
+#    in less than one orbital period (95.6 min)?
+# 2. The maximum magnetic torquer torque: T = M × B.
+#    For M = 10 A·m² and B = 30 µT, compute T_max.
+#    At what disturbance level does this exceed the torquer's capability?
+# 3. If wheels saturate every 6 hours and desat costs 0.5 mm/s each,
+#    what is the total desat ΔV over a 5-year mission?
+</pre>
+    </div>
+</div>
+
+<!-- REFLECTION -->
+<div class="reflection-block" id="reflect">
+    <h2>REFLECTION PROMPTS</h2>
+    <p class="ref-intro">Not graded. Write in your own words, 200–400 words each.</p>
+
+    <div class="ref-prompt"><h3>Prompt 1 — Pointing Budget Engineering Focus</h3>
+        <p>For a new LEO broadband satellite targeting Ka-band beams of 0.3°, you are the ADCS lead. Identify which error contributor has the largest impact on the total RSS budget, and describe two engineering approaches to reduce it. What are the cost and complexity implications of each?</p></div>
+
+    <div class="ref-prompt"><h3>Prompt 2 — Magnetic Desaturation Limits</h3>
+        <p>Magnetic torquers can handle routine desaturation below a certain disturbance torque level at 550 km. Identify the conditions under which this breaks down and the operator must use thrusters — and what the propellant cost implication is for the five-year mission.</p></div>
+
+    <div class="ref-prompt"><h3>Prompt 3 — Autonomous vs Human-in-the-Loop CAM</h3>
+        <p>Starlink executes collision avoidance manoeuvres autonomously without explicit ground approval. Evaluate the safety, liability, and operational efficiency implications versus a human-in-the-loop system. What failure modes does full autonomy introduce, and what failure modes does it prevent?</p></div>
+
+    <div class="ref-prompt"><h3>Prompt 4 — GPS and Ground Segment Architecture</h3>
+        <p>GPS-based orbit determination removes the need for frequent ground-station tracking updates. Evaluate how this changes the ground segment architecture, the cost of ground operations, and the satellite autonomy model compared to a pre-GPS constellation design. What residual ground involvement is still required even with full GPS autonomy?</p></div>
+</div>
+
+<!-- MARK COMPLETE -->
+<div class="complete-wrap">
+    <button class="complete-btn" id="completeBtn">MARK LESSON COMPLETE</button>
+    <div class="complete-msg" id="completeMsg"></div>
+</div>
+
+<div class="lesson-nav">
+    <a href="m3-1.html">← LESSON 01 — BUS ARCHITECTURE</a>
+    <a href="m3-3.html">LESSON 03 — PAYLOAD ARCHITECTURES →</a>
+</div>
+
+</div><!-- /lesson-wrap -->
+
+<button class="back-to-top" id="backToTop" title="Back to top">↑</button>
+
+<footer>© 2026 LEOAF · M3 · LESSON 02 OF 6</footer>
+
+<script>
+const canvas = document.getElementById('starsCanvas');
+const ctx = canvas.getContext('2d');
+let stars = [];
+function initStars(){ stars=[]; for(let i=0;i<180;i++) stars.push({x:Math.random()*canvas.width,y:Math.random()*canvas.height,size:Math.random()*1.5+0.4,speed:Math.random()*0.18+0.04,hue:Math.random()*360}); }
+function resizeCanvas(){ canvas.width=window.innerWidth; canvas.height=window.innerHeight; }
+resizeCanvas(); initStars(); window.addEventListener('resize', resizeCanvas);
+function animateStars(){ ctx.clearRect(0,0,canvas.width,canvas.height); stars.forEach(s=>{s.y-=s.speed;if(s.y<0){s.y=canvas.height;s.x=Math.random()*canvas.width;} ctx.beginPath();ctx.fillStyle=`hsl(${s.hue},80%,80%)`;ctx.arc(s.x,s.y,s.size,0,Math.PI*2);ctx.fill();}); requestAnimationFrame(animateStars); }
+animateStars();
+</script>
+
+<script>
+const feedbacks = {
+    1:{correct:"Correct. The star tracker identifies star patterns against a catalog to determine absolute attitude in inertial space at 1–10 arcsecond accuracy. This absolute reference corrects accumulated IMU gyroscope drift between updates.",wrong:"Incorrect. Star trackers are among the more expensive attitude sensors. They measure orientation, not angular rate — the IMU does that. They can work in eclipse if not occulted, but the key advantage is absolute inertial accuracy, not eclipse capability."},
+    2:{correct:"Correct. Spinning a reaction wheel faster increases its angular momentum; by conservation of angular momentum the satellite body rotates in the opposite direction. No propellant is consumed. The limitation is wheel saturation — maximum stored momentum — requiring periodic desaturation.",wrong:"Incorrect. Magnetic field interaction is the mechanism of magnetic torquers, not reaction wheels. Solar vanes and micro-thrusters would consume energy or propellant. Reaction wheels are internal flywheels — angular momentum exchange, propellant-free."},
+    3:{correct:"Correct. T = M × B — the cross product is always perpendicular to B. The component of control torque along the field direction is always zero. Full three-axis control requires time-averaging over multiple orbits as the Earth's field direction rotates relative to the satellite.",wrong:"Incorrect. Magnetic torquers do provide useful attitude control — they are not too slow for desaturation. They work at all latitudes (field strength varies but is usable everywhere). The fundamental limit is the cross-product geometry: no torque along the field direction."},
+    4:{correct:"Correct. The pointing error must be a small fraction of the beamwidth to maintain acceptable gain across the service area. For a −3 dB tolerance at the beam edge, the 3σ pointing error must be roughly 0.1° for a 0.5° beam.",wrong:"Incorrect. ±5° would point at the wrong ground area. ±0.5° (the full beamwidth) would place the beam edge at the centre — catastrophic gain loss. Arcsecond-level accuracy (0.001°) exceeds what cost-effective systems achieve and what the payload needs."},
+    5:{correct:"Correct. t = m·Δv/F = 300×0.2/0.050 = 1,200 s = 20 minutes. Acceptable given typical 72-hour SSN conjunction warnings. Hall thrusters absolutely perform CAMs — the burn is just longer than a chemical system.",wrong:"Incorrect. 1 second would need 60 N of thrust. Hall thrusters do perform CAMs. 3 hours would imply 0.33 mN of thrust — far below Hall thruster capability. The correct answer is t = m·Δv/F = 300×0.2/0.05 = 1,200 s = 20 minutes."},
+    6:{correct:"Correct. A 50 mN Hall thruster at ~50% efficiency requires ~3.2 kW of input power. Running it simultaneously with a full communications payload on a 5–8 kW bus would starve the payload. Eclipse and reduced-payload windows are used to schedule burns without service interruption.",wrong:"Incorrect. The magnetic field does not change significantly between eclipse and sunlit phases. Atmospheric drag variation between day and night hemispheres is small. GPS works equally well at all times. The constraint is purely electrical — power competition between thruster and payload."},
+    7:{correct:"Correct. GPS provides continuous position (5–20 m) and velocity (2–5 cm/s) for autonomous manoeuvre planning, and nanosecond-level timing for TDMA air interface synchronisation. Both functions are mission-critical, which is why redundant receivers are standard.",wrong:"Incorrect. GPS does not improve the Ka-band link. GPS satellites do not range to other LEO constellation members. Collision avoidance detection comes from SSN conjunction data, not GPS. The two primary functions are navigation and precision timing."},
+    8:{correct:"Correct. At 550 km with ~15 orbits per day, a satellite may have only 3–5 useful ground contact windows. A ±2 km along-track deadband can be exceeded between windows if drag is not corrected autonomously. Ground commanding of every burn is operationally impossible at fleet scale.",wrong:"Incorrect. The ground absolutely computes drag rates — it does so for catalog maintenance. Burn times are minutes to hours, not too short to uplink. Ground stations easily see LEO satellites. The issue is operational tempo: 1,584 satellites × multiple burns/day cannot be manually commanded."},
+    9:{correct:"Correct. Independent zero-mean error sources combine in quadrature — their variances add, and the total 3σ is √(σ₁² + σ₂² + ...). This is smaller than linear addition, correctly reflecting the statistical independence of star tracker error, structural flex, control residual, and alignment uncertainty.",wrong:"Incorrect. These error sources are not correlated — a star tracker measurement error and structural thermal flex are statistically independent. RSS is used because the sources are independent, not merely to make requirements easier to meet. It is the mathematically correct combination for independent random variables."},
+    10:{correct:"Correct. An active phased array steers its beam by adjusting element phases. A residual mechanical pointing error of 0.05° can be corrected by commanding a 0.05° electronic offset — maintaining the beam on the intended ground cell without requiring tighter mechanical pointing.",wrong:"Incorrect. Electronic steering does not replace reaction wheels — attitude control is still needed for solar array pointing, thermal management, and other functions. Electronic beams are not intrinsically wider. Star tracker count is driven by reliability, not antenna type."}
+};
+let answered = {};
+document.querySelectorAll('.quiz-opt').forEach(btn => {
+    btn.addEventListener('click', function(){
+        const q=this.dataset.q;
+        if(answered[q]!==undefined) return;
+        const correct=this.dataset.correct==='true';
+        answered[q]=correct;
+        document.querySelectorAll(`.quiz-opt[data-q="${q}"]`).forEach(b=>{b.disabled=true;if(b.dataset.correct==='true')b.classList.add('correct');});
+        if(!correct) this.classList.add('wrong');
+        const fb=document.getElementById(`fb${q}`);
+        fb.textContent=(correct?'✓ ':'✗ ')+feedbacks[q][correct?'correct':'wrong'];
+        fb.style.color=correct?'#39ff14':'#ff004f';
+        if(Object.keys(answered).length===10){
+            const total=Object.values(answered).filter(Boolean).length;
+            const el=document.getElementById('quizScore');
+            el.style.display='block';
+            const pct=Math.round(total/10*100);
+            el.textContent=`SCORE: ${total} / 10 (${pct}%) — ${pct===100?'PERFECT.':pct>=80?'STRONG. REVIEW ANY MISSES.':pct>=60?'ADEQUATE. REVISIT WEAK SECTIONS.':'REVISIT THE LESSON BEFORE PROCEEDING.'}`;
+        }
+    });
+});
+</script>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="supabase.js"></script>
+<script src="user_progress.js"></script>
+<script>
+const LESSON_ID='m3-2';
+(function(){
+    function bounceToLogin(r){console.error("Auth guard:",r);window.location.replace("index.html");}
+    async function init(){
+        if(typeof client==="undefined"||!client||!client.auth) return bounceToLogin("Supabase client not loaded");
+        let session=null;
+        try{({data:{session}}=await client.auth.getSession());}
+        catch(e){return bounceToLogin("getSession threw: "+e.message);}
+        if(!session){window.location.replace("index.html");return;}
+        const btn=document.getElementById('completeBtn');
+        const msg=document.getElementById('completeMsg');
+        function setDone(done){
+            if(done){btn.textContent='✓ COMPLETE — CLICK TO UNDO';btn.classList.add('done');btn.style.cssText='border-color:#39ff14;color:#39ff14;background:rgba(57,255,20,0.1);cursor:pointer;opacity:1;';msg.style.color='#39ff14';msg.textContent='Lesson marked complete. Click again to undo.';}
+            else{btn.textContent='MARK LESSON COMPLETE';btn.classList.remove('done');btn.style.cssText='';msg.style.color='#ffffff55';msg.textContent='Not yet marked complete.';}
+        }
+        let mastered=[];
+        try{mastered=await getMasteredSections();}catch(e){console.error(e);}
+        setDone(mastered.includes(LESSON_ID));
+        btn.addEventListener('click',async()=>{
+            const isDone=btn.classList.contains('done');
+            msg.style.color='#00d9ff';msg.textContent='Saving...';
+            const ok=await upsertSection(LESSON_ID,!isDone);
+            if(ok){setDone(!isDone);}else{msg.style.color='#ff004f';msg.textContent='Error saving. Try again.';}
+        });
+        const btt=document.getElementById('backToTop');
+        window.addEventListener('scroll',()=>{btt.classList.toggle('visible',window.scrollY>400);});
+        btt.addEventListener('click',()=>window.scrollTo({top:0,behavior:'smooth'}));
+    }
+    if(document.readyState==="loading") document.addEventListener("DOMContentLoaded",init);
+    else init();
+})();
+</script>
+
+</body>
+</html>
