@@ -1,0 +1,202 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, shrink-to-fit=no">
+<title>LESSON 03 — Frequency Bands: Ka, Ku, V &amp; E — Tradeoffs · LEOAF</title>
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;600;800&family=Share+Tech+Mono&family=Libre+Baskerville:ital,wght@0,400;0,700;1,400&display=swap" rel="stylesheet">
+<link rel="icon" href="favicon.ico" sizes="any" type="image/x-icon">
+<link rel="manifest" href="site.webmanifest">
+<meta name="theme-color" content="#0f0f0f">
+<script>
+window.leoafAbort = async function () {
+    function go() { window.location.replace("index.html?signedout=1"); }
+    try { if (typeof client !== "undefined" && client && client.auth && client.auth.signOut) { try { await client.auth.signOut({ scope: "local" }); } catch (e) {} } } catch (e) {}
+    go();
+};
+</script>
+<style>
+* { box-sizing:border-box; margin:0; padding:0; }
+html { height:100%; -webkit-text-size-adjust:100%; overflow-x:hidden; }
+body { font-family:'Share Tech Mono',monospace; background:#000; color:white; overflow-x:hidden; min-height:100vh; }
+#starsCanvas { position:fixed; inset:0; z-index:-1; }
+header { background:#000; border-bottom:1px solid #ff004f33; position:sticky; top:0; z-index:100; padding:1rem clamp(1.5rem,5vw,4rem); display:flex; justify-content:space-between; align-items:center; box-shadow:0 4px 16px #0008; }
+.logo { font-family:'Orbitron',sans-serif; font-weight:800; font-size:clamp(16px,2vw,22px); letter-spacing:3px; text-decoration:none; }
+.logo span:first-child { color:white; } .logo span:last-child { color:#ff004f; }
+.nav-right { display:flex; align-items:center; gap:10px; }
+.nav-btn { background:transparent; border:1px solid #ff004f44; color:#ff004f; padding:6px 14px; cursor:pointer; transition:0.3s ease; font-size:11px; font-family:'Orbitron',sans-serif; letter-spacing:1px; text-decoration:none; display:inline-block; }
+.nav-btn:hover { background:#ff004f; color:black; }
+.breadcrumb { padding:14px clamp(1.5rem,5vw,4rem); font-size:11px; color:#ffffff44; letter-spacing:1px; position:relative; z-index:1; }
+.breadcrumb a { color:#00d9ff66; text-decoration:none; } .breadcrumb a:hover { color:#00d9ff; }
+.breadcrumb span { margin:0 8px; }
+.lesson-wrap { max-width:820px; margin:0 auto; padding:0 clamp(1.5rem,5vw,4rem) 80px; position:relative; z-index:1; }
+.lesson-header { padding:30px 0 28px; border-bottom:1px solid #ffffff11; margin-bottom:36px; }
+.lesson-tag { font-family:'Orbitron',sans-serif; font-size:10px; color:#ff004f; letter-spacing:3px; margin-bottom:10px; }
+.lesson-header h1 { font-family:'Orbitron',sans-serif; font-size:clamp(20px,3.5vw,32px); font-weight:800; line-height:1.2; margin-bottom:12px; }
+.lesson-meta { display:flex; gap:10px; flex-wrap:wrap; margin-bottom:16px; }
+.l-pill { font-family:'Orbitron',sans-serif; font-size:10px; padding:3px 10px; border:1px solid; letter-spacing:1px; }
+.l-pill-q { color:#ff004f; border-color:#ff004f44; } .l-pill-t { color:#39ff14; border-color:#39ff1444; }
+.lesson-intro { font-size:13px; line-height:1.85; opacity:0.75; }
+.toc { background:rgba(0,217,255,0.06); border:1px solid #00d9ff33; padding:24px 28px; margin:30px 0; }
+.toc h4 { font-family:'Orbitron',sans-serif; font-size:10px; color:#00d9ff; letter-spacing:2px; margin-bottom:16px; }
+.toc ol { padding-left:20px; } .toc li { font-size:13px; line-height:2.1; }
+.toc li a { color:#00d9ffbb; text-decoration:none; transition:0.15s; } .toc li a:hover { color:#fff; padding-left:4px; }
+.toc li::marker { color:#ff004f; font-family:'Orbitron',sans-serif; font-size:10px; }
+.content-block { background:#f5f2ec; color:#1a1a1a; padding:36px clamp(24px,4vw,48px); margin-bottom:24px; border-left:4px solid #00d9ff; position:relative; z-index:1; }
+.content-block h2 { font-family:'Orbitron',sans-serif; font-size:13px; color:#003d66; letter-spacing:2px; text-transform:uppercase; margin-bottom:20px; padding-bottom:10px; border-bottom:2px solid #00d9ff66; scroll-margin-top:80px; }
+.source-note { background:rgba(0,217,255,0.06); border:1px solid #00d9ff33; padding:20px 24px; margin:32px 0; font-size:12px; line-height:1.8; }
+.source-note h3 { font-family:'Orbitron',sans-serif; font-size:11px; color:#00d9ff; letter-spacing:1.5px; margin-bottom:10px; }
+.complete-wrap { margin-top:56px; padding-top:30px; border-top:1px solid #ffffff11; text-align:center; }
+.complete-btn { font-family:'Orbitron',sans-serif; font-size:13px; letter-spacing:2px; padding:14px 44px; background:transparent; border:1px solid #39ff14; color:#39ff14; cursor:pointer; transition:0.3s ease; }
+.complete-btn:hover:not(.done) { background:#39ff14; color:black; box-shadow:0 0 20px rgba(57,255,20,0.4); }
+.complete-btn.done { background:rgba(57,255,20,0.1); cursor:default; opacity:0.7; }
+.complete-msg { font-size:12px; color:#39ff14; margin-top:14px; min-height:18px; letter-spacing:1px; }
+.lesson-nav { display:flex; justify-content:space-between; margin-top:30px; flex-wrap:wrap; gap:10px; }
+.lesson-nav a { font-family:'Orbitron',sans-serif; font-size:11px; color:#00d9ff66; text-decoration:none; letter-spacing:1px; transition:0.2s; }
+.lesson-nav a:hover { color:#00d9ff; }
+.back-to-top { position:fixed; bottom:28px; right:28px; z-index:200; width:44px; height:44px; background:#000; border:1px solid #00d9ff55; color:#00d9ff; font-size:20px; cursor:pointer; display:flex; align-items:center; justify-content:center; opacity:0; pointer-events:none; transition:opacity 0.3s ease; }
+.back-to-top.visible { opacity:1; pointer-events:auto; } .back-to-top:hover { border-color:#00d9ff; background:#001a2c; }
+footer { text-align:center; padding:30px; opacity:0.3; font-size:11px; position:relative; z-index:1; letter-spacing:1px; }
+</style>
+</head>
+<body>
+<canvas id="starsCanvas"></canvas>
+<header>
+    <a href="dashboard.html" class="logo"><span>LEO</span><span>AF</span></a>
+    <div class="nav-right">
+        <a href="m4.html" class="nav-btn">← M4 HUB</a>
+        <button class="nav-btn" onclick="leoafAbort()">ABORT</button>
+    </div>
+</header>
+<div class="breadcrumb">
+    <a href="dashboard.html">DASHBOARD</a><span>/</span>
+    <a href="m4.html">M4</a><span>/</span>
+    <span style="color:#ffffff88;">M4 · LESSON 03 OF 7</span>
+</div>
+<div class="lesson-wrap">
+<div class="lesson-header">
+    <div class="lesson-tag">M4 · LESSON 03 OF 7</div>
+    <h1>Frequency Bands: Ka, Ku, V &amp; E — Tradeoffs</h1>
+    <div class="lesson-meta">
+        <div class="l-pill l-pill-q">MODULE 4</div>
+        <div class="l-pill l-pill-t">RF &amp; LINK BUDGETS</div>
+    </div>
+    <p class="lesson-intro">Frequency is the most fundamental parameter in satellite link design. It determines path loss, antenna size, available bandwidth, atmospheric susceptibility, and regulatory regime — all simultaneously. This lesson maps the progression from L-band to E-band, explains why Ka-band dominates LEO broadband, establishes the path-loss vs frequency numbers, and adds the band-comparison function to the spine project.</p>
+</div>
+<div class="toc">
+    <h4>CONTENTS</h4>
+    <ol>
+        <li><a href="#s1">The band ladder: L through E</a></li>
+        <li><a href="#s2">Why Ka-band dominates LEO broadband</a></li>
+        <li><a href="#s3">Path loss vs frequency: the key numbers</a></li>
+        <li><a href="#s4">Ku-band: the legacy broadband workhorse</a></li>
+        <li><a href="#s5">Ka-band: the LEO broadband standard</a></li>
+        <li><a href="#s6">V-band: the emerging feeder link standard</a></li>
+        <li><a href="#s7">E-band: future directions</a></li>
+        <li><a href="#s8">System implications for LEO broadband</a></li>
+        <li><a href="#quiz">Knowledge check</a></li>
+        <li><a href="#python">Python exercises — spine project</a></li>
+        <li><a href="#reflect">Reflection prompts</a></li>
+    </ol>
+</div>
+<div class="content-block" id="s1">
+    <h2>1. The band ladder: L through E</h2>
+    <p style="font-family:'Libre Baskerville',serif;font-size:15px;line-height:1.9;color:#1a1a1a;">See markdown source for full content.</p>
+</div>
+<div class="content-block" id="s2">
+    <h2>2. Why Ka-band dominates LEO broadband</h2>
+    <p style="font-family:'Libre Baskerville',serif;font-size:15px;line-height:1.9;color:#1a1a1a;">See markdown source for full content.</p>
+</div>
+<div class="content-block" id="s3">
+    <h2>3. Path loss vs frequency: the key numbers</h2>
+    <p style="font-family:'Libre Baskerville',serif;font-size:15px;line-height:1.9;color:#1a1a1a;">See markdown source for full content.</p>
+</div>
+<div class="content-block" id="s4">
+    <h2>4. Ku-band: the legacy broadband workhorse</h2>
+    <p style="font-family:'Libre Baskerville',serif;font-size:15px;line-height:1.9;color:#1a1a1a;">See markdown source for full content.</p>
+</div>
+<div class="content-block" id="s5">
+    <h2>5. Ka-band: the LEO broadband standard</h2>
+    <p style="font-family:'Libre Baskerville',serif;font-size:15px;line-height:1.9;color:#1a1a1a;">See markdown source for full content.</p>
+</div>
+<div class="content-block" id="s6">
+    <h2>6. V-band: the emerging feeder link standard</h2>
+    <p style="font-family:'Libre Baskerville',serif;font-size:15px;line-height:1.9;color:#1a1a1a;">See markdown source for full content.</p>
+</div>
+<div class="content-block" id="s7">
+    <h2>7. E-band: future directions</h2>
+    <p style="font-family:'Libre Baskerville',serif;font-size:15px;line-height:1.9;color:#1a1a1a;">See markdown source for full content.</p>
+</div>
+<div class="content-block" id="s8">
+    <h2>8. System implications for LEO broadband</h2>
+    <p style="font-family:'Libre Baskerville',serif;font-size:15px;line-height:1.9;color:#1a1a1a;">See markdown source for full content.</p>
+</div>
+<div class="source-note" id="quiz">
+    <h3>KNOWLEDGE CHECK</h3>
+    <p>Ten questions covering the material in this lesson. See the markdown source (m4-3.md) for the full question set with distractors and feedback text. The quiz engine is identical to all other LEOAF lessons — copy the quiz HTML block from m4-1.html or m4-2.html and populate with the questions from the md file.</p>
+</div>
+<div class="source-note" id="python">
+    <h3>PYTHON EXERCISES — SPINE PROJECT</h3>
+    <p>Three exercises extending the spine link budget engine. See m4-3.md for the complete code. Exercise 3 is the spine project stage for this lesson. Paste the code blocks from the md file into this section following the pattern established in m4-1.html and m4-2.html.</p>
+</div>
+<div class="source-note" id="reflect">
+    <h3>REFLECTION PROMPTS</h3>
+    <p>Four reflection prompts for this lesson. See m4-3.md. Not graded — write in your own words, 200–400 words each.</p>
+</div>
+<div class="complete-wrap">
+    <button class="complete-btn" id="completeBtn">MARK LESSON COMPLETE</button>
+    <div class="complete-msg" id="completeMsg"></div>
+</div>
+<div class="lesson-nav">
+    <a href="m4-2.html">← LESSON 02 — NOISE &amp; THE RECEIVER CHAIN</a>
+    <a href="m4-4.html">LESSON 04 — PROPAGATION, RAIN FADE &amp; ATMOSPHERICS →</a>
+</div>
+</div>
+<button class="back-to-top" id="backToTop" title="Back to top">↑</button>
+<footer>© 2026 LEOAF · M4 · LESSON 03 OF 7</footer>
+<script>
+const canvas=document.getElementById('starsCanvas'),ctx=canvas.getContext('2d');
+let stars=[];
+function initStars(){stars=[];for(let i=0;i<180;i++)stars.push({x:Math.random()*canvas.width,y:Math.random()*canvas.height,size:Math.random()*1.5+0.4,speed:Math.random()*0.18+0.04,hue:Math.random()*360});}
+function resizeCanvas(){canvas.width=window.innerWidth;canvas.height=window.innerHeight;}
+resizeCanvas();initStars();window.addEventListener('resize',resizeCanvas);
+function animateStars(){ctx.clearRect(0,0,canvas.width,canvas.height);stars.forEach(s=>{s.y-=s.speed;if(s.y<0){s.y=canvas.height;s.x=Math.random()*canvas.width;}ctx.beginPath();ctx.fillStyle=`hsl(${s.hue},80%,80%)`;ctx.arc(s.x,s.y,s.size,0,Math.PI*2);ctx.fill();});requestAnimationFrame(animateStars);}
+animateStars();
+</script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="supabase.js"></script>
+<script src="user_progress.js"></script>
+<script>
+const LESSON_ID='m4-3';
+(function(){
+    function bounceToLogin(r){console.error("Auth guard:",r);window.location.replace("index.html");}
+    async function init(){
+        if(typeof client==="undefined"||!client||!client.auth)return bounceToLogin("Supabase client not loaded");
+        let session=null;
+        try{({data:{session}}=await client.auth.getSession());}
+        catch(e){return bounceToLogin("getSession threw: "+e.message);}
+        if(!session){window.location.replace("index.html");return;}
+        const btn=document.getElementById('completeBtn'),msg=document.getElementById('completeMsg');
+        function setDone(done){
+            if(done){btn.textContent='✓ COMPLETE — CLICK TO UNDO';btn.classList.add('done');btn.style.cssText='border-color:#39ff14;color:#39ff14;background:rgba(57,255,20,0.1);cursor:pointer;opacity:1;';msg.style.color='#39ff14';msg.textContent='Lesson marked complete. Click again to undo.';}
+            else{btn.textContent='MARK LESSON COMPLETE';btn.classList.remove('done');btn.style.cssText='';msg.style.color='#ffffff55';msg.textContent='Not yet marked complete.';}
+        }
+        let mastered=[];
+        try{mastered=await getMasteredSections();}catch(e){console.error(e);}
+        setDone(mastered.includes(LESSON_ID));
+        btn.addEventListener('click',async()=>{
+            const isDone=btn.classList.contains('done');
+            msg.style.color='#00d9ff';msg.textContent='Saving...';
+            const ok=await upsertSection(LESSON_ID,!isDone);
+            if(ok){setDone(!isDone);}else{msg.style.color='#ff004f';msg.textContent='Error saving. Try again.';}
+        });
+        const btt=document.getElementById('backToTop');
+        window.addEventListener('scroll',()=>{btt.classList.toggle('visible',window.scrollY>400);});
+        btt.addEventListener('click',()=>window.scrollTo({top:0,behavior:'smooth'}));
+    }
+    if(document.readyState==="loading")document.addEventListener("DOMContentLoaded",init);
+    else init();
+})();
+</script>
+</body>
+</html>
