@@ -1,0 +1,624 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, shrink-to-fit=no">
+<title>M3-5 — Frequency Reuse, Beam-Hopping &amp; Flexible Payloads · LEOAF</title>
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;600;800&family=Share+Tech+Mono&family=Libre+Baskerville:ital,wght@0,400;0,700;1,400&display=swap" rel="stylesheet">
+<link rel="icon" href="favicon.ico" sizes="any" type="image/x-icon">
+<link rel="manifest" href="site.webmanifest">
+<meta name="theme-color" content="#0f0f0f">
+<script>
+window.leoafAbort = async function () {
+    function go() { window.location.replace("index.html?signedout=1"); }
+    try { if (typeof client !== "undefined" && client && client.auth && client.auth.signOut) { try { await client.auth.signOut({ scope: "local" }); } catch (e) {} } } catch (e) {}
+    go();
+};
+</script>
+<style>
+* { box-sizing:border-box; margin:0; padding:0; }
+html { height:100%; -webkit-text-size-adjust:100%; overflow-x:hidden; }
+body { font-family:'Share Tech Mono',monospace; background:#000; color:white; overflow-x:hidden; min-height:100vh; }
+#starsCanvas { position:fixed; inset:0; z-index:-1; }
+header { background:#000; border-bottom:1px solid #ff004f33; position:sticky; top:0; z-index:100; padding:1rem clamp(1.5rem,5vw,4rem); display:flex; justify-content:space-between; align-items:center; box-shadow:0 4px 16px #0008; }
+.logo { font-family:'Orbitron',sans-serif; font-weight:800; font-size:clamp(16px,2vw,22px); letter-spacing:3px; text-decoration:none; }
+.logo span:first-child { color:white; } .logo span:last-child { color:#ff004f; }
+.nav-right { display:flex; align-items:center; gap:10px; }
+.nav-btn { background:transparent; border:1px solid #ff004f44; color:#ff004f; padding:6px 14px; cursor:pointer; transition:0.3s ease; font-size:11px; font-family:'Orbitron',sans-serif; letter-spacing:1px; text-decoration:none; display:inline-block; }
+.nav-btn:hover { background:#ff004f; color:black; }
+.breadcrumb { padding:14px clamp(1.5rem,5vw,4rem); font-size:11px; color:#ffffff44; letter-spacing:1px; position:relative; z-index:1; }
+.breadcrumb a { color:#00d9ff66; text-decoration:none; } .breadcrumb a:hover { color:#00d9ff; }
+.breadcrumb span { margin:0 8px; }
+.lesson-wrap { max-width:820px; margin:0 auto; padding:0 clamp(1.5rem,5vw,4rem) 80px; position:relative; z-index:1; }
+.lesson-header { padding:30px 0 28px; border-bottom:1px solid #ffffff11; margin-bottom:36px; }
+.lesson-tag { font-family:'Orbitron',sans-serif; font-size:10px; color:#ff004f; letter-spacing:3px; margin-bottom:10px; }
+.lesson-header h1 { font-family:'Orbitron',sans-serif; font-size:clamp(20px,3.5vw,32px); font-weight:800; line-height:1.2; margin-bottom:12px; }
+.lesson-meta { display:flex; gap:10px; flex-wrap:wrap; margin-bottom:16px; }
+.l-pill { font-family:'Orbitron',sans-serif; font-size:10px; padding:3px 10px; border:1px solid; letter-spacing:1px; }
+.l-pill-q { color:#ff004f; border-color:#ff004f44; } .l-pill-t { color:#39ff14; border-color:#39ff1444; }
+.lesson-intro { font-size:13px; line-height:1.85; opacity:0.75; }
+.toc { background:rgba(0,217,255,0.06); border:1px solid #00d9ff33; padding:24px 28px; margin:30px 0; }
+.toc h4 { font-family:'Orbitron',sans-serif; font-size:10px; color:#00d9ff; letter-spacing:2px; margin-bottom:16px; }
+.toc ol { padding-left:20px; } .toc li { font-size:13px; line-height:2.1; }
+.toc li a { color:#00d9ffbb; text-decoration:none; transition:0.15s; } .toc li a:hover { color:#fff; padding-left:4px; }
+.toc li::marker { color:#ff004f; font-family:'Orbitron',sans-serif; font-size:10px; }
+.content-block { margin-bottom:48px; }
+.content-block h2 { font-family:'Orbitron',sans-serif; font-size:13px; color:#00d9ff; letter-spacing:2px; text-transform:uppercase; margin-bottom:18px; padding-bottom:10px; border-bottom:1px solid #00d9ff22; scroll-margin-top:80px; }
+.content-block h3 { font-family:'Orbitron',sans-serif; font-size:11px; color:#ffffff88; letter-spacing:1.5px; text-transform:uppercase; margin:28px 0 12px; }
+.content-block p { font-size:13px; line-height:1.9; opacity:0.85; margin-bottom:16px; }
+.content-block ul,.content-block ol { padding-left:0; margin-bottom:16px; }
+.content-block ul li,.content-block ol li { font-size:13px; line-height:1.85; opacity:0.85; padding-left:20px; position:relative; margin-bottom:6px; }
+.content-block ul li::before { content:'›'; position:absolute; left:0; color:#00d9ff; }
+.content-block blockquote { border-left:3px solid #39ff14; background:rgba(57,255,20,0.05); padding:14px 20px; margin:18px 0; font-size:14px; font-family:'Share Tech Mono',monospace; color:#39ff14; letter-spacing:1px; }
+.callout { border-left:3px solid #00d9ff; background:rgba(0,217,255,0.05); padding:16px 20px; margin:22px 0; font-size:12px; line-height:1.8; }
+.callout.red { border-left-color:#ff004f; background:rgba(255,0,79,0.05); }
+.callout.green { border-left-color:#39ff14; background:rgba(57,255,20,0.05); }
+.callout.amber { border-left-color:#ffaa00; background:rgba(255,170,0,0.05); }
+.callout strong { font-family:'Orbitron',sans-serif; font-size:10px; letter-spacing:1px; display:block; margin-bottom:8px; color:inherit; }
+.key-numbers { display:grid; grid-template-columns:repeat(auto-fit,minmax(140px,1fr)); gap:12px; margin:22px 0; }
+.kn-item { background:rgba(255,255,255,0.03); border:1px solid #ffffff11; padding:16px 12px; text-align:center; }
+.kn-val { font-family:'Orbitron',sans-serif; font-size:clamp(15px,2.3vw,22px); font-weight:800; color:#00d9ff; display:block; }
+.kn-label { font-size:10px; opacity:0.5; letter-spacing:1px; margin-top:5px; display:block; line-height:1.4; }
+.compare-table { width:100%; border-collapse:collapse; margin:22px 0; font-size:12px; }
+.compare-table th { font-family:'Orbitron',sans-serif; font-size:10px; letter-spacing:1px; color:#00d9ff; padding:10px 12px; border-bottom:1px solid #00d9ff33; text-align:left; }
+.compare-table td { padding:10px 12px; border-bottom:1px solid #ffffff0a; line-height:1.5; opacity:0.85; vertical-align:top; }
+.compare-table tr:hover td { background:rgba(255,255,255,0.02); }
+.diagram-wrap { margin:24px 0; background:rgba(255,255,255,0.02); border:1px solid #ffffff11; padding:20px; overflow-x:auto; }
+.diagram-wrap figcaption { font-size:11px; color:#ffffff44; margin-top:12px; text-align:center; letter-spacing:1px; }
+.quiz-block { background:rgba(17,17,17,0.9); border:1px solid #ff004f33; padding:28px; margin:48px 0 32px; }
+.quiz-block h2 { font-family:'Orbitron',sans-serif; font-size:13px; color:#ff004f; letter-spacing:2px; margin-bottom:6px; }
+.quiz-intro { font-size:12px; opacity:0.6; margin-bottom:24px; padding-bottom:16px; border-bottom:1px solid #ff004f22; line-height:1.6; }
+.quiz-q { margin-bottom:28px; }
+.quiz-q p { font-size:13px; opacity:0.9; margin-bottom:12px; line-height:1.65; }
+.quiz-q p strong { color:#00d9ff; }
+.quiz-options { display:flex; flex-direction:column; gap:8px; }
+.quiz-opt { background:rgba(255,255,255,0.03); border:1px solid #ffffff1a; padding:11px 16px; cursor:pointer; font-size:12px; font-family:'Share Tech Mono',monospace; transition:0.2s ease; text-align:left; color:white; line-height:1.5; }
+.quiz-opt:hover:not(:disabled) { background:rgba(0,217,255,0.08); border-color:#00d9ff44; }
+.quiz-opt.correct { background:rgba(57,255,20,0.1); border-color:#39ff14; color:#39ff14; }
+.quiz-opt.wrong { background:rgba(255,0,79,0.1); border-color:#ff004f; color:#ff004f; }
+.quiz-opt:disabled { cursor:default; }
+.quiz-feedback { font-size:12px; margin-top:10px; min-height:18px; line-height:1.7; opacity:0.9; padding:0 4px; }
+.quiz-score { font-family:'Orbitron',sans-serif; font-size:12px; color:#39ff14; margin-top:20px; letter-spacing:1px; display:none; padding-top:16px; border-top:1px solid #39ff1433; }
+.py-block { background:rgba(10,10,10,0.95); border:1px solid #39ff1422; padding:28px; margin:32px 0; }
+.py-block h2 { font-family:'Orbitron',sans-serif; font-size:13px; color:#39ff14; letter-spacing:2px; margin-bottom:8px; }
+.py-block .py-intro { font-size:12px; opacity:0.7; margin-bottom:20px; padding-bottom:16px; border-bottom:1px solid #39ff1422; line-height:1.7; }
+.py-exercise { margin-bottom:32px; } .py-exercise:last-child { margin-bottom:0; }
+.py-exercise h3 { font-family:'Orbitron',sans-serif; font-size:11px; color:#39ff1499; letter-spacing:1.5px; text-transform:uppercase; margin-bottom:10px; }
+.py-exercise p { font-size:12px; opacity:0.8; margin-bottom:14px; line-height:1.75; }
+.py-block pre { background:#050505; border:1px solid #39ff1433; padding:20px; font-family:'Share Tech Mono',monospace; font-size:11.5px; line-height:1.75; overflow-x:auto; color:#39ff14; white-space:pre; margin-bottom:12px; }
+.reflection-block { background:rgba(255,170,0,0.04); border:1px solid #ffaa0033; padding:24px; margin:32px 0; }
+.reflection-block h2 { font-family:'Orbitron',sans-serif; font-size:13px; color:#ffaa00; letter-spacing:2px; margin-bottom:8px; }
+.reflection-block .ref-intro { font-size:12px; opacity:0.7; margin-bottom:20px; padding-bottom:14px; border-bottom:1px solid #ffaa0022; line-height:1.7; }
+.ref-prompt { margin-bottom:20px; }
+.ref-prompt h3 { font-family:'Orbitron',sans-serif; font-size:11px; color:#ffaa0099; letter-spacing:1px; margin-bottom:8px; }
+.ref-prompt p { font-size:12px; opacity:0.8; line-height:1.75; margin-bottom:10px; }
+.back-to-top { position:fixed; bottom:28px; right:28px; z-index:200; width:44px; height:44px; background:#000; border:1px solid #00d9ff55; color:#00d9ff; font-size:20px; cursor:pointer; display:flex; align-items:center; justify-content:center; opacity:0; pointer-events:none; transition:opacity 0.3s ease; }
+.back-to-top.visible { opacity:1; pointer-events:auto; } .back-to-top:hover { border-color:#00d9ff; background:#001a2c; }
+.complete-wrap { margin-top:56px; padding-top:30px; border-top:1px solid #ffffff11; text-align:center; }
+.complete-btn { font-family:'Orbitron',sans-serif; font-size:13px; letter-spacing:2px; padding:14px 44px; background:transparent; border:1px solid #39ff14; color:#39ff14; cursor:pointer; transition:0.3s ease; }
+.complete-btn:hover:not(.done) { background:#39ff14; color:black; box-shadow:0 0 20px rgba(57,255,20,0.4); }
+.complete-btn.done { background:rgba(57,255,20,0.1); cursor:default; opacity:0.7; }
+.complete-msg { font-size:12px; color:#39ff14; margin-top:14px; min-height:18px; letter-spacing:1px; }
+.lesson-nav { display:flex; justify-content:space-between; margin-top:30px; flex-wrap:wrap; gap:10px; }
+.lesson-nav a { font-family:'Orbitron',sans-serif; font-size:11px; color:#00d9ff66; text-decoration:none; letter-spacing:1px; transition:0.2s; }
+.lesson-nav a:hover { color:#00d9ff; }
+footer { text-align:center; padding:30px; opacity:0.3; font-size:11px; position:relative; z-index:1; letter-spacing:1px; }
+@media(max-width:600px) { .key-numbers{grid-template-columns:1fr 1fr;} .compare-table{font-size:11px;} .compare-table th,.compare-table td{padding:8px;} }
+.content-block { background:#f5f2ec; color:#1a1a1a; padding:36px clamp(24px,4vw,48px); margin-bottom:24px; border-left:4px solid #00d9ff; position:relative; z-index:1; }
+.content-block h2 { font-family:'Orbitron',sans-serif; font-size:13px; color:#003d66; letter-spacing:2px; text-transform:uppercase; margin-bottom:20px; padding-bottom:10px; border-bottom:2px solid #00d9ff66; scroll-margin-top:80px; }
+.content-block h3 { font-family:'Orbitron',sans-serif; font-size:11px; color:#444; letter-spacing:1.5px; text-transform:uppercase; margin:32px 0 14px; }
+.content-block p { font-family:'Libre Baskerville',Georgia,serif; font-size:15px; line-height:1.9; color:#1a1a1a; opacity:1; margin-bottom:18px; }
+.content-block ul li { font-family:'Libre Baskerville',Georgia,serif; font-size:14px; line-height:1.85; color:#1a1a1a; opacity:1; margin-bottom:8px; }
+.content-block ul li::before { color:#0077aa; }
+.content-block blockquote { border-left:3px solid #1a7a1a; background:#eafaea; color:#0a3d0a; }
+.content-block .callout { border-left:3px solid #0088cc; background:#e8f4fb; color:#1a1a1a; }
+.content-block .callout.red { border-left-color:#cc0033; background:#fdecea; }
+.content-block .callout.amber { border-left-color:#996600; background:#fef9ec; }
+.content-block .callout.green { border-left-color:#1a7a1a; background:#eafaea; }
+.content-block .callout strong { color:inherit; }
+.content-block .kn-item { background:#fff; border:1px solid #d0d0d0; }
+.content-block .kn-label { color:#555; opacity:1; }
+.content-block .compare-table th { color:#003d66; border-bottom:2px solid #00d9ff66; }
+.content-block .compare-table td { color:#1a1a1a; opacity:1; border-bottom:1px solid #ddd; }
+.content-block .compare-table tr:hover td { background:#f0f0f0; }
+.content-block .diagram-wrap { background:#0a0a0a; border:1px solid #333; }
+.content-block .diagram-wrap figcaption { color:#ffffff55; }
+</style>
+</head>
+<body>
+<canvas id="starsCanvas"></canvas>
+<header>
+    <a href="dashboard.html" class="logo"><span>LEO</span><span>AF</span></a>
+    <div class="nav-right">
+        <a href="m3.html" class="nav-btn">← M3 HUB</a>
+        <button class="nav-btn" onclick="leoafAbort()">ABORT</button>
+    </div>
+</header>
+<div class="breadcrumb">
+    <a href="dashboard.html">DASHBOARD</a><span>/</span>
+    <a href="m3.html">M3</a><span>/</span>
+    <span style="color:#ffffff88;">LESSON 05 — FREQUENCY REUSE, BEAM-HOPPING &amp; FLEXIBLE PAYLOADS</span>
+</div>
+
+<div class="lesson-wrap">
+<div class="lesson-header">
+    <div class="lesson-tag">M3 · LESSON 05 OF 6</div>
+    <h1>Frequency Reuse, Beam-Hopping &amp; Flexible Payloads</h1>
+    <div class="lesson-meta">
+        <div class="l-pill l-pill-q">MODULE 3</div>
+        <div class="l-pill l-pill-t">COMMS PAYLOAD</div>
+    </div>
+    <p class="lesson-intro">The previous lesson established how a phased array generates a spot beam. This lesson asks what happens when you generate many such beams simultaneously and what you do with the spectrum they share. Frequency reuse multiplies capacity by assigning the same spectrum to angularly separated beams. Beam-hopping redistributes capacity in time to match demand. The flexible payload combines both — making the power, spectrum, and beam-pattern allocation programmable on orbit. All three techniques are in operational use in first-generation LEO broadband systems and are central to the capacity economics of the next generation.</p>
+</div>
+
+<div class="toc">
+    <h4>CONTENTS</h4>
+    <ol>
+        <li><a href="#s1">The capacity equation</a></li>
+        <li><a href="#s2">Frequency reuse patterns</a></li>
+        <li><a href="#s3">Beam-hopping: time-domain capacity allocation</a></li>
+        <li><a href="#s4">Beam-hopping and full frequency reuse</a></li>
+        <li><a href="#s5">The flexible payload</a></li>
+        <li><a href="#s6">Interference between LEO constellation satellites</a></li>
+        <li><a href="#quiz">Knowledge check</a></li>
+        <li><a href="#python">Python exercises</a></li>
+        <li><a href="#reflect">Reflection prompts</a></li>
+    </ol>
+</div>
+
+<!-- S1 -->
+<div class="content-block" id="s1">
+    <h2>1. The Capacity Equation</h2>
+    <p>The capacity of a single satellite beam is bounded by the Shannon-Hartley theorem:</p>
+    <blockquote>C = B · log₂(1 + SNR)</blockquote>
+    <p>Capacity scales linearly with bandwidth B and logarithmically with SNR. For a multibeam satellite with K beams and frequency reuse factor R, the total capacity is approximately:</p>
+    <blockquote>C_total ≈ (K/R) · B · log₂(1 + SINR)</blockquote>
+    <p>where SINR is the signal-to-interference-plus-noise ratio — the SNR degraded by co-channel interference from other beams using the same frequency. Tightening reuse (reducing R) increases the bandwidth per beam but increases co-channel interference, degrading SINR. There is an optimal reuse factor that maximises total capacity — it depends on the antenna's sidelobe isolation capability.</p>
+
+    <div class="key-numbers">
+        <div class="kn-item"><span class="kn-val">C = B·log₂(1+SNR)</span><span class="kn-label">SHANNON CAPACITY</span></div>
+        <div class="kn-item"><span class="kn-val">∝ B</span><span class="kn-label">CAPACITY SCALES LINEARLY WITH BANDWIDTH</span></div>
+        <div class="kn-item"><span class="kn-val">∝ log₂(SNR)</span><span class="kn-label">CAPACITY SCALES LOGARITHMICALLY WITH POWER</span></div>
+        <div class="kn-item"><span class="kn-val">R=4→1</span><span class="kn-label">REUSE FACTOR RANGE: CONSERVATIVE → FULL</span></div>
+    </div>
+</div>
+
+<!-- S2 -->
+<div class="content-block" id="s2">
+    <h2>2. Frequency Reuse Patterns</h2>
+    <p>The standard commercial satellite multibeam architecture is <strong>four-colour reuse</strong>: the available spectrum is divided into two halves (A, B) and each half is transmitted in two orthogonal polarisations (RHCP, LHCP), creating four colours — A-RHCP, A-LHCP, B-RHCP, B-LHCP. Adjacent beams are assigned different colours. The minimum geographic separation between same-colour beams is approximately 2–3 beam diameters.</p>
+    <p>Four-colour reuse gives a capacity multiplication factor of 4, with co-channel interference suppressed by both geographic separation and polarisation isolation (RHCP/LHCP provide 20–30 dB of co-channel rejection).</p>
+
+    <div class="diagram-wrap">
+        <svg viewBox="0 0 740 220" width="100%" xmlns="http://www.w3.org/2000/svg" font-family="Share Tech Mono, monospace">
+            <rect width="740" height="220" fill="#0a0a0a"/>
+            <!-- 4-colour hex grid of beams -->
+            <!-- Row 1 -->
+            <circle cx="120" cy="80"  r="45" fill="rgba(0,217,255,0.15)"  stroke="#00d9ff"  stroke-width="1.5"/>
+            <text x="120" y="76"  font-size="9" fill="#00d9ff"  text-anchor="middle">A-RHCP</text>
+            <circle cx="210" cy="80"  r="45" fill="rgba(255,0,79,0.12)"   stroke="#ff004f"  stroke-width="1.5"/>
+            <text x="210" y="76"  font-size="9" fill="#ff004f"  text-anchor="middle">A-LHCP</text>
+            <circle cx="300" cy="80"  r="45" fill="rgba(57,255,20,0.12)"  stroke="#39ff14"  stroke-width="1.5"/>
+            <text x="300" y="76"  font-size="9" fill="#39ff14"  text-anchor="middle">B-RHCP</text>
+            <circle cx="390" cy="80"  r="45" fill="rgba(255,170,0,0.12)"  stroke="#ffaa00"  stroke-width="1.5"/>
+            <text x="390" y="76"  font-size="9" fill="#ffaa00"  text-anchor="middle">B-LHCP</text>
+            <!-- Row 2 (offset) -->
+            <circle cx="165" cy="155" r="45" fill="rgba(57,255,20,0.12)"  stroke="#39ff14"  stroke-width="1.5"/>
+            <text x="165" y="151" font-size="9" fill="#39ff14"  text-anchor="middle">B-RHCP</text>
+            <circle cx="255" cy="155" r="45" fill="rgba(255,170,0,0.12)"  stroke="#ffaa00"  stroke-width="1.5"/>
+            <text x="255" y="151" font-size="9" fill="#ffaa00"  text-anchor="middle">B-LHCP</text>
+            <circle cx="345" cy="155" r="45" fill="rgba(0,217,255,0.15)"  stroke="#00d9ff"  stroke-width="1.5"/>
+            <text x="345" y="151" font-size="9" fill="#00d9ff"  text-anchor="middle">A-RHCP</text>
+            <circle cx="435" cy="155" r="45" fill="rgba(255,0,79,0.12)"   stroke="#ff004f"  stroke-width="1.5"/>
+            <text x="435" y="151" font-size="9" fill="#ff004f"  text-anchor="middle">A-LHCP</text>
+            <!-- Labels -->
+            <text x="560" y="70"  font-size="11" fill="#00d9ff"  text-anchor="start">■ A-RHCP</text>
+            <text x="560" y="90"  font-size="11" fill="#ff004f"  text-anchor="start">■ A-LHCP</text>
+            <text x="560" y="110" font-size="11" fill="#39ff14"  text-anchor="start">■ B-RHCP</text>
+            <text x="560" y="130" font-size="11" fill="#ffaa00"  text-anchor="start">■ B-LHCP</text>
+            <text x="550" y="160" font-size="9"  fill="#ffffff44" text-anchor="start">No two adjacent</text>
+            <text x="550" y="173" font-size="9"  fill="#ffffff44" text-anchor="start">beams share</text>
+            <text x="550" y="186" font-size="9"  fill="#ffffff44" text-anchor="start">a colour</text>
+            <text x="370" y="210" font-size="9"  fill="#ffffff33" text-anchor="middle">FOUR-COLOUR REUSE — 2 frequency halves × 2 polarisations; adjacent beams always differ</text>
+        </svg>
+        <figcaption>Four-colour frequency reuse pattern. Each colour represents a unique combination of frequency half-band and polarisation. No two adjacent beams share the same colour, providing geographic and polarisation isolation between co-channel beams.</figcaption>
+    </div>
+
+    <h3>More aggressive reuse</h3>
+    <p>Four-colour reuse is conservative. More aggressive reuse (3-, 2-, or 1-colour / full reuse) increases the capacity multiplication factor but requires higher antenna sidelobe suppression. Enabling technologies: amplitude-tapered DBF arrays (m3-4), interference cancellation in the digital payload processor, and spatial precoding (multiuser MIMO) placing nulls toward co-channel users.</p>
+
+    <table class="compare-table">
+        <thead><tr><th>Reuse factor</th><th>Colours</th><th>Capacity multiplier</th><th>Required C/I</th><th>Enabling technology</th></tr></thead>
+        <tbody>
+            <tr><td>4-colour</td><td>4</td><td>4×</td><td>~15 dB</td><td>Standard multibeam reflector</td></tr>
+            <tr><td>2-colour</td><td>2</td><td>~2–3×</td><td>~20 dB</td><td>High-sidelobe phased array</td></tr>
+            <tr><td>1-colour (full)</td><td>1</td><td>~3–6×</td><td>~25 dB+</td><td>DBF + interference cancellation</td></tr>
+        </tbody>
+    </table>
+
+    <div class="callout">
+        <strong>C/I AND THE SIDELOBE BUDGET</strong>
+        C/I ≈ G_main − G_sidelobe(θ_sep). With −25 dB sidelobes and co-channel beams separated by 2 beam diameters, C/I ≈ 25 dB — sufficient for 16-APSK without interference management. The sidelobe level achieved by the phased array directly sets how aggressively the spectrum can be reused.
+    </div>
+</div>
+
+<!-- S3 -->
+<div class="content-block" id="s3">
+    <h2>3. Beam-Hopping: Time-Domain Capacity Allocation</h2>
+    <p>Instead of illuminating all K beams simultaneously with 1/K of the power, beam-hopping illuminates each beam in turn with all the available power, spending a fraction T_k of each frame period on beam k:</p>
+    <blockquote>T_k = D_k / Σ D_k</blockquote>
+    <p>where D_k is the demand in beam k. A dense urban beam with twice the demand of a rural beam receives twice the dwell time. The frame period is typically 1–10 ms in DVB-S2X Super-frame beam-hopping implementations.</p>
+
+    <h3>Advantages</h3>
+    <p><strong>Demand-matching</strong>: in a fixed-beam system, each beam receives a fixed spectrum and power allocation regardless of how many users are in it. An empty ocean beam wastes capacity that a congested city beam could use. Beam-hopping redistributes dwell time continuously — capacity follows demand, not geography.</p>
+    <p><strong>Full power per beam</strong>: when a beam is being served, it receives the full satellite transmit power for that dwell interval. For a given peak EIRP budget, beam-hopping delivers the maximum possible SNR to each beam, enabling higher modulation orders and greater spectral efficiency.</p>
+
+    <h3>Limitations</h3>
+    <p><strong>Burst-mode latency</strong>: users receive traffic in bursts during their dwell period rather than continuously. For TCP and VoIP, this introduces additional queuing delay — up to one hopping frame period. DVB-S2X Super-frame mode targets frame periods where this delay contribution stays below the link propagation latency floor.</p>
+    <p><strong>Synchronisation complexity</strong>: all ground terminals must synchronise to the hopping schedule and know precisely when their beam will be served. This requires tight timing distribution from the satellite to all terminals.</p>
+
+    <div class="callout amber">
+        <strong>BEAM-HOPPING vs SIMULTANEOUS BEAMS: THE CORE TRADEOFF</strong>
+        Simultaneous multibeam: all beams active, each with fraction of power → moderate SNR per beam, continuous service. Beam-hopping: one beam at a time, full power → maximum SNR per beam, burst-mode service. The right choice depends on whether the system is power-limited (hopping wins) or interference-limited (simultaneous reuse management wins).
+    </div>
+</div>
+
+<!-- S4 -->
+<div class="content-block" id="s4">
+    <h2>4. Beam-Hopping and Full Frequency Reuse</h2>
+    <p>The most powerful combination is full frequency reuse with beam-hopping: at any given moment the satellite illuminates one beam with all the spectrum and all the power. Since only one beam is illuminated at a time, there is no co-channel interference — the beams that would interfere are simply off during each other's dwell periods.</p>
+    <p>Total system capacity:</p>
+    <blockquote>C_total = K · T_k_avg · B · log₂(1 + SNR_peak)</blockquote>
+    <p>This exceeds simultaneous multi-colour reuse when SNR_peak (all power on one beam) >> SNR_shared (power divided across beams) — i.e. when the satellite is <strong>power-limited</strong> rather than interference-limited. For LEO satellites at 550 km with limited bus power, this condition is typically met. Telesat Lightspeed and the ESA VHTS programmes explicitly combine full frequency reuse with beam-hopping. DVB-S2X Annex E defines the physical layer framing for this mode.</p>
+
+    <div class="callout green">
+        <strong>THE CAPACITY OPTIMUM</strong>
+        Full reuse + beam-hopping is the theoretical capacity optimum for a power-limited satellite. It eliminates both the spectrum waste of multi-colour reuse and the co-channel interference that makes simultaneous full reuse difficult. The trade is burst-mode delivery and synchronisation complexity at the terminal.
+    </div>
+</div>
+
+<!-- S5 -->
+<div class="content-block" id="s5">
+    <h2>5. The Flexible Payload</h2>
+    <p>A flexible payload allows the power allocated to each beam, the spectrum assigned to each beam, and the beam pointing direction to be changed on orbit — not just at commissioning but continuously in response to market conditions, traffic patterns, and regulatory changes. The hardware enabling this is the active phased array with digital beamforming (m3-4) combined with the digital baseband processor (m3-3).</p>
+    <ul>
+        <li><strong>Flexible beam count</strong>: DBF weight changes create fewer, larger beams or more, narrower beams from the same aperture</li>
+        <li><strong>Flexible power allocation</strong>: DBF amplitude weights redirect transmit power from under-loaded to over-loaded beams</li>
+        <li><strong>Flexible spectrum allocation</strong>: the digital channeliser reassigns frequency sub-channels between beams without physical reconfiguration</li>
+        <li><strong>Flexible pointing</strong>: phase gradients in the DBF steer each beam to a different ground location — the satellite can serve different geographic regions than originally designed for</li>
+    </ul>
+    <p>Telesat Lightspeed (MDA Aurora platform), Airbus OneSat, and several next-generation GEO and LEO platforms are explicitly designed as software-defined flexible satellites.</p>
+
+    <div class="callout red">
+        <strong>FLEXIBILITY IS BOUNDED BY THE HARDWARE ENVELOPE</strong>
+        Flexibility means choosing how to allocate fixed hardware resources — it does not create resources not designed in at launch. Total transmit power is fixed by the bus and PA efficiency. Licensed spectrum is fixed by the regulator. Maximum scan angle is fixed by the array geometry. DBF beam count is fixed by processing capacity. Post-launch reconfigurability operates within these bounds.
+    </div>
+</div>
+
+<!-- S6 -->
+<div class="content-block" id="s6">
+    <h2>6. Interference Between LEO Constellation Satellites</h2>
+    <p>Frequency reuse within a single satellite is only part of the interference picture. In a LEO constellation, multiple satellites are simultaneously visible from a single ground terminal.</p>
+    <p><strong>Co-frequency inter-satellite interference</strong>: when two constellation satellites use the same frequency simultaneously, a terminal served by satellite A may receive interference from satellite B's beam. For a well-designed LEO constellation, adjacent satellites are separated enough that sidelobe isolation is sufficient — but this must be verified through system-level simulation, not assumed.</p>
+    <p><strong>LEO-to-GEO interference (EPFD limits)</strong>: as discussed in m1-6, NGSO constellations must satisfy ITU equivalent power flux density (EPFD) limits to protect GEO operators sharing the same frequency band. The cumulative downlink power density from all visible LEO satellites at a GEO Earth station must stay below the ITU threshold. This drives LEO downlink EIRP, beam pattern design, and in some cases requires beam blanking — turning off beams that would otherwise illuminate a GEO Earth station — which represents a real but managed capacity loss.
+    </p>
+</div>
+
+<!-- QUIZ -->
+<div class="quiz-block" id="quiz">
+    <h2>KNOWLEDGE CHECK</h2>
+    <p class="quiz-intro">Ten questions. Select one answer per question. Feedback is immediate; score appears when all ten are answered.</p>
+
+    <div class="quiz-q"><p><strong>Q1.</strong> In a four-colour frequency reuse scheme, the four colours come from:</p>
+        <div class="quiz-options">
+            <button class="quiz-opt" data-q="1" data-correct="false">A — Four separate frequency bands</button>
+            <button class="quiz-opt" data-q="1" data-correct="true">B — Two frequency sub-bands × two orthogonal polarisations (A-RHCP, A-LHCP, B-RHCP, B-LHCP)</button>
+            <button class="quiz-opt" data-q="1" data-correct="false">C — Four different modulation schemes</button>
+            <button class="quiz-opt" data-q="1" data-correct="false">D — Four time slots per frame</button>
+        </div><div class="quiz-feedback" id="fb1"></div></div>
+
+    <div class="quiz-q"><p><strong>Q2.</strong> Beam-hopping differs from simultaneous multibeam in that:</p>
+        <div class="quiz-options">
+            <button class="quiz-opt" data-q="2" data-correct="false">A — Beam-hopping uses less total spectrum</button>
+            <button class="quiz-opt" data-q="2" data-correct="true">B — Only one beam is active at a time, receiving all available power, rather than all beams being active simultaneously with fractional power</button>
+            <button class="quiz-opt" data-q="2" data-correct="false">C — Beam-hopping requires a different frequency band</button>
+            <button class="quiz-opt" data-q="2" data-correct="false">D — Beam-hopping eliminates the need for high-power amplifiers</button>
+        </div><div class="quiz-feedback" id="fb2"></div></div>
+
+    <div class="quiz-q"><p><strong>Q3.</strong> The main advantage of beam-hopping over fixed simultaneous multibeam is:</p>
+        <div class="quiz-options">
+            <button class="quiz-opt" data-q="3" data-correct="false">A — Lower satellite manufacturing cost</button>
+            <button class="quiz-opt" data-q="3" data-correct="true">B — Capacity is allocated proportionally to actual demand, eliminating waste in low-demand beams</button>
+            <button class="quiz-opt" data-q="3" data-correct="false">C — Simpler ground terminal design</button>
+            <button class="quiz-opt" data-q="3" data-correct="false">D — Lower Doppler shift at the terminal</button>
+        </div><div class="quiz-feedback" id="fb3"></div></div>
+
+    <div class="quiz-q"><p><strong>Q4.</strong> Full frequency reuse combined with beam-hopping eliminates co-channel interference because:</p>
+        <div class="quiz-options">
+            <button class="quiz-opt" data-q="4" data-correct="false">A — The satellite uses more transmit power to overcome interference</button>
+            <button class="quiz-opt" data-q="4" data-correct="true">B — Only one beam is illuminated at a time, so there are no simultaneously active co-channel beams to interfere</button>
+            <button class="quiz-opt" data-q="4" data-correct="false">C — The hopping sequence scrambles the interference pattern</button>
+            <button class="quiz-opt" data-q="4" data-correct="false">D — Full reuse uses a wider bandwidth per beam</button>
+        </div><div class="quiz-feedback" id="fb4"></div></div>
+
+    <div class="quiz-q"><p><strong>Q5.</strong> Beam-hopping with full reuse outperforms simultaneous multi-colour reuse primarily when:</p>
+        <div class="quiz-options">
+            <button class="quiz-opt" data-q="5" data-correct="false">A — The satellite has more spectrum than it can use</button>
+            <button class="quiz-opt" data-q="5" data-correct="true">B — The satellite is power-limited: SNR_peak (all power on one beam) >> SNR_shared (power divided across all beams)</button>
+            <button class="quiz-opt" data-q="5" data-correct="false">C — Ground terminals are clustered close together</button>
+            <button class="quiz-opt" data-q="5" data-correct="false">D — The hopping frame period is very short</button>
+        </div><div class="quiz-feedback" id="fb5"></div></div>
+
+    <div class="quiz-q"><p><strong>Q6.</strong> The EPFD limit constrains LEO constellation downlink EIRP because:</p>
+        <div class="quiz-options">
+            <button class="quiz-opt" data-q="6" data-correct="false">A — It prevents LEO satellites from exceeding their structural power budget</button>
+            <button class="quiz-opt" data-q="6" data-correct="true">B — It limits the interference a LEO constellation can cause to GEO Earth stations sharing the same frequency band</button>
+            <button class="quiz-opt" data-q="6" data-correct="false">C — It sets the maximum data rate any LEO satellite can transmit</button>
+            <button class="quiz-opt" data-q="6" data-correct="false">D — It defines the minimum ground terminal antenna size</button>
+        </div><div class="quiz-feedback" id="fb6"></div></div>
+
+    <div class="quiz-q"><p><strong>Q7.</strong> A flexible payload can change beam count, power allocation, and spectrum assignment on orbit, but cannot:</p>
+        <div class="quiz-options">
+            <button class="quiz-opt" data-q="7" data-correct="false">A — Change beam count at all post-launch</button>
+            <button class="quiz-opt" data-q="7" data-correct="true">B — Exceed the hardware design envelope — total transmit power, licensed spectrum, maximum scan angle, and DBF processing capacity are all fixed at launch</button>
+            <button class="quiz-opt" data-q="7" data-correct="false">C — Change the hopping schedule after launch</button>
+            <button class="quiz-opt" data-q="7" data-correct="false">D — Operate in different frequency bands than originally designed</button>
+        </div><div class="quiz-feedback" id="fb7"></div></div>
+
+    <div class="quiz-q"><p><strong>Q8.</strong> Co-channel interference between beams in a simultaneous multibeam system depends primarily on:</p>
+        <div class="quiz-options">
+            <button class="quiz-opt" data-q="8" data-correct="false">A — The orbital altitude of the satellite</button>
+            <button class="quiz-opt" data-q="8" data-correct="true">B — The satellite antenna's sidelobe level at the angular separation between co-channel beams — C/I ≈ G_main − G_sidelobe(θ_sep)</button>
+            <button class="quiz-opt" data-q="8" data-correct="false">C — The number of users in each beam</button>
+            <button class="quiz-opt" data-q="8" data-correct="false">D — The forward error correction scheme used</button>
+        </div><div class="quiz-feedback" id="fb8"></div></div>
+
+    <div class="quiz-q"><p><strong>Q9.</strong> DVB-S2X beam-hopping (Super-frame mode) addresses burst-mode latency by:</p>
+        <div class="quiz-options">
+            <button class="quiz-opt" data-q="9" data-correct="false">A — Eliminating latency entirely through a special modulation scheme</button>
+            <button class="quiz-opt" data-q="9" data-correct="true">B — Designing the frame structure so the hopping frame period contributes below the link propagation latency floor</button>
+            <button class="quiz-opt" data-q="9" data-correct="false">C — Requiring terminals to buffer all traffic and deliver it in one burst</button>
+            <button class="quiz-opt" data-q="9" data-correct="false">D — Using shorter packets than standard DVB-S2</button>
+        </div><div class="quiz-feedback" id="fb9"></div></div>
+
+    <div class="quiz-q"><p><strong>Q10.</strong> With −25 dB sidelobes and co-channel beams separated by 2 beam diameters, the achievable C/I is approximately:</p>
+        <div class="quiz-options">
+            <button class="quiz-opt" data-q="10" data-correct="false">A — −25 dB</button>
+            <button class="quiz-opt" data-q="10" data-correct="false">B — 0 dB</button>
+            <button class="quiz-opt" data-q="10" data-correct="true">C — ~20–25 dB</button>
+            <button class="quiz-opt" data-q="10" data-correct="false">D — 50 dB</button>
+        </div><div class="quiz-feedback" id="fb10"></div></div>
+
+    <div class="quiz-score" id="quizScore"></div>
+</div>
+
+<!-- PYTHON -->
+<div class="py-block" id="python">
+    <h2>PYTHON EXERCISES</h2>
+    <p class="py-intro">Three exercises covering system capacity vs reuse factor, beam-hopping schedule optimisation, and EPFD calculation. Python 3.8+ standard library only.</p>
+
+    <div class="py-exercise">
+        <h3>Exercise 1 — System Capacity vs Reuse Factor</h3>
+        <p>Compute total system capacity as a function of reuse factor, accounting for SINR degradation as reuse tightens.</p>
+<pre>
+import math
+
+def cap_mbps(bw_mhz, sinr_db):
+    return bw_mhz * math.log2(1 + 10**(sinr_db/10))
+
+def system_cap(n_beams, total_bw, R, peak_sinr, degrade_per_step=3.0):
+    bw  = total_bw / R
+    sinr = peak_sinr - degrade_per_step * (4 - R)
+    per  = cap_mbps(bw, sinr)
+    return n_beams * per, per, sinr
+
+n_beams = 100; total_bw = 500   # MHz
+
+print(f"System capacity vs reuse factor ({n_beams} beams, {total_bw} MHz)\n")
+print(f"{'R':>4}{'Beam BW':>10}{'SINR':>9}{'Cap/beam':>12}{'Total':>12}")
+print("-" * 49)
+for R in [4, 3, 2, 1]:
+    tot, per, sinr = system_cap(n_beams, total_bw, R, 20.0)
+    print(f"{R:>4}{total_bw/R:>8.0f}MHz{sinr:>8.1f}dB"
+          f"{per:>10.1f}Mbps{tot/1000:>10.1f}Gbps")
+
+# 1. At what R is total capacity maximised in this model?
+# 2. With full reuse + beam-hopping: SINR = 25 dB (no co-channel
+#    interference, full power per beam). Compare to the R=1 simultaneous
+#    case above. What is the hopping gain?
+# 3. If SINR degrades 5 dB per reuse step (not 3 dB), how does the
+#    optimal R change?
+</pre>
+    </div>
+
+    <div class="py-exercise">
+        <h3>Exercise 2 — Beam-Hopping Schedule Optimisation</h3>
+        <p>Allocate beam dwell times proportional to traffic demand across a 20-beam constellation.</p>
+<pre>
+def hop_schedule(demands, frame_ms=10.0, min_pct=0.0):
+    """Demand-proportional beam dwell allocation."""
+    total = sum(demands)
+    sched = []
+    for i, d in enumerate(demands):
+        frac  = max(d/total, min_pct/100)
+        dwell = frac * frame_ms
+        sched.append((i+1, d, dwell, frac*100))
+    # Renormalise if floors were applied
+    total_dwell = sum(s[2] for s in sched)
+    if total_dwell > frame_ms:
+        scale = frame_ms / total_dwell
+        sched = [(b, d, dw*scale, dw*scale/frame_ms*100)
+                 for b, d, dw, _ in sched]
+    return sched
+
+demands = [2, 2, 1, 30, 45, 20, 3, 1, 2, 15,
+           8,  5, 2,  1,  3, 12, 2,  1, 5, 10]
+
+sched = hop_schedule(demands, 10.0)
+print(f"{'Beam':>5}{'Demand':>8}{'Dwell(ms)':>11}{'Time%':>8}  Type")
+print("-" * 46)
+for b, d, dw, pct in sched:
+    t = "URBAN" if d>=15 else ("SUBURBAN" if d>=5 else "RURAL")
+    print(f"{b:>5}{d:>8}{dw:>10.2f}ms{pct:>7.1f}%  {t}")
+
+# 1. Beams 4 and 5 (demand 30, 45): what fraction of total dwell do they
+#    consume combined?
+# 2. Beam 4 demand doubles to 60. Recompute. Which beams lose most?
+# 3. Enforce a minimum 2% floor for all beams. How does this change the
+#    urban beam allocations?
+</pre>
+    </div>
+
+    <div class="py-exercise">
+        <h3>Exercise 3 — EPFD at a GEO Earth Station</h3>
+        <p>Compute the aggregate equivalent power flux density from LEO satellites at a GEO Earth station location and check against the ITU limit.</p>
+<pre>
+import math
+
+C = 299792458.0
+EPFD_LIMIT = -160.0   # dBW/m^2/Hz, typical ITU downlink limit
+
+def fspl(dist_km, freq_ghz):
+    lam = C / (freq_ghz * 1e9)
+    return 20 * math.log10(4 * math.pi * dist_km * 1e3 / lam)
+
+def epfd(eirps_dbw, dists_km, freq_ghz, bw_hz):
+    total = sum(10**((e - fspl(d, freq_ghz) - 10*math.log10(bw_hz))/10)
+                for e, d in zip(eirps_dbw, dists_km))
+    return 10 * math.log10(total) if total > 0 else -300
+
+freq = 20.0; bw = 250e6   # Ka-band downlink, 250 MHz ref BW
+
+cases = [
+    ("Beam ON GEO station, 3 sats",   [50,45,43], [700,1200,1800]),
+    ("Beam NOT on station (−25dB SL)", [25,20,18], [700,1200,1800]),
+    ("1 sat overhead, beam on station",[50],        [700]),
+]
+
+print(f"EPFD at GEO Earth station  (Ka {freq} GHz, BW={bw/1e6:.0f} MHz)\n")
+print(f"{'Scenario':<44}{'EPFD':>16}{'Margin':>10}")
+print("-"*72)
+for name, eirps, dists in cases:
+    e = epfd(eirps, dists, freq, bw)
+    m = EPFD_LIMIT - e
+    print(f"{name:<44}{e:>14.1f} dBW{m:>+9.1f} dB")
+print(f"\nITU limit: {EPFD_LIMIT} dBW/m²/Hz  (positive margin = compliant)")
+
+# 1. Blank the closest satellite (remove it from the sum) in case 1.
+#    Does this bring the EPFD into compliance?
+# 2. What maximum EIRP can the closest satellite (700 km) transmit
+#    if it is the only visible satellite and must stay below the limit?
+# 3. As constellation grows from 3 to 30 visible sats (each at 2,000 km,
+#    EIRP 43 dBW, beam not on station), how does EPFD scale?
+</pre>
+    </div>
+</div>
+
+<!-- REFLECTION -->
+<div class="reflection-block" id="reflect">
+    <h2>REFLECTION PROMPTS</h2>
+    <p class="ref-intro">Not graded. Write in your own words, 200–400 words each.</p>
+    <div class="ref-prompt"><h3>Prompt 1 — The Case for Full Reuse</h3>
+        <p>Construct the argument for moving from four-colour to full (one-colour) reuse in a new LEO constellation design. What additional antenna, processing, and interference management capabilities are required? What is the risk if those capabilities underperform their specification?</p></div>
+    <div class="ref-prompt"><h3>Prompt 2 — When Beam-Hopping Wins and Loses</h3>
+        <p>Identify one commercial application where beam-hopping provides a decisive advantage over simultaneous fixed beams, and one where it provides no advantage or even a disadvantage. Explain the structural reasons for the difference — what property of the traffic or link environment determines which approach wins?</p></div>
+    <div class="ref-prompt"><h3>Prompt 3 — EPFD Capacity Cost</h3>
+        <p>In a 1,584-satellite Starlink constellation at 53° inclination, estimate (order of magnitude) how many beam-blanking events occur per satellite per day due to EPFD compliance, and what fraction of total capacity they represent. What does this imply for gateway placement strategy?</p></div>
+    <div class="ref-prompt"><h3>Prompt 4 — Sizing the Flexible Payload Envelope</h3>
+        <p>A flexible satellite payload must be designed with enough headroom to be useful across its projected service life. Describe the engineering process by which an operator determines how large the design envelope must be at launch — what data on demand distribution, growth rates, and geographic shifts is needed, and over what confidence interval should the envelope be sized?</p></div>
+</div>
+
+<div class="complete-wrap">
+    <button class="complete-btn" id="completeBtn">MARK LESSON COMPLETE</button>
+    <div class="complete-msg" id="completeMsg"></div>
+</div>
+<div class="lesson-nav">
+    <a href="m3-4.html">← LESSON 04 — MULTIBEAM ANTENNAS &amp; PHASED ARRAYS</a>
+    <a href="m3-6.html">LESSON 06 — MANUFACTURING AT SCALE →</a>
+</div>
+</div>
+
+<button class="back-to-top" id="backToTop" title="Back to top">↑</button>
+<footer>© 2026 LEOAF · M3 · LESSON 05 OF 6</footer>
+
+<script>
+const canvas=document.getElementById('starsCanvas'),ctx=canvas.getContext('2d');
+let stars=[];
+function initStars(){stars=[];for(let i=0;i<180;i++)stars.push({x:Math.random()*canvas.width,y:Math.random()*canvas.height,size:Math.random()*1.5+0.4,speed:Math.random()*0.18+0.04,hue:Math.random()*360});}
+function resizeCanvas(){canvas.width=window.innerWidth;canvas.height=window.innerHeight;}
+resizeCanvas();initStars();window.addEventListener('resize',resizeCanvas);
+function animateStars(){ctx.clearRect(0,0,canvas.width,canvas.height);stars.forEach(s=>{s.y-=s.speed;if(s.y<0){s.y=canvas.height;s.x=Math.random()*canvas.width;}ctx.beginPath();ctx.fillStyle=`hsl(${s.hue},80%,80%)`;ctx.arc(s.x,s.y,s.size,0,Math.PI*2);ctx.fill();});requestAnimationFrame(animateStars);}
+animateStars();
+</script>
+<script>
+const feedbacks={
+    1:{correct:"Correct. Four-colour reuse divides the available bandwidth into two halves (A, B) and uses two polarisations (RHCP, LHCP) per half — creating four orthogonal channels. Adjacent beams are assigned different colours.",wrong:"Incorrect. Four separate bands would be partitioning, not reuse. Modulation schemes and time slots are different resource axes. The four colours come from 2 frequency halves × 2 polarisations = 4 combinations."},
+    2:{correct:"Correct. In beam-hopping the satellite serves beams sequentially, concentrating all transmit power on one beam during its dwell period, maximising SNR per served beam and (with full reuse) eliminating co-channel interference.",wrong:"Incorrect. Beam-hopping uses the same total spectrum, often more aggressively. It does not require a different frequency band. HPAs are still required — beam-hopping concentrates power onto them sequentially."},
+    3:{correct:"Correct. A fixed-beam system allocates equal capacity to all beams regardless of demand. Beam-hopping redistributes dwell time proportional to demand, so capacity follows traffic rather than geography — an ocean beam with low demand gives its time to a city beam.",wrong:"Incorrect. Beam-hopping increases satellite complexity (scheduling, synchronisation). Ground terminals must synchronise to the hopping schedule — more complex, not simpler. Doppler shift is a function of orbital geometry, not beam management."},
+    4:{correct:"Correct. If only one beam is illuminated at any instant, there is no co-channel beam active simultaneously to create interference. The beams that would interfere are off during each other's dwell periods — interference is eliminated by temporal separation.",wrong:"Incorrect. Higher power increases signal strength but not the absence of interference — the key is temporal separation. Scrambling is a different concept. Bandwidth per beam is unchanged by the elimination mechanism — it is simply that interferers are off."},
+    5:{correct:"Correct. Beam-hopping gains come from concentrating power. When the satellite is power-limited — power rather than bandwidth is the binding constraint — focusing all power on one beam dramatically improves SNR and spectral efficiency, more than compensating for less time on air.",wrong:"Incorrect. Extra spectrum beyond what can be efficiently used does not help the power-limited case. Terminal proximity affects interference geometry. Frame period affects latency, not total capacity. The key is the power-limited vs interference-limited distinction."},
+    6:{correct:"Correct. EPFD limits were established by the ITU to protect GEO operators from interference by NGSO constellations sharing the same frequency band. The cumulative downlink power density from all visible LEO satellites at a GEO Earth station must stay below the ITU threshold.",wrong:"Incorrect. Structural power budgets are set by bus design. EPFD does not set data rates or terminal antenna sizes. It specifically protects incumbent GEO users from NGSO interference — nothing else."},
+    7:{correct:"Correct. Flexibility means choosing how to allocate fixed resources within the hardware envelope. Total power is set by bus and PA efficiency; spectrum by licence; scan range by array geometry; beam count by DBF processing capacity. None of these can be exceeded post-launch.",wrong:"Incorrect. A flexible payload can change beam count (within DBF limits), change hopping schedules, and support multiple bands if the hardware was designed for them. What it cannot do is exceed its physical design envelope — that boundary is set at launch."},
+    8:{correct:"Correct. C/I ≈ G_main − G_sidelobe(θ_sep). The satellite antenna's sidelobe level at the angular separation between desired and interfering beams determines how much co-channel rejection the system achieves. Better sidelobe suppression directly enables more aggressive reuse.",wrong:"Incorrect. Orbital altitude affects overall link budget (path loss) but not directly the C/I between co-channel beams on the same satellite. User count affects load, not interference geometry. FEC is a receiver-side tool that does not change received interference power."},
+    9:{correct:"Correct. DVB-S2X Super-frame mode targets frame periods where the burst-mode queuing delay contribution stays below the link propagation latency floor. The latency is not eliminated but kept below the threshold that would materially affect application performance.",wrong:"Incorrect. Burst-mode latency cannot be eliminated — it is a consequence of scheduling. Buffering is already implicit in any packet system. Packet size is not the primary tool. The Super-frame structure is designed to manage, not eliminate, the hopping delay."},
+    10:{correct:"Correct. C/I ≈ G_main − G_sidelobe(θ_sep). With sidelobes at −25 dB and a 2-beam-diameter separation placing the interferer well into the sidelobe region, C/I ≈ 0 − (−25) = +25 dB — sufficient for 16-APSK and above without further interference management.",wrong:"Incorrect. −25 dB is the sidelobe level relative to the main beam — but the C/I is the ratio of main beam gain to sidelobe gain, which is +25 dB (the sign flips). 0 dB would mean equal signal and interference. 50 dB would require −50 dB sidelobes, beyond current commercial designs."}
+};
+let answered={};
+document.querySelectorAll('.quiz-opt').forEach(btn=>{
+    btn.addEventListener('click',function(){
+        const q=this.dataset.q;
+        if(answered[q]!==undefined)return;
+        const correct=this.dataset.correct==='true';
+        answered[q]=correct;
+        document.querySelectorAll(`.quiz-opt[data-q="${q}"]`).forEach(b=>{b.disabled=true;if(b.dataset.correct==='true')b.classList.add('correct');});
+        if(!correct)this.classList.add('wrong');
+        const fb=document.getElementById(`fb${q}`);
+        fb.textContent=(correct?'✓ ':'✗ ')+feedbacks[q][correct?'correct':'wrong'];
+        fb.style.color=correct?'#39ff14':'#ff004f';
+        if(Object.keys(answered).length===10){
+            const total=Object.values(answered).filter(Boolean).length;
+            const el=document.getElementById('quizScore');
+            el.style.display='block';
+            const pct=Math.round(total/10*100);
+            el.textContent=`SCORE: ${total} / 10 (${pct}%) — ${pct===100?'PERFECT.':pct>=80?'STRONG. REVIEW ANY MISSES.':pct>=60?'ADEQUATE. REVISIT WEAK SECTIONS.':'REVISIT THE LESSON BEFORE PROCEEDING.'}`;
+        }
+    });
+});
+</script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="supabase.js"></script>
+<script src="user_progress.js"></script>
+<script>
+const LESSON_ID='m3-5';
+(function(){
+    function bounceToLogin(r){console.error("Auth guard:",r);window.location.replace("index.html");}
+    async function init(){
+        if(typeof client==="undefined"||!client||!client.auth)return bounceToLogin("Supabase client not loaded");
+        let session=null;
+        try{({data:{session}}=await client.auth.getSession());}
+        catch(e){return bounceToLogin("getSession threw: "+e.message);}
+        if(!session){window.location.replace("index.html");return;}
+        const btn=document.getElementById('completeBtn'),msg=document.getElementById('completeMsg');
+        function setDone(done){
+            if(done){btn.textContent='✓ COMPLETE — CLICK TO UNDO';btn.classList.add('done');btn.style.cssText='border-color:#39ff14;color:#39ff14;background:rgba(57,255,20,0.1);cursor:pointer;opacity:1;';msg.style.color='#39ff14';msg.textContent='Lesson marked complete. Click again to undo.';}
+            else{btn.textContent='MARK LESSON COMPLETE';btn.classList.remove('done');btn.style.cssText='';msg.style.color='#ffffff55';msg.textContent='Not yet marked complete.';}
+        }
+        let mastered=[];
+        try{mastered=await getMasteredSections();}catch(e){console.error(e);}
+        setDone(mastered.includes(LESSON_ID));
+        btn.addEventListener('click',async()=>{
+            const isDone=btn.classList.contains('done');
+            msg.style.color='#00d9ff';msg.textContent='Saving...';
+            const ok=await upsertSection(LESSON_ID,!isDone);
+            if(ok){setDone(!isDone);}else{msg.style.color='#ff004f';msg.textContent='Error saving. Try again.';}
+        });
+        const btt=document.getElementById('backToTop');
+        window.addEventListener('scroll',()=>{btt.classList.toggle('visible',window.scrollY>400);});
+        btt.addEventListener('click',()=>window.scrollTo({top:0,behavior:'smooth'}));
+    }
+    if(document.readyState==="loading")document.addEventListener("DOMContentLoaded",init);
+    else init();
+})();
+</script>
+</body>
+</html>
