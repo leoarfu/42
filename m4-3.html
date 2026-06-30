@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, shrink-to-fit=no">
-<title>LESSON 03 — Frequency Bands: Ka, Ku, V &amp; E — Tradeoffs · LEOAF</title>
+<title>M4-3 — Frequency Bands: Ka, Ku, V &amp; E · LEOAF</title>
 <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;600;800&family=Share+Tech+Mono&family=Libre+Baskerville:ital,wght@0,400;0,700;1,400&display=swap" rel="stylesheet">
 <link rel="icon" href="favicon.ico" sizes="any" type="image/x-icon">
 <link rel="manifest" href="site.webmanifest">
@@ -20,11 +20,11 @@ window.leoafAbort = async function () {
 html { height:100%; -webkit-text-size-adjust:100%; overflow-x:hidden; }
 body { font-family:'Share Tech Mono',monospace; background:#000; color:white; overflow-x:hidden; min-height:100vh; }
 #starsCanvas { position:fixed; inset:0; z-index:-1; }
-header { background:#000; border-bottom:1px solid #ff004f33; position:sticky; top:0; z-index:100; padding:1rem clamp(1.5rem,5vw,4rem); display:flex; justify-content:space-between; align-items:center; box-shadow:0 4px 16px #0008; }
+header { background:#000; border-bottom:1px solid #ff004f33; position:sticky; top:0; z-index:100; padding:1rem clamp(1.5rem,5vw,4rem); display:flex; justify-content:space-between; align-items:center; }
 .logo { font-family:'Orbitron',sans-serif; font-weight:800; font-size:clamp(16px,2vw,22px); letter-spacing:3px; text-decoration:none; }
 .logo span:first-child { color:white; } .logo span:last-child { color:#ff004f; }
 .nav-right { display:flex; align-items:center; gap:10px; }
-.nav-btn { background:transparent; border:1px solid #ff004f44; color:#ff004f; padding:6px 14px; cursor:pointer; transition:0.3s ease; font-size:11px; font-family:'Orbitron',sans-serif; letter-spacing:1px; text-decoration:none; display:inline-block; }
+.nav-btn { background:transparent; border:1px solid #ff004f44; color:#ff004f; padding:6px 14px; cursor:pointer; transition:0.3s; font-size:11px; font-family:'Orbitron',sans-serif; letter-spacing:1px; text-decoration:none; display:inline-block; }
 .nav-btn:hover { background:#ff004f; color:black; }
 .breadcrumb { padding:14px clamp(1.5rem,5vw,4rem); font-size:11px; color:#ffffff44; letter-spacing:1px; position:relative; z-index:1; }
 .breadcrumb a { color:#00d9ff66; text-decoration:none; } .breadcrumb a:hover { color:#00d9ff; }
@@ -42,20 +42,66 @@ header { background:#000; border-bottom:1px solid #ff004f33; position:sticky; to
 .toc ol { padding-left:20px; } .toc li { font-size:13px; line-height:2.1; }
 .toc li a { color:#00d9ffbb; text-decoration:none; transition:0.15s; } .toc li a:hover { color:#fff; padding-left:4px; }
 .toc li::marker { color:#ff004f; font-family:'Orbitron',sans-serif; font-size:10px; }
-.content-block { background:#f5f2ec; color:#1a1a1a; padding:36px clamp(24px,4vw,48px); margin-bottom:24px; border-left:4px solid #00d9ff; position:relative; z-index:1; }
-.content-block h2 { font-family:'Orbitron',sans-serif; font-size:13px; color:#003d66; letter-spacing:2px; text-transform:uppercase; margin-bottom:20px; padding-bottom:10px; border-bottom:2px solid #00d9ff66; scroll-margin-top:80px; }
-.source-note { background:rgba(0,217,255,0.06); border:1px solid #00d9ff33; padding:20px 24px; margin:32px 0; font-size:12px; line-height:1.8; }
-.source-note h3 { font-family:'Orbitron',sans-serif; font-size:11px; color:#00d9ff; letter-spacing:1.5px; margin-bottom:10px; }
+.cb { background:#f5f2ec; color:#1a1a1a; padding:36px clamp(24px,4vw,48px); margin-bottom:24px; border-left:4px solid #00d9ff; position:relative; z-index:1; }
+.cb h2 { font-family:'Orbitron',sans-serif; font-size:13px; color:#003d66; letter-spacing:2px; text-transform:uppercase; margin-bottom:20px; padding-bottom:10px; border-bottom:2px solid #00d9ff66; scroll-margin-top:80px; }
+.cb h3 { font-family:'Orbitron',sans-serif; font-size:11px; color:#444; letter-spacing:1.5px; text-transform:uppercase; margin:28px 0 12px; }
+.cb p { font-family:'Libre Baskerville',Georgia,serif; font-size:15px; line-height:1.9; color:#1a1a1a; margin-bottom:16px; }
+.cb ul { padding-left:0; margin-bottom:16px; }
+.cb ul li { font-family:'Libre Baskerville',Georgia,serif; font-size:14px; line-height:1.85; color:#1a1a1a; padding-left:20px; position:relative; margin-bottom:8px; }
+.cb ul li::before { content:'›'; position:absolute; left:0; color:#0077aa; }
+.cb blockquote { border-left:3px solid #1a7a1a; background:#eafaea; padding:14px 20px; margin:18px 0; font-size:14px; font-family:'Share Tech Mono',monospace; color:#0a3d0a; }
+.callout { border-left:3px solid #0088cc; background:#e8f4fb; padding:16px 20px; margin:22px 0; font-size:12px; line-height:1.8; color:#1a1a1a; }
+.callout.red { border-left-color:#cc0033; background:#fdecea; }
+.callout.green { border-left-color:#1a7a1a; background:#eafaea; }
+.callout.amber { border-left-color:#996600; background:#fef9ec; }
+.callout strong { font-family:'Orbitron',sans-serif; font-size:10px; letter-spacing:1px; display:block; margin-bottom:8px; }
+.compare-table { width:100%; border-collapse:collapse; margin:22px 0; font-size:12px; }
+.compare-table th { font-family:'Orbitron',sans-serif; font-size:10px; letter-spacing:1px; color:#003d66; padding:10px 12px; border-bottom:2px solid #00d9ff66; text-align:left; }
+.compare-table td { padding:10px 12px; border-bottom:1px solid #ddd; line-height:1.5; color:#1a1a1a; vertical-align:top; }
+.compare-table tr:hover td { background:#f0f0f0; }
+.key-numbers { display:grid; grid-template-columns:repeat(auto-fit,minmax(140px,1fr)); gap:12px; margin:22px 0; }
+.kn-item { background:#fff; border:1px solid #d0d0d0; padding:16px 12px; text-align:center; }
+.kn-val { font-family:'Orbitron',sans-serif; font-size:clamp(13px,1.8vw,18px); font-weight:800; color:#003d66; display:block; }
+.kn-label { font-size:10px; color:#555; letter-spacing:1px; margin-top:5px; display:block; line-height:1.4; }
+.quiz-block { background:rgba(17,17,17,0.9); border:1px solid #ff004f33; padding:28px; margin:48px 0 32px; }
+.quiz-block h2 { font-family:'Orbitron',sans-serif; font-size:13px; color:#ff004f; letter-spacing:2px; margin-bottom:6px; }
+.quiz-intro { font-size:12px; opacity:0.6; margin-bottom:24px; padding-bottom:16px; border-bottom:1px solid #ff004f22; line-height:1.6; }
+.quiz-q { margin-bottom:28px; }
+.quiz-q p { font-size:13px; opacity:0.9; margin-bottom:12px; line-height:1.65; }
+.quiz-q p strong { color:#00d9ff; }
+.quiz-options { display:flex; flex-direction:column; gap:8px; }
+.quiz-opt { background:rgba(255,255,255,0.03); border:1px solid #ffffff1a; padding:11px 16px; cursor:pointer; font-size:12px; font-family:'Share Tech Mono',monospace; transition:0.2s; text-align:left; color:white; line-height:1.5; }
+.quiz-opt:hover:not(:disabled) { background:rgba(0,217,255,0.08); border-color:#00d9ff44; }
+.quiz-opt.correct { background:rgba(57,255,20,0.1); border-color:#39ff14; color:#39ff14; }
+.quiz-opt.wrong { background:rgba(255,0,79,0.1); border-color:#ff004f; color:#ff004f; }
+.quiz-opt:disabled { cursor:default; }
+.quiz-feedback { font-size:12px; margin-top:10px; min-height:18px; line-height:1.7; opacity:0.9; padding:0 4px; }
+.quiz-score { font-family:'Orbitron',sans-serif; font-size:12px; color:#39ff14; margin-top:20px; letter-spacing:1px; display:none; padding-top:16px; border-top:1px solid #39ff1433; }
+.py-block { background:rgba(10,10,10,0.95); border:1px solid #39ff1422; padding:28px; margin:32px 0; }
+.py-block h2 { font-family:'Orbitron',sans-serif; font-size:13px; color:#39ff14; letter-spacing:2px; margin-bottom:8px; }
+.py-block .py-intro { font-size:12px; opacity:0.7; margin-bottom:20px; padding-bottom:16px; border-bottom:1px solid #39ff1422; line-height:1.7; }
+.py-exercise { margin-bottom:32px; } .py-exercise:last-child { margin-bottom:0; }
+.py-exercise h3 { font-family:'Orbitron',sans-serif; font-size:11px; color:#39ff1499; letter-spacing:1.5px; text-transform:uppercase; margin-bottom:10px; }
+.py-exercise p { font-size:12px; opacity:0.8; margin-bottom:14px; line-height:1.75; }
+.py-block pre { background:#050505; border:1px solid #39ff1433; padding:20px; font-family:'Share Tech Mono',monospace; font-size:11.5px; line-height:1.75; overflow-x:auto; color:#39ff14; white-space:pre; margin-bottom:12px; }
+.py-note { background:rgba(57,255,20,0.04); border-left:2px solid #39ff14; padding:12px 16px; margin-top:14px; font-size:12px; line-height:1.75; opacity:0.8; }
+.py-note strong { font-family:'Orbitron',sans-serif; font-size:10px; color:#39ff14; display:block; margin-bottom:6px; letter-spacing:1px; }
+.reflection-block { background:rgba(255,170,0,0.04); border:1px solid #ffaa0033; padding:24px; margin:32px 0; }
+.reflection-block h2 { font-family:'Orbitron',sans-serif; font-size:13px; color:#ffaa00; letter-spacing:2px; margin-bottom:8px; }
+.ref-intro { font-size:12px; opacity:0.7; margin-bottom:20px; padding-bottom:14px; border-bottom:1px solid #ffaa0022; line-height:1.7; }
+.ref-prompt { margin-bottom:20px; }
+.ref-prompt h3 { font-family:'Orbitron',sans-serif; font-size:11px; color:#ffaa0099; letter-spacing:1px; margin-bottom:8px; }
+.ref-prompt p { font-size:12px; opacity:0.8; line-height:1.75; }
 .complete-wrap { margin-top:56px; padding-top:30px; border-top:1px solid #ffffff11; text-align:center; }
-.complete-btn { font-family:'Orbitron',sans-serif; font-size:13px; letter-spacing:2px; padding:14px 44px; background:transparent; border:1px solid #39ff14; color:#39ff14; cursor:pointer; transition:0.3s ease; }
+.complete-btn { font-family:'Orbitron',sans-serif; font-size:13px; letter-spacing:2px; padding:14px 44px; background:transparent; border:1px solid #39ff14; color:#39ff14; cursor:pointer; transition:0.3s; }
 .complete-btn:hover:not(.done) { background:#39ff14; color:black; box-shadow:0 0 20px rgba(57,255,20,0.4); }
-.complete-btn.done { background:rgba(57,255,20,0.1); cursor:default; opacity:0.7; }
+.complete-btn.done { background:rgba(57,255,20,0.1); cursor:pointer; opacity:1; }
 .complete-msg { font-size:12px; color:#39ff14; margin-top:14px; min-height:18px; letter-spacing:1px; }
 .lesson-nav { display:flex; justify-content:space-between; margin-top:30px; flex-wrap:wrap; gap:10px; }
 .lesson-nav a { font-family:'Orbitron',sans-serif; font-size:11px; color:#00d9ff66; text-decoration:none; letter-spacing:1px; transition:0.2s; }
 .lesson-nav a:hover { color:#00d9ff; }
-.back-to-top { position:fixed; bottom:28px; right:28px; z-index:200; width:44px; height:44px; background:#000; border:1px solid #00d9ff55; color:#00d9ff; font-size:20px; cursor:pointer; display:flex; align-items:center; justify-content:center; opacity:0; pointer-events:none; transition:opacity 0.3s ease; }
-.back-to-top.visible { opacity:1; pointer-events:auto; } .back-to-top:hover { border-color:#00d9ff; background:#001a2c; }
+.back-to-top { position:fixed; bottom:28px; right:28px; z-index:200; width:44px; height:44px; background:#000; border:1px solid #00d9ff55; color:#00d9ff; font-size:20px; cursor:pointer; display:flex; align-items:center; justify-content:center; opacity:0; pointer-events:none; transition:opacity 0.3s; }
+.back-to-top.visible { opacity:1; pointer-events:auto; } .back-to-top:hover { border-color:#00d9ff; }
 footer { text-align:center; padding:30px; opacity:0.3; font-size:11px; position:relative; z-index:1; letter-spacing:1px; }
 </style>
 </head>
@@ -71,18 +117,20 @@ footer { text-align:center; padding:30px; opacity:0.3; font-size:11px; position:
 <div class="breadcrumb">
     <a href="dashboard.html">DASHBOARD</a><span>/</span>
     <a href="m4.html">M4</a><span>/</span>
-    <span style="color:#ffffff88;">M4 · LESSON 03 OF 7</span>
+    <span style="color:#ffffff88;">LESSON 03 — FREQUENCY BANDS</span>
 </div>
+
 <div class="lesson-wrap">
 <div class="lesson-header">
     <div class="lesson-tag">M4 · LESSON 03 OF 7</div>
-    <h1>Frequency Bands: Ka, Ku, V &amp; E — Tradeoffs</h1>
+    <h1>Frequency Bands:<br>Ka, Ku, V &amp; E — Tradeoffs</h1>
     <div class="lesson-meta">
         <div class="l-pill l-pill-q">MODULE 4</div>
         <div class="l-pill l-pill-t">RF &amp; LINK BUDGETS</div>
     </div>
-    <p class="lesson-intro">Frequency is the most fundamental parameter in satellite link design. It determines path loss, antenna size, available bandwidth, atmospheric susceptibility, and regulatory regime — all simultaneously. This lesson maps the progression from L-band to E-band, explains why Ka-band dominates LEO broadband, establishes the path-loss vs frequency numbers, and adds the band-comparison function to the spine project.</p>
+    <p class="lesson-intro">Frequency is the most fundamental parameter in satellite link design. It determines path loss, antenna size, available bandwidth, atmospheric susceptibility, and regulatory regime — all simultaneously. The choice of band locks in the physics of every link budget the satellite will ever close. This lesson maps the progression from L-band to E-band, establishes why Ka dominates LEO broadband, and delivers Stage 3 of the spine project: band-aware link budget comparison.</p>
 </div>
+
 <div class="toc">
     <h4>CONTENTS</h4>
     <ol>
@@ -95,65 +143,411 @@ footer { text-align:center; padding:30px; opacity:0.3; font-size:11px; position:
         <li><a href="#s7">E-band: future directions</a></li>
         <li><a href="#s8">System implications for LEO broadband</a></li>
         <li><a href="#quiz">Knowledge check</a></li>
-        <li><a href="#python">Python exercises — spine project</a></li>
+        <li><a href="#python">Python exercises — spine project stage 3</a></li>
         <li><a href="#reflect">Reflection prompts</a></li>
     </ol>
 </div>
-<div class="content-block" id="s1">
-    <h2>1. The band ladder: L through E</h2>
-    <p style="font-family:'Libre Baskerville',serif;font-size:15px;line-height:1.9;color:#1a1a1a;">See markdown source for full content.</p>
+
+<div class="cb" id="s1">
+    <h2>1. The Band Ladder: L through E</h2>
+    <p>The ITU designates satellite frequency bands by letter, each with its own regulatory history, atmospheric behaviour, and technology base. The satellite communications industry has used a progression of these bands over sixty years, driven by congestion at lower frequencies pushing operators higher, and improving component technology making higher bands usable.</p>
+    <table class="compare-table">
+        <thead><tr><th>Band</th><th>Frequency Range</th><th>Wavelength</th><th>Primary Use</th></tr></thead>
+        <tbody>
+            <tr><td>L-band</td><td>1–2 GHz</td><td>15–30 cm</td><td>Mobile satellite (Inmarsat, Iridium voice/data)</td></tr>
+            <tr><td>S-band</td><td>2–4 GHz</td><td>7.5–15 cm</td><td>Weather, mobile satellite, TT&amp;C</td></tr>
+            <tr><td>C-band</td><td>4–8 GHz</td><td>3.75–7.5 cm</td><td>GEO broadcast, legacy FSS</td></tr>
+            <tr><td>X-band</td><td>8–12 GHz</td><td>2.5–3.75 cm</td><td>Government/military, weather radar</td></tr>
+            <tr><td>Ku-band</td><td>12–18 GHz</td><td>1.67–2.5 cm</td><td>GEO broadcast (BSS), VSAT, in-flight connectivity</td></tr>
+            <tr><td>Ka-band</td><td>26.5–40 GHz</td><td>0.75–1.13 cm</td><td>LEO/GEO broadband, feeder links</td></tr>
+            <tr><td>V-band</td><td>40–75 GHz</td><td>0.4–0.75 cm</td><td>LEO feeder links, emerging user links</td></tr>
+            <tr><td>E-band</td><td>60–90 GHz</td><td>0.33–0.5 cm</td><td>Future broadband, 60 GHz O₂ window</td></tr>
+        </tbody>
+    </table>
+    <p>The key satellite allocations in regulatory use:</p>
+    <ul>
+        <li><strong>Ku-band</strong>: downlink 10.7–12.75 GHz; uplink 13.75–14.5 GHz</li>
+        <li><strong>Ka-band</strong>: downlink 17.7–20.2 GHz; uplink 27.5–30.0 GHz</li>
+        <li><strong>V-band</strong>: 37.5–42.5 GHz (downlink), 47.2–51.4 GHz (uplink) — less congested, more bandwidth available</li>
+    </ul>
 </div>
-<div class="content-block" id="s2">
-    <h2>2. Why Ka-band dominates LEO broadband</h2>
-    <p style="font-family:'Libre Baskerville',serif;font-size:15px;line-height:1.9;color:#1a1a1a;">See markdown source for full content.</p>
+
+<div class="cb" id="s2">
+    <h2>2. Why Ka-Band Dominates LEO Broadband</h2>
+    <p>The progression from Ku to Ka was driven by two linked factors: bandwidth availability and antenna physics.</p>
+    <h3>Bandwidth</h3>
+    <p>Ka-band offers roughly 2.5 GHz of available downlink bandwidth (17.7–20.2 GHz), compared to about 2 GHz at Ku-band. More critically, Ka-band spectrum is less congested. Ku-band has been the GEO commercial satellite workhorse since the 1980s; virtually all useful orbital positions above populated regions are occupied and spectrum coordination is exhaustive. Ka-band, as a newer commercial allocation, has less incumbent congestion — particularly for NGSO systems.</p>
+    <h3>Antenna size</h3>
+    <p>Antenna gain scales as (πD/λ)². For a fixed physical aperture D, gain increases with frequency squared. For a fixed gain requirement, the required diameter scales as λ ∝ 1/f. Moving from Ku (12 GHz) to Ka (20 GHz) reduces the required antenna diameter for a given gain by factor 20/12 ≈ 1.67. A Ku-band dish achieving a given gain at 90 cm achieves the same gain at 54 cm at Ka-band. Smaller antennas mean smaller satellites and cheaper user terminals — the economics that make LEO broadband viable.</p>
+    <h3>The tradeoff: rain fade</h3>
+    <p>The cost of Ka-band is atmospheric attenuation. Rain attenuation scales strongly with frequency above 10 GHz, reaching 10–30 dB/km at Ka-band versus 2–10 dB/km at Ku-band. This is Ka-band's primary disadvantage and the primary driver for rain margin in Ka-band link budgets. At LEO altitudes, the shorter atmospheric path at high elevation partially mitigates this relative to GEO Ka-band systems.</p>
+    <div class="callout">
+        <strong>THE f² CANCELLATION</strong>
+        The additional FSPL at higher frequency is exactly compensated by increased antenna gain for a fixed physical aperture — both scale as f². Moving from Ku to Ka delivers no free link-budget improvement. The real benefits are bandwidth and smaller aperture for a given gain, not a physics shortcut.
+    </div>
 </div>
-<div class="content-block" id="s3">
-    <h2>3. Path loss vs frequency: the key numbers</h2>
-    <p style="font-family:'Libre Baskerville',serif;font-size:15px;line-height:1.9;color:#1a1a1a;">See markdown source for full content.</p>
+
+<div class="cb" id="s3">
+    <h2>3. Path Loss vs Frequency: The Key Numbers</h2>
+    <p>Free-space path loss at 1,000 km slant range:</p>
+    <table class="compare-table">
+        <thead><tr><th>Band</th><th>Frequency</th><th>FSPL at 1,000 km</th></tr></thead>
+        <tbody>
+            <tr><td>L-band</td><td>1.5 GHz</td><td>156.4 dB</td></tr>
+            <tr><td>S-band</td><td>2.0 GHz</td><td>158.4 dB</td></tr>
+            <tr><td>C-band</td><td>6.0 GHz</td><td>166.4 dB</td></tr>
+            <tr><td>Ku-band</td><td>14.0 GHz</td><td>173.8 dB</td></tr>
+            <tr><td>Ka-band</td><td>20.0 GHz</td><td>176.4 dB</td></tr>
+            <tr><td>Ka-band uplink</td><td>30.0 GHz</td><td>180.0 dB</td></tr>
+            <tr><td>V-band</td><td>47.0 GHz</td><td>183.8 dB</td></tr>
+            <tr><td>E-band</td><td>80.0 GHz</td><td>188.5 dB</td></tr>
+        </tbody>
+    </table>
+    <div class="key-numbers">
+        <div class="kn-item"><span class="kn-val">+2.6 dB</span><span class="kn-label">FSPL INCREASE KU→KA AT 1,000 KM</span></div>
+        <div class="kn-item"><span class="kn-val">+7.4 dB</span><span class="kn-label">FSPL INCREASE KA→V AT 1,000 KM</span></div>
+        <div class="kn-item"><span class="kn-val">0 dB net</span><span class="kn-label">FSPL+GAIN CHANGE FOR FIXED APERTURE</span></div>
+        <div class="kn-item"><span class="kn-val">+6 dB</span><span class="kn-label">GAIN INCREASE WHEN FREQUENCY DOUBLES, FIXED APERTURE</span></div>
+    </div>
+    <p>Moving from Ku to Ka adds 2.6 dB of path loss. Moving from Ka to V-band adds 7.4 dB. These losses must be recovered by antenna gain or transmit power. However, for a fixed physical aperture, FSPL increase and gain increase cancel exactly — the net link budget effect is zero. Higher frequency's advantages are bandwidth and smaller aperture for a given gain, not a free RF improvement.</p>
 </div>
-<div class="content-block" id="s4">
-    <h2>4. Ku-band: the legacy broadband workhorse</h2>
-    <p style="font-family:'Libre Baskerville',serif;font-size:15px;line-height:1.9;color:#1a1a1a;">See markdown source for full content.</p>
+
+<div class="cb" id="s4">
+    <h2>4. Ku-Band: The Legacy Broadband Workhorse</h2>
+    <p>Ku-band (12–18 GHz) has dominated commercial satellite communications since the 1980s for several reasons.</p>
+    <p><strong>Technology maturity</strong>: Ku-band amplifiers, LNAs, feeds, and dishes have been manufactured at scale for decades. The technology is cheap, reliable, and available from many suppliers.</p>
+    <p><strong>Regulatory clarity</strong>: Ku-band allocations are well-defined and heavily filed at the ITU. The coordination regime is complex but understood.</p>
+    <p><strong>Weather resilience</strong>: Ku-band rain attenuation is significantly lower than Ka-band — typically 3–8 dB/km versus 10–30 dB/km at Ka-band. Ku-band systems maintain service in rain events that would knock out Ka-band links.</p>
+    <p>The disadvantages: limited bandwidth (spectrum congestion at prime GEO positions), larger antennas than Ka for equivalent gain, and larger user terminals. For a LEO broadband constellation requiring small user terminals and high throughput capacity, Ka-band is almost always preferred.</p>
 </div>
-<div class="content-block" id="s5">
-    <h2>5. Ka-band: the LEO broadband standard</h2>
-    <p style="font-family:'Libre Baskerville',serif;font-size:15px;line-height:1.9;color:#1a1a1a;">See markdown source for full content.</p>
+
+<div class="cb" id="s5">
+    <h2>5. Ka-Band: The LEO Broadband Standard</h2>
+    <p>Ka-band (satellite allocations primarily 17.7–30 GHz) has become the standard for LEO broadband: smaller antennas for equivalent gain, more available bandwidth, and a less congested spectrum environment than Ku.</p>
+    <p>The key Ka-band sub-bands used in LEO broadband systems:</p>
+    <ul>
+        <li><strong>Ka downlink (user link)</strong>: 17.7–20.2 GHz — satellite transmits to user terminal</li>
+        <li><strong>Ka uplink (user link)</strong>: 27.5–30.0 GHz — user terminal transmits to satellite</li>
+        <li><strong>Ka gateway/feeder uplink</strong>: 27.5–30.0 GHz or 28–30 GHz</li>
+        <li><strong>Ka gateway/feeder downlink</strong>: 17.7–20.2 GHz or 18–20 GHz</li>
+    </ul>
+    <p>The distinction between user links and gateway feeder links matters for interference management. If user and feeder links share the same Ka-band spectrum, their beams must be coordinated to avoid co-channel interference. Some systems use Ka-band for user links and V-band for feeder links to separate the two traffic types entirely.</p>
 </div>
-<div class="content-block" id="s6">
-    <h2>6. V-band: the emerging feeder link standard</h2>
-    <p style="font-family:'Libre Baskerville',serif;font-size:15px;line-height:1.9;color:#1a1a1a;">See markdown source for full content.</p>
+
+<div class="cb" id="s6">
+    <h2>6. V-Band: The Emerging Feeder Link Standard</h2>
+    <p>V-band (satellite allocations at 37.5–51.4 GHz) offers approximately 10 GHz of available spectrum — four times more than Ka-band. This makes it attractive for high-capacity feeder links where bandwidth hunger is greatest.</p>
+    <p><strong>Advantages</strong>: enormous bandwidth; less crowded regulatory environment than Ka-band; higher antenna gain for a fixed aperture, enabling smaller gateway dishes for equivalent gain.</p>
+    <p><strong>Disadvantages</strong>: severe rain attenuation (significantly worse than Ka-band); atmospheric oxygen absorption peak near 60 GHz requires avoiding that region — the useful V-band satellite allocations are in the windows at 37.5–42.5 GHz and 47.2–51.4 GHz around the O₂ absorption peak; demanding component technology (GaN amplifiers at V-band are less mature than Ka-band).</p>
+    <div class="callout amber">
+        <strong>THE 60 GHz O₂ ABSORPTION PEAK</strong>
+        At 60 GHz, atmospheric oxygen absorption reaches 10–15 dB/km at sea level. A link through 5 km of atmosphere at this frequency suffers 50–75 dB of absorption — completely impractical for satellite use. V-band satellite allocations are intentionally placed in the spectral windows on either side of this peak. The 60 GHz band is usable for space-to-space ISLs where there is no atmosphere.
+    </div>
+    <p>Starlink's FCC filings include V-band user link allocations (37.5–40 GHz downlink, 47.2–50.2 GHz uplink) for dense urban deployment. OneWeb and Telesat Lightspeed use V-band for gateway feeder links.</p>
 </div>
-<div class="content-block" id="s7">
-    <h2>7. E-band: future directions</h2>
-    <p style="font-family:'Libre Baskerville',serif;font-size:15px;line-height:1.9;color:#1a1a1a;">See markdown source for full content.</p>
+
+<div class="cb" id="s7">
+    <h2>7. E-Band: Future Directions</h2>
+    <p>E-band (60–90 GHz) represents the frontier of commercial satellite frequency use. The satellite industry's interest is in the windows at 71–76 GHz and 81–86 GHz, which avoid the 60 GHz absorption peak and offer tens of GHz of bandwidth.</p>
+    <p>The 60 GHz O₂ absorption peak makes satellite links at that frequency impractical through the atmosphere, but it is being studied for satellite-to-satellite ISL links in space where there is no atmosphere. In practice, optical ISLs (laser, ~1,550 nm) already achieve higher performance than E-band RF ISLs for the same aperture size, with no ITU frequency coordination required — making E-band RF ISLs a niche interest rather than a primary development direction.</p>
 </div>
-<div class="content-block" id="s8">
-    <h2>8. System implications for LEO broadband</h2>
-    <p style="font-family:'Libre Baskerville',serif;font-size:15px;line-height:1.9;color:#1a1a1a;">See markdown source for full content.</p>
+
+<div class="cb" id="s8">
+    <h2>8. System Implications for LEO Broadband</h2>
+    <p>Band selection drives cascading design decisions across the entire system.</p>
+    <p><strong>Ka-band user link + Ka-band feeder</strong>: simplest architecture, single RF system on the satellite. Requires careful frequency planning to separate user and gateway beams. Used by OneWeb gen 1.</p>
+    <p><strong>Ka-band user link + V-band feeder</strong>: separates user and feeder frequency regimes, reducing interference risk and increasing gateway bandwidth. More complex satellite RF design. Used by Telesat Lightspeed and in Starlink's evolution.</p>
+    <p><strong>Ka-band user link + optical ISL</strong>: Starlink's current configuration. ISLs at ~1,550 nm are entirely separate from RF — no coordination needed, no spectrum consumed. The feeder-link question shifts: with ISLs routing traffic across the constellation, how many gateways are required globally?</p>
+    <p>The terminal side implications are direct:</p>
+    <ul>
+        <li><strong>Ka-band user terminal</strong>: 25–75 cm flat-panel phased array; EIRP typically 35–45 dBW; G/T typically 8–15 dB/K</li>
+        <li><strong>Ku-band user terminal</strong>: 45–90 cm dish; similar EIRP but larger aperture for equivalent gain</li>
+        <li><strong>V-band terminal (future)</strong>: 10–20 cm aperture for equivalent gain; very small physically but requires sophisticated GaN amplifiers not yet available at consumer price points</li>
+    </ul>
 </div>
-<div class="source-note" id="quiz">
-    <h3>KNOWLEDGE CHECK</h3>
-    <p>Ten questions covering the material in this lesson. See the markdown source (m4-3.md) for the full question set with distractors and feedback text. The quiz engine is identical to all other LEOAF lessons — copy the quiz HTML block from m4-1.html or m4-2.html and populate with the questions from the md file.</p>
+
+<!-- QUIZ -->
+<div class="quiz-block" id="quiz">
+    <h2>KNOWLEDGE CHECK</h2>
+    <p class="quiz-intro">Ten questions. Select one answer per question. Immediate feedback; score appears when all ten are answered.</p>
+
+    <div class="quiz-q"><p><strong>Q1.</strong> Moving from Ku-band (14 GHz) to Ka-band (20 GHz), the free-space path loss at 1,000 km increases by approximately:</p>
+        <div class="quiz-options">
+            <button class="quiz-opt" data-q="1" data-correct="false">A — 0 dB (path loss is independent of frequency)</button>
+            <button class="quiz-opt" data-q="1" data-correct="true">B — 2.6 dB</button>
+            <button class="quiz-opt" data-q="1" data-correct="false">C — 6 dB</button>
+            <button class="quiz-opt" data-q="1" data-correct="false">D — 20 dB</button>
+        </div><div class="quiz-feedback" id="fb1"></div></div>
+
+    <div class="quiz-q"><p><strong>Q2.</strong> For a fixed physical antenna aperture, moving from Ku to Ka-band:</p>
+        <div class="quiz-options">
+            <button class="quiz-opt" data-q="2" data-correct="false">A — Reduces gain because shorter wavelengths are harder to focus</button>
+            <button class="quiz-opt" data-q="2" data-correct="true">B — Increases gain proportional to f² — exactly compensating the additional path loss</button>
+            <button class="quiz-opt" data-q="2" data-correct="false">C — Has no effect on antenna gain</button>
+            <button class="quiz-opt" data-q="2" data-correct="false">D — Requires a larger aperture to maintain the same gain</button>
+        </div><div class="quiz-feedback" id="fb2"></div></div>
+
+    <div class="quiz-q"><p><strong>Q3.</strong> The primary advantage of Ka-band over Ku-band for LEO broadband user terminals is:</p>
+        <div class="quiz-options">
+            <button class="quiz-opt" data-q="3" data-correct="false">A — Lower rain attenuation</button>
+            <button class="quiz-opt" data-q="3" data-correct="true">B — Smaller antenna for equivalent gain, enabling smaller and cheaper user terminals</button>
+            <button class="quiz-opt" data-q="3" data-correct="false">C — Lower free-space path loss</button>
+            <button class="quiz-opt" data-q="3" data-correct="false">D — More mature component technology</button>
+        </div><div class="quiz-feedback" id="fb3"></div></div>
+
+    <div class="quiz-q"><p><strong>Q4.</strong> V-band satellite allocations avoid the 60 GHz frequency range because:</p>
+        <div class="quiz-options">
+            <button class="quiz-opt" data-q="4" data-correct="false">A — 60 GHz is reserved for military use</button>
+            <button class="quiz-opt" data-q="4" data-correct="true">B — Oxygen absorption at 60 GHz reaches 10–15 dB/km at sea level, making any link through the atmosphere impractical</button>
+            <button class="quiz-opt" data-q="4" data-correct="false">C — Component technology for 60 GHz is not yet available</button>
+            <button class="quiz-opt" data-q="4" data-correct="false">D — The ITU has not allocated 60 GHz to satellite services</button>
+        </div><div class="quiz-feedback" id="fb4"></div></div>
+
+    <div class="quiz-q"><p><strong>Q5.</strong> A Ka-band user link and Ka-band feeder link on the same satellite creates a coordination challenge because:</p>
+        <div class="quiz-options">
+            <button class="quiz-opt" data-q="5" data-correct="false">A — The satellite cannot transmit and receive at the same frequency simultaneously</button>
+            <button class="quiz-opt" data-q="5" data-correct="true">B — User and gateway beams using the same spectrum must be planned to avoid co-channel interference between the two traffic types</button>
+            <button class="quiz-opt" data-q="5" data-correct="false">C — Ka-band does not have enough bandwidth to support both traffic types</button>
+            <button class="quiz-opt" data-q="5" data-correct="false">D — The ITU prohibits using the same frequency band for both user and feeder links</button>
+        </div><div class="quiz-feedback" id="fb5"></div></div>
+
+    <div class="quiz-q"><p><strong>Q6.</strong> "Higher frequency does not inherently improve or degrade the link for a fixed physical aperture" is true because:</p>
+        <div class="quiz-options">
+            <button class="quiz-opt" data-q="6" data-correct="true">A — Path loss and antenna gain both scale as f², so they cancel for a fixed aperture</button>
+            <button class="quiz-opt" data-q="6" data-correct="false">B — Atmospheric losses compensate for antenna gain improvements</button>
+            <button class="quiz-opt" data-q="6" data-correct="false">C — Higher frequency always requires a larger aperture</button>
+            <button class="quiz-opt" data-q="6" data-correct="false">D — The link budget does not depend on frequency</button>
+        </div><div class="quiz-feedback" id="fb6"></div></div>
+
+    <div class="quiz-q"><p><strong>Q7.</strong> Starlink's V-band user link filing (37.5–40 GHz / 47.2–50.2 GHz) relative to its Ka-band allocation is primarily motivated by:</p>
+        <div class="quiz-options">
+            <button class="quiz-opt" data-q="7" data-correct="false">A — Lower rain attenuation at V-band</button>
+            <button class="quiz-opt" data-q="7" data-correct="true">B — Access to additional spectrum capacity for dense urban deployment</button>
+            <button class="quiz-opt" data-q="7" data-correct="false">C — V-band component technology being more mature than Ka-band</button>
+            <button class="quiz-opt" data-q="7" data-correct="false">D — ITU requirements to use V-band for LEO constellations</button>
+        </div><div class="quiz-feedback" id="fb7"></div></div>
+
+    <div class="quiz-q"><p><strong>Q8.</strong> The primary link-budget consequence of using a higher frequency band is:</p>
+        <div class="quiz-options">
+            <button class="quiz-opt" data-q="8" data-correct="false">A — Lower receiver noise temperature</button>
+            <button class="quiz-opt" data-q="8" data-correct="true">B — Access to more bandwidth, enabling a lower required spectral efficiency for the same data rate</button>
+            <button class="quiz-opt" data-q="8" data-correct="false">C — Larger satellite antenna required</button>
+            <button class="quiz-opt" data-q="8" data-correct="false">D — Lower required minimum elevation angle</button>
+        </div><div class="quiz-feedback" id="fb8"></div></div>
+
+    <div class="quiz-q"><p><strong>Q9.</strong> Why are optical ISLs preferred over V-band or E-band RF ISLs in current LEO broadband constellations?</p>
+        <div class="quiz-options">
+            <button class="quiz-opt" data-q="9" data-correct="false">A — Optical ISLs have lower latency than RF ISLs</button>
+            <button class="quiz-opt" data-q="9" data-correct="true">B — Optical ISLs at ~1,550 nm provide high gain from small apertures, very high bandwidth, and no RF spectrum coordination requirement</button>
+            <button class="quiz-opt" data-q="9" data-correct="false">C — RF ISLs at V-band require atmospheric compensation</button>
+            <button class="quiz-opt" data-q="9" data-correct="false">D — The ITU prohibits RF ISLs between LEO satellites</button>
+        </div><div class="quiz-feedback" id="fb9"></div></div>
+
+    <div class="quiz-q"><p><strong>Q10.</strong> The 60 GHz oxygen absorption peak is being considered for space-to-space ISLs because:</p>
+        <div class="quiz-options">
+            <button class="quiz-opt" data-q="10" data-correct="false">A — The absorption strengthens the signal between satellites</button>
+            <button class="quiz-opt" data-q="10" data-correct="true">B — There is no atmosphere between satellites so the absorption does not apply; the band offers wide spectrum and no frequency coordination burden — though optical ISLs already outperform it</button>
+            <button class="quiz-opt" data-q="10" data-correct="false">C — The 60 GHz band has a regulatory exemption for satellite ISLs</button>
+            <button class="quiz-opt" data-q="10" data-correct="false">D — The O₂ absorption peak disappears above 100 km altitude</button>
+        </div><div class="quiz-feedback" id="fb10"></div></div>
+
+    <div class="quiz-score" id="quizScore"></div>
 </div>
-<div class="source-note" id="python">
-    <h3>PYTHON EXERCISES — SPINE PROJECT</h3>
-    <p>Three exercises extending the spine link budget engine. See m4-3.md for the complete code. Exercise 3 is the spine project stage for this lesson. Paste the code blocks from the md file into this section following the pattern established in m4-1.html and m4-2.html.</p>
+
+<!-- PYTHON -->
+<div class="py-block" id="python">
+    <h2>PYTHON EXERCISES — SPINE PROJECT STAGE 3</h2>
+    <p class="py-intro">Stage 3 adds frequency-band awareness to the link budget engine: FSPL computed from frequency, aperture gain computed from physical diameter and frequency, and a band_sweep() method that evaluates a scenario across multiple bands in one call.</p>
+
+    <div class="py-exercise">
+        <h3>Exercise 1 — FSPL Across Bands</h3>
+        <p>Compute and compare free-space path loss across all commercial satellite bands at LEO slant ranges.</p>
+<pre>
+import math
+
+def fspl(d_km, f_ghz):
+    return 92.4 + 20*math.log10(d_km) + 20*math.log10(f_ghz)
+
+bands = [
+    ("L",    1.5),  ("S",   2.0),  ("C",    6.0),
+    ("X",   10.0),  ("Ku", 14.0),  ("Ka",  20.0),
+    ("Ka_up",30.0), ("V",  47.0),  ("E",   80.0),
+]
+ranges_km = [600, 1000, 2000]
+
+print("FSPL (dB) by band and slant range\n")
+print(f"{'Band':>7}{'Freq GHz':>10}" + "".join(f"{d:>9}km" for d in ranges_km))
+print("-" * (17 + 9*len(ranges_km)))
+for name, freq in bands:
+    row = "  ".join(f"{fspl(d,freq):>7.1f}" for d in ranges_km)
+    print(f"{name:>7}{freq:>10.1f} GHz  {row}")
+
+print("\nFSPL delta vs Ka 20 GHz at 1,000 km:")
+ref = fspl(1000, 20.0)
+for name, freq in bands:
+    print(f"  {name}: {fspl(1000,freq)-ref:+.1f} dB")
+
+# 1. What additional antenna gain is needed at V-band vs Ka-band at 1,000 km,
+#    assuming all other parameters equal?
+# 2. A 60 cm dish: compute gain at Ku, Ka, V (η=0.65).
+#    Verify gain improvement cancels the FSPL increase.
+# 3. At what frequency does FSPL at 1,000 km reach 185 dB?
+</pre>
+    </div>
+
+    <div class="py-exercise">
+        <h3>Exercise 2 — Band Comparison Function</h3>
+        <p>Evaluate a link scenario across multiple frequency bands, holding physical apertures fixed.</p>
+<pre>
+import math
+
+T0 = 290.0; K_DB = -228.6
+
+def fspl(d, f):         return 92.4 + 20*math.log10(d) + 20*math.log10(f)
+def gain_dbi(D, f, eta=0.65):
+    lam = 0.3/f
+    return 10*math.log10(eta*(math.pi*D/lam)**2)
+
+def band_link(name, freq_ghz, d_km, D_tx_m, p_tx_w,
+              D_rx_m, t_sys_k, atm_db, req_cn0):
+    eirp = 10*math.log10(p_tx_w) + gain_dbi(D_tx_m, freq_ghz)
+    loss = fspl(d_km, freq_ghz) + atm_db
+    gt   = gain_dbi(D_rx_m, freq_ghz) - 10*math.log10(t_sys_k)
+    cn0  = eirp - loss + gt - K_DB
+    return cn0, cn0 - req_cn0
+
+print("Band comparison — fixed physical apertures, varying frequency")
+print("Tx: D=1m, P=20W   Rx: D=0.6m, T_sys=300K   Range=1000km\n")
+print(f"{'Band':>7}{'Freq':>8}{'EIRP':>8}{'FSPL':>8}{'G/T':>8}{'C/N₀':>8}{'Margin':>8}")
+print("-" * 57)
+for name, freq, atm in [("Ku",14.0,0.3),("Ka",20.0,0.5),
+                          ("Ka_up",30.0,0.8),("V",47.0,3.0)]:
+    cn0, m = band_link(name, freq, 1000, 1.0, 20, 0.6, 300, atm, 105.0)
+    eirp = 10*math.log10(20) + gain_dbi(1.0, freq)
+    gt   = gain_dbi(0.6, freq) - 10*math.log10(300)
+    print(f"{name:>7}{freq:>7.1f}G{eirp:>8.1f}{fspl(1000,freq):>8.1f}"
+          f"{gt:>8.1f}{cn0:>8.1f}{m:>+8.1f}")
+
+# 1. Rerun with V-band atm_db=10.0 (heavy rain). How does it compare?
+# 2. What transmit power increase (W) is needed at V-band vs Ka-band
+#    to achieve the same margin, if T_sys=500K at V-band vs 300K?
+# 3. Minimum antenna diameter at V-band (47 GHz) for same G/T
+#    as a Ka-band terminal with 60 cm dish at 300 K?
+</pre>
+    </div>
+
+    <div class="py-exercise">
+        <h3>Exercise 3 — Spine Stage 3: Band-Aware Link Budget</h3>
+        <p>Extend the LinkBudget class with frequency-aware transmitter and receiver setup, and add a band_sweep() method.</p>
+<pre>
+import math
+
+K_DB = -228.6; T0 = 290.0
+
+def fspl(d, f): return 92.4 + 20*math.log10(d) + 20*math.log10(f)
+def gain_dbi(D, f, eta=0.65):
+    lam = 0.3/f
+    return 10*math.log10(eta*(math.pi*D/lam)**2)
+def nf_te(nf): return T0*(10**(nf/10)-1)
+def loss_te(l, t=T0): return t*(10**(l/10)-1)
+def dbl(x): return 10**(x/10)
+
+class LinkBudget:
+    """Stage 3: frequency-aware, supports band sweep."""
+    def __init__(self, name):
+        self.name=name; self.losses=[]; self._chain=[]
+        self._eirp=self._fspl=self._grx=self._tant=self._req=None
+        self._freq=None
+
+    def set_transmitter(self, p, g): self._eirp=10*math.log10(p)+g
+    def set_transmitter_aperture(self, p_w, D_m, freq_ghz, eta=0.65):
+        self._eirp = 10*math.log10(p_w) + gain_dbi(D_m, freq_ghz, eta)
+        self._freq = freq_ghz
+    def set_path(self, d_km, freq_ghz=None):
+        f = freq_ghz or self._freq
+        self._fspl = fspl(d_km, f); self._freq = f
+    def add_loss(self, lbl, v): self.losses.append((lbl,v))
+    def set_antenna(self, g, tant): self._grx=g; self._tant=tant
+    def set_antenna_aperture(self, D_m, freq_ghz, t_sys_k, eta=0.65):
+        self._grx  = gain_dbi(D_m, freq_ghz, eta)
+        self._tant = t_sys_k
+        self._freq = freq_ghz
+    def add_stage(self, lbl, te, g=None): self._chain.append((lbl,te,g))
+    def set_required(self, r): self._req=r
+
+    def _tsys(self):
+        t=self._tant; cg=1.0
+        for _,te,g in self._chain:
+            t+=te/cg
+            if g: cg*=dbl(g)
+        return t
+
+    def compute(self):
+        t = self._tsys()
+        total = self._fspl + sum(v for _,v in self.losses)
+        cn0 = self._eirp - total + self._grx - 10*math.log10(t) - K_DB
+        return cn0, cn0-self._req if self._req else None, t
+
+    def band_sweep(self, d_km, D_tx_m, p_w, D_rx_m, t_sys_k, bands, req_cn0):
+        print(f"\nBand sweep: {d_km}km, Tx D={D_tx_m}m {p_w}W, "
+              f"Rx D={D_rx_m}m T={t_sys_k}K")
+        print(f"{'Band':>8}{'Freq':>8}{'EIRP':>8}{'FSPL':>8}"
+              f"{'G/T':>8}{'C/N₀':>8}{'Margin':>8}")
+        print("-" * 58)
+        for name, freq, atm in bands:
+            eirp = 10*math.log10(p_w) + gain_dbi(D_tx_m, freq)
+            loss = fspl(d_km, freq) + atm
+            gt   = gain_dbi(D_rx_m, freq) - 10*math.log10(t_sys_k)
+            cn0  = eirp - loss + gt - K_DB
+            m    = cn0 - req_cn0
+            print(f"{name:>8}{freq:>7.1f}G{eirp:>8.1f}{loss-atm:>8.1f}"
+                  f"{gt:>8.1f}{cn0:>8.1f}{m:>+8.1f}")
+
+lb = LinkBudget("Band sweep demo")
+lb.band_sweep(
+    d_km=1000, D_tx_m=1.0, p_w=20, D_rx_m=0.6, t_sys_k=300,
+    bands=[
+        ("Ku",    14.0, 0.3),
+        ("Ka_dn", 20.0, 0.5),
+        ("Ka_up", 30.0, 0.8),
+        ("V",     47.0, 2.0),
+    ],
+    req_cn0=105.0
+)
+</pre>
+        <div class="py-note"><strong>SPINE PROJECT — STAGE 3</strong>
+            Stage 3 adds frequency-aware aperture gain computation and the band_sweep() method. Stage 4 (m4-4) adds ITU-R P.618 rain attenuation computed from climate zone. Stage 5 (m4-5) adds ionospheric terms. Stage 6 (m4-6) adds C/I.
+        </div>
+    </div>
 </div>
-<div class="source-note" id="reflect">
-    <h3>REFLECTION PROMPTS</h3>
-    <p>Four reflection prompts for this lesson. See m4-3.md. Not graded — write in your own words, 200–400 words each.</p>
+
+<!-- REFLECTION -->
+<div class="reflection-block" id="reflect">
+    <h2>REFLECTION PROMPTS</h2>
+    <p class="ref-intro">Not graded. 200–400 words each.</p>
+    <div class="ref-prompt"><h3>Prompt 1 — The Fixed-Aperture Neutrality Paradox</h3>
+        <p>The statement "higher frequency does not inherently improve or degrade the link for a fixed physical aperture" implies there is no link-budget reason to prefer one band over another for a given aperture size. Yet the industry has moved steadily toward higher frequencies. Identify the three most important reasons why higher frequency bands are preferred in practice, distinguishing carefully between effects that appear in the link budget and those that do not.</p></div>
+    <div class="ref-prompt"><h3>Prompt 2 — V-Band Feeder Link Trade</h3>
+        <p>V-band feeder links offer four times more bandwidth than Ka-band but significantly higher rain attenuation. For a gateway in northern France (ITU rain zone E, R₀.₀₁ = 22 mm/hr), quantify the trade: how much additional link margin or fade mitigation is needed for V-band vs Ka-band, and is the bandwidth gain worth it? Consider both uplink power control and site diversity as mitigation options.</p></div>
+    <div class="ref-prompt"><h3>Prompt 3 — Optical vs E-Band RF ISLs</h3>
+        <p>Optical ISLs (1,550 nm laser) are the current technology of choice for LEO constellation ISLs. V-band or E-band RF ISLs could in principle provide similar data rates. Construct a technical comparison covering: aperture size, pointing accuracy requirement, bandwidth, regulatory burden, and the impact of space weather (charged particles) on each technology.</p></div>
+    <div class="ref-prompt"><h3>Prompt 4 — V-Band User Link Justification</h3>
+        <p>Starlink has filed for both Ka-band and V-band user link allocations. From a systems engineering perspective, what operational scenario would justify activating the V-band user link (putting a V-band phased array in the user terminal) rather than simply adding Ka-band capacity? Consider terminal cost, rain availability tradeoff, and the regulatory and spectrum licensing challenges.</p></div>
 </div>
+
 <div class="complete-wrap">
     <button class="complete-btn" id="completeBtn">MARK LESSON COMPLETE</button>
     <div class="complete-msg" id="completeMsg"></div>
 </div>
 <div class="lesson-nav">
     <a href="m4-2.html">← LESSON 02 — NOISE &amp; THE RECEIVER CHAIN</a>
-    <a href="m4-4.html">LESSON 04 — PROPAGATION, RAIN FADE &amp; ATMOSPHERICS →</a>
+    <a href="m4-4.html">LESSON 04 — PROPAGATION &amp; RAIN FADE →</a>
 </div>
 </div>
+
 <button class="back-to-top" id="backToTop" title="Back to top">↑</button>
 <footer>© 2026 LEOAF · M4 · LESSON 03 OF 7</footer>
+
 <script>
 const canvas=document.getElementById('starsCanvas'),ctx=canvas.getContext('2d');
 let stars=[];
@@ -162,6 +556,41 @@ function resizeCanvas(){canvas.width=window.innerWidth;canvas.height=window.inne
 resizeCanvas();initStars();window.addEventListener('resize',resizeCanvas);
 function animateStars(){ctx.clearRect(0,0,canvas.width,canvas.height);stars.forEach(s=>{s.y-=s.speed;if(s.y<0){s.y=canvas.height;s.x=Math.random()*canvas.width;}ctx.beginPath();ctx.fillStyle=`hsl(${s.hue},80%,80%)`;ctx.arc(s.x,s.y,s.size,0,Math.PI*2);ctx.fill();});requestAnimationFrame(animateStars);}
 animateStars();
+</script>
+<script>
+const feedbacks={
+    1:{correct:"Correct. FSPL = 92.4 + 20·log₁₀(d) + 20·log₁₀(f). FSPL table: 173.8 dB at 14 GHz, 176.4 dB at 20 GHz — difference of 2.6 dB. Alternatively: 20·log₁₀(20/14) ≈ 3.1 dB (the small discrepancy reflects rounding in the table).",wrong:"Incorrect. Path loss depends on frequency as FSPL ∝ f². 0 dB would mean frequency has no effect. 6 dB would require doubling the frequency (14 to 28 GHz). 20 dB would require a factor-of-10 increase. The correct increase from 14 to 20 GHz is 2.6 dB."},
+    2:{correct:"Correct. G = η(πD/λ)² ∝ f² for fixed D. The additional FSPL at higher frequency also scales as f². For a fixed physical aperture, the two effects exactly cancel — the net link budget effect of going from Ku to Ka for a fixed aperture is zero.",wrong:"Incorrect. Higher frequency does not reduce gain for a fixed aperture — gain increases. Higher frequency requires a smaller aperture for a given gain (not larger). Gain increases with f² for a fixed aperture, and this increase exactly compensates the path loss increase. The result is that neither link improves purely from the frequency change."},
+    3:{correct:"Correct. Since gain ∝ f², a Ka-band antenna achieving a given gain requires a diameter smaller by factor 20/14 ≈ 1.43 compared to Ku. A Ku-band terminal requiring a 45 cm dish needs only ~32 cm at Ka-band for the same gain. This antenna size reduction is a decisive economic enabler for LEO broadband.",wrong:"Incorrect. Ka-band has higher rain attenuation than Ku-band — this is Ka-band's primary disadvantage, not advantage. FSPL is higher at Ka-band than Ku-band. Ku-band has more mature component technology due to decades of commercial production history."},
+    4:{correct:"Correct. At 60 GHz, atmospheric oxygen absorption produces a resonant peak of 10–15 dB/km at sea level. A link through 5 km of atmosphere would suffer 50–75 dB of absorption — completely impractical. Satellite V-band allocations use the windows around this peak: 37.5–42.5 GHz and 47.2–51.4 GHz.",wrong:"Incorrect. 60 GHz has civilian allocations (IEEE 802.11ad/ay for short-range indoor use). The technology exists at 60 GHz; the atmosphere is the problem, not hardware immaturity. The ITU has allocated 60 GHz to terrestrial services. The correct reason is the O₂ absorption peak."},
+    5:{correct:"Correct. If user and feeder links share Ka-band spectrum, a user terminal and a gateway operating on the same frequency in the same satellite's coverage footprint would interfere with each other. Frequency planning, spatial separation, and orthogonal polarisation manage this — but it adds complexity vs a two-band system.",wrong:"Incorrect. The satellite uses different sub-bands for uplink and downlink (20 GHz down, 30 GHz up), so simultaneous Tx/Rx at different frequencies is standard satellite practice. Ka-band has 2–3 GHz of bandwidth per direction — enough for both traffic types if planned carefully. The ITU does not prohibit using the same band for user and feeder links."},
+    6:{correct:"Correct. FSPL ∝ f² and G = η(πD/λ)² ∝ f² for fixed D. In the link equation G − FSPL is frequency-independent for a fixed physical aperture. The benefits of higher frequency are more available bandwidth and smaller aperture for a given gain — not a free link-budget improvement.",wrong:"Incorrect. Atmospheric losses are separate from this analysis — they make higher frequency worse, not neutral. Higher frequency requires a smaller aperture for a given gain (not larger). The link budget depends strongly on frequency through both FSPL and G — they just happen to cancel for a fixed aperture."},
+    7:{correct:"Correct. V-band offers approximately 10 GHz of spectrum — four times more than Ka-band's ~2.5 GHz allocation. For dense urban areas where per-beam capacity demand is highest, V-band provides the additional throughput potential that Ka-band alone cannot deliver.",wrong:"Incorrect. V-band has significantly higher rain attenuation than Ka-band. V-band amplifier and feed technology is less mature and more expensive than Ka-band. The ITU does not require LEO constellations to use V-band. The driver is spectrum capacity."},
+    8:{correct:"Correct. The primary benefit of moving to a higher frequency band in the sense the satellite industry uses it is access to more bandwidth. More bandwidth means a lower required spectral efficiency (bits/Hz) to deliver a given data rate — potentially enabling a more closed link at the same EIRP.",wrong:"Incorrect. Receiver noise temperature is set by the LNA and receive chain hardware, not directly by the frequency band choice (though component performance differs by band). Higher frequency requires a smaller satellite antenna for the same gain. Minimum elevation angle is set by coverage geometry requirements."},
+    9:{correct:"Correct. A laser terminal with a 10 cm aperture at 1,550 nm achieves enormous gain due to the very short wavelength, provides 10–100 Gbps data rates, requires no ITU frequency coordination, and operates in space without atmospheric absorption. RF ISLs at V/E-band would need larger apertures and RF spectrum coordination.",wrong:"Incorrect. Latency is determined by the speed of light and path length — identical for optical and RF ISLs. RF ISLs in space do not traverse the atmosphere. The ITU has not prohibited RF ISLs — they just require coordination. The correct reason is optical ISL performance superiority for the same aperture."},
+    10:{correct:"Correct. Between satellites in space there is no atmosphere, so O₂ absorption does not apply and 60 GHz is as transparent as any other microwave band. However, optical ISLs already outperform any RF ISL at these frequencies for gain, bandwidth, and regulatory simplicity — making 60 GHz RF ISLs a niche interest.",wrong:"Incorrect. The O₂ absorption does not strengthen signals — it absorbs them. It disappears in space because there is no oxygen, not because of altitude per se. There is no ITU regulatory exemption for 60 GHz satellite ISLs. The correct reason is the absence of atmosphere in space making the absorption irrelevant."}
+};
+let answered={};
+document.querySelectorAll('.quiz-opt').forEach(btn=>{
+    btn.addEventListener('click',function(){
+        const q=this.dataset.q;
+        if(answered[q]!==undefined)return;
+        const correct=this.dataset.correct==='true';
+        answered[q]=correct;
+        document.querySelectorAll(`.quiz-opt[data-q="${q}"]`).forEach(b=>{b.disabled=true;if(b.dataset.correct==='true')b.classList.add('correct');});
+        if(!correct)this.classList.add('wrong');
+        const fb=document.getElementById('fb'+q);
+        fb.textContent=(correct?'✓ ':'✗ ')+feedbacks[q][correct?'correct':'wrong'];
+        fb.style.color=correct?'#39ff14':'#ff004f';
+        if(Object.keys(answered).length===10){
+            const total=Object.values(answered).filter(Boolean).length;
+            const sc=document.getElementById('quizScore');
+            sc.style.display='block';
+            const pct=Math.round(total/10*100);
+            sc.textContent=`SCORE: ${total}/10 (${pct}%) — ${pct===100?'PERFECT.':pct>=80?'STRONG.':pct>=60?'ADEQUATE. REVISIT WEAK SECTIONS.':'REVISIT THE LESSON BEFORE PROCEEDING.'}`;
+        }
+    });
+});
 </script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="supabase.js"></script>
