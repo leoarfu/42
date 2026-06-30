@@ -1,0 +1,677 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, shrink-to-fit=no">
+<title>M4-7 — Link Budget Synthesis: The Full Engine · LEOAF</title>
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;600;800&family=Share+Tech+Mono&family=Libre+Baskerville:ital,wght@0,400;0,700;1,400&display=swap" rel="stylesheet">
+<link rel="icon" href="favicon.ico" sizes="any" type="image/x-icon">
+<link rel="manifest" href="site.webmanifest">
+<meta name="theme-color" content="#0f0f0f">
+<script>
+window.leoafAbort = async function () {
+    function go() { window.location.replace("index.html?signedout=1"); }
+    try { if (typeof client !== "undefined" && client && client.auth && client.auth.signOut) { try { await client.auth.signOut({ scope: "local" }); } catch (e) {} } } catch (e) {}
+    go();
+};
+</script>
+<style>
+* { box-sizing:border-box; margin:0; padding:0; }
+html { height:100%; -webkit-text-size-adjust:100%; overflow-x:hidden; }
+body { font-family:'Share Tech Mono',monospace; background:#000; color:white; overflow-x:hidden; min-height:100vh; }
+#starsCanvas { position:fixed; inset:0; z-index:-1; }
+header { background:#000; border-bottom:1px solid #ff004f33; position:sticky; top:0; z-index:100; padding:1rem clamp(1.5rem,5vw,4rem); display:flex; justify-content:space-between; align-items:center; }
+.logo { font-family:'Orbitron',sans-serif; font-weight:800; font-size:clamp(16px,2vw,22px); letter-spacing:3px; text-decoration:none; }
+.logo span:first-child { color:white; } .logo span:last-child { color:#ff004f; }
+.nav-right { display:flex; align-items:center; gap:10px; }
+.nav-btn { background:transparent; border:1px solid #ff004f44; color:#ff004f; padding:6px 14px; cursor:pointer; transition:0.3s; font-size:11px; font-family:'Orbitron',sans-serif; letter-spacing:1px; text-decoration:none; display:inline-block; }
+.nav-btn:hover { background:#ff004f; color:black; }
+.breadcrumb { padding:14px clamp(1.5rem,5vw,4rem); font-size:11px; color:#ffffff44; letter-spacing:1px; position:relative; z-index:1; }
+.breadcrumb a { color:#00d9ff66; text-decoration:none; } .breadcrumb a:hover { color:#00d9ff; }
+.breadcrumb span { margin:0 8px; }
+.lesson-wrap { max-width:820px; margin:0 auto; padding:0 clamp(1.5rem,5vw,4rem) 80px; position:relative; z-index:1; }
+.lesson-header { padding:30px 0 28px; border-bottom:1px solid #ffffff11; margin-bottom:36px; }
+.lesson-tag { font-family:'Orbitron',sans-serif; font-size:10px; color:#ff004f; letter-spacing:3px; margin-bottom:10px; }
+.lesson-header h1 { font-family:'Orbitron',sans-serif; font-size:clamp(20px,3.5vw,32px); font-weight:800; line-height:1.2; margin-bottom:12px; }
+.lesson-meta { display:flex; gap:10px; flex-wrap:wrap; margin-bottom:16px; }
+.l-pill { font-family:'Orbitron',sans-serif; font-size:10px; padding:3px 10px; border:1px solid; letter-spacing:1px; }
+.l-pill-q { color:#ff004f; border-color:#ff004f44; } .l-pill-t { color:#39ff14; border-color:#39ff1444; }
+.l-pill-c { color:#ffaa00; border-color:#ffaa0044; }
+.lesson-intro { font-size:13px; line-height:1.85; opacity:0.75; }
+.toc { background:rgba(0,217,255,0.06); border:1px solid #00d9ff33; padding:24px 28px; margin:30px 0; }
+.toc h4 { font-family:'Orbitron',sans-serif; font-size:10px; color:#00d9ff; letter-spacing:2px; margin-bottom:16px; }
+.toc ol { padding-left:20px; } .toc li { font-size:13px; line-height:2.1; }
+.toc li a { color:#00d9ffbb; text-decoration:none; transition:0.15s; } .toc li a:hover { color:#fff; padding-left:4px; }
+.toc li::marker { color:#ff004f; font-family:'Orbitron',sans-serif; font-size:10px; }
+.cb { background:#f5f2ec; color:#1a1a1a; padding:36px clamp(24px,4vw,48px); margin-bottom:24px; border-left:4px solid #00d9ff; position:relative; z-index:1; }
+.cb h2 { font-family:'Orbitron',sans-serif; font-size:13px; color:#003d66; letter-spacing:2px; text-transform:uppercase; margin-bottom:20px; padding-bottom:10px; border-bottom:2px solid #00d9ff66; scroll-margin-top:80px; }
+.cb h3 { font-family:'Orbitron',sans-serif; font-size:11px; color:#444; letter-spacing:1.5px; text-transform:uppercase; margin:28px 0 12px; }
+.cb p { font-family:'Libre Baskerville',Georgia,serif; font-size:15px; line-height:1.9; color:#1a1a1a; margin-bottom:16px; }
+.cb ul { padding-left:0; margin-bottom:16px; }
+.cb ul li { font-family:'Libre Baskerville',Georgia,serif; font-size:14px; line-height:1.85; color:#1a1a1a; padding-left:20px; position:relative; margin-bottom:8px; }
+.cb ul li::before { content:'›'; position:absolute; left:0; color:#0077aa; }
+.cb blockquote { border-left:3px solid #1a7a1a; background:#eafaea; padding:14px 20px; margin:18px 0; font-size:13px; font-family:'Share Tech Mono',monospace; color:#0a3d0a; line-height:1.8; }
+.callout { border-left:3px solid #0088cc; background:#e8f4fb; padding:16px 20px; margin:22px 0; font-size:12px; line-height:1.8; color:#1a1a1a; }
+.callout.red { border-left-color:#cc0033; background:#fdecea; }
+.callout.green { border-left-color:#1a7a1a; background:#eafaea; }
+.callout.amber { border-left-color:#996600; background:#fef9ec; }
+.callout strong { font-family:'Orbitron',sans-serif; font-size:10px; letter-spacing:1px; display:block; margin-bottom:8px; }
+.compare-table { width:100%; border-collapse:collapse; margin:22px 0; font-size:12px; }
+.compare-table th { font-family:'Orbitron',sans-serif; font-size:10px; letter-spacing:1px; color:#003d66; padding:10px 12px; border-bottom:2px solid #00d9ff66; text-align:left; }
+.compare-table td { padding:10px 12px; border-bottom:1px solid #ddd; line-height:1.5; color:#1a1a1a; vertical-align:top; }
+.compare-table tr:hover td { background:#f0f0f0; }
+.key-numbers { display:grid; grid-template-columns:repeat(auto-fit,minmax(140px,1fr)); gap:12px; margin:22px 0; }
+.kn-item { background:#fff; border:1px solid #d0d0d0; padding:16px 12px; text-align:center; }
+.kn-val { font-family:'Orbitron',sans-serif; font-size:clamp(13px,1.8vw,18px); font-weight:800; color:#003d66; display:block; }
+.kn-label { font-size:10px; color:#555; letter-spacing:1px; margin-top:5px; display:block; line-height:1.4; }
+.quiz-block { background:rgba(17,17,17,0.9); border:1px solid #ff004f33; padding:28px; margin:48px 0 32px; }
+.quiz-block h2 { font-family:'Orbitron',sans-serif; font-size:13px; color:#ff004f; letter-spacing:2px; margin-bottom:6px; }
+.quiz-intro { font-size:12px; opacity:0.6; margin-bottom:24px; padding-bottom:16px; border-bottom:1px solid #ff004f22; line-height:1.6; }
+.quiz-q { margin-bottom:28px; }
+.quiz-q p { font-size:13px; opacity:0.9; margin-bottom:12px; line-height:1.65; }
+.quiz-q p strong { color:#00d9ff; }
+.quiz-options { display:flex; flex-direction:column; gap:8px; }
+.quiz-opt { background:rgba(255,255,255,0.03); border:1px solid #ffffff1a; padding:11px 16px; cursor:pointer; font-size:12px; font-family:'Share Tech Mono',monospace; transition:0.2s; text-align:left; color:white; line-height:1.5; }
+.quiz-opt:hover:not(:disabled) { background:rgba(0,217,255,0.08); border-color:#00d9ff44; }
+.quiz-opt.correct { background:rgba(57,255,20,0.1); border-color:#39ff14; color:#39ff14; }
+.quiz-opt.wrong { background:rgba(255,0,79,0.1); border-color:#ff004f; color:#ff004f; }
+.quiz-opt:disabled { cursor:default; }
+.quiz-feedback { font-size:12px; margin-top:10px; min-height:18px; line-height:1.7; opacity:0.9; padding:0 4px; }
+.quiz-score { font-family:'Orbitron',sans-serif; font-size:12px; color:#39ff14; margin-top:20px; letter-spacing:1px; display:none; padding-top:16px; border-top:1px solid #39ff1433; }
+.py-block { background:rgba(10,10,10,0.95); border:1px solid #39ff1422; padding:28px; margin:32px 0; }
+.py-block h2 { font-family:'Orbitron',sans-serif; font-size:13px; color:#39ff14; letter-spacing:2px; margin-bottom:8px; }
+.py-block .py-intro { font-size:12px; opacity:0.7; margin-bottom:20px; padding-bottom:16px; border-bottom:1px solid #39ff1422; line-height:1.7; }
+.py-exercise { margin-bottom:32px; } .py-exercise:last-child { margin-bottom:0; }
+.py-exercise h3 { font-family:'Orbitron',sans-serif; font-size:11px; color:#39ff1499; letter-spacing:1.5px; text-transform:uppercase; margin-bottom:10px; }
+.py-exercise p { font-size:12px; opacity:0.8; margin-bottom:14px; line-height:1.75; }
+.py-block pre { background:#050505; border:1px solid #39ff1433; padding:20px; font-family:'Share Tech Mono',monospace; font-size:11px; line-height:1.7; overflow-x:auto; color:#39ff14; white-space:pre; margin-bottom:12px; }
+.py-note { background:rgba(57,255,20,0.04); border-left:2px solid #39ff14; padding:12px 16px; margin-top:14px; font-size:12px; line-height:1.75; opacity:0.8; }
+.py-note strong { font-family:'Orbitron',sans-serif; font-size:10px; color:#39ff14; display:block; margin-bottom:6px; letter-spacing:1px; }
+.reflection-block { background:rgba(255,170,0,0.04); border:1px solid #ffaa0033; padding:24px; margin:32px 0; }
+.reflection-block h2 { font-family:'Orbitron',sans-serif; font-size:13px; color:#ffaa00; letter-spacing:2px; margin-bottom:8px; }
+.ref-intro { font-size:12px; opacity:0.7; margin-bottom:20px; padding-bottom:14px; border-bottom:1px solid #ffaa0022; line-height:1.7; }
+.ref-prompt { margin-bottom:20px; }
+.ref-prompt h3 { font-family:'Orbitron',sans-serif; font-size:11px; color:#ffaa0099; letter-spacing:1px; margin-bottom:8px; }
+.ref-prompt p { font-size:12px; opacity:0.8; line-height:1.75; }
+.complete-wrap { margin-top:56px; padding-top:30px; border-top:1px solid #ffffff11; text-align:center; }
+.complete-btn { font-family:'Orbitron',sans-serif; font-size:13px; letter-spacing:2px; padding:14px 44px; background:transparent; border:1px solid #39ff14; color:#39ff14; cursor:pointer; transition:0.3s; }
+.complete-btn:hover:not(.done) { background:#39ff14; color:black; box-shadow:0 0 20px rgba(57,255,20,0.4); }
+.complete-btn.done { background:rgba(57,255,20,0.1); cursor:pointer; opacity:1; }
+.complete-msg { font-size:12px; color:#39ff14; margin-top:14px; min-height:18px; letter-spacing:1px; }
+.lesson-nav { display:flex; justify-content:space-between; margin-top:30px; flex-wrap:wrap; gap:10px; }
+.lesson-nav a { font-family:'Orbitron',sans-serif; font-size:11px; color:#00d9ff66; text-decoration:none; letter-spacing:1px; transition:0.2s; }
+.lesson-nav a:hover { color:#00d9ff; }
+.back-to-top { position:fixed; bottom:28px; right:28px; z-index:200; width:44px; height:44px; background:#000; border:1px solid #00d9ff55; color:#00d9ff; font-size:20px; cursor:pointer; display:flex; align-items:center; justify-content:center; opacity:0; pointer-events:none; transition:opacity 0.3s; }
+.back-to-top.visible { opacity:1; pointer-events:auto; } .back-to-top:hover { border-color:#00d9ff; }
+footer { text-align:center; padding:30px; opacity:0.3; font-size:11px; position:relative; z-index:1; letter-spacing:1px; }
+.module-complete { background:rgba(57,255,20,0.06); border:1px solid #39ff1444; padding:24px 28px; margin:40px 0; text-align:center; }
+.module-complete h3 { font-family:'Orbitron',sans-serif; font-size:14px; color:#39ff14; letter-spacing:2px; margin-bottom:10px; }
+.module-complete p { font-size:12px; opacity:0.8; line-height:1.7; }
+</style>
+</head>
+<body>
+<canvas id="starsCanvas"></canvas>
+<header>
+    <a href="dashboard.html" class="logo"><span>LEO</span><span>AF</span></a>
+    <div class="nav-right">
+        <a href="m4.html" class="nav-btn">← M4 HUB</a>
+        <button class="nav-btn" onclick="leoafAbort()">ABORT</button>
+    </div>
+</header>
+<div class="breadcrumb">
+    <a href="dashboard.html">DASHBOARD</a><span>/</span>
+    <a href="m4.html">M4</a><span>/</span>
+    <span style="color:#ffffff88;">LESSON 07 — LINK BUDGET SYNTHESIS: THE FULL ENGINE</span>
+</div>
+
+<div class="lesson-wrap">
+<div class="lesson-header">
+    <div class="lesson-tag">M4 · LESSON 07 OF 7 · MODULE CAPSTONE</div>
+    <h1>Link Budget Synthesis:<br>The Full Engine</h1>
+    <div class="lesson-meta">
+        <div class="l-pill l-pill-q">MODULE 4</div>
+        <div class="l-pill l-pill-t">RF &amp; LINK BUDGETS</div>
+        <div class="l-pill l-pill-c">CAPSTONE</div>
+    </div>
+    <p class="lesson-intro">The six preceding lessons built up the link budget term by term: free-space path loss, thermal noise and the Friis chain, frequency band selection, rain attenuation and fade mitigation, ionospheric effects, interference. This final lesson assembles every element into a single complete tool and closes two full worked examples with all impairments included. The spine project reaches its final form: a Python link budget engine computing C/(N₀+I₀) for Ka-band LEO forward and return links across all availability targets, with sensitivity analysis. This engine is the direct input to Module 5's throughput analysis.</p>
+</div>
+
+<div class="toc">
+    <h4>CONTENTS</h4>
+    <ol>
+        <li><a href="#s1">The complete link equation with all impairments</a></li>
+        <li><a href="#s2">The two-sided link: forward and return</a></li>
+        <li><a href="#s3">The key facts table</a></li>
+        <li><a href="#s4">Sensitivity analysis: what matters most?</a></li>
+        <li><a href="#s5">Worked example 1: LEO Ka forward link</a></li>
+        <li><a href="#s6">Worked example 2: LEO Ka return link</a></li>
+        <li><a href="#quiz">Knowledge check</a></li>
+        <li><a href="#python">Python exercises — spine project final</a></li>
+        <li><a href="#reflect">Reflection prompts</a></li>
+    </ol>
+</div>
+
+<div class="cb" id="s1">
+    <h2>1. The Complete Link Equation With All Impairments</h2>
+    <p>Assembling every term from the preceding six lessons:</p>
+    <blockquote>C/(N₀+I₀) [dBHz] = EIRP [dBW]
+    − FSPL(d, f) [dB]
+    − A_gas(f, ε) [dB]
+    − A_rain(f, ε, zone, p%) [dB]
+    − A_scint [dB]
+    − A_point [dB]
+    − A_misc [dB]
+    + G_R [dBi]
+    − 10·log₁₀(T_sys_Friis(chain, T_ant_rain)) [dBK]
+    + 228.6 [dBW/K/Hz]
+    − interference correction</blockquote>
+    <p>where T_sys_Friis is computed via the Friis chain with rain-coupling adjustment to T_ant; A_rain and the rain-adjusted T_ant are correlated, both arising from the same rain event; and the interference correction term modifies the effective noise density via the harmonic-sum formula from m4-6. This is the equation the spine project computes numerically — every term has a specific provenance in one of the preceding lessons.</p>
+</div>
+
+<div class="cb" id="s2">
+    <h2>2. The Two-Sided Link: Forward and Return</h2>
+    <p>A complete satellite broadband link has two independent link budgets.</p>
+    <p><strong>Forward link</strong> (satellite → user terminal): the satellite transmits, the terminal receives. Bounded by satellite EIRP and terminal G/T. The terminal G/T is the easier side to optimise — larger aperture, lower noise temperature looking at cold sky.</p>
+    <p><strong>Return link</strong> (user terminal → satellite): the terminal transmits, the satellite receives. Bounded by terminal EIRP and satellite G/T. The satellite G/T is the harder side — warm Earth in the antenna beam, higher T_sys. Return links are typically the tighter budget.</p>
+    <p>The two links are typically asymmetric in capacity: LEO broadband forward links deliver 50–500 Mbps per beam while return links deliver 10–50 Mbps per beam. This asymmetry drives the engineering tradeoffs discussed in Module 5.</p>
+</div>
+
+<div class="cb" id="s3">
+    <h2>3. The Key Facts Table</h2>
+    <p>Every lesson has established specific numbers. The link budget engineer must have these in working memory.</p>
+    <table class="compare-table">
+        <thead><tr><th>Parameter</th><th>Typical value</th><th>Source</th></tr></thead>
+        <tbody>
+            <tr><td>Ka downlink FSPL at 1,000 km, 20 GHz</td><td>178.4 dB</td><td>m4-1</td></tr>
+            <tr><td>Ka uplink FSPL at 1,000 km, 30 GHz</td><td>182.0 dB</td><td>m4-1</td></tr>
+            <tr><td>LEO satellite EIRP per beam (Ka)</td><td>40–52 dBW</td><td>m4-1, m3-1</td></tr>
+            <tr><td>Ground terminal G/T (Ka)</td><td>10–18 dB/K</td><td>m4-1, m4-2</td></tr>
+            <tr><td>Ground terminal T_sys (clear sky)</td><td>100–300 K</td><td>m4-2</td></tr>
+            <tr><td>Satellite T_sys (nadir, Ka)</td><td>300–500 K</td><td>m4-2</td></tr>
+            <tr><td>Gaseous absorption (Ka 20 GHz, 30°)</td><td>0.5 dB</td><td>m4-4</td></tr>
+            <tr><td>Rain attenuation (99.9%, zone F, Ka 20 GHz, 30°)</td><td>~7 dB</td><td>m4-4</td></tr>
+            <tr><td>Noise-rain coupling (10 dB event, T_sys=150K)</td><td>+3–5 dB above fade</td><td>m4-2, m4-4</td></tr>
+            <tr><td>Ionospheric margin (Ka-band)</td><td>&lt; 1 dB</td><td>m4-5</td></tr>
+            <tr><td>Scintillation margin (Ka, 99.9%, temperate)</td><td>0.5–1 dB</td><td>m4-5</td></tr>
+            <tr><td>Co-channel C/I (good reuse plan)</td><td>20–30 dB</td><td>m4-6</td></tr>
+            <tr><td>Required C/N₀ (DVB-S2X QPSK 1/2)</td><td>~85 dBHz</td><td>m5 preview</td></tr>
+            <tr><td>Required C/N₀ (DVB-S2X 16-APSK 3/4)</td><td>~105 dBHz</td><td>m5 preview</td></tr>
+            <tr><td>Required C/N₀ (DVB-S2X 32-APSK 3/4)</td><td>~112 dBHz</td><td>m5 preview</td></tr>
+        </tbody>
+    </table>
+</div>
+
+<div class="cb" id="s4">
+    <h2>4. Sensitivity Analysis: What Matters Most?</h2>
+    <p>After computing the link budget, the most valuable next step is a sensitivity analysis: how much does the margin change for a unit change in each input parameter? For the Ka-band forward link at 99.9% availability in central Europe, the margin is typically close to zero — just closing or just failing. The parameters with the most leverage:</p>
+    <p><strong>Satellite EIRP (+1 dBW = +1 dB margin)</strong>: a 1:1 lever. A 3 dB increase in EIRP buys 3 dB of margin directly.</p>
+    <p><strong>Terminal G/T (+1 dB/K = +1 dB margin)</strong>: also a 1:1 lever. Improving G/T by 3 dB — bigger dish, lower noise LNA, or both — buys the same 3 dB of margin.</p>
+    <p><strong>Rain attenuation</strong>: can only be reduced operationally — limiting minimum elevation angle (shorter slant path through rain), applying ACM (reducing required C/N₀ during rain), or site diversity at the gateway.</p>
+    <p><strong>Required C/N₀ (ACM leverage)</strong>: a more robust MODCOD during rain reduces the required C/N₀ by 5–15 dB (16-APSK to QPSK), buying significant margin at the cost of proportional throughput reduction.</p>
+    <p><strong>System noise temperature</strong>: replacing a 1.5 dB NF LNA with a 1.0 dB NF LNA reduces T_sys by approximately 50 K and improves G/T by approximately 0.5 dB — useful but small.</p>
+    <div class="callout amber">
+        <strong>ACM AND EIRP DOMINATE THE SENSITIVITY RANKING</strong>
+        The sensitivity analysis reveals that ACM and EIRP optimisation are the highest-leverage actions, and that chasing low LNA noise figures below 1.0 dB delivers diminishing returns when T_sys is dominated by sky noise and feed loss rather than the LNA itself.
+    </div>
+</div>
+
+<div class="cb" id="s5">
+    <h2>5. Worked Example 1: LEO Ka Forward Link, Full Impairment Budget</h2>
+    <p>The complete link budget for the LEO Ka-band forward link first computed in m4-1, now with all impairments from m4-2 through m4-6. Geometry: 550 km altitude, 30° elevation, 1,000 km slant range, central Europe, rain zone F.</p>
+    <table class="compare-table">
+        <thead><tr><th>#</th><th>Parameter</th><th>Clear sky</th><th>Rain fade (99.9%)</th></tr></thead>
+        <tbody>
+            <tr><td>1</td><td>Tx power per beam</td><td>+13.0 dBW</td><td>+13.0 dBW</td></tr>
+            <tr><td>2</td><td>Tx antenna gain</td><td>+34.0 dBi</td><td>+34.0 dBi</td></tr>
+            <tr><td>3</td><td><strong>EIRP</strong></td><td><strong>+47.0 dBW</strong></td><td><strong>+47.0 dBW</strong></td></tr>
+            <tr><td>4</td><td>Free-space path loss</td><td>−178.4 dB</td><td>−178.4 dB</td></tr>
+            <tr><td>5</td><td>Gaseous absorption</td><td>−0.5 dB</td><td>−0.5 dB</td></tr>
+            <tr><td>6</td><td>Rain attenuation</td><td>0 dB</td><td>−7.0 dB</td></tr>
+            <tr><td>7</td><td>Scintillation margin</td><td>−0.7 dB</td><td>−0.7 dB</td></tr>
+            <tr><td>8</td><td>Pointing loss</td><td>−0.5 dB</td><td>−0.5 dB</td></tr>
+            <tr><td>9</td><td>Rx antenna gain</td><td>+37.5 dBi</td><td>+37.5 dBi</td></tr>
+            <tr><td>10</td><td><strong>Received power C</strong></td><td><strong>−95.6 dBW</strong></td><td><strong>−102.6 dBW</strong></td></tr>
+            <tr><td>11</td><td>T_sys Friis chain</td><td>142 K</td><td>385 K</td></tr>
+            <tr><td>14</td><td>C/(N₀+I₀) thermal only</td><td>+107.5 dBHz</td><td>+95.1 dBHz</td></tr>
+            <tr><td>16</td><td><strong>C/(N₀+I₀)</strong></td><td><strong>+107.4 dBHz</strong></td><td><strong>+95.0 dBHz</strong></td></tr>
+            <tr><td>17</td><td>Required C/N₀ (peak MODCOD)</td><td>105.0 dBHz</td><td>85.0 dBHz</td></tr>
+            <tr><td>18</td><td><strong>Margin</strong></td><td><strong>+2.4 dB</strong></td><td><strong>+10.0 dB (ACM active)</strong></td></tr>
+        </tbody>
+    </table>
+    <p>The clear-sky margin is reduced from the m4-1 value (3.9 dB) because the complete model adds scintillation (0.7 dB) and a tighter gaseous absorption estimate. The rain event at 99.9% availability — 7 dB fade plus noise coupling bringing T_sys from 142 K to 385 K — degrades C/(N₀+I₀) by approximately 12.4 dB, from 107.4 to 95.0 dBHz. The link closes at 99.9% because ACM steps down the required C/N₀ from 105 dBHz (16-APSK 3/4) to 85 dBHz (QPSK 1/2), maintaining 10 dB of margin but at much lower throughput.</p>
+</div>
+
+<div class="cb" id="s6">
+    <h2>6. Worked Example 2: LEO Ka Return Link</h2>
+    <p>The return link is tighter because the satellite receive chain has much higher T_sys. Parameters: terminal 2 W, 35 dBi, Ka uplink 30 GHz; satellite receive 34 dBi, T_sys ≈ 378 K clear sky; same geometry.</p>
+    <table class="compare-table">
+        <thead><tr><th>Parameter</th><th>Value</th><th>Notes</th></tr></thead>
+        <tbody>
+            <tr><td>Terminal EIRP</td><td>+38.0 dBW</td><td>2W, 35 dBi phased array</td></tr>
+            <tr><td>FSPL (30 GHz, 1,000 km)</td><td>−182.0 dB</td><td>Higher loss at 30 GHz</td></tr>
+            <tr><td>Gaseous absorption</td><td>−0.8 dB</td><td>More H₂O at 30 GHz</td></tr>
+            <tr><td>Rain attenuation (99.9%)</td><td>−10.5 dB</td><td>30 GHz more severe than 20 GHz</td></tr>
+            <tr><td>Received power C</td><td>−122.5 dBW</td><td></td></tr>
+            <tr><td>Satellite T_sys (rain)</td><td>~620 K</td><td>T_ant(nadir+rain) ≈ 290K → noise chain</td></tr>
+            <tr><td><strong>C/(N₀+I₀)</strong></td><td><strong>+77.2 dBHz</strong></td><td></td></tr>
+            <tr><td>Required C/N₀ (QPSK 1/2)</td><td>85.0 dBHz</td><td>ACM minimum MODCOD</td></tr>
+            <tr><td><strong>Margin</strong></td><td><strong>−7.8 dB — FAILS AT 99.9%</strong></td><td></td></tr>
+        </tbody>
+    </table>
+    <p>The return link fails at 99.9% availability in central Europe at 30°. The primary causes: the satellite receive chain T_sys is ~4.3 dB noisier than the ground terminal (Earth vs sky noise), the Ka-band uplink (30 GHz) is significantly more rain-attenuated than the downlink (20 GHz), and the terminal transmit power of 2 W is insufficient to close the link at this availability target.</p>
+    <p>Possible engineering responses: increase terminal EIRP (more Tx power or larger aperture); reduce minimum elevation angle (shorter slant range, less rain path); accept a lower availability target (e.g. 99.5% instead of 99.9%); use return-link ACM with even more conservative MODCODs (BPSK 1/2); implement uplink power control (add 3–6 dB headroom).</p>
+    <div class="callout red">
+        <strong>THE ASYMMETRY IS STRUCTURAL, NOT INCIDENTAL</strong>
+        The forward-return capacity asymmetry of satellite broadband is not an engineering oversight to be fixed — it is the structural consequence of the satellite receiving against a warm Earth while the ground terminal receives against a cold sky, combined with the higher uplink frequency suffering more rain attenuation. Every LEO broadband system architecture must account for this asymmetry from the outset.
+    </div>
+</div>
+
+<!-- QUIZ -->
+<div class="quiz-block" id="quiz">
+    <h2>KNOWLEDGE CHECK</h2>
+    <p class="quiz-intro">Ten questions. Select one answer per question. Immediate feedback; score appears when all ten are answered.</p>
+
+    <div class="quiz-q"><p><strong>Q1.</strong> At Ka-band for a LEO link, the ionospheric correction in the complete link equation is:</p>
+        <div class="quiz-options">
+            <button class="quiz-opt" data-q="1" data-correct="false">A — The largest impairment, exceeding rain attenuation</button>
+            <button class="quiz-opt" data-q="1" data-correct="true">B — Negligible (&lt; 1 dB) — ionospheric effects scale as f⁻² and are tiny at 20 GHz</button>
+            <button class="quiz-opt" data-q="1" data-correct="false">C — Approximately equal to gaseous absorption</button>
+            <button class="quiz-opt" data-q="1" data-correct="false">D — Zero — the ionosphere does not affect Ka-band signals</button>
+        </div><div class="quiz-feedback" id="fb1"></div></div>
+
+    <div class="quiz-q"><p><strong>Q2.</strong> In the worked forward link example, the clear-sky C/(N₀+I₀) is 107.4 dBHz but the link still fails at 99.9% availability without ACM because:</p>
+        <div class="quiz-options">
+            <button class="quiz-opt" data-q="2" data-correct="false">A — The satellite runs out of power during rain</button>
+            <button class="quiz-opt" data-q="2" data-correct="true">B — Rain simultaneously attenuates the signal by 7 dB and raises T_sys from 142K to 385K, degrading C/(N₀+I₀) by ~12.4 dB</button>
+            <button class="quiz-opt" data-q="2" data-correct="false">C — Interference increases during rain events</button>
+            <button class="quiz-opt" data-q="2" data-correct="false">D — The MODCOD cannot change dynamically</button>
+        </div><div class="quiz-feedback" id="fb2"></div></div>
+
+    <div class="quiz-q"><p><strong>Q3.</strong> The return link in worked example 2 fails at 99.9% availability primarily because:</p>
+        <div class="quiz-options">
+            <button class="quiz-opt" data-q="3" data-correct="false">A — The terminal's antenna gain is insufficient</button>
+            <button class="quiz-opt" data-q="3" data-correct="true">B — The combination of the satellite's high T_sys (warm Earth) and the more severe rain attenuation at 30 GHz creates a 7.8 dB deficit</button>
+            <button class="quiz-opt" data-q="3" data-correct="false">C — The FSPL at 30 GHz is only slightly higher than at 20 GHz</button>
+            <button class="quiz-opt" data-q="3" data-correct="false">D — The satellite cannot receive at 30 GHz</button>
+        </div><div class="quiz-feedback" id="fb3"></div></div>
+
+    <div class="quiz-q"><p><strong>Q4.</strong> The sensitivity analysis shows ACM has the highest leverage on link availability because:</p>
+        <div class="quiz-options">
+            <button class="quiz-opt" data-q="4" data-correct="false">A — ACM increases the satellite EIRP during fades</button>
+            <button class="quiz-opt" data-q="4" data-correct="true">B — ACM reduces the required C/N₀ threshold by 5–20 dB during fades, allowing the link to remain open at a lower throughput rate</button>
+            <button class="quiz-opt" data-q="4" data-correct="false">C — ACM reduces rain attenuation</button>
+            <button class="quiz-opt" data-q="4" data-correct="false">D — ACM improves the terminal G/T</button>
+        </div><div class="quiz-feedback" id="fb4"></div></div>
+
+    <div class="quiz-q"><p><strong>Q5.</strong> The forward and return links are described as "structurally asymmetric" because:</p>
+        <div class="quiz-options">
+            <button class="quiz-opt" data-q="5" data-correct="false">A — The forward link uses a different frequency than the return link, and that alone explains it</button>
+            <button class="quiz-opt" data-q="5" data-correct="true">B — The satellite has much higher T_sys than the ground terminal, and the uplink frequency (30 GHz) suffers more rain attenuation than the downlink (20 GHz)</button>
+            <button class="quiz-opt" data-q="5" data-correct="false">C — The satellite has more transmit power than the terminal, which is the whole explanation</button>
+            <button class="quiz-opt" data-q="5" data-correct="false">D — The terminal receives more noise during rain than the satellite</button>
+        </div><div class="quiz-feedback" id="fb5"></div></div>
+
+    <div class="quiz-q"><p><strong>Q6.</strong> Uplink power control (UPC) is listed as a possible response to return link fade because:</p>
+        <div class="quiz-options">
+            <button class="quiz-opt" data-q="6" data-correct="false">A — It reduces the required C/N₀</button>
+            <button class="quiz-opt" data-q="6" data-correct="true">B — It increases the terminal's transmit power during uplink fade events, compensating up to 3–6 dB of attenuation within the PA headroom</button>
+            <button class="quiz-opt" data-q="6" data-correct="false">C — It reduces the satellite's noise temperature</button>
+            <button class="quiz-opt" data-q="6" data-correct="false">D — It is equivalent to using a higher-gain antenna</button>
+        </div><div class="quiz-feedback" id="fb6"></div></div>
+
+    <div class="quiz-q"><p><strong>Q7.</strong> Improving the LNA noise figure from 1.5 dB to 0.5 dB typically improves a ground terminal's G/T by approximately:</p>
+        <div class="quiz-options">
+            <button class="quiz-opt" data-q="7" data-correct="false">A — 0.1 dB/K</button>
+            <button class="quiz-opt" data-q="7" data-correct="true">B — 0.5–1.5 dB/K</button>
+            <button class="quiz-opt" data-q="7" data-correct="false">C — 5 dB/K</button>
+            <button class="quiz-opt" data-q="7" data-correct="false">D — 10 dB/K</button>
+        </div><div class="quiz-feedback" id="fb7"></div></div>
+
+    <div class="quiz-q"><p><strong>Q8.</strong> The two-sided link budget (forward + return) enables the system architect to identify:</p>
+        <div class="quiz-options">
+            <button class="quiz-opt" data-q="8" data-correct="false">A — Only the maximum satellite transmit power required</button>
+            <button class="quiz-opt" data-q="8" data-correct="true">B — The capacity-limiting link, the required terminal EIRP, and the MODCOD range needed to achieve the target availability on both links</button>
+            <button class="quiz-opt" data-q="8" data-correct="false">C — Only whether the satellite link closes in clear sky</button>
+            <button class="quiz-opt" data-q="8" data-correct="false">D — The exact data rate for every user terminal location</button>
+        </div><div class="quiz-feedback" id="fb8"></div></div>
+
+    <div class="quiz-q"><p><strong>Q9.</strong> The required C/N₀ values in the key facts table (85 dBHz for QPSK 1/2, 105 dBHz for 16-APSK 3/4, etc.) are:</p>
+        <div class="quiz-options">
+            <button class="quiz-opt" data-q="9" data-correct="false">A — Set by the ITU for standardised satellite links</button>
+            <button class="quiz-opt" data-q="9" data-correct="true">B — Properties of the air interface — the minimum C/N₀ at which the FEC decoder can recover data at a specified BER</button>
+            <button class="quiz-opt" data-q="9" data-correct="false">C — Properties of the receive terminal hardware</button>
+            <button class="quiz-opt" data-q="9" data-correct="false">D — Computed from the free-space path loss</button>
+        </div><div class="quiz-feedback" id="fb9"></div></div>
+
+    <div class="quiz-q"><p><strong>Q10.</strong> The purpose of building this link budget engine progressively across seven lessons, rather than presenting it complete in lesson 1, is:</p>
+        <div class="quiz-options">
+            <button class="quiz-opt" data-q="10" data-correct="false">A — To limit the complexity visible to the student at each step, nothing more</button>
+            <button class="quiz-opt" data-q="10" data-correct="true">B — To ensure each physical effect can be understood, verified, and attributed separately before being combined</button>
+            <button class="quiz-opt" data-q="10" data-correct="false">C — To make the code longer and harder to understand</button>
+            <button class="quiz-opt" data-q="10" data-correct="false">D — Because the link budget cannot be computed incrementally</button>
+        </div><div class="quiz-feedback" id="fb10"></div></div>
+
+    <div class="quiz-score" id="quizScore"></div>
+</div>
+
+<!-- PYTHON -->
+<div class="py-block" id="python">
+    <h2>PYTHON EXERCISES — SPINE PROJECT FINAL</h2>
+    <p class="py-intro">The fully assembled spine project. All six stages integrated into one production-quality LEO link budget engine: FSPL+EIRP (m4-1), Friis chain (m4-2), frequency band (m4-3), P.618 rain (m4-4), ionosphere/scintillation (m4-5), C/I (m4-6).</p>
+
+    <div class="py-exercise">
+        <h3>Exercise 1 — The Complete Link Budget Engine</h3>
+        <p>The fully assembled spine project, run for both forward and return links with an availability table and MODCOD selection.</p>
+<pre>
+import math
+
+K_DB = -228.6; T0 = 290.0
+
+def fspl(d, f):     return 92.4 + 20*math.log10(d) + 20*math.log10(f)
+def nf_te(nf):      return T0*(10**(nf/10)-1)
+def loss_te(l,t=T0):return t*(10**(l/10)-1)
+def dbl(x):         return 10**(x/10)
+def ldb(x):         return 10*math.log10(x)
+
+RAIN_ZONES = {'A':2,'B':3,'C':5,'D':8,'E':22,'F':28,
+              'G':42,'H':70,'K':100,'L':120,'M':150,'P':145}
+
+def rain_specific(R, f):
+    P={14:(.0229,1.265),20:(.0751,1.099),30:(.187,1.021),47:(.546,.911)}
+    k,a=min(P.items(),key=lambda x:abs(x[0]-f))[1]
+    return k*R**a
+
+def rain_atten_p618(zone, freq, elev, avail=99.9, h_rain=4.0):
+    R001=RAIN_ZONES.get(zone.upper(),28); p=100-avail
+    if p>=0.01:
+        R_p=R001*(p/0.01)**(-0.655-0.033*math.log(p)-0.045*math.log(R001))
+    else: R_p=R001
+    e=math.radians(elev); Ls=h_rain/math.sin(e)
+    return rain_specific(R_p,freq)*Ls*(1/(1+0.045*Ls*math.cos(e)))
+
+def gas_atten(freq_ghz, elev_deg, zenith=0.07):
+    return zenith/math.sin(math.radians(elev_deg))
+
+class LinkBudget:
+    """Complete LEO satellite link budget engine — Module 4 spine final."""
+    def __init__(self, name):
+        self.name=name; self.extra_losses=[]; self._chain=[]
+        self._eirp=self._fspl=self._grx=self._tant=self._req=None
+        self._freq=None; self._elev=None; self._zone=None
+        self._scint=0.0; self._ci=None; self._ci_bw=None
+        self._gas_zenith=0.07
+
+    def set_tx(self, p_w, g_dbi):           self._eirp = ldb(p_w)+g_dbi
+    def set_path(self, d_km, f_ghz, elev=30.0):
+        self._fspl=fspl(d_km,f_ghz); self._freq=f_ghz; self._elev=elev
+    def add_loss(self, lbl, v):             self.extra_losses.append((lbl,v))
+    def set_rx(self, g_dbi, t_ant_k):       self._grx=g_dbi; self._tant=t_ant_k
+    def add_chain(self, lbl, te, g=None):   self._chain.append((lbl,te,g))
+    def set_required(self, req):            self._req=req
+    def set_rain_zone(self, zone):          self._zone=zone
+    def set_scint(self, db):                self._scint=db
+    def set_ci(self, ci_db, bw_hz):         self._ci=ci_db; self._ci_bw=bw_hz
+    def set_gas_zenith(self, db):           self._gas_zenith=db
+
+    def _tsys(self, rain_db=0.0):
+        tant = self._tant + (273*(1-10**(-rain_db/10)) if rain_db>0 else 0)
+        t=tant; cg=1.0
+        for _,te,g in self._chain:
+            t+=te/cg
+            if g is not None: cg*=dbl(g)
+        return t
+
+    def _rain_db(self, avail):
+        if self._zone and self._freq and self._elev and avail:
+            return rain_atten_p618(self._zone,self._freq,self._elev,avail)
+        return 0.0
+
+    def compute(self, avail=None):
+        rain = self._rain_db(avail)
+        gas  = gas_atten(self._freq, self._elev, self._gas_zenith)
+        t    = self._tsys(rain)
+        gt   = self._grx - ldb(t)
+        extra = sum(v for _,v in self.extra_losses)
+        total_loss = self._fspl+gas+rain+self._scint+extra
+        c_dbw  = self._eirp - total_loss + self._grx
+        n0_dbhz = ldb(t)+K_DB
+        cn0_th  = c_dbw - n0_dbhz
+        if self._ci is not None and self._ci_bw:
+            ci0 = self._ci+ldb(self._ci_bw)
+            cn0_eff = -ldb(dbl(-cn0_th)+dbl(-ci0))
+        else:
+            cn0_eff = cn0_th
+        margin = cn0_eff-self._req if self._req else None
+        return {'cn0':cn0_eff,'margin':margin,'tsys':t,'gt':gt,
+                'rain_db':rain,'gas_db':gas,'eirp':self._eirp}
+
+    def availability_table(self, avail_levels, modcod_table=None):
+        print(f"\n  {self.name} — Availability Table")
+        print(f"  {'Avail%':>8}{'Rain':>8}{'T_sys':>8}{'C/N₀':>8}"
+              f"{'ReqC/N₀':>9}{'Margin':>8}{'MODCOD':>14}")
+        print("  "+"─"*68)
+        for a in avail_levels:
+            r = self.compute(a)
+            req=self._req; modcod=""
+            if modcod_table:
+                for mname,mreq in modcod_table:
+                    if r['cn0']>=mreq: modcod=mname; req=mreq; break
+                if not modcod: modcod="LINK FAIL"; req=modcod_table[-1][1]
+            margin = r['cn0']-req if req else r['margin']
+            status='✓' if margin>=0 else '✗'
+            print(f"  {a:>7.3f}%{r['rain_db']:>7.1f}{r['tsys']:>8.0f}"
+                  f"{r['cn0']:>8.1f}{req or 0:>9.1f}{margin:>+8.1f}  {modcod:<12}{status}")
+
+MODCOD_TABLE = [("32-APSK 3/4",112.0),("16-APSK 3/4",105.0),
+                 ("16-APSK 2/3",102.0),("QPSK 3/4",95.0),
+                 ("QPSK 1/2",85.0),("BPSK 1/3",75.0)]
+
+# FORWARD LINK
+fwd = LinkBudget("LEO Ka Forward Link — Central Europe")
+fwd.set_tx(20, 34); fwd.set_path(1000, 20.0, 30.0); fwd.add_loss("Pointing", 0.5)
+fwd.set_rx(37.5, 30.0)
+fwd.add_chain("Feed 0.3dB", loss_te(0.3),-0.3)
+fwd.add_chain("LNA NF=1 G=40", nf_te(1.0), 40.0)
+fwd.add_chain("Downconv NF=8", nf_te(8.0), 20.0)
+fwd.add_chain("IF NF=10", nf_te(10.0), None)
+fwd.set_rain_zone('F'); fwd.set_scint(0.7); fwd.set_gas_zenith(0.05)
+fwd.set_ci(25, 250e6); fwd.set_required(105.0)
+fwd.availability_table([100.0,99.5,99.0,98.0,95.0], MODCOD_TABLE)
+
+# RETURN LINK
+ret = LinkBudget("LEO Ka Return Link — Central Europe")
+ret.set_tx(2, 35); ret.set_path(1000, 30.0, 30.0); ret.add_loss("Pointing", 0.5)
+ret.set_rx(34, 255.0)
+ret.add_chain("Feed 0.2dB", loss_te(0.2),-0.2)
+ret.add_chain("LNA NF=1.5 G=35", nf_te(1.5), 35.0)
+ret.add_chain("Downconv NF=8", nf_te(8.0), 20.0)
+ret.add_chain("IF NF=10", nf_te(10.0), None)
+ret.set_rain_zone('F'); ret.set_scint(0.7); ret.set_gas_zenith(0.1)
+ret.set_ci(25, 250e6); ret.set_required(85.0)
+ret.availability_table([100.0,99.5,99.0,98.0,95.0], MODCOD_TABLE)
+</pre>
+    </div>
+
+    <div class="py-exercise">
+        <h3>Exercise 2 — Sensitivity Analysis</h3>
+        <p>Determine which parameter most improves the forward link margin at 99.9% availability.</p>
+<pre>
+# Using the LinkBudget class from Exercise 1
+
+print("Forward link at 99.9% availability — sensitivity to key parameters\n")
+print("  EIRP (dBW): each +1 dBW = +1 dB of margin")
+print("  G/T (dB/K): each +1 dB/K = +1 dB of margin")
+print("  Rain reduction (lower elevation, site diversity): −7dB rain → +7dB margin")
+print("  ACM step-down (QPSK 1/2 vs 16-APSK 3/4): required C/N₀ drops ~20dB → link closes")
+print("\n  Most impactful single change: ACM — enables link closure with ~20dB effective margin")
+print("  Most impactful hardware change: EIRP — but each dBW costs power/aperture mass")
+
+# 1. Compute by how much satellite transmit power must increase (watts)
+#    to close the 99.9% forward link without ACM.
+# 2. Compute by how much terminal dish diameter must increase (cm) to
+#    gain 3dB of G/T, starting from 65cm at 20GHz (65% efficiency).
+# 3. Compare cost/mass impact of doubling Tx power vs doubling antenna
+#    area vs reducing LNA NF from 1.5 to 0.5dB. Most practical path to
+#    3dB margin improvement?
+</pre>
+    </div>
+
+    <div class="py-exercise">
+        <h3>Exercise 3 — Link Closure for a Tropical Deployment</h3>
+        <p>Compute the link budget for rain zone K (tropical coast, R₀.₀₁=100 mm/hr) and determine the required EIRP for 99.9% availability.</p>
+<pre>
+# Using the LinkBudget class from Exercise 1
+
+trop = LinkBudget("LEO Ka Forward Link — Tropical Coast (Zone K)")
+trop.set_tx(20, 34); trop.set_path(900, 20.0, 40.0)
+trop.add_loss("Pointing", 0.5); trop.set_rx(37.5, 50.0)
+trop.add_chain("Feed 0.3dB", loss_te(0.3),-0.3)
+trop.add_chain("LNA NF=1 G=40", nf_te(1.0), 40.0)
+trop.add_chain("Downconv NF=8", nf_te(8.0), 20.0)
+trop.add_chain("IF NF=10", nf_te(10.0), None)
+trop.set_rain_zone('K'); trop.set_scint(1.0); trop.set_gas_zenith(0.15)
+trop.set_ci(25, 250e6); trop.set_required(105.0)
+trop.availability_table([100,99.5,99.0,98.0,95.0], MODCOD_TABLE)
+
+print("\nRequired EIRP increase for 99.9% availability (no ACM) in zone K:")
+for eirp_bonus in range(0, 30, 1):
+    t2 = LinkBudget("temp")
+    t2.set_tx(20*10**(eirp_bonus/10), 34)
+    t2.set_path(900, 20.0, 40.0); t2.add_loss("Pointing", 0.5)
+    t2.set_rx(37.5, 50.0)
+    t2.add_chain("Feed 0.3dB", loss_te(0.3),-0.3)
+    t2.add_chain("LNA NF=1 G=40", nf_te(1.0), 40.0)
+    t2.add_chain("Downconv NF=8", nf_te(8.0), 20.0)
+    t2.add_chain("IF NF=10", nf_te(10.0), None)
+    t2.set_rain_zone('K'); t2.set_scint(1.0); t2.set_gas_zenith(0.15)
+    t2.set_ci(25, 250e6); t2.set_required(105.0)
+    r = t2.compute(99.9)
+    if r['margin'] >= 0:
+        print(f"  Minimum additional EIRP: +{eirp_bonus} dBW "
+              f"= {20*10**(eirp_bonus/10):.0f} W transmit power")
+        print(f"  Impractical without ACM — stepping to QPSK 1/2 is the engineering answer.")
+        break
+
+print("\nModule 4 spine project complete.")
+print("Output: C/(N₀+I₀) vs availability, both links, all impairments.")
+print("Module 5 input: achieved C/N₀ → MODCOD selection → throughput per beam.")
+</pre>
+        <div class="py-note"><strong>SPINE PROJECT — COMPLETE</strong>
+            The Module 4 spine project is now a complete, six-stage LEO Ka-band link budget engine. It accepts transmitter, path, rain-zone, receiver, noise-chain, and interference parameters, and returns C/(N₀+I₀) as a function of target availability with automatic MODCOD selection. Module 5 takes this engine's output directly as input to the throughput-per-beam analysis.
+        </div>
+    </div>
+</div>
+
+<!-- REFLECTION -->
+<div class="reflection-block" id="reflect">
+    <h2>REFLECTION PROMPTS</h2>
+    <p class="ref-intro">Not graded. 200–400 words each.</p>
+    <div class="ref-prompt"><h3>Prompt 1 — Availability-Capacity Tradeoff, Quantified</h3>
+        <p>Rain at 99.9% availability in central Europe degrades C/(N₀+I₀) by approximately 12 dB. ACM with a step down to QPSK 1/2 saves ~20 dB of required C/N₀, closing the link with 8–10 dB of margin but at roughly one-quarter the throughput of 16-APSK 3/4. For a beam delivering 200 Mbps in clear sky, what is the expected throughput averaged over a year in central Europe, accounting for rain statistics across the full exceedance curve (not just the 99.9% point)?</p></div>
+    <div class="ref-prompt"><h3>Prompt 2 — Closing the Return Link Cost-Effectively</h3>
+        <p>The return link fails at 99.9% availability in central Europe without intervention. List five specific engineering changes, each with a quantitative estimate of its effect on the return link margin, and rank them by cost-effectiveness. Which combination would you recommend to close the return link at 99.9% availability while minimising system cost?</p></div>
+    <div class="ref-prompt"><h3>Prompt 3 — Modelling Fade Dynamics</h3>
+        <p>The spine engine is a steady-state link budget — it does not model the dynamics of rain fade onset and recovery, which occur over 10 seconds to several minutes. How would you extend the engine to model: (a) the time to detect a fade and step down MODCOD, (b) throughput loss during fade onset before ACM responds, and (c) recovery overshoot when the MODCOD steps back up too aggressively?</p></div>
+    <div class="ref-prompt"><h3>Prompt 4 — Integrating Per-Pass Variation Into a Capacity Model</h3>
+        <p>This module computed link budgets at a fixed geometry, but in a real LEO constellation the satellite elevation and slant range change continuously over a 5–8 minute pass — FSPL, gaseous attenuation, the rain slant path, and T_ant all change with elevation. Describe how you would integrate per-pass link budget variation into a system-level capacity model predicting total throughput over a user's location across all passes in a day.</p></div>
+</div>
+
+<div class="module-complete">
+    <h3>MODULE 4 COMPLETE</h3>
+    <p>RF, Propagation &amp; Link Budgets — seven lessons, FSPL through the full multi-impairment link budget engine. The spine project now computes C/(N₀+I₀) for forward and return links across any availability target, climate zone, and frequency band. This engine is the foundation for Module 5: Air Interface &amp; Access, where MODCOD selection and waveform design convert the achieved C/N₀ into delivered throughput per beam.</p>
+</div>
+
+<div class="complete-wrap">
+    <button class="complete-btn" id="completeBtn">MARK LESSON COMPLETE</button>
+    <div class="complete-msg" id="completeMsg"></div>
+</div>
+<div class="lesson-nav">
+    <a href="m4-6.html">← LESSON 06 — INTERFERENCE: EPFD &amp; C/I</a>
+    <a href="m4.html">M4 HUB →</a>
+</div>
+</div>
+
+<button class="back-to-top" id="backToTop" title="Back to top">↑</button>
+<footer>© 2026 LEOAF · M4 · LESSON 07 OF 7 · MODULE CAPSTONE</footer>
+
+<script>
+const canvas=document.getElementById('starsCanvas'),ctx=canvas.getContext('2d');
+let stars=[];
+function initStars(){stars=[];for(let i=0;i<180;i++)stars.push({x:Math.random()*canvas.width,y:Math.random()*canvas.height,size:Math.random()*1.5+0.4,speed:Math.random()*0.18+0.04,hue:Math.random()*360});}
+function resizeCanvas(){canvas.width=window.innerWidth;canvas.height=window.innerHeight;}
+resizeCanvas();initStars();window.addEventListener('resize',resizeCanvas);
+function animateStars(){ctx.clearRect(0,0,canvas.width,canvas.height);stars.forEach(s=>{s.y-=s.speed;if(s.y<0){s.y=canvas.height;s.x=Math.random()*canvas.width;}ctx.beginPath();ctx.fillStyle=`hsl(${s.hue},80%,80%)`;ctx.arc(s.x,s.y,s.size,0,Math.PI*2);ctx.fill();});requestAnimationFrame(animateStars);}
+animateStars();
+</script>
+<script>
+const feedbacks={
+    1:{correct:"Correct. As established in m4-5, all ionospheric effects scale as f⁻². At 20 GHz, ionospheric delay is millimetre-level and Faraday rotation is a few degrees. The ionospheric margin in a Ka-band LEO link budget is typically < 0.5 dB and is absorbed into implementation losses.",wrong:"Incorrect. Rain attenuation is 7–20+ dB for high-availability links — far larger than ionospheric effects. Gaseous absorption is 0.3–1 dB; ionospheric effects are smaller still. The ionosphere does affect Ka-band signals, but the effects are negligible for communications, not exactly zero."},
+    2:{correct:"Correct. Rain causes two simultaneous degradations: 7 dB signal attenuation and T_sys increase from 142K to ~385K (noise-rain coupling), adding approximately 4.3 dB of noise increase. Together they degrade C/(N₀+I₀) by ~12 dB, below the 105 dBHz threshold for 16-APSK 3/4.",wrong:"Incorrect. Satellite power is not reduced by rain — the bus generates constant power regardless of weather. Interference is not rain-correlated in this model. ACM is exactly the engineering solution — but without it, the link would fail at the higher MODCOD."},
+    3:{correct:"Correct. Satellite T_sys ≈ 378K (warm Earth) vs ground terminal ~142K reflects the fundamental thermal disadvantage of satellite receive. Combined with higher rain attenuation at 30 GHz, the return link C/(N₀+I₀) falls below even the minimum MODCOD threshold at 99.9% availability.",wrong:"Incorrect. The terminal has 35 dBi gain — the problem sits on the satellite receive side, not the terminal transmit side. FSPL at 30 GHz is meaningfully higher than at 20 GHz (~3.6 dB), not just slightly. All LEO broadband satellites do receive at Ka uplink frequencies; that is the standard architecture."},
+    4:{correct:"Correct. Required C/N₀ for QPSK 1/2 (≈85 dBHz) is approximately 20 dB lower than for 16-APSK 3/4 (≈105 dBHz). Stepping down MODCODs during fade buys 5–20 dB of effective margin at the cost of proportional throughput reduction — no other single parameter has this leverage.",wrong:"Incorrect. ACM does not change satellite EIRP — that is a hardware/power-budget parameter. ACM does not reduce rain attenuation, a physical atmospheric effect. ACM does not affect the receive chain's G/T, which is set by antenna and LNA hardware."},
+    5:{correct:"Correct. Two structural factors combine: satellite T_sys ≈378K (Earth noise) vs ground terminal ~142K (sky noise) is a ~4.3dB disadvantage; and the Ka uplink (30GHz) has more path loss and significantly more rain attenuation than the Ka downlink (20GHz). Both disadvantage the return link.",wrong:"Incorrect. The frequency difference matters but is not the complete explanation on its own. Satellite EIRP being higher than terminal EIRP is part of the asymmetry, not a separate explanation that contradicts it. Rain noise coupling affects the ground terminal too, but the structural T_sys and frequency asymmetries are primary."},
+    6:{correct:"Correct. UPC increases terminal transmit power within PA headroom in response to detected uplink fade, directly compensating attenuation up to the PA ceiling without reducing throughput — unlike ACM. The limitation is the available headroom, typically 3–6 dB.",wrong:"Incorrect. ACM (not UPC) reduces the required C/N₀ threshold. UPC does not change the satellite's noise temperature, a hardware parameter. UPC is not equivalent to antenna gain — both increase EIRP but through entirely different physical mechanisms (transmit power vs aperture)."},
+    7:{correct:"Correct. The exact value depends on the starting T_sys, but improving LNA NF from 1.5 to 0.5 dB typically yields 0.5–1.5 dB of G/T improvement in ground terminal configurations where T_ant and feed loss already contribute 50–100K to the noise budget.",wrong:"Incorrect. 0.1 dB/K understates the typical improvement. 5 dB/K and 10 dB/K substantially overstate it — these magnitudes would require eliminating nearly all other noise sources, which is not realistic given T_ant and feed contributions."},
+    8:{correct:"Correct. Computing both forward and return links reveals the capacity-limiting direction, the terminal's required transmit power to close the return link, the MODCOD stepping strategy for each link, and the asymmetric per-beam capacity available in each direction.",wrong:"Incorrect. Both links must be computed to characterise the system fully — satellite transmit power alone is insufficient. Clear-sky closure is necessary but not sufficient; the availability target under fade is the binding constraint. Exact per-location data rates require full coverage simulation with constellation geometry, beyond a single link budget."},
+    9:{correct:"Correct. The required C/N₀ for each MODCOD is determined by the air interface design — the FEC code's capacity at the chosen code rate and constellation size — which is Module 5 territory. The link budget achieves some C/N₀; the air interface determines whether it suffices for the desired data rate.",wrong:"Incorrect. The ITU does not mandate specific C/N₀ thresholds for satellite links. Terminal hardware sets the noise floor (via T_sys) but not the C/N₀ threshold itself, which is a waveform/coding property. Path loss determines the achieved C/N₀, not the required value."},
+    10:{correct:"Correct. The modular construction assigns each physical effect its own lesson with its own derivation, numerical verification, and Python implementation. When the full engine is assembled, every parameter has a known physical origin — the engineering discipline of traceability.",wrong:"Incorrect. The full engine is not simpler to understand presented all at once — it is more complex without the staged buildup. The modular approach makes the resulting code more legible, not longer or harder to follow. Link budgets can absolutely be computed incrementally, as this module has demonstrated across seven lessons."}
+};
+let answered={};
+document.querySelectorAll('.quiz-opt').forEach(btn=>{
+    btn.addEventListener('click',function(){
+        const q=this.dataset.q;
+        if(answered[q]!==undefined)return;
+        const correct=this.dataset.correct==='true';
+        answered[q]=correct;
+        document.querySelectorAll(`.quiz-opt[data-q="${q}"]`).forEach(b=>{b.disabled=true;if(b.dataset.correct==='true')b.classList.add('correct');});
+        if(!correct)this.classList.add('wrong');
+        const fb=document.getElementById('fb'+q);
+        fb.textContent=(correct?'✓ ':'✗ ')+feedbacks[q][correct?'correct':'wrong'];
+        fb.style.color=correct?'#39ff14':'#ff004f';
+        if(Object.keys(answered).length===10){
+            const total=Object.values(answered).filter(Boolean).length;
+            const sc=document.getElementById('quizScore');
+            sc.style.display='block';
+            const pct=Math.round(total/10*100);
+            sc.textContent=`SCORE: ${total}/10 (${pct}%) — ${pct===100?'PERFECT.':pct>=80?'STRONG.':pct>=60?'ADEQUATE. REVISIT WEAK SECTIONS.':'REVISIT THE LESSON BEFORE PROCEEDING.'}`;
+        }
+    });
+});
+</script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="supabase.js"></script>
+<script src="user_progress.js"></script>
+<script>
+const LESSON_ID='m4-7';
+(function(){
+    function bounceToLogin(r){console.error("Auth guard:",r);window.location.replace("index.html");}
+    async function init(){
+        if(typeof client==="undefined"||!client||!client.auth)return bounceToLogin("Supabase client not loaded");
+        let session=null;
+        try{({data:{session}}=await client.auth.getSession());}
+        catch(e){return bounceToLogin("getSession threw: "+e.message);}
+        if(!session){window.location.replace("index.html");return;}
+        const btn=document.getElementById('completeBtn'),msg=document.getElementById('completeMsg');
+        function setDone(done){
+            if(done){btn.textContent='✓ COMPLETE — CLICK TO UNDO';btn.classList.add('done');btn.style.cssText='border-color:#39ff14;color:#39ff14;background:rgba(57,255,20,0.1);cursor:pointer;opacity:1;';msg.style.color='#39ff14';msg.textContent='Lesson marked complete. Click again to undo.';}
+            else{btn.textContent='MARK LESSON COMPLETE';btn.classList.remove('done');btn.style.cssText='';msg.style.color='#ffffff55';msg.textContent='Not yet marked complete.';}
+        }
+        let mastered=[];
+        try{mastered=await getMasteredSections();}catch(e){console.error(e);}
+        setDone(mastered.includes(LESSON_ID));
+        btn.addEventListener('click',async()=>{
+            const isDone=btn.classList.contains('done');
+            msg.style.color='#00d9ff';msg.textContent='Saving...';
+            const ok=await upsertSection(LESSON_ID,!isDone);
+            if(ok){setDone(!isDone);}else{msg.style.color='#ff004f';msg.textContent='Error saving. Try again.';}
+        });
+        const btt=document.getElementById('backToTop');
+        window.addEventListener('scroll',()=>{btt.classList.toggle('visible',window.scrollY>400);});
+        btt.addEventListener('click',()=>window.scrollTo({top:0,behavior:'smooth'}));
+    }
+    if(document.readyState==="loading")document.addEventListener("DOMContentLoaded",init);
+    else init();
+})();
+</script>
+</body>
+</html>
