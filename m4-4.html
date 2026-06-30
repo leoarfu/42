@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, shrink-to-fit=no">
-<title>LESSON 04 — Propagation, Rain Fade &amp; Atmospherics · LEOAF</title>
+<title>M4-4 — Propagation, Rain Fade &amp; Atmospherics · LEOAF</title>
 <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;600;800&family=Share+Tech+Mono&family=Libre+Baskerville:ital,wght@0,400;0,700;1,400&display=swap" rel="stylesheet">
 <link rel="icon" href="favicon.ico" sizes="any" type="image/x-icon">
 <link rel="manifest" href="site.webmanifest">
@@ -20,11 +20,11 @@ window.leoafAbort = async function () {
 html { height:100%; -webkit-text-size-adjust:100%; overflow-x:hidden; }
 body { font-family:'Share Tech Mono',monospace; background:#000; color:white; overflow-x:hidden; min-height:100vh; }
 #starsCanvas { position:fixed; inset:0; z-index:-1; }
-header { background:#000; border-bottom:1px solid #ff004f33; position:sticky; top:0; z-index:100; padding:1rem clamp(1.5rem,5vw,4rem); display:flex; justify-content:space-between; align-items:center; box-shadow:0 4px 16px #0008; }
+header { background:#000; border-bottom:1px solid #ff004f33; position:sticky; top:0; z-index:100; padding:1rem clamp(1.5rem,5vw,4rem); display:flex; justify-content:space-between; align-items:center; }
 .logo { font-family:'Orbitron',sans-serif; font-weight:800; font-size:clamp(16px,2vw,22px); letter-spacing:3px; text-decoration:none; }
 .logo span:first-child { color:white; } .logo span:last-child { color:#ff004f; }
 .nav-right { display:flex; align-items:center; gap:10px; }
-.nav-btn { background:transparent; border:1px solid #ff004f44; color:#ff004f; padding:6px 14px; cursor:pointer; transition:0.3s ease; font-size:11px; font-family:'Orbitron',sans-serif; letter-spacing:1px; text-decoration:none; display:inline-block; }
+.nav-btn { background:transparent; border:1px solid #ff004f44; color:#ff004f; padding:6px 14px; cursor:pointer; transition:0.3s; font-size:11px; font-family:'Orbitron',sans-serif; letter-spacing:1px; text-decoration:none; display:inline-block; }
 .nav-btn:hover { background:#ff004f; color:black; }
 .breadcrumb { padding:14px clamp(1.5rem,5vw,4rem); font-size:11px; color:#ffffff44; letter-spacing:1px; position:relative; z-index:1; }
 .breadcrumb a { color:#00d9ff66; text-decoration:none; } .breadcrumb a:hover { color:#00d9ff; }
@@ -42,20 +42,66 @@ header { background:#000; border-bottom:1px solid #ff004f33; position:sticky; to
 .toc ol { padding-left:20px; } .toc li { font-size:13px; line-height:2.1; }
 .toc li a { color:#00d9ffbb; text-decoration:none; transition:0.15s; } .toc li a:hover { color:#fff; padding-left:4px; }
 .toc li::marker { color:#ff004f; font-family:'Orbitron',sans-serif; font-size:10px; }
-.content-block { background:#f5f2ec; color:#1a1a1a; padding:36px clamp(24px,4vw,48px); margin-bottom:24px; border-left:4px solid #00d9ff; position:relative; z-index:1; }
-.content-block h2 { font-family:'Orbitron',sans-serif; font-size:13px; color:#003d66; letter-spacing:2px; text-transform:uppercase; margin-bottom:20px; padding-bottom:10px; border-bottom:2px solid #00d9ff66; scroll-margin-top:80px; }
-.source-note { background:rgba(0,217,255,0.06); border:1px solid #00d9ff33; padding:20px 24px; margin:32px 0; font-size:12px; line-height:1.8; }
-.source-note h3 { font-family:'Orbitron',sans-serif; font-size:11px; color:#00d9ff; letter-spacing:1.5px; margin-bottom:10px; }
+.cb { background:#f5f2ec; color:#1a1a1a; padding:36px clamp(24px,4vw,48px); margin-bottom:24px; border-left:4px solid #00d9ff; position:relative; z-index:1; }
+.cb h2 { font-family:'Orbitron',sans-serif; font-size:13px; color:#003d66; letter-spacing:2px; text-transform:uppercase; margin-bottom:20px; padding-bottom:10px; border-bottom:2px solid #00d9ff66; scroll-margin-top:80px; }
+.cb h3 { font-family:'Orbitron',sans-serif; font-size:11px; color:#444; letter-spacing:1.5px; text-transform:uppercase; margin:28px 0 12px; }
+.cb p { font-family:'Libre Baskerville',Georgia,serif; font-size:15px; line-height:1.9; color:#1a1a1a; margin-bottom:16px; }
+.cb ul { padding-left:0; margin-bottom:16px; }
+.cb ul li { font-family:'Libre Baskerville',Georgia,serif; font-size:14px; line-height:1.85; color:#1a1a1a; padding-left:20px; position:relative; margin-bottom:8px; }
+.cb ul li::before { content:'›'; position:absolute; left:0; color:#0077aa; }
+.cb blockquote { border-left:3px solid #1a7a1a; background:#eafaea; padding:14px 20px; margin:18px 0; font-size:14px; font-family:'Share Tech Mono',monospace; color:#0a3d0a; }
+.callout { border-left:3px solid #0088cc; background:#e8f4fb; padding:16px 20px; margin:22px 0; font-size:12px; line-height:1.8; color:#1a1a1a; }
+.callout.red { border-left-color:#cc0033; background:#fdecea; }
+.callout.green { border-left-color:#1a7a1a; background:#eafaea; }
+.callout.amber { border-left-color:#996600; background:#fef9ec; }
+.callout strong { font-family:'Orbitron',sans-serif; font-size:10px; letter-spacing:1px; display:block; margin-bottom:8px; }
+.compare-table { width:100%; border-collapse:collapse; margin:22px 0; font-size:12px; }
+.compare-table th { font-family:'Orbitron',sans-serif; font-size:10px; letter-spacing:1px; color:#003d66; padding:10px 12px; border-bottom:2px solid #00d9ff66; text-align:left; }
+.compare-table td { padding:10px 12px; border-bottom:1px solid #ddd; line-height:1.5; color:#1a1a1a; vertical-align:top; }
+.compare-table tr:hover td { background:#f0f0f0; }
+.key-numbers { display:grid; grid-template-columns:repeat(auto-fit,minmax(140px,1fr)); gap:12px; margin:22px 0; }
+.kn-item { background:#fff; border:1px solid #d0d0d0; padding:16px 12px; text-align:center; }
+.kn-val { font-family:'Orbitron',sans-serif; font-size:clamp(13px,1.8vw,18px); font-weight:800; color:#003d66; display:block; }
+.kn-label { font-size:10px; color:#555; letter-spacing:1px; margin-top:5px; display:block; line-height:1.4; }
+.quiz-block { background:rgba(17,17,17,0.9); border:1px solid #ff004f33; padding:28px; margin:48px 0 32px; }
+.quiz-block h2 { font-family:'Orbitron',sans-serif; font-size:13px; color:#ff004f; letter-spacing:2px; margin-bottom:6px; }
+.quiz-intro { font-size:12px; opacity:0.6; margin-bottom:24px; padding-bottom:16px; border-bottom:1px solid #ff004f22; line-height:1.6; }
+.quiz-q { margin-bottom:28px; }
+.quiz-q p { font-size:13px; opacity:0.9; margin-bottom:12px; line-height:1.65; }
+.quiz-q p strong { color:#00d9ff; }
+.quiz-options { display:flex; flex-direction:column; gap:8px; }
+.quiz-opt { background:rgba(255,255,255,0.03); border:1px solid #ffffff1a; padding:11px 16px; cursor:pointer; font-size:12px; font-family:'Share Tech Mono',monospace; transition:0.2s; text-align:left; color:white; line-height:1.5; }
+.quiz-opt:hover:not(:disabled) { background:rgba(0,217,255,0.08); border-color:#00d9ff44; }
+.quiz-opt.correct { background:rgba(57,255,20,0.1); border-color:#39ff14; color:#39ff14; }
+.quiz-opt.wrong { background:rgba(255,0,79,0.1); border-color:#ff004f; color:#ff004f; }
+.quiz-opt:disabled { cursor:default; }
+.quiz-feedback { font-size:12px; margin-top:10px; min-height:18px; line-height:1.7; opacity:0.9; padding:0 4px; }
+.quiz-score { font-family:'Orbitron',sans-serif; font-size:12px; color:#39ff14; margin-top:20px; letter-spacing:1px; display:none; padding-top:16px; border-top:1px solid #39ff1433; }
+.py-block { background:rgba(10,10,10,0.95); border:1px solid #39ff1422; padding:28px; margin:32px 0; }
+.py-block h2 { font-family:'Orbitron',sans-serif; font-size:13px; color:#39ff14; letter-spacing:2px; margin-bottom:8px; }
+.py-block .py-intro { font-size:12px; opacity:0.7; margin-bottom:20px; padding-bottom:16px; border-bottom:1px solid #39ff1422; line-height:1.7; }
+.py-exercise { margin-bottom:32px; } .py-exercise:last-child { margin-bottom:0; }
+.py-exercise h3 { font-family:'Orbitron',sans-serif; font-size:11px; color:#39ff1499; letter-spacing:1.5px; text-transform:uppercase; margin-bottom:10px; }
+.py-exercise p { font-size:12px; opacity:0.8; margin-bottom:14px; line-height:1.75; }
+.py-block pre { background:#050505; border:1px solid #39ff1433; padding:20px; font-family:'Share Tech Mono',monospace; font-size:11.5px; line-height:1.75; overflow-x:auto; color:#39ff14; white-space:pre; margin-bottom:12px; }
+.py-note { background:rgba(57,255,20,0.04); border-left:2px solid #39ff14; padding:12px 16px; margin-top:14px; font-size:12px; line-height:1.75; opacity:0.8; }
+.py-note strong { font-family:'Orbitron',sans-serif; font-size:10px; color:#39ff14; display:block; margin-bottom:6px; letter-spacing:1px; }
+.reflection-block { background:rgba(255,170,0,0.04); border:1px solid #ffaa0033; padding:24px; margin:32px 0; }
+.reflection-block h2 { font-family:'Orbitron',sans-serif; font-size:13px; color:#ffaa00; letter-spacing:2px; margin-bottom:8px; }
+.ref-intro { font-size:12px; opacity:0.7; margin-bottom:20px; padding-bottom:14px; border-bottom:1px solid #ffaa0022; line-height:1.7; }
+.ref-prompt { margin-bottom:20px; }
+.ref-prompt h3 { font-family:'Orbitron',sans-serif; font-size:11px; color:#ffaa0099; letter-spacing:1px; margin-bottom:8px; }
+.ref-prompt p { font-size:12px; opacity:0.8; line-height:1.75; }
 .complete-wrap { margin-top:56px; padding-top:30px; border-top:1px solid #ffffff11; text-align:center; }
-.complete-btn { font-family:'Orbitron',sans-serif; font-size:13px; letter-spacing:2px; padding:14px 44px; background:transparent; border:1px solid #39ff14; color:#39ff14; cursor:pointer; transition:0.3s ease; }
+.complete-btn { font-family:'Orbitron',sans-serif; font-size:13px; letter-spacing:2px; padding:14px 44px; background:transparent; border:1px solid #39ff14; color:#39ff14; cursor:pointer; transition:0.3s; }
 .complete-btn:hover:not(.done) { background:#39ff14; color:black; box-shadow:0 0 20px rgba(57,255,20,0.4); }
-.complete-btn.done { background:rgba(57,255,20,0.1); cursor:default; opacity:0.7; }
+.complete-btn.done { background:rgba(57,255,20,0.1); cursor:pointer; opacity:1; }
 .complete-msg { font-size:12px; color:#39ff14; margin-top:14px; min-height:18px; letter-spacing:1px; }
 .lesson-nav { display:flex; justify-content:space-between; margin-top:30px; flex-wrap:wrap; gap:10px; }
 .lesson-nav a { font-family:'Orbitron',sans-serif; font-size:11px; color:#00d9ff66; text-decoration:none; letter-spacing:1px; transition:0.2s; }
 .lesson-nav a:hover { color:#00d9ff; }
-.back-to-top { position:fixed; bottom:28px; right:28px; z-index:200; width:44px; height:44px; background:#000; border:1px solid #00d9ff55; color:#00d9ff; font-size:20px; cursor:pointer; display:flex; align-items:center; justify-content:center; opacity:0; pointer-events:none; transition:opacity 0.3s ease; }
-.back-to-top.visible { opacity:1; pointer-events:auto; } .back-to-top:hover { border-color:#00d9ff; background:#001a2c; }
+.back-to-top { position:fixed; bottom:28px; right:28px; z-index:200; width:44px; height:44px; background:#000; border:1px solid #00d9ff55; color:#00d9ff; font-size:20px; cursor:pointer; display:flex; align-items:center; justify-content:center; opacity:0; pointer-events:none; transition:opacity 0.3s; }
+.back-to-top.visible { opacity:1; pointer-events:auto; } .back-to-top:hover { border-color:#00d9ff; }
 footer { text-align:center; padding:30px; opacity:0.3; font-size:11px; position:relative; z-index:1; letter-spacing:1px; }
 </style>
 </head>
@@ -71,18 +117,20 @@ footer { text-align:center; padding:30px; opacity:0.3; font-size:11px; position:
 <div class="breadcrumb">
     <a href="dashboard.html">DASHBOARD</a><span>/</span>
     <a href="m4.html">M4</a><span>/</span>
-    <span style="color:#ffffff88;">M4 · LESSON 04 OF 7</span>
+    <span style="color:#ffffff88;">LESSON 04 — PROPAGATION, RAIN FADE &amp; ATMOSPHERICS</span>
 </div>
+
 <div class="lesson-wrap">
 <div class="lesson-header">
     <div class="lesson-tag">M4 · LESSON 04 OF 7</div>
-    <h1>Propagation, Rain Fade &amp; Atmospherics</h1>
+    <h1>Propagation, Rain Fade<br>&amp; Atmospherics</h1>
     <div class="lesson-meta">
         <div class="l-pill l-pill-q">MODULE 4</div>
         <div class="l-pill l-pill-t">RF &amp; LINK BUDGETS</div>
     </div>
-    <p class="lesson-intro">The link equation assumes free-space propagation. It should not. The final tens of kilometres of every satellite link traverse the troposphere where weather happens. A moderate rain event at Ka-band imposes 10–20 dB of attenuation in seconds. This lesson quantifies each atmospheric contributor, presents the ITU-R P.618 framework, and delivers Stage 4 of the spine link-budget engine: rain attenuation from climate zone rather than assumed as a fixed loss.</p>
+    <p class="lesson-intro">The link equation assumes free-space propagation. The signal does not travel through free space. The final tens of kilometres of every satellite link traverse the troposphere — the layer where weather happens. At Ka-band and above, a moderate rain event imposes 10–20 dB of attenuation in seconds. This lesson quantifies each atmospheric contributor, presents the ITU-R P.618 prediction framework, and delivers Stage 4 of the spine engine: rain attenuation computed from climate zone and target availability rather than assumed as a fixed margin.</p>
 </div>
+
 <div class="toc">
     <h4>CONTENTS</h4>
     <ol>
@@ -94,50 +142,389 @@ footer { text-align:center; padding:30px; opacity:0.3; font-size:11px; position:
         <li><a href="#s6">Fade mitigation techniques</a></li>
         <li><a href="#s7">Putting it in the margin budget</a></li>
         <li><a href="#quiz">Knowledge check</a></li>
-        <li><a href="#python">Python exercises — spine project</a></li>
+        <li><a href="#python">Python exercises — spine project stage 4</a></li>
         <li><a href="#reflect">Reflection prompts</a></li>
     </ol>
 </div>
-<div class="content-block" id="s1">
-    <h2>1. Gaseous absorption</h2>
-    <p style="font-family:'Libre Baskerville',serif;font-size:15px;line-height:1.9;color:#1a1a1a;">See markdown source for full content.</p>
+
+<div class="cb" id="s1">
+    <h2>1. Gaseous Absorption</h2>
+    <p>The atmosphere contains gases that absorb microwave signals at specific resonant frequencies. Two are significant for satellite communications.</p>
+    <p><strong>Oxygen (O₂)</strong> has a cluster of absorption lines near 60 GHz and a weaker line near 119 GHz. At frequencies below 30 GHz, oxygen absorption is small but non-negligible — approximately 0.01–0.05 dB/km at Ka-band, contributing roughly 0.1–0.3 dB of total path attenuation for a vertical path through the troposphere.</p>
+    <p><strong>Water vapour (H₂O)</strong> has absorption lines at 22.2 GHz and 183 GHz, with the 22.2 GHz line falling within the Ka-band uplink region. Water vapour absorption depends strongly on surface precipitable water vapour (PWV), varying by location and season. At Ka-band and moderate humidity, water vapour contributes 0.05–0.3 dB of zenith attenuation, rising to 0.5–1.5 dB in tropical, high-humidity environments.</p>
+    <p>At elevation angle ε, the slant-path attenuation is:</p>
+    <blockquote>A_gas(ε) ≈ A_gas_zenith / sin(ε)</blockquote>
+    <p>At 10° elevation, the slant path through the atmosphere is approximately 5.8× longer than the zenith path. For a Ka-band system at 10° elevation this adds approximately 0.3–0.9 dB of gaseous loss beyond the clear-sky overhead figure.</p>
 </div>
-<div class="content-block" id="s2">
-    <h2>2. Cloud and fog attenuation</h2>
-    <p style="font-family:'Libre Baskerville',serif;font-size:15px;line-height:1.9;color:#1a1a1a;">See markdown source for full content.</p>
+
+<div class="cb" id="s2">
+    <h2>2. Cloud and Fog Attenuation</h2>
+    <p>Liquid water droplets in clouds and fog scatter and absorb microwave signals, though less severely than rain. The key distinction is drop size: rain drops (0.1–8 mm diameter) are much larger than cloud droplets (typically 0.01–0.1 mm), and rain attenuation scales strongly with drop size.</p>
+    <p>At Ka-band, cloud attenuation for a standard cloud layer ranges from 0.1–0.5 dB for light cloud to 0.5–2.0 dB for thick stratocumulus. Cumulonimbus associated with heavy rain can add up to 5 dB, but in practice this is dominated by the rain attenuation below the cloud base. Cloud attenuation is included in link budget analysis as part of the ITU-R P.618 statistical model rather than computed separately.</p>
 </div>
-<div class="content-block" id="s3">
-    <h2>3. Rain attenuation</h2>
-    <p style="font-family:'Libre Baskerville',serif;font-size:15px;line-height:1.9;color:#1a1a1a;">See markdown source for full content.</p>
+
+<div class="cb" id="s3">
+    <h2>3. Rain Attenuation</h2>
+    <p>Rain attenuation is the dominant atmospheric impairment for Ka-band and above, arising from absorption (converting microwave energy to heat) and scattering (redirecting energy out of the signal beam).</p>
+    <h3>Specific attenuation (ITU-R P.838)</h3>
+    <p>The specific attenuation γ_R (dB/km) through rain of rate R (mm/hr):</p>
+    <blockquote>γ_R = k_R · R^α</blockquote>
+    <p>where k_R and α are frequency-dependent empirical coefficients from ITU-R P.838:</p>
+    <table class="compare-table">
+        <thead><tr><th>Frequency</th><th>k_R</th><th>α</th><th>γ at R=25 mm/hr</th><th>γ at R=50 mm/hr</th></tr></thead>
+        <tbody>
+            <tr><td>14 GHz (Ku)</td><td>0.0229</td><td>1.265</td><td>1.5 dB/km</td><td>3.3 dB/km</td></tr>
+            <tr><td>20 GHz (Ka)</td><td>0.0751</td><td>1.099</td><td>3.8 dB/km</td><td>7.8 dB/km</td></tr>
+            <tr><td>30 GHz (Ka)</td><td>0.187</td><td>1.021</td><td>9.3 dB/km</td><td>18.6 dB/km</td></tr>
+            <tr><td>47 GHz (V)</td><td>0.546</td><td>0.911</td><td>23.4 dB/km</td><td>44.2 dB/km</td></tr>
+        </tbody>
+    </table>
+    <p>Rain at Ka-band uplink (30 GHz) is approximately 6× more severe than at Ku-band (14 GHz) for the same rain rate — the primary rain-fade disadvantage of Ka-band uplinks.</p>
+    <h3>ITU-R P.618 prediction model</h3>
+    <p>The P.618 model predicts rain attenuation exceeded for a given percentage of time at a specified location, frequency, elevation angle, and availability target. It takes: (1) the rain rate R₀.₀₁ exceeded for 0.01% of an average year from ITU-R P.837; (2) the effective rain height h_R from ITU-R P.839 (~3–5 km typically); (3) elevation angle; (4) frequency.</p>
+    <h3>Key rain zone values</h3>
+    <table class="compare-table">
+        <thead><tr><th>Region</th><th>Zone</th><th>R₀.₀₁ (mm/hr)</th><th>Ka 20 GHz, 30°, 99.99% avail</th></tr></thead>
+        <tbody>
+            <tr><td>Northern Europe</td><td>E</td><td>22 mm/hr</td><td>~3–6 dB</td></tr>
+            <tr><td>Central Europe</td><td>F</td><td>28 mm/hr</td><td>~4–8 dB</td></tr>
+            <tr><td>Southeast UK</td><td>G</td><td>42 mm/hr</td><td>~6–12 dB</td></tr>
+            <tr><td>Sub-tropical coast</td><td>K</td><td>100 mm/hr</td><td>~15–25 dB</td></tr>
+            <tr><td>Tropical (equatorial)</td><td>P</td><td>145 mm/hr</td><td>~25–40 dB</td></tr>
+        </tbody>
+    </table>
+    <div class="key-numbers">
+        <div class="kn-item"><span class="kn-val">6×</span><span class="kn-label">MORE RAIN ATTENUATION AT 30 GHz VS 14 GHz (R=25 mm/hr)</span></div>
+        <div class="kn-item"><span class="kn-val">~7 dB</span><span class="kn-label">KA 20 GHz, ZONE F, 30°, 99.9% AVAIL</span></div>
+        <div class="kn-item"><span class="kn-val">~53 min/yr</span><span class="kn-label">DURATION R₀.₀₁ IS EXCEEDED (= 99.99% AVAIL)</span></div>
+        <div class="kn-item"><span class="kn-val">4–5 km</span><span class="kn-label">TYPICAL EFFECTIVE RAIN HEIGHT IN EUROPE</span></div>
+    </div>
 </div>
-<div class="content-block" id="s4">
+
+<div class="cb" id="s4">
     <h2>4. Scintillation</h2>
-    <p style="font-family:'Libre Baskerville',serif;font-size:15px;line-height:1.9;color:#1a1a1a;">See markdown source for full content.</p>
+    <p>Tropospheric scintillation is rapid amplitude and phase variation of the received signal caused by turbulent mixing of air masses with different refractive indices. Unlike rain attenuation (which persists for minutes or hours), scintillation occurs at 0.1–100 Hz and produces short-duration signal fluctuations of ±0.5–3 dB at Ka-band under humid, hot conditions.</p>
+    <p>Scintillation is most severe at low elevation angles, high frequencies, and in hot, humid environments near the equator or in summer. For a Ka-band LEO link at ε ≥ 20°, scintillation typically contributes 0.5–1.5 dB of additional fade margin requirement. It is included in the link budget as a fixed margin term rather than a separate statistical model.</p>
+    <div class="callout">
+        <strong>SCINTILLATION VS RAIN — TIMESCALES MATTER</strong>
+        Rain fades evolve over minutes; scintillation fluctuates at sub-second timescales. ACM responds too slowly to track scintillation — it must be included as a fixed margin. Rain fades are slow enough for ACM to respond. The distinction determines whether an impairment is handled by margin or by adaptive mitigation.
+    </div>
 </div>
-<div class="content-block" id="s5">
-    <h2>5. Combining atmospheric impairments</h2>
-    <p style="font-family:'Libre Baskerville',serif;font-size:15px;line-height:1.9;color:#1a1a1a;">See markdown source for full content.</p>
+
+<div class="cb" id="s5">
+    <h2>5. Combining Atmospheric Impairments</h2>
+    <p>Total atmospheric attenuation:</p>
+    <blockquote>A_total = A_gas + A_cloud + A_rain + A_scint</blockquote>
+    <p>In practice: (1) compute rain attenuation A_rain(p%) from ITU-R P.618 for the target availability — this implicitly includes cloud attenuation during rain events; (2) add clear-sky gaseous attenuation A_gas(ε) as a constant loss; (3) add scintillation margin A_scint as a fixed term; (4) sum: A_total = A_gas + A_rain(p%) + A_scint.</p>
+    <p>The rain attenuation statistic is the dominant variable term. The 3.9 dB clear-sky margin from m4-1 is insufficient for 99.9% availability in central Europe — closing that link requires either higher EIRP, better G/T, ACM, or accepting a lower availability target.</p>
 </div>
-<div class="content-block" id="s6">
-    <h2>6. Fade mitigation techniques</h2>
-    <p style="font-family:'Libre Baskerville',serif;font-size:15px;line-height:1.9;color:#1a1a1a;">See markdown source for full content.</p>
+
+<div class="cb" id="s6">
+    <h2>6. Fade Mitigation Techniques</h2>
+    <p><strong>Adaptive coding and modulation (ACM)</strong>: the modulation scheme and coding rate are varied in real time in response to measured link quality. During rain fade the system steps down from e.g. 16-APSK 3/4 to QPSK 1/2, accepting lower data rate in exchange for more robust operation. The link never fails; throughput drops. This is the standard approach in DVB-S2X systems and is built into the air interface design.</p>
+    <p><strong>Uplink power control (UPC)</strong>: during an uplink rain event, the terminal increases transmit power to compensate attenuation. Available headroom is typically 3–6 dB — adequate for moderate events but insufficient for the tail of the fade distribution. Unlike ACM, UPC maintains data rate within its headroom range.</p>
+    <p><strong>Site diversity</strong>: two geographically separated gateway sites serve the same satellite simultaneously. Rain cells have limited horizontal extent (typically 5–20 km for convective events), so the probability that both sites experience deep rain simultaneously is much lower than for a single site. Sites separated by 10–20 km achieve diversity gains of 5–10 dB in heavy-rain climates. Primarily applied to gateway links — the cost is prohibitive for user terminals.</p>
+    <p><strong>Frequency diversity</strong>: dropping to a lower frequency band (e.g. Ku-band) during Ka-band rain events. Practical only with dual-band terminal capability — uncommon in consumer equipment.</p>
+    <p><strong>Higher elevation angle</strong>: serving users at higher minimum elevation reduces the slant-path attenuation at the cost of smaller coverage footprint per satellite or shorter service arc per pass.</p>
 </div>
-<div class="content-block" id="s7">
-    <h2>7. Putting it in the margin budget</h2>
-    <p style="font-family:'Libre Baskerville',serif;font-size:15px;line-height:1.9;color:#1a1a1a;">See markdown source for full content.</p>
+
+<div class="cb" id="s7">
+    <h2>7. Putting It in the Margin Budget</h2>
+    <p>Complete Ka-band downlink margin budget for a LEO link in central Europe (rain zone F), 30° elevation, 99.9% availability:</p>
+    <table class="compare-table">
+        <thead><tr><th>Loss contributor</th><th>Value</th><th>Method</th></tr></thead>
+        <tbody>
+            <tr><td>Free-space path loss</td><td>176.4 dB</td><td>Fixed geometry, 1,000 km, 20 GHz</td></tr>
+            <tr><td>Gaseous absorption</td><td>0.5 dB</td><td>ITU-R P.676, sin(30°) correction</td></tr>
+            <tr><td>Rain attenuation (99.9%, zone F)</td><td>~7.0 dB</td><td>ITU-R P.618</td></tr>
+            <tr><td>Cloud margin</td><td>included in P.618</td><td>—</td></tr>
+            <tr><td>Scintillation margin</td><td>0.7 dB</td><td>Fixed term</td></tr>
+            <tr><td>Pointing loss</td><td>0.5 dB</td><td>ADCS budget</td></tr>
+            <tr><td><strong>Total loss budget</strong></td><td><strong>~185.1 dB</strong></td><td></td></tr>
+        </tbody>
+    </table>
+    <div class="callout red">
+        <strong>THE 3.9 dB MARGIN IS INSUFFICIENT</strong>
+        The clear-sky margin from m4-1 (3.9 dB, 16-APSK 3/4) is not enough to survive the 7 dB rain event plus 0.7 dB scintillation at 99.9% availability. The link requires ACM, higher EIRP, improved G/T, or an accepted lower availability target. This is the standard engineering finding for Ka-band LEO broadband in temperate climates — ACM is not optional.
+    </div>
 </div>
-<div class="source-note" id="quiz">
-    <h3>KNOWLEDGE CHECK</h3>
-    <p>Ten questions covering the material in this lesson. See the markdown source (m4-4.md) for the full question set with distractors and feedback text. The quiz engine is identical to all other LEOAF lessons — copy the quiz HTML block from m4-1.html or m4-2.html and populate with the questions from the md file.</p>
+
+<!-- QUIZ -->
+<div class="quiz-block" id="quiz">
+    <h2>KNOWLEDGE CHECK</h2>
+    <p class="quiz-intro">Ten questions. Select one answer per question. Immediate feedback; score appears when all ten are answered.</p>
+
+    <div class="quiz-q"><p><strong>Q1.</strong> Gaseous absorption at Ka-band increases at low elevation angles because:</p>
+        <div class="quiz-options">
+            <button class="quiz-opt" data-q="1" data-correct="false">A — The atmosphere is denser at low altitudes</button>
+            <button class="quiz-opt" data-q="1" data-correct="true">B — The slant-path length through the atmosphere increases as 1/sin(ε) at lower elevation</button>
+            <button class="quiz-opt" data-q="1" data-correct="false">C — Ka-band signals are refracted downward at low angles</button>
+            <button class="quiz-opt" data-q="1" data-correct="false">D — Oxygen absorption increases at low temperatures near the ground</button>
+        </div><div class="quiz-feedback" id="fb1"></div></div>
+
+    <div class="quiz-q"><p><strong>Q2.</strong> Rain attenuation at Ka-band uplink (30 GHz) is approximately how much more severe than at Ku-band (14 GHz) for the same rain rate?</p>
+        <div class="quiz-options">
+            <button class="quiz-opt" data-q="2" data-correct="false">A — The same — rain attenuation is frequency-independent</button>
+            <button class="quiz-opt" data-q="2" data-correct="false">B — ~2× more</button>
+            <button class="quiz-opt" data-q="2" data-correct="true">C — ~6× more</button>
+            <button class="quiz-opt" data-q="2" data-correct="false">D — ~100× more</button>
+        </div><div class="quiz-feedback" id="fb2"></div></div>
+
+    <div class="quiz-q"><p><strong>Q3.</strong> The ITU-R P.618 model predicts rain attenuation as a function of:</p>
+        <div class="quiz-options">
+            <button class="quiz-opt" data-q="3" data-correct="false">A — Satellite altitude and inclination</button>
+            <button class="quiz-opt" data-q="3" data-correct="true">B — Rain rate R₀.₀₁, effective rain height, elevation angle, and frequency</button>
+            <button class="quiz-opt" data-q="3" data-correct="false">C — Time of day and season only</button>
+            <button class="quiz-opt" data-q="3" data-correct="false">D — Received signal power at the terminal</button>
+        </div><div class="quiz-feedback" id="fb3"></div></div>
+
+    <div class="quiz-q"><p><strong>Q4.</strong> Adaptive coding and modulation (ACM) during rain fade:</p>
+        <div class="quiz-options">
+            <button class="quiz-opt" data-q="4" data-correct="true">A — Prevents the link from failing but at the cost of reduced throughput</button>
+            <button class="quiz-opt" data-q="4" data-correct="false">B — Increases transmit power to compensate the fade</button>
+            <button class="quiz-opt" data-q="4" data-correct="false">C — Switches to a lower frequency band</button>
+            <button class="quiz-opt" data-q="4" data-correct="false">D — Reduces the noise figure of the receive chain during rain</button>
+        </div><div class="quiz-feedback" id="fb4"></div></div>
+
+    <div class="quiz-q"><p><strong>Q5.</strong> Site diversity achieves its gain by exploiting the fact that:</p>
+        <div class="quiz-options">
+            <button class="quiz-opt" data-q="5" data-correct="false">A — Two receivers add signals coherently, doubling SNR</button>
+            <button class="quiz-opt" data-q="5" data-correct="true">B — Rain cells have limited horizontal extent; the probability that two widely separated sites both experience deep rain simultaneously is much lower than for one site</button>
+            <button class="quiz-opt" data-q="5" data-correct="false">C — The satellite sees both sites at different elevation angles</button>
+            <button class="quiz-opt" data-q="5" data-correct="false">D — Site diversity allows higher EIRP by sharing power between two sites</button>
+        </div><div class="quiz-feedback" id="fb5"></div></div>
+
+    <div class="quiz-q"><p><strong>Q6.</strong> Tropospheric scintillation at Ka-band is most severe when:</p>
+        <div class="quiz-options">
+            <button class="quiz-opt" data-q="6" data-correct="false">A — It is cold and dry with high wind</button>
+            <button class="quiz-opt" data-q="6" data-correct="false">B — The satellite is at high elevation angles</button>
+            <button class="quiz-opt" data-q="6" data-correct="true">C — It is hot and humid with turbulent air masses and the satellite is at low elevation</button>
+            <button class="quiz-opt" data-q="6" data-correct="false">D — Rain is falling heavily</button>
+        </div><div class="quiz-feedback" id="fb6"></div></div>
+
+    <div class="quiz-q"><p><strong>Q7.</strong> The ITU-R rain zone parameter R₀.₀₁ (rain rate exceeded for 0.01% of an average year) corresponds to:</p>
+        <div class="quiz-options">
+            <button class="quiz-opt" data-q="7" data-correct="false">A — Rain occurring for 0.01% of every hour</button>
+            <button class="quiz-opt" data-q="7" data-correct="true">B — Rain attenuation exceeded for approximately 53 minutes per year</button>
+            <button class="quiz-opt" data-q="7" data-correct="false">C — The maximum rain rate ever recorded at the location</button>
+            <button class="quiz-opt" data-q="7" data-correct="false">D — Rain occurring at that rate for 0.01% of a single storm event</button>
+        </div><div class="quiz-feedback" id="fb7"></div></div>
+
+    <div class="quiz-q"><p><strong>Q8.</strong> For a Ka-band LEO link at 30° elevation in central Europe (zone F), rain attenuation exceeded for 99.9% availability is approximately:</p>
+        <div class="quiz-options">
+            <button class="quiz-opt" data-q="8" data-correct="false">A — 0.5 dB</button>
+            <button class="quiz-opt" data-q="8" data-correct="false">B — 3 dB</button>
+            <button class="quiz-opt" data-q="8" data-correct="true">C — 7 dB</button>
+            <button class="quiz-opt" data-q="8" data-correct="false">D — 40 dB</button>
+        </div><div class="quiz-feedback" id="fb8"></div></div>
+
+    <div class="quiz-q"><p><strong>Q9.</strong> Uplink power control (UPC) as a fade mitigation technique is limited because:</p>
+        <div class="quiz-options">
+            <button class="quiz-opt" data-q="9" data-correct="false">A — It increases interference to other satellites</button>
+            <button class="quiz-opt" data-q="9" data-correct="true">B — The terminal's power amplifier has finite headroom — typically only 3–6 dB of UPC range is available</button>
+            <button class="quiz-opt" data-q="9" data-correct="false">C — The ITU prohibits UPC at Ka-band</button>
+            <button class="quiz-opt" data-q="9" data-correct="false">D — UPC reduces the data rate</button>
+        </div><div class="quiz-feedback" id="fb9"></div></div>
+
+    <div class="quiz-q"><p><strong>Q10.</strong> Gaseous absorption is described as a "constant loss" (always present) unlike rain which is a "variable loss." This matters for link budget design because:</p>
+        <div class="quiz-options">
+            <button class="quiz-opt" data-q="10" data-correct="false">A — Variable losses must be included; constant losses can be ignored</button>
+            <button class="quiz-opt" data-q="10" data-correct="true">B — Constant losses reduce the clear-sky C/N₀ but do not drive the statistical availability target; variable losses determine how much margin must be reserved for availability</button>
+            <button class="quiz-opt" data-q="10" data-correct="false">C — Gaseous absorption is included in the noise temperature, not the path loss</button>
+            <button class="quiz-opt" data-q="10" data-correct="false">D — Constant losses can be compensated by UPC; variable losses cannot</button>
+        </div><div class="quiz-feedback" id="fb10"></div></div>
+
+    <div class="quiz-score" id="quizScore"></div>
 </div>
-<div class="source-note" id="python">
-    <h3>PYTHON EXERCISES — SPINE PROJECT</h3>
-    <p>Three exercises extending the spine link budget engine. See m4-4.md for the complete code. Exercise 3 is the spine project stage for this lesson. Paste the code blocks from the md file into this section following the pattern established in m4-1.html and m4-2.html.</p>
+
+<!-- PYTHON -->
+<div class="py-block" id="python">
+    <h2>PYTHON EXERCISES — SPINE PROJECT STAGE 4</h2>
+    <p class="py-intro">Stage 4 adds ITU-R P.618 rain attenuation to the link budget engine. Rain is now computed from climate zone and target availability, not assumed as a fixed loss. Noise-rain coupling adjusts T_ant during rain events.</p>
+
+    <div class="py-exercise">
+        <h3>Exercise 1 — Specific Attenuation Model (ITU-R P.838)</h3>
+        <p>Compute rain-specific attenuation at different frequencies and rain rates using interpolated P.838 coefficients.</p>
+<pre>
+import math
+
+P838 = {
+    4.0:(0.000650,1.121), 7.0:(0.00301,1.332), 10.0:(0.00887,1.264),
+    14.0:(0.0229,1.265),  20.0:(0.0751,1.099), 30.0:(0.187,1.021),
+    47.0:(0.546,0.911),   60.0:(0.953,0.826),  80.0:(1.425,0.769),
+}
+
+def specific_atten(R_mmhr, freq_ghz):
+    freqs = sorted(P838.keys())
+    if freq_ghz <= freqs[0]:   k,a = P838[freqs[0]]
+    elif freq_ghz >= freqs[-1]: k,a = P838[freqs[-1]]
+    else:
+        for i,f in enumerate(freqs[:-1]):
+            if f <= freq_ghz <= freqs[i+1]:
+                t = (math.log10(freq_ghz)-math.log10(f)) / \
+                    (math.log10(freqs[i+1])-math.log10(f))
+                k = P838[f][0] + t*(P838[freqs[i+1]][0]-P838[f][0])
+                a = P838[f][1] + t*(P838[freqs[i+1]][1]-P838[f][1])
+                break
+    return k * R_mmhr**a
+
+rain_rates = [5, 15, 25, 50, 100, 145]
+freqs = [14.0, 20.0, 30.0, 47.0, 80.0]
+print("Specific attenuation γ_R (dB/km) — ITU-R P.838\n")
+print(f"{'R(mm/hr)':>10}" + "".join(f"{f:>9.0f}GHz" for f in freqs))
+print("-" * (10+10*len(freqs)))
+for R in rain_rates:
+    print(f"{R:>10}" + "".join(f"{specific_atten(R,f):>10.2f}" for f in freqs))
+
+# 1. At what rain rate does Ka-band (20 GHz) reach 10 dB/km?
+# 2. Ratio of specific attenuation 30 GHz vs 14 GHz at R=25 mm/hr?
+#    Does it match the ~6× from the lesson?
+# 3. Total rain attenuation through a 2 km rain cell at 50 mm/hr each band.
+</pre>
+    </div>
+
+    <div class="py-exercise">
+        <h3>Exercise 2 — Slant-Path Attenuation vs Elevation</h3>
+        <p>Compute total path attenuation as a function of elevation angle and rain rate, and compare bands at 30° elevation.</p>
+<pre>
+import math
+
+def specific_atten(R, f):
+    P = {14:(.0229,1.265),20:(.0751,1.099),30:(.187,1.021),47:(.546,.911)}
+    k,a = min(P.items(),key=lambda x:abs(x[0]-f))[1]
+    return k*R**a
+
+def rain_atten_slant(R_mmhr, freq_ghz, elev_deg, h_rain=4.0, h_stn=0.1):
+    e  = math.radians(elev_deg)
+    Ls = (h_rain-h_stn)/math.sin(e)
+    Lg = Ls*math.cos(e)
+    return specific_atten(R_mmhr,freq_ghz) * Ls * (1/(1+0.045*Lg))
+
+def gas_atten(freq_ghz, elev_deg, zenith=0.07):
+    return zenith/math.sin(math.radians(elev_deg))
+
+print("Slant-path rain attenuation vs elevation — Ka 20 GHz\n")
+print(f"{'Elev':>7}{'R=5':>9}{'R=25':>9}{'R=50':>9}{'R=100':>9}{'Gas':>8}")
+print("-" * 46)
+for e in [90,60,45,30,20,15,10]:
+    row = [rain_atten_slant(R,20.0,e) for R in [5,25,50,100]]
+    gas = gas_atten(20.0,e)
+    print(f"{e:>5}°"+"".join(f"{v:>9.2f}" for v in row)+f"{gas:>8.2f}")
+
+print("\nBand comparison at 30° elevation, R=25 mm/hr:")
+for f,name in [(14,'Ku'),(20,'Ka_dn'),(30,'Ka_up'),(47,'V')]:
+    print(f"  {name} ({f}GHz): {rain_atten_slant(25,f,30):.1f} dB")
+
+# 1. At 10° elevation with R=50 mm/hr, compare Ka (20GHz) vs Ku (14GHz).
+# 2. What elevation angle minimises rain fade while maintaining ≥80% of a pass?
+# 3. For zone F (R₀.₀₁=28 mm/hr), Ka 20 GHz, 30° elevation, 99.99% availability:
+#    use R₀.₀₁ as the rain rate and compute attenuation.
+</pre>
+    </div>
+
+    <div class="py-exercise">
+        <h3>Exercise 3 — Spine Stage 4: Rain-Aware Link Budget</h3>
+        <p>Add ITU-R P.618 rain attenuation to the LinkBudget engine, linking climate zone to link availability, with noise-rain coupling.</p>
+<pre>
+import math
+
+K_DB = -228.6; T0 = 290.0
+
+def fspl(d, f): return 92.4 + 20*math.log10(d) + 20*math.log10(f)
+def nf_te(nf): return T0*(10**(nf/10)-1)
+def loss_te(l, t=T0): return t*(10**(l/10)-1)
+def dbl(x): return 10**(x/10)
+
+RAIN_ZONES = {
+    'A':2,'B':3,'C':5,'D':8,'E':22,'F':28,'G':42,
+    'H':70,'K':100,'L':120,'M':150,'P':145
+}
+
+def rain_specific(R, f):
+    P={14:(.0229,1.265),20:(.0751,1.099),30:(.187,1.021),47:(.546,.911)}
+    k,a=min(P.items(),key=lambda x:abs(x[0]-f))[1]
+    return k*R**a
+
+def rain_atten_p618(zone, freq, elev, avail=99.9, h_rain=4.0):
+    R001=RAIN_ZONES.get(zone.upper(),28); p=100-avail
+    if p>=0.01:
+        R_p=R001*(p/0.01)**(-0.655-0.033*math.log(p)-0.045*math.log(R001))
+    else: R_p=R001
+    e=math.radians(elev); Ls=h_rain/math.sin(e)
+    return rain_specific(R_p,freq)*Ls*(1/(1+0.045*Ls*math.cos(e)))
+
+class LinkBudget:
+    """Stage 4: Rain-aware with P.618 model and noise-rain coupling."""
+    def __init__(self, name):
+        self.name=name; self.losses=[]; self._chain=[]
+        self._eirp=self._fspl=self._grx=self._tant=self._req=None
+        self._zone=None; self._freq=None; self._elev=None
+
+    def set_transmitter(self, p, g): self._eirp=10*math.log10(p)+g
+    def set_path(self, d, f, elev=30):
+        self._fspl=fspl(d,f); self._freq=f; self._elev=elev
+    def add_loss(self, lbl, v): self.losses.append((lbl,v))
+    def set_antenna(self, g, tant): self._grx=g; self._tant=tant
+    def add_stage(self, lbl, te, g=None): self._chain.append((lbl,te,g))
+    def set_required(self, r): self._req=r
+    def set_rain_zone(self, z): self._zone=z
+
+    def _tsys(self, rain_db=0):
+        tant=self._tant+(273*(1-10**(-rain_db/10)) if rain_db else 0)
+        t=tant; cg=1.0
+        for _,te,g in self._chain:
+            t+=te/cg
+            if g: cg*=dbl(g)
+        return t
+
+    def compute(self, avail=None):
+        rain_db=rain_atten_p618(self._zone,self._freq,self._elev,avail) \
+            if (avail and self._zone) else 0.0
+        t=self._tsys(rain_db)
+        total=self._fspl+sum(v for _,v in self.losses)+rain_db
+        cn0=self._eirp-total+self._grx-10*math.log10(t)-K_DB
+        return cn0,cn0-self._req if self._req else None,t,rain_db
+
+    def print_availability(self, avail_levels):
+        print(f"\n  {self.name}  [Rain zone {self._zone}]")
+        print(f"  {'Avail%':>10}{'Rain dB':>10}{'T_sys K':>9}{'C/N₀':>8}{'Margin':>9}")
+        print("  "+"-"*48)
+        for a in avail_levels:
+            cn0,m,t,r=self.compute(a)
+            print(f"  {a:>10.3f}%{r:>9.1f}{t:>9.0f}{cn0:>8.1f}{m:>+9.1f}dB"
+                  f"  {'✓' if m>=0 else '✗'}")
+
+lb = LinkBudget("LEO Ka forward — Europe, 30° elevation")
+lb.set_transmitter(20, 34); lb.set_path(1000, 20.0, 30)
+lb.add_loss("Gaseous absorption", 0.5); lb.add_loss("Pointing", 0.5)
+lb.set_antenna(37.5, 30.0)
+lb.add_stage("Feed 0.3dB",    loss_te(0.3),-0.3)
+lb.add_stage("LNA NF=1 G=40", nf_te(1.0),  40.0)
+lb.add_stage("Downconv NF=8", nf_te(8.0),  20.0)
+lb.add_stage("IF NF=10",      nf_te(10.0), None)
+lb.set_rain_zone('F'); lb.set_required(105.0)
+lb.print_availability([99.0, 99.5, 99.9, 99.95, 99.99])
+</pre>
+        <div class="py-note"><strong>SPINE PROJECT — STAGE 4</strong>
+            Stage 4 links rain attenuation to climate zone and target availability via a simplified P.618 model. Rain noise coupling adjusts T_ant during the rain event. Stage 5 (m4-5) adds ionospheric margin. Stage 6 (m4-6) adds C/I. Stage 7 (m4-7) assembles all stages into the final engine.
+        </div>
+    </div>
 </div>
-<div class="source-note" id="reflect">
-    <h3>REFLECTION PROMPTS</h3>
-    <p>Four reflection prompts for this lesson. See m4-4.md. Not graded — write in your own words, 200–400 words each.</p>
+
+<!-- REFLECTION -->
+<div class="reflection-block" id="reflect">
+    <h2>REFLECTION PROMPTS</h2>
+    <p class="ref-intro">Not graded. 200–400 words each.</p>
+    <div class="ref-prompt"><h3>Prompt 1 — EIRP and G/T Requirement</h3>
+        <p>The clear-sky margin of 3.9 dB from m4-1 is insufficient for 99.9% availability in central Europe. Calculate the EIRP or G/T improvement required, expressing the answer as a required change in satellite transmit power (watts), terminal antenna diameter (cm), and LNA noise figure (dB). Which is the most practical change, and at what programme phase would each option be locked in?</p></div>
+    <div class="ref-prompt"><h3>Prompt 2 — ACM Throughput-Availability Curve</h3>
+        <p>ACM trades throughput for availability. For a Ka-band LEO link in central Europe targeting 99.9% availability, sketch the throughput-availability curve: what data rate can the link sustain at 100%, 99.9%, 99%, and 99.5% availability? Assume the link closes at DVB-S2X 16-APSK 3/4 in clear sky and that lower MODCODs step down in ~3 dB C/N₀ steps. What is the average throughput as a fraction of clear-sky peak?</p></div>
+    <div class="ref-prompt"><h3>Prompt 3 — Site Diversity Design for UK Gateways</h3>
+        <p>Site diversity is primarily applicable to gateway links, not user terminals — explain why in terms of both economics and rain cell geometry. For a Starlink gateway network in the UK (a heavy-rain environment), how many diversity sites would you recommend per primary gateway, what separation distance would you target, and what fraction of heavy-rain events (R &gt; 50 mm/hr) would this diversity scheme successfully mitigate?</p></div>
+    <div class="ref-prompt"><h3>Prompt 4 — Noise-Rain Coupling in the Margin Calculation</h3>
+        <p>The P.618 fade statistics describe signal attenuation only. The noise-rain coupling from m4-2 means total C/N₀ degradation exceeds the fade depth. How should a link budget designer account for noise coupling in the margin calculation — is it additive to rain attenuation, multiplicative, or does it require a separate statistical treatment? For a terminal with T_sys = 150 K and a 10 dB rain event, compute how much total C/N₀ degradation exceeds the 10 dB fade depth.</p></div>
 </div>
+
 <div class="complete-wrap">
     <button class="complete-btn" id="completeBtn">MARK LESSON COMPLETE</button>
     <div class="complete-msg" id="completeMsg"></div>
@@ -147,8 +534,10 @@ footer { text-align:center; padding:30px; opacity:0.3; font-size:11px; position:
     <a href="m4-5.html">LESSON 05 — IONOSPHERE &amp; SPACE WEATHER →</a>
 </div>
 </div>
+
 <button class="back-to-top" id="backToTop" title="Back to top">↑</button>
 <footer>© 2026 LEOAF · M4 · LESSON 04 OF 7</footer>
+
 <script>
 const canvas=document.getElementById('starsCanvas'),ctx=canvas.getContext('2d');
 let stars=[];
@@ -157,6 +546,41 @@ function resizeCanvas(){canvas.width=window.innerWidth;canvas.height=window.inne
 resizeCanvas();initStars();window.addEventListener('resize',resizeCanvas);
 function animateStars(){ctx.clearRect(0,0,canvas.width,canvas.height);stars.forEach(s=>{s.y-=s.speed;if(s.y<0){s.y=canvas.height;s.x=Math.random()*canvas.width;}ctx.beginPath();ctx.fillStyle=`hsl(${s.hue},80%,80%)`;ctx.arc(s.x,s.y,s.size,0,Math.PI*2);ctx.fill();});requestAnimationFrame(animateStars);}
 animateStars();
+</script>
+<script>
+const feedbacks={
+    1:{correct:"Correct. A_gas(ε) ≈ A_gas_zenith / sin(ε). At ε = 10°, sin(10°) ≈ 0.174, so the slant path through the atmosphere is ~5.8× longer than the zenith path — multiplying gaseous attenuation by the same factor.",wrong:"Incorrect. Atmospheric density variation with altitude is already included in the zenith attenuation figure. Refraction exists but is a pointing correction, not an absorption mechanism. The sin(ε) denominator in the slant-path formula is the correct explanation — the atmosphere appears optically thicker at low elevation."},
+    2:{correct:"Correct. From the P.838 table: at R = 25 mm/hr, γ ≈ 9.3 dB/km at 30 GHz vs 1.5 dB/km at 14 GHz — a ratio of ~6×. This is the primary rain-fade disadvantage of Ka-band uplinks relative to Ku-band.",wrong:"Incorrect. Rain attenuation is strongly frequency-dependent above 10 GHz, scaling approximately as f^1 to f^2 in this range. 2× underestimates the scaling. 100× would require a far steeper frequency dependence than the P.838 coefficients show."},
+    3:{correct:"Correct. P.618 takes the location-specific rain rate R₀.₀₁ (from P.837), the effective rain height (from P.839), the elevation angle (which determines slant path length), and the frequency (which determines specific attenuation via P.838) to predict the fade depth exceeded for a given percentage of time.",wrong:"Incorrect. Satellite altitude affects slant range but P.618 uses elevation angle, not altitude directly. Time of day and season are embedded in the annual statistics of R₀.₀₁. Received signal power is the output of the model applied to the link budget, not an input."},
+    4:{correct:"Correct. ACM steps down to more robust modulation (e.g. QPSK instead of 16-APSK) and lower coding rates during rain events, accepting lower data rates in exchange for link continuity. The link never fails; throughput degrades gracefully.",wrong:"Incorrect. Uplink power control (not ACM) increases transmit power. Frequency diversity (not ACM) switches bands. Noise figure is a hardware property, not affected by ACM. ACM changes the waveform requirements, not the physical link parameters."},
+    5:{correct:"Correct. Convective rain cells typically have horizontal extents of 5–20 km. Two gateway sites separated by 10–20 km will rarely both be under deep rain simultaneously, providing 5–10 dB of diversity gain in heavy-rain climates.",wrong:"Incorrect. Site diversity is about statistics, not coherent signal combining — the sites transmit independently. Different elevation angles are a secondary effect. EIRP is not doubled or shared between sites."},
+    6:{correct:"Correct. Scintillation is caused by turbulent mixing of air masses with different refractive indices, which is strongest in hot, humid conditions with high water vapour gradients. Low elevation angles traverse more of the turbulent boundary layer.",wrong:"Incorrect. Cold dry conditions reduce water vapour content, minimising refractive index gradients and therefore scintillation. High elevation minimises the slant path through the turbulent lower atmosphere, reducing scintillation. During heavy rain, rain attenuation (orders of magnitude larger) completely dominates scintillation effects."},
+    7:{correct:"Correct. 0.01% of 8,760 hours/year = 0.876 hours = 52.6 minutes/year. R₀.₀₁ mm/hr is exceeded for approximately 53 minutes per year on average — the threshold corresponding to 99.99% annual availability.",wrong:"Incorrect. 0.01% of every hour = 3.6 seconds/hour — a nonsensical interpretation. R₀.₀₁ is a statistical annual threshold derived from long-term rainfall records, not the all-time maximum at the location. It applies to annual exceedance statistics, not to within individual storms."},
+    8:{correct:"Correct. Rain zone F (central Europe), Ka-band (20 GHz downlink), 30° elevation: ITU-R P.618 predicts approximately 7 dB attenuation exceeded for 0.1% of the time (~8.76 hours/year), corresponding to 99.9% availability.",wrong:"Incorrect. 0.5 dB is appropriate for gaseous absorption, not rain at 99.9% availability. 3 dB corresponds roughly to 99.5% availability in zone F. 40 dB is tropical rain zone P at 99.99% availability — an extreme case not representative of central Europe."},
+    9:{correct:"Correct. A terminal's power amplifier has a maximum transmit power ceiling; UPC can only increase power up to this hardware limit. In practice, this restricts UPC to 3–6 dB of uplink fade compensation — adequate for moderate rain but not for the 10–20 dB tail events.",wrong:"Incorrect. UPC raises on-axis EIRP within the licensed power envelope — it does not change sidelobe levels toward other satellites beyond that. The ITU does not prohibit UPC. UPC maintains data rate (unlike ACM) but is limited by power amplifier headroom."},
+    10:{correct:"Correct. Gaseous absorption is always present and subtracts from the clear-sky C/N₀ as a fixed loss. Rain attenuation varies statistically and determines how much additional margin must be reserved to achieve a given availability percentage. Separating constant and variable losses clarifies which budget elements drive the availability requirement.",wrong:"Incorrect. Both constant and variable losses must be included in the link budget. Gaseous absorption is a path loss term, not a noise temperature. Both can be compensated by UPC in principle — the limitation is PA headroom, not the constant/variable classification."}
+};
+let answered={};
+document.querySelectorAll('.quiz-opt').forEach(btn=>{
+    btn.addEventListener('click',function(){
+        const q=this.dataset.q;
+        if(answered[q]!==undefined)return;
+        const correct=this.dataset.correct==='true';
+        answered[q]=correct;
+        document.querySelectorAll(`.quiz-opt[data-q="${q}"]`).forEach(b=>{b.disabled=true;if(b.dataset.correct==='true')b.classList.add('correct');});
+        if(!correct)this.classList.add('wrong');
+        const fb=document.getElementById('fb'+q);
+        fb.textContent=(correct?'✓ ':'✗ ')+feedbacks[q][correct?'correct':'wrong'];
+        fb.style.color=correct?'#39ff14':'#ff004f';
+        if(Object.keys(answered).length===10){
+            const total=Object.values(answered).filter(Boolean).length;
+            const sc=document.getElementById('quizScore');
+            sc.style.display='block';
+            const pct=Math.round(total/10*100);
+            sc.textContent=`SCORE: ${total}/10 (${pct}%) — ${pct===100?'PERFECT.':pct>=80?'STRONG.':pct>=60?'ADEQUATE. REVISIT WEAK SECTIONS.':'REVISIT THE LESSON BEFORE PROCEEDING.'}`;
+        }
+    });
+});
 </script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="supabase.js"></script>
