@@ -1,0 +1,385 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>LEOAF · Employer Directory — Space & Satcom</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700;900&family=Share+Tech+Mono&family=Libre+Baskerville:ital@0;1&display=swap" rel="stylesheet">
+<style>
+:root{
+    --bg:#050608;
+    --panel:#0a0d12;
+    --line:#1a2029;
+    --ink:#e8e6e1;
+    --muted:#ffffff55;
+    --accent:#00d9ff;
+    --accent-dim:#00d9ff33;
+    --warn:#ffb000;
+    --ok:#39ff14;
+    --alert:#ff004f;
+}
+*{margin:0;padding:0;box-sizing:border-box}
+html,body{background:var(--bg);color:var(--ink)}
+body{font-family:'Libre Baskerville',serif;line-height:1.65;-webkit-font-smoothing:antialiased}
+
+/* Scanline overlay */
+body::before{
+    content:"";position:fixed;inset:0;z-index:60;pointer-events:none;
+    background:repeating-linear-gradient(0deg,rgba(255,255,255,0.015) 0 1px,transparent 1px 3px);
+}
+
+main{max-width:880px;margin:0 auto;padding:28px 20px 80px}
+
+/* Top meta bar */
+.meta-bar{
+    display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap;
+    font-family:'Share Tech Mono',monospace;font-size:0.72rem;letter-spacing:0.14em;
+    border-bottom:1px solid var(--line);padding-bottom:14px;margin-bottom:34px;
+}
+.meta-bar .id{color:var(--accent)}
+.meta-bar .status{color:var(--muted)}
+.meta-bar .status .dot{display:inline-block;width:7px;height:7px;border-radius:50%;background:var(--ok);margin-right:7px;animation:blink 1.6s infinite}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:0.25}}
+.meta-bar .chip{border:1px solid var(--alert);color:var(--alert);padding:3px 10px;font-size:0.66rem}
+
+/* Mast */
+.mast{font-family:'Orbitron',sans-serif;font-weight:900;font-size:clamp(1.7rem,6vw,2.9rem);line-height:1.12;letter-spacing:0.02em;text-transform:uppercase}
+.mast .cy{color:var(--accent)}
+.sub{font-family:'Share Tech Mono',monospace;color:var(--muted);font-size:0.8rem;letter-spacing:0.18em;text-transform:uppercase;margin-top:12px}
+
+/* Divider */
+.divider{position:relative;height:1px;margin:36px 0;background:linear-gradient(90deg,transparent,var(--line) 15%,var(--line) 85%,transparent)}
+.divider::after{content:"◆";position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);color:var(--accent);font-size:0.65rem;background:var(--bg);padding:0 12px}
+
+/* Stat cells */
+.stats{display:grid;grid-template-columns:repeat(3,1fr);gap:1px;background:var(--line);border:1px solid var(--line);margin:26px 0}
+.stats .cell{background:var(--panel);padding:16px 14px}
+.stats .k{font-family:'Share Tech Mono',monospace;font-size:0.62rem;letter-spacing:0.3em;text-transform:uppercase;color:var(--muted);display:block;margin-bottom:6px}
+.stats .v{font-family:'Orbitron',sans-serif;font-weight:700;font-size:1.35rem;color:var(--accent)}
+
+/* Controls */
+.controls{margin:26px 0 18px}
+.searchbox{
+    width:100%;background:var(--panel);border:1px solid var(--line);color:var(--ink);
+    font-family:'Share Tech Mono',monospace;font-size:0.85rem;letter-spacing:0.08em;
+    padding:12px 14px;outline:none;
+}
+.searchbox:focus{border-color:var(--accent)}
+.searchbox::placeholder{color:var(--muted)}
+.chips{display:flex;flex-wrap:wrap;gap:8px;margin-top:14px}
+.chip-btn{
+    font-family:'Share Tech Mono',monospace;font-size:0.68rem;letter-spacing:0.14em;text-transform:uppercase;
+    background:transparent;border:1px solid var(--line);color:var(--muted);
+    padding:7px 12px;cursor:pointer;transition:all .15s;
+}
+.chip-btn:hover{border-color:var(--accent-dim);color:var(--ink)}
+.chip-btn.active{border-color:var(--accent);color:var(--accent);background:rgba(0,217,255,0.06)}
+.chip-btn:focus-visible{outline:1px solid var(--accent);outline-offset:2px}
+
+/* Section label */
+.section-label{
+    font-family:'Share Tech Mono',monospace;font-size:0.7rem;letter-spacing:0.3em;text-transform:uppercase;
+    color:var(--accent);margin:34px 0 12px;
+}
+
+/* Company cards */
+.grid{display:flex;flex-direction:column;gap:10px}
+.co{
+    position:relative;background:var(--panel);border:1px solid var(--line);
+    padding:16px 18px;display:flex;gap:14px;align-items:flex-start;justify-content:space-between;flex-wrap:wrap;
+}
+.co::before,.co::after{
+    content:"";position:absolute;width:18px;height:18px;border-color:var(--accent);border-style:solid;
+}
+.co::before{top:-1px;left:-1px;border-width:1px 0 0 1px}
+.co::after{bottom:-1px;right:-1px;border-width:0 1px 1px 0}
+.co-body{flex:1 1 340px;min-width:0}
+.co-name{font-family:'Orbitron',sans-serif;font-weight:700;font-size:0.95rem;letter-spacing:0.04em;text-transform:uppercase}
+.co-tags{font-family:'Share Tech Mono',monospace;font-size:0.66rem;letter-spacing:0.12em;color:var(--muted);text-transform:uppercase;margin-top:4px}
+.co-tags .base{color:var(--warn)}
+.co-desc{font-size:0.82rem;color:#c8c5be;margin-top:8px;max-width:56ch}
+.co-links{display:flex;gap:8px;align-items:center;flex-shrink:0;margin-top:2px}
+.btn{
+    font-family:'Share Tech Mono',monospace;font-size:0.7rem;letter-spacing:0.14em;
+    border:1px solid var(--accent-dim);color:var(--accent);text-decoration:none;
+    padding:8px 14px;transition:all .15s;white-space:nowrap;
+}
+.btn:hover{border-color:var(--accent);background:rgba(0,217,255,0.08)}
+.btn.alt{border-color:var(--line);color:var(--muted);padding:8px 10px}
+.btn.alt:hover{border-color:var(--accent-dim);color:var(--ink)}
+
+.empty{
+    display:none;font-family:'Share Tech Mono',monospace;color:var(--muted);
+    font-size:0.8rem;letter-spacing:0.14em;padding:30px 0;text-align:center;
+}
+
+/* Note block */
+.note{
+    border-left:2px solid var(--warn);background:var(--panel);
+    padding:14px 16px;margin:34px 0 0;font-size:0.8rem;color:#c8c5be;
+}
+.note strong{font-family:'Share Tech Mono',monospace;font-size:0.68rem;letter-spacing:0.2em;text-transform:uppercase;color:var(--warn);display:block;margin-bottom:6px}
+
+footer{
+    margin-top:60px;padding-top:18px;border-top:1px solid var(--line);
+    font-family:'Share Tech Mono',monospace;font-size:0.68rem;letter-spacing:0.2em;
+    color:var(--muted);text-transform:uppercase;text-align:center;
+}
+
+@media (max-width:560px){
+    .stats{grid-template-columns:1fr 1fr 1fr}
+    .stats .v{font-size:1.05rem}
+    .co{padding:14px}
+    .co-links{width:100%;justify-content:flex-start}
+}
+
+@media (prefers-reduced-motion:reduce){
+    .meta-bar .status .dot{animation:none}
+    *{transition:none !important}
+}
+
+@media print{
+    html,body{background:#fff;color:#111}
+    body::before{display:none}
+    .co,.stats .cell,.note{background:#fff;border-color:#ccc}
+    .co-name{color:#111}
+    .btn{color:#111;border-color:#999}
+    .controls,.meta-bar .chip{display:none}
+    .co::before,.co::after{display:none}
+    a{color:#111}
+}
+</style>
+</head>
+<body>
+
+<main>
+
+<div class="meta-bar">
+    <span class="id">LEOAF-CAREER-02 · EMPLOYER DIRECTORY</span>
+    <span class="status"><span class="dot"></span>SURVEY 2026-07</span>
+    <span class="chip">INTERNAL</span>
+</div>
+
+<h1 class="mast">Space &amp; Satcom<br><span class="cy">Employer Directory</span></h1>
+<p class="sub">Toulouse / Occitanie / Aerospace Valley footprint · career reconnaissance</p>
+
+<div class="stats">
+    <div class="cell"><span class="k">Entries</span><span class="v" id="statTotal">—</span></div>
+    <div class="cell"><span class="k">Toulouse area</span><span class="v" id="statTls">—</span></div>
+    <div class="cell"><span class="k">Segments</span><span class="v" id="statSeg">—</span></div>
+</div>
+
+<div class="controls">
+    <input type="text" class="searchbox" id="q" placeholder="&gt; FILTER BY NAME, DOMAIN, LOCATION…" autocomplete="off">
+    <div class="chips" id="chips"></div>
+</div>
+
+<div class="divider"></div>
+
+<div id="list"></div>
+<div class="empty" id="empty">NO MATCH. WIDEN THE FILTER.</div>
+
+<div class="note">
+    <strong>Link integrity</strong>
+    Primary links point to official sites or careers portals where the domain is known with confidence.
+    Where the domain could not be confirmed, the primary link is a search query instead — deliberate,
+    to avoid dead or wrong URLs. The ⌕ button on every row is a durable careers search fallback.
+    Survey date 2026-07; company sets and URLs drift, re-verify before applying.
+</div>
+
+<footer>© 2026 LEOAF · CAREER RECON · SELF-DIRECTED PROGRAM TOOLING</footer>
+
+</main>
+
+<script>
+// seg keys: prime, operator, equipment, ground, ssa, board
+const SEGMENTS = {
+    prime:     "Primes & Institutions",
+    operator:  "Operators & Services",
+    equipment: "Equipment & RF",
+    ground:    "Ground SW & Engineering",
+    ssa:       "SSA & In-Orbit",
+    board:     "Job Boards"
+};
+
+// url: confident official site / careers portal. null → search link becomes primary.
+const COMPANIES = [
+// PRIMES & INSTITUTIONS
+{name:"Airbus Defence & Space", seg:"prime", base:"Toulouse", desc:"Telecom payloads GEO+LEO, IRIS², OneSat, ground segment. Continuous recruitment across satcom disciplines.", url:"https://www.airbus.com/en/careers"},
+{name:"Thales Alenia Space", seg:"prime", base:"Toulouse", desc:"Civil and military telecom payloads, satnav, ground segments. ~2,800 staff on the Toulouse site.", url:"https://careers.thalesgroup.com"},
+{name:"CNES", seg:"prime", base:"Toulouse", desc:"French space agency. Recruits continuously across all space disciplines; principal institutional client of the ecosystem.", url:"https://recrutement.cnes.fr"},
+{name:"IRT Saint Exupéry", seg:"prime", base:"Toulouse", desc:"Partnership research institute — embedded systems, more-electric technologies, space projects with the primes.", url:"https://www.irt-saintexupery.com"},
+
+// OPERATORS & SERVICES
+{name:"Eutelsat Group", seg:"operator", base:"Paris / Toulouse ops", desc:"GEO fleet + OneWeb LEO constellation. Hybrid working supported; conditions depend on team location.", url:"https://www.eutelsat.com/group/careers"},
+{name:"CLS", seg:"operator", base:"Ramonville", desc:"Argos operator, satellite-based environmental and maritime connectivity services.", url:"https://www.cls.fr"},
+{name:"Telespazio France", seg:"operator", base:"Toulouse", desc:"Satcom services, ground operations, geo-information.", url:"https://www.telespazio.fr"},
+{name:"ESSP", seg:"operator", base:"Toulouse", desc:"EGNOS service provider — signal-in-space performance, safety-of-life navigation services.", url:"https://www.essp-sas.eu"},
+{name:"Kinéis", seg:"operator", base:"Ramonville", desc:"25-satellite IoT connectivity constellation, French Tech 120.", url:"https://www.kineis.com"},
+{name:"Loft Orbital", seg:"operator", base:"Toulouse", desc:"Condominium satellite missions, payload hosting and operations. French Tech Next 40.", url:"https://www.loftorbital.com"},
+{name:"Infinite Orbits", seg:"operator", base:"Toulouse", desc:"GEO in-orbit services — life extension, inspection. ~140 staff in Toulouse, factory opened 2026, SES and DGA contracts.", url:"https://www.infiniteorbits.io"},
+{name:"Univity", seg:"operator", base:"Toulouse", desc:"Constellation operator (ex-E-Space France perimeter per ecosystem listings). AV member.", url:"https://www.aerospace-valley.com/annuaire-des-membres/univity"},
+{name:"E-Space", seg:"operator", base:"Toulouse site", desc:"LEO constellation venture with Toulouse engineering presence.", url:"https://www.e-space.com"},
+{name:"Exotrail", seg:"operator", base:"Toulouse / Massy", desc:"Electric propulsion and in-space mobility services; SpaceVan orbital transfer.", url:"https://www.exotrail.com"},
+{name:"Astroscale France", seg:"ssa", base:"Toulouse", desc:"On-orbit servicing and debris removal, French subsidiary.", url:"https://astroscale.com"},
+
+// EQUIPMENT & RF
+{name:"Hemeria", seg:"equipment", base:"Toulouse", desc:"Nanosat platforms and equipment; built the 25 Kinéis constellation satellites.", url:"https://www.hemeria-group.com"},
+{name:"U-Space", seg:"equipment", base:"Toulouse", desc:"Nanosatellite manufacturer with series-production plant.", url:"https://u-space.fr"},
+{name:"Anywaves", seg:"equipment", base:"Toulouse", desc:"Antennas for small satellites — pure RF hardware play.", url:"https://anywaves.com"},
+{name:"Comat", seg:"equipment", base:"Flourens", desc:"Space mechanisms and equipment for smallsats.", url:null},
+{name:"Erems", seg:"equipment", base:"Flourens", desc:"Onboard electronics, recognized telecom equipment specialist.", url:"https://www.erems.fr"},
+{name:"Steel Électronique", seg:"equipment", base:"Martres-Tolosane", desc:"Space telecom equipment manufacturer.", url:null},
+{name:"Mecano ID", seg:"equipment", base:"Toulouse", desc:"Mechanical and thermal engineering for space hardware.", url:null},
+{name:"TRAD Tests & Radiations", seg:"equipment", base:"Labège", desc:"Radiation testing and analysis for space equipment.", url:"https://www.trad.fr"},
+{name:"Wupatec", seg:"equipment", base:"Limoges (AV region)", desc:"GaN RF power amplifier specialist — envelope tracking, high-efficiency PAs.", url:"https://www.wupatec.com"},
+{name:"Syntony GNSS", seg:"equipment", base:"Toulouse", desc:"GNSS receivers and signal simulation.", url:"https://www.syntony-gnss.com"},
+{name:"Abbia GNSS Technologies", seg:"equipment", base:"Toulouse", desc:"GNSS engineering and test services. AV member.", url:null},
+{name:"Safran Data Systems", seg:"equipment", base:"La Teste (AV region)", desc:"TT&C ground stations, telemetry, space communications equipment.", url:"https://www.safran-group.com"},
+{name:"ACTIA Group", seg:"equipment", base:"Toulouse", desc:"Electronics including space telecom boards and satcom subsystems.", url:null},
+
+// SSA & IN-ORBIT
+{name:"Look Up Space", seg:"ssa", base:"Toulouse", desc:"Space surveillance radar and SSA services.", url:null},
+{name:"Aldoria", seg:"ssa", base:"Toulouse presence", desc:"Optical space surveillance network.", url:null},
+
+// GROUND SW & ENGINEERING
+{name:"CS Group (Sopra Steria)", seg:"ground", base:"Toulouse", desc:"Ground segment software — mission control, flight dynamics, image processing chains.", url:"https://www.csgroup.eu"},
+{name:"Agenium", seg:"ground", base:"Toulouse", desc:"Ground software and space applications.", url:null},
+{name:"Viveris", seg:"ground", base:"Toulouse", desc:"Embedded and ground software engineering. AV member.", url:"https://www.viveris.fr"},
+{name:"Magellium", seg:"ground", base:"Ramonville", desc:"Geo-information, image processing, EO applications.", url:null},
+{name:"Scalian", seg:"ground", base:"Toulouse", desc:"Engineering services staffing the primes — systems, software, ops.", url:"https://www.scalian.com"},
+{name:"Expleo", seg:"ground", base:"Toulouse", desc:"Engineering services — space systems and validation.", url:"https://www.expleo.com"},
+{name:"ALTEN", seg:"ground", base:"Toulouse", desc:"Engineering services — recurring satcom/ground segment placements at the primes.", url:"https://www.alten.fr"},
+{name:"Capgemini Engineering", seg:"ground", base:"Toulouse", desc:"Engineering services — space and defence accounts.", url:"https://www.capgemini.com/careers"},
+{name:"Sopra Steria", seg:"ground", base:"Toulouse", desc:"Software and systems for space and defence programs.", url:"https://www.soprasteria.com"},
+{name:"Akkodis (ex-Akka)", seg:"ground", base:"Toulouse", desc:"Engineering services across the aerospace value chain.", url:"https://www.akkodis.com"},
+
+// JOB BOARDS
+{name:"Aerospace Valley job board", seg:"board", base:"AV members, all regions", desc:"Aggregated openings from cluster members. JS widget — browse manually, no static index.", url:"https://emploi.aerospace-valley.com"},
+{name:"Space-Careers", seg:"board", base:"Europe-wide", desc:"European space industry job board — satellite operators, manufacturers, ground systems categories.", url:"https://www.space-careers.com"},
+{name:"SpaceCrew", seg:"board", base:"Europe-wide", desc:"Space industry job aggregator with telecom satellite systems category.", url:"https://spacecrew.com"}
+];
+
+const listEl  = document.getElementById("list");
+const chipsEl = document.getElementById("chips");
+const qEl     = document.getElementById("q");
+const emptyEl = document.getElementById("empty");
+
+let activeSeg = "all";
+
+function searchURL(name){
+    return "https://www.google.com/search?q=" + encodeURIComponent(name + " careers");
+}
+
+function render(){
+    const q = qEl.value.trim().toLowerCase();
+    listEl.innerHTML = "";
+    let shown = 0;
+
+    Object.keys(SEGMENTS).forEach(seg => {
+        if (activeSeg !== "all" && activeSeg !== seg) return;
+
+        const items = COMPANIES.filter(c =>
+            c.seg === seg &&
+            (q === "" || (c.name + " " + c.base + " " + c.desc).toLowerCase().includes(q))
+        );
+        if (items.length === 0) return;
+
+        const label = document.createElement("div");
+        label.className = "section-label";
+        label.textContent = SEGMENTS[seg];
+        listEl.appendChild(label);
+
+        const grid = document.createElement("div");
+        grid.className = "grid";
+
+        items.forEach(c => {
+            const primary = c.url || searchURL(c.name);
+            const card = document.createElement("div");
+            card.className = "co";
+            card.innerHTML =
+                '<div class="co-body">' +
+                    '<div class="co-name">' + c.name + '</div>' +
+                    '<div class="co-tags"><span class="base">' + c.base + '</span></div>' +
+                    '<div class="co-desc">' + c.desc + '</div>' +
+                '</div>' +
+                '<div class="co-links">' +
+                    '<a class="btn" href="' + primary + '" target="_blank" rel="noopener">' +
+                        (c.url ? 'SITE / CAREERS' : 'SEARCH CAREERS') + '</a>' +
+                    (c.url ? '<a class="btn alt" href="' + searchURL(c.name) + '" target="_blank" rel="noopener" title="Careers search fallback">⌕</a>' : '') +
+                '</div>';
+            grid.appendChild(card);
+            shown++;
+        });
+
+        listEl.appendChild(grid);
+    });
+
+    emptyEl.style.display = shown === 0 ? "block" : "none";
+}
+
+function buildChips(){
+    const all = document.createElement("button");
+    all.className = "chip-btn active";
+    all.textContent = "ALL";
+    all.dataset.seg = "all";
+    chipsEl.appendChild(all);
+    Object.keys(SEGMENTS).forEach(seg => {
+        const b = document.createElement("button");
+        b.className = "chip-btn";
+        b.textContent = SEGMENTS[seg];
+        b.dataset.seg = seg;
+        chipsEl.appendChild(b);
+    });
+    chipsEl.addEventListener("click", e => {
+        const btn = e.target.closest(".chip-btn");
+        if (!btn) return;
+        activeSeg = btn.dataset.seg;
+        chipsEl.querySelectorAll(".chip-btn").forEach(x => x.classList.toggle("active", x === btn));
+        render();
+    });
+}
+
+function buildStats(){
+    document.getElementById("statTotal").textContent = COMPANIES.length;
+    document.getElementById("statTls").textContent = COMPANIES.filter(c =>
+        /toulouse|ramonville|labège|flourens|martres/i.test(c.base)).length;
+    document.getElementById("statSeg").textContent = Object.keys(SEGMENTS).length;
+}
+
+qEl.addEventListener("input", render);
+buildChips();
+buildStats();
+render();
+</script>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="supabase.js"></script>
+<script>
+(function () {
+    function bounceToLogin(reason) {
+        console.error("Auth guard:", reason, "- redirecting to index.html");
+        window.location.replace("index.html");
+    }
+    async function init() {
+        // Fail CLOSED: if the session cannot be confirmed, leave the page.
+        if (typeof client === "undefined" || !client || !client.auth) {
+            return bounceToLogin("Supabase client not loaded (is supabase.js in this directory?)");
+        }
+        let session = null;
+        try { ({ data: { session } } = await client.auth.getSession()); }
+        catch (e) { return bounceToLogin("getSession threw: " + e.message); }
+        if (!session) { window.location.replace("index.html"); return; }
+    }
+    if (document.readyState === "loading") {
+        document.addEventListener("DOMContentLoaded", init);
+    } else {
+        init();
+    }
+})();
+</script>
+
+</body>
+</html>
