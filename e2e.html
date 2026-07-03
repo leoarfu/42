@@ -1,0 +1,329 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, shrink-to-fit=no">
+<title>OneSat E2E Engineering Manager — Interview Prep · LEOAF</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;600;800&family=Share+Tech+Mono&family=Libre+Baskerville:ital,wght@0,400;0,700;1,400&display=swap" rel="stylesheet">
+
+<!-- AUTH GUARD: paste the standard fail-closed Supabase guard block from any
+     lesson page here (script tags for supabase.js + guard snippet). Not
+     reproduced here to avoid drifting from the canonical version. -->
+
+<style>
+* { box-sizing:border-box; margin:0; padding:0; }
+html { height:100%; -webkit-text-size-adjust:100%; overflow-x:hidden; }
+body { font-family:'Share Tech Mono',monospace; background:#000; color:white; overflow-x:hidden; min-height:100vh; }
+
+/* scanline overlay */
+body::after { content:''; position:fixed; inset:0; z-index:50; pointer-events:none;
+  background:repeating-linear-gradient(to bottom, rgba(255,255,255,0.015) 0 1px, transparent 1px 3px);
+  mix-blend-mode:overlay; }
+
+header { background:#000; border-bottom:1px solid #ff004f33; position:sticky; top:0; z-index:100; padding:1rem clamp(1.5rem,5vw,4rem); display:flex; justify-content:space-between; align-items:center; box-shadow:0 4px 16px #0008; }
+.logo { font-family:'Orbitron',sans-serif; font-weight:800; font-size:clamp(16px,2vw,22px); letter-spacing:3px; text-decoration:none; }
+.logo span:first-child { color:white; }
+.logo span:last-child { color:#ff004f; }
+.nav-right { display:flex; align-items:center; gap:10px; }
+.nav-btn { background:transparent; border:1px solid #ff004f44; color:#ff004f; padding:6px 14px; cursor:pointer; transition:0.3s ease; font-size:11px; font-family:'Orbitron',sans-serif; letter-spacing:1px; text-decoration:none; display:inline-block; }
+.nav-btn:hover { background:#ff004f; color:black; }
+
+.breadcrumb { padding:14px clamp(1.5rem,5vw,4rem); font-size:11px; color:#ffffff44; letter-spacing:1px; position:relative; z-index:1; }
+.breadcrumb a { color:#00d9ff66; text-decoration:none; }
+.breadcrumb a:hover { color:#00d9ff; }
+.breadcrumb span { margin:0 8px; }
+
+.lesson-wrap { max-width:820px; margin:0 auto; padding:0 clamp(1.5rem,5vw,4rem) 80px; position:relative; z-index:1; }
+
+.lesson-header { padding:30px 0 28px; border-bottom:1px solid #ffffff11; margin-bottom:36px; }
+.lesson-tag { font-family:'Orbitron',sans-serif; font-size:10px; color:#ff004f; letter-spacing:3px; margin-bottom:10px; }
+.lesson-header h1 { font-family:'Orbitron',sans-serif; font-size:clamp(20px,3.5vw,32px); font-weight:800; line-height:1.2; margin-bottom:12px; }
+.lesson-header h1 em { font-style:normal; color:#00d9ff; }
+.lesson-meta { display:flex; gap:10px; flex-wrap:wrap; margin-bottom:16px; }
+.l-pill { font-family:'Orbitron',sans-serif; font-size:10px; padding:3px 10px; border:1px solid; letter-spacing:1px; }
+.l-pill-q { color:#ff004f; border-color:#ff004f44; }
+.l-pill-t { color:#39ff14; border-color:#39ff1444; }
+.l-pill-c { color:#00d9ff; border-color:#00d9ff44; }
+.lesson-intro { font-size:13px; line-height:1.85; opacity:0.75; }
+
+.key-numbers { display:grid; grid-template-columns:repeat(auto-fit,minmax(140px,1fr)); gap:12px; margin:22px 0; }
+.kn-item { background:rgba(255,255,255,0.03); border:1px solid #ffffff11; padding:16px 12px; text-align:center; }
+.kn-val { font-family:'Orbitron',sans-serif; font-size:clamp(13px,2vw,18px); font-weight:800; color:#00d9ff; display:block; }
+.kn-label { font-size:10px; opacity:0.5; letter-spacing:1px; margin-top:5px; display:block; line-height:1.4; }
+
+/* manager quote — the one serif beat */
+.mgr-quote { border:1px solid #00d9ff33; padding:34px clamp(24px,4vw,48px); margin:36px 0; position:relative; text-align:center; }
+.mgr-quote::before, .mgr-quote::after { content:''; position:absolute; width:18px; height:18px; border:1px solid #00d9ff; }
+.mgr-quote::before { top:-1px; left:-1px; border-right:none; border-bottom:none; }
+.mgr-quote::after { bottom:-1px; right:-1px; border-left:none; border-top:none; }
+.mgr-quote p { font-family:'Libre Baskerville', Georgia, serif; font-style:italic; font-size:15px; line-height:1.9; color:#ececec; max-width:60ch; margin:0 auto 14px; }
+.mgr-quote .src { font-family:'Orbitron',sans-serif; font-size:10px; letter-spacing:2px; color:#00d9ff; }
+
+/* light reading blocks */
+.content-block { background:#f5f2ec; color:#1a1a1a; padding:36px clamp(24px,4vw,48px); margin-bottom:24px; border-left:4px solid #00d9ff; position:relative; z-index:1; }
+.content-block h2 { font-family:'Orbitron',sans-serif; font-size:13px; color:#003d66; letter-spacing:2px; text-transform:uppercase; margin-bottom:20px; padding-bottom:10px; border-bottom:2px solid #00d9ff66; scroll-margin-top:80px; }
+.content-block h3 { font-family:'Orbitron',sans-serif; font-size:11px; color:#444; letter-spacing:1.5px; text-transform:uppercase; margin:32px 0 14px; }
+.content-block p { font-family:'Libre Baskerville', Georgia, serif; font-size:15px; line-height:1.9; color:#1a1a1a; margin-bottom:18px; }
+.content-block ul { padding-left:0; margin-bottom:16px; list-style:none; }
+.content-block ul li { font-family:'Libre Baskerville', Georgia, serif; font-size:14px; line-height:1.85; color:#1a1a1a; padding-left:20px; position:relative; margin-bottom:8px; }
+.content-block ul li::before { content:'›'; position:absolute; left:0; color:#0077aa; }
+.content-block .callout { border-left:3px solid #0088cc; background:#e8f4fb; color:#1a1a1a; padding:16px 20px; margin:22px 0; font-size:13px; line-height:1.8; font-family:'Share Tech Mono',monospace; }
+.content-block .callout.red   { border-left-color:#cc0033; background:#fdecea; }
+.content-block .callout.green { border-left-color:#1a7a1a; background:#eafaea; }
+.content-block .callout.amber { border-left-color:#996600; background:#fef9ec; }
+.content-block .callout strong { font-family:'Orbitron',sans-serif; font-size:10px; letter-spacing:1px; display:block; margin-bottom:8px; color:inherit; }
+
+/* fit map table */
+table.fitmap { width:100%; border-collapse:collapse; margin:12px 0 6px; font-family:'Share Tech Mono',monospace; }
+table.fitmap th { font-family:'Orbitron',sans-serif; font-size:10px; letter-spacing:1.5px; text-transform:uppercase; color:#003d66; text-align:left; padding:10px 12px; border-bottom:2px solid #00d9ff66; }
+table.fitmap td { font-size:12.5px; line-height:1.65; padding:12px; border-bottom:1px solid #d8d4cc; vertical-align:top; color:#1a1a1a; }
+td.conf { font-family:'Orbitron',sans-serif; font-size:10px; letter-spacing:1px; white-space:nowrap; }
+td.conf.g { color:#1a7a1a; }
+td.conf.a { color:#996600; }
+td.conf.r { color:#cc0033; }
+
+/* Q&A prep entries */
+.prep-q { border:1px solid #d8d4cc; background:#fff; padding:20px 22px; margin-bottom:18px; }
+.prep-q h4 { font-family:'Orbitron',sans-serif; font-size:11px; letter-spacing:1px; color:#003d66; margin-bottom:12px; line-height:1.5; }
+.prep-q p { font-size:13.5px; margin-bottom:12px; }
+.prep-q .tag { font-family:'Orbitron',sans-serif; font-size:9px; letter-spacing:1.5px; display:inline-block; margin-bottom:10px; padding:2px 8px; border:1px solid; }
+.prep-q .tag.tests { color:#0077aa; border-color:#0077aa66; }
+.prep-q .trap { border-left:3px solid #cc0033; background:#fdecea; padding:10px 14px; font-family:'Share Tech Mono',monospace; font-size:12px; line-height:1.7; }
+.prep-q .trap strong { font-family:'Orbitron',sans-serif; font-size:9px; letter-spacing:1px; display:block; margin-bottom:6px; }
+
+/* story slots */
+.story-slot { border:1px dashed #99958c; background:#fbf9f5; padding:18px 20px; margin-bottom:14px; }
+.story-slot h4 { font-family:'Orbitron',sans-serif; font-size:10px; letter-spacing:1.5px; color:#996600; margin-bottom:10px; }
+.story-slot p { font-size:13px; margin-bottom:0; }
+
+/* divider */
+.divider { position:relative; height:1px; margin:44px 0; background:linear-gradient(to right, transparent, rgba(0,217,255,0.5), transparent); }
+.divider::after { content:'◆'; position:absolute; left:50%; top:50%; transform:translate(-50%,-50%); color:#00d9ff; font-size:10px; background:#000; padding:0 12px; }
+
+footer { text-align:center; padding:30px; opacity:0.3; font-size:11px; position:relative; z-index:1; letter-spacing:1px; }
+
+@media (max-width:600px) {
+  .key-numbers { grid-template-columns:1fr 1fr; }
+  table.fitmap thead { display:none; }
+  table.fitmap tr { display:block; border-bottom:2px solid #d8d4cc; padding:8px 0; }
+  table.fitmap td { display:block; border-bottom:none; padding:4px 12px; }
+}
+
+@media print {
+  html, body { background:#fff !important; color:#111 !important; }
+  body::after, header, .breadcrumb, footer { display:none !important; }
+  .lesson-wrap { max-width:100%; padding:0; }
+  .lesson-header h1, .lesson-header h1 em { color:#111; }
+  .lesson-tag { color:#555; }
+  .l-pill { color:#333 !important; border-color:#999 !important; }
+  .kn-item { border:1px solid #999; }
+  .kn-val { color:#111; }
+  .mgr-quote { border-color:#999; }
+  .mgr-quote p { color:#111; }
+  .mgr-quote .src { color:#333; }
+  .content-block { border-left-color:#666; background:#fff; }
+  .lesson-intro { opacity:1; color:#333; }
+}
+</style>
+</head>
+<body>
+
+<header>
+    <a href="dashboard.html" class="logo"><span>LEO</span><span>AF</span></a>
+    <div class="nav-right">
+        <a href="dashboard.html" class="nav-btn">← COMMAND CENTER</a>
+    </div>
+</header>
+
+<div class="breadcrumb">
+    <a href="dashboard.html">DASHBOARD</a><span>/</span>
+    <span style="color:#ffffff88;">CAREER — ONESAT E2E ENGINEERING MANAGER PREP</span>
+</div>
+
+<div class="lesson-wrap">
+
+<div class="lesson-header">
+    <div class="lesson-tag">CAREER DOSSIER · INTERVIEW PREPARATION</div>
+    <h1>OneSat <em>End-to-End</em> Engineering Manager</h1>
+    <div class="lesson-meta">
+        <div class="l-pill l-pill-c">SIGLUM TSESV1</div>
+        <div class="l-pill l-pill-q">CLASSE G13</div>
+        <div class="l-pill l-pill-t">CDI</div>
+    </div>
+    <p class="lesson-intro">Preparation dossier for the End-to-End Engineering Manager position in the OneSat Chief Engineering department, Toulouse Palays. Built from the full job description (last modified 18/06/2026) and the hiring manager's clarifying comment. The strategy: anchor on requirements-to-architecture discipline, ground segment depth, and customer-facing technical work; close the payload dimension — Digital Transparent Processor and active antennas — with structured preparation rather than pretending it is a strength.</p>
+</div>
+
+<div class="key-numbers">
+    <div class="kn-item"><span class="kn-val">TSESV1</span><span class="kn-label">SIGLUM</span></div>
+    <div class="kn-item"><span class="kn-val">G13</span><span class="kn-label">CLASSE EMPLOI</span></div>
+    <div class="kn-item"><span class="kn-val">PALAYS</span><span class="kn-label">TOULOUSE SITE</span></div>
+    <div class="kn-item"><span class="kn-val">11</span><span class="kn-label">COMPETENCY CODES · ALL LEVEL 2</span></div>
+</div>
+
+<div class="mgr-quote">
+    <p>« Plus orienté E2E, donc avec le besoin de prendre en compte la dimension payload (DTP, Antennes Actives) côté satellite. »</p>
+    <div class="src">HIRING MANAGER — CLARIFYING COMMENT ON THE JD</div>
+</div>
+
+<div class="content-block" id="s1">
+    <h2>1. What the manager's comment changes</h2>
+    <p>The comment names the payload dimension — the Digital Transparent Processor (the onboard digital channelizer that slices uplinked spectrum into sub-bands and routes them between beams) and the active antennas (arrays whose beams are formed and steered electronically, reconfigurable in orbit) — as the axis that distinguishes this seat from a ground-centric system role. That is precisely the pre-identified weak area, so it is the discriminating topic of the interview, not a footnote.</p>
+    <p>Two readings, both favorable. First, a manager who volunteers the hard part of a role is screening for honest engagement with it, not for pre-existing mastery; the JD itself asks for "knowledge of payload operations and design," not payload design experience. Second, the framing "prendre en compte" — take into account — describes an end-to-end engineer who reasons <em>across</em> the payload boundary and interfaces with payload experts, which matches the JD bullet "regular interface with ground components, satellite and operation experts."</p>
+    <div class="callout green">
+        <strong>POSITIONING LINE</strong>
+        "I reason from the user terminal through the gateway into the payload configuration. The payload internals belong to the payload experts — my job is to own the chain that crosses them, and to speak their language well enough to negotiate the interface."
+    </div>
+</div>
+
+<div class="content-block" id="s2">
+    <h2>2. Fit map — JD activities against actual experience</h2>
+    <p>Each activity from the JD, mapped to the strength that answers it and rated for interview confidence. Green means lead with it; amber means prepare a bridge; red means prepare a structured admission plus a learning plan.</p>
+    <table class="fitmap">
+        <thead><tr><th>JD activity</th><th>Anchor</th><th>Confidence</th></tr></thead>
+        <tbody>
+        <tr><td>Lead E2E engineering: system requirements management, architecture definition and justification</td><td>Requirements-to-architecture discipline from commercial aero satcom system work</td><td class="conf g">● STRONG</td></tr>
+        <tr><td>Capture customer telecom mission needs (air interface, operations, ground/space compatibility, user terminals)</td><td>Direct experience across air interface, terminals, and ground segment in Ka-band aero service</td><td class="conf g">● STRONG</td></tr>
+        <tr><td>Consolidate System Concept of Operations under customer constraints and product portfolio definition</td><td>CONOPS work anchored in operational service delivery; portfolio logic transferable</td><td class="conf g">● STRONG</td></tr>
+        <tr><td>Consolidate customer external and internal system interfaces</td><td>Interface management across multi-vendor ground/network stacks; matches competency A104</td><td class="conf g">● STRONG</td></tr>
+        <tr><td>Regular interface with ground, satellite, and operations experts to define the system solution</td><td>Cross-layer RF / baseband / IP fault isolation — the habit of working across expert domains</td><td class="conf g">● STRONG</td></tr>
+        <tr><td>Support system IVV activities</td><td>Support seat, not ownership — competency A503 confirms "support à la campagne d'essais." The IVVQ-role gap does not apply here</td><td class="conf a">● BRIDGE</td></tr>
+        <tr><td>Monitor and plan E2E activities; solve technical problems on time, quality, cost</td><td>Live operational problem-solving under pressure; planning dimension to evidence explicitly</td><td class="conf g">● STRONG</td></tr>
+        <tr><td>Interface with customer on E2E and ground system architecture</td><td>Customer-facing technical work in commercial aero satcom</td><td class="conf g">● STRONG</td></tr>
+        <tr><td>Organize and run technical system workshops</td><td>Multi-vendor supplier onboarding — same facilitation muscle</td><td class="conf g">● STRONG</td></tr>
+        <tr><td>Project reviews with customers, data pack elaboration on system topics</td><td>Review participation yes; formal data-pack elaboration in Airbus review culture to bridge</td><td class="conf a">● BRIDGE</td></tr>
+        <tr><td>Track and negotiate contractual technical changes with the customer project manager</td><td>Technical side familiar; contractual change-management mechanics to bridge</td><td class="conf a">● BRIDGE</td></tr>
+        <tr><td><strong>Payload dimension per manager comment: DTP and active antennas</strong></td><td>Weak area, explicitly named. Section 4 is the prep plan</td><td class="conf r">● GAP — PREPARE</td></tr>
+        </tbody>
+    </table>
+</div>
+
+<div class="content-block" id="s3">
+    <h2>3. Competency codes — what the grid will measure</h2>
+    <p>All eleven required competencies sit at Level 2, "Autonomous" — able to perform the activity independently, without needing Level 3 expertise or mentoring scope. That uniform Level 2 profile is consistent with the G13 grading and means no single competency demands expert status. In English gloss:</p>
+    <ul>
+        <li><strong>A100</strong> — Systems architecture</li>
+        <li><strong>A101</strong> — System functions: requirements definition and architecture</li>
+        <li><strong>A104</strong> — Interface management</li>
+        <li><strong>A503</strong> — Test campaign support (the written confirmation that IVV here is support, not ownership)</li>
+        <li><strong>CO-AM-00009</strong> — Building and establishing recommendations</li>
+        <li><strong>D010</strong> — Systems engineering</li>
+        <li><strong>D012</strong> — Operational and functional analysis</li>
+        <li><strong>CO-PA-00023</strong> — Project lifecycle management</li>
+        <li><strong>CO-OP-00002</strong> — Interacting and influencing</li>
+        <li><strong>CO-UY-00034</strong> — Customer and supplier relations</li>
+        <li><strong>CO-FR-00001</strong> — Risk and opportunity management execution</li>
+    </ul>
+    <div class="callout">
+        <strong>READ ON "MANAGER"</strong>
+        Lifecycle management plus risk-and-opportunity execution, with no people-management competency in the list, indicates the title refers to managing engineering activities, not a hierarchical team. Confirm with one sentence in the interview; do not spend more than that on it.
+    </div>
+</div>
+
+<div class="content-block" id="s4">
+    <h2>4. The payload dimension — DTP and active antennas</h2>
+    <h3>4.1 What an E2E engineer must actually know</h3>
+    <p>OneSat is a software-defined satellite: its coverage, capacity allocation, and frequency plan are reconfigurable in orbit rather than fixed at manufacture. Two payload elements carry that flexibility. The Digital Transparent Processor digitizes the received spectrum, splits it into sub-bands, and routes each sub-band between any uplink beam and any downlink beam according to a connectivity configuration — "transparent" because it does not demodulate the signal, so the air interface waveform passes through untouched. The active antennas form beams electronically from an array of radiating elements, so the beam layout — positions, sizes, count — is a configuration, not hardware.</p>
+    <p>The end-to-end consequence is the point to internalize: because the payload is configurable, the beam plan, the frequency plan, the gateway dimensioning, and the customer's capacity contract are all coupled through the payload configuration. A customer request to move capacity from one region to another is no longer a new satellite — it is a reconfiguration that propagates through CONOPS, payload configuration, ground segment, and the service-level commitments. Owning that propagation chain is this job.</p>
+    <h3>4.2 The reconfiguration chain, stated once</h3>
+    <ul>
+        <li>Customer mission change (new coverage area, capacity re-balance, new gateway)</li>
+        <li>→ CONOPS update: what the service must now do, under what constraints</li>
+        <li>→ Beam plan and frequency plan revision: where the beams sit, which sub-bands feed them</li>
+        <li>→ Payload configuration: DTP connectivity and channelization, active antenna beam definitions, uploaded through the payload configuration and control chain</li>
+        <li>→ Ground segment impact: gateway capacity and pointing, air interface resource plan, terminal population compatibility</li>
+        <li>→ Verification that the reconfigured system still meets the contracted service levels</li>
+    </ul>
+    <p>In the interview, narrate this chain fluently and place yourself as its owner. Depth inside any single box belongs to the box's experts; the interfaces between boxes belong to you.</p>
+
+    <h3>4.3 Likely questions, answer skeletons, traps</h3>
+
+    <div class="prep-q">
+        <span class="tag tests">TESTS: E2E REASONING ACROSS THE PAYLOAD</span>
+        <h4>Q — A customer wants to shift capacity from one coverage region to another mid-contract. Walk me through what happens.</h4>
+        <p>Skeleton: start from the contract and CONOPS, not from the hardware. Revised demand → revised beam plan → DTP sub-band re-routing and antenna beam redefinition → gateway and feeder-link impact → air interface resource re-plan → terminal compatibility check → regression against service levels → change managed contractually with the customer project manager. Close by naming which experts you pull in at which step.</p>
+        <div class="trap"><strong>TRAP</strong>Diving into DTP internals to prove payload credibility. The question tests chain ownership; hardware depth you don't have will show, and isn't being asked for.</div>
+    </div>
+
+    <div class="prep-q">
+        <span class="tag tests">TESTS: PAYLOAD LITERACY</span>
+        <h4>Q — What does a processed, software-defined payload change for system design compared to a bent-pipe payload?</h4>
+        <p>Skeleton: a bent-pipe fixes the beam-to-beam connectivity and frequency plan at design time, so the system design freezes early and flexibility lives entirely in the ground segment. A DTP makes connectivity and channelization operational variables, which moves complexity from hardware into configuration management — the frequency plan becomes a living artifact, verification must cover a configuration space rather than a point design, and the ground segment must track payload state. Flexibility is bought with configuration governance.</p>
+        <div class="trap"><strong>TRAP</strong>Presenting flexibility as pure upside. The mature answer names its cost: configuration control, expanded verification scope, tighter ground–space coupling.</div>
+    </div>
+
+    <div class="prep-q">
+        <span class="tag tests">TESTS: GROUND-SEGMENT STRENGTH APPLIED TO THE GAP</span>
+        <h4>Q — How does a reconfigurable beam layout affect gateway and ground segment dimensioning?</h4>
+        <p>Skeleton: answer from strength. Gateway dimensioning normally assumes a fixed traffic-to-feeder mapping; with reconfigurable beams that mapping moves, so gateways must be sized for the envelope of configurations, not one configuration — feeder link capacity, handover of traffic between gateways when the beam plan changes, and resource management in the air interface all inherit the payload's flexibility. This is the place to demonstrate that ground depth translates into payload-aware reasoning.</p>
+        <div class="trap"><strong>TRAP</strong>Answering as a pure ground engineer and never crossing back to what the payload configuration permits or forbids. Cross the boundary explicitly, both directions.</div>
+    </div>
+
+    <div class="prep-q">
+        <span class="tag tests">TESTS: HONESTY AND LEARNING PLAN</span>
+        <h4>Q — Your background is ground segment and service. How will you handle the payload side?</h4>
+        <p>Skeleton: name the gap before they do. State that payload operations and design depth is the area to build, that end-to-end work across RF, baseband, and IP layers is the existing habit that transfers, and give a concrete plan: structured time with the payload and PCS teams, ownership of one reconfiguration case end-to-end early in the role. Managers who flag a gap in advance want exactly this answer.</p>
+        <div class="trap"><strong>TRAP</strong>Overclaiming. One probing follow-up on DTP channelization detail collapses an inflated claim and taints the strong answers before it.</div>
+    </div>
+</div>
+
+<div class="content-block" id="s5">
+    <h2>5. Estimated time allocation across the JD activities</h2>
+    <p>The JD does not state a time split; this is an estimate from the activity list's structure, for calibration only. Verify it against the manager's own description in the interview — asking "how does the week actually divide" is itself a good question.</p>
+    <ul>
+        <li><strong>~25%</strong> — System requirements management, architecture definition and justification</li>
+        <li><strong>~20%</strong> — Customer-facing work: E2E and ground architecture topics, project reviews, data packs</li>
+        <li><strong>~15%</strong> — Mission-need capture and CONOPS consolidation</li>
+        <li><strong>~15%</strong> — Interface consolidation and regular work with ground, satellite, and operations experts</li>
+        <li><strong>~10%</strong> — Monitoring, planning, and technical problem resolution</li>
+        <li><strong>~10%</strong> — IVV support</li>
+        <li><strong>~5%</strong> — Contractual technical change tracking and negotiation support</li>
+    </ul>
+</div>
+
+<div class="content-block" id="s6">
+    <h2>6. Questions to ask the interviewer</h2>
+    <ul>
+        <li>"Manager" in the title — management of the end-to-end engineering activities, or hierarchical responsibility for a team? (One sentence; the competency list already suggests the former.)</li>
+        <li>For a typical OneSat applications program, how many reconfiguration cycles does the E2E engineer drive per year, and where do they usually originate — customer request or internal optimization?</li>
+        <li>Where does the E2E role's authority end at the payload boundary — who arbitrates when a customer need and a payload configuration constraint conflict?</li>
+        <li>How is the split organized between this department and the ground segment and payload teams during IVV — what exactly does "support" mean in practice here?</li>
+        <li>Which criteria capped the position at G13 in the classification grid, and what would growth beyond it look like from this seat? (Frames grade curiosity as growth interest.)</li>
+    </ul>
+</div>
+
+<div class="content-block" id="s7">
+    <h2>7. Story bank — slots to fill before the interview</h2>
+    <p>Four slots keyed to the strengths the fit map leans on. Fill each with a specific, dated, non-confidential case; write the situation in one sentence, the action in two, the result in one.</p>
+    <div class="story-slot">
+        <h4>SLOT 1 — CROSS-LAYER FAULT ISOLATION UNDER PRESSURE</h4>
+        <p>A live-service problem that crossed RF, baseband, and IP boundaries, where isolating the layer was the hard part. Targets the "technical problem solving on time, quality, cost" bullet.</p>
+    </div>
+    <div class="story-slot">
+        <h4>SLOT 2 — REQUIREMENTS TO ARCHITECTURE</h4>
+        <p>A case where an ambiguous customer need was converted into requirements and a justified architecture choice, including a trade-off you formalized and defended. Targets A100/A101 and the trade-off skill line.</p>
+    </div>
+    <div class="story-slot">
+        <h4>SLOT 3 — MULTI-VENDOR INTERFACE NEGOTIATION</h4>
+        <p>A supplier onboarding or interface dispute where you consolidated an interface definition across parties with conflicting interests. Targets A104 and customer/supplier relations.</p>
+    </div>
+    <div class="story-slot">
+        <h4>SLOT 4 — CUSTOMER-FACING TECHNICAL NEGOTIATION</h4>
+        <p>A moment where a technical position had to be carried in front of a customer — a review, a change request, a service commitment. Targets the negotiation-level-English, reviews, and contractual-change bullets.</p>
+    </div>
+</div>
+
+<div class="divider"></div>
+
+<div class="content-block" id="s8">
+    <h2>8. The close</h2>
+    <p>The role asks for an end-to-end engineer whose center of gravity is the system chain, not any single box. The genuine profile — ground segment depth, requirements discipline, cross-layer operational habit, customer-facing work — covers ten of eleven activities at strength or bridge level. The eleventh, the payload dimension, is named by the manager and therefore expected to be a development axis, not a filter. Lead with the chain, cross the payload boundary deliberately in every systems answer, and admit the gap once, with a plan, before being asked.</p>
+</div>
+
+</div>
+
+<footer>LEOAF · CAREER DOSSIER · PERSONAL RECORD ONLY</footer>
+
+</body>
+</html>
