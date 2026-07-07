@@ -1,0 +1,682 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, shrink-to-fit=no">
+<title>M4-2 — Noise: Sources, Temperature &amp; the Receiver Chain · LEOAF</title>
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;600;800&family=Share+Tech+Mono&family=Libre+Baskerville:ital,wght@0,400;0,700;1,400&display=swap" rel="stylesheet">
+<link rel="icon" href="favicon.ico" sizes="any" type="image/x-icon">
+<link rel="manifest" href="site.webmanifest">
+<meta name="theme-color" content="#0f0f0f">
+<script>
+window.leoafAbort = async function () {
+    function go() { window.location.replace("index.html?signedout=1"); }
+    try { if (typeof client !== "undefined" && client && client.auth && client.auth.signOut) { try { await client.auth.signOut({ scope: "local" }); } catch (e) {} } } catch (e) {}
+    go();
+};
+</script>
+<style>
+* { box-sizing:border-box; margin:0; padding:0; }
+html { height:100%; -webkit-text-size-adjust:100%; overflow-x:hidden; }
+body { font-family:'Share Tech Mono',monospace; background:#000; color:white; overflow-x:hidden; min-height:100vh; }
+#starsCanvas { position:fixed; inset:0; z-index:-1; }
+header { background:#000; border-bottom:1px solid #ff004f33; position:sticky; top:0; z-index:100; padding:1rem clamp(1.5rem,5vw,4rem); display:flex; justify-content:space-between; align-items:center; box-shadow:0 4px 16px #0008; }
+.logo { font-family:'Orbitron',sans-serif; font-weight:800; font-size:clamp(16px,2vw,22px); letter-spacing:3px; text-decoration:none; }
+.logo span:first-child { color:white; } .logo span:last-child { color:#ff004f; }
+.nav-right { display:flex; align-items:center; gap:10px; }
+.nav-btn { background:transparent; border:1px solid #ff004f44; color:#ff004f; padding:6px 14px; cursor:pointer; transition:0.3s ease; font-size:11px; font-family:'Orbitron',sans-serif; letter-spacing:1px; text-decoration:none; display:inline-block; }
+.nav-btn:hover { background:#ff004f; color:black; }
+.breadcrumb { padding:14px clamp(1.5rem,5vw,4rem); font-size:11px; color:#ffffff44; letter-spacing:1px; position:relative; z-index:1; }
+.breadcrumb a { color:#00d9ff66; text-decoration:none; } .breadcrumb a:hover { color:#00d9ff; }
+.breadcrumb span { margin:0 8px; }
+.lesson-wrap { max-width:820px; margin:0 auto; padding:0 clamp(1.5rem,5vw,4rem) 80px; position:relative; z-index:1; }
+.lesson-header { padding:30px 0 28px; border-bottom:1px solid #ffffff11; margin-bottom:36px; }
+.lesson-tag { font-family:'Orbitron',sans-serif; font-size:10px; color:#ff004f; letter-spacing:3px; margin-bottom:10px; }
+.lesson-header h1 { font-family:'Orbitron',sans-serif; font-size:clamp(20px,3.5vw,32px); font-weight:800; line-height:1.2; margin-bottom:12px; }
+.lesson-meta { display:flex; gap:10px; flex-wrap:wrap; margin-bottom:16px; }
+.l-pill { font-family:'Orbitron',sans-serif; font-size:10px; padding:3px 10px; border:1px solid; letter-spacing:1px; }
+.l-pill-q { color:#ff004f; border-color:#ff004f44; } .l-pill-t { color:#39ff14; border-color:#39ff1444; }
+.lesson-intro { font-size:13px; line-height:1.85; opacity:0.75; }
+.toc { background:rgba(0,217,255,0.06); border:1px solid #00d9ff33; padding:24px 28px; margin:30px 0; }
+.toc h4 { font-family:'Orbitron',sans-serif; font-size:10px; color:#00d9ff; letter-spacing:2px; margin-bottom:16px; }
+.toc ol { padding-left:20px; } .toc li { font-size:13px; line-height:2.1; }
+.toc li a { color:#00d9ffbb; text-decoration:none; transition:0.15s; } .toc li a:hover { color:#fff; padding-left:4px; }
+.toc li::marker { color:#ff004f; font-family:'Orbitron',sans-serif; font-size:10px; }
+.content-block { margin-bottom:48px; }
+.content-block h2 { font-family:'Orbitron',sans-serif; font-size:13px; color:#00d9ff; letter-spacing:2px; text-transform:uppercase; margin-bottom:18px; padding-bottom:10px; border-bottom:1px solid #00d9ff22; scroll-margin-top:80px; }
+.content-block h3 { font-family:'Orbitron',sans-serif; font-size:11px; color:#ffffff88; letter-spacing:1.5px; text-transform:uppercase; margin:28px 0 12px; }
+.content-block p { font-size:13px; line-height:1.9; opacity:0.85; margin-bottom:16px; }
+.content-block ul,.content-block ol { padding-left:0; margin-bottom:16px; }
+.content-block ul li,.content-block ol li { font-size:13px; line-height:1.85; opacity:0.85; padding-left:20px; position:relative; margin-bottom:6px; }
+.content-block ul li::before { content:'›'; position:absolute; left:0; color:#00d9ff; }
+.content-block blockquote { border-left:3px solid #39ff14; background:rgba(57,255,20,0.05); padding:14px 20px; margin:18px 0; font-size:14px; font-family:'Share Tech Mono',monospace; color:#39ff14; letter-spacing:1px; }
+.callout { border-left:3px solid #00d9ff; background:rgba(0,217,255,0.05); padding:16px 20px; margin:22px 0; font-size:12px; line-height:1.8; }
+.callout.amber { border-left-color:#ffaa00; background:rgba(255,170,0,0.05); }
+.callout.green { border-left-color:#39ff14; background:rgba(57,255,20,0.05); }
+.callout.red { border-left-color:#ff004f; background:rgba(255,0,79,0.05); }
+.callout strong { font-family:'Orbitron',sans-serif; font-size:10px; letter-spacing:1px; display:block; margin-bottom:8px; color:inherit; }
+.key-numbers { display:grid; grid-template-columns:repeat(auto-fit,minmax(140px,1fr)); gap:12px; margin:22px 0; }
+.kn-item { background:rgba(255,255,255,0.03); border:1px solid #ffffff11; padding:16px 12px; text-align:center; }
+.kn-val { font-family:'Orbitron',sans-serif; font-size:clamp(13px,1.8vw,18px); font-weight:800; color:#00d9ff; display:block; }
+.kn-label { font-size:10px; opacity:0.5; letter-spacing:1px; margin-top:5px; display:block; line-height:1.4; }
+.compare-table { width:100%; border-collapse:collapse; margin:22px 0; font-size:12px; }
+.compare-table th { font-family:'Orbitron',sans-serif; font-size:10px; letter-spacing:1px; color:#00d9ff; padding:10px 12px; border-bottom:1px solid #00d9ff33; text-align:left; }
+.compare-table td { padding:10px 12px; border-bottom:1px solid #ffffff0a; line-height:1.5; opacity:0.85; vertical-align:top; }
+.compare-table tr:hover td { background:rgba(255,255,255,0.02); }
+.quiz-block { background:rgba(17,17,17,0.9); border:1px solid #ff004f33; padding:28px; margin:48px 0 32px; }
+.quiz-block h2 { font-family:'Orbitron',sans-serif; font-size:13px; color:#ff004f; letter-spacing:2px; margin-bottom:6px; }
+.quiz-intro { font-size:12px; opacity:0.6; margin-bottom:24px; padding-bottom:16px; border-bottom:1px solid #ff004f22; line-height:1.6; }
+.quiz-q { margin-bottom:28px; }
+.quiz-q p { font-size:13px; opacity:0.9; margin-bottom:12px; line-height:1.65; }
+.quiz-q p strong { color:#00d9ff; }
+.quiz-options { display:flex; flex-direction:column; gap:8px; }
+.quiz-opt { background:rgba(255,255,255,0.03); border:1px solid #ffffff1a; padding:11px 16px; cursor:pointer; font-size:12px; font-family:'Share Tech Mono',monospace; transition:0.2s ease; text-align:left; color:white; line-height:1.5; }
+.quiz-opt:hover:not(:disabled) { background:rgba(0,217,255,0.08); border-color:#00d9ff44; }
+.quiz-opt.correct { background:rgba(57,255,20,0.1); border-color:#39ff14; color:#39ff14; }
+.quiz-opt.wrong { background:rgba(255,0,79,0.1); border-color:#ff004f; color:#ff004f; }
+.quiz-opt:disabled { cursor:default; }
+.quiz-feedback { font-size:12px; margin-top:10px; min-height:18px; line-height:1.7; opacity:0.9; padding:0 4px; }
+.quiz-score { font-family:'Orbitron',sans-serif; font-size:12px; color:#39ff14; margin-top:20px; letter-spacing:1px; display:none; padding-top:16px; border-top:1px solid #39ff1433; }
+.py-block { background:rgba(10,10,10,0.95); border:1px solid #39ff1422; padding:28px; margin:32px 0; }
+.py-block h2 { font-family:'Orbitron',sans-serif; font-size:13px; color:#39ff14; letter-spacing:2px; margin-bottom:8px; }
+.py-block .py-intro { font-size:12px; opacity:0.7; margin-bottom:20px; padding-bottom:16px; border-bottom:1px solid #39ff1422; line-height:1.7; }
+.py-exercise { margin-bottom:32px; } .py-exercise:last-child { margin-bottom:0; }
+.py-exercise h3 { font-family:'Orbitron',sans-serif; font-size:11px; color:#39ff1499; letter-spacing:1.5px; text-transform:uppercase; margin-bottom:10px; }
+.py-exercise p { font-size:12px; opacity:0.8; margin-bottom:14px; line-height:1.75; }
+.py-block pre { background:#050505; border:1px solid #39ff1433; padding:20px; font-family:'Share Tech Mono',monospace; font-size:11.5px; line-height:1.75; overflow-x:auto; color:#39ff14; white-space:pre; margin-bottom:12px; }
+.py-block .py-challenge { background:rgba(57,255,20,0.04); border-left:2px solid #39ff14; padding:12px 16px; margin-top:14px; font-size:12px; line-height:1.75; opacity:0.8; }
+.py-block .py-challenge strong { font-family:'Orbitron',sans-serif; font-size:10px; color:#39ff14; display:block; margin-bottom:6px; letter-spacing:1px; }
+.reflection-block { background:rgba(255,170,0,0.04); border:1px solid #ffaa0033; padding:24px; margin:32px 0; }
+.reflection-block h2 { font-family:'Orbitron',sans-serif; font-size:13px; color:#ffaa00; letter-spacing:2px; margin-bottom:8px; }
+.reflection-block .ref-intro { font-size:12px; opacity:0.7; margin-bottom:20px; padding-bottom:14px; border-bottom:1px solid #ffaa0022; line-height:1.7; }
+.ref-prompt { margin-bottom:20px; }
+.ref-prompt h3 { font-family:'Orbitron',sans-serif; font-size:11px; color:#ffaa0099; letter-spacing:1px; margin-bottom:8px; }
+.ref-prompt p { font-size:12px; opacity:0.8; line-height:1.75; margin-bottom:10px; }
+.back-to-top { position:fixed; bottom:28px; right:28px; z-index:200; width:44px; height:44px; background:#000; border:1px solid #00d9ff55; color:#00d9ff; font-size:20px; cursor:pointer; display:flex; align-items:center; justify-content:center; opacity:0; pointer-events:none; transition:opacity 0.3s ease; }
+.back-to-top.visible { opacity:1; pointer-events:auto; } .back-to-top:hover { border-color:#00d9ff; background:#001a2c; }
+.complete-wrap { margin-top:56px; padding-top:30px; border-top:1px solid #ffffff11; text-align:center; }
+.complete-btn { font-family:'Orbitron',sans-serif; font-size:13px; letter-spacing:2px; padding:14px 44px; background:transparent; border:1px solid #39ff14; color:#39ff14; cursor:pointer; transition:0.3s ease; }
+.complete-btn:hover:not(.done) { background:#39ff14; color:black; box-shadow:0 0 20px rgba(57,255,20,0.4); }
+.complete-btn.done { background:rgba(57,255,20,0.1); cursor:default; opacity:0.7; }
+.complete-msg { font-size:12px; color:#39ff14; margin-top:14px; min-height:18px; letter-spacing:1px; }
+.lesson-nav { display:flex; justify-content:space-between; margin-top:30px; flex-wrap:wrap; gap:10px; }
+.lesson-nav a { font-family:'Orbitron',sans-serif; font-size:11px; color:#00d9ff66; text-decoration:none; letter-spacing:1px; transition:0.2s; }
+.lesson-nav a:hover { color:#00d9ff; }
+footer { text-align:center; padding:30px; opacity:0.3; font-size:11px; position:relative; z-index:1; letter-spacing:1px; }
+@media(max-width:600px) { .key-numbers{grid-template-columns:1fr 1fr;} .compare-table{font-size:11px;} .compare-table th,.compare-table td{padding:8px;} }
+.content-block { background:#f5f2ec; color:#1a1a1a; padding:36px clamp(24px,4vw,48px); margin-bottom:24px; border-left:4px solid #00d9ff; position:relative; z-index:1; }
+.content-block h2 { font-family:'Orbitron',sans-serif; font-size:13px; color:#003d66; letter-spacing:2px; text-transform:uppercase; margin-bottom:20px; padding-bottom:10px; border-bottom:2px solid #00d9ff66; scroll-margin-top:80px; }
+.content-block h3 { font-family:'Orbitron',sans-serif; font-size:11px; color:#444; letter-spacing:1.5px; text-transform:uppercase; margin:32px 0 14px; }
+.content-block p { font-family:'Libre Baskerville',Georgia,serif; font-size:15px; line-height:1.9; color:#1a1a1a; opacity:1; margin-bottom:18px; }
+.content-block ul li { font-family:'Libre Baskerville',Georgia,serif; font-size:14px; line-height:1.85; color:#1a1a1a; opacity:1; margin-bottom:8px; }
+.content-block ul li::before { color:#0077aa; }
+.content-block blockquote { border-left:3px solid #1a7a1a; background:#eafaea; color:#0a3d0a; }
+.content-block .callout { border-left:3px solid #0088cc; background:#e8f4fb; color:#1a1a1a; }
+.content-block .callout.amber { border-left-color:#996600; background:#fef9ec; }
+.content-block .callout.green { border-left-color:#1a7a1a; background:#eafaea; }
+.content-block .callout.red { border-left-color:#cc0033; background:#fdecea; }
+.content-block .callout strong { color:inherit; }
+.content-block .kn-item { background:#fff; border:1px solid #d0d0d0; }
+.content-block .kn-label { color:#555; opacity:1; }
+.content-block .compare-table th { color:#003d66; border-bottom:2px solid #00d9ff66; }
+.content-block .compare-table td { color:#1a1a1a; opacity:1; border-bottom:1px solid #ddd; }
+.content-block .compare-table tr:hover td { background:#f0f0f0; }
+</style>
+</head>
+<body>
+<canvas id="starsCanvas"></canvas>
+<header>
+    <a href="dashboard.html" class="logo"><span>LEO</span><span>AF</span></a>
+    <div class="nav-right">
+        <a href="m4.html" class="nav-btn">← M4 HUB</a>
+        <button class="nav-btn" onclick="leoafAbort()">ABORT</button>
+    </div>
+</header>
+<div class="breadcrumb">
+    <a href="dashboard.html">DASHBOARD</a><span>/</span>
+    <a href="m4.html">M4</a><span>/</span>
+    <span style="color:#ffffff88;">LESSON 02 — NOISE: SOURCES, TEMPERATURE &amp; THE RECEIVER CHAIN</span>
+</div>
+
+<div class="lesson-wrap">
+<div class="lesson-header">
+    <div class="lesson-tag">M4 · LESSON 02 OF 7</div>
+    <h1>Noise: Sources, Temperature<br>&amp; the Receiver Chain</h1>
+    <div class="lesson-meta">
+        <div class="l-pill l-pill-q">MODULE 4</div>
+        <div class="l-pill l-pill-t">RF &amp; LINK BUDGETS</div>
+    </div>
+    <p class="lesson-intro">The link equation from m4-1 contains G/T — a single term that summarises the entire receive chain. The denominator T_sys is not a measurement you take with a thermometer. It is a mathematical construct capturing the combined noise contribution of every component from the antenna aperture to the demodulator input: the sky brightness the antenna collects, the feed network, the LNA, the downconverter. Getting it right is the difference between a link budget that matches measured performance and one that is optimistic by 2–5 dB.</p>
+</div>
+
+<div class="toc">
+    <h4>CONTENTS</h4>
+    <ol>
+        <li><a href="#s1">Thermal noise: the physical origin</a></li>
+        <li><a href="#s2">Noise figure and noise temperature</a></li>
+        <li><a href="#s3">Passive components: loss equals noise</a></li>
+        <li><a href="#s4">The Friis noise figure formula</a></li>
+        <li><a href="#s5">The antenna noise temperature</a></li>
+        <li><a href="#s6">The noise–rain coupling effect</a></li>
+        <li><a href="#s7">The satellite receive chain</a></li>
+        <li><a href="#quiz">Knowledge check</a></li>
+        <li><a href="#python">Python exercises — spine project stage 2</a></li>
+        <li><a href="#reflect">Reflection prompts</a></li>
+    </ol>
+</div>
+
+<!-- S1 -->
+<div class="content-block" id="s1">
+    <h2>1. Thermal Noise: The Physical Origin</h2>
+    <p>All matter above absolute zero emits electromagnetic radiation due to the random thermal motion of charge carriers. This Johnson-Nyquist noise sets a fundamental floor on any receiving system's sensitivity. A resistor at temperature T in bandwidth B generates:</p>
+    <blockquote>N = k · T · B</blockquote>
+    <p>where k = 1.380649 × 10⁻²³ J/K. This is exact and universal — it is a thermodynamic statement, not an electronics one. The noise power spectral density per unit bandwidth:</p>
+    <blockquote>N₀ = k · T   →   at 290 K:  N₀ ≈ −204 dBW/Hz</blockquote>
+    <p>Every passive component in the receive chain that has loss also has an associated noise temperature. There is no way around this: loss and noise are the same physical phenomenon in a passive element.</p>
+</div>
+
+<!-- S2 -->
+<div class="content-block" id="s2">
+    <h2>2. Noise Figure and Noise Temperature</h2>
+    <p>An amplifier adds its own noise to the signal it processes. Noise figure (NF) characterises this addition relative to a reference input at T₀ = 290 K:</p>
+    <blockquote>T_e = T₀ · (NF_linear − 1) = 290 · (10^(NF_dB/10) − 1)</blockquote>
+    <blockquote>NF_dB = 10 · log₁₀(1 + T_e / T₀)</blockquote>
+
+    <table class="compare-table">
+        <thead><tr><th>NF (dB)</th><th>T_e (K)</th><th>Notes</th></tr></thead>
+        <tbody>
+            <tr><td>0 dB</td><td>0 K</td><td>Perfect, noiseless</td></tr>
+            <tr><td>0.5 dB</td><td>35 K</td><td>Excellent HEMT LNA</td></tr>
+            <tr><td>1.0 dB</td><td>75 K</td><td>Good LNA (room temp)</td></tr>
+            <tr><td>1.5 dB</td><td>120 K</td><td>Very good LNA</td></tr>
+            <tr><td>2.0 dB</td><td>170 K</td><td>Decent LNA</td></tr>
+            <tr><td>3.0 dB</td><td>290 K</td><td>≈ T₀; each extra dB ≈ +200 K</td></tr>
+            <tr><td>10.0 dB</td><td>2,610 K</td><td>High-loss passive or poor amp</td></tr>
+        </tbody>
+    </table>
+
+    <div class="callout">
+        <strong>T₀ = 290 K IS A CONVENTION, NOT A TEMPERATURE</strong>
+        The IEEE reference temperature T₀ = 290 K is an agreed standard for defining noise figure, not necessarily the physical temperature of the component. A component at 250 K physical temperature still uses T₀ = 290 K to compute NF by convention — the physical temperature enters separately via the passive-loss noise temperature formula.
+    </div>
+</div>
+
+<!-- S3 -->
+<div class="content-block" id="s3">
+    <h2>3. Passive Components: Loss Equals Noise</h2>
+    <p>For any passive component with insertion loss L (linear) at physical temperature T_phys:</p>
+    <blockquote>T_e = T_phys · (L − 1)   where L = 10^(loss_dB/10)</blockquote>
+    <p>A feed network with 0.5 dB loss at 290 K: L = 1.122, T_e = 290 × 0.122 = 35 K — comparable to an excellent LNA. A 1 dB loss at 290 K adds approximately 75 K. The rule of thumb is roughly 72 K per dB of loss (for small losses at 290 K).</p>
+    <p>This is one of the most important results in receive chain design: every decibel of loss before the LNA directly adds noise at the physical temperature of that lossy element. Every passive component between the antenna aperture and the first amplifier is a noise source, not just an attenuator.</p>
+
+    <div class="callout red">
+        <strong>THE COST OF PRE-LNA LOSS</strong>
+        0.5 dB of feed loss at 290 K adds 35 K to T_sys. For a ground terminal targeting T_sys = 100 K, this single half-decibel loss is already 35% of the entire noise budget. This is why minimising the electrical path between the antenna feed point and the LNA input — ideally mounting the LNA directly at the feed — is the single highest-leverage design action in receive chain optimisation.
+    </div>
+</div>
+
+<!-- S4 -->
+<div class="content-block" id="s4">
+    <h2>4. The Friis Noise Figure Formula</h2>
+    <p>The total system noise temperature for a cascaded receive chain is:</p>
+    <blockquote>T_sys = T_ant + T₁ + T₂/G₁ + T₃/(G₁·G₂) + ···</blockquote>
+    <p>where T_ant is the antenna noise temperature, T₁ is the first stage (feed) noise temperature, T₂ is the second stage (LNA), G₁ is the first stage gain, and so on. Each subsequent stage's noise contribution is divided by the cumulative gain of all preceding stages.</p>
+
+    <h3>Worked example</h3>
+    <p>Ground terminal receive chain:</p>
+    <ul>
+        <li>T_ant = 50 K (clear sky, 30° elevation)</li>
+        <li>Feed: 0.3 dB loss → T_feed = 20.4 K, L_feed = 1.071</li>
+        <li>LNA: NF = 1.0 dB → T_LNA = 74.6 K; G_LNA = 40 dB (× 10,000)</li>
+        <li>Downconverter: NF = 8 dB → T_2 = 1,537 K</li>
+    </ul>
+    <blockquote>T_sys = 50/1.071 + 20.4 + 74.6 + 1537/10000 = 46.7 + 20.4 + 74.6 + 0.15 ≈ 142 K</blockquote>
+    <p>The downconverter's 1,537 K noise temperature contributes only 0.15 K because the LNA gain divides it by 10,000. The LNA (74.6 K) is the dominant contributor — which is exactly the design intent of the Friis architecture.</p>
+
+    <div class="callout green">
+        <strong>THE LNA DOMINATES — BY DESIGN</strong>
+        The Friis formula is not just an equation; it is a design philosophy. Place the best (lowest noise figure) amplifier first. Give it as much gain as practical. Everything after it contributes negligibly to T_sys. The entire receive chain optimisation problem reduces to: minimise pre-LNA loss, minimise LNA noise figure, maximise LNA gain.
+    </div>
+
+    <div class="key-numbers">
+        <div class="kn-item"><span class="kn-val">290 K</span><span class="kn-label">IEEE REFERENCE TEMPERATURE T₀</span></div>
+        <div class="kn-item"><span class="kn-val">~72 K/dB</span><span class="kn-label">NOISE COST OF PRE-LNA PASSIVE LOSS AT 290 K</span></div>
+        <div class="kn-item"><span class="kn-val">74.6 K</span><span class="kn-label">NF=1.0dB LNA NOISE TEMPERATURE</span></div>
+        <div class="kn-item"><span class="kn-val">0.15 K</span><span class="kn-label">1,537 K DOWNCONV CONTRIBUTION AFTER 40dB LNA GAIN</span></div>
+    </div>
+</div>
+
+<!-- S5 -->
+<div class="content-block" id="s5">
+    <h2>5. The Antenna Noise Temperature</h2>
+    <p>T_ant is not the physical temperature of the antenna structure. It is the <strong>brightness temperature</strong> of the electromagnetic environment the antenna's radiation pattern is looking at — the weighted average of the sky brightness temperature over the entire antenna pattern.</p>
+    <p>For a ground station at Ka-band:</p>
+    <ul>
+        <li><strong>Clear sky, high elevation</strong>: dominated by the cosmic microwave background (~2.7 K) plus atmospheric oxygen and water vapour emission — typically 5–40 K above 20° elevation</li>
+        <li><strong>Near horizon (10° elevation)</strong>: longer atmospheric path through more air — 50–100 K</li>
+        <li><strong>Ground spillover</strong>: sidelobes that illuminate the warm ground (~290 K) add 2–50 K depending on antenna sidelobe quality</li>
+        <li><strong>During rain</strong>: rain radiates as a near-blackbody at ~273 K, dramatically increasing T_ant (see §6)</li>
+    </ul>
+
+    <table class="compare-table">
+        <thead><tr><th>Condition</th><th>T_ant (Ka-band, ground)</th><th>Notes</th></tr></thead>
+        <tbody>
+            <tr><td>Clear sky, 90° elevation</td><td>5–10 K</td><td>Cold sky, minimal atmosphere</td></tr>
+            <tr><td>Clear sky, 30° elevation</td><td>20–40 K</td><td>Longer atmospheric path</td></tr>
+            <tr><td>Clear sky, 10° elevation</td><td>50–100 K</td><td>Near-horizon, much more atmosphere</td></tr>
+            <tr><td>Rain event (10 dB fade)</td><td>200–270 K</td><td>Rain radiates as ~273 K blackbody</td></tr>
+            <tr><td>Satellite receive (nadir)</td><td>250–290 K</td><td>Looking at warm Earth</td></tr>
+        </tbody>
+    </table>
+</div>
+
+<!-- S6 -->
+<div class="content-block" id="s6">
+    <h2>6. The Noise–Rain Coupling Effect</h2>
+    <p>During a rain event, two things happen simultaneously, both reducing C/N₀:</p>
+    <ul>
+        <li><strong>Signal attenuation</strong>: rain absorbs the signal, reducing C by A_rain_dB</li>
+        <li><strong>Noise increase</strong>: rain is a warm absorber (~273 K) that emits thermal noise, raising T_ant and reducing G/T</li>
+    </ul>
+    <p>The increase in antenna noise temperature from rain attenuation A (linear) at rain temperature T_rain:</p>
+    <blockquote>ΔT_ant ≈ T_rain · (1 − 1/A) ≈ 273 · (1 − 10^(−A_dB/10))</blockquote>
+    <p>For A_dB = 10 dB: ΔT_ant ≈ 273 × 0.9 = 245 K. If the baseline T_sys was 150 K, rain raises it to 395 K — a factor of 2.6× increase in noise power, adding approximately 4.1 dB of noise degradation on top of the 10 dB signal fade. Total C/N₀ degradation: ~14.1 dB, not just 10 dB.</p>
+    <p>For systems with low baseline T_sys (sensitive ground receivers), the noise-coupling term is proportionally more damaging. For satellite receive chains where T_sys is already ~400 K (dominated by the warm Earth), the incremental rain noise is proportionally smaller.</p>
+
+    <div class="callout amber">
+        <strong>RAIN MARGIN IS NOT JUST THE FADE DEPTH</strong>
+        Link budgets that account only for rain signal attenuation and ignore the noise coupling underestimate the required rain margin. For a sensitive ground terminal with T_sys = 100 K, a 10 dB rain event causes approximately 14–15 dB total C/N₀ degradation — 4–5 dB more than the fade depth alone. The rain margin must cover both effects.
+    </div>
+</div>
+
+<!-- S7 -->
+<div class="content-block" id="s7">
+    <h2>7. The Satellite Receive Chain</h2>
+    <p>The satellite receive antenna (return link, user terminal uplink) looks at the Earth — a ~255 K blackbody filling most of its field of view. T_ant ≈ 200–290 K, much higher than a ground station looking at cold sky. This is the fundamental thermal asymmetry between the forward and return links: the satellite is always a noisier receiver than a ground terminal aimed at cold sky.</p>
+    <p>A typical LEO satellite receive chain at Ka-band:</p>
+    <ul>
+        <li>T_ant = 255 K (nadir, warm Earth)</li>
+        <li>Feed: 0.2 dB loss → T_feed = 13.6 K</li>
+        <li>LNA: NF = 1.5 dB → T_LNA = 120 K; G = 35 dB</li>
+        <li>Downconverter: NF = 8 dB → T_2 = 1,537 K → contribution = 1537/3162 ≈ 0.49 K</li>
+    </ul>
+    <blockquote>T_sys ≈ 255/1.047 + 13.6 + 120 + 0.49 ≈ 378 K</blockquote>
+    <p>Compared to the ground terminal at ~142 K, the satellite is approximately 4.3 dB noisier as a receiver. This must be compensated by higher terminal EIRP on the return link, tighter modulation thresholds, or accepted as a capacity asymmetry (forward link delivers more capacity than the return link for the same geometry).</p>
+</div>
+
+<!-- QUIZ -->
+<div class="quiz-block" id="quiz">
+    <h2>KNOWLEDGE CHECK</h2>
+    <p class="quiz-intro">Ten questions. Select one answer per question. Feedback is immediate; score appears when all ten are answered.</p>
+
+    <div class="quiz-q"><p><strong>Q1.</strong> A 1 dB passive loss at 290 K contributes a noise temperature of approximately:</p>
+        <div class="quiz-options">
+            <button class="quiz-opt" data-q="1" data-correct="false">A — 1 K</button>
+            <button class="quiz-opt" data-q="1" data-correct="true">B — 75 K</button>
+            <button class="quiz-opt" data-q="1" data-correct="false">C — 290 K</button>
+            <button class="quiz-opt" data-q="1" data-correct="false">D — 0 K (passive components add no noise)</button>
+        </div><div class="quiz-feedback" id="fb1"></div></div>
+
+    <div class="quiz-q"><p><strong>Q2.</strong> With LNA gain = 40 dB and downconverter T_e = 1,500 K, the downconverter's contribution to T_sys is:</p>
+        <div class="quiz-options">
+            <button class="quiz-opt" data-q="2" data-correct="false">A — 1,500 K</button>
+            <button class="quiz-opt" data-q="2" data-correct="false">B — 150 K</button>
+            <button class="quiz-opt" data-q="2" data-correct="true">C — 0.15 K</button>
+            <button class="quiz-opt" data-q="2" data-correct="false">D — 15 K</button>
+        </div><div class="quiz-feedback" id="fb2"></div></div>
+
+    <div class="quiz-q"><p><strong>Q3.</strong> A ground station at Ka-band looking at clear sky at 30° elevation has T_ant approximately:</p>
+        <div class="quiz-options">
+            <button class="quiz-opt" data-q="3" data-correct="false">A — 290 K</button>
+            <button class="quiz-opt" data-q="3" data-correct="false">B — 2.7 K</button>
+            <button class="quiz-opt" data-q="3" data-correct="true">C — 20–40 K</button>
+            <button class="quiz-opt" data-q="3" data-correct="false">D — 0 K</button>
+        </div><div class="quiz-feedback" id="fb3"></div></div>
+
+    <div class="quiz-q"><p><strong>Q4.</strong> During a 10 dB rain event (T_rain ≈ 273 K), T_ant increases by approximately:</p>
+        <div class="quiz-options">
+            <button class="quiz-opt" data-q="4" data-correct="false">A — 10 K</button>
+            <button class="quiz-opt" data-q="4" data-correct="false">B — 27 K</button>
+            <button class="quiz-opt" data-q="4" data-correct="true">C — 245 K</button>
+            <button class="quiz-opt" data-q="4" data-correct="false">D — 273 K</button>
+        </div><div class="quiz-feedback" id="fb4"></div></div>
+
+    <div class="quiz-q"><p><strong>Q5.</strong> The noise figure of a perfect noiseless amplifier is:</p>
+        <div class="quiz-options">
+            <button class="quiz-opt" data-q="5" data-correct="false">A — −∞ dB</button>
+            <button class="quiz-opt" data-q="5" data-correct="true">B — 0 dB</button>
+            <button class="quiz-opt" data-q="5" data-correct="false">C — 10 dB</button>
+            <button class="quiz-opt" data-q="5" data-correct="false">D — Equal to its gain in dB</button>
+        </div><div class="quiz-feedback" id="fb5"></div></div>
+
+    <div class="quiz-q"><p><strong>Q6.</strong> Placing the LNA as close to the antenna as possible improves T_sys because:</p>
+        <div class="quiz-options">
+            <button class="quiz-opt" data-q="6" data-correct="false">A — The LNA gain makes all pre-LNA losses irrelevant</button>
+            <button class="quiz-opt" data-q="6" data-correct="true">B — Loss before the LNA directly adds noise at the physical temperature of the lossy element; loss after the LNA has its noise divided by the LNA gain</button>
+            <button class="quiz-opt" data-q="6" data-correct="false">C — Shorter cables have less capacitance</button>
+            <button class="quiz-opt" data-q="6" data-correct="false">D — The LNA performs better at low temperature near the antenna</button>
+        </div><div class="quiz-feedback" id="fb6"></div></div>
+
+    <div class="quiz-q"><p><strong>Q7.</strong> A satellite receive antenna (nadir-pointing) has T_ant ≈ 250–290 K because:</p>
+        <div class="quiz-options">
+            <button class="quiz-opt" data-q="7" data-correct="false">A — The satellite is close to the Sun</button>
+            <button class="quiz-opt" data-q="7" data-correct="true">B — The Earth is a warm body radiating as a near-blackbody at ~255 K, filling most of the antenna's field of view</button>
+            <button class="quiz-opt" data-q="7" data-correct="false">C — The satellite receiver electronics are warm</button>
+            <button class="quiz-opt" data-q="7" data-correct="false">D — The CMB is stronger at LEO altitudes</button>
+        </div><div class="quiz-feedback" id="fb7"></div></div>
+
+    <div class="quiz-q"><p><strong>Q8.</strong> The noise–rain coupling effect means total C/N₀ degradation during rain exceeds the fade depth because:</p>
+        <div class="quiz-options">
+            <button class="quiz-opt" data-q="8" data-correct="false">A — Rain also scatters the signal</button>
+            <button class="quiz-opt" data-q="8" data-correct="true">B — Rain simultaneously attenuates the signal (reducing C) and emits thermal noise that increases T_ant (increasing N₀), degrading both numerator and denominator of C/N₀</button>
+            <button class="quiz-opt" data-q="8" data-correct="false">C — The demodulator becomes noisier during rain</button>
+            <button class="quiz-opt" data-q="8" data-correct="false">D — Rain absorbs the antenna reflector dish</button>
+        </div><div class="quiz-feedback" id="fb8"></div></div>
+
+    <div class="quiz-q"><p><strong>Q9.</strong> The reference temperature T₀ = 290 K is used in noise figure definition because:</p>
+        <div class="quiz-options">
+            <button class="quiz-opt" data-q="9" data-correct="false">A — It is the average temperature of Earth's surface</button>
+            <button class="quiz-opt" data-q="9" data-correct="true">B — It is the internationally agreed IEEE/ITU standard reference temperature for noise figure definition</button>
+            <button class="quiz-opt" data-q="9" data-correct="false">C — It is the temperature of the cosmic microwave background</button>
+            <button class="quiz-opt" data-q="9" data-correct="false">D — It minimises rounding errors in the conversion formula</button>
+        </div><div class="quiz-feedback" id="fb9"></div></div>
+
+    <div class="quiz-q"><p><strong>Q10.</strong> In the Friis example (T_sys ≈ 142 K), the dominant contributor is:</p>
+        <div class="quiz-options">
+            <button class="quiz-opt" data-q="10" data-correct="false">A — The downconverter (T_e = 1,537 K)</button>
+            <button class="quiz-opt" data-q="10" data-correct="false">B — The antenna (T_ant = 50 K)</button>
+            <button class="quiz-opt" data-q="10" data-correct="true">C — The LNA (T_LNA = 74.6 K)</button>
+            <button class="quiz-opt" data-q="10" data-correct="false">D — All contributors are approximately equal</button>
+        </div><div class="quiz-feedback" id="fb10"></div></div>
+
+    <div class="quiz-score" id="quizScore"></div>
+</div>
+
+<!-- PYTHON -->
+<div class="py-block" id="python">
+    <h2>PYTHON EXERCISES — SPINE PROJECT STAGE 2</h2>
+    <p class="py-intro">Stage 2 adds the Friis noise chain to the link budget engine, replacing the scalar T_sys from Stage 1 with a computed chain result. Python 3.8+ standard library only.</p>
+
+    <div class="py-exercise">
+        <h3>Exercise 1 — Noise Figure ↔ Noise Temperature Toolkit</h3>
+        <p>Build the noise conversion utilities and compute the noise temperature of typical satellite receiver components.</p>
+<pre>
+import math
+T0 = 290.0
+
+def nf_to_te(nf_db):       return T0 * (10**(nf_db/10) - 1)
+def te_to_nf(te_k):        return 10 * math.log10(1 + te_k / T0)
+def loss_te(loss_db, t=T0): return t * (10**(loss_db/10) - 1)
+
+print("NF → T_e conversion\n")
+print(f"{'NF (dB)':>9}{'T_e (K)':>10}{'Notes'}")
+print("-" * 48)
+for nf, label in [(0,"Perfect"),(0.5,"Excellent HEMT"),(1.0,"Good LNA"),
+                   (1.5,"Decent LNA"),(2.0,"Budget LNA"),
+                   (3.0,"3 dB ≈ T₀"),(10.0,"High loss/poor amp")]:
+    print(f"{nf:>9.1f}{nf_to_te(nf):>10.1f}  {label}")
+
+print("\nPassive loss noise temperature (T_phys = 290 K)")
+print(f"{'Loss (dB)':>10}{'T_e (K)':>10}{'~Rule (72K/dB)':>16}")
+print("-" * 38)
+for loss in [0.1, 0.3, 0.5, 1.0, 1.5, 2.0, 3.0]:
+    print(f"{loss:>10.1f}{loss_te(loss):>10.1f}{72*loss:>14.0f}")
+
+# 1. What NF is needed for T_e < 50 K?
+# 2. A connector with 0.1 dB loss at 290 K: T_e? How many raise T_sys by 10 K?
+# 3. At T_phys = 100 K (cryogenic LNA), what NF gives T_e = 10 K?
+</pre>
+    </div>
+
+    <div class="py-exercise">
+        <h3>Exercise 2 — Friis Noise Chain</h3>
+        <p>Compute T_sys for ground terminal and satellite receive chains, showing each stage's contribution.</p>
+<pre>
+import math
+T0 = 290.0
+
+def nf_to_te(nf_db): return T0 * (10**(nf_db/10) - 1)
+def loss_te(loss_db, t=T0): return t * (10**(loss_db/10) - 1)
+def db_to_lin(x): return 10**(x/10)
+
+def friis(t_ant, stages):
+    """
+    stages: list of (label, te_k, gain_db or None)
+    Returns T_sys and per-stage contributions.
+    """
+    t = t_ant; cum_g = 1.0
+    bd = [("Antenna", t_ant, t_ant)]
+    for lbl, te, g_db in stages:
+        contrib = te / cum_g
+        t += contrib
+        bd.append((lbl, te, contrib))
+        if g_db is not None:
+            cum_g *= db_to_lin(g_db)
+    return t, bd
+
+def print_chain(name, t_ant, stages):
+    t, bd = friis(t_ant, stages)
+    print(f"\n{name}")
+    print(f"  {'Component':<30}{'Own T_e':>8}  {'Contribution':>12}")
+    print("  " + "─"*52)
+    for lbl, te, contrib in bd:
+        bar = '▪' * min(int(contrib/4), 18)
+        print(f"  {lbl:<30}{te:>7.1f}K  {contrib:>10.1f}K  {bar}")
+    print("  " + "─"*52)
+    print(f"  {'T_sys':>30}{'':>9}  {t:>10.1f} K")
+    print(f"  NF equivalent: {10*math.log10(1+t/T0):.2f} dB")
+    return t
+
+# Ground terminal — Ka forward link
+print_chain("Ground terminal (30° elevation, clear sky)",
+    t_ant=30.0,
+    stages=[
+        ("Feed (0.3dB loss)",       loss_te(0.3),   -0.3),
+        ("LNA (NF=1.0dB, G=40dB)", nf_to_te(1.0),  40.0),
+        ("Downconverter (NF=8dB)",  nf_to_te(8.0),  20.0),
+        ("IF chain (NF=10dB)",      nf_to_te(10.0), None),
+    ])
+
+# Satellite receive — Ka return link
+print_chain("Satellite receive (nadir, warm Earth)",
+    t_ant=255.0,
+    stages=[
+        ("Feed (0.2dB)",            loss_te(0.2),   -0.2),
+        ("LNA (NF=1.5dB, G=35dB)", nf_to_te(1.5),  35.0),
+        ("Downconverter (NF=8dB)",  nf_to_te(8.0),  20.0),
+        ("IF chain (NF=10dB)",      nf_to_te(10.0), None),
+    ])
+
+# 1. What LNA NF brings ground terminal T_sys below 100 K?
+# 2. Ground terminal at 10° elevation: T_ant rises to 80 K.
+#    New T_sys? How much does G/T change?
+# 3. Satellite pointing at deep space (T_ant=10 K, e.g. ISL receive).
+#    Compare T_sys to nadir-pointing. What does this imply for ISL receive?
+</pre>
+    </div>
+
+    <div class="py-exercise">
+        <h3>Exercise 3 — Spine Stage 2: Friis Chain in the Link Budget Engine</h3>
+        <p>Extend the LinkBudget class from Stage 1 with a computed Friis noise chain replacing the scalar T_sys. Also models noise-rain coupling.</p>
+<pre>
+import math
+K_DB = -228.6; T0 = 290.0
+
+def fspl(d, f): return 92.4 + 20*math.log10(d) + 20*math.log10(f)
+def nf_te(nf):  return T0 * (10**(nf/10) - 1)
+def loss_te(l, t=T0): return t * (10**(l/10) - 1)
+def dbl(x): return 10**(x/10)
+
+class LinkBudget:
+    def __init__(self, name):
+        self.name=name; self.losses=[]; self._chain=[]
+        self._eirp=self._fspl=self._grx=self._tant=self._req=None
+
+    def set_transmitter(self, p, g): self._eirp = 10*math.log10(p) + g
+    def set_path(self, d, f):        self._fspl = fspl(d, f)
+    def add_loss(self, lbl, v):      self.losses.append((lbl, v))
+    def set_antenna(self, g, tant):  self._grx=g; self._tant=tant
+    def add_stage(self, lbl, te, g=None): self._chain.append((lbl,te,g))
+    def set_required(self, r):       self._req=r
+
+    def _tsys(self):
+        t=self._tant; cg=1.0
+        for _,te,g in self._chain:
+            t+=te/cg
+            if g: cg*=dbl(g)
+        return t
+
+    def compute(self, rain_db=0.0):
+        t=self._tant
+        if rain_db > 0:
+            t += 273 * (1 - 10**(-rain_db/10))  # noise-rain coupling
+        # recompute chain with updated T_ant
+        t_sys = t
+        cg=1.0
+        for _,te,g in self._chain:
+            t_sys+=te/cg
+            if g: cg*=dbl(g)
+        total_loss = self._fspl + sum(v for _,v in self.losses) + rain_db
+        cn0 = self._eirp - total_loss + self._grx - 10*math.log10(t_sys) - K_DB
+        return cn0, cn0-self._req if self._req else None, t_sys
+
+    def print_budget(self, rain_db=0.0, label=""):
+        cn0, margin, t_sys = self.compute(rain_db)
+        gt = self._grx - 10*math.log10(t_sys)
+        tag = f"  [{label}]" if label else ""
+        print(f"\n  {self.name}{tag}")
+        print(f"  EIRP {self._eirp:+.1f}dBW  FSPL {self._fspl:.1f}dB  "
+              f"T_sys {t_sys:.0f}K  G/T {gt:.1f}dB/K")
+        if rain_db: print(f"  Rain: {rain_db}dB fade + noise coupling")
+        print(f"  C/N₀ {cn0:.1f}dBHz  Req {self._req:.1f}  "
+              f"Margin {margin:+.1f}dB  {'✓' if margin>=0 else '✗'}")
+
+lb = LinkBudget("LEO Ka forward — Friis chain + rain coupling")
+lb.set_transmitter(20, 34); lb.set_path(1000, 20.0)
+lb.add_loss("Gaseous absorption", 0.3); lb.add_loss("Pointing", 0.5)
+lb.set_antenna(37.5, 30.0)
+lb.add_stage("Feed 0.3dB",       loss_te(0.3), -0.3)
+lb.add_stage("LNA NF=1.0 G=40",  nf_te(1.0),   40.0)
+lb.add_stage("Downconv NF=8",    nf_te(8.0),    20.0)
+lb.add_stage("IF NF=10",         nf_te(10.0),   None)
+lb.set_required(93.4)  # 16-APSK 3/4 @ 208.3 Msym/s (Es/N0 10.21 dB + 83.2 dBHz)
+
+lb.print_budget(rain_db=0,  label="clear sky")
+lb.print_budget(rain_db=3,  label="3 dB rain")
+lb.print_budget(rain_db=10, label="10 dB rain")
+lb.print_budget(rain_db=20, label="20 dB heavy rain")
+</pre>
+        <div class="py-challenge"><strong>SPINE PROJECT — STAGE 2</strong>
+            Stage 2 replaces the scalar T_sys with a fully computed Friis noise chain, and adds noise-rain coupling to the rain attenuation model. Stage 3 (m4-3) adds band comparison functions. Stage 4 (m4-4) adds the ITU-R P.618 rain model that computes rain_db from the climate zone and link availability target.
+        </div>
+    </div>
+</div>
+
+<!-- REFLECTION -->
+<div class="reflection-block" id="reflect">
+    <h2>REFLECTION PROMPTS</h2>
+    <p class="ref-intro">Not graded. Write in your own words, 200–400 words each.</p>
+    <div class="ref-prompt"><h3>Prompt 1 — The 3 dB LNA Upgrade Trade</h3>
+        <p>A cost-reduction proposal suggests using NF = 3 dB instead of NF = 1 dB LNA. Evaluate: what is the impact on T_sys and G/T? Express in dB/K and link margin terms. When in a programme is this tradeoff acceptable and when is it not?</p></div>
+    <div class="ref-prompt"><h3>Prompt 2 — Rain Noise Coupling Asymmetry</h3>
+        <p>For a ground terminal with baseline T_sys = 100 K, compute the total C/N₀ degradation during a 10 dB rain event (signal fade + noise coupling). Compare to a terminal with T_sys = 400 K. Which suffers more from noise coupling, and why? What does this imply for terminal design in heavy rain climates?</p></div>
+    <div class="ref-prompt"><h3>Prompt 3 — Forward/Return Link Asymmetry</h3>
+        <p>The satellite receive chain has T_sys ≈ 378 K; the ground terminal has T_sys ≈ 142 K. This gives the ground terminal a fundamental thermal advantage. Trace the engineering implications for: (a) return link Δv budget, (b) modulation and coding on the return link, and (c) terminal transmit power specification for a given return-link data rate.</p></div>
+    <div class="ref-prompt"><h3>Prompt 4 — Elevation Angle and T_ant Management</h3>
+        <p>T_ant rises from ~10 K at 90° to ~100 K at 10° elevation for a Ka-band ground terminal. For a LEO broadband system serving users at all elevations above ε_min = 10°, design a link budget strategy that maintains the required margin across all elevation angles. What parameters can be adjusted dynamically as satellite elevation changes?</p></div>
+</div>
+
+<div class="complete-wrap">
+    <button class="complete-btn" id="completeBtn">MARK LESSON COMPLETE</button>
+    <div class="complete-msg" id="completeMsg"></div>
+</div>
+<div class="lesson-nav">
+    <a href="m4-1.html">← LESSON 01 — THE LINK BUDGET</a>
+    <a href="m4-3.html">LESSON 03 — FREQUENCY BANDS →</a>
+</div>
+</div>
+
+<button class="back-to-top" id="backToTop" title="Back to top">↑</button>
+<footer>© 2026 LEOAF · M4 · LESSON 02 OF 7</footer>
+
+<script>
+const canvas=document.getElementById('starsCanvas'),ctx=canvas.getContext('2d');
+let stars=[];
+function initStars(){stars=[];for(let i=0;i<180;i++)stars.push({x:Math.random()*canvas.width,y:Math.random()*canvas.height,size:Math.random()*1.5+0.4,speed:Math.random()*0.18+0.04,hue:Math.random()*360});}
+function resizeCanvas(){canvas.width=window.innerWidth;canvas.height=window.innerHeight;}
+resizeCanvas();initStars();window.addEventListener('resize',resizeCanvas);
+function animateStars(){ctx.clearRect(0,0,canvas.width,canvas.height);stars.forEach(s=>{s.y-=s.speed;if(s.y<0){s.y=canvas.height;s.x=Math.random()*canvas.width;}ctx.beginPath();ctx.fillStyle=`hsl(${s.hue},80%,80%)`;ctx.arc(s.x,s.y,s.size,0,Math.PI*2);ctx.fill();});requestAnimationFrame(animateStars);}
+animateStars();
+</script>
+<script>
+const feedbacks={
+    1:{correct:"Correct. T_e = T_phys × (L−1) = 290 × (10^(1/10)−1) = 290 × 0.259 ≈ 75 K. Every passive loss before the LNA adds noise at the physical temperature of that element — loss and noise are the same physical phenomenon in a passive component.",wrong:"Incorrect. 1 K is far too low. 290 K would be the noise temperature of an element with very high loss. Passive components absolutely add thermal noise — the Johnson-Nyquist relationship states any lossy medium at finite temperature generates noise. T_e = T_phys × (L−1) = 290 × 0.259 ≈ 75 K for 1 dB loss."},
+    2:{correct:"Correct. T_2/G_LNA = 1500/10^(40/10) = 1500/10000 = 0.15 K. A 40 dB LNA gain divides all subsequent stage noise temperatures by 10,000 — this is the point of the Friis formula and the reason the LNA must have high gain.",wrong:"Incorrect. The downconverter's 1,500 K own noise temperature must be divided by the cumulative preceding gain: 1500/10,000 = 0.15 K. 1,500 K ignores the LNA gain entirely. 150 K would correspond to 10 dB gain; 15 K to 20 dB. The 40 dB gain divides by 10,000."},
+    3:{correct:"Correct. At 30° elevation, Ka-band sees the CMB (2.7 K) plus atmospheric oxygen and water vapour emission — typically 20–40 K total for clear sky. The atmosphere contributes more at lower elevations where the path through it is longer.",wrong:"Incorrect. 290 K is the physical temperature of the antenna structure but not the noise temperature — T_ant is the brightness temperature of the electromagnetic environment the antenna sees, not the metal. 2.7 K is the CMB alone, ignoring the atmosphere. T_ant is never 0 K — the antenna couples to the warm atmosphere and any ground spillover."},
+    4:{correct:"Correct. ΔT_ant = T_rain × (1 − 10^(−A_dB/10)) = 273 × (1 − 0.1) = 273 × 0.9 = 245.7 K ≈ 245 K. A 10 dB event absorbs 90% of the signal and the rain medium emits 90% of its thermal emission — nearly 245 K of additional antenna noise.",wrong:"Incorrect. 10 K would be the change only if a tiny fraction of the atmosphere were affected. 27 K is 10% of 273 K, which corresponds to a much weaker attenuation. 273 K is the full rain temperature, appropriate only for complete signal absorption (infinite attenuation). At 10 dB, 90% is absorbed, giving 90% × 273 K = 245 K."},
+    5:{correct:"Correct. NF = 10·log₁₀(SNR_in/SNR_out). For a noiseless amplifier, output SNR = input SNR, so NF_linear = 1 and NF_dB = 0 dB. The amplifier adds no noise of its own.",wrong:"Incorrect. −∞ dB is not achievable — it would imply the amplifier removes noise from the signal. A gain equal to NF would mean the amplifier degrades SNR by its gain factor — not the definition of noise figure. 0 dB is the correct answer for a perfect noiseless device."},
+    6:{correct:"Correct. T_e = T_phys × (L−1) for pre-LNA losses adds directly to T_sys. Post-LNA losses have their noise divided by the LNA gain in the Friis formula, making their contribution negligible. Every dB of pre-LNA loss costs approximately 72 K of T_sys at 290 K.",wrong:"Incorrect. The LNA gain makes post-LNA losses irrelevant, not pre-LNA losses. Cable capacitance is an RF design issue unrelated to noise temperature. LNA performance does improve at low temperature, but the noise benefit of short pre-LNA cable runs comes from reduced passive loss noise, not from temperature effects on the LNA itself."},
+    7:{correct:"Correct. T_ant is the brightness temperature of the electromagnetic environment the antenna sees. A nadir-pointing satellite antenna sees the Earth, which radiates as a ~255 K blackbody in the microwave. This makes satellite receive chains inherently noisier than ground stations aimed at cold sky.",wrong:"Incorrect. Solar proximity affects physical temperature of surfaces but not the microwave brightness temperature the receive antenna measures. Receiver electronics contribute to T_sys (via the noise chain) but not T_ant (which is the antenna input temperature). The CMB is isotropic and altitude-independent."},
+    8:{correct:"Correct. Rain simultaneously reduces C (signal absorption) and increases N₀ (rain emits thermal noise that raises T_ant). Both numerator and denominator of C/N₀ degrade. For a sensitive terminal with T_sys = 100 K, a 10 dB rain event may cause 14–15 dB total C/N₀ degradation.",wrong:"Incorrect. Rain scattering (depolarisation) is a separate effect, not the noise-coupling mechanism. Demodulators are thermal-noise-limited regardless of rain. Rain attenuates the signal in the atmosphere — it does not physically absorb the antenna dish."},
+    9:{correct:"Correct. T₀ = 290 K (16.85°C) is an internationally agreed IEEE/ITU standard reference temperature for noise figure definition, set by convention — not because it equals Earth's average temperature (coincidental) or the CMB (2.7 K).",wrong:"Incorrect. 290 K ≈ Earth's surface temperature but that is coincidental — the standard was set by IEEE convention, not geophysical measurement. The CMB is 2.7 K. Rounding convenience was not the defining criterion. It is a convention, not a natural constant."},
+    10:{correct:"Correct. In the Friis chain: T_ant/L_feed ≈ 46.7 K, T_feed ≈ 20.4 K, T_LNA = 74.6 K, T_downconv/G_LNA ≈ 0.15 K. The LNA contributes 74.6 K — the largest single term. The downconverter's 1,537 K own noise temperature is divided by 10,000 by the LNA gain, becoming negligible.",wrong:"Incorrect. The downconverter's 1,537 K is divided by G_LNA = 10,000 → 0.15 K contribution — negligible. The antenna contributes 46.7 K (after feed reduction). The contributors are not equal; the LNA dominates precisely because the Friis formula is designed so that the LNA's noise temperature, being the second-stage contributor, is not divided by any preceding gain."}
+};
+let answered={};
+document.querySelectorAll('.quiz-opt').forEach(btn=>{
+    btn.addEventListener('click',function(){
+        const q=this.dataset.q;
+        if(answered[q]!==undefined)return;
+        const correct=this.dataset.correct==='true';
+        answered[q]=correct;
+        document.querySelectorAll(`.quiz-opt[data-q="${q}"]`).forEach(b=>{b.disabled=true;if(b.dataset.correct==='true')b.classList.add('correct');});
+        if(!correct)this.classList.add('wrong');
+        const fb=document.getElementById(`fb${q}`);
+        fb.textContent=(correct?'✓ ':'✗ ')+feedbacks[q][correct?'correct':'wrong'];
+        fb.style.color=correct?'#39ff14':'#ff004f';
+        if(Object.keys(answered).length===10){
+            const total=Object.values(answered).filter(Boolean).length;
+            const el=document.getElementById('quizScore');
+            el.style.display='block';
+            const pct=Math.round(total/10*100);
+            el.textContent=`SCORE: ${total} / 10 (${pct}%) — ${pct===100?'PERFECT.':pct>=80?'STRONG. REVIEW ANY MISSES.':pct>=60?'ADEQUATE. REVISIT WEAK SECTIONS.':'REVISIT THE LESSON BEFORE PROCEEDING.'}`;
+        }
+    });
+});
+</script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="supabase.js"></script>
+<script src="user_progress.js"></script>
+<script>
+const LESSON_ID='m4-2';
+(function(){
+    function bounceToLogin(r){console.error("Auth guard:",r);window.location.replace("index.html");}
+    async function init(){
+        if(typeof client==="undefined"||!client||!client.auth)return bounceToLogin("Supabase client not loaded");
+        let session=null;
+        try{({data:{session}}=await client.auth.getSession());}
+        catch(e){return bounceToLogin("getSession threw: "+e.message);}
+        if(!session){window.location.replace("index.html");return;}
+        const btn=document.getElementById('completeBtn'),msg=document.getElementById('completeMsg');
+        function setDone(done){
+            if(done){btn.textContent='✓ COMPLETE — CLICK TO UNDO';btn.classList.add('done');btn.style.cssText='border-color:#39ff14;color:#39ff14;background:rgba(57,255,20,0.1);cursor:pointer;opacity:1;';msg.style.color='#39ff14';msg.textContent='Lesson marked complete. Click again to undo.';}
+            else{btn.textContent='MARK LESSON COMPLETE';btn.classList.remove('done');btn.style.cssText='';msg.style.color='#ffffff55';msg.textContent='Not yet marked complete.';}
+        }
+        let mastered=[];
+        try{mastered=await getMasteredSections();}catch(e){console.error(e);}
+        setDone(mastered.includes(LESSON_ID));
+        btn.addEventListener('click',async()=>{
+            const isDone=btn.classList.contains('done');
+            msg.style.color='#00d9ff';msg.textContent='Saving...';
+            const ok=await upsertSection(LESSON_ID,!isDone);
+            if(ok){setDone(!isDone);}else{msg.style.color='#ff004f';msg.textContent='Error saving. Try again.';}
+        });
+        const btt=document.getElementById('backToTop');
+        window.addEventListener('scroll',()=>{btt.classList.toggle('visible',window.scrollY>400);});
+        btt.addEventListener('click',()=>window.scrollTo({top:0,behavior:'smooth'}));
+    }
+    if(document.readyState==="loading")document.addEventListener("DOMContentLoaded",init);
+    else init();
+})();
+</script>
+</body>
+</html>
