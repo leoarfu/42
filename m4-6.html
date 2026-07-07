@@ -1,0 +1,638 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, shrink-to-fit=no">
+<title>M4-6 — Interference: EPFD, C/I &amp; Co-Channel Physics · LEOAF</title>
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;600;800&family=Share+Tech+Mono&family=Libre+Baskerville:ital,wght@0,400;0,700;1,400&display=swap" rel="stylesheet">
+<link rel="icon" href="favicon.ico" sizes="any" type="image/x-icon">
+<link rel="manifest" href="site.webmanifest">
+<meta name="theme-color" content="#0f0f0f">
+<script>
+window.leoafAbort = async function () {
+    function go() { window.location.replace("index.html?signedout=1"); }
+    try { if (typeof client !== "undefined" && client && client.auth && client.auth.signOut) { try { await client.auth.signOut({ scope: "local" }); } catch (e) {} } } catch (e) {}
+    go();
+};
+</script>
+<style>
+* { box-sizing:border-box; margin:0; padding:0; }
+html { height:100%; -webkit-text-size-adjust:100%; overflow-x:hidden; }
+body { font-family:'Share Tech Mono',monospace; background:#000; color:white; overflow-x:hidden; min-height:100vh; }
+#starsCanvas { position:fixed; inset:0; z-index:-1; }
+header { background:#000; border-bottom:1px solid #ff004f33; position:sticky; top:0; z-index:100; padding:1rem clamp(1.5rem,5vw,4rem); display:flex; justify-content:space-between; align-items:center; }
+.logo { font-family:'Orbitron',sans-serif; font-weight:800; font-size:clamp(16px,2vw,22px); letter-spacing:3px; text-decoration:none; }
+.logo span:first-child { color:white; } .logo span:last-child { color:#ff004f; }
+.nav-right { display:flex; align-items:center; gap:10px; }
+.nav-btn { background:transparent; border:1px solid #ff004f44; color:#ff004f; padding:6px 14px; cursor:pointer; transition:0.3s; font-size:11px; font-family:'Orbitron',sans-serif; letter-spacing:1px; text-decoration:none; display:inline-block; }
+.nav-btn:hover { background:#ff004f; color:black; }
+.breadcrumb { padding:14px clamp(1.5rem,5vw,4rem); font-size:11px; color:#ffffff44; letter-spacing:1px; position:relative; z-index:1; }
+.breadcrumb a { color:#00d9ff66; text-decoration:none; } .breadcrumb a:hover { color:#00d9ff; }
+.breadcrumb span { margin:0 8px; }
+.lesson-wrap { max-width:820px; margin:0 auto; padding:0 clamp(1.5rem,5vw,4rem) 80px; position:relative; z-index:1; }
+.lesson-header { padding:30px 0 28px; border-bottom:1px solid #ffffff11; margin-bottom:36px; }
+.lesson-tag { font-family:'Orbitron',sans-serif; font-size:10px; color:#ff004f; letter-spacing:3px; margin-bottom:10px; }
+.lesson-header h1 { font-family:'Orbitron',sans-serif; font-size:clamp(20px,3.5vw,32px); font-weight:800; line-height:1.2; margin-bottom:12px; }
+.lesson-meta { display:flex; gap:10px; flex-wrap:wrap; margin-bottom:16px; }
+.l-pill { font-family:'Orbitron',sans-serif; font-size:10px; padding:3px 10px; border:1px solid; letter-spacing:1px; }
+.l-pill-q { color:#ff004f; border-color:#ff004f44; } .l-pill-t { color:#39ff14; border-color:#39ff1444; }
+.lesson-intro { font-size:13px; line-height:1.85; opacity:0.75; }
+.toc { background:rgba(0,217,255,0.06); border:1px solid #00d9ff33; padding:24px 28px; margin:30px 0; }
+.toc h4 { font-family:'Orbitron',sans-serif; font-size:10px; color:#00d9ff; letter-spacing:2px; margin-bottom:16px; }
+.toc ol { padding-left:20px; } .toc li { font-size:13px; line-height:2.1; }
+.toc li a { color:#00d9ffbb; text-decoration:none; transition:0.15s; } .toc li a:hover { color:#fff; padding-left:4px; }
+.toc li::marker { color:#ff004f; font-family:'Orbitron',sans-serif; font-size:10px; }
+.cb { background:#f5f2ec; color:#1a1a1a; padding:36px clamp(24px,4vw,48px); margin-bottom:24px; border-left:4px solid #00d9ff; position:relative; z-index:1; }
+.cb h2 { font-family:'Orbitron',sans-serif; font-size:13px; color:#003d66; letter-spacing:2px; text-transform:uppercase; margin-bottom:20px; padding-bottom:10px; border-bottom:2px solid #00d9ff66; scroll-margin-top:80px; }
+.cb h3 { font-family:'Orbitron',sans-serif; font-size:11px; color:#444; letter-spacing:1.5px; text-transform:uppercase; margin:28px 0 12px; }
+.cb p { font-family:'Libre Baskerville',Georgia,serif; font-size:15px; line-height:1.9; color:#1a1a1a; margin-bottom:16px; }
+.cb ul { padding-left:0; margin-bottom:16px; }
+.cb ul li { font-family:'Libre Baskerville',Georgia,serif; font-size:14px; line-height:1.85; color:#1a1a1a; padding-left:20px; position:relative; margin-bottom:8px; }
+.cb ul li::before { content:'›'; position:absolute; left:0; color:#0077aa; }
+.cb blockquote { border-left:3px solid #1a7a1a; background:#eafaea; padding:14px 20px; margin:18px 0; font-size:14px; font-family:'Share Tech Mono',monospace; color:#0a3d0a; }
+.callout { border-left:3px solid #0088cc; background:#e8f4fb; padding:16px 20px; margin:22px 0; font-size:12px; line-height:1.8; color:#1a1a1a; }
+.callout.red { border-left-color:#cc0033; background:#fdecea; }
+.callout.green { border-left-color:#1a7a1a; background:#eafaea; }
+.callout.amber { border-left-color:#996600; background:#fef9ec; }
+.callout strong { font-family:'Orbitron',sans-serif; font-size:10px; letter-spacing:1px; display:block; margin-bottom:8px; }
+.compare-table { width:100%; border-collapse:collapse; margin:22px 0; font-size:12px; }
+.compare-table th { font-family:'Orbitron',sans-serif; font-size:10px; letter-spacing:1px; color:#003d66; padding:10px 12px; border-bottom:2px solid #00d9ff66; text-align:left; }
+.compare-table td { padding:10px 12px; border-bottom:1px solid #ddd; line-height:1.5; color:#1a1a1a; vertical-align:top; }
+.compare-table tr:hover td { background:#f0f0f0; }
+.key-numbers { display:grid; grid-template-columns:repeat(auto-fit,minmax(140px,1fr)); gap:12px; margin:22px 0; }
+.kn-item { background:#fff; border:1px solid #d0d0d0; padding:16px 12px; text-align:center; }
+.kn-val { font-family:'Orbitron',sans-serif; font-size:clamp(13px,1.8vw,18px); font-weight:800; color:#003d66; display:block; }
+.kn-label { font-size:10px; color:#555; letter-spacing:1px; margin-top:5px; display:block; line-height:1.4; }
+.quiz-block { background:rgba(17,17,17,0.9); border:1px solid #ff004f33; padding:28px; margin:48px 0 32px; }
+.quiz-block h2 { font-family:'Orbitron',sans-serif; font-size:13px; color:#ff004f; letter-spacing:2px; margin-bottom:6px; }
+.quiz-intro { font-size:12px; opacity:0.6; margin-bottom:24px; padding-bottom:16px; border-bottom:1px solid #ff004f22; line-height:1.6; }
+.quiz-q { margin-bottom:28px; }
+.quiz-q p { font-size:13px; opacity:0.9; margin-bottom:12px; line-height:1.65; }
+.quiz-q p strong { color:#00d9ff; }
+.quiz-options { display:flex; flex-direction:column; gap:8px; }
+.quiz-opt { background:rgba(255,255,255,0.03); border:1px solid #ffffff1a; padding:11px 16px; cursor:pointer; font-size:12px; font-family:'Share Tech Mono',monospace; transition:0.2s; text-align:left; color:white; line-height:1.5; }
+.quiz-opt:hover:not(:disabled) { background:rgba(0,217,255,0.08); border-color:#00d9ff44; }
+.quiz-opt.correct { background:rgba(57,255,20,0.1); border-color:#39ff14; color:#39ff14; }
+.quiz-opt.wrong { background:rgba(255,0,79,0.1); border-color:#ff004f; color:#ff004f; }
+.quiz-opt:disabled { cursor:default; }
+.quiz-feedback { font-size:12px; margin-top:10px; min-height:18px; line-height:1.7; opacity:0.9; padding:0 4px; }
+.quiz-score { font-family:'Orbitron',sans-serif; font-size:12px; color:#39ff14; margin-top:20px; letter-spacing:1px; display:none; padding-top:16px; border-top:1px solid #39ff1433; }
+.py-block { background:rgba(10,10,10,0.95); border:1px solid #39ff1422; padding:28px; margin:32px 0; }
+.py-block h2 { font-family:'Orbitron',sans-serif; font-size:13px; color:#39ff14; letter-spacing:2px; margin-bottom:8px; }
+.py-block .py-intro { font-size:12px; opacity:0.7; margin-bottom:20px; padding-bottom:16px; border-bottom:1px solid #39ff1422; line-height:1.7; }
+.py-exercise { margin-bottom:32px; } .py-exercise:last-child { margin-bottom:0; }
+.py-exercise h3 { font-family:'Orbitron',sans-serif; font-size:11px; color:#39ff1499; letter-spacing:1.5px; text-transform:uppercase; margin-bottom:10px; }
+.py-exercise p { font-size:12px; opacity:0.8; margin-bottom:14px; line-height:1.75; }
+.py-block pre { background:#050505; border:1px solid #39ff1433; padding:20px; font-family:'Share Tech Mono',monospace; font-size:11.5px; line-height:1.75; overflow-x:auto; color:#39ff14; white-space:pre; margin-bottom:12px; }
+.py-note { background:rgba(57,255,20,0.04); border-left:2px solid #39ff14; padding:12px 16px; margin-top:14px; font-size:12px; line-height:1.75; opacity:0.8; }
+.py-note strong { font-family:'Orbitron',sans-serif; font-size:10px; color:#39ff14; display:block; margin-bottom:6px; letter-spacing:1px; }
+.reflection-block { background:rgba(255,170,0,0.04); border:1px solid #ffaa0033; padding:24px; margin:32px 0; }
+.reflection-block h2 { font-family:'Orbitron',sans-serif; font-size:13px; color:#ffaa00; letter-spacing:2px; margin-bottom:8px; }
+.ref-intro { font-size:12px; opacity:0.7; margin-bottom:20px; padding-bottom:14px; border-bottom:1px solid #ffaa0022; line-height:1.7; }
+.ref-prompt { margin-bottom:20px; }
+.ref-prompt h3 { font-family:'Orbitron',sans-serif; font-size:11px; color:#ffaa0099; letter-spacing:1px; margin-bottom:8px; }
+.ref-prompt p { font-size:12px; opacity:0.8; line-height:1.75; }
+.complete-wrap { margin-top:56px; padding-top:30px; border-top:1px solid #ffffff11; text-align:center; }
+.complete-btn { font-family:'Orbitron',sans-serif; font-size:13px; letter-spacing:2px; padding:14px 44px; background:transparent; border:1px solid #39ff14; color:#39ff14; cursor:pointer; transition:0.3s; }
+.complete-btn:hover:not(.done) { background:#39ff14; color:black; box-shadow:0 0 20px rgba(57,255,20,0.4); }
+.complete-btn.done { background:rgba(57,255,20,0.1); cursor:pointer; opacity:1; }
+.complete-msg { font-size:12px; color:#39ff14; margin-top:14px; min-height:18px; letter-spacing:1px; }
+.lesson-nav { display:flex; justify-content:space-between; margin-top:30px; flex-wrap:wrap; gap:10px; }
+.lesson-nav a { font-family:'Orbitron',sans-serif; font-size:11px; color:#00d9ff66; text-decoration:none; letter-spacing:1px; transition:0.2s; }
+.lesson-nav a:hover { color:#00d9ff; }
+.back-to-top { position:fixed; bottom:28px; right:28px; z-index:200; width:44px; height:44px; background:#000; border:1px solid #00d9ff55; color:#00d9ff; font-size:20px; cursor:pointer; display:flex; align-items:center; justify-content:center; opacity:0; pointer-events:none; transition:opacity 0.3s; }
+.back-to-top.visible { opacity:1; pointer-events:auto; } .back-to-top:hover { border-color:#00d9ff; }
+footer { text-align:center; padding:30px; opacity:0.3; font-size:11px; position:relative; z-index:1; letter-spacing:1px; }
+</style>
+</head>
+<body>
+<canvas id="starsCanvas"></canvas>
+<header>
+    <a href="dashboard.html" class="logo"><span>LEO</span><span>AF</span></a>
+    <div class="nav-right">
+        <a href="m4.html" class="nav-btn">← M4 HUB</a>
+        <button class="nav-btn" onclick="leoafAbort()">ABORT</button>
+    </div>
+</header>
+<div class="breadcrumb">
+    <a href="dashboard.html">DASHBOARD</a><span>/</span>
+    <a href="m4.html">M4</a><span>/</span>
+    <span style="color:#ffffff88;">LESSON 06 — INTERFERENCE: EPFD, C/I &amp; CO-CHANNEL PHYSICS</span>
+</div>
+
+<div class="lesson-wrap">
+<div class="lesson-header">
+    <div class="lesson-tag">M4 · LESSON 06 OF 7</div>
+    <h1>Interference: EPFD, C/I<br>&amp; Co-Channel Physics</h1>
+    <div class="lesson-meta">
+        <div class="l-pill l-pill-q">MODULE 4</div>
+        <div class="l-pill l-pill-t">RF &amp; LINK BUDGETS</div>
+    </div>
+    <p class="lesson-intro">Every link budget so far has assumed a single signal and thermal noise alone. In a real operational environment, the receive chain also picks up unwanted signals from co-channel beams, adjacent constellation satellites, and GEO systems sharing the same band. This lesson derives the C/I calculation from first principles, characterises interference sources in a LEO constellation, explains the ITU EPFD framework protecting GEO from NGSO interference, and delivers Stage 6 of the spine project by incorporating C/I into the effective noise floor.</p>
+</div>
+
+<div class="toc">
+    <h4>CONTENTS</h4>
+    <ol>
+        <li><a href="#s1">Interference in the link equation</a></li>
+        <li><a href="#s2">Carrier-to-interference ratio: the geometry</a></li>
+        <li><a href="#s3">Within-constellation interference</a></li>
+        <li><a href="#s4">Inter-system interference: LEO-to-LEO</a></li>
+        <li><a href="#s5">LEO-to-GEO interference: the EPFD framework</a></li>
+        <li><a href="#s6">GEO-to-LEO interference</a></li>
+        <li><a href="#s7">Incorporating C/I into the link budget</a></li>
+        <li><a href="#quiz">Knowledge check</a></li>
+        <li><a href="#python">Python exercises — spine project stage 6</a></li>
+        <li><a href="#reflect">Reflection prompts</a></li>
+    </ol>
+</div>
+
+<div class="cb" id="s1">
+    <h2>1. Interference in the Link Equation</h2>
+    <p>When the receive terminal receives the desired signal plus an undesired interfering signal, the effective noise floor increases. With desired carrier power C and total interference power I, the composite noise floor is:</p>
+    <blockquote>N_eff = N₀ · B + I</blockquote>
+    <p>The carrier-to-noise-plus-interference ratio:</p>
+    <blockquote>C/(N+I) = C / (N + I)</blockquote>
+    <p>A convenient reformulation uses separate C/N and C/I terms:</p>
+    <blockquote>1/(C/(N+I)) = 1/(C/N) + 1/(C/I)</blockquote>
+    <p>In the link budget, C/(N₀+I₀) where I₀ is the interference spectral density (W/Hz) gives the effective noise density N₀_eff = N₀ + I₀ = k·T_sys + I₀. This is the "interference as noise" model — valid when the interference is uncorrelated with the desired signal, the case for most satellite interference scenarios.</p>
+</div>
+
+<div class="cb" id="s2">
+    <h2>2. Carrier-to-Interference Ratio: The Geometry</h2>
+    <p>C/I for a satellite link depends on the geometry between the desired satellite, the interfering transmitter, and the receive terminal. The key quantity is the ratio of antenna gain toward the desired direction versus the gain toward the interfering source.</p>
+    <p>For <strong>downlink interference</strong> (an interfering satellite on the same frequency):</p>
+    <blockquote>C/I_dB = (EIRP_desired + G_rx(θ_desired)) − (EIRP_interferer + G_rx(θ_interferer))</blockquote>
+    <p>For a directional ground terminal pointing at the desired satellite, G_rx(θ_desired) = G_peak while G_rx(θ_interferer) is the sidelobe gain toward the interferer. The discrimination comes from the terminal's sidelobe pattern.</p>
+    <p>For <strong>satellite-to-satellite interference</strong> (the spatial reuse scenario from m3-5):</p>
+    <blockquote>C/I_dB ≈ G_sat_main − G_sat_sidelobe(Δθ)</blockquote>
+    <p>As derived in m3-5: C/I ≈ 20–25 dB for a well-designed phased array with −25 dB sidelobes and co-channel beams separated by two beam diameters. The ITU-R S.580 reference earth station pattern provides a standardised off-axis gain envelope used in coordination calculations between systems.</p>
+</div>
+
+<div class="cb" id="s3">
+    <h2>3. Within-Constellation Interference</h2>
+    <h3>Co-channel beams within the same satellite</h3>
+    <p>As covered in m3-5, adjacent spot beams using the same frequency colour create co-channel interference. For a four-colour reuse pattern, co-channel beams are separated by at least two beam diameters, with C/I typically 20–25 dB for a well-designed array — the intra-satellite co-channel case.</p>
+    <h3>Adjacent satellite interference within the constellation</h3>
+    <p>When multiple constellation satellites are simultaneously visible from the terminal, signals from a non-serving satellite arrive as interference. The C/I depends on the interfering satellite's antenna gain toward the terminal (narrow spot beams provide substantial sidelobe isolation outside their service area) and the angular separation between desired and interfering satellites as seen from the terminal.</p>
+    <p>For a well-designed LEO constellation with tight spot beams (0.3–0.5°) and good sidelobe control, adjacent-satellite interference within the constellation is typically 25–35 dB below the desired signal — a fixed, manageable C/I term in the link budget.</p>
+    <div class="callout">
+        <strong>THE GEOMETRY AT 550 KM</strong>
+        Two adjacent Starlink satellites in the same orbital plane are separated by approximately 1,600 km. When a terminal sits midway between two satellites at similar elevations, the angular separation it sees may be only 10–30°. The terminal's ~0.5°-beam phased array has sidelobes of approximately −25 to −30 dB at this angle — providing 25–30 dB of C/I isolation.
+    </div>
+</div>
+
+<div class="cb" id="s4">
+    <h2>4. Inter-System Interference: LEO-to-LEO</h2>
+    <p>When two different LEO broadband constellations (e.g. Starlink and Kuiper) share the same Ka-band allocation, their satellites can interfere with each other's users — fundamentally the same geometry as within-constellation interference, but without guaranteed coordination.</p>
+    <p>Mitigation mechanisms: <strong>different inclinations and altitudes</strong> — Starlink (53°, 550 km) and Kuiper (51.9°, 590 km) drift relative to each other due to differing orbital periods, reducing persistent conjunction geometries; <strong>frequency coordination</strong> — ITU coordination between operators can assign different sub-bands or temporal sharing agreements; <strong>pointing exclusion zones</strong> — a serving constellation's beams may be required to avoid pointing toward a terminal already served by another operator's visible satellite.</p>
+    <p>In practice, inter-system LEO interference is managed through bilateral coordination agreements and ITU spectrum coordination — a regulatory process still evolving as the number of large LEO constellations grows.</p>
+</div>
+
+<div class="cb" id="s5">
+    <h2>5. LEO-to-GEO Interference: The EPFD Framework</h2>
+    <p>The most heavily regulated interference category is NGSO (LEO) constellations interfering with GSO (GEO) satellite systems sharing the same band, addressed through the ITU's equivalent power flux density (EPFD) framework.</p>
+    <h3>What EPFD measures</h3>
+    <p>EPFD is the aggregate power flux density at a GEO Earth station from all NGSO satellites transmitting in the shared band, summed over every visible NGSO satellite, accounting for each satellite's transmit power, its antenna gain in the direction of the GEO Earth station (usually the sidelobe), the distance from each satellite to the station, and the reference bandwidth used for comparison with the ITU limit.</p>
+    <h3>ITU EPFD limits</h3>
+    <table class="compare-table">
+        <thead><tr><th>Direction</th><th>ITU limit (Ka-band, typical)</th></tr></thead>
+        <tbody>
+            <tr><td>EPFD_down (NGSO transmit, GEO Rx)</td><td>−160 dBW/m²/Hz</td></tr>
+            <tr><td>EPFD_up (NGSO terminal transmit)</td><td>−120.5 dBW/m²/Hz</td></tr>
+            <tr><td>EPFD_is (into space station)</td><td>−168 dBW/m²/Hz</td></tr>
+        </tbody>
+    </table>
+    <p>These limits are statistical — they must not be exceeded for more than a specified percentage of time (typically 0.001% for worst-case instantaneous limits, 0.01–0.1% for time-averaged limits).</p>
+    <h3>Operational EPFD management</h3>
+    <p><strong>Beam blanking</strong>: when a LEO satellite's beam would illuminate a GEO Earth station, the beam is turned off or steered away, creating a capacity dead zone around that station. <strong>Power control</strong>: reducing transmit power in the vicinity of GEO stations, at the cost of reduced margin for nearby LEO users. <strong>Orbital geometry exploitation</strong>: where possible, constellation parameters minimise time in the interference geometry with high-usage GEO stations.</p>
+    <p>The fraction of capacity lost to EPFD management depends on the geographic distribution of GEO Earth stations relative to the LEO service area. In regions with many GEO stations (North America, Europe), beam blanking creates non-trivial capacity losses — estimated at 2–10% of total capacity in heavily coordinated bands.</p>
+</div>
+
+<div class="cb" id="s6">
+    <h2>6. GEO-to-LEO Interference</h2>
+    <p>GEO satellites sharing the same frequency band also interfere with LEO user terminals. When the GEO and LEO satellite are at similar azimuth angles from the terminal, the GEO signal enters the LEO terminal's antenna sidelobes and adds interference. The magnitude depends on GEO satellite EIRP, the path loss difference (GEO at 35,786 km vs LEO at 550 km), and the terminal's off-axis discrimination.</p>
+    <p>At GEO-to-terminal distances of ~36,000 km vs LEO-to-terminal distances of ~600–2,000 km, the GEO signal arrives with approximately 20·log₁₀(36,000/1,000) ≈ 31 dB more path loss than the LEO signal. A high-EIRP GEO satellite (50–60 dBW EIRP) can still produce meaningful interference depending on geometry.</p>
+    <p>Managed through frequency separation between GEO and LEO allocations where the ITU plan allows, terminal antenna sidelobe pattern standards ensuring sufficient off-axis rejection, and scheduling of LEO service to avoid geometries where the GEO satellite is close to the LEO satellite in the sky.</p>
+</div>
+
+<div class="cb" id="s7">
+    <h2>7. Incorporating C/I Into the Link Budget</h2>
+    <p>C/I enters the link budget as an addition to the effective noise floor. Given C/N₀ (thermal noise only) and C/I₀ (interference spectral density):</p>
+    <blockquote>C/(N₀+I₀)_dBHz = −10·log₁₀(10^(−C/N₀/10) + 10^(−C/I₀/10))</blockquote>
+    <p>where C/I₀_dBHz = C/I_dB + 10·log₁₀(B_interferer). For typical LEO broadband scenarios where C/I ≈ 25 dB over a 250 MHz carrier, C/I₀ = 25 + 84 = 109 dBHz. This is comparable to — not far below — the thermal C/N₀ of a strong clear-sky link (108–112 dBHz), and combining the two degrades C/(N₀+I₀) by 2–4.5 dB relative to C/N₀ alone. Interference becomes a second-order effect only when the thermal C/N₀ sits well below C/I₀ — which is exactly the situation under a deep rain fade, when the noise floor has risen. Worth fixing in memory: co-channel interference costs the most in clear sky, when the link is trying to run its highest MODCOD, and the least during the fades that dominate the availability analysis.</p>
+    <p>When C/I approaches or falls below C/N₀ — interference comparable to or stronger than thermal noise — the interference term dominates and must be managed through the frequency reuse and interference suppression techniques from m3-5.</p>
+    <table class="compare-table">
+        <thead><tr><th>Interference source</th><th>Typical C/I</th><th>Link budget impact</th></tr></thead>
+        <tbody>
+            <tr><td>Intra-satellite co-channel (4-colour)</td><td>20–25 dB</td><td>&lt; 0.5 dB degradation</td></tr>
+            <tr><td>Adjacent satellite (within constellation)</td><td>25–35 dB</td><td>&lt; 0.1 dB degradation</td></tr>
+            <tr><td>Inter-system (other LEO constellation)</td><td>25–40 dB</td><td>&lt; 0.1 dB in normal conditions</td></tr>
+            <tr><td>GEO-to-LEO (unfavourable geometry)</td><td>15–25 dB</td><td>0.5–2 dB degradation</td></tr>
+            <tr><td>EPFD violation (beam not blanked)</td><td>5–15 dB</td><td>2–10 dB degradation, potential outage</td></tr>
+        </tbody>
+    </table>
+    <div class="key-numbers">
+        <div class="kn-item"><span class="kn-val">~31 dB</span><span class="kn-label">EXTRA PATH LOSS, GEO VS LEO AT SAME TERMINAL</span></div>
+        <div class="kn-item"><span class="kn-val">−160 dBW/m²/Hz</span><span class="kn-label">TYPICAL ITU EPFD_DOWN LIMIT</span></div>
+        <div class="kn-item"><span class="kn-val">2–10%</span><span class="kn-label">CAPACITY LOST TO BEAM BLANKING (HEAVY COORDINATION)</span></div>
+        <div class="kn-item"><span class="kn-val">&lt;0.1 dB</span><span class="kn-label">TYPICAL DEGRADATION AT C/I=25dB, C/N₀=108dBHz</span></div>
+    </div>
+</div>
+
+<!-- QUIZ -->
+<div class="quiz-block" id="quiz">
+    <h2>KNOWLEDGE CHECK</h2>
+    <p class="quiz-intro">Ten questions. Select one answer per question. Immediate feedback; score appears when all ten are answered.</p>
+
+    <div class="quiz-q"><p><strong>Q1.</strong> The "interference as noise" model treats interference as additional noise in the receive chain. This model is valid when:</p>
+        <div class="quiz-options">
+            <button class="quiz-opt" data-q="1" data-correct="false">A — The interference is stronger than the thermal noise</button>
+            <button class="quiz-opt" data-q="1" data-correct="true">B — The interference is uncorrelated with the desired signal</button>
+            <button class="quiz-opt" data-q="1" data-correct="false">C — The interference is from within the same constellation</button>
+            <button class="quiz-opt" data-q="1" data-correct="false">D — The interference is narrowband relative to the signal bandwidth</button>
+        </div><div class="quiz-feedback" id="fb1"></div></div>
+
+    <div class="quiz-q"><p><strong>Q2.</strong> The EPFD limit protects GEO satellite operators by:</p>
+        <div class="quiz-options">
+            <button class="quiz-opt" data-q="2" data-correct="false">A — Requiring LEO satellites to avoid GEO satellite positions</button>
+            <button class="quiz-opt" data-q="2" data-correct="true">B — Limiting the aggregate power flux density that all LEO satellites collectively deliver to a GEO Earth station</button>
+            <button class="quiz-opt" data-q="2" data-correct="false">C — Reducing the transmit power of all LEO satellites globally</button>
+            <button class="quiz-opt" data-q="2" data-correct="false">D — Requiring LEO operators to purchase GEO orbital slots</button>
+        </div><div class="quiz-feedback" id="fb2"></div></div>
+
+    <div class="quiz-q"><p><strong>Q3.</strong> Beam blanking as an EPFD management technique means:</p>
+        <div class="quiz-options">
+            <button class="quiz-opt" data-q="3" data-correct="false">A — The LEO satellite blanks its entire transmit array</button>
+            <button class="quiz-opt" data-q="3" data-correct="true">B — Specific LEO downlink beams are turned off when they would illuminate a GEO Earth station, at the cost of reduced capacity in that geographic area</button>
+            <button class="quiz-opt" data-q="3" data-correct="false">C — The GEO Earth station's receive dish is blanked by a mechanical shutter</button>
+            <button class="quiz-opt" data-q="3" data-correct="false">D — The LEO satellite switches to a different frequency when near a GEO station</button>
+        </div><div class="quiz-feedback" id="fb3"></div></div>
+
+    <div class="quiz-q"><p><strong>Q4.</strong> The C/I for intra-satellite co-channel interference in a four-colour reuse system depends primarily on:</p>
+        <div class="quiz-options">
+            <button class="quiz-opt" data-q="4" data-correct="false">A — The satellite's orbital altitude</button>
+            <button class="quiz-opt" data-q="4" data-correct="true">B — The satellite transmit antenna sidelobe level toward the co-channel ground cell</button>
+            <button class="quiz-opt" data-q="4" data-correct="false">C — The number of users in each beam</button>
+            <button class="quiz-opt" data-q="4" data-correct="false">D — The satellite's transmit power</button>
+        </div><div class="quiz-feedback" id="fb4"></div></div>
+
+    <div class="quiz-q"><p><strong>Q5.</strong> When C/I ≈ 25 dB and C/N₀ ≈ 108 dBHz for a 250 MHz bandwidth, the interference is approximately:</p>
+        <div class="quiz-options">
+            <button class="quiz-opt" data-q="5" data-correct="false">A — The dominant degradation factor</button>
+            <button class="quiz-opt" data-q="5" data-correct="false">B — Comparable to the thermal noise</button>
+            <button class="quiz-opt" data-q="5" data-correct="true">C — Much weaker than the thermal noise — C/I contributes &lt; 0.1 dB degradation</button>
+            <button class="quiz-opt" data-q="5" data-correct="false">D — Strong enough to cause a link outage</button>
+        </div><div class="quiz-feedback" id="fb5"></div></div>
+
+    <div class="quiz-q"><p><strong>Q6.</strong> The extra path loss of a GEO satellite (36,000 km) vs a LEO satellite (1,000 km) serving the same terminal is approximately:</p>
+        <div class="quiz-options">
+            <button class="quiz-opt" data-q="6" data-correct="false">A — 6 dB</button>
+            <button class="quiz-opt" data-q="6" data-correct="false">B — 10 dB</button>
+            <button class="quiz-opt" data-q="6" data-correct="true">C — 31 dB</button>
+            <button class="quiz-opt" data-q="6" data-correct="false">D — 0 dB — both satellites use the same frequency and band</button>
+        </div><div class="quiz-feedback" id="fb6"></div></div>
+
+    <div class="quiz-q"><p><strong>Q7.</strong> The ITU EPFD_down limit of approximately −160 dBW/m²/Hz is:</p>
+        <div class="quiz-options">
+            <button class="quiz-opt" data-q="7" data-correct="false">A — The minimum signal power required at a GEO Earth station</button>
+            <button class="quiz-opt" data-q="7" data-correct="true">B — The maximum aggregate interference power density that all LEO satellites may collectively deliver to a GEO Earth station receive antenna</button>
+            <button class="quiz-opt" data-q="7" data-correct="false">C — The LEO satellite's maximum allowed EIRP</button>
+            <button class="quiz-opt" data-q="7" data-correct="false">D — The minimum sidelobe level required for LEO satellite antennas</button>
+        </div><div class="quiz-feedback" id="fb7"></div></div>
+
+    <div class="quiz-q"><p><strong>Q8.</strong> The fraction of LEO capacity lost to EPFD compliance is estimated at 2–10% in heavily coordinated bands because:</p>
+        <div class="quiz-options">
+            <button class="quiz-opt" data-q="8" data-correct="false">A — 2–10% of all satellite passes coincide with GEO satellites</button>
+            <button class="quiz-opt" data-q="8" data-correct="true">B — GEO Earth stations are geographically concentrated in populated regions where LEO service demand is also highest, creating frequent geometric conflicts</button>
+            <button class="quiz-opt" data-q="8" data-correct="false">C — ITU regulations require 2–10% capacity reservation for GEO protection</button>
+            <button class="quiz-opt" data-q="8" data-correct="false">D — LEO phased arrays can only blank beams at 2–10% efficiency</button>
+        </div><div class="quiz-feedback" id="fb8"></div></div>
+
+    <div class="quiz-q"><p><strong>Q9.</strong> The formula 1/(C/(N+I)) = 1/(C/N) + 1/(C/I) shows that:</p>
+        <div class="quiz-options">
+            <button class="quiz-opt" data-q="9" data-correct="false">A — The combined effect of noise and interference is the arithmetic sum of their individual effects</button>
+            <button class="quiz-opt" data-q="9" data-correct="true">B — The dominant impairment (the smaller of C/N and C/I) approximately determines the combined C/(N+I)</button>
+            <button class="quiz-opt" data-q="9" data-correct="false">C — Interference and noise can cancel each other</button>
+            <button class="quiz-opt" data-q="9" data-correct="false">D — The formula only applies when noise and interference are equal</button>
+        </div><div class="quiz-feedback" id="fb9"></div></div>
+
+    <div class="quiz-q"><p><strong>Q10.</strong> For a Ka-band LEO terminal with a high-gain phased array, the primary mechanism providing isolation against GEO-to-LEO downlink interference is:</p>
+        <div class="quiz-options">
+            <button class="quiz-opt" data-q="10" data-correct="false">A — The high path loss of the GEO signal relative to the LEO signal, alone</button>
+            <button class="quiz-opt" data-q="10" data-correct="true">B — Both the path loss difference (~31 dB) and the terminal's off-axis sidelobe discrimination toward the GEO satellite</button>
+            <button class="quiz-opt" data-q="10" data-correct="false">C — The frequency difference between GEO and LEO allocations</button>
+            <button class="quiz-opt" data-q="10" data-correct="false">D — The LEO satellite's active interference cancellation</button>
+        </div><div class="quiz-feedback" id="fb10"></div></div>
+
+    <div class="quiz-score" id="quizScore"></div>
+</div>
+
+<!-- PYTHON -->
+<div class="py-block" id="python">
+    <h2>PYTHON EXERCISES — SPINE PROJECT STAGE 6</h2>
+    <p class="py-intro">Stage 6 incorporates C/I into the effective noise floor of the link budget engine — the penultimate stage before the final synthesis in m4-7.</p>
+
+    <div class="py-exercise">
+        <h3>Exercise 1 — C/I Calculation and the Interference Floor</h3>
+        <p>Compute C/I for various interference scenarios and determine when interference becomes the limiting factor.</p>
+<pre>
+import math
+
+def lin(db): return 10**(db/10)
+def db(x):   return 10*math.log10(x)
+
+def combined_cn0_i(cn0_dbhz, ci_db, b_interferer_hz):
+    """
+    C/I₀ = C/I + 10·log10(B_interferer)  [dBHz]
+    1/(C/(N₀+I₀)) = 1/(C/N₀) + 1/(C/I₀)
+    """
+    ci0 = ci_db + 10*math.log10(b_interferer_hz)
+    combined_inv = 1/lin(cn0_dbhz) + 1/lin(ci0)
+    return db(1/combined_inv), db(1/lin(cn0_dbhz)), db(1/lin(ci0))
+
+print("Combined C/(N₀+I₀) — Ka-band LEO forward link\n")
+print(f"{'C/I (dB)':>10}{'C/I₀ (dBHz)':>14}{'C/N₀ (dBHz)':>14}"
+      f"{'C/(N+I)₀':>12}{'Degradation':>13}")
+print("-" * 64)
+cn0 = 108.9   # from m4-1 example
+B   = 250e6   # interferer bandwidth Hz
+
+for ci in [35, 30, 25, 20, 15, 12, 10]:
+    combined, _, _ = combined_cn0_i(cn0, ci, B)
+    degrad = cn0 - combined
+    ci0 = ci + 10*math.log10(B)
+    print(f"{ci:>10}{ci0:>14.1f}{cn0:>14.1f}{combined:>12.1f}{degrad:>11.2f} dB")
+
+print("\nNote: C/I must fall below ~C/N₀ − B_dBHz to significantly degrade the link")
+
+# 1. At what C/I does interference cause > 1 dB degradation in C/(N₀+I₀)?
+# 2. An interfering satellite has EIRP=45dBW, path loss=180dB, terminal
+#    off-axis gain -15dBi. What is C/I if the desired satellite C=-95dBW?
+# 3. For EPFD compliance at -160 dBW/m²/Hz, satellite at 1,000km, beam
+#    gain 0dBi (sidelobe), what max EIRP per beam (250 MHz ref BW)?
+</pre>
+    </div>
+
+    <div class="py-exercise">
+        <h3>Exercise 2 — EPFD Calculation</h3>
+        <p>Compute the EPFD from a LEO constellation at a GEO Earth station and check against the ITU limit.</p>
+<pre>
+import math
+
+EPFD_LIMIT_DB = -160.0   # dBW/m²/Hz — approximate ITU Ka-band downlink limit
+C = 3e8
+
+def fspl(d_km, f_ghz):
+    lam = C / (f_ghz*1e9)
+    return (4*math.pi*d_km*1e3 / lam)**2
+
+def epfd_pfd(eirp_dbw, d_km, f_ghz, bw_hz):
+    path_loss = fspl(d_km, f_ghz)
+    return 10**(eirp_dbw/10) / (path_loss * bw_hz)
+
+def total_epfd(sats, f_ghz, bw_hz):
+    """sats: list of (eirp_dbw, distance_km). Returns total EPFD in dBW/m²/Hz."""
+    total = sum(epfd_pfd(e,d,f_ghz,bw_hz) for e,d in sats)
+    return 10*math.log10(total) if total>0 else -300
+
+f = 20.0; bw = 250e6
+
+scenarios = [
+    ("3 sats, beam ON GEO station (eirp=50dBW)",
+     [(50,700),(45,1200),(43,1800)]),
+    ("3 sats, beam NOT on station (eirp=25dBW, -25dB SL)",
+     [(25,700),(20,1200),(18,1800)]),
+    ("10 sats, beam not on station (eirp=25dBW)",
+     [(25,700+i*200) for i in range(10)]),
+    ("30 sats, beam not on station (eirp=20dBW)",
+     [(20,700+i*100) for i in range(30)]),
+]
+
+print(f"EPFD at GEO Earth station — Ka {f} GHz, BW={bw/1e6:.0f} MHz\n")
+print(f"{'Scenario':<46}{'EPFD':>14}{'Margin':>10}")
+print("-"*72)
+for name, sats in scenarios:
+    epfd = total_epfd(sats, f, bw)
+    margin = EPFD_LIMIT_DB - epfd
+    print(f"{name:<46}{epfd:>13.1f}dB{margin:>+9.1f}dB")
+print(f"\nITU limit: {EPFD_LIMIT_DB} dBW/m²/Hz")
+
+# 1. In scenario 1, which satellite (if blanked) brings EPFD into compliance?
+# 2. As constellation grows to 100 visible sats (2,000km, 20dBW, sidelobe),
+#    how does EPFD scale? Plot EPFD vs satellite count.
+# 3. Max beam EIRP for a single satellite at 700km to stay below the
+#    EPFD limit as the only visible satellite?
+</pre>
+    </div>
+
+    <div class="py-exercise">
+        <h3>Exercise 3 — Spine Stage 6: C/I Into the Link Budget</h3>
+        <p>Extend the LinkBudget engine with interference terms — the penultimate spine stage before the final synthesis in m4-7.</p>
+<pre>
+import math
+
+K_DB = -228.6; T0 = 290.0
+
+def fspl(d, f): return 92.4 + 20*math.log10(d) + 20*math.log10(f)
+def nf_te(nf): return T0*(10**(nf/10)-1)
+def loss_te(l, t=T0): return t*(10**(l/10)-1)
+def dbl(x): return 10**(x/10)
+
+RAIN_ZONES = {'E':22,'F':28,'G':30,'K':42,'N':95,'P':145}  # ITU-R P.837 R0.01
+
+def rain_specific(R, f):
+    P = {14:(.0229,1.265),20:(.0751,1.099),30:(.187,1.021),47:(.546,.911)}
+    k,a = min(P.items(),key=lambda x:abs(x[0]-f))[1]
+    return k*R**a
+
+def rain_atten(zone, f, elev, avail=99.9):
+    # Simplified P.618: A0.01 first, then scale the ATTENUATION (m4-4).
+    R001=RAIN_ZONES.get(zone.upper(),28); p=max(100-avail, 0.01)
+    e=math.radians(elev); Ls=3.9/math.sin(e)
+    L0=35.0*math.exp(-0.015*R001)
+    A001=rain_specific(R001,f)*Ls*(1/(1+Ls*math.cos(e)/L0))
+    if p==0.01: return A001
+    return A001*(p/0.01)**(-(0.655+0.033*math.log(p)-0.045*math.log(A001)))
+
+class LinkBudget:
+    """Stage 6: Full propagation + interference."""
+    def __init__(self, name):
+        self.name=name; self.losses=[]; self._chain=[]
+        self._eirp=self._fspl=self._grx=self._tant=self._req=None
+        self._freq=None; self._elev=None; self._zone=None
+        self._scint=0.0; self._ci_db=None; self._ci_bw=None
+
+    def set_transmitter(self, p, g): self._eirp=10*math.log10(p)+g
+    def set_path(self, d, f, elev=30):
+        self._fspl=fspl(d,f); self._freq=f; self._elev=elev
+    def add_loss(self, lbl, v): self.losses.append((lbl,v))
+    def set_antenna(self, g, tant): self._grx=g; self._tant=tant
+    def add_stage(self, lbl, te, g=None): self._chain.append((lbl,te,g))
+    def set_required(self, r): self._req=r
+    def set_rain_zone(self, z): self._zone=z
+    def set_scintillation(self, db): self._scint=db
+    def set_interference(self, ci_db, bw_hz):
+        self._ci_db=ci_db; self._ci_bw=bw_hz
+
+    def _tsys(self, rain_db=0):
+        tant=self._tant+(273*(1-10**(-rain_db/10)) if rain_db else 0)
+        t=tant; cg=1.0
+        for _,te,g in self._chain:
+            t+=te/cg
+            if g: cg*=dbl(g)
+        return t
+
+    def compute(self, avail=None):
+        rain_db = rain_atten(self._zone,self._freq,self._elev,avail) if (avail and self._zone) else 0
+        t = self._tsys(rain_db)
+        total_path = self._fspl + sum(v for _,v in self.losses) + rain_db + self._scint
+        c_dbw  = self._eirp - total_path + self._grx
+        n0_dbhz = 10*math.log10(t) + K_DB
+        cn0_thermal = c_dbw - n0_dbhz
+        if self._ci_db is not None:
+            ci0 = self._ci_db + 10*math.log10(self._ci_bw)
+            cn0_eff = -10*math.log10(dbl(-cn0_thermal) + dbl(-ci0))
+        else:
+            cn0_eff = cn0_thermal
+        margin = cn0_eff - self._req if self._req else None
+        return cn0_eff, margin, t, rain_db
+
+    def print_full(self, avail=99.9):
+        cn0, m, t, r = self.compute(avail)
+        ci_str = f"C/I={self._ci_db}dB" if self._ci_db else "no interference"
+        print(f"\n  {self.name}")
+        print(f"  Avail={avail}%  Zone={self._zone}  Rain={r:.1f}dB  "
+              f"Scint={self._scint}dB  {ci_str}")
+        print(f"  T_sys={t:.0f}K  C/N₀+I₀={cn0:.1f}dBHz  Margin={m:+.1f}dB  "
+              f"{'✓' if m>=0 else '✗'}")
+
+lb = LinkBudget("LEO Ka forward — all impairments stage 6")
+lb.set_transmitter(20, 34); lb.set_path(1000, 20.0, 30)
+lb.add_loss("Gaseous abs", 0.5); lb.add_loss("Pointing", 0.5)
+lb.set_antenna(37.5, 30.0)
+lb.add_stage("Feed 0.3dB",   loss_te(0.3),-0.3)
+lb.add_stage("LNA NF=1 G=40",nf_te(1.0),  40.0)
+lb.add_stage("Downconv NF=8",nf_te(8.0),  20.0)
+lb.add_stage("IF NF=10",     nf_te(10.0), None)
+lb.set_rain_zone('F'); lb.set_scintillation(0.7)
+lb.set_interference(ci_db=25, bw_hz=250e6)
+lb.set_required(93.4)  # 16-APSK 3/4 @ 208.3 Msym/s (Es/N0 10.21 dB + 83.2 dBHz)
+
+for avail in [99.0, 99.5, 99.9, 99.95, 99.99]:
+    lb.print_full(avail)
+</pre>
+        <div class="py-note"><strong>SPINE PROJECT — STAGE 6</strong>
+            Stage 6 folds C/I into the effective noise floor via the harmonic-sum formula. The engine now carries every impairment from m4-1 through m4-6 except the final two-link synthesis. Stage 7 (m4-7) assembles forward and return links with full sensitivity analysis.
+        </div>
+    </div>
+</div>
+
+<!-- REFLECTION -->
+<div class="reflection-block" id="reflect">
+    <h2>REFLECTION PROMPTS</h2>
+    <p class="ref-intro">Not graded. 200–400 words each.</p>
+    <div class="ref-prompt"><h3>Prompt 1 — Constellation Density Threshold</h3>
+        <p>With C/I ≈ 25 dB, interference adds less than 0.5 dB degradation. As constellations grow from hundreds to thousands of satellites, adjacent-satellite interference increases. At what constellation density (satellites per unit sky solid angle) does adjacent-satellite interference become the dominant link impairment rather than thermal noise? Derive an approximate threshold and compare it to current Starlink density.</p></div>
+    <div class="ref-prompt"><h3>Prompt 2 — EPFD Capacity Loss Over the US</h3>
+        <p>GEO Earth stations serving broadcast and broadband services are distributed in every US metropolitan area. Estimate the fraction of total Starlink forward-link capacity over the continental US lost to EPFD compliance, assuming a beam blanking radius of 2° around each GEO Earth station direction and a ground station density of 1 per 5,000 km².</p></div>
+    <div class="ref-prompt"><h3>Prompt 3 — Uncoordinated Third-Operator Scenarios</h3>
+        <p>Inter-system coordination between Starlink and Kuiper is currently handled through bilateral agreements rather than binding ITU enforcement. Identify three specific interference scenarios that could arise if a third operator deployed a 1,000-satellite Ka-band constellation without coordination. What is the mechanism of interference, the magnitude of degradation in dB, and the coordination measures available?</p></div>
+    <div class="ref-prompt"><h3>Prompt 4 — EPFD Scaling With Constellation Growth</h3>
+        <p>The ITU EPFD limit applies to aggregate interference from all visible LEO satellites. As Starlink grows from 1,584 to 12,000 satellites, the number of simultaneously visible satellites from any point increases. Compute how EPFD increases with constellation size (assuming equal per-satellite EIRP toward GEO stations) and determine at what constellation size EPFD compliance requires either reduced per-satellite EIRP or more aggressive beam blanking.</p></div>
+</div>
+
+<div class="complete-wrap">
+    <button class="complete-btn" id="completeBtn">MARK LESSON COMPLETE</button>
+    <div class="complete-msg" id="completeMsg"></div>
+</div>
+<div class="lesson-nav">
+    <a href="m4-5.html">← LESSON 05 — IONOSPHERE &amp; SPACE WEATHER</a>
+    <a href="m4-7.html">LESSON 07 — LINK BUDGET SYNTHESIS →</a>
+</div>
+</div>
+
+<button class="back-to-top" id="backToTop" title="Back to top">↑</button>
+<footer>© 2026 LEOAF · M4 · LESSON 06 OF 7</footer>
+
+<script>
+const canvas=document.getElementById('starsCanvas'),ctx=canvas.getContext('2d');
+let stars=[];
+function initStars(){stars=[];for(let i=0;i<180;i++)stars.push({x:Math.random()*canvas.width,y:Math.random()*canvas.height,size:Math.random()*1.5+0.4,speed:Math.random()*0.18+0.04,hue:Math.random()*360});}
+function resizeCanvas(){canvas.width=window.innerWidth;canvas.height=window.innerHeight;}
+resizeCanvas();initStars();window.addEventListener('resize',resizeCanvas);
+function animateStars(){ctx.clearRect(0,0,canvas.width,canvas.height);stars.forEach(s=>{s.y-=s.speed;if(s.y<0){s.y=canvas.height;s.x=Math.random()*canvas.width;}ctx.beginPath();ctx.fillStyle=`hsl(${s.hue},80%,80%)`;ctx.arc(s.x,s.y,s.size,0,Math.PI*2);ctx.fill();});requestAnimationFrame(animateStars);}
+animateStars();
+</script>
+<script>
+const feedbacks={
+    1:{correct:"Correct. When interference is uncorrelated with the desired signal (different transmitters, waveforms, frequency offsets), its power adds incoherently to thermal noise. The interference spectral density I₀ adds directly to N₀ in the noise floor calculation.",wrong:"Incorrect. The model works regardless of whether interference is stronger or weaker than thermal noise. Both within- and cross-constellation interference can be modelled this way if uncorrelated. Narrowband interference can be worse, not exempt, because it concentrates power."},
+    2:{correct:"Correct. EPFD measures cumulative downlink power density from all visible LEO satellites at the GEO Earth station and limits it to a threshold protecting GEO link quality — a statistical constraint on aggregate interference, not a per-satellite limit.",wrong:"Incorrect. LEO and GEO satellites operate in different orbits and cannot 'avoid' each other's positions. EPFD does not globally reduce LEO power — it applies only in interference geometries. LEO operators do not purchase GEO orbital slots."},
+    3:{correct:"Correct. Beam blanking selectively turns off or redirects the LEO satellite's spot beam when geometric alignment would direct power toward a GEO Earth station's receive dish, reducing available capacity in that vicinity.",wrong:"Incorrect. Only specific beams in the interference geometry are blanked, not the entire array. GEO Earth station dishes have no mechanical shutters. Switching frequency is frequency diversity, a different technique entirely."},
+    4:{correct:"Correct. C/I ≈ G_main − G_sidelobe(θ_sep) — the ratio of on-axis gain to sidelobe gain at the angular separation between desired and co-channel beams. Sidelobe level is set by aperture, weighting, and element count.",wrong:"Incorrect. Orbital altitude affects link budget path loss but not co-channel C/I within the same satellite. User count affects load, not interference geometry. Transmit power cancels in the C/I ratio — both numerator and denominator scale with it equally."},
+    5:{correct:"Correct. C/I₀ = C/I + 10·log₁₀(B) = 25 + 84 ≈ 109 dBHz. With C/N₀ ≈ 108 dBHz the interference density is comparable to the noise density, and the combined C/(N₀+I₀) ≈ 105 dBHz — a ~3 dB hit. That is a first-order term on a strong clear-sky link; it becomes second-order only when rain raises the thermal noise floor well above I₀.",wrong:"Incorrect. With C/I=25dB the interference power is only about 1/316 of carrier — not dominant. C/I₀ is comparable to C/N₀ but does not overwhelm it. Outages require far more severe interference, in the 5–15 dB C/I range."},
+    6:{correct:"Correct. ΔFSPL = 20·log₁₀(36,000/1,000) = 20·log₁₀(36) ≈ 31.1 dB. The GEO satellite's signal arrives with 31 dB more path loss than the LEO signal — partially offsetting GEO's often higher EIRP.",wrong:"Incorrect. 6 dB corresponds to a 2× distance ratio. 10 dB corresponds to roughly 3.2×. The actual ratio here is 36×, giving 31 dB — not zero, since path loss does depend on distance even at the same frequency."},
+    7:{correct:"Correct. EPFD_down is the aggregate equivalent power flux density from all visible LEO satellites at the GEO Earth station, limited to protect GEO link quality — the downlink interference from NGSO into GSO Earth stations.",wrong:"Incorrect. GEO minimum signal requirements come from the GEO link budget, a separate calculation. The limit is not a per-satellite EIRP cap — EPFD sums all visible satellites. Sidelobe requirements are a separate antenna specification, though they help achieve EPFD compliance."},
+    8:{correct:"Correct. GEO Earth stations concentrate in Europe, North America, and parts of Asia — the same high-demand regions where LEO broadband is most valuable. LEO satellite passes over these regions frequently enter geometries that would violate EPFD limits, requiring blanking in the most commercially valuable areas.",wrong:"Incorrect. The figure is geographic and geometric, not a direct pass-coincidence statistic. ITU regulations specify EPFD power-density limits, not a capacity reservation percentage. Phased arrays can blank individual beams at any granularity — efficiency is not the limiting factor."},
+    9:{correct:"Correct. The harmonic sum means the smaller of C/N and C/I dominates the result. If C/N=15dB and C/I=30dB, thermal noise dominates; if C/I=12dB and C/N=20dB, interference dominates instead.",wrong:"Incorrect. The formula computes a harmonic (inversely additive) sum, not an arithmetic sum. Noise and interference are incoherent power contributions and cannot cancel. The formula applies for any relative magnitudes of C/N and C/I, not only when they are equal."},
+    10:{correct:"Correct. Both mechanisms contribute: the GEO satellite is 36× farther (~31 dB more path loss), and the terminal's phased array pointed at the LEO satellite has sidelobe levels of −25 to −30 dB toward the GEO direction. Together these provide 50+ dB of discrimination in typical geometries.",wrong:"Incorrect. Path loss alone is insufficient when GEO and LEO satellites are close together in the sky — terminal antenna discrimination is also required. GEO and LEO may well share frequency allocations, which is exactly why the EPFD problem exists. Active interference cancellation is not standard equipment in consumer user terminals."}
+};
+let answered={};
+document.querySelectorAll('.quiz-opt').forEach(btn=>{
+    btn.addEventListener('click',function(){
+        const q=this.dataset.q;
+        if(answered[q]!==undefined)return;
+        const correct=this.dataset.correct==='true';
+        answered[q]=correct;
+        document.querySelectorAll(`.quiz-opt[data-q="${q}"]`).forEach(b=>{b.disabled=true;if(b.dataset.correct==='true')b.classList.add('correct');});
+        if(!correct)this.classList.add('wrong');
+        const fb=document.getElementById('fb'+q);
+        fb.textContent=(correct?'✓ ':'✗ ')+feedbacks[q][correct?'correct':'wrong'];
+        fb.style.color=correct?'#39ff14':'#ff004f';
+        if(Object.keys(answered).length===10){
+            const total=Object.values(answered).filter(Boolean).length;
+            const sc=document.getElementById('quizScore');
+            sc.style.display='block';
+            const pct=Math.round(total/10*100);
+            sc.textContent=`SCORE: ${total}/10 (${pct}%) — ${pct===100?'PERFECT.':pct>=80?'STRONG.':pct>=60?'ADEQUATE. REVISIT WEAK SECTIONS.':'REVISIT THE LESSON BEFORE PROCEEDING.'}`;
+        }
+    });
+});
+</script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="supabase.js"></script>
+<script src="user_progress.js"></script>
+<script>
+const LESSON_ID='m4-6';
+(function(){
+    function bounceToLogin(r){console.error("Auth guard:",r);window.location.replace("index.html");}
+    async function init(){
+        if(typeof client==="undefined"||!client||!client.auth)return bounceToLogin("Supabase client not loaded");
+        let session=null;
+        try{({data:{session}}=await client.auth.getSession());}
+        catch(e){return bounceToLogin("getSession threw: "+e.message);}
+        if(!session){window.location.replace("index.html");return;}
+        const btn=document.getElementById('completeBtn'),msg=document.getElementById('completeMsg');
+        function setDone(done){
+            if(done){btn.textContent='✓ COMPLETE — CLICK TO UNDO';btn.classList.add('done');btn.style.cssText='border-color:#39ff14;color:#39ff14;background:rgba(57,255,20,0.1);cursor:pointer;opacity:1;';msg.style.color='#39ff14';msg.textContent='Lesson marked complete. Click again to undo.';}
+            else{btn.textContent='MARK LESSON COMPLETE';btn.classList.remove('done');btn.style.cssText='';msg.style.color='#ffffff55';msg.textContent='Not yet marked complete.';}
+        }
+        let mastered=[];
+        try{mastered=await getMasteredSections();}catch(e){console.error(e);}
+        setDone(mastered.includes(LESSON_ID));
+        btn.addEventListener('click',async()=>{
+            const isDone=btn.classList.contains('done');
+            msg.style.color='#00d9ff';msg.textContent='Saving...';
+            const ok=await upsertSection(LESSON_ID,!isDone);
+            if(ok){setDone(!isDone);}else{msg.style.color='#ff004f';msg.textContent='Error saving. Try again.';}
+        });
+        const btt=document.getElementById('backToTop');
+        window.addEventListener('scroll',()=>{btt.classList.toggle('visible',window.scrollY>400);});
+        btt.addEventListener('click',()=>window.scrollTo({top:0,behavior:'smooth'}));
+    }
+    if(document.readyState==="loading")document.addEventListener("DOMContentLoaded",init);
+    else init();
+})();
+</script>
+</body>
+</html>
