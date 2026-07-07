@@ -1,0 +1,605 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, shrink-to-fit=no">
+<title>M4-5 — Ionosphere, Scintillation &amp; Space Weather · LEOAF</title>
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;600;800&family=Share+Tech+Mono&family=Libre+Baskerville:ital,wght@0,400;0,700;1,400&display=swap" rel="stylesheet">
+<link rel="icon" href="favicon.ico" sizes="any" type="image/x-icon">
+<link rel="manifest" href="site.webmanifest">
+<meta name="theme-color" content="#0f0f0f">
+<script>
+window.leoafAbort = async function () {
+    function go() { window.location.replace("index.html?signedout=1"); }
+    try { if (typeof client !== "undefined" && client && client.auth && client.auth.signOut) { try { await client.auth.signOut({ scope: "local" }); } catch (e) {} } } catch (e) {}
+    go();
+};
+</script>
+<style>
+* { box-sizing:border-box; margin:0; padding:0; }
+html { height:100%; -webkit-text-size-adjust:100%; overflow-x:hidden; }
+body { font-family:'Share Tech Mono',monospace; background:#000; color:white; overflow-x:hidden; min-height:100vh; }
+#starsCanvas { position:fixed; inset:0; z-index:-1; }
+header { background:#000; border-bottom:1px solid #ff004f33; position:sticky; top:0; z-index:100; padding:1rem clamp(1.5rem,5vw,4rem); display:flex; justify-content:space-between; align-items:center; }
+.logo { font-family:'Orbitron',sans-serif; font-weight:800; font-size:clamp(16px,2vw,22px); letter-spacing:3px; text-decoration:none; }
+.logo span:first-child { color:white; } .logo span:last-child { color:#ff004f; }
+.nav-right { display:flex; align-items:center; gap:10px; }
+.nav-btn { background:transparent; border:1px solid #ff004f44; color:#ff004f; padding:6px 14px; cursor:pointer; transition:0.3s; font-size:11px; font-family:'Orbitron',sans-serif; letter-spacing:1px; text-decoration:none; display:inline-block; }
+.nav-btn:hover { background:#ff004f; color:black; }
+.breadcrumb { padding:14px clamp(1.5rem,5vw,4rem); font-size:11px; color:#ffffff44; letter-spacing:1px; position:relative; z-index:1; }
+.breadcrumb a { color:#00d9ff66; text-decoration:none; } .breadcrumb a:hover { color:#00d9ff; }
+.breadcrumb span { margin:0 8px; }
+.lesson-wrap { max-width:820px; margin:0 auto; padding:0 clamp(1.5rem,5vw,4rem) 80px; position:relative; z-index:1; }
+.lesson-header { padding:30px 0 28px; border-bottom:1px solid #ffffff11; margin-bottom:36px; }
+.lesson-tag { font-family:'Orbitron',sans-serif; font-size:10px; color:#ff004f; letter-spacing:3px; margin-bottom:10px; }
+.lesson-header h1 { font-family:'Orbitron',sans-serif; font-size:clamp(20px,3.5vw,32px); font-weight:800; line-height:1.2; margin-bottom:12px; }
+.lesson-meta { display:flex; gap:10px; flex-wrap:wrap; margin-bottom:16px; }
+.l-pill { font-family:'Orbitron',sans-serif; font-size:10px; padding:3px 10px; border:1px solid; letter-spacing:1px; }
+.l-pill-q { color:#ff004f; border-color:#ff004f44; } .l-pill-t { color:#39ff14; border-color:#39ff1444; }
+.lesson-intro { font-size:13px; line-height:1.85; opacity:0.75; }
+.toc { background:rgba(0,217,255,0.06); border:1px solid #00d9ff33; padding:24px 28px; margin:30px 0; }
+.toc h4 { font-family:'Orbitron',sans-serif; font-size:10px; color:#00d9ff; letter-spacing:2px; margin-bottom:16px; }
+.toc ol { padding-left:20px; } .toc li { font-size:13px; line-height:2.1; }
+.toc li a { color:#00d9ffbb; text-decoration:none; transition:0.15s; } .toc li a:hover { color:#fff; padding-left:4px; }
+.toc li::marker { color:#ff004f; font-family:'Orbitron',sans-serif; font-size:10px; }
+.cb { background:#f5f2ec; color:#1a1a1a; padding:36px clamp(24px,4vw,48px); margin-bottom:24px; border-left:4px solid #00d9ff; position:relative; z-index:1; }
+.cb h2 { font-family:'Orbitron',sans-serif; font-size:13px; color:#003d66; letter-spacing:2px; text-transform:uppercase; margin-bottom:20px; padding-bottom:10px; border-bottom:2px solid #00d9ff66; scroll-margin-top:80px; }
+.cb h3 { font-family:'Orbitron',sans-serif; font-size:11px; color:#444; letter-spacing:1.5px; text-transform:uppercase; margin:28px 0 12px; }
+.cb p { font-family:'Libre Baskerville',Georgia,serif; font-size:15px; line-height:1.9; color:#1a1a1a; margin-bottom:16px; }
+.cb ul { padding-left:0; margin-bottom:16px; }
+.cb ul li { font-family:'Libre Baskerville',Georgia,serif; font-size:14px; line-height:1.85; color:#1a1a1a; padding-left:20px; position:relative; margin-bottom:8px; }
+.cb ul li::before { content:'›'; position:absolute; left:0; color:#0077aa; }
+.cb blockquote { border-left:3px solid #1a7a1a; background:#eafaea; padding:14px 20px; margin:18px 0; font-size:14px; font-family:'Share Tech Mono',monospace; color:#0a3d0a; }
+.callout { border-left:3px solid #0088cc; background:#e8f4fb; padding:16px 20px; margin:22px 0; font-size:12px; line-height:1.8; color:#1a1a1a; }
+.callout.red { border-left-color:#cc0033; background:#fdecea; }
+.callout.green { border-left-color:#1a7a1a; background:#eafaea; }
+.callout.amber { border-left-color:#996600; background:#fef9ec; }
+.callout strong { font-family:'Orbitron',sans-serif; font-size:10px; letter-spacing:1px; display:block; margin-bottom:8px; }
+.compare-table { width:100%; border-collapse:collapse; margin:22px 0; font-size:12px; }
+.compare-table th { font-family:'Orbitron',sans-serif; font-size:10px; letter-spacing:1px; color:#003d66; padding:10px 12px; border-bottom:2px solid #00d9ff66; text-align:left; }
+.compare-table td { padding:10px 12px; border-bottom:1px solid #ddd; line-height:1.5; color:#1a1a1a; vertical-align:top; }
+.compare-table tr:hover td { background:#f0f0f0; }
+.key-numbers { display:grid; grid-template-columns:repeat(auto-fit,minmax(140px,1fr)); gap:12px; margin:22px 0; }
+.kn-item { background:#fff; border:1px solid #d0d0d0; padding:16px 12px; text-align:center; }
+.kn-val { font-family:'Orbitron',sans-serif; font-size:clamp(13px,1.8vw,18px); font-weight:800; color:#003d66; display:block; }
+.kn-label { font-size:10px; color:#555; letter-spacing:1px; margin-top:5px; display:block; line-height:1.4; }
+.quiz-block { background:rgba(17,17,17,0.9); border:1px solid #ff004f33; padding:28px; margin:48px 0 32px; }
+.quiz-block h2 { font-family:'Orbitron',sans-serif; font-size:13px; color:#ff004f; letter-spacing:2px; margin-bottom:6px; }
+.quiz-intro { font-size:12px; opacity:0.6; margin-bottom:24px; padding-bottom:16px; border-bottom:1px solid #ff004f22; line-height:1.6; }
+.quiz-q { margin-bottom:28px; }
+.quiz-q p { font-size:13px; opacity:0.9; margin-bottom:12px; line-height:1.65; }
+.quiz-q p strong { color:#00d9ff; }
+.quiz-options { display:flex; flex-direction:column; gap:8px; }
+.quiz-opt { background:rgba(255,255,255,0.03); border:1px solid #ffffff1a; padding:11px 16px; cursor:pointer; font-size:12px; font-family:'Share Tech Mono',monospace; transition:0.2s; text-align:left; color:white; line-height:1.5; }
+.quiz-opt:hover:not(:disabled) { background:rgba(0,217,255,0.08); border-color:#00d9ff44; }
+.quiz-opt.correct { background:rgba(57,255,20,0.1); border-color:#39ff14; color:#39ff14; }
+.quiz-opt.wrong { background:rgba(255,0,79,0.1); border-color:#ff004f; color:#ff004f; }
+.quiz-opt:disabled { cursor:default; }
+.quiz-feedback { font-size:12px; margin-top:10px; min-height:18px; line-height:1.7; opacity:0.9; padding:0 4px; }
+.quiz-score { font-family:'Orbitron',sans-serif; font-size:12px; color:#39ff14; margin-top:20px; letter-spacing:1px; display:none; padding-top:16px; border-top:1px solid #39ff1433; }
+.py-block { background:rgba(10,10,10,0.95); border:1px solid #39ff1422; padding:28px; margin:32px 0; }
+.py-block h2 { font-family:'Orbitron',sans-serif; font-size:13px; color:#39ff14; letter-spacing:2px; margin-bottom:8px; }
+.py-block .py-intro { font-size:12px; opacity:0.7; margin-bottom:20px; padding-bottom:16px; border-bottom:1px solid #39ff1422; line-height:1.7; }
+.py-exercise { margin-bottom:32px; } .py-exercise:last-child { margin-bottom:0; }
+.py-exercise h3 { font-family:'Orbitron',sans-serif; font-size:11px; color:#39ff1499; letter-spacing:1.5px; text-transform:uppercase; margin-bottom:10px; }
+.py-exercise p { font-size:12px; opacity:0.8; margin-bottom:14px; line-height:1.75; }
+.py-block pre { background:#050505; border:1px solid #39ff1433; padding:20px; font-family:'Share Tech Mono',monospace; font-size:11.5px; line-height:1.75; overflow-x:auto; color:#39ff14; white-space:pre; margin-bottom:12px; }
+.py-note { background:rgba(57,255,20,0.04); border-left:2px solid #39ff14; padding:12px 16px; margin-top:14px; font-size:12px; line-height:1.75; opacity:0.8; }
+.py-note strong { font-family:'Orbitron',sans-serif; font-size:10px; color:#39ff14; display:block; margin-bottom:6px; letter-spacing:1px; }
+.reflection-block { background:rgba(255,170,0,0.04); border:1px solid #ffaa0033; padding:24px; margin:32px 0; }
+.reflection-block h2 { font-family:'Orbitron',sans-serif; font-size:13px; color:#ffaa00; letter-spacing:2px; margin-bottom:8px; }
+.ref-intro { font-size:12px; opacity:0.7; margin-bottom:20px; padding-bottom:14px; border-bottom:1px solid #ffaa0022; line-height:1.7; }
+.ref-prompt { margin-bottom:20px; }
+.ref-prompt h3 { font-family:'Orbitron',sans-serif; font-size:11px; color:#ffaa0099; letter-spacing:1px; margin-bottom:8px; }
+.ref-prompt p { font-size:12px; opacity:0.8; line-height:1.75; }
+.complete-wrap { margin-top:56px; padding-top:30px; border-top:1px solid #ffffff11; text-align:center; }
+.complete-btn { font-family:'Orbitron',sans-serif; font-size:13px; letter-spacing:2px; padding:14px 44px; background:transparent; border:1px solid #39ff14; color:#39ff14; cursor:pointer; transition:0.3s; }
+.complete-btn:hover:not(.done) { background:#39ff14; color:black; box-shadow:0 0 20px rgba(57,255,20,0.4); }
+.complete-btn.done { background:rgba(57,255,20,0.1); cursor:pointer; opacity:1; }
+.complete-msg { font-size:12px; color:#39ff14; margin-top:14px; min-height:18px; letter-spacing:1px; }
+.lesson-nav { display:flex; justify-content:space-between; margin-top:30px; flex-wrap:wrap; gap:10px; }
+.lesson-nav a { font-family:'Orbitron',sans-serif; font-size:11px; color:#00d9ff66; text-decoration:none; letter-spacing:1px; transition:0.2s; }
+.lesson-nav a:hover { color:#00d9ff; }
+.back-to-top { position:fixed; bottom:28px; right:28px; z-index:200; width:44px; height:44px; background:#000; border:1px solid #00d9ff55; color:#00d9ff; font-size:20px; cursor:pointer; display:flex; align-items:center; justify-content:center; opacity:0; pointer-events:none; transition:opacity 0.3s; }
+.back-to-top.visible { opacity:1; pointer-events:auto; } .back-to-top:hover { border-color:#00d9ff; }
+footer { text-align:center; padding:30px; opacity:0.3; font-size:11px; position:relative; z-index:1; letter-spacing:1px; }
+</style>
+</head>
+<body>
+<canvas id="starsCanvas"></canvas>
+<header>
+    <a href="dashboard.html" class="logo"><span>LEO</span><span>AF</span></a>
+    <div class="nav-right">
+        <a href="m4.html" class="nav-btn">← M4 HUB</a>
+        <button class="nav-btn" onclick="leoafAbort()">ABORT</button>
+    </div>
+</header>
+<div class="breadcrumb">
+    <a href="dashboard.html">DASHBOARD</a><span>/</span>
+    <a href="m4.html">M4</a><span>/</span>
+    <span style="color:#ffffff88;">LESSON 05 — IONOSPHERE, SCINTILLATION &amp; SPACE WEATHER</span>
+</div>
+
+<div class="lesson-wrap">
+<div class="lesson-header">
+    <div class="lesson-tag">M4 · LESSON 05 OF 7</div>
+    <h1>Ionosphere, Scintillation<br>&amp; Space Weather</h1>
+    <div class="lesson-meta">
+        <div class="l-pill l-pill-q">MODULE 4</div>
+        <div class="l-pill l-pill-t">RF &amp; LINK BUDGETS</div>
+    </div>
+    <p class="lesson-intro">Above the troposphere lies the ionosphere — partially ionised plasma that interacts with radio waves in ways qualitatively different from tropospheric effects: it introduces delays, rotates polarisation, and causes amplitude fluctuations. Crucially, every ionospheric effect scales as f⁻² — the opposite of rain attenuation. At Ka-band these effects are negligible; at L-band and S-band, used for mobile satellite and direct-to-device, they are the dominant propagation impairment. This lesson establishes the f⁻² scaling law and delivers Stage 5 of the spine engine.</p>
+</div>
+
+<div class="toc">
+    <h4>CONTENTS</h4>
+    <ol>
+        <li><a href="#s1">The ionosphere: structure and origin</a></li>
+        <li><a href="#s2">Total electron content and group delay</a></li>
+        <li><a href="#s3">Faraday rotation</a></li>
+        <li><a href="#s4">Ionospheric scintillation</a></li>
+        <li><a href="#s5">Space weather: solar events and geomagnetic storms</a></li>
+        <li><a href="#s6">The f⁻² frequency scaling law: summary</a></li>
+        <li><a href="#s7">Implications for LEO Ka-band broadband</a></li>
+        <li><a href="#quiz">Knowledge check</a></li>
+        <li><a href="#python">Python exercises — spine project stage 5</a></li>
+        <li><a href="#reflect">Reflection prompts</a></li>
+    </ol>
+</div>
+
+<div class="cb" id="s1">
+    <h2>1. The Ionosphere: Structure and Origin</h2>
+    <p>The ionosphere forms when solar ultraviolet and X-ray radiation ionises oxygen, nitrogen, and other atmospheric gases, creating free electrons and ions. It extends from approximately 60 km to 1,000 km altitude, with several distinct layers:</p>
+    <ul>
+        <li><strong>D-layer</strong> (60–90 km): exists only during daytime; low electron density; primarily absorbs HF signals</li>
+        <li><strong>E-layer</strong> (90–130 km): moderate electron density; important for HF propagation by reflection</li>
+        <li><strong>F₁ and F₂ layers</strong> (150–400+ km): the most dense layers; F₂ is the primary refraction and delay region for satellite signals</li>
+    </ul>
+    <p>Electron density varies with the 11-year solar cycle (much higher near solar maximum, by a factor of 3–5×), time of day (peaks in afternoon, minimum before sunrise), latitude (equatorial region ±20° magnetic latitude is particularly active, polar ionosphere disturbed during storms), and season.</p>
+</div>
+
+<div class="cb" id="s2">
+    <h2>2. Total Electron Content and Group Delay</h2>
+    <p>Total electron content (TEC) is the integrated number of free electrons per square metre along the line of sight:</p>
+    <blockquote>TEC = ∫ n_e dl   (electrons/m²)</blockquote>
+    <p>Expressed in TEC units (TECU): 1 TECU = 10¹⁶ electrons/m². Typical values range from 1–5 TECU at night, solar minimum, high latitude, to 100+ TECU at midday, solar maximum, equatorial.</p>
+    <p>Free electrons slow the group velocity of radio waves, introducing a group delay:</p>
+    <blockquote>Δd = 40.3 × 10⁻¹⁶ / f_GHz² · TEC_TECU   (metres)</blockquote>
+    <p>At Ka-band (20 GHz) with TEC = 10 TECU: Δd ≈ 1 mm. At L-band (1.5 GHz), the same TEC produces ~180 mm — 180× larger because delay scales as f⁻². This is why GNSS receivers at L-band must correct for ionospheric delay in their navigation solution, while Ka-band satellite broadband does not.</p>
+    <div class="key-numbers">
+        <div class="kn-item"><span class="kn-val">~1 mm</span><span class="kn-label">KA-BAND DELAY AT TEC=10 TECU</span></div>
+        <div class="kn-item"><span class="kn-val">~180 mm</span><span class="kn-label">L-BAND DELAY, SAME TEC</span></div>
+        <div class="kn-item"><span class="kn-val">178×</span><span class="kn-label">L-BAND/KA-BAND DELAY RATIO</span></div>
+        <div class="kn-item"><span class="kn-val">f⁻²</span><span class="kn-label">SCALING LAW FOR DELAY &amp; ROTATION</span></div>
+    </div>
+</div>
+
+<div class="cb" id="s3">
+    <h2>3. Faraday Rotation</h2>
+    <p>A linearly polarised wave traversing the ionosphere has its plane of polarisation rotated by the Faraday effect — the interaction between the signal and the Earth's magnetic field in the ionospheric plasma:</p>
+    <blockquote>Ω = K · TEC / f²   (radians, K ≈ 2.36×10⁴ at the magnetic equator)</blockquote>
+    <p>At 1 GHz with TEC = 10 TECU: Ω ≈ 23.6 radians ≈ 1,352° — multiple complete rotations, making linear polarisation essentially random after traversing the ionosphere. This is why L-band satellite systems (Inmarsat, GPS, Iridium) use circular polarisation, which is rotation-invariant.</p>
+    <p>At Ka-band (20 GHz) with the same TEC: Ω ≈ 0.059 rad ≈ 3.4° — a few degrees even under moderate ionospheric conditions, essentially negligible for communications. Ka-band systems routinely use linear polarisation without rotation correction.</p>
+</div>
+
+<div class="cb" id="s4">
+    <h2>4. Ionospheric Scintillation</h2>
+    <p>While average TEC produces smooth, predictable effects, irregularities in the electron density distribution cause rapid amplitude and phase variations — ionospheric scintillation. The irregularities act as diffracting screens, producing fades of 5–20 dB, quantified by the S4 index:</p>
+    <blockquote>S4 = √(⟨I²⟩ − ⟨I⟩²) / ⟨I⟩</blockquote>
+    <p>S4 ranges from 0 (no scintillation) to 1 (severe, frequent 10+ dB fades). S4 &gt; 0.3 is moderate; S4 &gt; 0.7 is severe and can cause link outages at low frequencies.</p>
+    <p>The strongest scintillation regions: the equatorial region (±20° magnetic latitude) — the most severe globally, occurring 1–3 hours after local sunset, driven by post-sunset plasma bubble instabilities, with S4 reaching 0.8–1.0 at L-band; polar and auroral regions, driven by auroral precipitation and less predictable; mid-latitudes, much lower except during strong geomagnetic storms.</p>
+    <h3>Frequency scaling</h3>
+    <p>Scintillation strength scales as S4(f) ∝ f^n, n ≈ −1.5 to −1.8. At Ka-band (20 GHz), scintillation is suppressed by approximately (20/1.5)^1.5 ≈ 82× relative to L-band. Even at the most severe equatorial conditions where L-band S4 = 1.0, the equivalent Ka-band S4 is approximately 0.01 — essentially negligible. Ka-band LEO broadband systems are largely immune to ionospheric scintillation. At lower frequencies used for direct-to-device (L-band, S-band), scintillation is a real availability impairment requiring an explicit margin.</p>
+</div>
+
+<div class="cb" id="s5">
+    <h2>5. Space Weather: Solar Events and Geomagnetic Storms</h2>
+    <p>The ionosphere's electron density is not static — solar events dramatically increase it over short timescales.</p>
+    <p><strong>Solar flares</strong>: sudden X-ray/UV energy releases that increase ionisation in the sunlit hemisphere's D and E layers within minutes. The primary communications effect is radio blackouts — D-layer absorption of HF signals. At Ka-band, a flare may increase ionospheric delay by 2–3× but does not cause outages.</p>
+    <p><strong>Solar energetic particle (SEP) events</strong>: high-energy protons reaching the upper atmosphere within hours, causing polar cap absorption affecting HF in polar regions. At Ka-band, the primary risk is not propagation but single-event effects in satellite electronics — discussed in m3-6 in the context of COTS radiation risk.</p>
+    <p><strong>Geomagnetic storms</strong>: triggered when a coronal mass ejection reaches Earth and interacts with the geomagnetic field. Storms cause widespread TEC increases, enhanced scintillation at all latitudes, and Faraday rotation increases. For Ka-band: increased TEC raises ionospheric delay (still small), scintillation enhances at polar latitudes, and single-event upset rates increase in satellite electronics due to enhanced particle flux.</p>
+    <p><strong>Solar cycle context</strong>: the 11-year cycle sets the average ionospheric environment. Solar maximum produces higher TEC, more frequent flares, and more frequent storms than solar minimum. Ka-band systems designed at solar minimum may find ionospheric margins tighter at solar maximum, though still small in absolute terms.</p>
+</div>
+
+<div class="cb" id="s6">
+    <h2>6. The f⁻² Frequency Scaling Law: Summary</h2>
+    <p>The unifying theme of this lesson: every ionospheric phenomenon weakens dramatically at higher frequencies — the opposite of tropospheric rain attenuation, which worsens at higher frequencies.</p>
+    <table class="compare-table">
+        <thead><tr><th>Effect</th><th>Frequency dependence</th><th>Ka (20 GHz) vs L (1.5 GHz) ratio</th></tr></thead>
+        <tbody>
+            <tr><td>Ionospheric delay</td><td>∝ f⁻²</td><td>×(1.5/20)² ≈ 1/178</td></tr>
+            <tr><td>Faraday rotation</td><td>∝ f⁻²</td><td>×(1.5/20)² ≈ 1/178</td></tr>
+            <tr><td>Ionospheric scintillation</td><td>∝ f^(−1.5)</td><td>×(1.5/20)^1.5 ≈ 1/82</td></tr>
+            <tr><td>Rain attenuation</td><td>∝ f^(+1 to +2)</td><td>×(20/1.5)^1.5 ≈ 82× more</td></tr>
+        </tbody>
+    </table>
+    <div class="callout green">
+        <strong>THE OPPOSING SCALING LAWS EXPLAIN THE BAND CHOICE</strong>
+        This tradeoff is the fundamental reason L-band serves mobile satellite (small antennas and rain immunity matter) while Ka-band serves broadband (high capacity and small terminal size matter more than ionospheric immunity). Neither band is universally superior — the choice depends entirely on which impairment the application cannot tolerate.
+    </div>
+</div>
+
+<div class="cb" id="s7">
+    <h2>7. Implications for LEO Ka-Band Broadband</h2>
+    <p>For first-generation LEO Ka-band broadband systems (Starlink, OneWeb, Kuiper), ionospheric effects are minor: group delay 1–5 mm (negligible for communications, relevant only for precision ranging); Faraday rotation 1–5° (negligible; linear polarisation unaffected in practice); scintillation S4 &lt; 0.1 even at the equatorial maximum (no link outages expected).</p>
+    <p>The ionospheric margin required in a Ka-band LEO link budget is small (&lt; 1 dB) and is often absorbed into the overall pointing and implementation loss margin rather than computed explicitly.</p>
+    <p>The ionosphere becomes relevant for LEO Ka-band systems in two specific contexts: <strong>equatorial gateways</strong>, where antennas must maintain alignment through ionospheric delays that vary more rapidly than mid-latitude sites — though the magnitudes at Ka-band make this a second-order effect for current aperture sizes; and <strong>direct-to-device links at lower frequencies</strong>, where emerging satellite D2D applications targeting 3GPP NR integration may use S-band or L-band spectrum where ionospheric scintillation is a real link impairment in equatorial regions, requiring explicit margin in S-band link budgets for tropical deployment.</p>
+</div>
+
+<!-- QUIZ -->
+<div class="quiz-block" id="quiz">
+    <h2>KNOWLEDGE CHECK</h2>
+    <p class="quiz-intro">Ten questions. Select one answer per question. Immediate feedback; score appears when all ten are answered.</p>
+
+    <div class="quiz-q"><p><strong>Q1.</strong> All ionospheric effects scale as f⁻². At Ka-band (20 GHz) relative to L-band (1.5 GHz):</p>
+        <div class="quiz-options">
+            <button class="quiz-opt" data-q="1" data-correct="false">A — Ionospheric effects are about the same magnitude</button>
+            <button class="quiz-opt" data-q="1" data-correct="true">B — Ionospheric effects are approximately 178× smaller at Ka-band</button>
+            <button class="quiz-opt" data-q="1" data-correct="false">C — Ionospheric effects are 178× larger at Ka-band</button>
+            <button class="quiz-opt" data-q="1" data-correct="false">D — The scaling depends on whether it is day or night</button>
+        </div><div class="quiz-feedback" id="fb1"></div></div>
+
+    <div class="quiz-q"><p><strong>Q2.</strong> The S4 index is:</p>
+        <div class="quiz-options">
+            <button class="quiz-opt" data-q="2" data-correct="false">A — The ratio of signal power to noise power</button>
+            <button class="quiz-opt" data-q="2" data-correct="true">B — A measure of ionospheric scintillation intensity — the normalised standard deviation of received signal intensity</button>
+            <button class="quiz-opt" data-q="2" data-correct="false">C — The solar flux index at 10.7 cm wavelength</button>
+            <button class="quiz-opt" data-q="2" data-correct="false">D — The electron density at the F2 peak</button>
+        </div><div class="quiz-feedback" id="fb2"></div></div>
+
+    <div class="quiz-q"><p><strong>Q3.</strong> At Ka-band (20 GHz), Faraday rotation for TEC = 10 TECU is approximately:</p>
+        <div class="quiz-options">
+            <button class="quiz-opt" data-q="3" data-correct="false">A — 1,350° (multiple complete rotations)</button>
+            <button class="quiz-opt" data-q="3" data-correct="false">B — 90° (quarter-wave rotation)</button>
+            <button class="quiz-opt" data-q="3" data-correct="true">C — 3–4°</button>
+            <button class="quiz-opt" data-q="3" data-correct="false">D — 0° (Faraday rotation only affects L-band)</button>
+        </div><div class="quiz-feedback" id="fb3"></div></div>
+
+    <div class="quiz-q"><p><strong>Q4.</strong> The equatorial ionosphere produces the most severe scintillation primarily because:</p>
+        <div class="quiz-options">
+            <button class="quiz-opt" data-q="4" data-correct="false">A — The Earth's magnetic field is strongest at the equator</button>
+            <button class="quiz-opt" data-q="4" data-correct="true">B — Post-sunset plasma bubble instabilities cause large-scale electron density irregularities</button>
+            <button class="quiz-opt" data-q="4" data-correct="false">C — The equatorial atmosphere contains more oxygen to ionise</button>
+            <button class="quiz-opt" data-q="4" data-correct="false">D — The Sun is directly overhead at the equator for longer periods</button>
+        </div><div class="quiz-feedback" id="fb4"></div></div>
+
+    <div class="quiz-q"><p><strong>Q5.</strong> A solar energetic particle (SEP) event primarily threatens Ka-band LEO satellite communications by:</p>
+        <div class="quiz-options">
+            <button class="quiz-opt" data-q="5" data-correct="false">A — Dramatically increasing rain attenuation at Ka-band</button>
+            <button class="quiz-opt" data-q="5" data-correct="true">B — Causing single-event effects (SEEs) in satellite electronics rather than propagation impairments</button>
+            <button class="quiz-opt" data-q="5" data-correct="false">C — Creating a complete radio blackout at Ka-band for several hours</button>
+            <button class="quiz-opt" data-q="5" data-correct="false">D — Permanently destroying all satellite antennas</button>
+        </div><div class="quiz-feedback" id="fb5"></div></div>
+
+    <div class="quiz-q"><p><strong>Q6.</strong> Ionospheric group delay at Ka-band is negligible for communications because:</p>
+        <div class="quiz-options">
+            <button class="quiz-opt" data-q="6" data-correct="false">A — The delay is zero at Ka-band</button>
+            <button class="quiz-opt" data-q="6" data-correct="true">B — The delay scales as f⁻² and is only millimetre-level at 20 GHz even for moderate TEC</button>
+            <button class="quiz-opt" data-q="6" data-correct="false">C — Ka-band signals travel faster than the speed of light</button>
+            <button class="quiz-opt" data-q="6" data-correct="false">D — The ionosphere is below LEO satellite altitude</button>
+        </div><div class="quiz-feedback" id="fb6"></div></div>
+
+    <div class="quiz-q"><p><strong>Q7.</strong> Why do L-band mobile satellite systems (Inmarsat, Iridium) use circular polarisation?</p>
+        <div class="quiz-options">
+            <button class="quiz-opt" data-q="7" data-correct="false">A — Circular polarisation has lower path loss than linear</button>
+            <button class="quiz-opt" data-q="7" data-correct="true">B — Faraday rotation at L-band is many degrees or complete rotations, making linear polarisation orientation unpredictable after traversing the ionosphere</button>
+            <button class="quiz-opt" data-q="7" data-correct="false">C — Circular polarisation is required by ITU regulations at L-band</button>
+            <button class="quiz-opt" data-q="7" data-correct="false">D — L-band antennas cannot generate linear polarisation</button>
+        </div><div class="quiz-feedback" id="fb7"></div></div>
+
+    <div class="quiz-q"><p><strong>Q8.</strong> The primary difference between tropospheric and ionospheric impairments for Ka-band link budgets is:</p>
+        <div class="quiz-options">
+            <button class="quiz-opt" data-q="8" data-correct="false">A — Tropospheric effects are time-varying; ionospheric effects are constant</button>
+            <button class="quiz-opt" data-q="8" data-correct="true">B — Tropospheric rain attenuation is the dominant variable impairment at Ka-band; ionospheric effects are small (&lt; 1 dB margin)</button>
+            <button class="quiz-opt" data-q="8" data-correct="false">C — Ionospheric effects are worse at Ka-band; tropospheric effects are worse at L-band</button>
+            <button class="quiz-opt" data-q="8" data-correct="false">D — Tropospheric effects are purely a loss; ionospheric effects are purely a delay</button>
+        </div><div class="quiz-feedback" id="fb8"></div></div>
+
+    <div class="quiz-q"><p><strong>Q9.</strong> At solar maximum versus solar minimum, Ka-band ionospheric effects:</p>
+        <div class="quiz-options">
+            <button class="quiz-opt" data-q="9" data-correct="true">A — Increase by a factor of 3–5× but remain negligible for communications</button>
+            <button class="quiz-opt" data-q="9" data-correct="false">B — Double, causing significant link outages</button>
+            <button class="quiz-opt" data-q="9" data-correct="false">C — Are unchanged — the solar cycle only affects L-band</button>
+            <button class="quiz-opt" data-q="9" data-correct="false">D — Disappear — solar radiation burns off the ionosphere</button>
+        </div><div class="quiz-feedback" id="fb9"></div></div>
+
+    <div class="quiz-q"><p><strong>Q10.</strong> For direct-to-device satellite services at S-band, ionospheric scintillation is more relevant than for Ka-band broadband because:</p>
+        <div class="quiz-options">
+            <button class="quiz-opt" data-q="10" data-correct="false">A — S-band satellites are at lower altitude</button>
+            <button class="quiz-opt" data-q="10" data-correct="true">B — S-band scintillation (S4) can be tens of times larger than at Ka-band due to f^(−1.5) scaling, reaching link-threatening levels in equatorial regions</button>
+            <button class="quiz-opt" data-q="10" data-correct="false">C — D2D devices have higher noise figures than VSAT terminals</button>
+            <button class="quiz-opt" data-q="10" data-correct="false">D — S-band is regulated differently by the ITU</button>
+        </div><div class="quiz-feedback" id="fb10"></div></div>
+
+    <div class="quiz-score" id="quizScore"></div>
+</div>
+
+<!-- PYTHON -->
+<div class="py-block" id="python">
+    <h2>PYTHON EXERCISES — SPINE PROJECT STAGE 5</h2>
+    <p class="py-intro">Stage 5 adds ionospheric delay and a configurable scintillation margin to the link budget engine. At Ka-band these terms are near-zero, but the structure generalises to lower-frequency D2D link budgets in later modules.</p>
+
+    <div class="py-exercise">
+        <h3>Exercise 1 — Ionospheric Delay and Faraday Rotation vs Frequency</h3>
+        <p>Compute ionospheric delay and Faraday rotation across the L to Ka band range.</p>
+<pre>
+import math
+
+K_FARADAY = 2.36e4    # rad·Hz²/TECU, equatorial geometry
+K_DELAY   = 40.3e-16  # m·Hz²/(electrons/m²)
+
+def iono_delay_m(tec_tecu, freq_ghz):
+    return K_DELAY * (tec_tecu*1e16) / (freq_ghz*1e9)**2
+
+def faraday_deg(tec_tecu, freq_ghz):
+    omega = K_FARADAY * (tec_tecu*1e16) / (freq_ghz*1e9)**2
+    return math.degrees(omega)
+
+tec_values = [1, 5, 10, 50]
+freqs = [("L",1.5),("S",2.4),("X",10.0),("Ku",14.0),("Ka_dn",20.0),("Ka_up",30.0)]
+
+print("Ionospheric group delay (mm) vs TEC\n")
+print(f"{'Band':>8}{'Freq':>8}" + "".join(f"{t:>8}TECU" for t in tec_values))
+print("-" * (16+12*len(tec_values)))
+for name, f in freqs:
+    delays = [iono_delay_m(t,f)*1000 for t in tec_values]
+    print(f"{name:>8}{f:>7.1f}G" + "".join(f"{d:>12.2f}" for d in delays) + " mm")
+
+print("\nFaraday rotation (degrees) vs TEC\n")
+print(f"{'Band':>8}{'Freq':>8}" + "".join(f"{t:>8}TECU" for t in tec_values))
+print("-" * (16+12*len(tec_values)))
+for name, f in freqs:
+    rots = [faraday_deg(t,f) for t in tec_values]
+    print(f"{name:>8}{f:>7.1f}G" + "".join(f"{r:>11.1f}°" for r in rots))
+
+# 1. At what frequency does Faraday rotation reach < 5° for TEC=50 TECU
+#    (severe solar maximum, equatorial)?
+# 2. For GPS L1 (1.575 GHz) and L2 (1.228 GHz), compute the differential
+#    group delay for TEC=20 TECU — the quantity dual-frequency GPS corrects for.
+# 3. How many wavelengths of path length does ionospheric delay represent
+#    at 20 GHz for TEC=50 TECU? Significant for phased-array beamforming?
+</pre>
+    </div>
+
+    <div class="py-exercise">
+        <h3>Exercise 2 — Scintillation Frequency Scaling</h3>
+        <p>Compute S4 index across frequency bands and evaluate the resulting fade margin requirements.</p>
+<pre>
+import math
+
+def s4_scale(s4_ref, f_ref_ghz, f_ghz, n=1.5):
+    """S4 ∝ f^(-n), n ≈ 1.5–1.8."""
+    return s4_ref * (f_ref_ghz/f_ghz)**n
+
+def s4_to_fade_margin_db(s4):
+    """Approximate fade margin (dB) for given S4 (simplified)."""
+    if s4 < 0.01: return 0.0
+    return max(0, -10*math.log10(1-s4**2)) if s4 < 1.0 else 20.0
+
+s4_L = 0.8   # severe equatorial post-sunset, L-band reference
+
+print("Scintillation S4 and required fade margin across bands\n")
+print(f"{'Band':>8}{'Freq GHz':>10}{'S4':>8}{'Fade margin (dB)':>18}")
+print("-" * 48)
+bands = [("L",1.5),("S",2.4),("C",6.0),("X",10.0),("Ku",14.0),
+         ("Ka",20.0),("Ka_up",30.0),("V",47.0)]
+for name, f in bands:
+    s4 = s4_scale(s4_L, 1.5, f)
+    margin = s4_to_fade_margin_db(s4)
+    bar = '█' * min(int(margin), 20)
+    print(f"{name:>8}{f:>10.1f}{s4:>8.3f}{margin:>14.1f} dB  {bar}")
+print(f"\nReference: S4={s4_L} at L-band (1.5 GHz) — severe equatorial scintillation")
+
+# 1. What fade margin is needed at S-band (2.4 GHz) for the same scenario?
+# 2. At what frequency does the required scintillation margin drop below 0.5 dB?
+# 3. During a geomagnetic storm, mid-latitude S4=0.3 at L-band.
+#    What is the equivalent S4 at Ka-band?
+</pre>
+    </div>
+
+    <div class="py-exercise">
+        <h3>Exercise 3 — Spine Stage 5: Ionospheric Terms in the Link Budget</h3>
+        <p>Add ionospheric delay tracking and a configurable scintillation margin to the LinkBudget engine.</p>
+<pre>
+import math
+
+K_DB = -228.6; T0 = 290.0
+
+def fspl(d, f): return 92.4 + 20*math.log10(d) + 20*math.log10(f)
+def nf_te(nf): return T0*(10**(nf/10)-1)
+def loss_te(l, t=T0): return t*(10**(l/10)-1)
+def dbl(x): return 10**(x/10)
+def iono_delay_m(tec, f_ghz): return 40.3e-16*(tec*1e16)/(f_ghz*1e9)**2
+
+RAIN_ZONES = {'E':22,'F':28,'G':30,'K':42,'N':95,'P':145}  # ITU-R P.837 R0.01
+
+def rain_specific(R, f):
+    P = {14:(.0229,1.265),20:(.0751,1.099),30:(.187,1.021),47:(.546,.911)}
+    k,a = min(P.items(),key=lambda x:abs(x[0]-f))[1]
+    return k*R**a
+
+def rain_atten(zone, f, elev, avail=99.9):
+    # Simplified P.618: build A0.01, then scale the ATTENUATION to the
+    # exceedance p — never the rain rate (see m4-4).
+    R001 = RAIN_ZONES.get(zone.upper(),28); p = max(100-avail, 0.01)
+    e = math.radians(elev)
+    Ls = 3.9/math.sin(e)                    # 4 km rain height, 0.1 km station
+    L0 = 35.0*math.exp(-0.015*R001)
+    A001 = rain_specific(R001, f) * Ls * (1/(1+Ls*math.cos(e)/L0))
+    if p == 0.01: return A001
+    return A001*(p/0.01)**(-(0.655+0.033*math.log(p)-0.045*math.log(A001)))
+
+class LinkBudget:
+    """Stage 5: ionospheric terms added."""
+    def __init__(self, name):
+        self.name=name; self.losses=[]; self._chain=[]
+        self._eirp=self._fspl=self._grx=self._tant=self._req=None
+        self._freq=None; self._elev=None; self._zone=None
+        self._tec=10.0; self._scint_margin=0.0
+
+    def set_transmitter(self, p, g): self._eirp=10*math.log10(p)+g
+    def set_path(self, d, f, elev=30):
+        self._fspl=fspl(d,f); self._freq=f; self._elev=elev
+    def add_loss(self, lbl, v): self.losses.append((lbl,v))
+    def set_antenna(self, g, tant): self._grx=g; self._tant=tant
+    def add_stage(self, lbl, te, g=None): self._chain.append((lbl,te,g))
+    def set_required(self, r): self._req=r
+    def set_rain_zone(self, z): self._zone=z
+    def set_ionosphere(self, tec_tecu=10.0, scint_margin_db=0.5):
+        self._tec=tec_tecu; self._scint_margin=scint_margin_db
+
+    def _tsys(self, rain_db=0):
+        tant=self._tant+(273*(1-10**(-rain_db/10)) if rain_db else 0)
+        t=tant; cg=1.0
+        for _,te,g in self._chain:
+            t+=te/cg
+            if g: cg*=dbl(g)
+        return t
+
+    def compute(self, avail=None):
+        rain_db = rain_atten(self._zone,self._freq,self._elev,avail) if (avail and self._zone) else 0
+        iono_db = 0.0   # <0.01 dB at Ka-band — negligible, kept for traceability
+        t = self._tsys(rain_db)
+        total = self._fspl + sum(v for _,v in self.losses) + rain_db + self._scint_margin + iono_db
+        cn0 = self._eirp - total + self._grx - 10*math.log10(t) - K_DB
+        return cn0, cn0-self._req if self._req else None, t, rain_db
+
+    def print_summary(self, avail=99.9):
+        cn0, m, t, r = self.compute(avail)
+        iono_m = iono_delay_m(self._tec, self._freq)*1000
+        print(f"\n  {self.name}")
+        print(f"  Availability target: {avail}%   Rain zone: {self._zone}")
+        print(f"  Rain attenuation:    {r:.1f} dB")
+        print(f"  Scintillation margin:{self._scint_margin:.1f} dB")
+        print(f"  Ionospheric delay:   {iono_m:.2f} mm (TEC={self._tec} TECU) — negligible")
+        print(f"  T_sys: {t:.0f} K   C/N₀: {cn0:.1f} dBHz   Margin: {m:+.1f} dB "
+              f"{'✓' if m>=0 else '✗'}")
+
+lb = LinkBudget("LEO Ka forward — full propagation model")
+lb.set_transmitter(20, 34); lb.set_path(1000, 20.0, 30)
+lb.add_loss("Gaseous absorption", 0.5); lb.add_loss("Pointing", 0.5)
+lb.set_antenna(37.5, 30.0)
+lb.add_stage("Feed 0.3dB",   loss_te(0.3),-0.3)
+lb.add_stage("LNA NF=1 G=40",nf_te(1.0),  40.0)
+lb.add_stage("Downconv NF=8",nf_te(8.0),  20.0)
+lb.add_stage("IF NF=10",     nf_te(10.0), None)
+lb.set_rain_zone('F'); lb.set_ionosphere(tec_tecu=20.0, scint_margin_db=0.7)
+lb.set_required(93.4)  # 16-APSK 3/4 @ 208.3 Msym/s
+lb.print_summary(99.9)
+
+# Stage 6 preview: m4-6 adds interference C/I into the effective noise floor.
+</pre>
+        <div class="py-note"><strong>SPINE PROJECT — STAGE 5</strong>
+            Stage 5 adds ionospheric delay tracking (informational, negligible at Ka-band) and a configurable scintillation margin. The structure is built to generalise to S-band and L-band D2D link budgets in later modules, where these terms are not negligible. Stage 6 (m4-6) adds C/I.
+        </div>
+    </div>
+</div>
+
+<!-- REFLECTION -->
+<div class="reflection-block" id="reflect">
+    <h2>REFLECTION PROMPTS</h2>
+    <p class="ref-intro">Not graded. 200–400 words each.</p>
+    <div class="ref-prompt"><h3>Prompt 1 — S-Band D2D Scintillation Margin Strategy</h3>
+        <p>Ionospheric effects are negligible at Ka-band but significant at S-band for direct-to-device applications. For a LEO D2D service targeting 3GPP NR at S-band (2.5 GHz), design a scintillation margin strategy for an equatorial deployment: how much margin is needed, what fraction of time is it active, and how would ACM handle the scintillation-affected intervals given that scintillation timescales (sub-second) are faster than typical ACM response times?</p></div>
+    <div class="ref-prompt"><h3>Prompt 2 — Solar Maximum Impact Comparison</h3>
+        <p>Solar maximum increases TEC by 3–5× relative to solar minimum. For a Ka-band LEO link budget designed at solar minimum, quantify the impact at solar maximum on ionospheric delay, Faraday rotation, and scintillation. Is any design response needed, or is the change absorbed in existing margins? Compare this to the same question for an L-band mobile satellite service, where the absolute effects are much larger.</p></div>
+    <div class="ref-prompt"><h3>Prompt 3 — Geomagnetic Storm Availability Impact</h3>
+        <p>Geomagnetic storms can cause enhanced scintillation at polar and mid-latitudes for hours. For a LEO broadband gateway at 60°N (e.g. northern Finland), estimate the link availability impact of the three largest geomagnetic storms per solar maximum year, each lasting 4 hours with S4 reaching 0.4 at Ka-band. Express the result as annual availability degradation and compare it to the rain fade availability budget from m4-4.</p></div>
+    <div class="ref-prompt"><h3>Prompt 4 — S-Band vs Ka-Band for Equatorial D2D</h3>
+        <p>An operator is planning a D2D service targeting smartphones in equatorial Africa, choosing between S-band (2.4 GHz) and Ka-band (20 GHz). Compare the two bands specifically for the ionospheric scintillation threat in this region — S4 expected values, fade depth statistics, margin requirements, and the interaction with rain fade. Which band is better suited, and why?</p></div>
+</div>
+
+<div class="complete-wrap">
+    <button class="complete-btn" id="completeBtn">MARK LESSON COMPLETE</button>
+    <div class="complete-msg" id="completeMsg"></div>
+</div>
+<div class="lesson-nav">
+    <a href="m4-4.html">← LESSON 04 — PROPAGATION &amp; RAIN FADE</a>
+    <a href="m4-6.html">LESSON 06 — INTERFERENCE: EPFD &amp; C/I →</a>
+</div>
+</div>
+
+<button class="back-to-top" id="backToTop" title="Back to top">↑</button>
+<footer>© 2026 LEOAF · M4 · LESSON 05 OF 7</footer>
+
+<script>
+const canvas=document.getElementById('starsCanvas'),ctx=canvas.getContext('2d');
+let stars=[];
+function initStars(){stars=[];for(let i=0;i<180;i++)stars.push({x:Math.random()*canvas.width,y:Math.random()*canvas.height,size:Math.random()*1.5+0.4,speed:Math.random()*0.18+0.04,hue:Math.random()*360});}
+function resizeCanvas(){canvas.width=window.innerWidth;canvas.height=window.innerHeight;}
+resizeCanvas();initStars();window.addEventListener('resize',resizeCanvas);
+function animateStars(){ctx.clearRect(0,0,canvas.width,canvas.height);stars.forEach(s=>{s.y-=s.speed;if(s.y<0){s.y=canvas.height;s.x=Math.random()*canvas.width;}ctx.beginPath();ctx.fillStyle=`hsl(${s.hue},80%,80%)`;ctx.arc(s.x,s.y,s.size,0,Math.PI*2);ctx.fill();});requestAnimationFrame(animateStars);}
+animateStars();
+</script>
+<script>
+const feedbacks={
+    1:{correct:"Correct. The f⁻² scaling means all ionospheric effects are reduced by (20/1.5)² ≈ 178× at Ka-band relative to L-band. This is why Ka-band systems use linear polarisation without rotation correction and require no ionospheric scintillation margin.",wrong:"Incorrect. The magnitude differs enormously between bands — not the same. The f⁻² scaling makes Ka-band much less affected, not more. Day/night variation affects the absolute TEC level but not the frequency scaling law itself."},
+    2:{correct:"Correct. S4 = √(⟨I²⟩−⟨I⟩²)/⟨I⟩ — the normalised standard deviation of received intensity, ranging from 0 (no scintillation) to 1 (severe). S4 > 0.3 is moderate; S4 > 0.7 is severe.",wrong:"Incorrect. SNR is the C/N ratio, a different quantity. F10.7 is the 10.7 cm solar flux index, used as a solar activity proxy but distinct from S4. NmF2 is the electron density at the F2 peak — also a different parameter."},
+    3:{correct:"Correct. Ω = K·TEC/f² ≈ 2.36×10⁴ × 10×10¹⁶ / (2×10¹⁰)² ≈ 0.059 rad ≈ 3.4°. At Ka-band, rotation is a few degrees even for moderate TEC — negligible for communications.",wrong:"Incorrect. 1,350° applies at L-band (1 GHz), not Ka-band. 90° would convert linear to circular polarisation — Ka-band systems show no such effect. Faraday rotation affects all frequencies; it simply becomes negligible at Ka-band due to f⁻² scaling, not zero."},
+    4:{correct:"Correct. The equatorial electrojet and post-sunset plasma bubbles (Rayleigh-Taylor instability) create km-scale electron density irregularities 1–3 hours after local sunset. These act as diffracting screens producing the severe amplitude and phase scintillation characteristic of the equatorial region.",wrong:"Incorrect. The Earth's magnetic field is actually weakest (horizontal) at the equator. Atmospheric composition at ionospheric altitudes is similar globally. Solar zenith angle variation is not the primary driver of plasma bubble formation — the post-sunset instability mechanism is."},
+    5:{correct:"Correct. At Ka-band, SEP events have negligible propagation impact. The real threat is high-energy proton flux causing single-event upsets, latch-up events, or bit errors in satellite electronics — particularly COTS components lacking full radiation hardening, as discussed in m3-6.",wrong:"Incorrect. SEPs do not affect rain attenuation. Radio blackouts affect HF (not Ka-band) via D-layer absorption. Ka-band signals are unaffected by SEP-enhanced ionisation. SEPs do not destroy antenna hardware."},
+    6:{correct:"Correct. At Ka-band (20 GHz) and TEC=10 TECU, Δd = 40.3×10⁻¹⁶/f² × TEC ≈ 1 mm. Millimetre-level path delays are negligible for communications. The same TEC at L-band gives ~180 mm — important for GNSS navigation.",wrong:"Incorrect. The delay is not zero; it is simply very small. Ka-band signals do not exceed light speed. The ionosphere extends from 60–1,000 km — LEO satellites at 550 km are below the F-layer, meaning downlink signals do traverse the ionosphere."},
+    7:{correct:"Correct. At L-band with moderate TEC, Faraday rotation is hundreds to thousands of degrees — effectively randomising linear polarisation orientation. Circularly polarised signals have no preferred orientation and are unaffected by rotation — the engineering response to the Faraday rotation problem.",wrong:"Incorrect. Circular and linear polarisations have identical path loss. No ITU regulation mandates circular polarisation at L-band, though it is universal practice for the physical reason given. L-band antennas can generate either polarisation."},
+    8:{correct:"Correct. At Ka-band, rain attenuation is the primary impairment requiring 5–20+ dB of margin for availability, while ionospheric effects require <1 dB. The opposite is true at L-band. This is the consequence of the opposing frequency dependencies.",wrong:"Incorrect. Ionospheric effects vary with time (solar cycle, day/night, season) — not constant. Ka-band ionospheric effects are smaller than tropospheric, not larger. Both ionospheric and tropospheric effects include losses and delay-type effects."},
+    9:{correct:"Correct. Solar maximum increases TEC by 3–5×. At Ka-band, ionospheric delay, rotation, and scintillation increase proportionally — but baseline effects are already small enough that even a 5× increase leaves them negligible for communications.",wrong:"Incorrect. A 3–5× increase does not cause link outages at Ka-band — the baseline is already tiny. The solar cycle affects all frequencies; Ka-band's near-immunity is what makes the variation irrelevant. Solar radiation creates the ionosphere; it does not burn it off."},
+    10:{correct:"Correct. Scintillation scales as f^(−1.5). At S-band vs Ka-band, scintillation is dramatically larger. In equatorial regions where Ka-band S4 ≈ 0.01–0.05, S-band S4 may reach 0.3–0.5 — sufficient to cause significant link fades and availability degradation.",wrong:"Incorrect. Orbital altitude doesn't change the ionospheric path — the ionosphere sits above 60 km regardless of LEO satellite altitude. Terminal noise figure is unrelated to scintillation. ITU regulation does not determine scintillation susceptibility."}
+};
+let answered={};
+document.querySelectorAll('.quiz-opt').forEach(btn=>{
+    btn.addEventListener('click',function(){
+        const q=this.dataset.q;
+        if(answered[q]!==undefined)return;
+        const correct=this.dataset.correct==='true';
+        answered[q]=correct;
+        document.querySelectorAll(`.quiz-opt[data-q="${q}"]`).forEach(b=>{b.disabled=true;if(b.dataset.correct==='true')b.classList.add('correct');});
+        if(!correct)this.classList.add('wrong');
+        const fb=document.getElementById('fb'+q);
+        fb.textContent=(correct?'✓ ':'✗ ')+feedbacks[q][correct?'correct':'wrong'];
+        fb.style.color=correct?'#39ff14':'#ff004f';
+        if(Object.keys(answered).length===10){
+            const total=Object.values(answered).filter(Boolean).length;
+            const sc=document.getElementById('quizScore');
+            sc.style.display='block';
+            const pct=Math.round(total/10*100);
+            sc.textContent=`SCORE: ${total}/10 (${pct}%) — ${pct===100?'PERFECT.':pct>=80?'STRONG.':pct>=60?'ADEQUATE. REVISIT WEAK SECTIONS.':'REVISIT THE LESSON BEFORE PROCEEDING.'}`;
+        }
+    });
+});
+</script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="supabase.js"></script>
+<script src="user_progress.js"></script>
+<script>
+const LESSON_ID='m4-5';
+(function(){
+    function bounceToLogin(r){console.error("Auth guard:",r);window.location.replace("index.html");}
+    async function init(){
+        if(typeof client==="undefined"||!client||!client.auth)return bounceToLogin("Supabase client not loaded");
+        let session=null;
+        try{({data:{session}}=await client.auth.getSession());}
+        catch(e){return bounceToLogin("getSession threw: "+e.message);}
+        if(!session){window.location.replace("index.html");return;}
+        const btn=document.getElementById('completeBtn'),msg=document.getElementById('completeMsg');
+        function setDone(done){
+            if(done){btn.textContent='✓ COMPLETE — CLICK TO UNDO';btn.classList.add('done');btn.style.cssText='border-color:#39ff14;color:#39ff14;background:rgba(57,255,20,0.1);cursor:pointer;opacity:1;';msg.style.color='#39ff14';msg.textContent='Lesson marked complete. Click again to undo.';}
+            else{btn.textContent='MARK LESSON COMPLETE';btn.classList.remove('done');btn.style.cssText='';msg.style.color='#ffffff55';msg.textContent='Not yet marked complete.';}
+        }
+        let mastered=[];
+        try{mastered=await getMasteredSections();}catch(e){console.error(e);}
+        setDone(mastered.includes(LESSON_ID));
+        btn.addEventListener('click',async()=>{
+            const isDone=btn.classList.contains('done');
+            msg.style.color='#00d9ff';msg.textContent='Saving...';
+            const ok=await upsertSection(LESSON_ID,!isDone);
+            if(ok){setDone(!isDone);}else{msg.style.color='#ff004f';msg.textContent='Error saving. Try again.';}
+        });
+        const btt=document.getElementById('backToTop');
+        window.addEventListener('scroll',()=>{btt.classList.toggle('visible',window.scrollY>400);});
+        btt.addEventListener('click',()=>window.scrollTo({top:0,behavior:'smooth'}));
+    }
+    if(document.readyState==="loading")document.addEventListener("DOMContentLoaded",init);
+    else init();
+})();
+</script>
+</body>
+</html>
