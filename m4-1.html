@@ -1,0 +1,690 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, shrink-to-fit=no">
+<title>M4-1 — The Link Budget: EIRP, Path Loss &amp; G/T · LEOAF</title>
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;600;800&family=Share+Tech+Mono&family=Libre+Baskerville:ital,wght@0,400;0,700;1,400&display=swap" rel="stylesheet">
+<link rel="icon" href="favicon.ico" sizes="any" type="image/x-icon">
+<link rel="manifest" href="site.webmanifest">
+<meta name="theme-color" content="#0f0f0f">
+<script>
+window.leoafAbort = async function () {
+    function go() { window.location.replace("index.html?signedout=1"); }
+    try { if (typeof client !== "undefined" && client && client.auth && client.auth.signOut) { try { await client.auth.signOut({ scope: "local" }); } catch (e) {} } } catch (e) {}
+    go();
+};
+</script>
+<style>
+* { box-sizing:border-box; margin:0; padding:0; }
+html { height:100%; -webkit-text-size-adjust:100%; overflow-x:hidden; }
+body { font-family:'Share Tech Mono',monospace; background:#000; color:white; overflow-x:hidden; min-height:100vh; }
+#starsCanvas { position:fixed; inset:0; z-index:-1; }
+header { background:#000; border-bottom:1px solid #ff004f33; position:sticky; top:0; z-index:100; padding:1rem clamp(1.5rem,5vw,4rem); display:flex; justify-content:space-between; align-items:center; box-shadow:0 4px 16px #0008; }
+.logo { font-family:'Orbitron',sans-serif; font-weight:800; font-size:clamp(16px,2vw,22px); letter-spacing:3px; text-decoration:none; }
+.logo span:first-child { color:white; } .logo span:last-child { color:#ff004f; }
+.nav-right { display:flex; align-items:center; gap:10px; }
+.nav-btn { background:transparent; border:1px solid #ff004f44; color:#ff004f; padding:6px 14px; cursor:pointer; transition:0.3s ease; font-size:11px; font-family:'Orbitron',sans-serif; letter-spacing:1px; text-decoration:none; display:inline-block; }
+.nav-btn:hover { background:#ff004f; color:black; }
+.breadcrumb { padding:14px clamp(1.5rem,5vw,4rem); font-size:11px; color:#ffffff44; letter-spacing:1px; position:relative; z-index:1; }
+.breadcrumb a { color:#00d9ff66; text-decoration:none; } .breadcrumb a:hover { color:#00d9ff; }
+.breadcrumb span { margin:0 8px; }
+.lesson-wrap { max-width:820px; margin:0 auto; padding:0 clamp(1.5rem,5vw,4rem) 80px; position:relative; z-index:1; }
+.lesson-header { padding:30px 0 28px; border-bottom:1px solid #ffffff11; margin-bottom:36px; }
+.lesson-tag { font-family:'Orbitron',sans-serif; font-size:10px; color:#ff004f; letter-spacing:3px; margin-bottom:10px; }
+.lesson-header h1 { font-family:'Orbitron',sans-serif; font-size:clamp(20px,3.5vw,32px); font-weight:800; line-height:1.2; margin-bottom:12px; }
+.lesson-meta { display:flex; gap:10px; flex-wrap:wrap; margin-bottom:16px; }
+.l-pill { font-family:'Orbitron',sans-serif; font-size:10px; padding:3px 10px; border:1px solid; letter-spacing:1px; }
+.l-pill-q { color:#ff004f; border-color:#ff004f44; } .l-pill-t { color:#39ff14; border-color:#39ff1444; }
+.lesson-intro { font-size:13px; line-height:1.85; opacity:0.75; }
+.toc { background:rgba(0,217,255,0.06); border:1px solid #00d9ff33; padding:24px 28px; margin:30px 0; }
+.toc h4 { font-family:'Orbitron',sans-serif; font-size:10px; color:#00d9ff; letter-spacing:2px; margin-bottom:16px; }
+.toc ol { padding-left:20px; } .toc li { font-size:13px; line-height:2.1; }
+.toc li a { color:#00d9ffbb; text-decoration:none; transition:0.15s; } .toc li a:hover { color:#fff; padding-left:4px; }
+.toc li::marker { color:#ff004f; font-family:'Orbitron',sans-serif; font-size:10px; }
+.content-block { margin-bottom:48px; }
+.content-block h2 { font-family:'Orbitron',sans-serif; font-size:13px; color:#00d9ff; letter-spacing:2px; text-transform:uppercase; margin-bottom:18px; padding-bottom:10px; border-bottom:1px solid #00d9ff22; scroll-margin-top:80px; }
+.content-block h3 { font-family:'Orbitron',sans-serif; font-size:11px; color:#ffffff88; letter-spacing:1.5px; text-transform:uppercase; margin:28px 0 12px; }
+.content-block p { font-size:13px; line-height:1.9; opacity:0.85; margin-bottom:16px; }
+.content-block ul,.content-block ol { padding-left:0; margin-bottom:16px; }
+.content-block ul li,.content-block ol li { font-size:13px; line-height:1.85; opacity:0.85; padding-left:20px; position:relative; margin-bottom:6px; }
+.content-block ul li::before { content:'›'; position:absolute; left:0; color:#00d9ff; }
+.content-block blockquote { border-left:3px solid #39ff14; background:rgba(57,255,20,0.05); padding:14px 20px; margin:18px 0; font-size:14px; font-family:'Share Tech Mono',monospace; color:#39ff14; letter-spacing:1px; }
+.callout { border-left:3px solid #00d9ff; background:rgba(0,217,255,0.05); padding:16px 20px; margin:22px 0; font-size:12px; line-height:1.8; }
+.callout.amber { border-left-color:#ffaa00; background:rgba(255,170,0,0.05); }
+.callout.green { border-left-color:#39ff14; background:rgba(57,255,20,0.05); }
+.callout.red { border-left-color:#ff004f; background:rgba(255,0,79,0.05); }
+.callout strong { font-family:'Orbitron',sans-serif; font-size:10px; letter-spacing:1px; display:block; margin-bottom:8px; color:inherit; }
+.key-numbers { display:grid; grid-template-columns:repeat(auto-fit,minmax(130px,1fr)); gap:12px; margin:22px 0; }
+.kn-item { background:rgba(255,255,255,0.03); border:1px solid #ffffff11; padding:16px 12px; text-align:center; }
+.kn-val { font-family:'Orbitron',sans-serif; font-size:clamp(13px,1.8vw,18px); font-weight:800; color:#00d9ff; display:block; }
+.kn-label { font-size:10px; opacity:0.5; letter-spacing:1px; margin-top:5px; display:block; line-height:1.4; }
+.compare-table { width:100%; border-collapse:collapse; margin:22px 0; font-size:12px; }
+.compare-table th { font-family:'Orbitron',sans-serif; font-size:10px; letter-spacing:1px; color:#00d9ff; padding:10px 12px; border-bottom:1px solid #00d9ff33; text-align:left; }
+.compare-table td { padding:10px 12px; border-bottom:1px solid #ffffff0a; line-height:1.5; opacity:0.85; vertical-align:top; }
+.compare-table tr:hover td { background:rgba(255,255,255,0.02); }
+.lb-table { width:100%; border-collapse:collapse; margin:22px 0; font-size:12px; font-family:'Share Tech Mono',monospace; }
+.lb-table th { font-family:'Orbitron',sans-serif; font-size:10px; letter-spacing:1px; color:#00d9ff; padding:8px 12px; border-bottom:1px solid #00d9ff33; text-align:left; }
+.lb-table td { padding:8px 12px; border-bottom:1px solid #ffffff08; line-height:1.4; }
+.lb-table tr.subtotal td { border-top:1px solid #00d9ff44; background:rgba(0,217,255,0.04); font-weight:bold; color:#00d9ff; }
+.lb-table tr.result td { border-top:2px solid #39ff14; background:rgba(57,255,20,0.06); color:#39ff14; font-weight:bold; }
+.lb-table tr.margin td { color:#ffaa00; }
+.lb-table .plus  { color:#39ff14; }
+.lb-table .minus { color:#ff004f; }
+.quiz-block { background:rgba(17,17,17,0.9); border:1px solid #ff004f33; padding:28px; margin:48px 0 32px; }
+.quiz-block h2 { font-family:'Orbitron',sans-serif; font-size:13px; color:#ff004f; letter-spacing:2px; margin-bottom:6px; }
+.quiz-intro { font-size:12px; opacity:0.6; margin-bottom:24px; padding-bottom:16px; border-bottom:1px solid #ff004f22; line-height:1.6; }
+.quiz-q { margin-bottom:28px; }
+.quiz-q p { font-size:13px; opacity:0.9; margin-bottom:12px; line-height:1.65; }
+.quiz-q p strong { color:#00d9ff; }
+.quiz-options { display:flex; flex-direction:column; gap:8px; }
+.quiz-opt { background:rgba(255,255,255,0.03); border:1px solid #ffffff1a; padding:11px 16px; cursor:pointer; font-size:12px; font-family:'Share Tech Mono',monospace; transition:0.2s ease; text-align:left; color:white; line-height:1.5; }
+.quiz-opt:hover:not(:disabled) { background:rgba(0,217,255,0.08); border-color:#00d9ff44; }
+.quiz-opt.correct { background:rgba(57,255,20,0.1); border-color:#39ff14; color:#39ff14; }
+.quiz-opt.wrong { background:rgba(255,0,79,0.1); border-color:#ff004f; color:#ff004f; }
+.quiz-opt:disabled { cursor:default; }
+.quiz-feedback { font-size:12px; margin-top:10px; min-height:18px; line-height:1.7; opacity:0.9; padding:0 4px; }
+.quiz-score { font-family:'Orbitron',sans-serif; font-size:12px; color:#39ff14; margin-top:20px; letter-spacing:1px; display:none; padding-top:16px; border-top:1px solid #39ff1433; }
+.py-block { background:rgba(10,10,10,0.95); border:1px solid #39ff1422; padding:28px; margin:32px 0; }
+.py-block h2 { font-family:'Orbitron',sans-serif; font-size:13px; color:#39ff14; letter-spacing:2px; margin-bottom:8px; }
+.py-block .py-intro { font-size:12px; opacity:0.7; margin-bottom:20px; padding-bottom:16px; border-bottom:1px solid #39ff1422; line-height:1.7; }
+.py-exercise { margin-bottom:32px; } .py-exercise:last-child { margin-bottom:0; }
+.py-exercise h3 { font-family:'Orbitron',sans-serif; font-size:11px; color:#39ff1499; letter-spacing:1.5px; text-transform:uppercase; margin-bottom:10px; }
+.py-exercise p { font-size:12px; opacity:0.8; margin-bottom:14px; line-height:1.75; }
+.py-block pre { background:#050505; border:1px solid #39ff1433; padding:20px; font-family:'Share Tech Mono',monospace; font-size:11.5px; line-height:1.75; overflow-x:auto; color:#39ff14; white-space:pre; margin-bottom:12px; }
+.py-block .py-challenge { background:rgba(57,255,20,0.04); border-left:2px solid #39ff14; padding:12px 16px; margin-top:14px; font-size:12px; line-height:1.75; opacity:0.8; }
+.py-block .py-challenge strong { font-family:'Orbitron',sans-serif; font-size:10px; color:#39ff14; display:block; margin-bottom:6px; letter-spacing:1px; }
+.reflection-block { background:rgba(255,170,0,0.04); border:1px solid #ffaa0033; padding:24px; margin:32px 0; }
+.reflection-block h2 { font-family:'Orbitron',sans-serif; font-size:13px; color:#ffaa00; letter-spacing:2px; margin-bottom:8px; }
+.reflection-block .ref-intro { font-size:12px; opacity:0.7; margin-bottom:20px; padding-bottom:14px; border-bottom:1px solid #ffaa0022; line-height:1.7; }
+.ref-prompt { margin-bottom:20px; }
+.ref-prompt h3 { font-family:'Orbitron',sans-serif; font-size:11px; color:#ffaa0099; letter-spacing:1px; margin-bottom:8px; }
+.ref-prompt p { font-size:12px; opacity:0.8; line-height:1.75; margin-bottom:10px; }
+.back-to-top { position:fixed; bottom:28px; right:28px; z-index:200; width:44px; height:44px; background:#000; border:1px solid #00d9ff55; color:#00d9ff; font-size:20px; cursor:pointer; display:flex; align-items:center; justify-content:center; opacity:0; pointer-events:none; transition:opacity 0.3s ease; }
+.back-to-top.visible { opacity:1; pointer-events:auto; } .back-to-top:hover { border-color:#00d9ff; background:#001a2c; }
+.complete-wrap { margin-top:56px; padding-top:30px; border-top:1px solid #ffffff11; text-align:center; }
+.complete-btn { font-family:'Orbitron',sans-serif; font-size:13px; letter-spacing:2px; padding:14px 44px; background:transparent; border:1px solid #39ff14; color:#39ff14; cursor:pointer; transition:0.3s ease; }
+.complete-btn:hover:not(.done) { background:#39ff14; color:black; box-shadow:0 0 20px rgba(57,255,20,0.4); }
+.complete-btn.done { background:rgba(57,255,20,0.1); cursor:default; opacity:0.7; }
+.complete-msg { font-size:12px; color:#39ff14; margin-top:14px; min-height:18px; letter-spacing:1px; }
+.lesson-nav { display:flex; justify-content:space-between; margin-top:30px; flex-wrap:wrap; gap:10px; }
+.lesson-nav a { font-family:'Orbitron',sans-serif; font-size:11px; color:#00d9ff66; text-decoration:none; letter-spacing:1px; transition:0.2s; }
+.lesson-nav a:hover { color:#00d9ff; }
+footer { text-align:center; padding:30px; opacity:0.3; font-size:11px; position:relative; z-index:1; letter-spacing:1px; }
+@media(max-width:600px) { .key-numbers{grid-template-columns:1fr 1fr;} .compare-table,.lb-table{font-size:11px;} .compare-table th,.compare-table td,.lb-table th,.lb-table td{padding:7px 8px;} }
+.content-block { background:#f5f2ec; color:#1a1a1a; padding:36px clamp(24px,4vw,48px); margin-bottom:24px; border-left:4px solid #00d9ff; position:relative; z-index:1; }
+.content-block h2 { font-family:'Orbitron',sans-serif; font-size:13px; color:#003d66; letter-spacing:2px; text-transform:uppercase; margin-bottom:20px; padding-bottom:10px; border-bottom:2px solid #00d9ff66; scroll-margin-top:80px; }
+.content-block h3 { font-family:'Orbitron',sans-serif; font-size:11px; color:#444; letter-spacing:1.5px; text-transform:uppercase; margin:32px 0 14px; }
+.content-block p { font-family:'Libre Baskerville',Georgia,serif; font-size:15px; line-height:1.9; color:#1a1a1a; opacity:1; margin-bottom:18px; }
+.content-block ul li { font-family:'Libre Baskerville',Georgia,serif; font-size:14px; line-height:1.85; color:#1a1a1a; opacity:1; margin-bottom:8px; }
+.content-block ul li::before { color:#0077aa; }
+.content-block blockquote { border-left:3px solid #1a7a1a; background:#eafaea; color:#0a3d0a; }
+.content-block .callout { border-left:3px solid #0088cc; background:#e8f4fb; color:#1a1a1a; }
+.content-block .callout.amber { border-left-color:#996600; background:#fef9ec; }
+.content-block .callout.green { border-left-color:#1a7a1a; background:#eafaea; }
+.content-block .callout.red { border-left-color:#cc0033; background:#fdecea; }
+.content-block .callout strong { color:inherit; }
+.content-block .kn-item { background:#fff; border:1px solid #d0d0d0; }
+.content-block .kn-label { color:#555; opacity:1; }
+.content-block .compare-table th,.content-block .lb-table th { color:#003d66; border-bottom:2px solid #00d9ff66; }
+.content-block .compare-table td,.content-block .lb-table td { color:#1a1a1a; opacity:1; border-bottom:1px solid #ddd; }
+.content-block .compare-table tr:hover td,.content-block .lb-table tr:hover td { background:#f0f0f0; }
+.content-block .lb-table tr.subtotal td { background:#e8f4fb; color:#003d66; border-color:#0088cc44; }
+.content-block .lb-table tr.result td { background:#eafaea; color:#1a7a1a; border-color:#1a7a1a; }
+.content-block .lb-table tr.margin td { color:#996600; }
+.content-block .lb-table .plus { color:#1a7a1a; }
+.content-block .lb-table .minus { color:#cc0033; }
+</style>
+</head>
+<body>
+<canvas id="starsCanvas"></canvas>
+<header>
+    <a href="dashboard.html" class="logo"><span>LEO</span><span>AF</span></a>
+    <div class="nav-right">
+        <a href="m4.html" class="nav-btn">← M4 HUB</a>
+        <button class="nav-btn" onclick="leoafAbort()">ABORT</button>
+    </div>
+</header>
+<div class="breadcrumb">
+    <a href="dashboard.html">DASHBOARD</a><span>/</span>
+    <a href="m4.html">M4</a><span>/</span>
+    <span style="color:#ffffff88;">LESSON 01 — THE LINK BUDGET: EIRP, PATH LOSS &amp; G/T</span>
+</div>
+
+<div class="lesson-wrap">
+<div class="lesson-header">
+    <div class="lesson-tag">M4 · LESSON 01 OF 7</div>
+    <h1>The Link Budget:<br>EIRP, Path Loss &amp; G/T</h1>
+    <div class="lesson-meta">
+        <div class="l-pill l-pill-q">MODULE 4</div>
+        <div class="l-pill l-pill-t">RF &amp; LINK BUDGETS</div>
+    </div>
+    <p class="lesson-intro">Every satellite communications system reduces to a single question: does the received signal have enough power, relative to the noise floor, to support the required data rate? The link budget is the structured accounting that answers this question — taking every gain and every loss in the signal's journey from transmitter to receiver, summing them in decibels, and comparing the result to the minimum threshold the demodulator requires. This lesson derives the link equation from first principles and builds the scaffold that the remaining six lessons will fill with atmospheric, interference, and environmental effects.</p>
+</div>
+
+<div class="toc">
+    <h4>CONTENTS</h4>
+    <ol>
+        <li><a href="#s1">Decibel arithmetic</a></li>
+        <li><a href="#s2">Free-space path loss</a></li>
+        <li><a href="#s3">Effective isotropic radiated power (EIRP)</a></li>
+        <li><a href="#s4">The received carrier power</a></li>
+        <li><a href="#s5">The noise floor: kTB</a></li>
+        <li><a href="#s6">C/N₀ — the master link quality metric</a></li>
+        <li><a href="#s7">The full link equation</a></li>
+        <li><a href="#s8">The link budget table structure</a></li>
+        <li><a href="#s9">Typical LEO Ka-band downlink: a first-pass example</a></li>
+        <li><a href="#quiz">Knowledge check</a></li>
+        <li><a href="#python">Python exercises — spine project stage 1</a></li>
+        <li><a href="#reflect">Reflection prompts</a></li>
+    </ol>
+</div>
+
+<!-- S1 -->
+<div class="content-block" id="s1">
+    <h2>1. Decibel Arithmetic</h2>
+    <p>The link budget is computed in decibels because signal power spans many orders of magnitude — a satellite transmitting 10 W at 550 km produces a received power at the terminal of approximately 10⁻¹³ W. Working in logarithms turns that fourteen-order-of-magnitude range into a manageable addition and subtraction problem.</p>
+    <blockquote>X_dB = 10 · log₁₀(X_linear)   &nbsp;&nbsp;   X_linear = 10^(X_dB / 10)</blockquote>
+    <p>Antenna gain is expressed in <strong>dBi</strong> — decibels relative to an isotropic radiator. Power is expressed in <strong>dBW</strong> (relative to 1 W) or <strong>dBm</strong> (relative to 1 mW). 1 W = 0 dBW = 30 dBm.</p>
+
+    <div class="key-numbers">
+        <div class="kn-item"><span class="kn-val">+3 dB</span><span class="kn-label">FACTOR OF 2 (double the power)</span></div>
+        <div class="kn-item"><span class="kn-val">+10 dB</span><span class="kn-label">FACTOR OF 10</span></div>
+        <div class="kn-item"><span class="kn-val">+20 dB</span><span class="kn-label">FACTOR OF 100</span></div>
+        <div class="kn-item"><span class="kn-val">−3 dB</span><span class="kn-label">FACTOR OF 0.5 (half the power)</span></div>
+        <div class="kn-item"><span class="kn-val">−10 dB</span><span class="kn-label">FACTOR OF 0.1</span></div>
+        <div class="kn-item"><span class="kn-val">0 dBi</span><span class="kn-label">ISOTROPIC ANTENNA GAIN</span></div>
+    </div>
+</div>
+
+<!-- S2 -->
+<div class="content-block" id="s2">
+    <h2>2. Free-Space Path Loss</h2>
+    <p>A transmitter radiates into a spherical wavefront. At distance d, power is spread over area 4πd². A receive antenna with effective area A_eff = G_R · λ²/(4π) intercepts a fraction of this. The ratio of received to transmitted power for isotropic antennas in free space — the free-space path loss — is:</p>
+    <blockquote>FSPL = (4π d / λ)²   →   FSPL_dB = 92.4 + 20·log₁₀(d_km) + 20·log₁₀(f_GHz)</blockquote>
+    <p>At Ka-band downlink (20 GHz) and 1,000 km slant range:</p>
+    <blockquote>FSPL = 92.4 + 60.0 + 26.0 = 178.4 dB</blockquote>
+    <p>This is the dominant loss in any satellite link — roughly 178 dB that must be overcome by EIRP and receive gain. Note the dependencies: FSPL increases as d² (6 dB per doubling of range) and as f² (+6 dB per doubling of frequency). It does not depend on transmit power or antenna design — those determine what remains after this loss is subtracted.</p>
+
+    <div class="callout red">
+        <strong>HIGHER FREQUENCY = MORE PATH LOSS</strong>
+        Moving from Ku-band (14 GHz) to Ka-band (20 GHz) adds 20·log₁₀(20/14) ≈ +3.1 dB of path loss at the same range. Moving from Ka to V-band (47 GHz) adds another 20·log₁₀(47/20) ≈ +7.4 dB. Higher frequencies need more antenna gain or transmit power just to maintain the same received signal level, even before atmospheric effects are added.
+    </div>
+</div>
+
+<!-- S3 -->
+<div class="content-block" id="s3">
+    <h2>3. Effective Isotropic Radiated Power (EIRP)</h2>
+    <p>EIRP is the product of transmit power and transmit antenna gain:</p>
+    <blockquote>EIRP_dBW = P_T_dBW + G_T_dBi</blockquote>
+    <p>EIRP represents the power that an isotropic radiator would need to produce the same power flux density at the receiver. It is the single figure of merit for the transmit side of any link.</p>
+    <p>A Starlink satellite with ~20 W per beam and ~34 dBi spot beam gain: EIRP ≈ 13 + 34 = 47 dBW. A user terminal with 2 W and 35 dBi: EIRP ≈ 3 + 35 = 38 dBW. EIRP is controlled by regulatory limits (EPFD, power flux density masks) that constrain the product of power and gain — a high-gain low-power design can have the same EIRP as a low-gain high-power design.</p>
+</div>
+
+<!-- S4 -->
+<div class="content-block" id="s4">
+    <h2>4. The Received Carrier Power</h2>
+    <p>Combining EIRP with path loss and receive gain:</p>
+    <blockquote>C_dBW = EIRP_dBW − FSPL_dB + G_R_dBi − L_other_dB</blockquote>
+    <p>where L_other is the sum of all additional losses: pointing, atmospheric, feed/line, rain fade. All are positive numbers that reduce C. This is the first line of the link budget — the received signal power.</p>
+</div>
+
+<!-- S5 -->
+<div class="content-block" id="s5">
+    <h2>5. The Noise Floor: kTB</h2>
+    <p>Thermal noise power in bandwidth B at temperature T is N = k · T · B, where k = 1.380649 × 10⁻²³ J/K. The noise power spectral density (per Hz):</p>
+    <blockquote>N₀_dBW/Hz = −228.6 + T_sys_dBK</blockquote>
+    <p>where −228.6 = 10·log₁₀(1.380649 × 10⁻²³) and T_sys is the system noise temperature in Kelvin (covered in detail in m4-2). For a typical terminal at T_sys = 300 K (24.8 dBK):</p>
+    <blockquote>N₀ = −228.6 + 24.8 = −203.8 dBW/Hz</blockquote>
+</div>
+
+<!-- S6 -->
+<div class="content-block" id="s6">
+    <h2>6. C/N₀ — The Master Link Quality Metric</h2>
+    <p>The carrier-to-noise density ratio C/N₀ = C/N₀ (linear, in Hz) is the ratio of received carrier power to noise power spectral density:</p>
+    <blockquote>C/N₀_dBHz = C_dBW − N₀_dBW/Hz</blockquote>
+    <p>C/N₀ is bandwidth-independent — it describes link quality in a way that allows comparison across systems with different channel widths. The required C/N₀ for a given data rate and modulation scheme is a property of the air interface (Module 5); the achieved C/N₀ is what the link budget computes.</p>
+    <p>The receive system figure of merit G/T (receive gain divided by system noise temperature) appears naturally:</p>
+    <blockquote>C/N₀_dBHz = EIRP − FSPL − L_other + G/T + 228.6</blockquote>
+    <p>where G/T_dB = G_R_dBi − T_sys_dBK. Higher G/T means the receiver collects more signal relative to its noise floor.</p>
+
+    <div class="key-numbers">
+        <div class="kn-item"><span class="kn-val">C/N₀</span><span class="kn-label">MASTER METRIC — BANDWIDTH INDEPENDENT</span></div>
+        <div class="kn-item"><span class="kn-val">G/T</span><span class="kn-label">RECEIVE FIGURE OF MERIT (dB/K)</span></div>
+        <div class="kn-item"><span class="kn-val">228.6</span><span class="kn-label">−10·log₁₀(k), k = Boltzmann</span></div>
+        <div class="kn-item"><span class="kn-val">Eb/N₀</span><span class="kn-label">C/N₀ − 10·log₁₀(R_bps)</span></div>
+    </div>
+</div>
+
+<!-- S7 -->
+<div class="content-block" id="s7">
+    <h2>7. The Full Link Equation</h2>
+    <p>The complete link equation and its derived quantities:</p>
+    <blockquote>C/N₀ [dBHz] = EIRP [dBW] − FSPL [dB] − L_misc [dB] + G/T [dB/K] + 228.6</blockquote>
+    <p>Derived quantities:</p>
+    <blockquote>Eb/N₀_dB = C/N₀_dBHz − 10·log₁₀(R_bps)</blockquote>
+    <blockquote>C/N_dB = C/N₀_dBHz − 10·log₁₀(B_Hz)</blockquote>
+    <blockquote>Margin_dB = (C/N₀)_achieved − (C/N₀)_required</blockquote>
+    <p>A positive margin means the link closes with headroom. Industry convention requires at least 2–3 dB of margin to account for implementation losses and parameter uncertainties.</p>
+
+    <div class="callout green">
+        <strong>THE FIVE TERMS</strong>
+        EIRP — transmitter strength. FSPL — inverse-square-law loss. L_misc — all other losses (atmosphere, pointing, rain, interference — lessons 4–6). G/T — receiver quality. 228.6 — converts Boltzmann's constant to convenient units. Every link budget is these five terms, applied to the specific geometry and environment of the link.
+    </div>
+</div>
+
+<!-- S8 -->
+<div class="content-block" id="s8">
+    <h2>8. The Link Budget Table Structure</h2>
+    <p>A link budget is presented as a numbered table of gains (positive) and losses (negative), summing to the achieved C/N₀, then compared to the required threshold to yield the margin. The industry-standard structure:</p>
+
+    <table class="lb-table">
+        <thead><tr><th>#</th><th>Parameter</th><th>Value</th><th>Unit</th></tr></thead>
+        <tbody>
+            <tr><td>1</td><td>Transmit power</td><td>P_T</td><td>dBW</td></tr>
+            <tr><td>2</td><td>Transmit antenna gain</td><td>G_T</td><td class="plus">+ dBi</td></tr>
+            <tr class="subtotal"><td>3</td><td>EIRP (1 + 2)</td><td>EIRP</td><td>dBW</td></tr>
+            <tr><td>4</td><td>Free-space path loss</td><td>FSPL</td><td class="minus">− dB</td></tr>
+            <tr><td>5</td><td>Atmospheric / rain loss</td><td>L_atm</td><td class="minus">− dB</td></tr>
+            <tr><td>6</td><td>Pointing loss</td><td>L_pt</td><td class="minus">− dB</td></tr>
+            <tr><td>7</td><td>Other losses</td><td>L_other</td><td class="minus">− dB</td></tr>
+            <tr><td>8</td><td>Receive antenna gain</td><td>G_R</td><td class="plus">+ dBi</td></tr>
+            <tr class="subtotal"><td>9</td><td>Received power C (3+4+5+6+7+8)</td><td>C</td><td>dBW</td></tr>
+            <tr><td>10</td><td>System noise temperature</td><td>T_sys</td><td class="minus">− dBK</td></tr>
+            <tr><td>11</td><td>Boltzmann's constant</td><td>228.6</td><td class="plus">+ dBW/K/Hz</td></tr>
+            <tr class="subtotal"><td>12</td><td>Noise spectral density N₀ (10 + 11)</td><td>N₀</td><td>dBW/Hz</td></tr>
+            <tr class="result"><td>13</td><td>C/N₀ (9 − 12)</td><td>C/N₀</td><td>dBHz</td></tr>
+            <tr><td>14</td><td>Required C/N₀ (from air interface)</td><td>C/N₀_req</td><td>dBHz</td></tr>
+            <tr class="margin"><td>15</td><td>Link margin (13 − 14)</td><td>Margin</td><td>dB</td></tr>
+        </tbody>
+    </table>
+</div>
+
+<!-- S9 -->
+<div class="content-block" id="s9">
+    <h2>9. Typical LEO Ka-Band Downlink: A First-Pass Example</h2>
+    <p>Forward link (satellite → user terminal), Ka-band downlink at 20 GHz, 1,000 km slant range, clear sky:</p>
+
+    <table class="lb-table">
+        <thead><tr><th>Parameter</th><th>Value</th><th>Comment</th></tr></thead>
+        <tbody>
+            <tr><td>Tx power (per beam)</td><td class="plus">+13.0 dBW</td><td>20 W</td></tr>
+            <tr><td>Tx antenna gain</td><td class="plus">+34.0 dBi</td><td>Phased array, 0.5° beam</td></tr>
+            <tr class="subtotal"><td>EIRP</td><td>+47.0 dBW</td><td></td></tr>
+            <tr><td>Free-space path loss</td><td class="minus">−178.4 dB</td><td>1,000 km, 20 GHz</td></tr>
+            <tr><td>Atmospheric loss (clear sky)</td><td class="minus">−0.5 dB</td><td>Gaseous absorption</td></tr>
+            <tr><td>Pointing loss</td><td class="minus">−0.5 dB</td><td>ADCS residual</td></tr>
+            <tr class="subtotal"><td>Received power C</td><td>−94.9 dBW</td><td></td></tr>
+            <tr><td>System noise temperature</td><td class="minus">−24.8 dBK</td><td>T_sys = 300 K</td></tr>
+            <tr><td>Boltzmann's constant</td><td class="plus">+228.6</td><td>−10·log₁₀(k)</td></tr>
+            <tr class="subtotal"><td>Noise density N₀</td><td>−203.8 dBW/Hz</td><td></td></tr>
+            <tr class="result"><td>C/N₀</td><td>+108.9 dBHz</td><td></td></tr>
+            <tr><td>Required C/N₀ (DVB-S2 16-APSK 3/4 @ 208.3 Msym/s)</td><td>+93.4 dBHz</td><td>Es/N₀ 10.21 dB + 10·log₁₀(R_s)</td></tr>
+            <tr class="margin"><td>Link margin</td><td>+15.5 dB</td><td>Generous clear-sky margin</td></tr>
+        </tbody>
+    </table>
+
+    <p>The 15.5 dB clear-sky margin is the headroom before the required C/N₀ for this MODCOD is not met. Lessons m4-4, m4-5, and m4-6 add rain fade (7–20 dB at Ka-band), ionospheric effects, and interference — all of which spend this margin. Whether 15.5 dB is generous or barely adequate depends on the rain climate and the target availability, and adaptive systems (Module 5) convert whatever is left over in clear sky into higher-order MODCODs rather than wasting it.</p>
+
+    <div class="callout amber">
+        <strong>CLEAR-SKY IS NOT THE DESIGN CASE</strong>
+        The clear-sky link budget establishes the best-case performance. The design case is determined by the worst-case conditions that must still close with positive margin — typically the rain fade depth exceeded for some fraction of the year (e.g. 0.01% of time for 99.99% availability). Lessons m4-4 and m4-7 convert the clear-sky margin into a link availability statement.
+    </div>
+</div>
+
+<!-- QUIZ -->
+<div class="quiz-block" id="quiz">
+    <h2>KNOWLEDGE CHECK</h2>
+    <p class="quiz-intro">Ten questions. Select one answer per question. Feedback is immediate; score appears when all ten are answered.</p>
+
+    <div class="quiz-q"><p><strong>Q1.</strong> Free-space path loss increases by how much when the frequency doubles at fixed range?</p>
+        <div class="quiz-options">
+            <button class="quiz-opt" data-q="1" data-correct="false">A — +3 dB</button>
+            <button class="quiz-opt" data-q="1" data-correct="true">B — +6 dB</button>
+            <button class="quiz-opt" data-q="1" data-correct="false">C — +10 dB</button>
+            <button class="quiz-opt" data-q="1" data-correct="false">D — +20 dB</button>
+        </div><div class="quiz-feedback" id="fb1"></div></div>
+
+    <div class="quiz-q"><p><strong>Q2.</strong> A satellite transmits 10 W (+10 dBW) into an antenna with 40 dBi gain. The EIRP is:</p>
+        <div class="quiz-options">
+            <button class="quiz-opt" data-q="2" data-correct="false">A — 4 dBW</button>
+            <button class="quiz-opt" data-q="2" data-correct="false">B — 30 dBW</button>
+            <button class="quiz-opt" data-q="2" data-correct="true">C — 50 dBW</button>
+            <button class="quiz-opt" data-q="2" data-correct="false">D — 400 dBW</button>
+        </div><div class="quiz-feedback" id="fb2"></div></div>
+
+    <div class="quiz-q"><p><strong>Q3.</strong> The term G/T in the link equation represents:</p>
+        <div class="quiz-options">
+            <button class="quiz-opt" data-q="3" data-correct="false">A — Transmit antenna gain divided by system temperature</button>
+            <button class="quiz-opt" data-q="3" data-correct="true">B — Receive antenna gain (dBi) minus system noise temperature (dBK) — the receive system figure of merit</button>
+            <button class="quiz-opt" data-q="3" data-correct="false">C — The ratio of gain to thermal noise power</button>
+            <button class="quiz-opt" data-q="3" data-correct="false">D — The receive antenna aperture efficiency</button>
+        </div><div class="quiz-feedback" id="fb3"></div></div>
+
+    <div class="quiz-q"><p><strong>Q4.</strong> C/N₀ is preferred over C/N as the master link quality metric because:</p>
+        <div class="quiz-options">
+            <button class="quiz-opt" data-q="4" data-correct="false">A — C/N₀ is always larger than C/N</button>
+            <button class="quiz-opt" data-q="4" data-correct="true">B — C/N₀ is independent of bandwidth, allowing comparison across systems with different channel widths</button>
+            <button class="quiz-opt" data-q="4" data-correct="false">C — C/N₀ is easier to measure than C/N</button>
+            <button class="quiz-opt" data-q="4" data-correct="false">D — C/N₀ is required by ITU regulations</button>
+        </div><div class="quiz-feedback" id="fb4"></div></div>
+
+    <div class="quiz-q"><p><strong>Q5.</strong> At 1,000 km slant range and 20 GHz, FSPL is approximately:</p>
+        <div class="quiz-options">
+            <button class="quiz-opt" data-q="5" data-correct="false">A — 148 dB</button>
+            <button class="quiz-opt" data-q="5" data-correct="true">B — 178 dB</button>
+            <button class="quiz-opt" data-q="5" data-correct="false">C — 208 dB</button>
+            <button class="quiz-opt" data-q="5" data-correct="false">D — 92 dB</button>
+        </div><div class="quiz-feedback" id="fb5"></div></div>
+
+    <div class="quiz-q"><p><strong>Q6.</strong> A terminal has G_R = 37 dBi and T_sys = 300 K (24.8 dBK). Its G/T is:</p>
+        <div class="quiz-options">
+            <button class="quiz-opt" data-q="6" data-correct="false">A — 337 dB/K</button>
+            <button class="quiz-opt" data-q="6" data-correct="false">B — 917 dB/K</button>
+            <button class="quiz-opt" data-q="6" data-correct="true">C — 12.2 dB/K</button>
+            <button class="quiz-opt" data-q="6" data-correct="false">D — 1.5 dB/K</button>
+        </div><div class="quiz-feedback" id="fb6"></div></div>
+
+    <div class="quiz-q"><p><strong>Q7.</strong> Link margin is defined as:</p>
+        <div class="quiz-options">
+            <button class="quiz-opt" data-q="7" data-correct="false">A — The excess EIRP above the regulatory limit</button>
+            <button class="quiz-opt" data-q="7" data-correct="true">B — The difference between achieved and required C/N₀ — positive margin means the link closes</button>
+            <button class="quiz-opt" data-q="7" data-correct="false">C — The ratio of signal power to noise power</button>
+            <button class="quiz-opt" data-q="7" data-correct="false">D — The rain fade depth the link can tolerate before failure</button>
+        </div><div class="quiz-feedback" id="fb7"></div></div>
+
+    <div class="quiz-q"><p><strong>Q8.</strong> Eb/N₀_dB = C/N₀_dBHz − 10·log₁₀(R_bps) because:</p>
+        <div class="quiz-options">
+            <button class="quiz-opt" data-q="8" data-correct="false">A — Eb/N₀ = C/N₀ × R</button>
+            <button class="quiz-opt" data-q="8" data-correct="true">B — Energy per bit Eb = C/R; dividing by N₀ gives Eb/N₀ = C/(R·N₀), which in dB is C/N₀ − 10·log₁₀(R)</button>
+            <button class="quiz-opt" data-q="8" data-correct="false">C — Eb/N₀ is independent of data rate</button>
+            <button class="quiz-opt" data-q="8" data-correct="false">D — Eb/N₀_dB = C/N₀_dBHz + 10·log₁₀(R)</button>
+        </div><div class="quiz-feedback" id="fb8"></div></div>
+
+    <div class="quiz-q"><p><strong>Q9.</strong> The constant 228.6 in the link equation is:</p>
+        <div class="quiz-options">
+            <button class="quiz-opt" data-q="9" data-correct="false">A — The speed of light in convenient units</button>
+            <button class="quiz-opt" data-q="9" data-correct="true">B — −10·log₁₀(k) where k = 1.38 × 10⁻²³ J/K is Boltzmann's constant</button>
+            <button class="quiz-opt" data-q="9" data-correct="false">C — A regulatory constant set by the ITU</button>
+            <button class="quiz-opt" data-q="9" data-correct="false">D — The polarisation loss factor for circular polarisation</button>
+        </div><div class="quiz-feedback" id="fb9"></div></div>
+
+    <div class="quiz-q"><p><strong>Q10.</strong> The first-pass example gives a clear-sky margin of +15.5 dB at 16-APSK 3/4 (208.3 Msym/s). This means:</p>
+        <div class="quiz-options">
+            <button class="quiz-opt" data-q="10" data-correct="false">A — The link will fail during any rain event</button>
+            <button class="quiz-opt" data-q="10" data-correct="true">B — The link can tolerate up to 15.5 dB of additional losses before the required C/N₀ for this MODCOD is no longer met</button>
+            <button class="quiz-opt" data-q="10" data-correct="false">C — The received power is 15.5 times the required power</button>
+            <button class="quiz-opt" data-q="10" data-correct="false">D — The margin is wasted — a well-designed link should carry 0 dB of clear-sky margin</button>
+        </div><div class="quiz-feedback" id="fb10"></div></div>
+
+    <div class="quiz-score" id="quizScore"></div>
+</div>
+
+<!-- PYTHON -->
+<div class="py-block" id="python">
+    <h2>PYTHON EXERCISES — SPINE PROJECT STAGE 1</h2>
+    <p class="py-intro">Stage 1 builds the link budget engine skeleton: dB toolkit, FSPL, EIRP, C/N₀. Each subsequent lesson extends this engine with a new loss or noise contributor. Python 3.8+ standard library only.</p>
+
+    <div class="py-exercise">
+        <h3>Exercise 1 — dB Toolkit and FSPL</h3>
+        <p>Build the core dB conversion utilities and compute free-space path loss across LEO link conditions.</p>
+<pre>
+import math
+
+def lin_to_db(x):     return 10 * math.log10(x)
+def db_to_lin(xdb):   return 10 ** (xdb / 10)
+def w_to_dbw(w):      return lin_to_db(w)
+
+def fspl(d_km, f_ghz):
+    """Free-space path loss in dB."""
+    return 92.4 + 20*math.log10(d_km) + 20*math.log10(f_ghz)
+
+print("FSPL — LEO Ka-band (d_km × f_GHz)\n")
+print(f"{'Slant (km)':>12}{'14 GHz':>10}{'20 GHz':>10}{'30 GHz':>10}{'47 GHz':>10}")
+print("-" * 54)
+for d in [400, 600, 800, 1000, 1500, 2000]:
+    row = [fspl(d, f) for f in [14, 20, 30, 47]]
+    print(f"{d:>10} km" + "".join(f"{v:>9.1f}dB" for v in row))
+
+print("\nKey dB facts:")
+for lin, lbl in [(2,'×2'),(10,'×10'),(100,'×100'),(0.5,'×0.5')]:
+    print(f"  {lbl}: {lin_to_db(lin):+.2f} dB")
+
+# 1. At what slant range does FSPL at 20 GHz reach 180 dB?
+# 2. How much extra path loss does V-band (47 GHz) incur vs
+#    Ka-band (20 GHz) at 1,000 km slant?
+# 3. Compute FSPL in linear form at 28 GHz, 800 km slant.
+#    Appreciate the scale: what fraction of transmitted power arrives?
+</pre>
+    </div>
+
+    <div class="py-exercise">
+        <h3>Exercise 2 — Link Equation: EIRP, G/T, C/N₀</h3>
+        <p>Compute C/N₀ and link margin for forward and return LEO Ka-band links.</p>
+<pre>
+import math
+
+K_DB = -228.6   # dBW/K/Hz
+
+def fspl(d_km, f_ghz):
+    return 92.4 + 20*math.log10(d_km) + 20*math.log10(f_ghz)
+
+def link_budget(name, p_tx_w, g_tx_dbi, d_km, f_ghz,
+                losses_db, g_rx_dbi, t_sys_k, req_cn0):
+    eirp   = 10*math.log10(p_tx_w) + g_tx_dbi
+    loss   = fspl(d_km, f_ghz) + losses_db
+    gt     = g_rx_dbi - 10*math.log10(t_sys_k)
+    cn0    = eirp - loss + gt - K_DB
+    margin = cn0 - req_cn0
+    print(f"\n{name}")
+    print(f"  EIRP   {eirp:+.1f} dBW  |  FSPL {fspl(d_km,f_ghz):.1f} dB  "
+          f"|  G/T {gt:.1f} dB/K")
+    print(f"  C/N₀   {cn0:.1f} dBHz  |  Required {req_cn0:.1f}  "
+          f"|  Margin {margin:+.1f} dB  {'✓' if margin>=0 else '✗'}")
+    return cn0, margin
+
+# Forward link: satellite → user terminal
+link_budget("FORWARD — Ka downlink (sat→terminal)",
+    p_tx_w=20, g_tx_dbi=34,
+    d_km=1000, f_ghz=20.0, losses_db=1.0,
+    g_rx_dbi=37.5, t_sys_k=300, req_cn0=93.4)  # 16-APSK 3/4 @ 208.3 Msym/s
+
+# Return link: user terminal → satellite
+link_budget("RETURN — Ka uplink (terminal→sat)",
+    p_tx_w=2, g_tx_dbi=35,
+    d_km=1000, f_ghz=30.0, losses_db=1.5,
+    g_rx_dbi=34, t_sys_k=500, req_cn0=87.2)   # QPSK 3/4 @ 208.3 Msym/s — return is tighter
+
+# 1. What Tx power does the terminal need if G_rx drops to 30 dBi
+#    to maintain the same return link margin?
+# 2. Compute both links at ε=10° elevation (slant ≈ 2,000 km).
+#    How does margin change?
+# 3. What is Eb/N₀ for the forward link at 100 Mbps data rate?
+</pre>
+    </div>
+
+    <div class="py-exercise">
+        <h3>Exercise 3 — Spine Stage 1: Link Budget Engine (Seed)</h3>
+        <p>The extensible LinkBudget class that will be grown in m4-2 through m4-7. Each subsequent lesson adds one new contributor via add_loss() or an extended receiver noise chain.</p>
+<pre>
+import math
+
+K_DB = -228.6
+
+def fspl(d_km, f_ghz):
+    return 92.4 + 20*math.log10(d_km) + 20*math.log10(f_ghz)
+
+class LinkBudget:
+    def __init__(self, name):
+        self.name = name; self.rows = []
+        self._eirp=self._fspl=self._grx=self._tsys=self._req=None
+
+    def set_transmitter(self, p_tx_w, g_tx_dbi):
+        self._eirp = 10*math.log10(p_tx_w) + g_tx_dbi
+        self.rows += [("Tx power",       10*math.log10(p_tx_w), +1),
+                      ("Tx antenna gain", g_tx_dbi,              +1)]
+
+    def set_path(self, d_km, f_ghz):
+        self._fspl = fspl(d_km, f_ghz)
+        self.rows.append(("Free-space path loss", self._fspl, -1))
+
+    def add_loss(self, label, loss_db):
+        self.rows.append((label, loss_db, -1))
+
+    def set_receiver(self, g_rx_dbi, t_sys_k):
+        self._grx = g_rx_dbi; self._tsys = t_sys_k
+        self.rows += [("Rx antenna gain",    g_rx_dbi,                   +1),
+                      ("System noise temp",  10*math.log10(t_sys_k),     -1),
+                      ("Boltzmann const",    abs(K_DB),                   +1)]
+
+    def set_required(self, req):  self._req = req
+
+    def compute(self):
+        cn0 = (self._eirp - self._fspl + self._grx
+               - 10*math.log10(self._tsys) - K_DB
+               - sum(v for l,v,s in self.rows
+                     if s==-1 and l not in
+                     ("Free-space path loss","System noise temp")))
+        return cn0, cn0 - self._req if self._req else None
+
+    def print_budget(self):
+        cn0, margin = self.compute()
+        print(f"\n{'─'*54}\n  {self.name}\n{'─'*54}")
+        for lbl, val, sign in self.rows:
+            s = '+' if sign>0 else '−'
+            print(f"  {s} {lbl:<35} {val:>7.2f} dB")
+        print(f"{'─'*54}")
+        print(f"    C/N₀            {cn0:>7.1f} dBHz")
+        if self._req:
+            print(f"    Required C/N₀   {self._req:>7.1f} dBHz")
+            print(f"    Margin          {margin:>+7.1f} dB  "
+                  f"{'✓ CLOSES' if margin>=0 else '✗ FAILS'}")
+        print(f"{'─'*54}")
+
+lb = LinkBudget("LEO Ka forward — clear sky")
+lb.set_transmitter(20, 34)
+lb.set_path(1000, 20.0)
+lb.add_loss("Gaseous absorption", 0.3)
+lb.add_loss("Pointing loss",      0.5)
+lb.set_receiver(37.5, 300)
+lb.set_required(93.4)  # 16-APSK 3/4 @ 208.3 Msym/s
+lb.print_budget()
+
+# STAGE-2 PREVIEW: m4-2 extends set_receiver() with a Friis
+# noise chain; m4-4 adds rain attenuation via add_loss();
+# m4-6 adds interference into the effective noise floor.
+</pre>
+        <div class="py-challenge"><strong>SPINE PROJECT — STAGE 1</strong>
+            The LinkBudget engine is the Module 4 spine project. Each lesson m4-2 through m4-7 adds one physical effect to this skeleton. By m4-7, the engine will compute a complete, production-quality LEO link budget including noise chain, atmospheric fade, ionospheric delay, and interference — ready to feed the throughput model in Module 5.
+        </div>
+    </div>
+</div>
+
+<!-- REFLECTION -->
+<div class="reflection-block" id="reflect">
+    <h2>REFLECTION PROMPTS</h2>
+    <p class="ref-intro">Not graded. Write in your own words, 200–400 words each.</p>
+    <div class="ref-prompt"><h3>Prompt 1 — Statistical Margin Strategy</h3>
+        <p>The link budget is deterministic but every term is really a probability distribution. Describe how a link budget designer converts the deterministic equation into a statistical statement about link availability. What margin strategy would you use for a Ka-band LEO link targeting 99.9% availability in a heavy rain climate?</p></div>
+    <div class="ref-prompt"><h3>Prompt 2 — High-Gain Low-Power vs Low-Gain High-Power</h3>
+        <p>A regulatory EIRP limit constrains the product of power and gain. An engineer proposes achieving the limit with 100 W and 24 dBi rather than 10 W and 34 dBi. The EIRP is identical. Is the link performance identical? Explain what changes and what does not.</p></div>
+    <div class="ref-prompt"><h3>Prompt 3 — The 3 dB Data Rate Tax</h3>
+        <p>Doubling the data rate from 100 Mbps to 200 Mbps reduces Eb/N₀ by 3 dB at fixed C/N₀. Trace the full chain of engineering responses available to a designer who wants to support 200 Mbps without adding transmit power or changing the antenna: what air interface parameters, modulation and coding choices, or link geometry changes could compensate?</p></div>
+    <div class="ref-prompt"><h3>Prompt 4 — Pre-Computing the Rain Margin</h3>
+        <p>The clear-sky margin is +15.5 dB at 16-APSK 3/4 (208.3 Msym/s). Without yet knowing the precise magnitudes of rain fade, atmospheric losses, and interference, judge whether that is sufficient for 99.9% availability in a temperate European rain climate — and state what the design should do with the margin during the large majority of the time when it is not raining. What does your answer imply about the system parameters — EIRP, G/T, required C/N₀ — that must be traded?</p></div>
+</div>
+
+<div class="complete-wrap">
+    <button class="complete-btn" id="completeBtn">MARK LESSON COMPLETE</button>
+    <div class="complete-msg" id="completeMsg"></div>
+</div>
+<div class="lesson-nav">
+    <a href="m4.html">← M4 HUB</a>
+    <a href="m4-2.html">LESSON 02 — NOISE: SOURCES, TEMPERATURE &amp; RECEIVER CHAIN →</a>
+</div>
+</div>
+
+<button class="back-to-top" id="backToTop" title="Back to top">↑</button>
+<footer>© 2026 LEOAF · M4 · LESSON 01 OF 7</footer>
+
+<script>
+const canvas=document.getElementById('starsCanvas'),ctx=canvas.getContext('2d');
+let stars=[];
+function initStars(){stars=[];for(let i=0;i<180;i++)stars.push({x:Math.random()*canvas.width,y:Math.random()*canvas.height,size:Math.random()*1.5+0.4,speed:Math.random()*0.18+0.04,hue:Math.random()*360});}
+function resizeCanvas(){canvas.width=window.innerWidth;canvas.height=window.innerHeight;}
+resizeCanvas();initStars();window.addEventListener('resize',resizeCanvas);
+function animateStars(){ctx.clearRect(0,0,canvas.width,canvas.height);stars.forEach(s=>{s.y-=s.speed;if(s.y<0){s.y=canvas.height;s.x=Math.random()*canvas.width;}ctx.beginPath();ctx.fillStyle=`hsl(${s.hue},80%,80%)`;ctx.arc(s.x,s.y,s.size,0,Math.PI*2);ctx.fill();});requestAnimationFrame(animateStars);}
+animateStars();
+</script>
+<script>
+const feedbacks={
+    1:{correct:"Correct. FSPL ∝ f², so doubling f multiplies FSPL by 4 = +6 dB. From the formula: FSPL_dB = 92.4 + 20·log₁₀(d) + 20·log₁₀(f). Doubling f adds 20·log₁₀(2) ≈ 6 dB.",wrong:"Incorrect. FSPL scales as f² (area of the spherical wavefront per unit solid angle scales with λ², and λ = c/f). Doubling f multiplies FSPL by 4, not 2, 10, or 100. That is +6 dB, not +3, +10, or +20."},
+    2:{correct:"Correct. EIRP_dBW = P_T_dBW + G_T_dBi = 10 + 40 = 50 dBW. In dB, products become sums.",wrong:"Incorrect. In decibels, power and gain multiply (in linear terms), which means they add in dB. EIRP_dBW = 10 dBW + 40 dBi = 50 dBW. 4 would be 10/40; 30 would be 40−10; 400 is the linear product of the linear values, not the dB result."},
+    3:{correct:"Correct. G/T_dB = G_R_dBi − T_sys_dBK. In the link equation the receive G/T summarises receive system performance: higher G/T means more signal power collected relative to the noise floor.",wrong:"Incorrect. The G/T in the link equation is always the receive antenna gain and the receive system temperature — never the transmit values. It is a noise-normalised gain ratio, not an efficiency or a ratio of gain to noise power."},
+    4:{correct:"Correct. C/N₀ = C divided by noise per hertz. It is bandwidth-independent, making it a universal link quality metric that can be compared across systems with different channel widths. C/N depends on the chosen bandwidth B.",wrong:"Incorrect. C/N₀ is not inherently larger than C/N in all cases — it depends on whether B is greater or less than 1 Hz. Ease of measurement is not the reason. The ITU does not mandate C/N₀ over C/N. The key property is bandwidth independence."},
+    5:{correct:"Correct. FSPL = 92.4 + 20·log₁₀(1000) + 20·log₁₀(20) = 92.4 + 60.0 + 26.0 = 178.4 dB.",wrong:"Incorrect. Apply the formula: FSPL = 92.4 + 20·log₁₀(d_km) + 20·log₁₀(f_GHz) = 92.4 + 60.0 + 26.0 = 178.4 dB. 148 dB would need much shorter range or lower frequency. 208 dB needs 10,000 km or much higher frequency. 92 dB is the constant term only."},
+    6:{correct:"Correct. G/T_dB = G_R_dBi − T_sys_dBK = 37 − 24.8 = 12.2 dB/K. In decibels, division becomes subtraction.",wrong:"Incorrect. In decibels, ratios are computed by subtraction. G/T_dB = G_R_dBi − T_sys_dBK = 37 − 24.8 = 12.2 dB/K. Adding, multiplying, or dividing the dB values themselves gives meaningless results."},
+    7:{correct:"Correct. Margin = (C/N₀)_achieved − (C/N₀)_required. A positive margin means the received signal quality exceeds the minimum required. Industry convention requires ≥ 2–3 dB margin to account for parameter uncertainties and implementation losses.",wrong:"Incorrect. The margin is the gap between achieved and required C/N₀, not EIRP vs regulatory limits. C/N is a quality measure, not a margin. Rain fade tolerance is derived from the margin (the rain depth that consumes the margin), not the definition of margin itself."},
+    8:{correct:"Correct. Eb = C/R (power divided by bits per second = energy per bit). N₀ is noise per Hz. Eb/N₀ = C/(R·N₀). In dB: Eb/N₀_dB = C/N₀_dBHz − 10·log₁₀(R_bps). Doubling the data rate reduces Eb/N₀ by 3 dB.",wrong:"Incorrect. Eb = C/R, so Eb/N₀ = C/(R·N₀). In dB that is C/N₀ − 10·log₁₀(R). The sign is minus (more bits per second = less energy per bit). Eb/N₀ is very much dependent on data rate."},
+    9:{correct:"Correct. N₀ = k·T_sys in W/Hz. In dB: N₀_dBW/Hz = 10·log₁₀(k) + T_sys_dBK = −228.6 + T_sys_dBK. Moving the constant to the C/N₀ expression gives +228.6 dBW/K/Hz.",wrong:"Incorrect. The speed of light appears in the FSPL constant (147.55 in the metre/Hz form). There is no ITU constant of this value. Polarisation loss is a separate loss term, typically 0–3 dB. The 228.6 is purely Boltzmann's constant converted to convenient units."},
+    10:{correct:"Correct. The margin is the additional loss budget before C/N₀ drops to the required threshold for this MODCOD. Rain fade, pointing degradation, or component ageing totalling less than 15.5 dB will still leave the link closed. Whether that is generous or barely adequate depends on the rain climate and target availability — m4-4 shows Ka-band rain events consume 7–20 dB.",wrong:"Incorrect. Rain events adding less than 15.5 dB will still close the link at this MODCOD. The dB margin is logarithmic, not a linear factor of 15.5. Zero clear-sky margin is not a design goal — clear-sky margin is the budget that rain statistics spend, and adaptive systems (Module 5) convert the clear-sky excess into higher-order MODCODs rather than wasting it."}
+};
+let answered={};
+document.querySelectorAll('.quiz-opt').forEach(btn=>{
+    btn.addEventListener('click',function(){
+        const q=this.dataset.q;
+        if(answered[q]!==undefined)return;
+        const correct=this.dataset.correct==='true';
+        answered[q]=correct;
+        document.querySelectorAll(`.quiz-opt[data-q="${q}"]`).forEach(b=>{b.disabled=true;if(b.dataset.correct==='true')b.classList.add('correct');});
+        if(!correct)this.classList.add('wrong');
+        const fb=document.getElementById(`fb${q}`);
+        fb.textContent=(correct?'✓ ':'✗ ')+feedbacks[q][correct?'correct':'wrong'];
+        fb.style.color=correct?'#39ff14':'#ff004f';
+        if(Object.keys(answered).length===10){
+            const total=Object.values(answered).filter(Boolean).length;
+            const el=document.getElementById('quizScore');
+            el.style.display='block';
+            const pct=Math.round(total/10*100);
+            el.textContent=`SCORE: ${total} / 10 (${pct}%) — ${pct===100?'PERFECT.':pct>=80?'STRONG. REVIEW ANY MISSES.':pct>=60?'ADEQUATE. REVISIT WEAK SECTIONS.':'REVISIT THE LESSON BEFORE PROCEEDING.'}`;
+        }
+    });
+});
+</script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="supabase.js"></script>
+<script src="user_progress.js"></script>
+<script>
+const LESSON_ID='m4-1';
+(function(){
+    function bounceToLogin(r){console.error("Auth guard:",r);window.location.replace("index.html");}
+    async function init(){
+        if(typeof client==="undefined"||!client||!client.auth)return bounceToLogin("Supabase client not loaded");
+        let session=null;
+        try{({data:{session}}=await client.auth.getSession());}
+        catch(e){return bounceToLogin("getSession threw: "+e.message);}
+        if(!session){window.location.replace("index.html");return;}
+        const btn=document.getElementById('completeBtn'),msg=document.getElementById('completeMsg');
+        function setDone(done){
+            if(done){btn.textContent='✓ COMPLETE — CLICK TO UNDO';btn.classList.add('done');btn.style.cssText='border-color:#39ff14;color:#39ff14;background:rgba(57,255,20,0.1);cursor:pointer;opacity:1;';msg.style.color='#39ff14';msg.textContent='Lesson marked complete. Click again to undo.';}
+            else{btn.textContent='MARK LESSON COMPLETE';btn.classList.remove('done');btn.style.cssText='';msg.style.color='#ffffff55';msg.textContent='Not yet marked complete.';}
+        }
+        let mastered=[];
+        try{mastered=await getMasteredSections();}catch(e){console.error(e);}
+        setDone(mastered.includes(LESSON_ID));
+        btn.addEventListener('click',async()=>{
+            const isDone=btn.classList.contains('done');
+            msg.style.color='#00d9ff';msg.textContent='Saving...';
+            const ok=await upsertSection(LESSON_ID,!isDone);
+            if(ok){setDone(!isDone);}else{msg.style.color='#ff004f';msg.textContent='Error saving. Try again.';}
+        });
+        const btt=document.getElementById('backToTop');
+        window.addEventListener('scroll',()=>{btt.classList.toggle('visible',window.scrollY>400);});
+        btt.addEventListener('click',()=>window.scrollTo({top:0,behavior:'smooth'}));
+    }
+    if(document.readyState==="loading")document.addEventListener("DOMContentLoaded",init);
+    else init();
+})();
+</script>
+</body>
+</html>
