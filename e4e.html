@@ -1,0 +1,404 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, shrink-to-fit=no">
+<title>OneSat E2E — Technical Deep Dive · LEOAF</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;600;800&family=Share+Tech+Mono&family=Libre+Baskerville:ital,wght@0,400;0,700;1,400&display=swap" rel="stylesheet">
+
+<!-- AUTH GUARD: paste the standard fail-closed Supabase guard block from any
+     lesson page here. Not reproduced to avoid drifting from the canonical
+     version. -->
+
+<style>
+* { box-sizing:border-box; margin:0; padding:0; }
+html { height:100%; -webkit-text-size-adjust:100%; overflow-x:hidden; }
+body { font-family:'Share Tech Mono',monospace; background:#000; color:white; overflow-x:hidden; min-height:100vh; }
+
+body::after { content:''; position:fixed; inset:0; z-index:50; pointer-events:none;
+  background:repeating-linear-gradient(to bottom, rgba(255,255,255,0.015) 0 1px, transparent 1px 3px);
+  mix-blend-mode:overlay; }
+
+header { background:#000; border-bottom:1px solid #ff004f33; position:sticky; top:0; z-index:100; padding:1rem clamp(1.5rem,5vw,4rem); display:flex; justify-content:space-between; align-items:center; box-shadow:0 4px 16px #0008; }
+.logo { font-family:'Orbitron',sans-serif; font-weight:800; font-size:clamp(16px,2vw,22px); letter-spacing:3px; text-decoration:none; }
+.logo span:first-child { color:white; }
+.logo span:last-child { color:#ff004f; }
+.nav-btn { background:transparent; border:1px solid #ff004f44; color:#ff004f; padding:6px 14px; cursor:pointer; transition:0.3s ease; font-size:11px; font-family:'Orbitron',sans-serif; letter-spacing:1px; text-decoration:none; display:inline-block; }
+.nav-btn:hover { background:#ff004f; color:black; }
+
+.breadcrumb { padding:14px clamp(1.5rem,5vw,4rem); font-size:11px; color:#ffffff44; letter-spacing:1px; position:relative; z-index:1; }
+.breadcrumb a { color:#00d9ff66; text-decoration:none; }
+.breadcrumb a:hover { color:#00d9ff; }
+.breadcrumb span { margin:0 8px; }
+
+.lesson-wrap { max-width:820px; margin:0 auto; padding:0 clamp(1.5rem,5vw,4rem) 80px; position:relative; z-index:1; }
+
+.lesson-header { padding:30px 0 24px; border-bottom:1px solid #ffffff11; margin-bottom:0; }
+.lesson-tag { font-family:'Orbitron',sans-serif; font-size:10px; color:#ff004f; letter-spacing:3px; margin-bottom:10px; }
+.lesson-header h1 { font-family:'Orbitron',sans-serif; font-size:clamp(20px,3.5vw,32px); font-weight:800; line-height:1.2; margin-bottom:12px; }
+.lesson-header h1 em { font-style:normal; color:#00d9ff; }
+.lesson-intro { font-size:13px; line-height:1.85; opacity:0.75; }
+.lesson-intro a { color:#00d9ff; text-decoration:none; }
+
+/* ── TABS ── */
+.tabbar { display:flex; flex-wrap:wrap; gap:0; border-bottom:1px solid #00d9ff33; margin:28px 0 28px; position:sticky; top:64px; z-index:90; background:#000; }
+.tabbar button { font-family:'Orbitron',sans-serif; font-size:10px; letter-spacing:1.5px; padding:12px 14px; background:transparent; border:none; border-bottom:2px solid transparent; color:#ffffff55; cursor:pointer; transition:0.2s ease; }
+.tabbar button:hover { color:#00d9ffaa; }
+.tabbar button.active { color:#00d9ff; border-bottom-color:#00d9ff; }
+.tabbar button.career { color:#ff004f77; }
+.tabbar button.career:hover { color:#ff004faa; }
+.tabbar button.career.active { color:#ff004f; border-bottom-color:#ff004f; }
+.tabpanel { display:none; }
+.tabpanel.active { display:block; }
+
+.content-block { background:#f5f2ec; color:#1a1a1a; padding:36px clamp(24px,4vw,48px); margin-bottom:24px; border-left:4px solid #00d9ff; position:relative; z-index:1; }
+.content-block.career { border-left-color:#ff004f; }
+.content-block h2 { font-family:'Orbitron',sans-serif; font-size:13px; color:#003d66; letter-spacing:2px; text-transform:uppercase; margin-bottom:20px; padding-bottom:10px; border-bottom:2px solid #00d9ff66; }
+.content-block.career h2 { color:#66001f; border-bottom-color:#ff004f66; }
+.content-block h3 { font-family:'Orbitron',sans-serif; font-size:11px; color:#444; letter-spacing:1.5px; text-transform:uppercase; margin:32px 0 14px; }
+.content-block p { font-family:'Libre Baskerville', Georgia, serif; font-size:15px; line-height:1.9; color:#1a1a1a; margin-bottom:18px; }
+.content-block ul { padding-left:0; margin-bottom:16px; list-style:none; }
+.content-block ul li { font-family:'Libre Baskerville', Georgia, serif; font-size:14px; line-height:1.85; color:#1a1a1a; padding-left:20px; position:relative; margin-bottom:8px; }
+.content-block ul li::before { content:'›'; position:absolute; left:0; color:#0077aa; }
+.content-block.career ul li::before { color:#cc0033; }
+.content-block .callout { border-left:3px solid #0088cc; background:#e8f4fb; color:#1a1a1a; padding:16px 20px; margin:22px 0; font-size:13px; line-height:1.8; font-family:'Share Tech Mono',monospace; }
+.content-block .callout.green { border-left-color:#1a7a1a; background:#eafaea; }
+.content-block .callout.amber { border-left-color:#996600; background:#fef9ec; }
+.content-block .callout.red   { border-left-color:#cc0033; background:#fdecea; }
+.content-block .callout strong { font-family:'Orbitron',sans-serif; font-size:10px; letter-spacing:1px; display:block; margin-bottom:8px; color:inherit; }
+
+.kv { width:100%; border-collapse:collapse; margin:12px 0 20px; font-family:'Share Tech Mono',monospace; }
+.kv th { font-family:'Orbitron',sans-serif; font-size:10px; letter-spacing:1.5px; text-transform:uppercase; color:#003d66; text-align:left; padding:9px 12px; border-bottom:2px solid #00d9ff66; }
+.kv td { font-size:12.5px; line-height:1.6; padding:10px 12px; border-bottom:1px solid #d8d4cc; vertical-align:top; color:#1a1a1a; }
+
+.probe { border:1px solid #d8d4cc; background:#fff; padding:18px 20px; margin-bottom:14px; }
+.probe h4 { font-family:'Orbitron',sans-serif; font-size:11px; letter-spacing:1px; color:#003d66; margin-bottom:10px; line-height:1.5; }
+.probe p { font-size:13.5px; margin-bottom:0; }
+.probe.ask h4 { color:#66001f; }
+.probe .listen { display:block; margin-top:10px; font-family:'Share Tech Mono',monospace; font-size:12px; line-height:1.7; color:#333; background:#f7f5f0; border-left:3px solid #999; padding:10px 14px; }
+.probe .listen b { font-family:'Orbitron',sans-serif; font-size:9px; letter-spacing:1px; display:block; margin-bottom:4px; color:#555; }
+
+.story { border:1px solid #d8d4cc; background:#fff; padding:18px 20px; margin-bottom:14px; }
+.story h4 { font-family:'Orbitron',sans-serif; font-size:11px; letter-spacing:1px; color:#66001f; margin-bottom:4px; line-height:1.5; }
+.story .src { font-family:'Share Tech Mono',monospace; font-size:11px; color:#888; letter-spacing:1px; margin-bottom:12px; }
+.story dl { margin:0; }
+.story dt { font-family:'Orbitron',sans-serif; font-size:9px; letter-spacing:1.5px; color:#555; margin:10px 0 3px; }
+.story dd { font-family:'Libre Baskerville', Georgia, serif; font-size:13.5px; line-height:1.8; color:#1a1a1a; margin:0; }
+.story dd.fill { color:#8a6d00; font-style:italic; border-bottom:1px dashed #c9b56a; padding-bottom:2px; }
+
+footer { text-align:center; padding:30px; opacity:0.3; font-size:11px; position:relative; z-index:1; letter-spacing:1px; }
+
+@media (max-width:600px) {
+  .tabbar { top:58px; }
+  .tabbar button { padding:11px 10px; font-size:9px; }
+}
+
+@media print {
+  html, body { background:#fff !important; color:#111 !important; }
+  body::after, header, .breadcrumb, footer, .tabbar { display:none !important; }
+  .lesson-wrap { max-width:100%; padding:0; }
+  .lesson-header h1, .lesson-header h1 em { color:#111; }
+  .tabpanel { display:block !important; page-break-before:always; }
+  .content-block { border-left-color:#666; background:#fff; }
+  .lesson-intro { opacity:1; color:#333; }
+}
+</style>
+</head>
+<body>
+
+<header>
+    <a href="dashboard.html" class="logo"><span>LEO</span><span>AF</span></a>
+    <a href="onesat-e2e-prep.html" class="nav-btn">← PREP DOSSIER</a>
+</header>
+
+<div class="breadcrumb">
+    <a href="dashboard.html">DASHBOARD</a><span>/</span>
+    <a href="onesat-e2e-prep.html">E2E PREP</a><span>/</span>
+    <span style="color:#ffffff88;">TECHNICAL DEEP DIVE</span>
+</div>
+
+<div class="lesson-wrap">
+
+<div class="lesson-header">
+    <div class="lesson-tag">CAREER DOSSIER · TECHNICAL ANNEX</div>
+    <h1>OneSat E2E — <em>Technical</em> Deep Dive</h1>
+    <p class="lesson-intro">Companion to the <a href="onesat-e2e-prep.html">prep dossier</a>. Six technical domains the interview can probe, each with the engineering substance, the end-to-end coupling that makes it this job's business, and the probing questions to rehearse — plus two career tabs in red: the due-diligence questions to ask the manager and team, and the story bank that turns the CV into rehearsed evidence. Technical content is public-domain engineering knowledge plus Airbus's published OneSat positioning — nothing proprietary, so it is safe to study from and safe to say in the room. Print renders all tabs sequentially.</p>
+</div>
+
+<div class="tabbar" id="tabbar">
+    <button data-tab="t1" class="active">SYSTEM E2E</button>
+    <button data-tab="t2">DTP</button>
+    <button data-tab="t3">ACTIVE ANTENNAS</button>
+    <button data-tab="t4">GROUND SEGMENT</button>
+    <button data-tab="t5">AIR INTERFACE</button>
+    <button data-tab="t6">IVV SUPPORT</button>
+    <button data-tab="t7" class="career">ASK THEM</button>
+    <button data-tab="t8" class="career">STORY BANK</button>
+</div>
+
+<!-- ══════════════ TAB 1 · SYSTEM E2E ══════════════ -->
+<div class="tabpanel active" id="t1">
+<div class="content-block">
+    <h2>The end-to-end system view</h2>
+    <p>OneSat's publicly stated proposition is full in-orbit reconfigurability: coverage, capacity allocation, and frequency plan are operational variables rather than manufacturing decisions. The system-engineering consequence is that the classical geostationary design flow — freeze the mission, freeze the payload, build, launch, operate a static asset — collapses into a loop that runs for the life of the satellite. The end-to-end engineer owns that loop.</p>
+    <h3>The chain, as budgets</h3>
+    <p>Every customer mission need decomposes into four coupled budgets, and the E2E role's technical authority is arbitrating between them:</p>
+    <ul>
+        <li><strong>Capacity budget</strong> — offered Gbps per beam and per region, a function of allocated sub-band bandwidth, achievable spectral efficiency at the service availability target, and frequency reuse across the beam lay-down.</li>
+        <li><strong>Link budget</strong> — Effective Isotropic Radiated Power (EIRP) and receive figure of merit (G/T) per beam versus terminal capability, rain margin at Ka-band, and the modulation-and-coding operating point that closes.</li>
+        <li><strong>Latency budget</strong> — for geostationary orbit, propagation is fixed by physics: 239 ms minimum one-way (uplink plus downlink legs at the sub-satellite point), 278 ms at the ~41,700 km worst-case slant range, so 477–556 ms round trip through a transparent payload before any ground processing. The engineering latency work is therefore entirely in the ground and network segment.</li>
+        <li><strong>Interface budget</strong> — Interface Control Documents (ICDs) between space segment, ground segment, customer network, and terminal population; the JD's "consolidate interfaces" bullet in document form.</li>
+    </ul>
+    <h3>What "software-defined" does to requirements management</h3>
+    <p>A static payload has a point-design requirement set: one coverage, one frequency plan, verified once. A reconfigurable payload has an <em>envelope</em> requirement set: the system must be shown to meet service requirements across a configuration space. That changes three things the interview may probe. Requirements must separate invariants (what holds for every configuration — saturated EIRP ceilings, processed bandwidth totals, regulatory masks) from per-configuration derivations (this beam plan, this frequency plan). Verification must sample the envelope intelligently rather than test one point. And configuration management becomes a first-class engineering discipline — the system's "design" partly lives in uploadable tables, so version control of configurations carries the weight that drawing control carries in classical programs.</p>
+    <div class="callout green">
+        <strong>INTERVIEW ANGLE</strong>
+        Frame every technical answer as budget arbitration across the chain. The role is not depth in one box; it is the authority to say which budget gives when a customer need over-constrains the system.
+    </div>
+    <div class="probe"><h4>PROBE — "A customer asks for more capacity over a region than the current configuration provides. Walk the trade space."</h4><p>Order the levers by cost: re-allocate sub-band bandwidth from under-used beams (DTP re-routing, cheapest); densify the beam lay-down over the region for tighter reuse (antenna reconfiguration, couples to gateway plan); raise spectral efficiency by accepting lower availability or requiring better terminals (contractual, not technical); add feeder capacity if the gateway side is the binding constraint. Name the invariant you cannot trade: total processed bandwidth and total radiated power are hardware ceilings.</p></div>
+</div>
+</div>
+
+<!-- ══════════════ TAB 2 · DTP ══════════════ -->
+<div class="tabpanel" id="t2">
+<div class="content-block">
+    <h2>Digital Transparent Processor</h2>
+    <p>The DTP is the payload's routing fabric. "Digital" because the received spectrum is digitized after down-conversion; "transparent" because the sample stream is never demodulated — the waveform passes through untouched, so the payload is agnostic to the air interface running over it. Everything between the analog front ends is filtering, switching, and gain arithmetic on samples.</p>
+    <h3>The processing chain</h3>
+    <ul>
+        <li><strong>Analog-to-digital conversion</strong> per receive chain, after low-noise amplification and down-conversion to an intermediate frequency band the converters can sample.</li>
+        <li><strong>Channelization</strong> — a filter bank (polyphase implementations are the standard technique) slices each digitized chunk of spectrum into narrow sub-channels. Sub-channel granularity is the DTP's defining parameter: finer slices mean finer capacity allocation but more processing resource per megahertz.</li>
+        <li><strong>Switching</strong> — a connectivity matrix routes any input sub-channel to any output port. This matrix, uploaded from ground, <em>is</em> the frequency plan: which uplink spectrum from which beam re-appears in which downlink beam at which frequency.</li>
+        <li><strong>Per-channel gain control</strong> — digital gain per sub-channel replaces the fixed channel amplifier settings of a classical repeater, enabling power balancing across beams and per-carrier level management.</li>
+        <li><strong>Recombination and digital-to-analog conversion</strong> — sub-channels destined for one output are re-assembled and converted back to analog for the transmit chain. In a payload with digital beamforming, the DTP output stage also applies the beamforming coefficients (see the antennas tab — the two functions merge in the digital domain).</li>
+    </ul>
+    <h3>Design and operational parameters that matter to an E2E engineer</h3>
+    <table class="kv">
+        <thead><tr><th>Parameter</th><th>E2E consequence</th></tr></thead>
+        <tbody>
+        <tr><td>Total processed bandwidth</td><td>The hard capacity ceiling. No configuration exceeds it; every capacity commitment is an allocation of it.</td></tr>
+        <tr><td>Channelization granularity</td><td>Sets the quantum of capacity re-allocation and the minimum carrier plan flexibility offered to the customer.</td></tr>
+        <tr><td>Connectivity (any-to-any vs restricted)</td><td>Determines which gateway-to-user-beam mappings are reachable — directly constrains gateway placement and traffic engineering.</td></tr>
+        <tr><td>Reconfiguration mechanism and latency</td><td>Whether a new connectivity table applies seamlessly or with service interruption defines what "dynamic" means contractually.</td></tr>
+        <tr><td>Spurious/imaging performance, quantization noise</td><td>Enters the link budget as a payload contribution to carrier-to-interference — the DTP is not noiseless.</td></tr>
+        <tr><td>Power and thermal draw vs configuration</td><td>Aggressive configurations can be thermally or power-limited; the envelope is not flat.</td></tr>
+        </tbody>
+    </table>
+    <div class="callout amber">
+        <strong>HONESTY BOUNDARY</strong>
+        Specific OneSat DTP figures — processed gigahertz, channel widths, matrix dimensions — are not public. Do not quote numbers in the interview; reason in parameters. Saying "the granularity sets the re-allocation quantum, and I'd want to know yours" is a stronger answer than a guessed figure.
+    </div>
+    <div class="probe"><h4>PROBE — "Why transparent rather than regenerative?"</h4><p>Transparent processing keeps the payload waveform-agnostic: air interface evolution (new modulation-and-coding schemes, new standards revisions) requires no payload change, and one payload serves any customer's chosen waveform. Regenerative processing (demodulating on board) buys link-budget decoupling of the two hops and on-board switching at packet level, at the cost of freezing the waveform into the hardware and adding processing complexity. For a multi-customer, multi-decade commercial product, transparency is the defensible default.</p></div>
+    <div class="probe"><h4>PROBE — "What does the DTP change in the link budget compared to a classical bent pipe?"</h4><p>Structurally little — it is still a transparent repeater, so the two-hop budget composes the same way. What changes: per-sub-channel digital gain replaces fixed channel gain (finer operating-point control); the DTP adds its own noise and spurious contributions as a payload term; and because connectivity is variable, the budget must be verified per configuration class, not once.</p></div>
+</div>
+</div>
+
+<!-- ══════════════ TAB 3 · ACTIVE ANTENNAS ══════════════ -->
+<div class="tabpanel" id="t3">
+<div class="content-block">
+    <h2>Active antennas and beamforming</h2>
+    <p>A classical geostationary telecom antenna is a reflector with a feed array: each beam is a horn, and the beam lay-down is set by mechanical geometry at manufacture. An active antenna replaces that with an array of radiating elements, each with its own amplification, whose signals are combined with controlled amplitude and phase weights. The beam is the weight set. Change the weights, and the beam moves, resizes, splits, or disappears — which is what makes the coverage a configuration.</p>
+    <h3>Concepts to hold precisely</h3>
+    <ul>
+        <li><strong>Beamforming</strong> — applying a vector of complex weights (amplitude and phase per element) so the element signals add coherently in the wanted direction. Done digitally, the weights are just multiplications in the DTP's numeric domain, which is why "DTP" and "active antenna" merge into one digital payload architecture: the same processor that routes sub-channels also forms the beams that carry them.</li>
+        <li><strong>Direct radiating array vs array-fed reflector</strong> — a direct radiating array points its elements at Earth directly and scans widely; an array-fed reflector puts the array at the focus of a reflector, trading scan range for higher gain per element count. Both are "active"; the trade is aperture efficiency versus flexibility.</li>
+        <li><strong>Beam hopping</strong> — instead of illuminating all beams continuously with divided power, the payload illuminates subsets of beam positions in rapid time slices per a hopping plan. Capacity follows the illumination time share, so power and bandwidth concentrate where traffic is, when it is. The hopping plan is another uploadable table — and it must be synchronized with the air interface framing (see that tab).</li>
+        <li><strong>Scan loss and grating lobes</strong> — array gain drops as the beam steers away from boresight (element pattern roll-off), and element spacing wider than roughly half a wavelength creates grating lobes that constrain the usable scan range and the regulatory emission mask. These are the physical reasons "fully flexible" coverage still has an envelope.</li>
+        <li><strong>Per-beam EIRP and G/T as pooled resources</strong> — with distributed amplification, radiated power is a pool shared across simultaneous beams. More simultaneous beams means less power per beam; the link budget and the beam plan are therefore the same trade, not two documents.</li>
+    </ul>
+    <h3>The E2E couplings</h3>
+    <p>Three couplings make the antenna the end-to-end engineer's problem rather than the antenna team's alone. The beam plan determines the frequency reuse pattern, hence the capacity map, hence what can be sold. The beam plan determines which gateways see which feeder capacity, hence ground segment dimensioning. And if beam hopping is used, the hopping plan must be co-designed with the air interface superframe structure and the resource management system — a pure payload view or a pure ground view of it fails identically.</p>
+    <div class="callout green">
+        <strong>INTERVIEW ANGLE</strong>
+        The phrase to earn: "the beam plan is a system artifact, not an antenna artifact." Every strong answer in this domain shows a beam-plan decision propagating to reuse, gateways, and the resource manager.
+    </div>
+    <div class="probe"><h4>PROBE — "Beam hopping versus more, smaller fixed beams — when is each right?"</h4><p>Fixed dense beams suit spatially stable, predictable demand: reuse is maximal and the resource problem is frequency assignment. Hopping suits sparse, moving, or bursty demand — aeronautical and maritime mobility being the canonical case — because capacity follows traffic in time rather than being stranded in empty beams. Costs of hopping: synchronization with the air interface, terminal support for burst reception, and a harder resource-management problem. Answer with the demand topology first, mechanism second.</p></div>
+    <div class="probe"><h4>PROBE — "What limits the number of simultaneous beams?"</h4><p>Four ceilings: processed bandwidth in the DTP (each beam consumes routing resource), the radiated power pool (per-beam EIRP falls as beams multiply), beamforming computational resource, and interference — beams closer than the array's angular resolution stop being separate beams. The commercial question "how many beams" is really "which ceiling binds first for this traffic case."</p></div>
+</div>
+</div>
+
+<!-- ══════════════ TAB 4 · GROUND SEGMENT ══════════════ -->
+<div class="tabpanel" id="t4">
+<div class="content-block">
+    <h2>Ground segment for a reconfigurable payload</h2>
+    <p>Home terrain — so the preparation here is not learning the domain but re-framing it around what payload flexibility changes. A static satellite's ground segment is dimensioned once against a fixed traffic-to-feeder mapping. A reconfigurable satellite's ground segment must track a moving payload state, and two elements that barely exist in classical programs become central.</p>
+    <h3>The functional stack</h3>
+    <ul>
+        <li><strong>Gateways and feeder links</strong> — high-capacity earth stations aggregating user traffic to and from the satellite. With a DTP, the feeder-to-user-beam mapping is a configuration variable, so gateways must be dimensioned for the envelope of beam plans they may serve, and traffic can be re-homed between gateways when the connectivity table changes. Site diversity against rain fade remains the availability workhorse at these frequencies.</li>
+        <li><strong>Telemetry, tracking and command (TT&C)</strong> — the classical bus control path. Distinct from, and to be kept distinct from, the payload configuration path in any answer.</li>
+        <li><strong>Payload configuration and control chain</strong> — the system that builds, validates, uploads, and activates payload configurations: connectivity tables, beamforming weight sets, hopping plans, gain plans. This is the "PCS interaction" flagged as a weak area; the safe and accurate framing is functional — every reconfigurable payload needs this chain, and the E2E engineer's stake in it is the validation step (does this configuration keep the system inside its verified envelope?) and the operational procedure around activation (seamless or service-affecting, rollback on anomaly).</li>
+        <li><strong>Resource management and the network layer</strong> — the hub/network management systems that assign carriers, symbol rates, and modulation-and-coding to terminals in real time. With beam hopping or dynamic beam plans, the resource manager and the payload configuration must agree at all times; the interface between them is one of the sharpest ICDs in the system.</li>
+        <li><strong>Service operations</strong> — monitoring against service-level commitments, capacity re-planning, and the operational loop back into reconfiguration requests. The iDirect-era hub and network operations experience maps here directly.</li>
+    </ul>
+    <h3>The configuration lifecycle, as an operational procedure</h3>
+    <p>Rehearse it as a sequence, because it is the concrete form of "E2E ownership": demand or anomaly trigger → candidate configuration built on ground → validation against the verified envelope (link budgets, interference, regulatory masks, power and thermal) → scheduled upload → activation with the resource manager pre-staged for the new beam and frequency plan → post-activation verification against service metrics → rollback path held open until confirmed. An interviewer hearing that sequence hears someone who has operated systems, which is the true strength being sold.</p>
+    <div class="callout green">
+        <strong>INTERVIEW ANGLE</strong>
+        Answer ground questions with the payload state in view and payload questions with the gateway impact in view. The seat exists because those two conversations usually happen in different rooms.
+    </div>
+    <div class="probe"><h4>PROBE — "What breaks operationally if payload configuration and resource management fall out of sync?"</h4><p>Terminals get resource assignments in spectrum the payload no longer routes, or beams illuminate with no carriers planned in them: service loss with all subsystems individually "healthy." The defense is architectural — a single source of truth for the active configuration, an atomic activation procedure spanning both sides, and monitoring that compares commanded payload state against network-side assumptions continuously.</p></div>
+</div>
+</div>
+
+<!-- ══════════════ TAB 5 · AIR INTERFACE ══════════════ -->
+<div class="tabpanel" id="t5">
+<div class="content-block">
+    <h2>Air interface and terminals</h2>
+    <p>Second home-terrain tab. The transparent payload carries whatever waveform the ground system runs; in commercial Ka-band broadband that is overwhelmingly the DVB-S2X standard family (Digital Video Broadcasting — Satellite, second generation, extensions) on the forward link, with return links on DVB-RCS2 (Return Channel via Satellite) or vendor-proprietary multi-frequency time-division schemes of the kind the iDirect years covered.</p>
+    <h3>What to have crisp</h3>
+    <ul>
+        <li><strong>Adaptive coding and modulation (ACM)</strong> — the forward link adapts modulation-and-coding per terminal against reported signal quality, converting rain fade from an availability event into a throughput event. Its system-level consequence: offered capacity is a distribution over the terminal population and weather, not a single number — which is exactly the sophistication a capacity-commitment discussion with a customer needs.</li>
+        <li><strong>The efficiency-availability trade</strong> — spectral efficiency at high modulation orders versus the margin consumed to hold them at the availability target. This is the terminal-quality lever from the system E2E tab's capacity discussion.</li>
+        <li><strong>Beam-hopping support in the waveform</strong> — hopped illumination means terminals receive bursts, not a continuous carrier; the DVB-S2X extensions define superframe structures for exactly this, and the hopping plan, superframe timing, and resource manager must be designed as one synchronization problem. This is the cleanest bridge sentence between the ground strength and the payload gap — use it.</li>
+        <li><strong>Terminal population as a system constraint</strong> — antenna size and transmit capability per segment (aeronautical, maritime, fixed) bound the return-link budget and hence the beam G/T requirement; mobility adds pointing, handover between beams, and regulatory constraints per platform. The aeronautical service background makes this the strongest specialist card in the deck.</li>
+        <li><strong>Ground/space compatibility</strong> — the JD's own phrase. It means, concretely: the carrier plan fits the channelization granularity, the waveform's occupied bandwidth and roll-off fit the sub-channel filters, burst timing fits the hopping plan, and terminal capability fits the per-beam link budget. Being able to enumerate that list is being able to do the job.</li>
+    </ul>
+    <div class="callout green">
+        <strong>INTERVIEW ANGLE</strong>
+        This tab and the ground tab are where answers should be fast and concrete. Spend rehearsal time on the two gap tabs instead; here, the preparation is only choosing which examples to lead with.
+    </div>
+    <div class="probe"><h4>PROBE — "A customer's terminal fleet underperforms the assumed G/T. Where does the impact land and what are the recovery levers?"</h4><p>Impact lands as a lower sustainable modulation-and-coding operating point, so lower capacity per allocated hertz. Levers, cheapest first: re-run the capacity commitment against the real terminal distribution (contractual honesty); re-allocate bandwidth to compensate if the DTP has slack; raise per-beam EIRP within the power pool at the expense of other beams; densify beams over the affected region for higher gain. The answer demonstrates the budgets-arbitration frame from the first tab applied in miniature.</p></div>
+</div>
+</div>
+
+<!-- ══════════════ TAB 6 · IVV SUPPORT ══════════════ -->
+<div class="tabpanel" id="t6">
+<div class="content-block">
+    <h2>Integration, verification and validation — the support seat</h2>
+    <p>The competency list pins this at "support à la campagne d'essais" (test campaign support), Autonomous level: the E2E engineer feeds, witnesses, and consumes verification rather than owning the campaign. Preparation therefore targets fluency in the landscape and precision about the E2E engineer's specific contributions — not campaign-management depth that the role does not ask for and the CV does not claim.</p>
+    <h3>The verification landscape, oriented</h3>
+    <ul>
+        <li><strong>Requirements-to-verification traceability</strong> — every system requirement carries a verification method (test, analysis, review of design, inspection) and a stage. The E2E engineer's stake: the system-level requirements are largely this role's requirements, so their verifiability — measurable, configuration-aware, unambiguous — is authored here. Badly written requirements surface as campaign disputes; that is the support seat's chief preventive contribution.</li>
+        <li><strong>The envelope problem</strong> — a reconfigurable system cannot test every configuration. Verification samples the envelope: corner configurations (maximum beam count, extreme frequency plans, boundary power states) plus the invariants that guarantee interpolation between them. Defining which corners span the envelope is a system-engineering judgement, and it is the single most valuable technical input the E2E seat gives the campaign.</li>
+        <li><strong>Stages to know by name</strong> — payload-level testing on ground; satellite-level system testing; in-orbit test (IOT) after launch, where payload performance (EIRP, G/T, frequency response, beam patterns) is measured through real gateways; and end-to-end service verification, where the full chain from customer network through gateway, payload, and terminal is exercised against the service requirements. The last one is the E2E engineer's natural territory — it is the system requirements being demonstrated.</li>
+        <li><strong>Ground segment integration</strong> — gateway, resource manager, and payload-configuration chain integration and their rehearsal against the satellite (or its representative test bench) before service. The operational background makes this the strongest support contribution to cite: knowing what breaks at integration because of having run the resulting systems live.</li>
+    </ul>
+    <h3>Language discipline</h3>
+    <p>Formal campaign vocabulary — qualification reviews, configuration control boards, factory and system validation testing — belongs to the campaign owners. Use it accurately when the interviewer uses it; do not lead with it, and do not claim ownership experience that a follow-up question would collapse. The honest sentence: "I have consumed and fed verification campaigns from the system and operations side; I have not run one, and this role does not ask me to."</p>
+    <div class="callout amber">
+        <strong>BOUNDARY WITH THE IVVQ ROLE</strong>
+        If asked why not the IVVQ Manager position: that role owns campaigns; this one architects the system the campaigns verify. The honest gap analysis that ruled out the first is itself a credible answer — it demonstrates exactly the self-assessment the JD's "synthesize and take technical decisions" line asks for.
+    </div>
+    <div class="probe"><h4>PROBE — "How would you verify that a new payload configuration is safe to activate in service?"</h4><p>Two-layer answer. Design-time: the configuration is checked against the verified envelope — inside the tested corners for connectivity, power, thermal, interference, and regulatory masks — by the configuration validation step in the ground chain, so most configurations never need new testing. Operations-time: staged activation with the resource manager synchronized, service metrics monitored against pre-activation baseline, rollback armed. If the configuration exits the verified envelope, it is not an operational act anymore — it triggers delta verification, and knowing where that line sits is the E2E engineer's call.</p></div>
+</div>
+</div>
+
+<!-- ══════════════ TAB 7 · ASK THEM ══════════════ -->
+<div class="tabpanel" id="t7">
+<div class="content-block career">
+    <h2>Due diligence — the questions to ask</h2>
+    <p>The second interview is a two-way gate. The decision to join depends on facts only the room can supply: where the program actually stands, why this seat exists, and how exposed it is to the merger. Every question below is phrased as it should be said aloud, with what a good and a bad answer sound like. Ask from genuine curiosity — these are also the questions a strong E2E hire <em>would</em> ask, so asking them is itself part of the interview performance.</p>
+
+    <h3>Program reality</h3>
+    <div class="probe ask"><h4>ASK — "Where is the first flight satellite right now — still in environmental test, shipped, or in launch campaign?"</h4><p>The single highest-value fact in the room. Leadership has publicly committed to first delivery in 2026; the working level knows whether that is real.</p><span class="listen"><b>LISTEN FOR</b>GOOD: a specific milestone and location, stated without hesitation. BAD: press-release language ("we're confident for this year") or visible discomfort — that means the date is still soft, and the program phase you'd join is not the one being sold.</span></div>
+    <div class="probe ask"><h4>ASK — "Which application program would I land on first, and what phase is it in — design, IVV, in-orbit test, service entry?"</h4><p>Determines whether the first year is architecture work (the interesting version of this job) or firefighting someone else's late qualification (the other version).</p><span class="listen"><b>LISTEN FOR</b>GOOD: a named program and phase. BAD: "it depends" or "several at once" — a signal the team is spread thin across programs.</span></div>
+    <div class="probe ask"><h4>ASK — "How many application programs is Chief Engineering currently staffed against, and how is the E2E team sized for that?"</h4><p>The neutral phrasing of the backlog question — public sources disagree on the firm order count, and this surfaces the real number plus the load ratio without citing anything. One E2E engineer per program is a job; one per three programs is a burnout schedule.</p><span class="listen"><b>LISTEN FOR</b>GOOD: a number, and a ratio near 1:1 with named colleagues. BAD: evasion on the count, or a team visibly smaller than the program list.</span></div>
+
+    <h3>The seat itself</h3>
+    <div class="probe ask"><h4>ASK — "Is this a new position or a replacement — and if a replacement, where did the previous person go?"</h4><p>On a program that has been through two years of charges and restructuring, turnover in a customer-facing system seat is diagnostic. Internal promotion out of the seat is healthy; departure from the company or the program is worth a follow-up.</p><span class="listen"><b>LISTEN FOR</b>GOOD: promotion, rotation to another program, or genuine growth of the team. BAD: hesitation, or "the position has been open for a while" — long-open seats on stressed programs are open for a reason.</span></div>
+    <div class="probe ask"><h4>ASK — "How much payload-side exposure does this seat actually get — do I sit in DTP and antenna design reviews, or consume their outputs through documents?"</h4><p>Tests whether the manager's "plus orienté E2E avec la dimension payload" comment is a growth offer or an unresourced expectation. Also quietly serves the long-term goal: design-review exposure to digital payloads is the transferable asset.</p><span class="listen"><b>LISTEN FOR</b>GOOD: named payload counterparts, standing reviews, a ramp-up expectation stated in months. BAD: "you'll pick it up" with no mechanism.</span></div>
+    <div class="probe ask"><h4>ASK — "What does success in this seat look like at twelve months, concretely?"</h4><p>Forces the implicit job description into the open. The answer also reveals whether the manager measures architecture quality or schedule survival.</p><span class="listen"><b>LISTEN FOR</b>GOOD: a specific milestone tied to a specific program review. BAD: generic competency language.</span></div>
+
+    <h3>The environment</h3>
+    <div class="probe ask"><h4>ASK — "How is the team thinking about the merged entity — two software-defined product lines under one roof eventually has to resolve somehow. What's the view from inside?"</h4><p>Asked plainly, engineer to engineer. Nobody in the room can promise an outcome, but how they engage with the question is the signal.</p><span class="listen"><b>LISTEN FOR</b>GOOD: candid engagement — acknowledged uncertainty, an argument for OneSat's position (backlog in execution, delivery imminent, Toulouse integration center of gravity). BAD: "no impact on us" or visible instruction not to discuss it. Denial of an obvious strategic question is itself information.</span></div>
+    <div class="probe ask"><h4>ASK — "The posting mentions priority for employees affected by workforce adaptation. How has the team changed through the restructuring?"</h4><p>Gets at team stability and morale without asking "is morale bad." Also clarifies whether the competition for this seat includes redeployed internal candidates with formal priority.</p><span class="listen"><b>LISTEN FOR</b>GOOD: a stable core with named tenure. BAD: a team largely reconstituted in the last eighteen months.</span></div>
+
+    <div class="callout red">
+        <strong>DO NOT ASK · DO NOT SAY</strong>
+        No compensation or grade questions in this round — that is for the offer stage. Do not quote the charge figures or analyst commentary back at the manager; the backlog question above gets the same information without the ambush. Never mention the US/LEO ambition in any form — the coherent story is terminal-side to system-side on the same end-to-end chain, full stop. And do not criticize HBC+ on the way out; the two programs share an employer and a small world.
+    </div>
+</div>
+</div>
+
+<!-- ══════════════ TAB 8 · STORY BANK ══════════════ -->
+<div class="tabpanel" id="t8">
+<div class="content-block career">
+    <h2>Story bank — evidence per JD bullet</h2>
+    <p>Second interviews run on evidence, not knowledge. Each block below pins one JD requirement to one real episode from the CV, in a three-line skeleton: LEAD (one sentence of situation), PROOF (what was personally done — the verbs the interviewer writes down), RESULT (the outcome, quantified where honest). Dashed lines are blanks to fill from memory before the interview — the skeleton is worthless unrehearsed. One story per bullet, told in under ninety seconds, beats any amount of additional theory.</p>
+
+    <h3>Customer & mission capture</h3>
+    <div class="story"><h4>JD — "Understand and capture Customer telecommunication mission needs"</h4><div class="src">SOURCE · HBC+ PROVIDER ONBOARDING</div><dl>
+        <dt>LEAD</dt><dd>Onboarding a satellite service provider onto the HBC+ terminal, from contract signature through type approval on the provider's network.</dd>
+        <dt>PROOF</dt><dd class="fill">Name the provider (or anonymize), the mission needs captured — network entry, air interface constraints, approval criteria — and the deliverable they were formalized in.</dd>
+        <dt>RESULT</dt><dd class="fill">Type approval achieved / onboarding milestone date — pick the strongest completed one.</dd>
+    </dl></div>
+
+    <h3>Interfaces</h3>
+    <div class="story"><h4>JD — "Consolidate customer external and internal system interfaces definition"</h4><div class="src">SOURCE · HBC+ ARCHITECTURE STANDARDS</div><dl>
+        <dt>LEAD</dt><dd>Defining software architecture standards across distributed Airbus engineering teams and external suppliers — an interface-consolidation problem where every party had its own baseline.</dd>
+        <dt>PROOF</dt><dd class="fill">One concrete interface conflict between two teams or a team and a supplier, and how the standard resolved it. Name the mechanism (working group, ICD, review board).</dd>
+        <dt>RESULT</dt><dd class="fill">The standard's adoption scope — how many teams/suppliers now build against it.</dd>
+    </dl></div>
+
+    <h3>ConOps</h3>
+    <div class="story"><h4>JD — "Consolidation of System Concept of Operations taking into account Customer constraints"</h4><div class="src">SOURCE · IDIRECT NETWORK PLANNING</div><dl>
+        <dt>LEAD</dt><dd>Designing configuration, upgrade, and network planning for operational satellite operators — ConOps work under a live customer's availability constraints.</dd>
+        <dt>PROOF</dt><dd class="fill">One operator's constraint (maintenance window, no-downtime upgrade, capacity migration) and the operational sequence designed around it.</dd>
+        <dt>RESULT</dt><dd class="fill">Executed without service impact / adopted as the standard procedure — whichever is true.</dd>
+    </dl></div>
+
+    <h3>Problem solving on time, quality, cost</h3>
+    <div class="story"><h4>JD — "Ensure technical problem solving on time, on quality and on cost"</h4><div class="src">SOURCE · IDIRECT CROSS-LAYER FAULT ISOLATION</div><dl>
+        <dt>LEAD</dt><dd>A service-affecting fault spanning RF, DVB-S2 baseband, IP networking, and Linux — the layers pointing at each other, the customer escalating.</dd>
+        <dt>PROOF</dt><dd class="fill">The best single incident: symptom, the isolation logic across layers, the root cause. This is the signature story — it demonstrates the E2E seat's core skill under pressure.</dd>
+        <dt>RESULT</dt><dd class="fill">Time to resolution, and the systemic fix (automation, monitoring, procedure) that followed. The MTTR-improvement automation work slots here as the cost dimension.</dd>
+    </dl></div>
+
+    <h3>Customer interface & reviews</h3>
+    <div class="story"><h4>JD — "Interface with customer for end-to-end and ground system architecture topics · Prepare and participate to project reviews"</h4><div class="src">SOURCE · IDIRECT ESCALATION & TRAINING / HBC+ REVIEWS</div><dl>
+        <dt>LEAD</dt><dd>Standing customer-facing role: escalation ownership and training delivery for operators, plus architecture deliverables into program reviews on HBC+.</dd>
+        <dt>PROOF</dt><dd class="fill">One review or escalation where a technical position had to be defended to a skeptical customer. What was the disagreement and how was it closed?</dd>
+        <dt>RESULT</dt><dd class="fill">Customer outcome — retained, satisfied, review passed.</dd>
+    </dl></div>
+
+    <h3>IVV support</h3>
+    <div class="story"><h4>JD — "Support system IVV activities for the program"</h4><div class="src">SOURCE · OPERATIONS-SIDE VALIDATION</div><dl>
+        <dt>LEAD</dt><dd>Fed and consumed verification from the operations side: acceptance of operator network changes, upgrade validation, and the field discovery of what integration testing missed.</dd>
+        <dt>PROOF</dt><dd class="fill">One case where operational knowledge changed what got tested — a failure mode fed back into a test plan or acceptance criterion.</dd>
+        <dt>RESULT</dt><dd class="fill">The defect class that stopped recurring.</dd>
+    </dl></div>
+
+    <h3>The thin bullet — prepare the honest fallback</h3>
+    <div class="story"><h4>JD — "Support customer project manager in tracking and negotiation of contractual technical changes"</h4><div class="src">SOURCE · WEAKEST MAPPING — DO NOT OVERCLAIM</div><dl>
+        <dt>LEAD</dt><dd>Nearest real experience: provider onboarding scope evolutions on HBC+ and change-driven work at iDirect — technical change management adjacent to, but not inside, contract negotiation.</dd>
+        <dt>PROOF</dt><dd class="fill">The closest genuine episode where a technical change had commercial consequences that had to be characterized for whoever held the contract.</dd>
+        <dt>RESULT</dt><dd>The honest close, rehearsed verbatim: "I've characterized the technical impact of changes for the people negotiating them; I haven't held the negotiation itself, and I'd expect to grow into that part of the seat with the project manager."</dd>
+    </dl></div>
+
+    <h3>The "why this move" script</h3>
+    <p>The manager will ask, and HBC+ management may resist releasing (the mobility golden rules exist for exactly that friction). The story that is both true and safe: <em>HBC+ is the terminal end of the connectivity chain; this seat is the system end of the same chain. Two years defining architecture where the service lands makes the natural next step defining the system that delivers it — same end-to-end discipline, wider authority, and the payload dimension is precisely the part of the chain not yet covered.</em> It frames the payload gap as the motive rather than the weakness, gives HBC+ a graceful role in the narrative, and contains nothing about geography or orbits.</p>
+    <div class="callout amber">
+        <strong>REHEARSAL PROTOCOL</strong>
+        Fill every dashed line in writing, then rehearse aloud against a 90-second timer per story. The fault-isolation story and the "why this move" script get double repetitions — one is the signature evidence, the other is the first question of the interview.
+    </div>
+</div>
+</div>
+
+</div>
+
+<footer>LEOAF · CAREER DOSSIER · TECHNICAL ANNEX · PERSONAL RECORD ONLY</footer>
+
+<script>
+(function () {
+    var bar = document.getElementById('tabbar');
+    var buttons = bar.querySelectorAll('button');
+    function activate(id, push) {
+        buttons.forEach(function (b) { b.classList.toggle('active', b.dataset.tab === id); });
+        document.querySelectorAll('.tabpanel').forEach(function (p) { p.classList.toggle('active', p.id === id); });
+        if (push) { try { history.replaceState(null, '', '#' + id); } catch (e) {} }
+    }
+    bar.addEventListener('click', function (e) {
+        var btn = e.target.closest('button');
+        if (btn && btn.dataset.tab) { activate(btn.dataset.tab, true); }
+    });
+    var h = (location.hash || '').replace('#', '');
+    if (h && document.getElementById(h) && document.getElementById(h).classList.contains('tabpanel')) {
+        activate(h, false);
+    }
+})();
+</script>
+
+</body>
+</html>
