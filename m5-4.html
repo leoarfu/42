@@ -1,0 +1,695 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, shrink-to-fit=no">
+<title>M5-4 — DVB-S2X vs Proprietary Air Interfaces · LEOAF</title>
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;600;800&family=Share+Tech+Mono&family=Libre+Baskerville:ital,wght@0,400;0,700;1,400&display=swap" rel="stylesheet">
+<link rel="icon" href="favicon.ico" sizes="any" type="image/x-icon">
+<link rel="manifest" href="site.webmanifest">
+<meta name="theme-color" content="#0f0f0f">
+<script>
+window.leoafAbort = async function () {
+    function go() { window.location.replace("index.html?signedout=1"); }
+    try { if (typeof client !== "undefined" && client && client.auth && client.auth.signOut) { try { await client.auth.signOut({ scope: "local" }); } catch (e) {} } } catch (e) {}
+    go();
+};
+</script>
+<style>
+* { box-sizing:border-box; margin:0; padding:0; }
+html { height:100%; -webkit-text-size-adjust:100%; overflow-x:hidden; }
+body { font-family:'Share Tech Mono',monospace; background:#000; color:white; overflow-x:hidden; min-height:100vh; }
+#starsCanvas { position:fixed; inset:0; z-index:-1; }
+header { background:#000; border-bottom:1px solid #ff004f33; position:sticky; top:0; z-index:100; padding:1rem clamp(1.5rem,5vw,4rem); display:flex; justify-content:space-between; align-items:center; }
+.logo { font-family:'Orbitron',sans-serif; font-weight:800; font-size:clamp(16px,2vw,22px); letter-spacing:3px; text-decoration:none; }
+.logo span:first-child { color:white; } .logo span:last-child { color:#ff004f; }
+.nav-right { display:flex; align-items:center; gap:10px; }
+.nav-btn { background:transparent; border:1px solid #ff004f44; color:#ff004f; padding:6px 14px; cursor:pointer; transition:0.3s; font-size:11px; font-family:'Orbitron',sans-serif; letter-spacing:1px; text-decoration:none; display:inline-block; }
+.nav-btn:hover { background:#ff004f; color:black; }
+.breadcrumb { padding:14px clamp(1.5rem,5vw,4rem); font-size:11px; color:#ffffff44; letter-spacing:1px; position:relative; z-index:1; }
+.breadcrumb a { color:#00d9ff66; text-decoration:none; } .breadcrumb a:hover { color:#00d9ff; }
+.breadcrumb span { margin:0 8px; }
+.lesson-wrap { max-width:820px; margin:0 auto; padding:0 clamp(1.5rem,5vw,4rem) 80px; position:relative; z-index:1; }
+.lesson-header { padding:30px 0 28px; border-bottom:1px solid #ffffff11; margin-bottom:36px; }
+.lesson-tag { font-family:'Orbitron',sans-serif; font-size:10px; color:#ff004f; letter-spacing:3px; margin-bottom:10px; }
+.lesson-header h1 { font-family:'Orbitron',sans-serif; font-size:clamp(20px,3.5vw,32px); font-weight:800; line-height:1.2; margin-bottom:12px; }
+.lesson-meta { display:flex; gap:10px; flex-wrap:wrap; margin-bottom:16px; }
+.l-pill { font-family:'Orbitron',sans-serif; font-size:10px; padding:3px 10px; border:1px solid; letter-spacing:1px; }
+.l-pill-q { color:#ff004f; border-color:#ff004f44; } .l-pill-t { color:#39ff14; border-color:#39ff1444; }
+.l-pill-c { color:#ffaa00; border-color:#ffaa0044; }
+.lesson-intro { font-size:13px; line-height:1.85; opacity:0.75; }
+.toc { background:rgba(0,217,255,0.06); border:1px solid #00d9ff33; padding:24px 28px; margin:30px 0; }
+.toc h4 { font-family:'Orbitron',sans-serif; font-size:10px; color:#00d9ff; letter-spacing:2px; margin-bottom:16px; }
+.toc ol { padding-left:20px; } .toc li { font-size:13px; line-height:2.1; }
+.toc li a { color:#00d9ffbb; text-decoration:none; transition:0.15s; } .toc li a:hover { color:#fff; padding-left:4px; }
+.toc li::marker { color:#ff004f; font-family:'Orbitron',sans-serif; font-size:10px; }
+.cb { background:#f5f2ec; color:#1a1a1a; padding:36px clamp(24px,4vw,48px); margin-bottom:24px; border-left:4px solid #00d9ff; position:relative; z-index:1; }
+.cb h2 { font-family:'Orbitron',sans-serif; font-size:13px; color:#003d66; letter-spacing:2px; text-transform:uppercase; margin-bottom:20px; padding-bottom:10px; border-bottom:2px solid #00d9ff66; scroll-margin-top:80px; }
+.cb h3 { font-family:'Orbitron',sans-serif; font-size:11px; color:#444; letter-spacing:1.5px; text-transform:uppercase; margin:28px 0 12px; }
+.cb p { font-family:'Libre Baskerville',Georgia,serif; font-size:15px; line-height:1.9; color:#1a1a1a; margin-bottom:16px; }
+.cb ul { padding-left:0; margin-bottom:16px; }
+.cb ul li { font-family:'Libre Baskerville',Georgia,serif; font-size:14px; line-height:1.85; color:#1a1a1a; padding-left:20px; position:relative; margin-bottom:8px; }
+.cb ul li::before { content:'›'; position:absolute; left:0; color:#0077aa; }
+.cb blockquote { border-left:3px solid #1a7a1a; background:#eafaea; padding:14px 20px; margin:18px 0; font-size:13px; font-family:'Share Tech Mono',monospace; color:#0a3d0a; line-height:1.8; }
+.callout { border-left:3px solid #0088cc; background:#e8f4fb; padding:16px 20px; margin:22px 0; font-size:12px; line-height:1.8; color:#1a1a1a; }
+.callout.red { border-left-color:#cc0033; background:#fdecea; }
+.callout.green { border-left-color:#1a7a1a; background:#eafaea; }
+.callout.amber { border-left-color:#996600; background:#fef9ec; }
+.callout strong { font-family:'Orbitron',sans-serif; font-size:10px; letter-spacing:1px; display:block; margin-bottom:8px; }
+.compare-table { width:100%; border-collapse:collapse; margin:22px 0; font-size:12px; }
+.compare-table th { font-family:'Orbitron',sans-serif; font-size:10px; letter-spacing:1px; color:#003d66; padding:10px 12px; border-bottom:2px solid #00d9ff66; text-align:left; }
+.compare-table td { padding:10px 12px; border-bottom:1px solid #ddd; line-height:1.5; color:#1a1a1a; vertical-align:top; }
+.compare-table tr:hover td { background:#f0f0f0; }
+.key-numbers { display:grid; grid-template-columns:repeat(auto-fit,minmax(140px,1fr)); gap:12px; margin:22px 0; }
+.kn-item { background:#fff; border:1px solid #d0d0d0; padding:16px 12px; text-align:center; }
+.kn-val { font-family:'Orbitron',sans-serif; font-size:clamp(13px,1.8vw,18px); font-weight:800; color:#003d66; display:block; }
+.kn-label { font-size:10px; color:#555; letter-spacing:1px; margin-top:5px; display:block; line-height:1.4; }
+.quiz-block { background:rgba(17,17,17,0.9); border:1px solid #ff004f33; padding:28px; margin:48px 0 32px; }
+.quiz-block h2 { font-family:'Orbitron',sans-serif; font-size:13px; color:#ff004f; letter-spacing:2px; margin-bottom:6px; }
+.quiz-intro { font-size:12px; opacity:0.6; margin-bottom:24px; padding-bottom:16px; border-bottom:1px solid #ff004f22; line-height:1.6; }
+.quiz-q { margin-bottom:28px; }
+.quiz-q p { font-size:13px; opacity:0.9; margin-bottom:12px; line-height:1.65; }
+.quiz-q p strong { color:#00d9ff; }
+.quiz-options { display:flex; flex-direction:column; gap:8px; }
+.quiz-opt { background:rgba(255,255,255,0.03); border:1px solid #ffffff1a; padding:11px 16px; cursor:pointer; font-size:12px; font-family:'Share Tech Mono',monospace; transition:0.2s; text-align:left; color:white; line-height:1.5; }
+.quiz-opt:hover:not(:disabled) { background:rgba(0,217,255,0.08); border-color:#00d9ff44; }
+.quiz-opt.correct { background:rgba(57,255,20,0.1); border-color:#39ff14; color:#39ff14; }
+.quiz-opt.wrong { background:rgba(255,0,79,0.1); border-color:#ff004f; color:#ff004f; }
+.quiz-opt:disabled { cursor:default; }
+.quiz-feedback { font-size:12px; margin-top:10px; min-height:18px; line-height:1.7; opacity:0.9; padding:0 4px; }
+.quiz-score { font-family:'Orbitron',sans-serif; font-size:12px; color:#39ff14; margin-top:20px; letter-spacing:1px; display:none; padding-top:16px; border-top:1px solid #39ff1433; }
+.py-block { background:rgba(10,10,10,0.95); border:1px solid #39ff1422; padding:28px; margin:32px 0; }
+.py-block h2 { font-family:'Orbitron',sans-serif; font-size:13px; color:#39ff14; letter-spacing:2px; margin-bottom:8px; }
+.py-block .py-intro { font-size:12px; opacity:0.7; margin-bottom:20px; padding-bottom:16px; border-bottom:1px solid #39ff1422; line-height:1.7; }
+.py-exercise { margin-bottom:32px; } .py-exercise:last-child { margin-bottom:0; }
+.py-exercise h3 { font-family:'Orbitron',sans-serif; font-size:11px; color:#39ff1499; letter-spacing:1.5px; text-transform:uppercase; margin-bottom:10px; }
+.py-exercise p { font-size:12px; opacity:0.8; margin-bottom:14px; line-height:1.75; }
+.py-block pre { background:#050505; border:1px solid #39ff1433; padding:20px; font-family:'Share Tech Mono',monospace; font-size:11px; line-height:1.7; overflow-x:auto; color:#39ff14; white-space:pre; margin-bottom:12px; }
+.py-note { background:rgba(57,255,20,0.04); border-left:2px solid #39ff14; padding:12px 16px; margin-top:14px; font-size:12px; line-height:1.75; opacity:0.8; }
+.py-note strong { font-family:'Orbitron',sans-serif; font-size:10px; color:#39ff14; display:block; margin-bottom:6px; letter-spacing:1px; }
+.reflection-block { background:rgba(255,170,0,0.04); border:1px solid #ffaa0033; padding:24px; margin:32px 0; }
+.reflection-block h2 { font-family:'Orbitron',sans-serif; font-size:13px; color:#ffaa00; letter-spacing:2px; margin-bottom:8px; }
+.ref-intro { font-size:12px; opacity:0.7; margin-bottom:20px; padding-bottom:14px; border-bottom:1px solid #ffaa0022; line-height:1.7; }
+.ref-prompt { margin-bottom:20px; }
+.ref-prompt h3 { font-family:'Orbitron',sans-serif; font-size:11px; color:#ffaa0099; letter-spacing:1px; margin-bottom:8px; }
+.ref-prompt p { font-size:12px; opacity:0.8; line-height:1.75; }
+.complete-wrap { margin-top:56px; padding-top:30px; border-top:1px solid #ffffff11; text-align:center; }
+.complete-btn { font-family:'Orbitron',sans-serif; font-size:13px; letter-spacing:2px; padding:14px 44px; background:transparent; border:1px solid #39ff14; color:#39ff14; cursor:pointer; transition:0.3s; }
+.complete-btn:hover:not(.done) { background:#39ff14; color:black; box-shadow:0 0 20px rgba(57,255,20,0.4); }
+.complete-btn.done { background:rgba(57,255,20,0.1); cursor:pointer; opacity:1; }
+.complete-msg { font-size:12px; color:#39ff14; margin-top:14px; min-height:18px; letter-spacing:1px; }
+.lesson-nav { display:flex; justify-content:space-between; margin-top:30px; flex-wrap:wrap; gap:10px; }
+.lesson-nav a { font-family:'Orbitron',sans-serif; font-size:11px; color:#00d9ff66; text-decoration:none; letter-spacing:1px; transition:0.2s; }
+.lesson-nav a:hover { color:#00d9ff; }
+.back-to-top { position:fixed; bottom:28px; right:28px; z-index:200; width:44px; height:44px; background:#000; border:1px solid #00d9ff55; color:#00d9ff; font-size:20px; cursor:pointer; display:flex; align-items:center; justify-content:center; opacity:0; pointer-events:none; transition:opacity 0.3s; }
+.back-to-top.visible { opacity:1; pointer-events:auto; } .back-to-top:hover { border-color:#00d9ff; }
+footer { text-align:center; padding:30px; opacity:0.3; font-size:11px; position:relative; z-index:1; letter-spacing:1px; }
+.module-complete { background:rgba(57,255,20,0.06); border:1px solid #39ff1444; padding:24px 28px; margin:40px 0; text-align:center; }
+.module-complete h3 { font-family:'Orbitron',sans-serif; font-size:14px; color:#39ff14; letter-spacing:2px; margin-bottom:10px; }
+.module-complete p { font-size:12px; opacity:0.8; line-height:1.7; }
+</style>
+</head>
+<body>
+<canvas id="starsCanvas"></canvas>
+<header>
+    <a href="dashboard.html" class="logo"><span>LEO</span><span>AF</span></a>
+    <div class="nav-right">
+        <a href="m5.html" class="nav-btn">← M5 HUB</a>
+        <button class="nav-btn" onclick="leoafAbort()">ABORT</button>
+    </div>
+</header>
+<div class="breadcrumb">
+    <a href="dashboard.html">DASHBOARD</a><span>/</span>
+    <a href="m5.html">M5</a><span>/</span>
+    <span style="color:#ffffff88;">LESSON 04 — DVB-S2X VS PROPRIETARY</span>
+</div>
+
+<div class="lesson-wrap">
+<div class="lesson-header">
+    <div class="lesson-tag">M5 · LESSON 04 OF 7</div>
+    <h1>DVB-S2X vs Proprietary<br>Air Interfaces</h1>
+    <div class="lesson-meta">
+        <div class="l-pill l-pill-q">MODULE 5</div>
+        <div class="l-pill l-pill-t">AIR INTERFACE &amp; ACCESS</div>
+        <div class="l-pill l-pill-c">CORE</div>
+    </div>
+    <p class="lesson-intro" style="margin-bottom:12px;">The first three lessons of this module priced the physics: symbols per hertz (m5-1), bits per symbol at a given C/N₀ (m5-2), and the cost of sharing a carrier among users (m5-3). This lesson prices the packaging. Every real carrier wraps its payload in framing — synchronisation words, signalling headers, pilot symbols, encapsulation — that exists even for a single user on a dedicated link. Framing is what lets a receiver find frame boundaries, learn each frame's MODCOD before decoding it, and track carrier phase through an entire frame; it is bought with symbols that carry no user data.</p>
+    <p class="lesson-intro" style="margin-bottom:12px;">This lesson does two things. First, it dissects the framing of the open standard — DVB-S2/S2X — precisely enough to compute its cost, including a reconciliation that matters for the spine project's bookkeeping: part of the framing bill was silently included in the m5-2 spectral efficiencies, and charging it twice would corrupt the engine. Second, it examines the most consequential air-interface decision in modern satcom: why the vertically integrated LEO mega-constellations abandoned the standard entirely, and what an architect gives up in each direction.</p>
+    <p class="lesson-intro" style="margin-bottom:12px;">The boundary discipline continues: m5-3 charged <em>sharing</em> costs (guards, preambles, contention, grant latency); this lesson charges <em>per-carrier structure</em> (frame headers, pilots, encapsulation, padding). The two multiply in the engine and never overlap.</p>
+</div>
+
+<div class="toc">
+    <h4>CONTENTS</h4>
+    <ol>
+        <li><a href="#s1">What framing buys</a></li>
+        <li><a href="#s2">Anatomy of the DVB-S2 PLFRAME</a></li>
+        <li><a href="#s3">The reconciliation: what m5-2 already paid</a></li>
+        <li><a href="#s4">Pilots: phase tracking, priced</a></li>
+        <li><a href="#s5">Encapsulation: GSE and the packet-size economics</a></li>
+        <li><a href="#s6">DVB-S2X: the standard, extended</a></li>
+        <li><a href="#s7">Why the mega-constellations went proprietary</a></li>
+        <li><a href="#s8">Key facts</a></li>
+        <li><a href="#s9">What this lesson delivers to the design chain</a></li>
+        <li><a href="#quiz">Knowledge check</a></li>
+        <li><a href="#py">Python exercises</a></li>
+        <li><a href="#reflect">Reflection</a></li>
+    </ol>
+</div>
+
+<div class="cb" id="s1">
+    <h2>1. What framing buys</h2>
+<p>A DVB-S2 receiver tuning to a forward carrier knows nothing: not where frames begin, not what MODCOD each frame uses, not the carrier phase. Framing solves each problem with dedicated symbols:</p>
+<ul>
+<li>A <strong>start-of-frame word</strong> — a fixed, known symbol pattern the receiver can detect by correlation, even below decoding threshold.</li>
+<li>A <strong>signalling field</strong> announcing each frame's MODCOD and structure — necessarily encoded far more robustly than the payload, because it must be readable <em>before</em> the payload's MODCOD is known, by every terminal in the beam including the ones in deep fades.</li>
+<li><strong>Pilot symbols</strong> — known symbols inserted periodically through the frame so the demodulator can track carrier phase against oscillator phase noise. High-order constellations (m5-1) have small phase distances between points; without pilots, phase drift across a 33,000-symbol frame would destroy them.</li>
+<li><strong>Encapsulation headers and padding</strong> — the adaptation layer that maps variable-length IP packets into fixed-size FEC frames.</li>
+</ul>
+<p>None of this is waste. All of it is overhead. The engineering content of this lesson is knowing the exact price and what each item purchases.</p>
+</div>
+
+<div class="cb" id="s2">
+    <h2>2. Anatomy of the DVB-S2 PLFRAME</h2>
+<p>The DVB-S2 forward-link transmission chain, from packets to symbols:</p>
+<p>1. <strong>BBFRAME</strong> — a baseband frame: an 80-bit BBHEADER plus a data field of encapsulated user packets (and padding if the data field cannot be filled). Its size is chosen so that after FEC encoding the result is exactly one FECFRAME. 2. <strong>FECFRAME</strong> — the BBFRAME plus BCH and LDPC parity: 64,800 coded bits (normal frame; 16,200 for the short frame). This is the m5-2 object. 3. <strong>XFECFRAME</strong> — the FECFRAME mapped onto constellation symbols: 64,800 / log₂(M) symbols. QPSK: 32,400 symbols; 16-APSK: 16,200. 4. <strong>PLFRAME</strong> — the physical-layer frame actually transmitted: a <strong>PLHEADER of 90 symbols</strong> (26-symbol start-of-frame word + 64 symbols of π/2-BPSK-encoded signalling carrying the MODCOD identity), followed by the XFECFRAME organised in <strong>slots of 90 symbols</strong>, with an optional <strong>36-symbol pilot block after every 16 slots</strong>.</p>
+<p>Frames of different MODCODs stream back-to-back on the carrier — a QPSK 1/2 frame for a terminal in rain, then a 16-APSK 3/4 frame for one in clear sky. Each terminal decodes every PLHEADER (robust by design) and demodulates only the frames addressed to it at whatever MODCOD they announce. This structure <em>is</em> the ACM mechanism of m5-2, made physical.</p>
+</div>
+
+<div class="cb" id="s3">
+    <h2>3. The reconciliation: what m5-2 already paid</h2>
+<p>The spectral efficiencies the spine engine took from Table 13 in m5-2 are not raw code rates. Reconstructing the QPSK 1/2 value from first principles:</p>
+<blockquote>η = (K_bch − 80) / 64,800 × log₂(M) × 32,400 / (32,400 + 90)<br>
+η = (32,208 − 80) / 64,800 × 2 × 0.99723 = <strong>0.988858</strong> — exactly the Table 13 value.</blockquote>
+<p>The same reconstruction reproduces 16-APSK 3/4's 2.966728 exactly. Conclusion, verified to six decimal places: <strong>Table 13 efficiencies already include the BBHEADER and the PLHEADER (pilots off)</strong>. The m5-2 information rates were therefore already net of that structure.</p>
+<p>Stage 4's incremental bill is only what Table 13 excludes:</p>
+<ul>
+<li><strong>Pilot blocks</strong>, if enabled (section 4): 2.2–2.4%.</li>
+<li><strong>Encapsulation</strong> (GSE headers) and <strong>BBFRAME padding</strong> (section 5): 0.7–9% depending on packet sizes.</li>
+<li><strong>Superframe structure</strong>, where used (section 6).</li>
+</ul>
+<p>This kind of reconciliation is not pedantry. Overhead accounting errors of a few percent, compounded across a business case's thousands of beams, are the difference between a constellation's advertised and delivered capacity — and the classic failure mode is exactly this one: two teams each charging "framing" against different baselines.</p>
+</div>
+
+<div class="cb" id="s4">
+    <h2>4. Pilots: phase tracking, priced</h2>
+<p>The optional pilot block is 36 known symbols after every 16 slots (1,440 payload symbols). The count of pilot blocks per frame is ⌊(S−1)/16⌋ for S slots, giving a computed pilot efficiency of:</p>
+<table class="compare-table">
+<thead><tr>
+<th>Modulation</th>
+<th>Slots/frame</th>
+<th>Pilot blocks</th>
+<th>Pilot efficiency</th>
+</tr></thead>
+<tbody>
+<tr><td>QPSK</td><td>360</td><td>22</td><td>97.62%</td></tr>
+<tr><td>8-PSK</td><td>240</td><td>14</td><td>97.73%</td></tr>
+<tr><td>16-APSK</td><td>180</td><td>11</td><td>97.63%</td></tr>
+<tr><td>32-APSK</td><td>162</td><td>8</td><td>97.84%</td></tr>
+</tbody>
+</table>
+<p>What the ~2.3% buys: the demodulator re-anchors its carrier phase estimate every 1,440 symbols. Between pilots, phase drifts with the combined phase noise of the satellite converter and terminal oscillator. QPSK's 90° phase distances tolerate substantial drift; 32-APSK's fine amplitude-phase structure does not. In practice pilots are off for low-order MODCODs with good oscillators and on for high-order MODCODs and consumer-grade hardware — a per-carrier configuration choice, and one of the small levers a system engineer actually owns. Note the interlock with m5-1's roll-off discussion: the cheap capacity gains (tight roll-off, pilots off) all assume better hardware; the air interface lets you trade silicon quality against overhead.</p>
+</div>
+
+<div class="cb" id="s5">
+    <h2>5. Encapsulation: GSE and the packet-size economics</h2>
+<p>IP packets do not arrive in 64,800-bit units. <strong>Generic Stream Encapsulation (GSE, ETSI TS 102 606)</strong> maps variable-length packets into BBFRAME data fields: each packet gets a GSE header (typically ~10 bytes unfragmented), packets are concatenated to fill the frame, and a packet can be fragmented across frame boundaries to avoid padding. The cost is header-per-packet:</p>
+<table class="compare-table">
+<thead><tr>
+<th>Packet size</th>
+<th>GSE efficiency</th>
+</tr></thead>
+<tbody>
+<tr><td>1,500 B (bulk traffic)</td><td>99.3%</td></tr>
+<tr><td>500 B (mixed)</td><td>98.0%</td></tr>
+<tr><td>100 B (VoIP, telemetry, TCP ACKs)</td><td>90.9%</td></tr>
+</tbody>
+</table>
+<p>The pattern from m5-3's burst table repeats one layer up: fixed per-unit taxes make small units expensive. A beam whose traffic is dominated by small packets — an IoT service, a telemetry backhaul — loses ~9% at the encapsulation layer alone, before the access layer's small-burst penalty. The two penalties multiply, which is why small-packet services get purpose-built profiles (short FEC frames, tailored slot sizes) rather than the broadband defaults.</p>
+</div>
+
+<div class="cb" id="s6">
+    <h2>6. DVB-S2X: the standard, extended</h2>
+<p>DVB-S2X (EN 302 307-2, 2014) is the same architecture with the margins engineered out:</p>
+<ul>
+<li><strong>A finer MODCOD grid</strong> — roughly 112 MODCODs versus S2's 28, shrinking the rung spacing so ACM wastes less achieved C/N₀ as unusable headroom (the m5-2 ladder argument, refined).</li>
+<li><strong>Sharper roll-offs</strong> — 0.15, 0.10, 0.05 (the m5-1 capacity lever).</li>
+<li><strong>Constellations to 256-APSK</strong> and variants optimised separately for linear and nonlinear channels.</li>
+<li><strong>Very-low-SNR MODCODs</strong> — down to about −10 dB Es/N₀, using π/2-BPSK and spreading: the mobility and D2D end of the ladder (m5-6).</li>
+<li><strong>Channel bonding and wideband carriers</strong> (hundreds of Msym/s) for gateway feeders.</li>
+<li><strong>Superframing (Annex E)</strong> — a fixed-length outer frame structure with its own sync and signalling, designed for the things classic S2 never anticipated: <strong>beam hopping</strong> (a superframe is the natural dwell quantum for a beam that illuminates a cell for milliseconds at a time) and multi-format multiplexing. Superframing costs additional overhead of order one percent and is the standard's answer to the flexible-payload world of Module 3.</li>
+</ul>
+<p>The direction of travel is visible: S2X progressively rebuilt, inside the standard, the flexibility that vertically integrated systems built natively.</p>
+</div>
+
+<div class="cb" id="s7">
+    <h2>7. Why the mega-constellations went proprietary</h2>
+<p>Starlink and Kuiper do not use DVB-S2X on their user links. Published independent signal analyses (Humphreys et al., UT Austin) found the Starlink Ku-band downlink to be an OFDM design — 240 MHz channels, 1,024 subcarriers, ~1.33 ms frames — structurally unlike anything in the DVB family. The reasons a rational architect makes that choice:</p>
+<p><strong>Vertical integration removes the standard's whole purpose.</strong> DVB exists so that satellites, gateways, chipsets, and terminals from different vendors interoperate. An operator that designs its own satellites, gateways, silicon, and terminals has no interoperability boundary inside its network; the standard's benefit evaporates while its constraints remain.</p>
+<p><strong>LEO system functions live below the framing.</strong> Beam hopping dwell structure, handover signalling every few minutes, ephemeris-driven timing advance and Doppler pre-compensation (m5-3 §7), phased-array beam scheduling — a purpose-built air interface integrates these natively into the frame structure. The standard retrofits them (superframing) a generation later.</p>
+<p><strong>Iteration speed.</strong> A proprietary waveform changes when the operator's software does. A standard changes when a committee does. For a constellation launching replacement satellites every five years, waveform agility is a real asset.</p>
+<p><strong>OFDM itself.</strong> Fine-grained time-frequency scheduling (m5-3's OFDMA logic) and cheap equalisation suit wideband LEO channels and align with the terrestrial silicon ecosystem — the same reason 3GPP NTN (m5-5) arrives at OFDM from the other direction.</p>
+<p>The counter-case is equally structural. A standard buys: a <strong>multi-vendor equipment market</strong> (the entire VSAT industry runs on DVB — an operator serving enterprise, maritime, or government customers with existing terminal fleets cannot ignore it); <strong>customer-mandated interoperability</strong> (defence and institutional buyers often require standards compliance precisely to avoid vendor lock-in); <strong>regulator and partner familiarity</strong>; and <strong>shared R&amp;D</strong> — the S2X MODCOD grid represents decades of accumulated, verified coding work that a proprietary team must reproduce or license. GEO-HTS operators and the ground-segment industry remain firmly DVB for these reasons.</p>
+<p>The decision compresses to one question: <strong>who owns both ends of the link, and for how long?</strong> Own both ends forever — proprietary wins on every technical axis. Sell capacity into an ecosystem of other people's terminals — the standard is not optional.</p>
+</div>
+
+<div class="cb" id="s8">
+    <h2>8. Key facts</h2>
+<table class="compare-table">
+<thead><tr>
+<th>Fact</th>
+<th>Value</th>
+<th>Unit</th>
+<th>Source</th>
+</tr></thead>
+<tbody>
+<tr><td>DVB-S2 PLHEADER</td><td>90 (26 SOF + 64 signalling)</td><td>symbols</td><td>EN 302 307-1</td></tr>
+<tr><td>Slot size</td><td>90</td><td>symbols</td><td>EN 302 307-1</td></tr>
+<tr><td>Pilot block</td><td>36, after every 16 slots</td><td>symbols</td><td>EN 302 307-1</td></tr>
+<tr><td>BBHEADER</td><td>80</td><td>bits</td><td>EN 302 307-1</td></tr>
+<tr><td>Table 13 η includes</td><td>BBHEADER + PLHEADER (pilots off)</td><td>—</td><td>Verified reconstruction</td></tr>
+<tr><td>Pilot efficiency (QPSK / 16-APSK)</td><td>97.62 / 97.63</td><td>%</td><td>Computed</td></tr>
+<tr><td>GSE header (unfragmented, typical)</td><td>~10</td><td>bytes</td><td>ETSI TS 102 606</td></tr>
+<tr><td>GSE efficiency, 1500 B / 100 B packets</td><td>99.3 / 90.9</td><td>%</td><td>Computed</td></tr>
+<tr><td>S2X MODCOD count</td><td>~112 (vs 28 in S2)</td><td>—</td><td>EN 302 307-2</td></tr>
+<tr><td>S2X VL-SNR floor</td><td>≈ −10</td><td>dB Es/N₀</td><td>EN 302 307-2</td></tr>
+<tr><td>Starlink downlink (published analysis)</td><td>OFDM, 240 MHz, 1024 subcarriers, ~1.33 ms frames</td><td>—</td><td>Humphreys et al.</td></tr>
+<tr><td>Stage-4 incremental factor (pilots on, 1500 B)</td><td>≈ 0.970</td><td>—</td><td>Computed (0.9763 × 0.9934)</td></tr>
+</tbody>
+</table>
+</div>
+
+<div class="cb" id="s9">
+    <h2>9. What this lesson delivers to the design chain</h2>
+<p>The engine's Stage-3 access capacity now becomes net throughput: multiplied by pilot efficiency (if pilots are on) and encapsulation efficiency (a function of the traffic's packet-size mix), with the Table 13 reconciliation guaranteeing nothing is charged twice. For the demonstration beam: 674.3 Mbps information rate → 654.0 Mbps after scheduling (Stage 3) → <strong>634.3 Mbps net</strong> with pilots on and 1500-byte traffic — a total information-to-net factor of 0.94. That final number is the honest ancestor of a marketing datasheet's "beam capacity."</p>
+<p>Strategically, the lesson delivers the standard-versus-proprietary decision framework — the module's first question that is architectural rather than physical. The next two lessons follow the two branches: m5-5 takes the standards path to its terrestrial-convergence conclusion (3GPP NTN), and m5-6 takes the physics to its hardest case (direct-to-device).</p>
+</div>
+
+<div class="quiz-block" id="quiz">
+    <h2>KNOWLEDGE CHECK</h2>
+    <div class="quiz-intro">Ten questions. Each option explains itself after you commit. No retries per question — decide first.</div>
+    <div class="quiz-q">
+        <p><strong>Q1.</strong> The PLHEADER is transmitted in π/2-BPSK with heavy protection, far more robustly than the payload, because:</p>
+        <div class="quiz-options">
+            <button class="quiz-opt" data-q="1" data-correct="false">A — It carries the most valuable user data</button>
+            <button class="quiz-opt" data-q="1" data-correct="true">B — Every terminal must decode it — including the frame's MODCOD announcement — before the payload's MODCOD is known, and in the worst channel conditions of any terminal in the beam</button>
+            <button class="quiz-opt" data-q="1" data-correct="false">C — π/2-BPSK is more spectrally efficient</button>
+            <button class="quiz-opt" data-q="1" data-correct="false">D — The standard predates LDPC codes</button>
+        </div>
+        <div class="quiz-feedback" id="fb1"></div>
+    </div>
+    <div class="quiz-q">
+        <p><strong>Q2.</strong> Reconstructing Table 13's QPSK 1/2 efficiency (0.988858) from K_bch = 32,208, the 80-bit BBHEADER, and the 90-symbol PLHEADER matches exactly. The consequence for the spine engine is:</p>
+        <div class="quiz-options">
+            <button class="quiz-opt" data-q="2" data-correct="false">A — Table 13 values are wrong</button>
+            <button class="quiz-opt" data-q="2" data-correct="true">B — Stage 2 already charged the BBHEADER and PLHEADER; Stage 4 must charge only pilots, encapsulation, and padding, or the engine double-counts</button>
+            <button class="quiz-opt" data-q="2" data-correct="false">C — Pilots are already included in Table 13</button>
+            <button class="quiz-opt" data-q="2" data-correct="false">D — The engine must recompute the FEC code rates</button>
+        </div>
+        <div class="quiz-feedback" id="fb2"></div>
+    </div>
+    <div class="quiz-q">
+        <p><strong>Q3.</strong> Pilot blocks cost about 2.3–2.4% of capacity. What they purchase is:</p>
+        <div class="quiz-options">
+            <button class="quiz-opt" data-q="3" data-correct="false">A — Better forward error correction</button>
+            <button class="quiz-opt" data-q="3" data-correct="true">B — Periodic re-anchoring of the receiver's carrier-phase estimate, without which oscillator phase noise would destroy high-order constellations across a frame</button>
+            <button class="quiz-opt" data-q="3" data-correct="false">C — Frame synchronisation</button>
+            <button class="quiz-opt" data-q="3" data-correct="false">D — Higher transmit power</button>
+        </div>
+        <div class="quiz-feedback" id="fb3"></div>
+    </div>
+    <div class="quiz-q">
+        <p><strong>Q4.</strong> A beam whose traffic is dominated by 100-byte packets loses roughly 9% at the GSE layer while a 1500-byte-packet beam loses under 1%, because:</p>
+        <div class="quiz-options">
+            <button class="quiz-opt" data-q="4" data-correct="false">A — Small packets use a weaker FEC code</button>
+            <button class="quiz-opt" data-q="4" data-correct="true">B — The GSE header is a fixed per-packet tax, so its relative cost is inversely proportional to packet size</button>
+            <button class="quiz-opt" data-q="4" data-correct="false">C — Small packets require pilots</button>
+            <button class="quiz-opt" data-q="4" data-correct="false">D — The BBFRAME cannot carry small packets</button>
+        </div>
+        <div class="quiz-feedback" id="fb4"></div>
+    </div>
+    <div class="quiz-q">
+        <p><strong>Q5.</strong> DVB-S2X's expansion of the MODCOD grid from 28 to ~112 entries improves system capacity because:</p>
+        <div class="quiz-options">
+            <button class="quiz-opt" data-q="5" data-correct="false">A — The new MODCODs exceed the Shannon bound</button>
+            <button class="quiz-opt" data-q="5" data-correct="true">B — Finer rung spacing means the ACM selection wastes less of the achieved C/N₀ as unusable headroom between rungs</button>
+            <button class="quiz-opt" data-q="5" data-correct="false">C — More MODCODs increase the transmit power</button>
+            <button class="quiz-opt" data-q="5" data-correct="false">D — It reduces the PLHEADER size</button>
+        </div>
+        <div class="quiz-feedback" id="fb5"></div>
+    </div>
+    <div class="quiz-q">
+        <p><strong>Q6.</strong> DVB-S2X superframing (Annex E) exists primarily to support:</p>
+        <div class="quiz-options">
+            <button class="quiz-opt" data-q="6" data-correct="false">A — Higher FEC coding gain</button>
+            <button class="quiz-opt" data-q="6" data-correct="true">B — Beam hopping and multi-format multiplexing — a fixed-length outer structure whose sync survives the payload changing entirely from dwell to dwell</button>
+            <button class="quiz-opt" data-q="6" data-correct="false">C — Lower roll-off factors</button>
+            <button class="quiz-opt" data-q="6" data-correct="false">D — Compatibility with DVB-S (1995)</button>
+        </div>
+        <div class="quiz-feedback" id="fb6"></div>
+    </div>
+    <div class="quiz-q">
+        <p><strong>Q7.</strong> The strongest structural argument for a vertically integrated LEO operator to use a proprietary air interface is:</p>
+        <div class="quiz-options">
+            <button class="quiz-opt" data-q="7" data-correct="false">A — Proprietary waveforms are always more spectrally efficient</button>
+            <button class="quiz-opt" data-q="7" data-correct="true">B — Standards exist to create interoperability across vendor boundaries; an operator that owns satellites, gateways, silicon, and terminals has no such boundary inside its network</button>
+            <button class="quiz-opt" data-q="7" data-correct="false">C — DVB-S2X cannot operate at LEO</button>
+            <button class="quiz-opt" data-q="7" data-correct="false">D — Proprietary systems avoid ITU spectrum coordination</button>
+        </div>
+        <div class="quiz-feedback" id="fb7"></div>
+    </div>
+    <div class="quiz-q">
+        <p><strong>Q8.</strong> The strongest argument for the standard, for an operator selling capacity to enterprise, maritime, and government customers, is:</p>
+        <div class="quiz-options">
+            <button class="quiz-opt" data-q="8" data-correct="false">A — DVB-S2X has lower latency</button>
+            <button class="quiz-opt" data-q="8" data-correct="true">B — The existing multi-vendor terminal ecosystem and customer-mandated interoperability — fleets of deployed VSAT hardware and procurement rules that require standards compliance</button>
+            <button class="quiz-opt" data-q="8" data-correct="false">C — Proprietary waveforms are illegal for government use</button>
+            <button class="quiz-opt" data-q="8" data-correct="false">D — The standard requires no licensing</button>
+        </div>
+        <div class="quiz-feedback" id="fb8"></div>
+    </div>
+    <div class="quiz-q">
+        <p><strong>Q9.</strong> Published independent analyses of the Starlink downlink found an OFDM structure. This aligns with the m5-3/m5-5 logic because OFDM provides:</p>
+        <div class="quiz-options">
+            <button class="quiz-opt" data-q="9" data-correct="false">A — Immunity to rain fade</button>
+            <button class="quiz-opt" data-q="9" data-correct="true">B — Fine-grained time-frequency resource scheduling and cheap wideband equalisation, aligned with the terrestrial silicon ecosystem</button>
+            <button class="quiz-opt" data-q="9" data-correct="false">C — Zero peak-to-average power ratio</button>
+            <button class="quiz-opt" data-q="9" data-correct="false">D — Compliance with DVB-S2X</button>
+        </div>
+        <div class="quiz-feedback" id="fb9"></div>
+    </div>
+    <div class="quiz-q">
+        <p><strong>Q10.</strong> This lesson's demonstration chain ends at 634.3 Mbps net from a 674.3 Mbps information rate (factor 0.94). Quoting the 674.3 figure — or the 909.1 Mbps raw rate of m5-1 — as "beam capacity" would be:</p>
+        <div class="quiz-options">
+            <button class="quiz-opt" data-q="10" data-correct="false">A — Correct, since the physical layer supports it</button>
+            <button class="quiz-opt" data-q="10" data-correct="true">B — An overhead-accounting misrepresentation: raw, information, access, and net rates are different quantities, and only net survives to a user's measurement</button>
+            <button class="quiz-opt" data-q="10" data-correct="false">C — Conservative</button>
+            <button class="quiz-opt" data-q="10" data-correct="false">D — Only wrong for the return link</button>
+        </div>
+        <div class="quiz-feedback" id="fb10"></div>
+    </div>
+    <div class="quiz-score" id="quizScore"></div>
+</div>
+
+<div class="py-block" id="py">
+    <h2>PYTHON EXERCISES</h2>
+    <div class="py-intro">Three exercises; the last extends the module spine project. Run them, then work the numbered follow-ups in the comments — the follow-ups are the exercise.</div>
+    <div class="py-exercise">
+        <h3>Exercise 1 — The PLFRAME ledger and the Table 13 proof</h3>
+        <p>Compute the framing arithmetic from the standard's constants and prove what Table 13 includes.</p>
+<pre>
+# DVB-S2 normal-frame constants (EN 302 307-1)
+K_BCH = {&quot;QPSK 1/2&quot;: 32208, &quot;QPSK 3/4&quot;: 48408, &quot;16APSK 3/4&quot;: 48408,
+         &quot;16APSK 2/3&quot;: 43040, &quot;8PSK 3/4&quot;: 48408, &quot;32APSK 3/4&quot;: 48408}
+BITS_PER_SYM = {&quot;QPSK&quot;: 2, &quot;8PSK&quot;: 3, &quot;16APSK&quot;: 4, &quot;32APSK&quot;: 5}
+TABLE13 = {&quot;QPSK 1/2&quot;: 0.988858, &quot;QPSK 3/4&quot;: 1.487473, &quot;8PSK 3/4&quot;: 2.228124,
+           &quot;16APSK 2/3&quot;: 2.637201, &quot;16APSK 3/4&quot;: 2.966728, &quot;32APSK 3/4&quot;: 3.703295}
+
+def reconstruct_eta(modcod):
+    mod = modcod.split()[0]
+    b = BITS_PER_SYM[mod]
+    xfec = 64800 // b
+    return (K_BCH[modcod] - 80) / 64800 * b * xfec / (xfec + 90)
+
+print(f&quot;{&#x27;MODCOD&#x27;:&lt;12}{&#x27;reconstructed&#x27;:&gt;14}{&#x27;Table 13&#x27;:&gt;10}{&#x27;match&#x27;:&gt;7}&quot;)
+for mc in TABLE13:
+    r = reconstruct_eta(mc)
+    print(f&quot;{mc:&lt;12}{r:&gt;14.6f}{TABLE13[mc]:&gt;10.6f}{str(abs(r-TABLE13[mc])&lt;1e-4):&gt;7}&quot;)
+
+# 1. The reconstruction uses (K_bch - 80): identify what the 80 bits are
+#    and what K_bch already excludes (hint: BCH parity vs LDPC parity).
+# 2. Repeat for the short frame (16,200 bits, PLHEADER still 90 symbols,
+#    K_bch for QPSK 1/2 short = 7032): how much worse is the short
+#    frame&#x27;s efficiency, and when is that price worth paying?
+# 3. Compute the PLHEADER&#x27;s own &#x27;spectral efficiency&#x27; contribution:
+#    what fraction of the carrier does pure signalling consume at
+#    QPSK vs 32APSK? Why does the fraction grow with modulation order?
+</pre>
+    </div>
+    <div class="py-exercise">
+        <h3>Exercise 2 — Pilots and packets: the two incremental taxes</h3>
+        <p>Sweep the Stage-4 costs that Table 13 does not include.</p>
+<pre>
+def pilot_efficiency(bits_per_sym):
+    xfec = 64800 // bits_per_sym
+    slots = xfec // 90
+    n_pilot = (slots - 1) // 16
+    return (90 + xfec) / (90 + xfec + 36 * n_pilot)
+
+def gse_efficiency(pkt_bytes, header_bytes=10):
+    return pkt_bytes / (pkt_bytes + header_bytes)
+
+print(&quot;Pilot efficiency by modulation:&quot;)
+for mod, b in [(&quot;QPSK&quot;,2),(&quot;8PSK&quot;,3),(&quot;16APSK&quot;,4),(&quot;32APSK&quot;,5)]:
+    print(f&quot;  {mod:&gt;7}: {pilot_efficiency(b)*100:.2f}%&quot;)
+
+print(&quot;\nGSE efficiency by packet size:&quot;)
+for pkt in [1500, 1000, 500, 200, 100, 64]:
+    print(f&quot;  {pkt:&gt;5} B: {gse_efficiency(pkt)*100:.2f}%&quot;)
+
+print(&quot;\nCombined Stage-4 factor (pilots on), by traffic mix:&quot;)
+for name, pkt in [(&quot;bulk&quot;, 1500), (&quot;mixed&quot;, 500), (&quot;IoT/VoIP&quot;, 100)]:
+    f = pilot_efficiency(4) * gse_efficiency(pkt)
+    print(f&quot;  {name:&gt;9} ({pkt} B): {f:.4f}&quot;)
+
+# 1. A traffic mix is 70% bytes in 1500 B packets, 30% in 100 B packets.
+#    Compute the byte-weighted GSE efficiency. (Careful: weight by
+#    bytes, not by packet count — show why the two differ.)
+# 2. Pilots off saves 2.4% but costs phase-tracking robustness. For
+#    which rows of the m5-2 MODCOD table is that trade obviously safe,
+#    and what hardware spec (phase noise) decides the boundary?
+# 3. Estimate the total multiplicative gap from m5-1 raw rate to net
+#    user throughput for the demonstration beam. Which single stage
+#    contributes most, and is that stage physics or configuration?
+</pre>
+    </div>
+    <div class="py-exercise">
+        <h3>Exercise 3 — Spine Stage 4: the framing model</h3>
+        <p>The engine gains its last per-carrier factor. Net throughput emerges.</p>
+<pre>
+import math
+
+# ═══════════════════════════════════════════════════════
+# M5 SPINE PROJECT — THROUGHPUT ENGINE
+# Stage 4: framing &amp; encapsulation.
+#   Stage 1: bandwidth, roll-off -&gt; symbol rate
+#   Stage 2: C/N0 -&gt; MODCOD -&gt; information rate
+#            (Table 13: BBHEADER + PLHEADER already included)
+#   Stage 3: sharing -&gt; access capacity
+#   Stage 4: pilots + GSE -&gt; NET throughput
+# Next: m5-5 NTN/OFDM branch, m5-6 D2D, m5-7 assembly.
+# ═══════════════════════════════════════════════════════
+
+MODCOD_TABLE = [  # (name, eta bit/sym, EsN0 dB) — EN 302 307-1 Tbl 13
+    (&quot;QPSK 1/4&quot;, 0.490243, -2.35), (&quot;QPSK 1/2&quot;, 0.988858, 1.00),
+    (&quot;QPSK 3/4&quot;, 1.487473, 4.03),  (&quot;8PSK 3/4&quot;, 2.228124, 7.91),
+    (&quot;16APSK 2/3&quot;, 2.637201, 8.97),(&quot;16APSK 3/4&quot;, 2.966728, 10.21),
+    (&quot;32APSK 3/4&quot;, 3.703295, 12.73),(&quot;32APSK 9/10&quot;, 4.453027, 16.05),
+]
+BITS_PER_SYM = {&quot;QPSK&quot;: 2, &quot;8PSK&quot;: 3, &quot;16APSK&quot;: 4, &quot;32APSK&quot;: 5}
+
+def select_modcod(esn0_db, margin_db=1.5):
+    best = None
+    for name, eta, thr in MODCOD_TABLE:
+        if esn0_db &gt;= thr + margin_db and (best is None or eta &gt; best[1]):
+            best = (name, eta, thr)
+    return best
+
+def pilot_efficiency(modcod_name):
+    mod = [k for k in BITS_PER_SYM if modcod_name.startswith(k)][0]
+    xfec = 64800 // BITS_PER_SYM[mod]
+    slots = xfec // 90
+    return (90 + xfec) / (90 + xfec + 36 * ((slots - 1) // 16))
+
+def gse_efficiency(pkt_bytes, header_bytes=10):
+    return pkt_bytes / (pkt_bytes + header_bytes)
+
+class ThroughputEngine:
+    &quot;&quot;&quot;Stages 1–4 chained. Reports every intermediate quantity —
+    the honest ledger from raw symbols to net user throughput.&quot;&quot;&quot;
+    def __init__(self, name, bw_hz, alpha, cn0_dbhz,
+                 sched_eff=0.97, pilots=True, pkt_bytes=1500):
+        self.name = name
+        self.rs = bw_hz / (1 + alpha)                       # Stage 1
+        self.esn0 = cn0_dbhz - 10 * math.log10(self.rs)
+        self.modcod = select_modcod(self.esn0)              # Stage 2
+        self.info_rate = self.modcod[1] * self.rs if self.modcod else 0.0
+        self.sched_eff = sched_eff                          # Stage 3
+        self.pilot_eff = pilot_efficiency(self.modcod[0]) if (pilots and self.modcod) else 1.0
+        self.gse_eff = gse_efficiency(pkt_bytes)            # Stage 4
+
+    @property
+    def net_throughput(self):
+        return self.info_rate * self.sched_eff * self.pilot_eff * self.gse_eff
+
+    def ledger(self):
+        raw = self.rs * BITS_PER_SYM[[k for k in BITS_PER_SYM
+                                      if self.modcod[0].startswith(k)][0]]
+        print(f&quot;\n{&#x27;─&#x27;*58}&quot;)
+        print(f&quot;  THROUGHPUT LEDGER — {self.name}&quot;)
+        print(f&quot;{&#x27;─&#x27;*58}&quot;)
+        print(f&quot;  Symbol rate            {self.rs/1e6:&gt;9.1f} Msym/s&quot;)
+        print(f&quot;  MODCOD                 {self.modcod[0]:&gt;9}  (Es/N0 {self.esn0:.2f} dB)&quot;)
+        print(f&quot;  RAW bit rate           {raw/1e6:&gt;9.1f} Mbps   (m5-1)&quot;)
+        print(f&quot;  Information rate       {self.info_rate/1e6:&gt;9.1f} Mbps   (m5-2, incl. BB/PLHEADER)&quot;)
+        print(f&quot;  x scheduler {self.sched_eff:.2f}       {self.info_rate*self.sched_eff/1e6:&gt;9.1f} Mbps   (m5-3)&quot;)
+        print(f&quot;  x pilots    {self.pilot_eff:.4f}     {self.info_rate*self.sched_eff*self.pilot_eff/1e6:&gt;9.1f} Mbps   (m5-4)&quot;)
+        print(f&quot;  x GSE       {self.gse_eff:.4f}     {self.net_throughput/1e6:&gt;9.1f} Mbps   (m5-4)&quot;)
+        print(f&quot;  NET THROUGHPUT         {self.net_throughput/1e6:&gt;9.1f} Mbps&quot;)
+        print(f&quot;  raw -&gt; net factor      {self.net_throughput/raw:&gt;9.3f}&quot;)
+        print(f&quot;{&#x27;─&#x27;*58}&quot;)
+
+# ── The demonstration beam, all four stages ─────────────
+eng = ThroughputEngine(&quot;Ka forward, user beam&quot;, bw_hz=250e6, alpha=0.10,
+                       cn0_dbhz=96.0)
+eng.ledger()
+
+# ── Traffic-mix sensitivity ─────────────────────────────
+print(f&quot;\n{&#x27;traffic&#x27;:&gt;10}{&#x27;pkt (B)&#x27;:&gt;9}{&#x27;net (Mbps)&#x27;:&gt;12}&quot;)
+for name, pkt in [(&quot;bulk&quot;,1500),(&quot;mixed&quot;,500),(&quot;small-pkt&quot;,100)]:
+    e = ThroughputEngine(&quot;t&quot;, 250e6, 0.10, 96.0, pkt_bytes=pkt)
+    print(f&quot;{name:&gt;10}{pkt:&gt;9}{e.net_throughput/1e6:&gt;12.1f}&quot;)
+
+# ── STAGE-5 PREVIEW ────────────────────────────────────
+# m5-5 adds an OFDM branch: the same ledger, rebuilt with NR
+# numerology (subcarriers, cyclic prefix, reference signals)
+# instead of DVB framing — and the two compared honestly.
+
+# 1. Run the ledger across the m5-2 fade sweep (C/N0 96 down to
+#    82 dBHz). Does the raw-&gt;net factor stay constant through the
+#    MODCOD steps? Explain which stage moves and why.
+# 2. Add BBFRAME padding: if the scheduler cannot fragment across
+#    frames, average half a packet of padding per frame. How much
+#    does it cost at QPSK 1/2 vs 32APSK 3/4, and why do they differ?
+# 3. The ledger&#x27;s sched_eff is a constant 0.97. Replace it with the
+#    m5-3 ReturnAccess burst model for a return-direction ledger and
+#    compare the raw-&gt;net factors of the two directions.
+</pre>
+    </div>
+</div>
+
+<div class="reflection-block" id="reflect">
+    <h2>REFLECTION</h2>
+    <div class="ref-intro">Four prompts. Each forces a decision — write the position down before moving on; the act of committing is the exercise.</div>
+    <div class="ref-prompt">
+        <h3>PROMPT 01</h3>
+        <p>Section 7 compressed the standard-versus-proprietary decision to "who owns both ends of the link, and for how long?" Stress-test the compression: construct the case of an operator that owns both ends today but expects to sell wholesale capacity to MNOs and government users within five years. Which air-interface choice is reversible, what does the migration cost in deployed terminals, and what does this say about the real decision variable (hint: it is not technical superiority)?</p>
+    </div>
+    <div class="ref-prompt">
+        <h3>PROMPT 02</h3>
+        <p>Pilots cost 2.4% always; phase-noise failures cost frames occasionally. Frame the pilots-on/off decision as an expected-value calculation: what failure rate at 32-APSK justifies the pilot tax, what terminal hardware parameter drives that rate, and who — the air-interface designer, the terminal vendor, or the network operator — actually holds the decision in a standards-based ecosystem versus a vertically integrated one?</p>
+    </div>
+    <div class="ref-prompt">
+        <h3>PROMPT 03</h3>
+        <p>The lesson showed fixed per-unit taxes at three layers: burst preambles (m5-3), GSE headers, and BBFRAME quantisation. An IoT operator proposes aggregating small packets at the terminal — buffering 100-byte reports for up to 500 ms and sending them as one 1,500-byte unit. Compute what this recovers at each layer, identify what it costs (which m5-3 §5 quantity grows), and decide for which service classes the trade is legitimate.</p>
+    </div>
+    <div class="ref-prompt">
+        <h3>PROMPT 04</h3>
+        <p>DVB-S2X superframing rebuilt beam-hopping support inside the standard roughly a decade after proprietary systems needed it. Generalise: identify the structural reason standards lag vertically integrated systems on architecture-coupled features, and the structural reason they eventually catch up. Then predict: which capability that today exists only in proprietary LEO air interfaces will be standardised next, and through which body — DVB or 3GPP?</p>
+    </div>
+</div>
+
+<div class="cb">
+    <h2>Sources</h2>
+<ul>
+<li>ETSI EN 302 307-1 (DVB-S2) — PLFRAME structure, PLHEADER, pilots, BBFRAME, K_bch values, Table 13.</li>
+<li>ETSI EN 302 307-2 (DVB-S2X) — extended MODCODs, VL-SNR, superframing Annex E, channel bonding.</li>
+<li>ETSI TS 102 606 — Generic Stream Encapsulation (GSE).</li>
+<li>ETSI TR 102 376 — DVB-S2 user guidelines: pilot usage, ACM operation.</li>
+<li>Humphreys et al., "Signal Structure of the Starlink Ku-Band Downlink" (UT Austin) — published independent analysis of a proprietary LEO air interface.</li>
+<li>Maral &amp; Bousquet, <em>Satellite Communications Systems</em> — air-interface system engineering context.</li>
+</ul>
+</div>
+
+<div class="complete-wrap">
+    <button class="complete-btn" id="completeBtn">MARK LESSON COMPLETE</button>
+    <div class="complete-msg" id="completeMsg"></div>
+</div>
+<div class="lesson-nav">
+    <a href="m5-3.html">← LESSON 03 — MULTIPLE ACCESS &amp; SCHEDULING</a>
+    <a href="m5-5.html">LESSON 05 — 3GPP NTN AIR INTERFACE →</a>
+</div>
+</div>
+
+<button class="back-to-top" id="backToTop" title="Back to top">↑</button>
+<footer>© 2026 LEOAF · M5 · LESSON 04 OF 7</footer>
+<script>
+const canvas=document.getElementById('starsCanvas'),ctx=canvas.getContext('2d');
+let stars=[];
+function initStars(){stars=[];for(let i=0;i<180;i++)stars.push({x:Math.random()*canvas.width,y:Math.random()*canvas.height,size:Math.random()*1.5+0.4,speed:Math.random()*0.18+0.04,hue:Math.random()*360});}
+function resizeCanvas(){canvas.width=window.innerWidth;canvas.height=window.innerHeight;}
+resizeCanvas();initStars();window.addEventListener('resize',resizeCanvas);
+function animateStars(){ctx.clearRect(0,0,canvas.width,canvas.height);stars.forEach(s=>{s.y-=s.speed;if(s.y<0){s.y=canvas.height;s.x=Math.random()*canvas.width;}ctx.beginPath();ctx.fillStyle=`hsl(${s.hue},80%,80%)`;ctx.arc(s.x,s.y,s.size,0,Math.PI*2);ctx.fill();});requestAnimationFrame(animateStars);}
+animateStars();
+</script>
+<script>
+const feedbacks={
+    1:{correct:"The signalling field tells the receiver how to demodulate what follows; it must therefore be readable without that knowledge, by the faded QPSK-1/4 terminal and the clear-sky 32-APSK terminal alike. Robustness of the signalling sets the floor under the whole ACM mechanism.",wrong:"It carries signalling, not user data. π/2-BPSK is the least spectrally efficient choice — that is the price of robustness. DVB-S2 was designed around LDPC from the start."},
+    2:{correct:"The reconstruction proves what the published efficiencies contain. Overhead must be charged against a defined baseline exactly once; the reconciliation fixes the baseline.",wrong:"The values are exactly right — that is the point of the reconstruction. Pilots are explicitly excluded from Table 13 (it is the pilots-off figure). Code rates are unchanged."},
+    3:{correct:"Between pilot blocks the phase estimate drifts with the phase noise of the whole conversion chain. QPSK's 90° decision distances forgive this; 32-APSK's fine structure does not — which is why pilots are typically enabled for high-order MODCODs and consumer oscillators.",wrong:"FEC lives in the FECFRAME, independent of pilots. Frame sync is the start-of-frame word's job. Transmit power is unaffected."},
+    4:{correct:"~10 bytes of header against 100 bytes of payload is 9% gone; against 1,500 bytes it is 0.7%. The same fixed-tax structure as m5-3's burst preambles, one layer up — and the two multiply for small-packet services.",wrong:"FEC is independent of packet size. Pilots are a per-carrier setting. BBFRAMEs carry concatenated small packets perfectly well — at the price of one header each."},
+    5:{correct:"With coarse rungs, a link whose Es/N₀ sits just below the next threshold strands that margin. Halving the rung spacing halves the average stranded margin — a direct capacity recovery with no physics changed (the m5-2 ladder-granularity argument).",wrong:"Nothing exceeds Shannon (m5-1). Power and PLHEADER size are unchanged; the grid is a signalling-table expansion."},
+    6:{correct:"A hopping beam illuminates a cell for a short dwell and vanishes; the terminal needs a fixed temporal structure to reacquire instantly. The superframe supplies it, at ~1% additional overhead — the standard retrofitting what proprietary LEO designs built natively.",wrong:"Coding gain lives in the LDPC layer. Roll-off is a filter parameter, independent of framing. Backward compatibility with DVB-S is not a superframe function."},
+    7:{correct:"The standard's benefit is interoperability; its cost is constraint and committee-speed evolution. Remove the benefit (by owning both ends) and only the cost remains — while LEO-specific functions (hopping, handover, timing advance) integrate natively into a purpose-built frame structure.",wrong:"Efficiency near Shannon is available to both (m5-2). DVB-S2X operates at LEO fine — OneWeb-class and GEO-HTS systems demonstrate the family broadly. Spectrum coordination (m4-3 / Module 10 territory) applies to everyone regardless of waveform."},
+    8:{correct:"An operator serving other people's terminals cannot dictate silicon. The VSAT industry, institutional procurement, and partner gateways all speak DVB; abandoning it means abandoning those markets or funding a full ecosystem replacement.",wrong:"Latency is set by geometry and access design, not the framing standard. Proprietary waveforms are legal (many governments buy them); the constraint is procurement policy, not law. Standards involve their own licensing (patent pools)."},
+    9:{correct:"OFDMA's two-dimensional scheduling grid (m5-3) suits a beam-hopped, densely scheduled LEO downlink, and OFDM equalisation of wide channels is computationally cheap — the same forces that made OFDM the terrestrial and NTN choice (m5-5).",wrong:"Rain physics (m4-4) is waveform-independent. OFDM's PAPR is high, not zero — the m5-1 amplifier cost, acceptable on a downlink where the satellite PA is engineered for it. It is precisely not DVB-compliant."},
+    10:{correct:"Each stage's factor is real and unavoidable; the spine engine carries the quantities separately precisely so that the honest number is always identifiable. The gap between raw and net — here 30% — is where datasheet capacity claims quietly live.",wrong:"The physical layer supports the raw symbol stream, not user throughput. The gap makes headline figures optimistic, not conservative. The same accounting applies in both directions — the return link's gap is larger (m5-3's burst overheads)."}
+};
+let answered={};
+document.querySelectorAll('.quiz-opt').forEach(btn=>{
+    btn.addEventListener('click',function(){
+        const q=this.dataset.q;
+        if(answered[q]!==undefined)return;
+        const correct=this.dataset.correct==='true';
+        answered[q]=correct;
+        document.querySelectorAll(`.quiz-opt[data-q="${q}"]`).forEach(b=>{b.disabled=true;if(b.dataset.correct==='true')b.classList.add('correct');});
+        if(!correct)this.classList.add('wrong');
+        const fb=document.getElementById('fb'+q);
+        fb.textContent=(correct?'✓ ':'✗ ')+feedbacks[q][correct?'correct':'wrong'];
+        fb.style.color=correct?'#39ff14':'#ff004f';
+        if(Object.keys(answered).length===10){
+            const total=Object.values(answered).filter(Boolean).length;
+            const sc=document.getElementById('quizScore');
+            sc.style.display='block';
+            const pct=Math.round(total/10*100);
+            sc.textContent=`SCORE: ${total}/10 (${pct}%) — ${pct===100?'PERFECT.':pct>=80?'STRONG.':pct>=60?'ADEQUATE. REVISIT WEAK SECTIONS.':'REVISIT THE LESSON BEFORE PROCEEDING.'}`;
+        }
+    });
+});
+</script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="supabase.js"></script>
+<script src="user_progress.js"></script>
+<script>
+const LESSON_ID='m5-4';
+(function(){
+    function bounceToLogin(r){console.error("Auth guard:",r);window.location.replace("index.html");}
+    async function init(){
+        if(typeof client==="undefined"||!client||!client.auth)return bounceToLogin("Supabase client not loaded");
+        let session=null;
+        try{({data:{session}}=await client.auth.getSession());}
+        catch(e){return bounceToLogin("getSession threw: "+e.message);}
+        if(!session){window.location.replace("index.html");return;}
+        const btn=document.getElementById('completeBtn'),msg=document.getElementById('completeMsg');
+        function setDone(done){
+            if(done){btn.textContent='✓ COMPLETE — CLICK TO UNDO';btn.classList.add('done');btn.style.cssText='border-color:#39ff14;color:#39ff14;background:rgba(57,255,20,0.1);cursor:pointer;opacity:1;';msg.style.color='#39ff14';msg.textContent='Lesson marked complete. Click again to undo.';}
+            else{btn.textContent='MARK LESSON COMPLETE';btn.classList.remove('done');btn.style.cssText='';msg.style.color='#ffffff55';msg.textContent='Not yet marked complete.';}
+        }
+        let mastered=[];
+        try{mastered=await getMasteredSections();}catch(e){console.error(e);}
+        setDone(mastered.includes(LESSON_ID));
+        btn.addEventListener('click',async()=>{
+            const isDone=btn.classList.contains('done');
+            msg.style.color='#00d9ff';msg.textContent='Saving...';
+            const ok=await upsertSection(LESSON_ID,!isDone);
+            if(ok){setDone(!isDone);}else{msg.style.color='#ff004f';msg.textContent='Error saving. Try again.';}
+        });
+        const btt=document.getElementById('backToTop');
+        window.addEventListener('scroll',()=>{btt.classList.toggle('visible',window.scrollY>400);});
+        btt.addEventListener('click',()=>window.scrollTo({top:0,behavior:'smooth'}));
+    }
+    if(document.readyState==="loading")document.addEventListener("DOMContentLoaded",init);
+    else init();
+})();
+</script>
+</body>
+</html>
