@@ -1,0 +1,694 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, shrink-to-fit=no">
+<title>M5-6 — Direct-to-Device Physical Layer · LEOAF</title>
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;600;800&family=Share+Tech+Mono&family=Libre+Baskerville:ital,wght@0,400;0,700;1,400&display=swap" rel="stylesheet">
+<link rel="icon" href="favicon.ico" sizes="any" type="image/x-icon">
+<link rel="manifest" href="site.webmanifest">
+<meta name="theme-color" content="#0f0f0f">
+<script>
+window.leoafAbort = async function () {
+    function go() { window.location.replace("index.html?signedout=1"); }
+    try { if (typeof client !== "undefined" && client && client.auth && client.auth.signOut) { try { await client.auth.signOut({ scope: "local" }); } catch (e) {} } } catch (e) {}
+    go();
+};
+</script>
+<style>
+* { box-sizing:border-box; margin:0; padding:0; }
+html { height:100%; -webkit-text-size-adjust:100%; overflow-x:hidden; }
+body { font-family:'Share Tech Mono',monospace; background:#000; color:white; overflow-x:hidden; min-height:100vh; }
+#starsCanvas { position:fixed; inset:0; z-index:-1; }
+header { background:#000; border-bottom:1px solid #ff004f33; position:sticky; top:0; z-index:100; padding:1rem clamp(1.5rem,5vw,4rem); display:flex; justify-content:space-between; align-items:center; }
+.logo { font-family:'Orbitron',sans-serif; font-weight:800; font-size:clamp(16px,2vw,22px); letter-spacing:3px; text-decoration:none; }
+.logo span:first-child { color:white; } .logo span:last-child { color:#ff004f; }
+.nav-right { display:flex; align-items:center; gap:10px; }
+.nav-btn { background:transparent; border:1px solid #ff004f44; color:#ff004f; padding:6px 14px; cursor:pointer; transition:0.3s; font-size:11px; font-family:'Orbitron',sans-serif; letter-spacing:1px; text-decoration:none; display:inline-block; }
+.nav-btn:hover { background:#ff004f; color:black; }
+.breadcrumb { padding:14px clamp(1.5rem,5vw,4rem); font-size:11px; color:#ffffff44; letter-spacing:1px; position:relative; z-index:1; }
+.breadcrumb a { color:#00d9ff66; text-decoration:none; } .breadcrumb a:hover { color:#00d9ff; }
+.breadcrumb span { margin:0 8px; }
+.lesson-wrap { max-width:820px; margin:0 auto; padding:0 clamp(1.5rem,5vw,4rem) 80px; position:relative; z-index:1; }
+.lesson-header { padding:30px 0 28px; border-bottom:1px solid #ffffff11; margin-bottom:36px; }
+.lesson-tag { font-family:'Orbitron',sans-serif; font-size:10px; color:#ff004f; letter-spacing:3px; margin-bottom:10px; }
+.lesson-header h1 { font-family:'Orbitron',sans-serif; font-size:clamp(20px,3.5vw,32px); font-weight:800; line-height:1.2; margin-bottom:12px; }
+.lesson-meta { display:flex; gap:10px; flex-wrap:wrap; margin-bottom:16px; }
+.l-pill { font-family:'Orbitron',sans-serif; font-size:10px; padding:3px 10px; border:1px solid; letter-spacing:1px; }
+.l-pill-q { color:#ff004f; border-color:#ff004f44; } .l-pill-t { color:#39ff14; border-color:#39ff1444; }
+.l-pill-c { color:#ffaa00; border-color:#ffaa0044; }
+.lesson-intro { font-size:13px; line-height:1.85; opacity:0.75; }
+.toc { background:rgba(0,217,255,0.06); border:1px solid #00d9ff33; padding:24px 28px; margin:30px 0; }
+.toc h4 { font-family:'Orbitron',sans-serif; font-size:10px; color:#00d9ff; letter-spacing:2px; margin-bottom:16px; }
+.toc ol { padding-left:20px; } .toc li { font-size:13px; line-height:2.1; }
+.toc li a { color:#00d9ffbb; text-decoration:none; transition:0.15s; } .toc li a:hover { color:#fff; padding-left:4px; }
+.toc li::marker { color:#ff004f; font-family:'Orbitron',sans-serif; font-size:10px; }
+.cb { background:#f5f2ec; color:#1a1a1a; padding:36px clamp(24px,4vw,48px); margin-bottom:24px; border-left:4px solid #00d9ff; position:relative; z-index:1; }
+.cb h2 { font-family:'Orbitron',sans-serif; font-size:13px; color:#003d66; letter-spacing:2px; text-transform:uppercase; margin-bottom:20px; padding-bottom:10px; border-bottom:2px solid #00d9ff66; scroll-margin-top:80px; }
+.cb h3 { font-family:'Orbitron',sans-serif; font-size:11px; color:#444; letter-spacing:1.5px; text-transform:uppercase; margin:28px 0 12px; }
+.cb p { font-family:'Libre Baskerville',Georgia,serif; font-size:15px; line-height:1.9; color:#1a1a1a; margin-bottom:16px; }
+.cb ul { padding-left:0; margin-bottom:16px; }
+.cb ul li { font-family:'Libre Baskerville',Georgia,serif; font-size:14px; line-height:1.85; color:#1a1a1a; padding-left:20px; position:relative; margin-bottom:8px; }
+.cb ul li::before { content:'›'; position:absolute; left:0; color:#0077aa; }
+.cb blockquote { border-left:3px solid #1a7a1a; background:#eafaea; padding:14px 20px; margin:18px 0; font-size:13px; font-family:'Share Tech Mono',monospace; color:#0a3d0a; line-height:1.8; }
+.callout { border-left:3px solid #0088cc; background:#e8f4fb; padding:16px 20px; margin:22px 0; font-size:12px; line-height:1.8; color:#1a1a1a; }
+.callout.red { border-left-color:#cc0033; background:#fdecea; }
+.callout.green { border-left-color:#1a7a1a; background:#eafaea; }
+.callout.amber { border-left-color:#996600; background:#fef9ec; }
+.callout strong { font-family:'Orbitron',sans-serif; font-size:10px; letter-spacing:1px; display:block; margin-bottom:8px; }
+.compare-table { width:100%; border-collapse:collapse; margin:22px 0; font-size:12px; }
+.compare-table th { font-family:'Orbitron',sans-serif; font-size:10px; letter-spacing:1px; color:#003d66; padding:10px 12px; border-bottom:2px solid #00d9ff66; text-align:left; }
+.compare-table td { padding:10px 12px; border-bottom:1px solid #ddd; line-height:1.5; color:#1a1a1a; vertical-align:top; }
+.compare-table tr:hover td { background:#f0f0f0; }
+.key-numbers { display:grid; grid-template-columns:repeat(auto-fit,minmax(140px,1fr)); gap:12px; margin:22px 0; }
+.kn-item { background:#fff; border:1px solid #d0d0d0; padding:16px 12px; text-align:center; }
+.kn-val { font-family:'Orbitron',sans-serif; font-size:clamp(13px,1.8vw,18px); font-weight:800; color:#003d66; display:block; }
+.kn-label { font-size:10px; color:#555; letter-spacing:1px; margin-top:5px; display:block; line-height:1.4; }
+.quiz-block { background:rgba(17,17,17,0.9); border:1px solid #ff004f33; padding:28px; margin:48px 0 32px; }
+.quiz-block h2 { font-family:'Orbitron',sans-serif; font-size:13px; color:#ff004f; letter-spacing:2px; margin-bottom:6px; }
+.quiz-intro { font-size:12px; opacity:0.6; margin-bottom:24px; padding-bottom:16px; border-bottom:1px solid #ff004f22; line-height:1.6; }
+.quiz-q { margin-bottom:28px; }
+.quiz-q p { font-size:13px; opacity:0.9; margin-bottom:12px; line-height:1.65; }
+.quiz-q p strong { color:#00d9ff; }
+.quiz-options { display:flex; flex-direction:column; gap:8px; }
+.quiz-opt { background:rgba(255,255,255,0.03); border:1px solid #ffffff1a; padding:11px 16px; cursor:pointer; font-size:12px; font-family:'Share Tech Mono',monospace; transition:0.2s; text-align:left; color:white; line-height:1.5; }
+.quiz-opt:hover:not(:disabled) { background:rgba(0,217,255,0.08); border-color:#00d9ff44; }
+.quiz-opt.correct { background:rgba(57,255,20,0.1); border-color:#39ff14; color:#39ff14; }
+.quiz-opt.wrong { background:rgba(255,0,79,0.1); border-color:#ff004f; color:#ff004f; }
+.quiz-opt:disabled { cursor:default; }
+.quiz-feedback { font-size:12px; margin-top:10px; min-height:18px; line-height:1.7; opacity:0.9; padding:0 4px; }
+.quiz-score { font-family:'Orbitron',sans-serif; font-size:12px; color:#39ff14; margin-top:20px; letter-spacing:1px; display:none; padding-top:16px; border-top:1px solid #39ff1433; }
+.py-block { background:rgba(10,10,10,0.95); border:1px solid #39ff1422; padding:28px; margin:32px 0; }
+.py-block h2 { font-family:'Orbitron',sans-serif; font-size:13px; color:#39ff14; letter-spacing:2px; margin-bottom:8px; }
+.py-block .py-intro { font-size:12px; opacity:0.7; margin-bottom:20px; padding-bottom:16px; border-bottom:1px solid #39ff1422; line-height:1.7; }
+.py-exercise { margin-bottom:32px; } .py-exercise:last-child { margin-bottom:0; }
+.py-exercise h3 { font-family:'Orbitron',sans-serif; font-size:11px; color:#39ff1499; letter-spacing:1.5px; text-transform:uppercase; margin-bottom:10px; }
+.py-exercise p { font-size:12px; opacity:0.8; margin-bottom:14px; line-height:1.75; }
+.py-block pre { background:#050505; border:1px solid #39ff1433; padding:20px; font-family:'Share Tech Mono',monospace; font-size:11px; line-height:1.7; overflow-x:auto; color:#39ff14; white-space:pre; margin-bottom:12px; }
+.py-note { background:rgba(57,255,20,0.04); border-left:2px solid #39ff14; padding:12px 16px; margin-top:14px; font-size:12px; line-height:1.75; opacity:0.8; }
+.py-note strong { font-family:'Orbitron',sans-serif; font-size:10px; color:#39ff14; display:block; margin-bottom:6px; letter-spacing:1px; }
+.reflection-block { background:rgba(255,170,0,0.04); border:1px solid #ffaa0033; padding:24px; margin:32px 0; }
+.reflection-block h2 { font-family:'Orbitron',sans-serif; font-size:13px; color:#ffaa00; letter-spacing:2px; margin-bottom:8px; }
+.ref-intro { font-size:12px; opacity:0.7; margin-bottom:20px; padding-bottom:14px; border-bottom:1px solid #ffaa0022; line-height:1.7; }
+.ref-prompt { margin-bottom:20px; }
+.ref-prompt h3 { font-family:'Orbitron',sans-serif; font-size:11px; color:#ffaa0099; letter-spacing:1px; margin-bottom:8px; }
+.ref-prompt p { font-size:12px; opacity:0.8; line-height:1.75; }
+.complete-wrap { margin-top:56px; padding-top:30px; border-top:1px solid #ffffff11; text-align:center; }
+.complete-btn { font-family:'Orbitron',sans-serif; font-size:13px; letter-spacing:2px; padding:14px 44px; background:transparent; border:1px solid #39ff14; color:#39ff14; cursor:pointer; transition:0.3s; }
+.complete-btn:hover:not(.done) { background:#39ff14; color:black; box-shadow:0 0 20px rgba(57,255,20,0.4); }
+.complete-btn.done { background:rgba(57,255,20,0.1); cursor:pointer; opacity:1; }
+.complete-msg { font-size:12px; color:#39ff14; margin-top:14px; min-height:18px; letter-spacing:1px; }
+.lesson-nav { display:flex; justify-content:space-between; margin-top:30px; flex-wrap:wrap; gap:10px; }
+.lesson-nav a { font-family:'Orbitron',sans-serif; font-size:11px; color:#00d9ff66; text-decoration:none; letter-spacing:1px; transition:0.2s; }
+.lesson-nav a:hover { color:#00d9ff; }
+.back-to-top { position:fixed; bottom:28px; right:28px; z-index:200; width:44px; height:44px; background:#000; border:1px solid #00d9ff55; color:#00d9ff; font-size:20px; cursor:pointer; display:flex; align-items:center; justify-content:center; opacity:0; pointer-events:none; transition:opacity 0.3s; }
+.back-to-top.visible { opacity:1; pointer-events:auto; } .back-to-top:hover { border-color:#00d9ff; }
+footer { text-align:center; padding:30px; opacity:0.3; font-size:11px; position:relative; z-index:1; letter-spacing:1px; }
+.module-complete { background:rgba(57,255,20,0.06); border:1px solid #39ff1444; padding:24px 28px; margin:40px 0; text-align:center; }
+.module-complete h3 { font-family:'Orbitron',sans-serif; font-size:14px; color:#39ff14; letter-spacing:2px; margin-bottom:10px; }
+.module-complete p { font-size:12px; opacity:0.8; line-height:1.7; }
+</style>
+</head>
+<body>
+<canvas id="starsCanvas"></canvas>
+<header>
+    <a href="dashboard.html" class="logo"><span>LEO</span><span>AF</span></a>
+    <div class="nav-right">
+        <a href="m5.html" class="nav-btn">← M5 HUB</a>
+        <button class="nav-btn" onclick="leoafAbort()">ABORT</button>
+    </div>
+</header>
+<div class="breadcrumb">
+    <a href="dashboard.html">DASHBOARD</a><span>/</span>
+    <a href="m5.html">M5</a><span>/</span>
+    <span style="color:#ffffff88;">LESSON 06 — DIRECT-TO-DEVICE PHY</span>
+</div>
+
+<div class="lesson-wrap">
+<div class="lesson-header">
+    <div class="lesson-tag">M5 · LESSON 06 OF 7</div>
+    <h1>Direct-to-Device<br>Physical Layer</h1>
+    <div class="lesson-meta">
+        <div class="l-pill l-pill-q">MODULE 5</div>
+        <div class="l-pill l-pill-t">AIR INTERFACE &amp; ACCESS</div>
+        <div class="l-pill l-pill-c">ADVANCED</div>
+    </div>
+    <p class="lesson-intro" style="margin-bottom:12px;">Every link in this module so far assumed a cooperative terminal: a dish that points, an amplifier with watts to spend, an antenna with gain. Direct-to-device (D2D) removes the assumption. The terminal is an unmodified smartphone — designed for a cell tower two kilometres away, held at an arbitrary angle, next to a human head — and it will not change, because the entire commercial premise of D2D is serving the phones people already own. The handset's RF parameters are the fixed point of the design, and every decibel the link budget needs must be found on the space segment.</p>
+    <p class="lesson-intro" style="margin-bottom:12px;">This lesson is Module 4 applied to its hardest case. The tools are all familiar — EIRP, G/T, FSPL, bandwidth, MODCOD floors — but the regime is extreme: the terminal is 40–47 dB worse than the VSAT of m4-1, and the system architecture that closes the gap (enormous apertures, narrowband carriers, waveforms operating below 0 dB SNR) looks nothing like broadband satcom. The lesson also resolves a thread left open in m5-3 and m5-5: how a satellite serves a phone that has GNSS but none of the Release-17 NTN protocol machinery — by making the network do the compensating, and making the beams small enough that it works.</p>
+    <p class="lesson-intro" style="margin-bottom:12px;">The strategic frame to hold throughout: D2D is a <strong>coverage product, not a capacity product</strong>. The physics permits closing the link; it does not permit closing it with much spectral width or to many simultaneous users per beam. Section 8 does that arithmetic, and it disciplines every expectation upstream.</p>
+</div>
+
+<div class="toc">
+    <h4>CONTENTS</h4>
+    <ol>
+        <li><a href="#s1">The fixed point: what a smartphone is, radiometrically</a></li>
+        <li><a href="#s2">Where the decibels come from</a></li>
+        <li><a href="#s3">Aperture economics</a></li>
+        <li><a href="#s4">The bandwidth lever, demonstrated</a></li>
+        <li><a href="#s5">The waveform floor</a></li>
+        <li><a href="#s6">Two link budgets, assembled</a></li>
+        <li><a href="#s7">Spectrum: the narrowest resource</a></li>
+        <li><a href="#s8">The capacity arithmetic, and the elephant</a></li>
+        <li><a href="#s9">Key facts</a></li>
+        <li><a href="#s10">What this lesson delivers to the design chain</a></li>
+        <li><a href="#quiz">Knowledge check</a></li>
+        <li><a href="#py">Python exercises</a></li>
+        <li><a href="#reflect">Reflection</a></li>
+    </ol>
+</div>
+
+<div class="cb" id="s1">
+    <h2>1. The fixed point: what a smartphone is, radiometrically</h2>
+<p>Typical handset RF characteristics at L/S-band, with the m4-1 VSAT alongside:</p>
+<table class="compare-table">
+<thead><tr>
+<th>Parameter</th>
+<th>Smartphone</th>
+<th>VSAT terminal (m4-1)</th>
+<th>Gap</th>
+</tr></thead>
+<tbody>
+<tr><td>Transmit power</td><td>23 dBm (0.2 W, power class 3)</td><td>~3 dBW (2 W)</td><td>10 dB</td></tr>
+<tr><td>Antenna gain</td><td>≈ −3 dBi (near-omni, detuned by hand/head)</td><td>34–37.5 dBi</td><td>~37–40 dB</td></tr>
+<tr><td><strong>EIRP</strong></td><td><strong>≈ −10 dBW</strong></td><td><strong>≈ +37 dBW</strong></td><td><strong>47 dB</strong></td></tr>
+<tr><td>Receive G/T</td><td>≈ −30 dB/K (−3 dBi, T_sys ~500 K)</td><td>+12.7 dB/K</td><td>~43 dB</td></tr>
+<tr><td>Pointing</td><td>none — arbitrary orientation</td><td>tracked</td><td>—</td></tr>
+<tr><td>Polarisation</td><td>linear, orientation random</td><td>matched circular</td><td>~3 dB budgeted</td></tr>
+</tbody>
+</table>
+<p>Three properties beyond the headline numbers matter. The antenna is <strong>unpointed</strong>: no gain can ever be recovered by aiming, and the −3 dBi figure already averages over orientations and body loss. The polarisation is <strong>linear and random</strong> against the satellite's circular, budgeting a ~3 dB mismatch permanently. And the platform is <strong>uncooperative in aggregate</strong>: the phone regulates its own power for battery and SAR compliance, and it implements exactly the protocol releases it shipped with.</p>
+<p>Two terminal generations therefore exist. A <strong>Release-17 NTN handset</strong> implements m5-5's machinery — it computes its own timing advance and Doppler pre-compensation from GNSS plus broadcast ephemeris. A <strong>legacy handset</strong> has the GNSS but not the protocol: for it, the network must pre-compensate the beam-centre delay and Doppler on the satellite side, and the <em>residuals</em> across the beam must fit inside what legacy terrestrial tracking loops and random-access formats tolerate. Residual Doppler scales with beam size — of order a kilohertz across a tens-of-kilometres beam at 2 GHz — which makes small beams a protocol requirement, not just an antenna consequence. This is the design fork: UE-side compensation (new phones, Rel-17) versus network-side compensation (any phone, small beams, satellite does the work).</p>
+</div>
+
+<div class="cb" id="s2">
+    <h2>2. Where the decibels come from</h2>
+<p>The ~45 dB hole is filled from exactly four accounts:</p>
+<p><strong>Orbit altitude.</strong> LEO at 550 km instead of GEO: FSPL at 2 GHz is 158.5 dB at a 1,000 km design slant versus ~190 dB from GEO — roughly 32 dB recovered instantly (37 dB at high elevation), which is why D2D at scale is a LEO product. (MSS from GEO existed for decades — with phones that were not smartphones: external antennas, watts of transmit power, users who pointed them at the sky.)</p>
+<p><strong>Aperture.</strong> Antenna gain is proportional to area. At 2 GHz (λ = 15 cm), useful gain demands physically large structures — section 3 quantifies the scaling. This is the account the current generation of D2D operators is drawing on hardest, with deployable arrays from tens to hundreds of square metres reported publicly.</p>
+<p><strong>Bandwidth reduction.</strong> For a fixed C/N₀, SNR = C/N₀ − 10·log₁₀(B): every halving of carrier bandwidth buys 3 dB of SNR at proportional cost in rate. Narrowband is the poor man's antenna gain, purchased in throughput — section 4.</p>
+<p><strong>Waveform floor.</strong> Air-interface modes engineered for deeply negative SNR: DVB-S2X's VL-SNR MODCODs reach ≈ −10 dB Es/N₀ via spreading; NB-IoT buys margin with up to 128 repetitions; NR coverage enhancement stacks repetition similarly. All trade time for decibels — section 5.</p>
+<p>Nothing else exists. Satellite transmit power helps the downlink but is bounded by the power subsystem and by regulatory flux limits toward the ground (section 7); frequency is fixed low by the handset's antennas and the allocations.</p>
+</div>
+
+<div class="cb" id="s3">
+    <h2>3. Aperture economics</h2>
+<p>Gain scales with area (G = 4πA/λ², ~70% efficiency assumed); beamwidth shrinks as diameter grows:</p>
+<table class="compare-table">
+<thead><tr>
+<th>Array area</th>
+<th>Equiv. diameter</th>
+<th>Gain @ 2 GHz</th>
+<th>Beamwidth</th>
+<th>Nadir footprint (550 km)</th>
+</tr></thead>
+<tbody>
+<tr><td>8 m²</td><td>3.2 m</td><td>35.0 dBi</td><td>3.3°</td><td>~32 km</td></tr>
+<tr><td>64 m²</td><td>9.0 m</td><td>44.0 dBi</td><td>1.2°</td><td>~11 km</td></tr>
+<tr><td>220 m²</td><td>16.7 m</td><td>49.4 dBi</td><td>0.6°</td><td>~6 km</td></tr>
+</tbody>
+</table>
+<p>Every row is a spacecraft-engineering statement before it is an RF one: these are deployable structures in the Module-3 payload class, and area drives launch volume, deployment risk, attitude control, and cost. But the RF returns compound three ways. Gain serves both directions (uplink G/T and downlink EIRP). Small beams concentrate the scarce spectrum into small cells, multiplying areal capacity through reuse — the m3 frequency-reuse logic at maximum intensity. And small beams shrink the differential delay and Doppler that legacy handsets must absorb (section 1) — the aperture is doing protocol work. The single most important scaling law in D2D: <strong>capacity per unit area grows roughly with aperture area squared</strong> (once through gain, once through reuse density), which is why the operators' aperture race is rational.</p>
+</div>
+
+<div class="cb" id="s4">
+    <h2>4. The bandwidth lever, demonstrated</h2>
+<p>A worked downlink at 2 GHz, 1,000 km slant (FSPL 158.5 dB), 4 dB of polarisation and miscellaneous losses, to the handset's −30 dB/K:</p>
+<table class="compare-table">
+<thead><tr>
+<th>Satellite beam EIRP</th>
+<th>C/N₀</th>
+<th>SNR over 5 MHz</th>
+<th>SNR over 180 kHz</th>
+</tr></thead>
+<tbody>
+<tr><td>24 dBW</td><td>60.1 dBHz</td><td>−6.8 dB</td><td>+7.6 dB</td></tr>
+<tr><td>30 dBW</td><td>66.1 dBHz</td><td>−0.8 dB</td><td>+13.6 dB</td></tr>
+<tr><td>36 dBW</td><td>72.1 dBHz</td><td>+5.2 dB</td><td>+19.6 dB</td></tr>
+</tbody>
+</table>
+<p>Read the middle row: at 30 dBW (1 kW EIRP — a serious but achievable per-beam figure for a large array), a 5 MHz NR carrier does not close, while a single 180 kHz resource block enjoys 13.6 dB. Same link, same C/N₀ — the carrier width is the dial. The system consequence: D2D carriers are narrow by design, capacity arrives as <em>many narrow carriers across many small beams</em>, and per-user peak rates are structurally modest. The uplink tells the same story with the satellite aperture as the variable: against a 64 m² array (G/T ≈ 17 dB/K), the handset's −10 dBW closes 180 kHz at ~20 dB SNR and even 1.4 MHz at ~12 dB — the big aperture converts a hopeless transmitter into a workable one.</p>
+</div>
+
+<div class="cb" id="s5">
+    <h2>5. The waveform floor</h2>
+<p>Below roughly 0 dB SNR, the m5-2 ladder runs out — QPSK 1/4 needs −2.35 dB Es/N₀ and nothing in the classic table goes deeper. Three mechanisms extend the floor:</p>
+<p><strong>Spreading (DVB-S2X VL-SNR).</strong> π/2-BPSK with spreading factors trades bandwidth for energy per symbol, reaching ≈ −10 dB Es/N₀. The S2X answer, built for exactly this regime.</p>
+<p><strong>Repetition (NB-IoT, NR coverage enhancement).</strong> Transmit the same block up to 128 times; the receiver combines coherently, gaining ~3 dB per doubling (up to channel-coherence limits). A 64-repetition NB-IoT uplink buys ~18 dB — which is how a sensor, or a text message, closes a link a voice call cannot.</p>
+<p><strong>Both are time-for-decibels trades.</strong> A message that costs 64 slots instead of one is fine for messaging and telemetry, marginal for voice, and disqualifying for broadband. The waveform floor thus maps directly onto the service tiers of section 8: each tier is a different point on the time-energy exchange.</p>
+</div>
+
+<div class="cb" id="s6">
+    <h2>6. Two link budgets, assembled</h2>
+<p>Pulling the accounts together for a mid-size (64 m²) array at 550 km, 2 GHz, 1,000 km design slant:</p>
+<p><strong>Downlink (satellite → phone):</strong> EIRP 30 dBW − FSPL 158.5 − losses 4 + G/T (−30) + 228.6 = <strong>C/N₀ 66.1 dBHz</strong>. Over one 180 kHz carrier: SNR 13.6 dB → comfortable for a few-hundred-kbps carrier; over 1.4 MHz: 4.7 dB → workable low-rate broadband; over 5 MHz: fails. The downlink is EIRP-constrained, and beam EIRP is the payload's scarcest export.</p>
+<p><strong>Uplink (phone → satellite):</strong> EIRP −10 dBW − 158.5 − 4 + G/T 17.0 + 228.6 = <strong>C/N₀ 73.2 dBHz</strong> — <em>higher</em> than the downlink. The giant receive aperture more than repays the handset's feeble transmitter. This reverses the broadband asymmetry of m4-7 (where the return link was the starved one): in D2D with a large array, the <strong>downlink</strong> is the binding constraint, because the handset's awful G/T has no aperture on its side of the link while the handset's awful EIRP does.</p>
+<p>Both budgets carry the usual m4 machinery on top — elevation-dependent slant, and at L/S-band the atmospherics are mercifully mild (m4-3: rain is a Ka-band tax; 2 GHz shrugs at it), which is one quiet advantage of the D2D regime.</p>
+</div>
+
+<div class="cb" id="s7">
+    <h2>7. Spectrum: the narrowest resource</h2>
+<p>Two spectrum routes, with different physics attached:</p>
+<p><strong>MSS allocations</strong> (the m5-5 bands n255/n256 — L- and S-band mobile-satellite spectrum): designed for the job, internationally coordinated for space use, but scarce — of order tens of megahertz total, shared among systems.</p>
+<p><strong>Terrestrial partner spectrum</strong> — a mobile operator lends its licensed cellular band to a satellite partner (the "supplemental coverage from space" model, given a regulatory framework by the FCC in 2024 and mirrored elsewhere). The satellite transmits <em>inside a terrestrial operator's band</em>, which buys handset compatibility at the cost of hard coexistence constraints: power flux-density limits protecting the terrestrial network at the coverage boundary, per-market coordination, and carrier widths capped by what the partner can spare — typically 5 MHz-class blocks. The lesson's capacity arithmetic uses exactly such a block, because it is the realistic case.</p>
+<p>Either way, D2D operates on one to two orders of magnitude less spectrum than a Ka-band broadband beam (5–30 MHz versus 250–400 MHz) — the root cause of section 8's conclusions.</p>
+</div>
+
+<div class="cb" id="s8">
+    <h2>8. The capacity arithmetic, and the elephant</h2>
+<p>Per-beam capacity for the realistic case — a 5 MHz partner-spectrum block, spectral efficiency ~1 bit/s/Hz at D2D SNRs (attenuated-Shannon at the section-4 operating points):</p>
+<blockquote>≈ 3–5 Mbps per beam, shared among every active user in a ~10–30 km cell (the spine's power-split model lands at ~3; a full-power-per-carrier idealisation at ~5).</blockquote>
+<p>Translate into services: <strong>messaging</strong> at ~1 kb per message → thousands of messages per second per beam — an excellent product, genuinely mass-market. <strong>Voice</strong> at ~10–20 kbps per call → a few hundred simultaneous calls per beam — viable, finite. <strong>Broadband</strong> at Mbps per user → a handful of users per beam — not a product, a demonstration. Frequency reuse across many small beams multiplies the totals (the §3 scaling), and larger apertures raise η — but the conclusion is robust across every plausible parameter set: D2D delivers <em>coverage everywhere</em>, not <em>capacity anywhere</em>. The commercial architecture follows: D2D as an MNO's dead-zone layer (messaging first, voice next, data last), priced as coverage insurance, while broadband stays with pointed terminals on Ka (m4, m5-1..4). An architect who lets a business plan assume otherwise has failed the module.</p>
+</div>
+
+<div class="cb" id="s9">
+    <h2>9. Key facts</h2>
+<table class="compare-table">
+<thead><tr>
+<th>Fact</th>
+<th>Value</th>
+<th>Unit</th>
+<th>Source</th>
+</tr></thead>
+<tbody>
+<tr><td>Handset transmit power (class 3)</td><td>23 (0.2 W)</td><td>dBm</td><td>3GPP TS 38.101</td></tr>
+<tr><td>Handset antenna gain</td><td>≈ −3</td><td>dBi</td><td>Typical, orientation-averaged</td></tr>
+<tr><td>Handset EIRP</td><td>≈ −10</td><td>dBW</td><td>Computed</td></tr>
+<tr><td>Handset G/T</td><td>≈ −30</td><td>dB/K</td><td>Computed (T_sys ~500 K)</td></tr>
+<tr><td>EIRP gap vs VSAT</td><td>~47</td><td>dB</td><td>Computed vs m4-1</td></tr>
+<tr><td>FSPL, 2 GHz, 550 / 1,000 km</td><td>153.3 / 158.5</td><td>dB</td><td>Computed</td></tr>
+<tr><td>Gain of 64 m² array @ 2 GHz</td><td>~44 (η = 0.7)</td><td>dBi</td><td>Computed</td></tr>
+<tr><td>Footprint, 64 m² array, 550 km</td><td>~11</td><td>km</td><td>Computed</td></tr>
+<tr><td>D2D areal-capacity scaling</td><td>∝ aperture area² (gain × reuse)</td><td>—</td><td>§3 argument</td></tr>
+<tr><td>DL: 30 dBW EIRP → SNR over 5 MHz / 180 kHz</td><td>−0.8 / +13.6</td><td>dB</td><td>Computed</td></tr>
+<tr><td>UL: 64 m² array → C/N₀</td><td>73.2 (exceeds DL)</td><td>dBHz</td><td>Computed</td></tr>
+<tr><td>S2X VL-SNR floor</td><td>≈ −10</td><td>dB Es/N₀</td><td>EN 302 307-2</td></tr>
+<tr><td>NB-IoT repetitions</td><td>up to 128 (~3 dB per doubling)</td><td>—</td><td>3GPP NB-IoT</td></tr>
+<tr><td>Partner-spectrum carrier class</td><td>~5</td><td>MHz</td><td>FCC SCS framework (2024)</td></tr>
+<tr><td>Per-beam capacity, 5 MHz block</td><td>≈ 3–5</td><td>Mbps</td><td>Computed (spine Stage 6)</td></tr>
+</tbody>
+</table>
+</div>
+
+<div class="cb" id="s10">
+    <h2>10. What this lesson delivers to the design chain</h2>
+<p>The spine gains Stage 6: a D2D link model with the handset constants frozen and the space segment as the only variable — aperture area, per-beam EIRP, carrier width — producing both directions' C/N₀, the widest carrier that closes at a target SNR, and the per-beam capacity that section 8's service tiers consume. It is the same engine as broadband, run at the far corner of its parameter space, and the corner inverts the familiar asymmetry: the downlink, not the uplink, binds.</p>
+<p>Conceptually the lesson closes the module's terminal-side story: m5-1 through m5-4 assumed the terminal cooperates, m5-5 assumed it at least runs new software, m5-6 assumed nothing — and got, in exchange, the largest addressable device base in the industry and the smallest per-user capacity. m5-7 now assembles all six stages into the module's final artefact: throughput per beam, end to end, for any terminal class.</p>
+</div>
+
+<div class="quiz-block" id="quiz">
+    <h2>KNOWLEDGE CHECK</h2>
+    <div class="quiz-intro">Ten questions. Each option explains itself after you commit. No retries per question — decide first.</div>
+    <div class="quiz-q">
+        <p><strong>Q1.</strong> The handset's ≈ −10 dBW EIRP is the design's fixed point because:</p>
+        <div class="quiz-options">
+            <button class="quiz-opt" data-q="1" data-correct="false">A — Regulators forbid improving handsets</button>
+            <button class="quiz-opt" data-q="1" data-correct="true">B — The commercial premise of D2D is serving unmodified phones people already own, so the terminal's RF parameters cannot be engineered — every decibel must come from the space segment</button>
+            <button class="quiz-opt" data-q="1" data-correct="false">C — Handset antennas are optimal already</button>
+            <button class="quiz-opt" data-q="1" data-correct="false">D — EIRP does not matter at L/S-band</button>
+        </div>
+        <div class="quiz-feedback" id="fb1"></div>
+    </div>
+    <div class="quiz-q">
+        <p><strong>Q2.</strong> LEO rather than GEO is effectively mandatory for smartphone D2D because:</p>
+        <div class="quiz-options">
+            <button class="quiz-opt" data-q="2" data-correct="false">A — GEO satellites cannot transmit at 2 GHz</button>
+            <button class="quiz-opt" data-q="2" data-correct="true">B — The ~32–37 dB of FSPL saved by 550–1,000 km ranges versus 36,000+ km is the single largest deposit available against the handset's ~45 dB deficit</button>
+            <button class="quiz-opt" data-q="2" data-correct="false">C — LEO spectrum is free</button>
+            <button class="quiz-opt" data-q="2" data-correct="false">D — GEO Doppler is too high</button>
+        </div>
+        <div class="quiz-feedback" id="fb2"></div>
+    </div>
+    <div class="quiz-q">
+        <p><strong>Q3.</strong> Serving a <em>legacy</em> handset (no Release-17 NTN features) requires the network to pre-compensate beam-centre delay and Doppler, and requires small beams, because:</p>
+        <div class="quiz-options">
+            <button class="quiz-opt" data-q="3" data-correct="false">A — Legacy phones lack GNSS</button>
+            <button class="quiz-opt" data-q="3" data-correct="true">B — The residual delay and Doppler after beam-centre compensation scale with beam size, and must fit inside what legacy terrestrial tracking loops and random-access formats tolerate</button>
+            <button class="quiz-opt" data-q="3" data-correct="false">C — Small beams increase the handset's antenna gain</button>
+            <button class="quiz-opt" data-q="3" data-correct="false">D — Regulators mandate beam sizes</button>
+        </div>
+        <div class="quiz-feedback" id="fb3"></div>
+    </div>
+    <div class="quiz-q">
+        <p><strong>Q4.</strong> Halving a D2D carrier's bandwidth at fixed C/N₀:</p>
+        <div class="quiz-options">
+            <button class="quiz-opt" data-q="4" data-correct="false">A — Halves the SNR</button>
+            <button class="quiz-opt" data-q="4" data-correct="true">B — Adds 3 dB of SNR while roughly halving the achievable rate — bandwidth reduction is a link-margin lever paid in throughput</button>
+            <button class="quiz-opt" data-q="4" data-correct="false">C — Doubles the required satellite EIRP</button>
+            <button class="quiz-opt" data-q="4" data-correct="false">D — Has no effect on SNR</button>
+        </div>
+        <div class="quiz-feedback" id="fb4"></div>
+    </div>
+    <div class="quiz-q">
+        <p><strong>Q5.</strong> D2D areal capacity scales roughly with aperture area <em>squared</em> because area buys:</p>
+        <div class="quiz-options">
+            <button class="quiz-opt" data-q="5" data-correct="false">A — Lower FSPL and lower Doppler</button>
+            <button class="quiz-opt" data-q="5" data-correct="true">B — Gain (once) and beam-count/reuse density (again) — more decibels per link and more small cells per unit ground area</button>
+            <button class="quiz-opt" data-q="5" data-correct="false">C — More spectrum</button>
+            <button class="quiz-opt" data-q="5" data-correct="false">D — Better handset antennas</button>
+        </div>
+        <div class="quiz-feedback" id="fb5"></div>
+    </div>
+    <div class="quiz-q">
+        <p><strong>Q6.</strong> With a large satellite array, the binding constraint of a D2D system is typically the <em>downlink</em>, reversing m4-7's broadband asymmetry, because:</p>
+        <div class="quiz-options">
+            <button class="quiz-opt" data-q="6" data-correct="false">A — Handsets cannot receive at 2 GHz</button>
+            <button class="quiz-opt" data-q="6" data-correct="true">B — The aperture repays the handset's weak transmitter on the uplink (G/T on the satellite side), but nothing repays the handset's −30 dB/K receive G/T except raw beam EIRP — the payload's scarcest export</button>
+            <button class="quiz-opt" data-q="6" data-correct="false">C — Downlink FSPL is higher than uplink FSPL</button>
+            <button class="quiz-opt" data-q="6" data-correct="false">D — Rain attenuates only the downlink</button>
+        </div>
+        <div class="quiz-feedback" id="fb6"></div>
+    </div>
+    <div class="quiz-q">
+        <p><strong>Q7.</strong> NB-IoT closes links that voice cannot, using the same handset and satellite, because:</p>
+        <div class="quiz-options">
+            <button class="quiz-opt" data-q="7" data-correct="false">A — Sensors have better antennas</button>
+            <button class="quiz-opt" data-q="7" data-correct="true">B — Up to 128 repetitions trade time for ~3 dB per doubling — acceptable for a message with no latency requirement, disqualifying for a conversation</button>
+            <button class="quiz-opt" data-q="7" data-correct="false">C — NB-IoT uses Ka-band</button>
+            <button class="quiz-opt" data-q="7" data-correct="false">D — NB-IoT is exempt from the link budget</button>
+        </div>
+        <div class="quiz-feedback" id="fb7"></div>
+    </div>
+    <div class="quiz-q">
+        <p><strong>Q8.</strong> Terrestrial partner spectrum ("supplemental coverage from space") buys handset compatibility at the cost of:</p>
+        <div class="quiz-options">
+            <button class="quiz-opt" data-q="8" data-correct="false">A — Higher FSPL</button>
+            <button class="quiz-opt" data-q="8" data-correct="true">B — Hard coexistence constraints — power flux-density limits protecting the terrestrial network, per-market coordination, and carrier widths capped at what the partner spares</button>
+            <button class="quiz-opt" data-q="8" data-correct="false">C — Mandatory Ka-band operation</button>
+            <button class="quiz-opt" data-q="8" data-correct="false">D — Losing GNSS</button>
+        </div>
+        <div class="quiz-feedback" id="fb8"></div>
+    </div>
+    <div class="quiz-q">
+        <p><strong>Q9.</strong> The ≈3–5 Mbps-per-beam figure makes D2D a coverage product rather than a capacity product because:</p>
+        <div class="quiz-options">
+            <button class="quiz-opt" data-q="9" data-correct="false">A — 5 Mbps cannot carry any service</button>
+            <button class="quiz-opt" data-q="9" data-correct="true">B — Divided across every active user in a 10–30 km cell, it supports messaging at mass scale, voice at hundreds of calls, and broadband only as a demonstration — the value is reaching everywhere, not serving densely</button>
+            <button class="quiz-opt" data-q="9" data-correct="false">C — Beams cannot overlap</button>
+            <button class="quiz-opt" data-q="9" data-correct="false">D — The figure ignores frequency reuse</button>
+        </div>
+        <div class="quiz-feedback" id="fb9"></div>
+    </div>
+    <div class="quiz-q">
+        <p><strong>Q10.</strong> Compared with the Ka-band broadband beam of m5-4 (634 Mbps net in 250 MHz), the D2D beam's two-orders-of-magnitude capacity deficit traces primarily to:</p>
+        <div class="quiz-options">
+            <button class="quiz-opt" data-q="10" data-correct="false">A — Worse FEC codes</button>
+            <button class="quiz-opt" data-q="10" data-correct="true">B — One to two orders of magnitude less spectrum (5 vs 250 MHz) times several fewer bits/s/Hz at D2D SNRs — both consequences of the frozen terminal</button>
+            <button class="quiz-opt" data-q="10" data-correct="false">C — The satellite's altitude</button>
+            <button class="quiz-opt" data-q="10" data-correct="false">D — Regulatory throttling of data rates</button>
+        </div>
+        <div class="quiz-feedback" id="fb10"></div>
+    </div>
+    <div class="quiz-score" id="quizScore"></div>
+</div>
+
+<div class="py-block" id="py">
+    <h2>PYTHON EXERCISES</h2>
+    <div class="py-intro">Three exercises; the last extends the module spine project. Run them, then work the numbered follow-ups in the comments — the follow-ups are the exercise.</div>
+    <div class="py-exercise">
+        <h3>Exercise 1 — The fixed point, quantified</h3>
+        <p>Build the handset and measure the hole.</p>
+<pre>
+import math
+db = lambda x: 10*math.log10(x)
+
+# The frozen terminal
+h_eirp = -7 + (-3)                 # 23 dBm PA, -3 dBi antenna -&gt; dBW
+h_gt   = -3 - db(500)              # -3 dBi over T_sys ~500 K
+# The m4-1 comparison terminal
+v_eirp = db(2) + 34                # 2 W, 34 dBi (uplink config)
+v_gt   = 12.7
+
+print(f&quot;handset EIRP {h_eirp:+.0f} dBW   VSAT {v_eirp:+.0f} dBW   gap {v_eirp-h_eirp:.0f} dB&quot;)
+print(f&quot;handset G/T  {h_gt:+.1f} dB/K  VSAT {v_gt:+.1f} dB/K  gap {v_gt-h_gt:.1f} dB&quot;)
+
+# Where the decibels come from — the four accounts at 2 GHz
+fspl = lambda d_km, f_ghz: 92.45 + 20*math.log10(d_km) + 20*math.log10(f_ghz)
+print(f&quot;\norbit:  GEO-&gt;LEO FSPL saving: {fspl(38000,2)-fspl(1000,2):.1f} dB&quot;)
+lam = 0.15
+for A in [8, 64, 220]:
+    print(f&quot;aperture {A:&gt;4} m2: gain {db(4*math.pi*A/lam**2)-1.5:.1f} dBi&quot;)
+print(f&quot;bandwidth: 5 MHz -&gt; 180 kHz buys {db(5e6/180e3):.1f} dB of SNR&quot;)
+print(f&quot;waveform:  QPSK1/4 floor -2.35 dB; VL-SNR ~-10 dB; 64 reps ~ +{db(64):.0f} dB&quot;)
+
+# 1. Recompute the handset G/T for T_sys 300 K (open sky, good LNA)
+#    and 1000 K (urban, hand-blocked). How much does the spread move
+#    the section-4 SNR table, and who controls this parameter?
+# 2. The -3 dBi is orientation-averaged. If 10% of orientations sit
+#    at -10 dBi, what does that do to a service availability target —
+#    and which m4-4 concept does this reuse (hint: statistics of a loss)?
+# 3. Express the total hole (EIRP gap + G/T gap) and verify the four
+#    accounts above can plausibly sum to fill it for messaging service.
+</pre>
+    </div>
+    <div class="py-exercise">
+        <h3>Exercise 2 — Aperture, beams, and the squared scaling</h3>
+        <p>Quantify gain, footprint, and areal capacity together.</p>
+<pre>
+import math
+db = lambda x: 10*math.log10(x)
+lam, h = 0.15, 550e3
+
+def array(A_m2, eff=0.7):
+    G = db(4*math.pi*A_m2/lam**2 * eff)
+    D = math.sqrt(4*A_m2/math.pi)
+    bw = 70*lam/D                       # deg
+    foot = 2*(h/1e3)*math.tan(math.radians(bw/2))
+    return G, bw, foot
+
+print(f&quot;{&#x27;A (m2)&#x27;:&gt;7}{&#x27;G (dBi)&#x27;:&gt;9}{&#x27;beam&#x27;:&gt;7}{&#x27;foot (km)&#x27;:&gt;10}{&#x27;cells/1000km2&#x27;:&gt;15}&quot;)
+for A in [8, 16, 32, 64, 128, 220]:
+    G, bw, foot = array(A)
+    cell_area = math.pi*(foot/2)**2
+    print(f&quot;{A:&gt;7}{G:&gt;9.1f}{bw:&gt;6.2f}°{foot:&gt;10.1f}{1000/cell_area:&gt;15.2f}&quot;)
+
+# Areal capacity ∝ area^2 check: per-cell rate grows with G (∝A),
+# cells per km2 grow with 1/foot^2 (∝A) -&gt; product ∝ A^2 (until
+# the SNR-&gt;eta curve saturates).
+
+# 1. Verify the squared law numerically: compute per-km2 capacity at
+#    A=16 and A=64 using the attenuated-Shannon eta at each gain&#x27;s
+#    downlink SNR (EIRP fixed at 30 dBW). Where does saturation bend it?
+# 2. The 220 m2 row&#x27;s 6 km footprint approaches terrestrial cell
+#    sizes. What new problem appears when satellite cells are this
+#    small and moving at 7.6 km/s? (m5-5 §6 vocabulary.)
+# 3. Each doubling of A costs structure, launch volume, and attitude-
+#    control authority. Sketch the diminishing-returns argument: which
+#    single m4/m5 quantity would you monitor to decide when to stop?
+</pre>
+    </div>
+    <div class="py-exercise">
+        <h3>Exercise 3 — Spine Stage 6: the D2D link model</h3>
+        <p>The engine visits the far corner of its parameter space.</p>
+<pre>
+import math
+
+# ═══════════════════════════════════════════════════════
+# M5 SPINE PROJECT — THROUGHPUT ENGINE
+# Stage 6: direct-to-device.
+#   Handset constants frozen; the space segment is the only
+#   variable. Outputs: both directions&#x27; C/N0, widest closing
+#   carrier, per-beam capacity for the §8 service tiers.
+# Next: m5-7 assembles stages 1-6 into throughput-per-beam.
+# ═══════════════════════════════════════════════════════
+
+db = lambda x: 10*math.log10(x)
+
+HANDSET = {&quot;eirp_dbw&quot;: -10.0, &quot;gt_dbk&quot;: -30.0}   # the fixed point
+CARRIERS_HZ = [5e6, 1.4e6, 720e3, 360e3, 180e3]  # NR-ish widths
+
+class D2DLink:
+    def __init__(self, name, array_m2, beam_eirp_dbw, f_ghz=2.0,
+                 slant_km=1000.0, t_sys_sat=500.0, losses_db=4.0):
+        self.name = name
+        self.fspl = 92.45 + 20*math.log10(slant_km) + 20*math.log10(f_ghz)
+        lam = 0.3/f_ghz
+        g_sat = db(4*math.pi*array_m2/lam**2 * 0.7)
+        self.sat_gt = g_sat - db(t_sys_sat)
+        self.dl_cn0 = beam_eirp_dbw - self.fspl - losses_db \
+                      + HANDSET[&quot;gt_dbk&quot;] + 228.6
+        self.ul_cn0 = HANDSET[&quot;eirp_dbw&quot;] - self.fspl - losses_db \
+                      + self.sat_gt + 228.6
+
+    def widest_carrier(self, cn0, target_snr_db=4.0):
+        for bw in CARRIERS_HZ:
+            if cn0 - db(bw) &gt;= target_snr_db:
+                return bw
+        return None
+
+    def eta(self, snr_db, alpha=0.75, cap=7.406):   # m5-5 abstraction
+        return min(cap, alpha*math.log2(1 + 10**(snr_db/10)))
+
+    def report(self, spectrum_hz=5e6):
+        print(f&quot;\n{&#x27;─&#x27;*56}&quot;)
+        print(f&quot;  D2D LINK — {self.name}&quot;)
+        print(f&quot;{&#x27;─&#x27;*56}&quot;)
+        for label, cn0 in [(&quot;DOWNLINK&quot;, self.dl_cn0), (&quot;UPLINK  &quot;, self.ul_cn0)]:
+            bw = self.widest_carrier(cn0)
+            if bw:
+                snr = cn0 - db(bw)
+                rate = bw*self.eta(snr)
+                print(f&quot;  {label}  C/N0 {cn0:5.1f} dBHz | widest carrier &quot;
+                      f&quot;{bw/1e3:6.0f} kHz | SNR {snr:5.1f} dB | {rate/1e3:7.0f} kbps&quot;)
+            else:
+                print(f&quot;  {label}  C/N0 {cn0:5.1f} dBHz | no carrier closes at target&quot;)
+        # per-beam capacity: fill the block with the binding direction
+        cn0 = min(self.dl_cn0, self.ul_cn0)
+        snr_full = cn0 - db(spectrum_hz)
+        cap_narrow = 0
+        bw = self.widest_carrier(cn0)
+        if bw:
+            n = int(spectrum_hz // bw)
+            # Total beam power splits across n carriers: per-carrier
+            # C/N0 drops by 10*log10(n). (Exercise 1 interrogates this.)
+            snr_split = cn0 - db(n) - db(bw)
+            cap_narrow = n * bw * self.eta(snr_split)
+        print(f&quot;  BEAM ({spectrum_hz/1e6:.0f} MHz): binding dir C/N0 {cn0:.1f} dBHz&quot;
+              f&quot; -&gt; ~{cap_narrow/1e6:5.2f} Mbps/beam&quot;)
+        print(f&quot;  tiers: ~{cap_narrow/1e3:.0f} msgs/s @1kb | &quot;
+              f&quot;~{cap_narrow/15e3:.0f} voice calls @15kbps&quot;)
+        print(f&quot;{&#x27;─&#x27;*56}&quot;)
+
+# ── The aperture sweep ──────────────────────────────────
+for A, eirp in [(8, 24), (64, 30), (220, 36)]:
+    D2DLink(f&quot;{A} m² array, {eirp} dBW/beam&quot;, A, eirp).report()
+
+# 1. The beam-capacity model splits total power across n carriers
+#    (C/N0 - 10log10 n per carrier). Defend or attack this assumption
+#    for (a) the downlink, (b) the uplink — which direction does it
+#    actually apply to, and what replaces it in the other?
+# 2. Sweep slant 550..2000 km for the 64 m² case: at what range does
+#    each service tier die? Relate to minimum elevation angle policy
+#    (m2) and constellation sizing.
+# 3. Add the m5-5 per-UE HARQ duty factor for a Rel-17 NTN handset
+#    at RTT 25.8 ms. Does it bind before or after the link budget
+#    does, at these carrier widths?
+</pre>
+    </div>
+</div>
+
+<div class="reflection-block" id="reflect">
+    <h2>REFLECTION</h2>
+    <div class="ref-intro">Four prompts. Each forces a decision — write the position down before moving on; the act of committing is the exercise.</div>
+    <div class="ref-prompt">
+        <h3>PROMPT 01</h3>
+        <p>Section 1 froze the handset and section 2 enumerated exactly four decibel accounts. A colleague proposes a fifth: cooperative combining, where several satellites illuminate one handset coherently. Assess it honestly — what synchronisation accuracy does coherent combining across LEO baselines require (express in picoseconds against the 23 µs/s delay drift of m5-3), what does incoherent combining still buy, and why has no operator led with this?</p>
+    </div>
+    <div class="ref-prompt">
+        <h3>PROMPT 02</h3>
+        <p>Section 6 found the downlink binding for a large-array system. Invert the architecture: a small-array constellation (8 m² class) with many more satellites. Rerun the §6 logic — which direction binds now, what does the §3 squared-scaling say about areal capacity per unit of total deployed aperture, and under what launch-cost regime does the many-small architecture win? This is a genuine open trade in the industry; commit to a position and defend it with the module's numbers.</p>
+    </div>
+    <div class="ref-prompt">
+        <h3>PROMPT 03</h3>
+        <p>The §8 tier arithmetic prices messaging as the natural first product. Regulators in several jurisdictions are moving toward mandating satellite <em>emergency</em> messaging capability in handsets or networks. Analyse the mandate's effect through this lesson's lenses: what does guaranteed-availability emergency service require that best-effort messaging does not (which m4-4 statistic returns), what fraction of a 5 Mbps beam must be held in reserve, and who pays for reserved capacity that is almost never used?</p>
+    </div>
+    <div class="ref-prompt">
+        <h3>PROMPT 04</h3>
+        <p>This module's six lessons priced the terminal three times: the pointed VSAT (m5-1..4), the Rel-17 NTN device (m5-5), and the frozen handset (m5-6), with per-beam capacities spanning two orders of magnitude. Construct the unified statement: express beam capacity as a function of terminal G/T and available spectrum only, holding the space segment fixed, and determine how much of the industry's segmentation into "broadband," "mobility," and "D2D" markets is just this one function evaluated at three points.</p>
+    </div>
+</div>
+
+<div class="cb">
+    <h2>Sources</h2>
+<ul>
+<li>3GPP TS 38.101-1/-5 — UE power classes, NTN bands.</li>
+<li>3GPP TR 36.763 / Release-17 IoT-NTN — NB-IoT over satellite, repetition and coverage enhancement.</li>
+<li>ETSI EN 302 307-2 — DVB-S2X VL-SNR modes.</li>
+<li>FCC Report &amp; Order, "Supplemental Coverage from Space" (2024) — the partner-spectrum regulatory framework.</li>
+<li>Lin et al., "5G from Space" — NTN architecture context, D2D scenarios.</li>
+<li>Publicly reported D2D system parameters (large deployable arrays, tens to hundreds of m²) — order-of-magnitude anchors only; specific operator figures deliberately not asserted.</li>
+</ul>
+</div>
+
+<div class="complete-wrap">
+    <button class="complete-btn" id="completeBtn">MARK LESSON COMPLETE</button>
+    <div class="complete-msg" id="completeMsg"></div>
+</div>
+<div class="lesson-nav">
+    <a href="m5-5.html">← LESSON 05 — 3GPP NTN AIR INTERFACE</a>
+    <a href="m5-7.html">LESSON 07 — SYNTHESIS: THROUGHPUT PER BEAM →</a>
+</div>
+</div>
+
+<button class="back-to-top" id="backToTop" title="Back to top">↑</button>
+<footer>© 2026 LEOAF · M5 · LESSON 06 OF 7</footer>
+<script>
+const canvas=document.getElementById('starsCanvas'),ctx=canvas.getContext('2d');
+let stars=[];
+function initStars(){stars=[];for(let i=0;i<180;i++)stars.push({x:Math.random()*canvas.width,y:Math.random()*canvas.height,size:Math.random()*1.5+0.4,speed:Math.random()*0.18+0.04,hue:Math.random()*360});}
+function resizeCanvas(){canvas.width=window.innerWidth;canvas.height=window.innerHeight;}
+resizeCanvas();initStars();window.addEventListener('resize',resizeCanvas);
+function animateStars(){ctx.clearRect(0,0,canvas.width,canvas.height);stars.forEach(s=>{s.y-=s.speed;if(s.y<0){s.y=canvas.height;s.x=Math.random()*canvas.width;}ctx.beginPath();ctx.fillStyle=`hsl(${s.hue},80%,80%)`;ctx.arc(s.x,s.y,s.size,0,Math.PI*2);ctx.fill();});requestAnimationFrame(animateStars);}
+animateStars();
+</script>
+<script>
+const feedbacks={
+    1:{correct:"A D2D system that requires a better terminal is just MSS, which has existed for decades with pointed, powerful phones and a correspondingly small market. Freezing the terminal is the product decision; the 40–47 dB hole is its physical price.",wrong:"Power class limits reflect battery and SAR engineering, not prohibition on satellite use. Handset antennas are compromised by design (size, orientation, body). EIRP matters at every frequency — m4-1's chain is band-independent."},
+    2:{correct:"No aperture or waveform trick recovers 35 dB as cheaply as proximity does. GEO MSS closed its links by making the *terminal* better (external antennas, watts) — exactly the move D2D forbids itself.",wrong:"GEO MSS at L/S-band is decades old. Spectrum licensing is orbit-independent. GEO Doppler is near zero; Doppler is a LEO problem."},
+    3:{correct:"The phone has GNSS but no protocol machinery to use it for the link (m5-5's fixes are UE features). Move the compensation to the satellite and only the across-beam residuals remain — of order a kilohertz of Doppler across tens of kilometres at 2 GHz, which legacy loops absorb. The aperture's small beams are doing protocol work.",wrong:"Smartphones have had GNSS for fifteen years — the missing piece is Rel-17 software, not position. Beam size changes nothing at the handset antenna. PFD rules constrain power, not this mechanism."},
+    4:{correct:"SNR = C/N₀ − 10·log₁₀(B). The §4 table shows the lever at full stroke: the same 66.1 dBHz fails over 5 MHz (−0.8 dB) and thrives over 180 kHz (+13.6 dB). D2D systems are narrowband because this is the cheapest decibel source left after orbit and aperture.",wrong:"SNR rises, not falls. EIRP is untouched. \"No effect\" confuses C/N₀ (bandwidth-independent) with SNR (bandwidth-defined)."},
+    5:{correct:"G ∝ A raises every link's closing SNR; beamwidth ∝ 1/D shrinks cells, and reuse multiplies the scarce 5 MHz across them. The compounding is why the publicly visible D2D aperture race (tens to hundreds of m²) is rational engineering, not spectacle.",wrong:"FSPL is geometry; Doppler is orbital velocity — area touches neither. Spectrum is licensed, not manufactured. The handset is the fixed point."},
+    6:{correct:"The worked budgets land at UL 73.2 vs DL 66.1 dBHz for the same geometry. The array sits on the satellite: it aids the direction where the satellite receives. The handset's receive deficit can only be bought with transmitted watts per beam, capped by the power subsystem and PFD limits.",wrong:"Handsets receive at these bands natively. FSPL differs trivially between the paired bands. Rain is negligible at 2 GHz in both directions (m4-3)."},
+    7:{correct:"Repetition combining is the waveform floor's deepest tool: 64 repetitions ≈ 18 dB of effective margin, at 64× the airtime. The time-for-decibels exchange maps each service tier to a rung: messaging deepest, voice shallow, broadband none.",wrong:"The terminal is the same fixed point. NB-IoT NTN lives in the same L/S allocations. Nothing is exempt from Module 4."},
+    8:{correct:"Transmitting inside a cellular operator's licensed band means the satellite is, regulatorily, a guest in an occupied house: its ground-level flux must not degrade the terrestrial cells at the coverage boundary, and the borrowed block is a 5 MHz-class sliver. The physics of §4 and the arithmetic of §8 both inherit that cap.",wrong:"FSPL is geometry. The whole point is staying in the handset's existing low bands. GNSS is unrelated."},
+    9:{correct:"The tier arithmetic is the product strategy: dead-zone messaging and emergency service are excellent businesses at kilobits; broadband at megabits per user collapses against the per-beam pool. Reuse and aperture growth raise totals without changing the conclusion's shape.",wrong:"5 Mbps carries thousands of messages per second — a real product. Beams tile and reuse (§3); the figure is per reuse cell, which is exactly why the conclusion is robust."},
+    10:{correct:"Capacity = bandwidth × spectral efficiency (m5-1 §7). The handset's antennas confine D2D to narrow low-band slivers, and its G/T confines the SNR to low-η territory. Same physics, same engine — the terminal choice sets both factors.",wrong:"The codes are identical LDPC families (m5-2). Altitude is the same LEO. No regulator throttles rates; regulators cap flux and spectrum, and the physics does the rest."}
+};
+let answered={};
+document.querySelectorAll('.quiz-opt').forEach(btn=>{
+    btn.addEventListener('click',function(){
+        const q=this.dataset.q;
+        if(answered[q]!==undefined)return;
+        const correct=this.dataset.correct==='true';
+        answered[q]=correct;
+        document.querySelectorAll(`.quiz-opt[data-q="${q}"]`).forEach(b=>{b.disabled=true;if(b.dataset.correct==='true')b.classList.add('correct');});
+        if(!correct)this.classList.add('wrong');
+        const fb=document.getElementById('fb'+q);
+        fb.textContent=(correct?'✓ ':'✗ ')+feedbacks[q][correct?'correct':'wrong'];
+        fb.style.color=correct?'#39ff14':'#ff004f';
+        if(Object.keys(answered).length===10){
+            const total=Object.values(answered).filter(Boolean).length;
+            const sc=document.getElementById('quizScore');
+            sc.style.display='block';
+            const pct=Math.round(total/10*100);
+            sc.textContent=`SCORE: ${total}/10 (${pct}%) — ${pct===100?'PERFECT.':pct>=80?'STRONG.':pct>=60?'ADEQUATE. REVISIT WEAK SECTIONS.':'REVISIT THE LESSON BEFORE PROCEEDING.'}`;
+        }
+    });
+});
+</script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="supabase.js"></script>
+<script src="user_progress.js"></script>
+<script>
+const LESSON_ID='m5-6';
+(function(){
+    function bounceToLogin(r){console.error("Auth guard:",r);window.location.replace("index.html");}
+    async function init(){
+        if(typeof client==="undefined"||!client||!client.auth)return bounceToLogin("Supabase client not loaded");
+        let session=null;
+        try{({data:{session}}=await client.auth.getSession());}
+        catch(e){return bounceToLogin("getSession threw: "+e.message);}
+        if(!session){window.location.replace("index.html");return;}
+        const btn=document.getElementById('completeBtn'),msg=document.getElementById('completeMsg');
+        function setDone(done){
+            if(done){btn.textContent='✓ COMPLETE — CLICK TO UNDO';btn.classList.add('done');btn.style.cssText='border-color:#39ff14;color:#39ff14;background:rgba(57,255,20,0.1);cursor:pointer;opacity:1;';msg.style.color='#39ff14';msg.textContent='Lesson marked complete. Click again to undo.';}
+            else{btn.textContent='MARK LESSON COMPLETE';btn.classList.remove('done');btn.style.cssText='';msg.style.color='#ffffff55';msg.textContent='Not yet marked complete.';}
+        }
+        let mastered=[];
+        try{mastered=await getMasteredSections();}catch(e){console.error(e);}
+        setDone(mastered.includes(LESSON_ID));
+        btn.addEventListener('click',async()=>{
+            const isDone=btn.classList.contains('done');
+            msg.style.color='#00d9ff';msg.textContent='Saving...';
+            const ok=await upsertSection(LESSON_ID,!isDone);
+            if(ok){setDone(!isDone);}else{msg.style.color='#ff004f';msg.textContent='Error saving. Try again.';}
+        });
+        const btt=document.getElementById('backToTop');
+        window.addEventListener('scroll',()=>{btt.classList.toggle('visible',window.scrollY>400);});
+        btt.addEventListener('click',()=>window.scrollTo({top:0,behavior:'smooth'}));
+    }
+    if(document.readyState==="loading")document.addEventListener("DOMContentLoaded",init);
+    else init();
+})();
+</script>
+</body>
+</html>
