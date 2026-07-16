@@ -1,0 +1,671 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, shrink-to-fit=no">
+<title>M5-3 — Multiple Access &amp; Scheduling · LEOAF</title>
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;600;800&family=Share+Tech+Mono&family=Libre+Baskerville:ital,wght@0,400;0,700;1,400&display=swap" rel="stylesheet">
+<link rel="icon" href="favicon.ico" sizes="any" type="image/x-icon">
+<link rel="manifest" href="site.webmanifest">
+<meta name="theme-color" content="#0f0f0f">
+<script>
+window.leoafAbort = async function () {
+    function go() { window.location.replace("index.html?signedout=1"); }
+    try { if (typeof client !== "undefined" && client && client.auth && client.auth.signOut) { try { await client.auth.signOut({ scope: "local" }); } catch (e) {} } } catch (e) {}
+    go();
+};
+</script>
+<style>
+* { box-sizing:border-box; margin:0; padding:0; }
+html { height:100%; -webkit-text-size-adjust:100%; overflow-x:hidden; }
+body { font-family:'Share Tech Mono',monospace; background:#000; color:white; overflow-x:hidden; min-height:100vh; }
+#starsCanvas { position:fixed; inset:0; z-index:-1; }
+header { background:#000; border-bottom:1px solid #ff004f33; position:sticky; top:0; z-index:100; padding:1rem clamp(1.5rem,5vw,4rem); display:flex; justify-content:space-between; align-items:center; }
+.logo { font-family:'Orbitron',sans-serif; font-weight:800; font-size:clamp(16px,2vw,22px); letter-spacing:3px; text-decoration:none; }
+.logo span:first-child { color:white; } .logo span:last-child { color:#ff004f; }
+.nav-right { display:flex; align-items:center; gap:10px; }
+.nav-btn { background:transparent; border:1px solid #ff004f44; color:#ff004f; padding:6px 14px; cursor:pointer; transition:0.3s; font-size:11px; font-family:'Orbitron',sans-serif; letter-spacing:1px; text-decoration:none; display:inline-block; }
+.nav-btn:hover { background:#ff004f; color:black; }
+.breadcrumb { padding:14px clamp(1.5rem,5vw,4rem); font-size:11px; color:#ffffff44; letter-spacing:1px; position:relative; z-index:1; }
+.breadcrumb a { color:#00d9ff66; text-decoration:none; } .breadcrumb a:hover { color:#00d9ff; }
+.breadcrumb span { margin:0 8px; }
+.lesson-wrap { max-width:820px; margin:0 auto; padding:0 clamp(1.5rem,5vw,4rem) 80px; position:relative; z-index:1; }
+.lesson-header { padding:30px 0 28px; border-bottom:1px solid #ffffff11; margin-bottom:36px; }
+.lesson-tag { font-family:'Orbitron',sans-serif; font-size:10px; color:#ff004f; letter-spacing:3px; margin-bottom:10px; }
+.lesson-header h1 { font-family:'Orbitron',sans-serif; font-size:clamp(20px,3.5vw,32px); font-weight:800; line-height:1.2; margin-bottom:12px; }
+.lesson-meta { display:flex; gap:10px; flex-wrap:wrap; margin-bottom:16px; }
+.l-pill { font-family:'Orbitron',sans-serif; font-size:10px; padding:3px 10px; border:1px solid; letter-spacing:1px; }
+.l-pill-q { color:#ff004f; border-color:#ff004f44; } .l-pill-t { color:#39ff14; border-color:#39ff1444; }
+.l-pill-c { color:#ffaa00; border-color:#ffaa0044; }
+.lesson-intro { font-size:13px; line-height:1.85; opacity:0.75; }
+.toc { background:rgba(0,217,255,0.06); border:1px solid #00d9ff33; padding:24px 28px; margin:30px 0; }
+.toc h4 { font-family:'Orbitron',sans-serif; font-size:10px; color:#00d9ff; letter-spacing:2px; margin-bottom:16px; }
+.toc ol { padding-left:20px; } .toc li { font-size:13px; line-height:2.1; }
+.toc li a { color:#00d9ffbb; text-decoration:none; transition:0.15s; } .toc li a:hover { color:#fff; padding-left:4px; }
+.toc li::marker { color:#ff004f; font-family:'Orbitron',sans-serif; font-size:10px; }
+.cb { background:#f5f2ec; color:#1a1a1a; padding:36px clamp(24px,4vw,48px); margin-bottom:24px; border-left:4px solid #00d9ff; position:relative; z-index:1; }
+.cb h2 { font-family:'Orbitron',sans-serif; font-size:13px; color:#003d66; letter-spacing:2px; text-transform:uppercase; margin-bottom:20px; padding-bottom:10px; border-bottom:2px solid #00d9ff66; scroll-margin-top:80px; }
+.cb h3 { font-family:'Orbitron',sans-serif; font-size:11px; color:#444; letter-spacing:1.5px; text-transform:uppercase; margin:28px 0 12px; }
+.cb p { font-family:'Libre Baskerville',Georgia,serif; font-size:15px; line-height:1.9; color:#1a1a1a; margin-bottom:16px; }
+.cb ul { padding-left:0; margin-bottom:16px; }
+.cb ul li { font-family:'Libre Baskerville',Georgia,serif; font-size:14px; line-height:1.85; color:#1a1a1a; padding-left:20px; position:relative; margin-bottom:8px; }
+.cb ul li::before { content:'›'; position:absolute; left:0; color:#0077aa; }
+.cb blockquote { border-left:3px solid #1a7a1a; background:#eafaea; padding:14px 20px; margin:18px 0; font-size:13px; font-family:'Share Tech Mono',monospace; color:#0a3d0a; line-height:1.8; }
+.callout { border-left:3px solid #0088cc; background:#e8f4fb; padding:16px 20px; margin:22px 0; font-size:12px; line-height:1.8; color:#1a1a1a; }
+.callout.red { border-left-color:#cc0033; background:#fdecea; }
+.callout.green { border-left-color:#1a7a1a; background:#eafaea; }
+.callout.amber { border-left-color:#996600; background:#fef9ec; }
+.callout strong { font-family:'Orbitron',sans-serif; font-size:10px; letter-spacing:1px; display:block; margin-bottom:8px; }
+.compare-table { width:100%; border-collapse:collapse; margin:22px 0; font-size:12px; }
+.compare-table th { font-family:'Orbitron',sans-serif; font-size:10px; letter-spacing:1px; color:#003d66; padding:10px 12px; border-bottom:2px solid #00d9ff66; text-align:left; }
+.compare-table td { padding:10px 12px; border-bottom:1px solid #ddd; line-height:1.5; color:#1a1a1a; vertical-align:top; }
+.compare-table tr:hover td { background:#f0f0f0; }
+.key-numbers { display:grid; grid-template-columns:repeat(auto-fit,minmax(140px,1fr)); gap:12px; margin:22px 0; }
+.kn-item { background:#fff; border:1px solid #d0d0d0; padding:16px 12px; text-align:center; }
+.kn-val { font-family:'Orbitron',sans-serif; font-size:clamp(13px,1.8vw,18px); font-weight:800; color:#003d66; display:block; }
+.kn-label { font-size:10px; color:#555; letter-spacing:1px; margin-top:5px; display:block; line-height:1.4; }
+.quiz-block { background:rgba(17,17,17,0.9); border:1px solid #ff004f33; padding:28px; margin:48px 0 32px; }
+.quiz-block h2 { font-family:'Orbitron',sans-serif; font-size:13px; color:#ff004f; letter-spacing:2px; margin-bottom:6px; }
+.quiz-intro { font-size:12px; opacity:0.6; margin-bottom:24px; padding-bottom:16px; border-bottom:1px solid #ff004f22; line-height:1.6; }
+.quiz-q { margin-bottom:28px; }
+.quiz-q p { font-size:13px; opacity:0.9; margin-bottom:12px; line-height:1.65; }
+.quiz-q p strong { color:#00d9ff; }
+.quiz-options { display:flex; flex-direction:column; gap:8px; }
+.quiz-opt { background:rgba(255,255,255,0.03); border:1px solid #ffffff1a; padding:11px 16px; cursor:pointer; font-size:12px; font-family:'Share Tech Mono',monospace; transition:0.2s; text-align:left; color:white; line-height:1.5; }
+.quiz-opt:hover:not(:disabled) { background:rgba(0,217,255,0.08); border-color:#00d9ff44; }
+.quiz-opt.correct { background:rgba(57,255,20,0.1); border-color:#39ff14; color:#39ff14; }
+.quiz-opt.wrong { background:rgba(255,0,79,0.1); border-color:#ff004f; color:#ff004f; }
+.quiz-opt:disabled { cursor:default; }
+.quiz-feedback { font-size:12px; margin-top:10px; min-height:18px; line-height:1.7; opacity:0.9; padding:0 4px; }
+.quiz-score { font-family:'Orbitron',sans-serif; font-size:12px; color:#39ff14; margin-top:20px; letter-spacing:1px; display:none; padding-top:16px; border-top:1px solid #39ff1433; }
+.py-block { background:rgba(10,10,10,0.95); border:1px solid #39ff1422; padding:28px; margin:32px 0; }
+.py-block h2 { font-family:'Orbitron',sans-serif; font-size:13px; color:#39ff14; letter-spacing:2px; margin-bottom:8px; }
+.py-block .py-intro { font-size:12px; opacity:0.7; margin-bottom:20px; padding-bottom:16px; border-bottom:1px solid #39ff1422; line-height:1.7; }
+.py-exercise { margin-bottom:32px; } .py-exercise:last-child { margin-bottom:0; }
+.py-exercise h3 { font-family:'Orbitron',sans-serif; font-size:11px; color:#39ff1499; letter-spacing:1.5px; text-transform:uppercase; margin-bottom:10px; }
+.py-exercise p { font-size:12px; opacity:0.8; margin-bottom:14px; line-height:1.75; }
+.py-block pre { background:#050505; border:1px solid #39ff1433; padding:20px; font-family:'Share Tech Mono',monospace; font-size:11px; line-height:1.7; overflow-x:auto; color:#39ff14; white-space:pre; margin-bottom:12px; }
+.py-note { background:rgba(57,255,20,0.04); border-left:2px solid #39ff14; padding:12px 16px; margin-top:14px; font-size:12px; line-height:1.75; opacity:0.8; }
+.py-note strong { font-family:'Orbitron',sans-serif; font-size:10px; color:#39ff14; display:block; margin-bottom:6px; letter-spacing:1px; }
+.reflection-block { background:rgba(255,170,0,0.04); border:1px solid #ffaa0033; padding:24px; margin:32px 0; }
+.reflection-block h2 { font-family:'Orbitron',sans-serif; font-size:13px; color:#ffaa00; letter-spacing:2px; margin-bottom:8px; }
+.ref-intro { font-size:12px; opacity:0.7; margin-bottom:20px; padding-bottom:14px; border-bottom:1px solid #ffaa0022; line-height:1.7; }
+.ref-prompt { margin-bottom:20px; }
+.ref-prompt h3 { font-family:'Orbitron',sans-serif; font-size:11px; color:#ffaa0099; letter-spacing:1px; margin-bottom:8px; }
+.ref-prompt p { font-size:12px; opacity:0.8; line-height:1.75; }
+.complete-wrap { margin-top:56px; padding-top:30px; border-top:1px solid #ffffff11; text-align:center; }
+.complete-btn { font-family:'Orbitron',sans-serif; font-size:13px; letter-spacing:2px; padding:14px 44px; background:transparent; border:1px solid #39ff14; color:#39ff14; cursor:pointer; transition:0.3s; }
+.complete-btn:hover:not(.done) { background:#39ff14; color:black; box-shadow:0 0 20px rgba(57,255,20,0.4); }
+.complete-btn.done { background:rgba(57,255,20,0.1); cursor:pointer; opacity:1; }
+.complete-msg { font-size:12px; color:#39ff14; margin-top:14px; min-height:18px; letter-spacing:1px; }
+.lesson-nav { display:flex; justify-content:space-between; margin-top:30px; flex-wrap:wrap; gap:10px; }
+.lesson-nav a { font-family:'Orbitron',sans-serif; font-size:11px; color:#00d9ff66; text-decoration:none; letter-spacing:1px; transition:0.2s; }
+.lesson-nav a:hover { color:#00d9ff; }
+.back-to-top { position:fixed; bottom:28px; right:28px; z-index:200; width:44px; height:44px; background:#000; border:1px solid #00d9ff55; color:#00d9ff; font-size:20px; cursor:pointer; display:flex; align-items:center; justify-content:center; opacity:0; pointer-events:none; transition:opacity 0.3s; }
+.back-to-top.visible { opacity:1; pointer-events:auto; } .back-to-top:hover { border-color:#00d9ff; }
+footer { text-align:center; padding:30px; opacity:0.3; font-size:11px; position:relative; z-index:1; letter-spacing:1px; }
+.module-complete { background:rgba(57,255,20,0.06); border:1px solid #39ff1444; padding:24px 28px; margin:40px 0; text-align:center; }
+.module-complete h3 { font-family:'Orbitron',sans-serif; font-size:14px; color:#39ff14; letter-spacing:2px; margin-bottom:10px; }
+.module-complete p { font-size:12px; opacity:0.8; line-height:1.7; }
+</style>
+</head>
+<body>
+<canvas id="starsCanvas"></canvas>
+<header>
+    <a href="dashboard.html" class="logo"><span>LEO</span><span>AF</span></a>
+    <div class="nav-right">
+        <a href="m5.html" class="nav-btn">← M5 HUB</a>
+        <button class="nav-btn" onclick="leoafAbort()">ABORT</button>
+    </div>
+</header>
+<div class="breadcrumb">
+    <a href="dashboard.html">DASHBOARD</a><span>/</span>
+    <a href="m5.html">M5</a><span>/</span>
+    <span style="color:#ffffff88;">LESSON 03 — MULTIPLE ACCESS &amp; SCHEDULING</span>
+</div>
+
+<div class="lesson-wrap">
+<div class="lesson-header">
+    <div class="lesson-tag">M5 · LESSON 03 OF 7</div>
+    <h1>Multiple Access<br>&amp; Scheduling</h1>
+    <div class="lesson-meta">
+        <div class="l-pill l-pill-q">MODULE 5</div>
+        <div class="l-pill l-pill-t">AIR INTERFACE &amp; ACCESS</div>
+        <div class="l-pill l-pill-c">CORE</div>
+    </div>
+    <p class="lesson-intro" style="margin-bottom:12px;">Lessons m5-1 and m5-2 produced a number for one carrier: the information rate a given C/N₀ supports. But a beam does not serve one user; it serves hundreds to thousands of terminals whose traffic arrives in bursts, at different priorities, from different locations within the beam. The mechanism that divides the carrier among them — the multiple access scheme and the scheduler that operates it — determines how much of the information rate survives as capacity a user can actually be allocated, and how quickly a terminal that suddenly needs capacity can get it.</p>
+    <p class="lesson-intro" style="margin-bottom:12px;">Two structurally different problems hide under one name. On the <strong>forward link</strong> (gateway → users), one transmitter serves everyone: sharing is a scheduling decision made by a single entity that knows the whole queue, and the access cost is small. On the <strong>return link</strong> (users → satellite), thousands of uncoordinated transmitters share the uplink: sharing requires either dividing the resource in advance, coordinating requests and grants across the propagation delay, or accepting collisions. Almost all of this lesson's difficulty lives on the return link — the same side that m4-7 showed was power-starved.</p>
+    <p class="lesson-intro" style="margin-bottom:12px;">A boundary declaration, to prevent double counting across the module: this lesson charges the costs of <em>multi-user sharing</em> — guard times, burst preambles, contention losses, request-grant latency, scheduling quantisation. Lesson m5-4 charges the costs of <em>per-carrier physical-layer framing</em> — frame headers, pilots, and signalling that exist even with a single user. The spine engine keeps the two factors separate and multiplies them.</p>
+</div>
+
+<div class="toc">
+    <h4>CONTENTS</h4>
+    <ol>
+        <li><a href="#s1">The access families</a></li>
+        <li><a href="#s2">The forward link: one TDM carrier and a scheduler</a></li>
+        <li><a href="#s3">Return-link disciplines: contention, requests, and grants</a></li>
+        <li><a href="#s4">The overhead budget: burst-length economics</a></li>
+        <li><a href="#s5">The request-grant latency budget</a></li>
+        <li><a href="#s6">Scheduling policies and the ACM interaction</a></li>
+        <li><a href="#s7">LEO-specific mechanics: the access layer in motion</a></li>
+        <li><a href="#s8">Key facts</a></li>
+        <li><a href="#s9">What this lesson delivers to the design chain</a></li>
+        <li><a href="#quiz">Knowledge check</a></li>
+        <li><a href="#py">Python exercises</a></li>
+        <li><a href="#reflect">Reflection</a></li>
+    </ol>
+</div>
+
+<div class="cb" id="s1">
+    <h2>1. The access families</h2>
+<p>Five schemes cover the field. Each divides a different resource, and each interacts differently with the amplifier physics of m5-1.</p>
+<p><strong>FDMA — frequency division.</strong> Each terminal gets its own carrier. Simple, no time coordination needed. Costs: guard bands between carriers, and — decisive on the space segment — multiple carriers through one high-power amplifier generate intermodulation products, forcing several dB of output back-off (the m5-1 §5 problem in its worst form). Classical FDMA is now mostly a component inside hybrid schemes.</p>
+<p><strong>TDMA — time division.</strong> One carrier, divided into time slots; each terminal transmits bursts at full carrier power. The amplifier sees a single carrier and can run near saturation — the HPA-friendly choice. Costs: every burst needs a preamble (carrier and timing acquisition at the receiver) and a guard time (uncertainty in burst arrival), and all terminals must be time-synchronised to the frame — non-trivial when the range to a LEO satellite changes by kilometres per second (section 7).</p>
+<p><strong>MF-TDMA — multi-frequency TDMA.</strong> The return-link workhorse, standardised in DVB-RCS2: a grid of moderate-rate carriers × time slots. A terminal hops between carriers and slots as the scheduler assigns them. MF-TDMA keeps per-carrier symbol rates low enough for small terminal amplifiers while retaining TDMA's scheduling flexibility; the price is the burst overhead of TDMA multiplied across every carrier, plus the frequency-hopping agility required of the terminal.</p>
+<p><strong>CDMA — code division.</strong> All terminals transmit simultaneously across the full band, separated by spreading codes. Graceful degradation with load and no hard slot structure, but spectral efficiency is poor for broadband, and the near-far problem demands tight closed-loop power control. In satellite practice CDMA survives where its robustness matters more than efficiency — GNSS signals, some mobile-satellite services — not in broadband.</p>
+<p><strong>OFDMA — orthogonal frequency division.</strong> The channel is split into thousands of narrow subcarriers, scheduled in time-frequency blocks. This is the access scheme of 5G NR and therefore of 3GPP NTN (m5-5). Fine-grained two-dimensional scheduling is its strength; its weakness is PAPR — the sum of many subcarriers has a large envelope variation, which is why the NR <em>uplink</em> offers a single-carrier variant (DFT-s-OFDM) for power-limited transmitters. The m5-1 amplifier logic, again.</p>
+</div>
+
+<div class="cb" id="s2">
+    <h2>2. The forward link: one TDM carrier and a scheduler</h2>
+<p>The DVB-S2 forward link is a single wideband TDM carrier. Frames are transmitted back-to-back, each frame addressed to one or more terminals, each frame potentially at its own MODCOD (this is how ACM physically works — the m5-2 selection is applied per frame, per destination terminal). There is no contention and almost no access overhead; user separation costs only the addressing and signalling inside the framing, which m5-4 owns.</p>
+<p>What the forward link does have is a <strong>scheduler</strong>: the entity that decides, every frame, which terminal's queue is served next. Its efficiency cost is small — quantisation (a frame addressed to one user cannot be partially reassigned) and scheduling signalling, typically a few percent. Its policy consequences are large, and section 6 returns to them. The structural point: forward-link sharing is cheap because coordination is free when one node owns the transmitter.</p>
+</div>
+
+<div class="cb" id="s3">
+    <h2>3. Return-link disciplines: contention, requests, and grants</h2>
+<p>The return link must get uncoordinated terminals onto a shared uplink. Three disciplines, in increasing order of coordination:</p>
+<p><strong>Random access.</strong> A terminal simply transmits and hopes. The classical analysis: with Poisson-distributed attempts at normalised load G, <strong>pure ALOHA</strong> delivers throughput S = G·e^(−2G), peaking at 18.4%; <strong>slotted ALOHA</strong> (transmissions aligned to slot boundaries) delivers S = G·e^(−G), peaking at 36.8% at G = 1. Beyond the peak, throughput <em>falls</em> as load rises — the signature instability of contention. Modern satellite systems use contention-resolution variants: <strong>CRDSA</strong> (DVB-RCS2) transmits each burst twice in random slots and uses successive interference cancellation to unpick collisions, raising usable throughput to roughly 50–80% of channel capacity depending on configuration. Random access is used where its latency advantage matters and its efficiency penalty is affordable: initial logon, small control messages, the first packet of a flow.</p>
+<p><strong>Demand assignment (DAMA).</strong> The terminal sends a small capacity request (itself via random access or a reserved slot); the scheduler grants dedicated slots; the terminal transmits without contention. Efficiency is high — the payload slots carry no collision risk — but every fresh burst of demand pays the <strong>request-grant round trip</strong> (section 5). DAMA in several flavours (rate-based, volume-based) carries the bulk of return traffic in managed satellite networks.</p>
+<p><strong>Dedicated assignment.</strong> Slots permanently allocated to a terminal (constant rate assignment). Zero access latency, zero contention — and zero statistical multiplexing: capacity is burned whether or not the terminal has traffic. Reserved for constant-rate services (voice trunks, telemetry) and as the guaranteed floor under QoS contracts.</p>
+<p>Real return links blend all three: a contention pool for logon and requests, DAMA for the traffic bulk, dedicated slots for guaranteed-rate services. Choosing the blend — how much capacity to reserve for contention, how aggressive to make the grant cycle — is a live operational tuning problem, not a design-time constant.</p>
+</div>
+
+<div class="cb" id="s4">
+    <h2>4. The overhead budget: burst-length economics</h2>
+<p>Every MF-TDMA burst pays a fixed tax: a preamble for the demodulator to acquire carrier phase and symbol timing (order 100–300 symbols), and a guard time absorbing residual timing uncertainty (order 50–200 symbols). The tax is fixed per burst, so its relative cost depends entirely on burst length:</p>
+<table class="compare-table">
+<thead><tr>
+<th>Carrier rate</th>
+<th>Slot duration</th>
+<th>Symbols/slot</th>
+<th>Overhead (300 sym)</th>
+<th>Efficiency</th>
+</tr></thead>
+<tbody>
+<tr><td>10 Msym/s</td><td>2.0 ms</td><td>20,000</td><td>300</td><td>98.5%</td></tr>
+<tr><td>10 Msym/s</td><td>0.5 ms</td><td>5,000</td><td>300</td><td>94.0%</td></tr>
+<tr><td>2 Msym/s</td><td>2.0 ms</td><td>4,000</td><td>300</td><td>92.5%</td></tr>
+<tr><td>2 Msym/s</td><td>0.5 ms</td><td>1,000</td><td>300</td><td>70.0%</td></tr>
+</tbody>
+</table>
+<p>The table encodes a genuine design tension. Long slots on fast carriers are efficient but coarse: the minimum allocation quantum is large, so a terminal with a trickle of traffic wastes most of its grant (allocation quantisation loss — a second, hidden overhead). Short slots on slow carriers allocate finely but drown in preamble. The scheduler's job includes matching burst sizes to traffic — and the 70% corner of the table is what a badly configured return link looks like.</p>
+</div>
+
+<div class="cb" id="s5">
+    <h2>5. The request-grant latency budget</h2>
+<p>DAMA's efficiency is paid in latency. The cycle: terminal detects queued traffic → sends request → scheduler receives, decides, and signals the grant → terminal transmits in the granted slot. The floor under this cycle is propagation: for a LEO bent-pipe system with ~1,000 km slant paths, four legs (request up, request down to gateway, grant up, grant down) cost about 13 ms, plus the scheduler's own decision period (commonly 10–50 ms), plus waiting for the granted slot. Total: <strong>roughly 25–65 ms</strong> of allocation delay before the first payload symbol of a fresh burst.</p>
+<p>The GEO comparison explains an entire generation of user experience: the same four legs at 35,786 km cost 477 ms of propagation alone — half a second of allocation delay on top of the half-second data RTT. It also explains the discipline blend: random access exists precisely so that small, latency-sensitive bursts can skip the grant cycle, and schedulers pre-grant capacity speculatively to active terminals to hide the cycle from ongoing flows. The residual access latency of a well-tuned LEO return link is a defining input to M7's end-to-end latency budget — this number is exported, not just computed.</p>
+</div>
+
+<div class="cb" id="s6">
+    <h2>6. Scheduling policies and the ACM interaction</h2>
+<p>Given demand exceeding supply, the scheduler must choose. Three canonical policies:</p>
+<p><strong>Round robin</strong> — equal turns. Simple, predictable, indifferent to both channel state and traffic value.</p>
+<p><strong>Max-throughput</strong> — always serve the terminal whose current MODCOD (per m5-2 ACM) is highest. Maximises beam capacity and starves anyone in a fade — the users who arguably need service continuity most.</p>
+<p><strong>Proportional fair</strong> — serve the terminal with the best ratio of current achievable rate to its recent average rate. The compromise that dominates practice: it exploits good channel states (a terminal at a MODCOD peak gets served preferentially) without starving faded users (whose falling average raises their priority).</p>
+<p>ACM makes scheduling and the physical layer inseparable: the <em>cost</em> of serving a user depends on their channel. A frame sent to a terminal at QPSK 1/2 delivers one-third the bits of the same frame at 16-APSK 3/4 (m5-2). A beam-wide capacity figure is therefore not a constant but a traffic-weighted average over the users' MODCOD distribution — and a scheduler policy choice shifts that average. On top sit QoS classes: guaranteed-rate tiers, weighted shares, priority queues, all implemented as constraints on the same slot-assignment decision. The m5-2 reflection on fade-time fairness is exactly a scheduler-policy question; here it becomes concrete: the policy is a few lines of arithmetic in the grant loop, and it silently encodes the operator's commercial promises.</p>
+</div>
+
+<div class="cb" id="s7">
+    <h2>7. LEO-specific mechanics: the access layer in motion</h2>
+<p>Everything above holds for GEO. LEO adds motion, and the access layer feels it twice:</p>
+<p><strong>Timing.</strong> TDMA and MF-TDMA require bursts from all terminals to arrive at the satellite aligned to the slot grid. The range to a LEO satellite at 550 km changes at up to ~7.0 km/s above 5° elevation — a one-way delay drifting at <strong>23 µs per second</strong>. A 10 Msym/s carrier's symbol lasts 0.1 µs: uncorrected, timing error grows by hundreds of symbols per second. The options are a per-terminal <strong>timing advance</strong> continuously updated from ephemeris and position (the terminal knows where the satellite is and pre-compensates — the standard LEO answer, and the mechanism 3GPP NTN formalises in m5-5), closed-loop timing correction signalled by the hub, or guard times fat enough to absorb the drift — which the section-4 table prices, and the price is unacceptable. Ephemeris-driven pre-compensation is what makes tight guard times, and therefore efficient bursts, possible at LEO.</p>
+<p><strong>Frequency.</strong> The same ~7 km/s produces up to ~700 kHz of Doppler at a 30 GHz uplink (the m2-4 geometry, landing here as an access-layer problem). Uncompensated, a terminal's burst arrives outside its assigned MF-TDMA carrier slot's tolerance. As with timing, the fix is pre-compensation from ephemeris, and the residual (from position error and oscillator drift) is what the preamble and the carrier-spacing guard must absorb.</p>
+<p>Both compensations assume the terminal knows the satellite ephemeris and its own position — and has the protocol machinery to act on them. A broadband terminal satisfies both trivially. A smartphone has GNSS but, unless it implements the Release-17 NTN features (m5-5), lacks the machinery — so direct-to-device systems serving unmodified phones must move the compensation to the network side, which is one of the quiet shaping forces of m5-6.</p>
+</div>
+
+<div class="cb" id="s8">
+    <h2>8. Key facts</h2>
+<table class="compare-table">
+<thead><tr>
+<th>Fact</th>
+<th>Value</th>
+<th>Unit</th>
+<th>Source</th>
+</tr></thead>
+<tbody>
+<tr><td>Pure ALOHA peak throughput</td><td>18.4 (1/2e)</td><td>%</td><td>Abramson analysis</td></tr>
+<tr><td>Slotted ALOHA peak throughput</td><td>36.8 (1/e), at G = 1</td><td>%</td><td>Roberts analysis</td></tr>
+<tr><td>CRDSA usable throughput</td><td>~50–80</td><td>% of capacity</td><td>DVB-RCS2 / Casini et al.</td></tr>
+<tr><td>MF-TDMA burst overhead (preamble + guard)</td><td>~150–500</td><td>symbols/burst</td><td>ETSI EN 301 545-2 order</td></tr>
+<tr><td>Burst efficiency, 20k-symbol slot, 300 sym overhead</td><td>98.5</td><td>%</td><td>Computed</td></tr>
+<tr><td>Burst efficiency, 1k-symbol slot, 300 sym overhead</td><td>70.0</td><td>%</td><td>Computed</td></tr>
+<tr><td>LEO DAMA request-grant delay (bent pipe)</td><td>~25–65</td><td>ms</td><td>Computed (13 ms prop + scheduler)</td></tr>
+<tr><td>GEO request-grant propagation alone</td><td>477</td><td>ms</td><td>Computed</td></tr>
+<tr><td>Max LEO range rate (550 km, &gt;5° elev)</td><td>~7.0</td><td>km/s</td><td>Computed</td></tr>
+<tr><td>One-way delay drift</td><td>23</td><td>µs/s</td><td>Computed</td></tr>
+<tr><td>Doppler at 30 GHz uplink</td><td>~700</td><td>kHz</td><td>Computed</td></tr>
+<tr><td>Forward TDM scheduler efficiency</td><td>~0.95–0.98</td><td>—</td><td>Typical, quantisation + signalling</td></tr>
+</tbody>
+</table>
+</div>
+
+<div class="cb" id="s9">
+    <h2>9. What this lesson delivers to the design chain</h2>
+<p>The m5-2 information rate is a carrier property. This lesson converts it toward a user property: the forward link loses a few percent to scheduling quantisation, the return link loses burst overhead, contention-pool reservation, and allocation quantisation — and gains an allocation-delay figure that M7's latency budget will consume. The scheduler policy, not the physics, decides how the surviving capacity is divided among users, and the policy encodes commercial commitments.</p>
+<p>Spine Stage 3 attaches an access model to the throughput engine: a forward TDM efficiency and weighted per-user allocation, and a return MF-TDMA model with burst-length-dependent efficiency and a contention-pool reservation. What the engine still assumes: framing is free. m5-4 charges that bill — physical-layer framing, pilots, and signalling — and examines how the standardised air interface (DVB-S2X) and the proprietary ones package everything from m5-1 to m5-3 differently.</p>
+</div>
+
+<div class="quiz-block" id="quiz">
+    <h2>KNOWLEDGE CHECK</h2>
+    <div class="quiz-intro">Ten questions. Each option explains itself after you commit. No retries per question — decide first.</div>
+    <div class="quiz-q">
+        <p><strong>Q1.</strong> Forward-link and return-link sharing are structurally different because:</p>
+        <div class="quiz-options">
+            <button class="quiz-opt" data-q="1" data-correct="false">A — The forward link uses a different frequency band</button>
+            <button class="quiz-opt" data-q="1" data-correct="true">B — The forward link has a single transmitter that owns the whole queue, so sharing is a scheduling decision; the return link has many uncoordinated transmitters, so sharing requires slotting, coordination, or contention</button>
+            <button class="quiz-opt" data-q="1" data-correct="false">C — Return-link traffic is always smaller</button>
+            <button class="quiz-opt" data-q="1" data-correct="false">D — The forward link does not use MODCODs</button>
+        </div>
+        <div class="quiz-feedback" id="fb1"></div>
+    </div>
+    <div class="quiz-q">
+        <p><strong>Q2.</strong> Slotted ALOHA's maximum throughput is:</p>
+        <div class="quiz-options">
+            <button class="quiz-opt" data-q="2" data-correct="false">A — 100% at high load</button>
+            <button class="quiz-opt" data-q="2" data-correct="false">B — 50% at G = 0.5</button>
+            <button class="quiz-opt" data-q="2" data-correct="true">C — 36.8% at G = 1, falling as load increases beyond it</button>
+            <button class="quiz-opt" data-q="2" data-correct="false">D — 18.4% at G = 2</button>
+        </div>
+        <div class="quiz-feedback" id="fb2"></div>
+    </div>
+    <div class="quiz-q">
+        <p><strong>Q3.</strong> CRDSA improves on slotted ALOHA by:</p>
+        <div class="quiz-options">
+            <button class="quiz-opt" data-q="3" data-correct="false">A — Eliminating collisions entirely</button>
+            <button class="quiz-opt" data-q="3" data-correct="true">B — Transmitting each burst multiple times in random slots and using successive interference cancellation to recover collided bursts</button>
+            <button class="quiz-opt" data-q="3" data-correct="false">C — Using longer slots</button>
+            <button class="quiz-opt" data-q="3" data-correct="false">D — Requiring terminals to listen before transmitting</button>
+        </div>
+        <div class="quiz-feedback" id="fb3"></div>
+    </div>
+    <div class="quiz-q">
+        <p><strong>Q4.</strong> DAMA achieves high return-link efficiency at the cost of:</p>
+        <div class="quiz-options">
+            <button class="quiz-opt" data-q="4" data-correct="false">A — Higher collision rates</button>
+            <button class="quiz-opt" data-q="4" data-correct="true">B — An allocation delay of roughly one request-grant round trip plus the scheduler period before a fresh burst can transmit</button>
+            <button class="quiz-opt" data-q="4" data-correct="false">C — Requiring CDMA spreading</button>
+            <button class="quiz-opt" data-q="4" data-correct="false">D — Doubling the required C/N₀</button>
+        </div>
+        <div class="quiz-feedback" id="fb4"></div>
+    </div>
+    <div class="quiz-q">
+        <p><strong>Q5.</strong> The burst-overhead table shows a 2 Msym/s carrier with 0.5 ms slots running at 70% efficiency. The root cause is:</p>
+        <div class="quiz-options">
+            <button class="quiz-opt" data-q="5" data-correct="false">A — The FEC code rate</button>
+            <button class="quiz-opt" data-q="5" data-correct="true">B — A fixed per-burst tax (preamble + guard) divided by too few payload symbols</button>
+            <button class="quiz-opt" data-q="5" data-correct="false">C — Rain attenuation</button>
+            <button class="quiz-opt" data-q="5" data-correct="false">D — The scheduler policy</button>
+        </div>
+        <div class="quiz-feedback" id="fb5"></div>
+    </div>
+    <div class="quiz-q">
+        <p><strong>Q6.</strong> Guard times in a LEO MF-TDMA return link can be kept short primarily because:</p>
+        <div class="quiz-options">
+            <button class="quiz-opt" data-q="6" data-correct="false">A — LEO satellites move slowly relative to terminals</button>
+            <button class="quiz-opt" data-q="6" data-correct="true">B — Terminals pre-compensate their burst timing using satellite ephemeris and their own position, so residual arrival uncertainty is small</button>
+            <button class="quiz-opt" data-q="6" data-correct="false">C — The speed of light is higher at low altitude</button>
+            <button class="quiz-opt" data-q="6" data-correct="false">D — Guard times are not needed at LEO</button>
+        </div>
+        <div class="quiz-feedback" id="fb6"></div>
+    </div>
+    <div class="quiz-q">
+        <p><strong>Q7.</strong> The NR uplink offers DFT-s-OFDM (a single-carrier variant) alongside OFDMA because:</p>
+        <div class="quiz-options">
+            <button class="quiz-opt" data-q="7" data-correct="false">A — OFDMA cannot carry uplink data</button>
+            <button class="quiz-opt" data-q="7" data-correct="true">B — Pure OFDM's high peak-to-average power ratio is costly for a power-limited terminal amplifier, and the single-carrier variant reduces it</button>
+            <button class="quiz-opt" data-q="7" data-correct="false">C — DFT-s-OFDM has higher spectral efficiency</button>
+            <button class="quiz-opt" data-q="7" data-correct="false">D — Regulators require it</button>
+        </div>
+        <div class="quiz-feedback" id="fb7"></div>
+    </div>
+    <div class="quiz-q">
+        <p><strong>Q8.</strong> Under a proportional-fair scheduler with ACM, a terminal deep in a rain fade:</p>
+        <div class="quiz-options">
+            <button class="quiz-opt" data-q="8" data-correct="false">A — Is never served until the fade ends</button>
+            <button class="quiz-opt" data-q="8" data-correct="true">B — Continues to be served because its falling average rate raises its scheduling priority, though each frame it receives delivers fewer bits</button>
+            <button class="quiz-opt" data-q="8" data-correct="false">C — Receives more bits than in clear sky</button>
+            <button class="quiz-opt" data-q="8" data-correct="false">D — Is switched to the forward link</button>
+        </div>
+        <div class="quiz-feedback" id="fb8"></div>
+    </div>
+    <div class="quiz-q">
+        <p><strong>Q9.</strong> The access-layer costs this lesson charges are kept separate from m5-4's framing costs because:</p>
+        <div class="quiz-options">
+            <button class="quiz-opt" data-q="9" data-correct="false">A — They are the same thing counted twice</button>
+            <button class="quiz-opt" data-q="9" data-correct="true">B — Access costs arise from multi-user sharing (guards, preambles, contention, grant latency, quantisation) and exist per burst; framing costs arise from per-carrier physical-layer structure and exist even with a single user</button>
+            <button class="quiz-opt" data-q="9" data-correct="false">C — Framing costs are negligible</button>
+            <button class="quiz-opt" data-q="9" data-correct="false">D — Access costs only exist at GEO</button>
+        </div>
+        <div class="quiz-feedback" id="fb9"></div>
+    </div>
+    <div class="quiz-q">
+        <p><strong>Q10.</strong> The residual output of this lesson that Module 7's latency budget consumes is:</p>
+        <div class="quiz-options">
+            <button class="quiz-opt" data-q="10" data-correct="false">A — The beam's spectral efficiency</button>
+            <button class="quiz-opt" data-q="10" data-correct="true">B — The return-link allocation delay — the time between traffic arriving at a terminal and its first granted transmission opportunity</button>
+            <button class="quiz-opt" data-q="10" data-correct="false">C — The satellite's transmit power</button>
+            <button class="quiz-opt" data-q="10" data-correct="false">D — The number of MF-TDMA carriers</button>
+        </div>
+        <div class="quiz-feedback" id="fb10"></div>
+    </div>
+    <div class="quiz-score" id="quizScore"></div>
+</div>
+
+<div class="py-block" id="py">
+    <h2>PYTHON EXERCISES</h2>
+    <div class="py-intro">Three exercises; the last extends the module spine project. Run them, then work the numbered follow-ups in the comments — the follow-ups are the exercise.</div>
+    <div class="py-exercise">
+        <h3>Exercise 1 — The contention ceiling</h3>
+        <p>Compute the ALOHA family throughput curves and locate the instability.</p>
+<pre>
+import math
+
+def pure_aloha(G):    return G * math.exp(-2*G)
+def slotted_aloha(G): return G * math.exp(-G)
+
+print(f&quot;{&#x27;G&#x27;:&gt;6}{&#x27;pure&#x27;:&gt;9}{&#x27;slotted&#x27;:&gt;9}&quot;)
+best_p = best_s = (0, 0)
+for i in range(1, 61):
+    G = i * 0.05
+    p, s = pure_aloha(G), slotted_aloha(G)
+    if p &gt; best_p[1]: best_p = (G, p)
+    if s &gt; best_s[1]: best_s = (G, s)
+    if i % 4 == 0:
+        print(f&quot;{G:&gt;6.2f}{p:&gt;9.3f}{s:&gt;9.3f}&quot;)
+print(f&quot;\npure ALOHA peak:    S={best_p[1]:.3f} at G={best_p[0]:.2f}  (theory 1/2e={1/(2*math.e):.3f} at 0.5)&quot;)
+print(f&quot;slotted ALOHA peak: S={best_s[1]:.3f} at G={best_s[0]:.2f}  (theory 1/e={1/math.e:.3f} at 1.0)&quot;)
+
+# 1. Plot (or tabulate) the region G &gt; 1 for slotted ALOHA. Explain in
+#    one sentence why operating there is unstable, not merely inefficient.
+# 2. A contention pool carries only capacity requests (100-symbol bursts)
+#    for a DAMA system. If the pool must stay below G = 0.5 for stability,
+#    how many requests/second does one 2 Msym/s contention carrier
+#    support with 500-symbol slots?
+# 3. CRDSA reaches ~0.55+ usable throughput with 2 replicas. What does
+#    each replica cost in transmitted energy per delivered burst, and
+#    why is that an acceptable trade on the return link specifically?
+</pre>
+    </div>
+    <div class="py-exercise">
+        <h3>Exercise 2 — Burst-length economics</h3>
+        <p>Quantify the fixed-tax structure of MF-TDMA bursts and the quantisation loss.</p>
+<pre>
+def burst_efficiency(rs_syms, slot_ms, overhead_sym=300):
+    n = rs_syms * slot_ms / 1e3
+    return (n - overhead_sym) / n, n
+
+print(f&quot;{&#x27;Rs (Msym/s)&#x27;:&gt;12}{&#x27;slot (ms)&#x27;:&gt;10}{&#x27;sym/slot&#x27;:&gt;10}{&#x27;eff&#x27;:&gt;8}&quot;)
+for rs in [10e6, 5e6, 2e6, 1e6]:
+    for slot in [4.0, 2.0, 1.0, 0.5]:
+        eff, n = burst_efficiency(rs, slot)
+        print(f&quot;{rs/1e6:&gt;12.0f}{slot:&gt;10.1f}{n:&gt;10.0f}{eff*100:&gt;7.1f}%&quot;)
+
+# Allocation quantisation: a terminal needs `demand` bits in a scheduler
+# period but grants come in whole slots.
+def quantisation_loss(demand_bits, slot_payload_bits):
+    import math as m
+    slots = m.ceil(demand_bits / slot_payload_bits)
+    return slots * slot_payload_bits - demand_bits
+
+# 1. For a 2 Msym/s carrier, QPSK 1/2 (0.989 bit/sym), 2 ms slots:
+#    compute the slot payload in bits, then the average quantisation
+#    loss for demands uniformly distributed 1..3 slot-payloads.
+# 2. Combine burst efficiency and quantisation loss into one effective
+#    efficiency for a terminal sending 1500-byte packets one at a time.
+# 3. Recommend a slot size for (a) VoIP-like traffic (small, periodic),
+#    (b) bulk upload. Defend both against the table.
+</pre>
+    </div>
+    <div class="py-exercise">
+        <h3>Exercise 3 — Spine Stage 3: the access model</h3>
+        <p>The throughput engine gains its sharing layer: forward TDM allocation and a return MF-TDMA model.</p>
+<pre>
+import math
+
+# ═══════════════════════════════════════════════════════
+# M5 SPINE PROJECT — THROUGHPUT ENGINE
+# Stage 3: multiple access &amp; scheduling.
+#   Stage 1 (m5-1): bandwidth, roll-off -&gt; symbol rate
+#   Stage 2 (m5-2): C/N0 -&gt; MODCOD -&gt; information rate
+#   Stage 3 (here): information rate -&gt; access-layer capacity
+#                   -&gt; per-user allocation; return burst model
+# Next: m5-4 framing overhead, m5-5 NTN branch, m5-6 D2D,
+#       m5-7 full assembly.
+# Boundary: this stage charges SHARING costs only. Framing,
+# pilots, and PHY headers are m5-4&#x27;s bill.
+# ═══════════════════════════════════════════════════════
+
+MODCOD_TABLE = [  # (name, eta bit/sym, EsN0 threshold dB) — EN 302 307-1 Tbl 13
+    (&quot;QPSK 1/4&quot;, 0.490243, -2.35), (&quot;QPSK 1/2&quot;, 0.988858, 1.00),
+    (&quot;QPSK 3/4&quot;, 1.487473, 4.03),  (&quot;8PSK 3/4&quot;, 2.228124, 7.91),
+    (&quot;16APSK 2/3&quot;, 2.637201, 8.97),(&quot;16APSK 3/4&quot;, 2.966728, 10.21),
+    (&quot;32APSK 3/4&quot;, 3.703295, 12.73),(&quot;32APSK 9/10&quot;, 4.453027, 16.05),
+]
+
+def select_modcod(esn0_db, margin_db=1.5):
+    best = None
+    for name, eta, thr in MODCOD_TABLE:
+        if esn0_db &gt;= thr + margin_db and (best is None or eta &gt; best[1]):
+            best = (name, eta, thr)
+    return best
+
+class ForwardAccess:
+    &quot;&quot;&quot;Single TDM carrier + weighted scheduler. Sharing cost:
+    scheduler efficiency (quantisation + signalling).&quot;&quot;&quot;
+    def __init__(self, bw_hz, alpha, cn0_dbhz, sched_eff=0.97):
+        self.rs = bw_hz / (1 + alpha)                     # Stage 1
+        esn0 = cn0_dbhz - 10*math.log10(self.rs)
+        self.modcod = select_modcod(esn0)                 # Stage 2
+        self.info_rate = self.modcod[1] * self.rs if self.modcod else 0.0
+        self.sched_eff = sched_eff
+
+    @property
+    def access_capacity(self):
+        return self.info_rate * self.sched_eff            # Stage 3
+
+    def allocate(self, weights):
+        total = sum(weights.values())
+        return {u: self.access_capacity * w / total for u, w in weights.items()}
+
+class ReturnAccess:
+    &quot;&quot;&quot;MF-TDMA grid: n_carriers x slots. Sharing costs: burst
+    overhead, contention-pool reservation, quantisation (coarse).&quot;&quot;&quot;
+    def __init__(self, bw_hz, n_carriers, alpha, esn0_db,
+                 slot_ms=2.0, overhead_sym=300, contention_frac=0.05):
+        carrier_bw = bw_hz / n_carriers                   # incl. spacing
+        self.rs_carrier = carrier_bw / (1 + alpha)
+        self.n_carriers = n_carriers
+        self.modcod = select_modcod(esn0_db)
+        syms = self.rs_carrier * slot_ms / 1e3
+        self.burst_eff = (syms - overhead_sym) / syms
+        self.contention_frac = contention_frac
+        self.slot_ms = slot_ms
+
+    @property
+    def access_capacity(self):
+        if not self.modcod: return 0.0
+        info = self.modcod[1] * self.rs_carrier * self.n_carriers
+        return info * self.burst_eff * (1 - self.contention_frac)
+
+    def grant_delay_ms(self, slant_km=1000, sched_period_ms=20):
+        prop = 4 * slant_km * 1e3 / 3e8 * 1e3             # request+grant legs
+        return prop + sched_period_ms + self.slot_ms / 2
+
+# ── Demonstration: one Ka user beam, both directions ────
+fwd = ForwardAccess(bw_hz=250e6, alpha=0.10, cn0_dbhz=96.0)
+print(f&quot;FORWARD  {fwd.modcod[0]:&gt;12}: info {fwd.info_rate/1e6:7.1f} Mbps&quot;
+      f&quot; -&gt; access {fwd.access_capacity/1e6:7.1f} Mbps&quot;)
+
+alloc = fwd.allocate({&quot;premium&quot;: 3, &quot;standard&quot;: 1, &quot;standard2&quot;: 1})
+for u, r in alloc.items():
+    print(f&quot;    {u:&lt;10} {r/1e6:7.1f} Mbps&quot;)
+
+ret = ReturnAccess(bw_hz=125e6, n_carriers=25, alpha=0.20, esn0_db=4.5)
+print(f&quot;\nRETURN   {ret.modcod[0]:&gt;12}: {ret.n_carriers} carriers x &quot;
+      f&quot;{ret.rs_carrier/1e6:.1f} Msym/s, burst eff {ret.burst_eff*100:.1f}%&quot;)
+print(f&quot;    access capacity {ret.access_capacity/1e6:7.1f} Mbps&quot;)
+print(f&quot;    DAMA grant delay ~{ret.grant_delay_ms():.0f} ms  (exported to M7)&quot;)
+
+# ── Burst-length sensitivity on the same return grid ────
+print(f&quot;\n{&#x27;slot (ms)&#x27;:&gt;10}{&#x27;burst eff&#x27;:&gt;11}{&#x27;capacity (Mbps)&#x27;:&gt;17}&quot;)
+for slot in [4.0, 2.0, 1.0, 0.5]:
+    r = ReturnAccess(125e6, 25, 0.20, 4.5, slot_ms=slot)
+    print(f&quot;{slot:&gt;10.1f}{r.burst_eff*100:&gt;10.1f}%{r.access_capacity/1e6:&gt;16.1f}&quot;)
+
+# ── STAGE-4 PREVIEW ────────────────────────────────────
+# m5-4 multiplies in the framing efficiency: PLHEADER, pilots,
+# and signalling per FECFRAME — the last factor between the
+# access capacity above and what a user&#x27;s socket measures.
+
+# 1. Sweep contention_frac 0.02..0.20 and plot capacity vs the
+#    request latency you avoid. Where would you set it for a
+#    consumer beam vs an IoT beam?
+# 2. Give ReturnAccess an allocation quantum (whole slots) and
+#    compute effective per-user efficiency for 100 users sending
+#    1500-byte packets.
+# 3. The forward scheduler above splits capacity by static weights.
+#    Implement proportional fair over a 100-frame window with two
+#    users whose MODCODs differ, and compare total delivered bits
+#    against max-throughput scheduling.
+</pre>
+    </div>
+</div>
+
+<div class="reflection-block" id="reflect">
+    <h2>REFLECTION</h2>
+    <div class="ref-intro">Four prompts. Each forces a decision — write the position down before moving on; the act of committing is the exercise.</div>
+    <div class="ref-prompt">
+        <h3>PROMPT 01</h3>
+        <p>Section 3 said the contention/DAMA/dedicated blend is "a live operational tuning problem, not a design-time constant." Argue the opposite position first — that the blend should be fixed at design time and never touched — then defeat it. Identify the observable network metric that should trigger a rebalance, and the failure mode if the contention pool is sized by a design document that no one revisits after the traffic mix changes.</p>
+    </div>
+    <div class="ref-prompt">
+        <h3>PROMPT 02</h3>
+        <p>The section-4 table's 70% corner was called "what a badly configured return link looks like." A vendor proposes solving it with a very long 8 ms slot on a 10 Msym/s carrier (99.6% burst efficiency). Compute what that slot costs in allocation quantum at QPSK 1/2, and decide which traffic profile it silently penalises. What does this say about quoting a return link's "efficiency" as a single number?</p>
+    </div>
+    <div class="ref-prompt">
+        <h3>PROMPT 03</h3>
+        <p>The ephemeris-driven timing advance of section 7 assumes every terminal knows its own position. Enumerate what breaks, layer by layer, when a terminal's position is wrong by 10 km — timing, Doppler, beam assignment — and determine which layer fails first. Then reverse the question: how much of the access layer's efficiency at LEO is actually purchased by the assumption that the terminal carries GNSS?</p>
+    </div>
+    <div class="ref-prompt">
+        <h3>PROMPT 04</h3>
+        <p>Proportional fair scheduling was presented as the practical compromise, but its fairness is defined per-terminal, not per-person or per-bit-of-value. Construct a scenario in a mixed consumer/enterprise beam where proportional fair produces an outcome the operator's sales contracts cannot tolerate, and specify the minimal QoS mechanism (weight, floor, or cap) that repairs it. Which of the three mechanisms degrades total beam throughput least, and why?</p>
+    </div>
+</div>
+
+<div class="cb">
+    <h2>Sources</h2>
+<ul>
+<li>ETSI EN 301 545-2 (DVB-RCS2) — MF-TDMA return link, burst structure, CRDSA random access, DAMA signalling.</li>
+<li>Abramson, "The ALOHA System" (1970); Roberts, slotted ALOHA analysis — contention throughput.</li>
+<li>Casini, De Gaudenzi &amp; del Río Herrero, "Contention Resolution Diversity Slotted ALOHA (CRDSA)" (IEEE Trans. Wireless Comm., 2007).</li>
+<li>Maral &amp; Bousquet, <em>Satellite Communications Systems</em> — FDMA/TDMA/CDMA system engineering, DAMA operation.</li>
+<li>ETSI EN 302 307-1 — forward-link TDM structure and per-frame ACM (framing detail in m5-4).</li>
+<li>3GPP TS 38.211 / TR 38.821 — OFDMA numerology and NTN timing advance (developed in m5-5).</li>
+</ul>
+</div>
+
+<div class="complete-wrap">
+    <button class="complete-btn" id="completeBtn">MARK LESSON COMPLETE</button>
+    <div class="complete-msg" id="completeMsg"></div>
+</div>
+<div class="lesson-nav">
+    <a href="m5-2.html">← LESSON 02 — MODCOD &amp; ACM</a>
+    <a href="m5-4.html">LESSON 04 — DVB-S2X VS PROPRIETARY →</a>
+</div>
+</div>
+
+<button class="back-to-top" id="backToTop" title="Back to top">↑</button>
+<footer>© 2026 LEOAF · M5 · LESSON 03 OF 7</footer>
+<script>
+const canvas=document.getElementById('starsCanvas'),ctx=canvas.getContext('2d');
+let stars=[];
+function initStars(){stars=[];for(let i=0;i<180;i++)stars.push({x:Math.random()*canvas.width,y:Math.random()*canvas.height,size:Math.random()*1.5+0.4,speed:Math.random()*0.18+0.04,hue:Math.random()*360});}
+function resizeCanvas(){canvas.width=window.innerWidth;canvas.height=window.innerHeight;}
+resizeCanvas();initStars();window.addEventListener('resize',resizeCanvas);
+function animateStars(){ctx.clearRect(0,0,canvas.width,canvas.height);stars.forEach(s=>{s.y-=s.speed;if(s.y<0){s.y=canvas.height;s.x=Math.random()*canvas.width;}ctx.beginPath();ctx.fillStyle=`hsl(${s.hue},80%,80%)`;ctx.arc(s.x,s.y,s.size,0,Math.PI*2);ctx.fill();});requestAnimationFrame(animateStars);}
+animateStars();
+</script>
+<script>
+const feedbacks={
+    1:{correct:"One node owning the transmitter makes coordination free — the gateway simply decides the frame order. Uncoordinated terminals must be separated in frequency, time, or code, and every separation mechanism costs overhead, latency, or collisions.",wrong:"The band difference (m4) affects the link budget, not the sharing structure. Return traffic being smaller is a traffic pattern, not the structural cause. The forward link applies MODCODs per frame — that is precisely how ACM operates."},
+    2:{correct:"S = G·e^(−G) peaks at 1/e ≈ 36.8% when G = 1. Beyond the peak, additional offered load produces more collisions than successes and throughput declines — the instability that makes uncontrolled contention unusable as a bulk-traffic mechanism.",wrong:"Contention can never reach 100% — collisions are intrinsic. 18.4% is pure (unslotted) ALOHA's peak, at G = 0.5."},
+    3:{correct:"Each burst carries a pointer to its replica; once any copy is decoded cleanly, its replica's interference can be subtracted from the slots it collided in, often freeing further bursts — a chain reaction that lifts usable throughput to 50–80% of capacity in DVB-RCS2 configurations.",wrong:"Collisions still occur — they are resolved, not prevented. Slot length is orthogonal. Listen-before-talk does not work over satellite propagation delays: by the time a terminal hears the channel, the information is milliseconds stale."},
+    4:{correct:"The payload slots are contention-free, but a terminal with newly arrived traffic must request and be granted first — ~25–65 ms at LEO, ~0.5 s+ at GEO. Systems hide this with speculative pre-grants to active terminals and a random-access pool for first packets.",wrong:"DAMA payload slots have no collisions — that is the point. No spreading is involved. The link budget is unchanged; the cost is temporal, not energetic."},
+    5:{correct:"300 overhead symbols against a 1,000-symbol slot is 30% gone before any payload. The preamble and guard are fixed costs of burst acquisition and timing uncertainty; only longer bursts amortise them.",wrong:"Code rate is an m5-2 cost, charged separately. Rain moves the MODCOD, not the burst structure. The scheduler chooses who gets slots, not what the slot structure costs."},
+    6:{correct:"With the range changing at up to ~7 km/s (23 µs/s of delay drift), open-loop transmission would smear bursts across the slot grid within seconds. Ephemeris-driven timing advance removes the predictable component; the guard absorbs only the residual from position and oscillator error.",wrong:"LEO satellites move fast — that is the problem being solved. The speed of light is constant. Some guard is always needed; the question is whether it absorbs kilometres of uncertainty or metres."},
+    7:{correct:"Summing thousands of subcarriers produces large envelope fluctuations; a handset or small terminal PA must back off accordingly, surrendering scarce uplink EIRP (the m5-1 §5 economics on the terminal side). DFT-s-OFDM restores a near-single-carrier envelope for power-limited uplinks — directly relevant to NTN and D2D (m5-5, m5-6).",wrong:"OFDMA carries uplink data in terrestrial NR routinely. Spectral efficiency is comparable or slightly worse. No regulatory mandate exists."},
+    8:{correct:"Proportional fair ranks users by current-rate/average-rate. A faded user's achievable rate drops, but so does their average, keeping their priority alive — service degrades in rate, not in existence. Max-throughput scheduling, by contrast, would starve them.",wrong:"Starvation is the max-throughput pathology, not proportional fair's. Fewer bits per frame at a robust MODCOD means less throughput, not more. Forward and return are different directions, not fallback paths for each other."},
+    9:{correct:"The separation prevents double counting in the throughput engine: η_access multiplies the information rate for sharing losses, η_framing (m5-4) multiplies it for PHY structure. A single-user point-to-point carrier pays the second and not the first.",wrong:"They are distinct cost classes by construction. Framing overhead is several percent to tens of percent — not negligible (m5-4). Access costs exist wherever multiple users share; LEO changes their mechanics, not their existence."},
+    10:{correct:"End-to-end latency is propagation (m1-3, m2) plus processing plus *access* — and for fresh return-link bursts the access term (~25–65 ms LEO DAMA, less with pre-grants or random access) can dominate the propagation term. M7 imports this number.",wrong:"Spectral efficiency feeds the capacity chain, not latency. Transmit power is an m4 input. Carrier count is an internal configuration variable."}
+};
+let answered={};
+document.querySelectorAll('.quiz-opt').forEach(btn=>{
+    btn.addEventListener('click',function(){
+        const q=this.dataset.q;
+        if(answered[q]!==undefined)return;
+        const correct=this.dataset.correct==='true';
+        answered[q]=correct;
+        document.querySelectorAll(`.quiz-opt[data-q="${q}"]`).forEach(b=>{b.disabled=true;if(b.dataset.correct==='true')b.classList.add('correct');});
+        if(!correct)this.classList.add('wrong');
+        const fb=document.getElementById('fb'+q);
+        fb.textContent=(correct?'✓ ':'✗ ')+feedbacks[q][correct?'correct':'wrong'];
+        fb.style.color=correct?'#39ff14':'#ff004f';
+        if(Object.keys(answered).length===10){
+            const total=Object.values(answered).filter(Boolean).length;
+            const sc=document.getElementById('quizScore');
+            sc.style.display='block';
+            const pct=Math.round(total/10*100);
+            sc.textContent=`SCORE: ${total}/10 (${pct}%) — ${pct===100?'PERFECT.':pct>=80?'STRONG.':pct>=60?'ADEQUATE. REVISIT WEAK SECTIONS.':'REVISIT THE LESSON BEFORE PROCEEDING.'}`;
+        }
+    });
+});
+</script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="supabase.js"></script>
+<script src="user_progress.js"></script>
+<script>
+const LESSON_ID='m5-3';
+(function(){
+    function bounceToLogin(r){console.error("Auth guard:",r);window.location.replace("index.html");}
+    async function init(){
+        if(typeof client==="undefined"||!client||!client.auth)return bounceToLogin("Supabase client not loaded");
+        let session=null;
+        try{({data:{session}}=await client.auth.getSession());}
+        catch(e){return bounceToLogin("getSession threw: "+e.message);}
+        if(!session){window.location.replace("index.html");return;}
+        const btn=document.getElementById('completeBtn'),msg=document.getElementById('completeMsg');
+        function setDone(done){
+            if(done){btn.textContent='✓ COMPLETE — CLICK TO UNDO';btn.classList.add('done');btn.style.cssText='border-color:#39ff14;color:#39ff14;background:rgba(57,255,20,0.1);cursor:pointer;opacity:1;';msg.style.color='#39ff14';msg.textContent='Lesson marked complete. Click again to undo.';}
+            else{btn.textContent='MARK LESSON COMPLETE';btn.classList.remove('done');btn.style.cssText='';msg.style.color='#ffffff55';msg.textContent='Not yet marked complete.';}
+        }
+        let mastered=[];
+        try{mastered=await getMasteredSections();}catch(e){console.error(e);}
+        setDone(mastered.includes(LESSON_ID));
+        btn.addEventListener('click',async()=>{
+            const isDone=btn.classList.contains('done');
+            msg.style.color='#00d9ff';msg.textContent='Saving...';
+            const ok=await upsertSection(LESSON_ID,!isDone);
+            if(ok){setDone(!isDone);}else{msg.style.color='#ff004f';msg.textContent='Error saving. Try again.';}
+        });
+        const btt=document.getElementById('backToTop');
+        window.addEventListener('scroll',()=>{btt.classList.toggle('visible',window.scrollY>400);});
+        btt.addEventListener('click',()=>window.scrollTo({top:0,behavior:'smooth'}));
+    }
+    if(document.readyState==="loading")document.addEventListener("DOMContentLoaded",init);
+    else init();
+})();
+</script>
+</body>
+</html>
