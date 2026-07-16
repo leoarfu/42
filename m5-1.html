@@ -1,0 +1,756 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, shrink-to-fit=no">
+<title>M5-1 — Waveforms &amp; Modulation Fundamentals · LEOAF</title>
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;600;800&family=Share+Tech+Mono&family=Libre+Baskerville:ital,wght@0,400;0,700;1,400&display=swap" rel="stylesheet">
+<link rel="icon" href="favicon.ico" sizes="any" type="image/x-icon">
+<link rel="manifest" href="site.webmanifest">
+<meta name="theme-color" content="#0f0f0f">
+<script>
+window.leoafAbort = async function () {
+    function go() { window.location.replace("index.html?signedout=1"); }
+    try { if (typeof client !== "undefined" && client && client.auth && client.auth.signOut) { try { await client.auth.signOut({ scope: "local" }); } catch (e) {} } } catch (e) {}
+    go();
+};
+</script>
+<style>
+* { box-sizing:border-box; margin:0; padding:0; }
+html { height:100%; -webkit-text-size-adjust:100%; overflow-x:hidden; }
+body { font-family:'Share Tech Mono',monospace; background:#000; color:white; overflow-x:hidden; min-height:100vh; }
+#starsCanvas { position:fixed; inset:0; z-index:-1; }
+header { background:#000; border-bottom:1px solid #ff004f33; position:sticky; top:0; z-index:100; padding:1rem clamp(1.5rem,5vw,4rem); display:flex; justify-content:space-between; align-items:center; }
+.logo { font-family:'Orbitron',sans-serif; font-weight:800; font-size:clamp(16px,2vw,22px); letter-spacing:3px; text-decoration:none; }
+.logo span:first-child { color:white; } .logo span:last-child { color:#ff004f; }
+.nav-right { display:flex; align-items:center; gap:10px; }
+.nav-btn { background:transparent; border:1px solid #ff004f44; color:#ff004f; padding:6px 14px; cursor:pointer; transition:0.3s; font-size:11px; font-family:'Orbitron',sans-serif; letter-spacing:1px; text-decoration:none; display:inline-block; }
+.nav-btn:hover { background:#ff004f; color:black; }
+.breadcrumb { padding:14px clamp(1.5rem,5vw,4rem); font-size:11px; color:#ffffff44; letter-spacing:1px; position:relative; z-index:1; }
+.breadcrumb a { color:#00d9ff66; text-decoration:none; } .breadcrumb a:hover { color:#00d9ff; }
+.breadcrumb span { margin:0 8px; }
+.lesson-wrap { max-width:820px; margin:0 auto; padding:0 clamp(1.5rem,5vw,4rem) 80px; position:relative; z-index:1; }
+.lesson-header { padding:30px 0 28px; border-bottom:1px solid #ffffff11; margin-bottom:36px; }
+.lesson-tag { font-family:'Orbitron',sans-serif; font-size:10px; color:#ff004f; letter-spacing:3px; margin-bottom:10px; }
+.lesson-header h1 { font-family:'Orbitron',sans-serif; font-size:clamp(20px,3.5vw,32px); font-weight:800; line-height:1.2; margin-bottom:12px; }
+.lesson-meta { display:flex; gap:10px; flex-wrap:wrap; margin-bottom:16px; }
+.l-pill { font-family:'Orbitron',sans-serif; font-size:10px; padding:3px 10px; border:1px solid; letter-spacing:1px; }
+.l-pill-q { color:#ff004f; border-color:#ff004f44; } .l-pill-t { color:#39ff14; border-color:#39ff1444; }
+.l-pill-c { color:#ffaa00; border-color:#ffaa0044; }
+.lesson-intro { font-size:13px; line-height:1.85; opacity:0.75; }
+.toc { background:rgba(0,217,255,0.06); border:1px solid #00d9ff33; padding:24px 28px; margin:30px 0; }
+.toc h4 { font-family:'Orbitron',sans-serif; font-size:10px; color:#00d9ff; letter-spacing:2px; margin-bottom:16px; }
+.toc ol { padding-left:20px; } .toc li { font-size:13px; line-height:2.1; }
+.toc li a { color:#00d9ffbb; text-decoration:none; transition:0.15s; } .toc li a:hover { color:#fff; padding-left:4px; }
+.toc li::marker { color:#ff004f; font-family:'Orbitron',sans-serif; font-size:10px; }
+.cb { background:#f5f2ec; color:#1a1a1a; padding:36px clamp(24px,4vw,48px); margin-bottom:24px; border-left:4px solid #00d9ff; position:relative; z-index:1; }
+.cb h2 { font-family:'Orbitron',sans-serif; font-size:13px; color:#003d66; letter-spacing:2px; text-transform:uppercase; margin-bottom:20px; padding-bottom:10px; border-bottom:2px solid #00d9ff66; scroll-margin-top:80px; }
+.cb h3 { font-family:'Orbitron',sans-serif; font-size:11px; color:#444; letter-spacing:1.5px; text-transform:uppercase; margin:28px 0 12px; }
+.cb p { font-family:'Libre Baskerville',Georgia,serif; font-size:15px; line-height:1.9; color:#1a1a1a; margin-bottom:16px; }
+.cb ul { padding-left:0; margin-bottom:16px; }
+.cb ul li { font-family:'Libre Baskerville',Georgia,serif; font-size:14px; line-height:1.85; color:#1a1a1a; padding-left:20px; position:relative; margin-bottom:8px; }
+.cb ul li::before { content:'›'; position:absolute; left:0; color:#0077aa; }
+.cb blockquote { border-left:3px solid #1a7a1a; background:#eafaea; padding:14px 20px; margin:18px 0; font-size:13px; font-family:'Share Tech Mono',monospace; color:#0a3d0a; line-height:1.8; }
+.callout { border-left:3px solid #0088cc; background:#e8f4fb; padding:16px 20px; margin:22px 0; font-size:12px; line-height:1.8; color:#1a1a1a; }
+.callout.red { border-left-color:#cc0033; background:#fdecea; }
+.callout.green { border-left-color:#1a7a1a; background:#eafaea; }
+.callout.amber { border-left-color:#996600; background:#fef9ec; }
+.callout strong { font-family:'Orbitron',sans-serif; font-size:10px; letter-spacing:1px; display:block; margin-bottom:8px; }
+.compare-table { width:100%; border-collapse:collapse; margin:22px 0; font-size:12px; }
+.compare-table th { font-family:'Orbitron',sans-serif; font-size:10px; letter-spacing:1px; color:#003d66; padding:10px 12px; border-bottom:2px solid #00d9ff66; text-align:left; }
+.compare-table td { padding:10px 12px; border-bottom:1px solid #ddd; line-height:1.5; color:#1a1a1a; vertical-align:top; }
+.compare-table tr:hover td { background:#f0f0f0; }
+.key-numbers { display:grid; grid-template-columns:repeat(auto-fit,minmax(140px,1fr)); gap:12px; margin:22px 0; }
+.kn-item { background:#fff; border:1px solid #d0d0d0; padding:16px 12px; text-align:center; }
+.kn-val { font-family:'Orbitron',sans-serif; font-size:clamp(13px,1.8vw,18px); font-weight:800; color:#003d66; display:block; }
+.kn-label { font-size:10px; color:#555; letter-spacing:1px; margin-top:5px; display:block; line-height:1.4; }
+.quiz-block { background:rgba(17,17,17,0.9); border:1px solid #ff004f33; padding:28px; margin:48px 0 32px; }
+.quiz-block h2 { font-family:'Orbitron',sans-serif; font-size:13px; color:#ff004f; letter-spacing:2px; margin-bottom:6px; }
+.quiz-intro { font-size:12px; opacity:0.6; margin-bottom:24px; padding-bottom:16px; border-bottom:1px solid #ff004f22; line-height:1.6; }
+.quiz-q { margin-bottom:28px; }
+.quiz-q p { font-size:13px; opacity:0.9; margin-bottom:12px; line-height:1.65; }
+.quiz-q p strong { color:#00d9ff; }
+.quiz-options { display:flex; flex-direction:column; gap:8px; }
+.quiz-opt { background:rgba(255,255,255,0.03); border:1px solid #ffffff1a; padding:11px 16px; cursor:pointer; font-size:12px; font-family:'Share Tech Mono',monospace; transition:0.2s; text-align:left; color:white; line-height:1.5; }
+.quiz-opt:hover:not(:disabled) { background:rgba(0,217,255,0.08); border-color:#00d9ff44; }
+.quiz-opt.correct { background:rgba(57,255,20,0.1); border-color:#39ff14; color:#39ff14; }
+.quiz-opt.wrong { background:rgba(255,0,79,0.1); border-color:#ff004f; color:#ff004f; }
+.quiz-opt:disabled { cursor:default; }
+.quiz-feedback { font-size:12px; margin-top:10px; min-height:18px; line-height:1.7; opacity:0.9; padding:0 4px; }
+.quiz-score { font-family:'Orbitron',sans-serif; font-size:12px; color:#39ff14; margin-top:20px; letter-spacing:1px; display:none; padding-top:16px; border-top:1px solid #39ff1433; }
+.py-block { background:rgba(10,10,10,0.95); border:1px solid #39ff1422; padding:28px; margin:32px 0; }
+.py-block h2 { font-family:'Orbitron',sans-serif; font-size:13px; color:#39ff14; letter-spacing:2px; margin-bottom:8px; }
+.py-block .py-intro { font-size:12px; opacity:0.7; margin-bottom:20px; padding-bottom:16px; border-bottom:1px solid #39ff1422; line-height:1.7; }
+.py-exercise { margin-bottom:32px; } .py-exercise:last-child { margin-bottom:0; }
+.py-exercise h3 { font-family:'Orbitron',sans-serif; font-size:11px; color:#39ff1499; letter-spacing:1.5px; text-transform:uppercase; margin-bottom:10px; }
+.py-exercise p { font-size:12px; opacity:0.8; margin-bottom:14px; line-height:1.75; }
+.py-block pre { background:#050505; border:1px solid #39ff1433; padding:20px; font-family:'Share Tech Mono',monospace; font-size:11px; line-height:1.7; overflow-x:auto; color:#39ff14; white-space:pre; margin-bottom:12px; }
+.py-note { background:rgba(57,255,20,0.04); border-left:2px solid #39ff14; padding:12px 16px; margin-top:14px; font-size:12px; line-height:1.75; opacity:0.8; }
+.py-note strong { font-family:'Orbitron',sans-serif; font-size:10px; color:#39ff14; display:block; margin-bottom:6px; letter-spacing:1px; }
+.reflection-block { background:rgba(255,170,0,0.04); border:1px solid #ffaa0033; padding:24px; margin:32px 0; }
+.reflection-block h2 { font-family:'Orbitron',sans-serif; font-size:13px; color:#ffaa00; letter-spacing:2px; margin-bottom:8px; }
+.ref-intro { font-size:12px; opacity:0.7; margin-bottom:20px; padding-bottom:14px; border-bottom:1px solid #ffaa0022; line-height:1.7; }
+.ref-prompt { margin-bottom:20px; }
+.ref-prompt h3 { font-family:'Orbitron',sans-serif; font-size:11px; color:#ffaa0099; letter-spacing:1px; margin-bottom:8px; }
+.ref-prompt p { font-size:12px; opacity:0.8; line-height:1.75; }
+.complete-wrap { margin-top:56px; padding-top:30px; border-top:1px solid #ffffff11; text-align:center; }
+.complete-btn { font-family:'Orbitron',sans-serif; font-size:13px; letter-spacing:2px; padding:14px 44px; background:transparent; border:1px solid #39ff14; color:#39ff14; cursor:pointer; transition:0.3s; }
+.complete-btn:hover:not(.done) { background:#39ff14; color:black; box-shadow:0 0 20px rgba(57,255,20,0.4); }
+.complete-btn.done { background:rgba(57,255,20,0.1); cursor:pointer; opacity:1; }
+.complete-msg { font-size:12px; color:#39ff14; margin-top:14px; min-height:18px; letter-spacing:1px; }
+.lesson-nav { display:flex; justify-content:space-between; margin-top:30px; flex-wrap:wrap; gap:10px; }
+.lesson-nav a { font-family:'Orbitron',sans-serif; font-size:11px; color:#00d9ff66; text-decoration:none; letter-spacing:1px; transition:0.2s; }
+.lesson-nav a:hover { color:#00d9ff; }
+.back-to-top { position:fixed; bottom:28px; right:28px; z-index:200; width:44px; height:44px; background:#000; border:1px solid #00d9ff55; color:#00d9ff; font-size:20px; cursor:pointer; display:flex; align-items:center; justify-content:center; opacity:0; pointer-events:none; transition:opacity 0.3s; }
+.back-to-top.visible { opacity:1; pointer-events:auto; } .back-to-top:hover { border-color:#00d9ff; }
+footer { text-align:center; padding:30px; opacity:0.3; font-size:11px; position:relative; z-index:1; letter-spacing:1px; }
+.module-complete { background:rgba(57,255,20,0.06); border:1px solid #39ff1444; padding:24px 28px; margin:40px 0; text-align:center; }
+.module-complete h3 { font-family:'Orbitron',sans-serif; font-size:14px; color:#39ff14; letter-spacing:2px; margin-bottom:10px; }
+.module-complete p { font-size:12px; opacity:0.8; line-height:1.7; }
+</style>
+</head>
+<body>
+<canvas id="starsCanvas"></canvas>
+<header>
+    <a href="dashboard.html" class="logo"><span>LEO</span><span>AF</span></a>
+    <div class="nav-right">
+        <a href="m5.html" class="nav-btn">← M5 HUB</a>
+        <button class="nav-btn" onclick="leoafAbort()">ABORT</button>
+    </div>
+</header>
+<div class="breadcrumb">
+    <a href="dashboard.html">DASHBOARD</a><span>/</span>
+    <a href="m5.html">M5</a><span>/</span>
+    <span style="color:#ffffff88;">LESSON 01 — WAVEFORMS &amp; MODULATION</span>
+</div>
+
+<div class="lesson-wrap">
+<div class="lesson-header">
+    <div class="lesson-tag">M5 · LESSON 01 OF 7</div>
+    <h1>Waveforms &amp;<br>Modulation Fundamentals</h1>
+    <div class="lesson-meta">
+        <div class="l-pill l-pill-q">MODULE 5</div>
+        <div class="l-pill l-pill-t">AIR INTERFACE &amp; ACCESS</div>
+        <div class="l-pill l-pill-c">FOUNDATION</div>
+    </div>
+    <p class="lesson-intro" style="margin-bottom:12px;">Module 4 ended with a number: the achieved C/(N₀+I₀) of a link, in dBHz. That number says nothing about bits. A link budget describes how much signal power arrives relative to the noise floor; it does not say how many bits per second that power can carry, because the answer depends entirely on how the bits are encoded onto the radio wave. Module 5 builds that conversion — from dBHz to bits per second per beam — and this lesson builds its first stage: the mapping from a bit stream to a physical waveform occupying a definite slice of spectrum.</p>
+    <p class="lesson-intro" style="margin-bottom:12px;">The chain this module assembles is: waveform (this lesson) → modulation and coding selection (m5-2) → sharing the channel among users (m5-3) → framing and the real air interfaces that package all of it (m5-4 through m5-6) → net throughput per beam (m5-7). The Module 5 spine project — a Python throughput engine that consumes the Module 4 link budget output — begins here with its first stage: a carrier model that converts symbol rate, roll-off, and modulation order into occupied bandwidth and raw bit rate.</p>
+    <p class="lesson-intro" style="margin-bottom:12px;">Two ideas dominate this lesson. First, bandwidth is spent on symbols, not bits — the number of bits each symbol carries is a design choice with a steep price in required signal power. Second, the satellite channel is nonlinear in a way terrestrial channels are not, and this single fact explains why satellite air interfaces use constellations (APSK) that almost no terrestrial system uses.</p>
+</div>
+
+<div class="toc">
+    <h4>CONTENTS</h4>
+    <ol>
+        <li><a href="#s1">From bits to a passband waveform</a></li>
+        <li><a href="#s2">Constellations: PSK, APSK, QAM</a></li>
+        <li><a href="#s3">Bandwidth: Nyquist, roll-off, and occupied spectrum</a></li>
+        <li><a href="#s4">Raw spectral efficiency</a></li>
+        <li><a href="#s5">The nonlinear channel: why satellite uses APSK, not QAM</a></li>
+        <li><a href="#s6">The power cost of density: uncoded error performance</a></li>
+        <li><a href="#s7">The Shannon ceiling</a></li>
+        <li><a href="#s8">Key facts</a></li>
+        <li><a href="#s9">What this lesson delivers to the design chain</a></li>
+        <li><a href="#quiz">Knowledge check</a></li>
+        <li><a href="#py">Python exercises</a></li>
+        <li><a href="#reflect">Reflection</a></li>
+    </ol>
+</div>
+
+<div class="cb" id="s1">
+    <h2>1. From bits to a passband waveform</h2>
+<p>A digital transmitter must convert a stream of bits into a continuous radio-frequency signal. The universal representation is the quadrature (I/Q) form:</p>
+<blockquote>s(t) = I(t) · cos(2πf_c t) − Q(t) · sin(2πf_c t)</blockquote>
+<p>where f_c is the carrier frequency and I(t), Q(t) are two independent baseband signals — the in-phase and quadrature components. Because cosine and sine are orthogonal, a receiver can recover I and Q independently. Every modulation scheme in this module is just a rule for choosing the pair (I, Q) as a function of the input bits.</p>
+<p>The transmitter groups the bit stream into blocks of k bits, and each block selects one of M = 2^k allowed (I, Q) pairs. Each selected pair is held (after pulse shaping — section 3) for one symbol duration T_s. The pair is a <strong>symbol</strong>; the set of M allowed pairs, plotted on the I/Q plane, is the <strong>constellation</strong>.</p>
+<p>The two rates that matter:</p>
+<blockquote>Symbol rate: R_s = 1 / T_s   [symbols per second, "baud"]<br>
+Raw bit rate: R_b = k · R_s = log₂(M) · R_s   [bits per second]</blockquote>
+<p>The channel — the amplifier, the antenna, the atmosphere, the spectrum allocation — sees only symbols. Bandwidth is consumed by R_s. The bit rate is R_s multiplied by however many bits the designer dares to pack into each symbol. That "dares" is the subject of sections 5 and 6.</p>
+</div>
+
+<div class="cb" id="s2">
+    <h2>2. Constellations: PSK, APSK, QAM</h2>
+<p>Three constellation families cover essentially all of satellite communications:</p>
+<p><strong>Phase-shift keying (PSK)</strong> places all M points on a single circle, encoding information in phase only. All symbols have identical amplitude.</p>
+<ul>
+<li><strong>BPSK</strong> (M=2, 1 bit/symbol): two points, 180° apart. The most robust scheme in existence; used for TT&amp;C, GPS signals, and the lowest rungs of adaptive ladders.</li>
+<li><strong>QPSK</strong> (M=4, 2 bits/symbol): four points, 90° apart. The workhorse of satellite communications for fifty years.</li>
+<li><strong>8-PSK</strong> (M=8, 3 bits/symbol): eight points, 45° apart. The points crowd together; noise tolerance drops noticeably.</li>
+</ul>
+<p><strong>Amplitude and phase-shift keying (APSK)</strong> places points on concentric rings. <strong>16-APSK</strong> uses a 4+12 arrangement — 4 inner points, 12 outer. <strong>32-APSK</strong> uses 4+12+16 on three rings. The ratio between ring radii is a design parameter, and in DVB-S2/S2X it is specified per code rate so that the constellation shape is matched to the decoder's operating point.</p>
+<p><strong>Quadrature amplitude modulation (QAM)</strong> places points on a square grid: 16-QAM, 64-QAM, 256-QAM. QAM maximises the minimum distance between points for a given average power, which makes it the standard for terrestrial systems — Wi-Fi, cable, cellular, microwave links all use QAM. Satellite systems largely do not, for the reason developed in section 5.</p>
+<p>Bits per symbol by scheme:</p>
+<table class="compare-table">
+<thead><tr>
+<th>Scheme</th>
+<th>M</th>
+<th>Bits/symbol (k)</th>
+<th>Family</th>
+</tr></thead>
+<tbody>
+<tr><td>BPSK</td><td>2</td><td>1</td><td>PSK</td></tr>
+<tr><td>QPSK</td><td>4</td><td>2</td><td>PSK</td></tr>
+<tr><td>8-PSK</td><td>8</td><td>3</td><td>PSK</td></tr>
+<tr><td>16-APSK</td><td>16</td><td>4</td><td>APSK (4+12)</td></tr>
+<tr><td>32-APSK</td><td>32</td><td>5</td><td>APSK (4+12+16)</td></tr>
+<tr><td>64-APSK</td><td>64</td><td>6</td><td>APSK (DVB-S2X)</td></tr>
+<tr><td>256-APSK</td><td>256</td><td>8</td><td>APSK (DVB-S2X)</td></tr>
+<tr><td>16-QAM</td><td>16</td><td>4</td><td>QAM</td></tr>
+<tr><td>64-QAM</td><td>64</td><td>6</td><td>QAM</td></tr>
+</tbody>
+</table>
+<p>One convention worth fixing now: bit-to-symbol mapping uses <strong>Gray coding</strong>, in which adjacent constellation points differ in exactly one bit. When noise pushes a received symbol into a neighbouring decision region — by far the most likely error — only one bit is corrupted. Gray coding costs nothing and roughly halves the bit error rate relative to naive mapping; every practical system uses it.</p>
+</div>
+
+<div class="cb" id="s3">
+    <h2>3. Bandwidth: Nyquist, roll-off, and occupied spectrum</h2>
+<p>An idealised symbol — a rectangular pulse held for T_s — occupies infinite bandwidth. Real systems shape each symbol with a filter so that the spectrum is confined and, critically, so that symbols do not smear into each other at the sampling instants (zero inter-symbol interference). The standard choice is the <strong>root-raised-cosine (RRC)</strong> filter, applied half at the transmitter and half at the receiver, characterised by a single parameter: the <strong>roll-off factor α</strong>.</p>
+<p>The occupied bandwidth of an RRC-shaped carrier is:</p>
+<blockquote>B_occ = R_s · (1 + α)</blockquote>
+<p>The Nyquist limit is α = 0: a symbol rate of R_s fits, in theory, in exactly R_s Hz. Real filters need excess bandwidth. DVB-S2 specified α ∈ {0.20, 0.25, 0.35}; DVB-S2X extended it down to {0.05, 0.10, 0.15}, because in a bandwidth-limited system, every percent of roll-off is a percent of capacity.</p>
+<p>Worked numbers for a 250 MHz Ka-band channel allocation:</p>
+<table class="compare-table">
+<thead><tr>
+<th>Roll-off α</th>
+<th>Symbol rate R_s in 250 MHz</th>
+<th>Gain vs α = 0.20</th>
+</tr></thead>
+<tbody>
+<tr><td>0.20</td><td>208.3 Msym/s</td><td>—</td></tr>
+<tr><td>0.05</td><td>238.1 Msym/s</td><td>+14.3%</td></tr>
+</tbody>
+</table>
+<p>Tightening the roll-off from 0.20 to 0.05 puts 14.3% more symbols — and therefore 14.3% more bits, at any modulation — through the same allocation. This is free capacity in the sense that it costs no power and no spectrum; it costs filter complexity, sensitivity to timing error, and a higher peak-to-average power ratio, which feeds directly into the amplifier problem of section 5.</p>
+</div>
+
+<div class="cb" id="s4">
+    <h2>4. Raw spectral efficiency</h2>
+<p>Combining sections 2 and 3, the raw (pre-coding) spectral efficiency of a carrier is:</p>
+<blockquote>η_raw = R_b / B_occ = log₂(M) / (1 + α)   [bit/s/Hz]</blockquote>
+<p>For the same 250 MHz channel at α = 0.20 (R_s = 208.3 Msym/s):</p>
+<table class="compare-table">
+<thead><tr>
+<th>Scheme</th>
+<th>Raw bit rate</th>
+<th>η_raw</th>
+</tr></thead>
+<tbody>
+<tr><td>QPSK</td><td>416.7 Mbps</td><td>1.67 bit/s/Hz</td></tr>
+<tr><td>16-APSK</td><td>833.3 Mbps</td><td>3.33 bit/s/Hz</td></tr>
+<tr><td>32-APSK</td><td>1,041.7 Mbps</td><td>4.17 bit/s/Hz</td></tr>
+</tbody>
+</table>
+<p>These figures are deliberately labelled <strong>raw</strong>. They assume every transmitted bit is a payload bit. In reality a fraction of the bits are forward error correction parity (m5-2) and a further fraction are framing, pilots, and headers (m5-4). Net spectral efficiency is always lower — often by a factor of 1.5–3. Quoting raw rates as if they were delivered capacity is one of the oldest tricks in satellite marketing; the spine project keeps raw and net strictly separate for exactly this reason.</p>
+</div>
+
+<div class="cb" id="s5">
+    <h2>5. The nonlinear channel: why satellite uses APSK, not QAM</h2>
+<p>On the I/Q plane, QAM is the better constellation: for a fixed average power, the square grid maximises the minimum distance between points, which minimises error probability in Gaussian noise. Terrestrial systems therefore use QAM everywhere. Satellite systems use APSK instead, and the reason is the high-power amplifier (HPA) on the satellite.</p>
+<p>A satellite HPA — travelling-wave tube or solid-state — is most power-efficient when driven at or near <strong>saturation</strong>, its maximum output. Near saturation the amplifier is strongly nonlinear: output amplitude compresses (AM/AM distortion) and output phase shifts with input amplitude (AM/PM distortion). A signal whose envelope fluctuates gets distorted in proportion to those fluctuations.</p>
+<p>The envelope fluctuation of a modulated carrier is measured by its <strong>peak-to-average power ratio (PAPR)</strong>. Constellations with many amplitude levels — QAM above all — have high PAPR. The operator's escape is <strong>output back-off (OBO)</strong>: run the amplifier below saturation, in its linear region. But every dB of back-off is a dB of EIRP surrendered, and Module 4 established what a dB of EIRP is worth. On a power-limited spacecraft, backing a 100 W amplifier off by 6 dB means radiating 25 W.</p>
+<p>Typical operating points (ranges; exact values depend on amplifier linearisation and the DVB-S2 implementation guidelines' methodology):</p>
+<table class="compare-table">
+<thead><tr>
+<th>Constellation</th>
+<th>Amplitude rings</th>
+<th>Typical OBO required</th>
+</tr></thead>
+<tbody>
+<tr><td>QPSK</td><td>1</td><td>≈ 0–1 dB (near saturation)</td></tr>
+<tr><td>16-APSK</td><td>2</td><td>≈ 2–4 dB</td></tr>
+<tr><td>32-APSK</td><td>3</td><td>≈ 3–5 dB</td></tr>
+<tr><td>16-QAM</td><td>3 (grid)</td><td>≈ 5–7 dB</td></tr>
+</tbody>
+</table>
+<p>APSK is the compromise this table explains. By restricting points to a small number of rings — two for 16-APSK, three for 32-APSK — APSK keeps the envelope variation low enough that the amplifier can run only a few dB from saturation. The ring-radius ratio is then optimised (per code rate, in DVB-S2) to recover most of the noise-distance QAM would have offered. APSK is a constellation designed for the amplifier first and the noise second — a priority ordering that only makes sense when the amplifier rides on a spacecraft where every watt is precious.</p>
+<p>Two refinements complete the picture. <strong>Pre-distortion</strong> — applying the inverse of the amplifier's nonlinearity at the modulator — claws back 1–2 dB of the back-off and is standard in modern gateways. And the trend toward higher-order APSK (64-APSK, 256-APSK in DVB-S2X) is only usable on links with both high C/N and well-linearised amplifiers, which in practice means gateway feeder links far more often than user downlinks.</p>
+</div>
+
+<div class="cb" id="s6">
+    <h2>6. The power cost of density: uncoded error performance</h2>
+<p>Packing more bits per symbol crowds the constellation points closer together at fixed average power, so the same noise causes more errors. The currency for comparing schemes is the <strong>Eb/N₀ required for a target bit error rate (BER)</strong> — energy per bit over noise density, which Module 4 related to C/N₀ via Eb/N₀ = C/N₀ − 10·log₁₀(R_b).</p>
+<p>For coherent detection with Gray coding in additive white Gaussian noise, QPSK has the classic closed form:</p>
+<blockquote>P_b = Q(√(2 · Eb/N₀))</blockquote>
+<p>where Q is the Gaussian tail function. Numerically solved thresholds at BER = 10⁻⁵, uncoded:</p>
+<table class="compare-table">
+<thead><tr>
+<th>Scheme</th>
+<th>Required Eb/N₀ (uncoded, BER 10⁻⁵)</th>
+</tr></thead>
+<tbody>
+<tr><td>BPSK / QPSK</td><td>9.6 dB</td></tr>
+<tr><td>8-PSK</td><td>≈ 13.0 dB</td></tr>
+<tr><td>16-QAM</td><td>≈ 13.4 dB</td></tr>
+</tbody>
+</table>
+<p>Note the QPSK result carefully: BPSK and QPSK require the same Eb/N₀. QPSK carries twice the bits per symbol, but each bit rides on an independent quadrature, so per-bit performance is identical. QPSK is strictly better than BPSK in spectral efficiency at zero power cost — which is why BPSK survives only where extreme robustness or implementation simplicity dominates.</p>
+<p>The ladder above is the uncoded ladder, and no modern system operates uncoded. Its role in this module is to establish the shape of the trade: each step up in constellation density buys bits per symbol and costs dB of required Eb/N₀, and the exchange rate worsens as the constellation grows. Lesson m5-2 shows how forward error correction shifts the entire ladder 5–9 dB to the left — and turns it into the MODCOD table that the spine project's selection logic runs on.</p>
+</div>
+
+<div class="cb" id="s7">
+    <h2>7. The Shannon ceiling</h2>
+<p>There is a hard upper bound on what any waveform, any code, and any amount of engineering can extract from a channel. The Shannon–Hartley capacity of a bandwidth B with signal-to-noise ratio SNR is:</p>
+<blockquote>C = B · log₂(1 + SNR)   [bit/s]</blockquote>
+<p>Equivalently, transmitting at spectral efficiency η bit/s/Hz requires at minimum:</p>
+<blockquote>SNR_min = 2^η − 1,   (Eb/N₀)_min = (2^η − 1) / η</blockquote>
+<table class="compare-table">
+<thead><tr>
+<th>Target η (bit/s/Hz)</th>
+<th>Minimum SNR</th>
+<th>Minimum Eb/N₀</th>
+</tr></thead>
+<tbody>
+<tr><td>1</td><td>0.0 dB</td><td>0.0 dB</td></tr>
+<tr><td>2</td><td>4.8 dB</td><td>1.8 dB</td></tr>
+<tr><td>3</td><td>8.5 dB</td><td>3.7 dB</td></tr>
+<tr><td>4</td><td>11.8 dB</td><td>5.7 dB</td></tr>
+<tr><td>5</td><td>14.9 dB</td><td>7.9 dB</td></tr>
+<tr><td>6</td><td>18.0 dB</td><td>10.2 dB</td></tr>
+</tbody>
+</table>
+<p>As η → 0 the required Eb/N₀ approaches the ultimate floor of −1.59 dB: below this, no communication is possible at any rate by any means.</p>
+<p>The table quantifies the opportunity that motivates the rest of this module. Uncoded QPSK delivers ~2 bit/s/Hz at 9.6 dB Eb/N₀; Shannon says 2 bit/s/Hz is achievable at 1.8 dB. The gap — roughly 7.8 dB — is the territory that forward error correction conquers. Modern LDPC codes (m5-2) close to within about 1 dB of the bound, which is why the MODCOD thresholds quoted in m4-7 (85 dBHz for QPSK 1/2, 105 dBHz for 16-APSK 3/4 at their respective rates) sit where they do.</p>
+<p>Shannon capacity also gives the spine project its sanity check: for any C/N the Module 4 engine reports, the engine can compute the Shannon ceiling for the channel bandwidth, and every throughput figure the M5 engine ever produces must sit below it. A model output above the Shannon line is not optimistic; it is wrong.</p>
+</div>
+
+<div class="cb" id="s8">
+    <h2>8. Key facts</h2>
+<table class="compare-table">
+<thead><tr>
+<th>Fact</th>
+<th>Value</th>
+<th>Unit</th>
+<th>Source</th>
+</tr></thead>
+<tbody>
+<tr><td>Occupied bandwidth</td><td>R_s · (1 + α)</td><td>Hz</td><td>RRC filter definition</td></tr>
+<tr><td>Raw bit rate</td><td>log₂(M) · R_s</td><td>bit/s</td><td>Definition</td></tr>
+<tr><td>DVB-S2X roll-off range</td><td>0.05 – 0.35</td><td>—</td><td>ETSI EN 302 307-2</td></tr>
+<tr><td>R_s in 250 MHz, α = 0.20</td><td>208.3</td><td>Msym/s</td><td>Computed</td></tr>
+<tr><td>R_s in 250 MHz, α = 0.05</td><td>238.1 (+14.3%)</td><td>Msym/s</td><td>Computed</td></tr>
+<tr><td>16-APSK ring structure</td><td>4 + 12</td><td>points</td><td>ETSI EN 302 307</td></tr>
+<tr><td>32-APSK ring structure</td><td>4 + 12 + 16</td><td>points</td><td>ETSI EN 302 307</td></tr>
+<tr><td>QPSK uncoded Eb/N₀, BER 10⁻⁵</td><td>9.6</td><td>dB</td><td>Q(√(2Eb/N₀)), computed</td></tr>
+<tr><td>Shannon floor (η → 0)</td><td>−1.59</td><td>dB Eb/N₀</td><td>ln 2</td></tr>
+<tr><td>Shannon minimum for η = 2</td><td>1.8</td><td>dB Eb/N₀</td><td>(2^η−1)/η</td></tr>
+<tr><td>Uncoded QPSK gap to Shannon</td><td>≈ 7.8</td><td>dB</td><td>9.6 − 1.8</td></tr>
+</tbody>
+</table>
+</div>
+
+<div class="cb" id="s9">
+    <h2>9. What this lesson delivers to the design chain</h2>
+<p>Module 4 produced C/(N₀+I₀). This lesson converts a spectrum allocation into a symbol rate (via roll-off) and a symbol rate into a raw bit rate (via constellation choice), and establishes the two constraints every later lesson operates inside: the power cost of constellation density, and the Shannon ceiling neither cleverness nor marketing can exceed. It also fixed why the satellite constellation alphabet is APSK — a decision made by the amplifier, not the mathematician.</p>
+<p>The spine project now exists as Stage 1: a carrier model that maps (bandwidth, roll-off, modulation) → (symbol rate, raw bit rate, raw spectral efficiency) with a Shannon ceiling check. Lesson m5-2 attaches the missing organ: the forward error correction that turns raw bits into protected bits, and the MODCOD table that tells the engine which combination of modulation and code rate a given C/N₀ can actually support.</p>
+</div>
+
+<div class="quiz-block" id="quiz">
+    <h2>KNOWLEDGE CHECK</h2>
+    <div class="quiz-intro">Ten questions. Each option explains itself after you commit. No retries per question — decide first.</div>
+    <div class="quiz-q">
+        <p><strong>Q1.</strong> A carrier transmits 208.3 Msym/s using 16-APSK. The raw bit rate is:</p>
+        <div class="quiz-options">
+            <button class="quiz-opt" data-q="1" data-correct="false">A — 208.3 Mbps</button>
+            <button class="quiz-opt" data-q="1" data-correct="false">B — 416.7 Mbps</button>
+            <button class="quiz-opt" data-q="1" data-correct="true">C — 833.3 Mbps</button>
+            <button class="quiz-opt" data-q="1" data-correct="false">D — 3,333 Mbps</button>
+        </div>
+        <div class="quiz-feedback" id="fb1"></div>
+    </div>
+    <div class="quiz-q">
+        <p><strong>Q2.</strong> The occupied bandwidth of an RRC-shaped carrier at symbol rate R_s with roll-off α is:</p>
+        <div class="quiz-options">
+            <button class="quiz-opt" data-q="2" data-correct="false">A — R_s / (1 + α)</button>
+            <button class="quiz-opt" data-q="2" data-correct="true">B — R_s · (1 + α)</button>
+            <button class="quiz-opt" data-q="2" data-correct="false">C — R_s · α</button>
+            <button class="quiz-opt" data-q="2" data-correct="false">D — R_s, independent of α</button>
+        </div>
+        <div class="quiz-feedback" id="fb2"></div>
+    </div>
+    <div class="quiz-q">
+        <p><strong>Q3.</strong> Reducing roll-off from α = 0.20 to α = 0.05 in a fixed 250 MHz allocation increases the achievable symbol rate by approximately:</p>
+        <div class="quiz-options">
+            <button class="quiz-opt" data-q="3" data-correct="false">A — 4%</button>
+            <button class="quiz-opt" data-q="3" data-correct="true">B — 14%</button>
+            <button class="quiz-opt" data-q="3" data-correct="false">C — 25%</button>
+            <button class="quiz-opt" data-q="3" data-correct="false">D — It does not change the symbol rate</button>
+        </div>
+        <div class="quiz-feedback" id="fb3"></div>
+    </div>
+    <div class="quiz-q">
+        <p><strong>Q4.</strong> BPSK and QPSK require the same Eb/N₀ for the same bit error rate because:</p>
+        <div class="quiz-options">
+            <button class="quiz-opt" data-q="4" data-correct="false">A — They have the same number of constellation points</button>
+            <button class="quiz-opt" data-q="4" data-correct="true">B — QPSK is two independent BPSK streams on orthogonal quadratures, so each bit sees identical per-bit conditions</button>
+            <button class="quiz-opt" data-q="4" data-correct="false">C — Gray coding equalises their performance</button>
+            <button class="quiz-opt" data-q="4" data-correct="false">D — They occupy the same bandwidth at the same bit rate</button>
+        </div>
+        <div class="quiz-feedback" id="fb4"></div>
+    </div>
+    <div class="quiz-q">
+        <p><strong>Q5.</strong> Satellite systems use 16-APSK rather than 16-QAM primarily because:</p>
+        <div class="quiz-options">
+            <button class="quiz-opt" data-q="5" data-correct="false">A — APSK has a larger minimum distance between constellation points</button>
+            <button class="quiz-opt" data-q="5" data-correct="true">B — APSK's low number of amplitude rings keeps envelope variation small, allowing the satellite amplifier to operate close to saturation with little output back-off</button>
+            <button class="quiz-opt" data-q="5" data-correct="false">C — APSK is easier to demodulate</button>
+            <button class="quiz-opt" data-q="5" data-correct="false">D — QAM is patented</button>
+        </div>
+        <div class="quiz-feedback" id="fb5"></div>
+    </div>
+    <div class="quiz-q">
+        <p><strong>Q6.</strong> Output back-off (OBO) is costly on a satellite because:</p>
+        <div class="quiz-options">
+            <button class="quiz-opt" data-q="6" data-correct="false">A — It increases the amplifier's noise figure</button>
+            <button class="quiz-opt" data-q="6" data-correct="true">B — Every dB of back-off is a dB of EIRP not radiated, directly reducing the link budget's C/N₀</button>
+            <button class="quiz-opt" data-q="6" data-correct="false">C — It shortens the amplifier's lifetime</button>
+            <button class="quiz-opt" data-q="6" data-correct="false">D — It increases the satellite's mass</button>
+        </div>
+        <div class="quiz-feedback" id="fb6"></div>
+    </div>
+    <div class="quiz-q">
+        <p><strong>Q7.</strong> Gray coding is used in constellation mapping because:</p>
+        <div class="quiz-options">
+            <button class="quiz-opt" data-q="7" data-correct="false">A — It reduces the peak-to-average power ratio</button>
+            <button class="quiz-opt" data-q="7" data-correct="true">B — Adjacent constellation points differ in one bit, so the most likely symbol error corrupts only one bit</button>
+            <button class="quiz-opt" data-q="7" data-correct="false">C — It increases the minimum distance between points</button>
+            <button class="quiz-opt" data-q="7" data-correct="false">D — It is required by the ITU</button>
+        </div>
+        <div class="quiz-feedback" id="fb7"></div>
+    </div>
+    <div class="quiz-q">
+        <p><strong>Q8.</strong> The Shannon–Hartley theorem states that for a channel of bandwidth B and signal-to-noise ratio SNR, the capacity is C = B·log₂(1+SNR). A model that reports throughput above this value is:</p>
+        <div class="quiz-options">
+            <button class="quiz-opt" data-q="8" data-correct="false">A — Optimistic but possible with sufficiently advanced coding</button>
+            <button class="quiz-opt" data-q="8" data-correct="true">B — Wrong — no waveform or code can exceed the Shannon bound</button>
+            <button class="quiz-opt" data-q="8" data-correct="false">C — Possible if the modulation order is high enough</button>
+            <button class="quiz-opt" data-q="8" data-correct="false">D — Possible with APSK but not QAM</button>
+        </div>
+        <div class="quiz-feedback" id="fb8"></div>
+    </div>
+    <div class="quiz-q">
+        <p><strong>Q9.</strong> Uncoded QPSK at BER 10⁻⁵ requires about 9.6 dB Eb/N₀, while the Shannon minimum for 2 bit/s/Hz is about 1.8 dB. The ≈7.8 dB gap represents:</p>
+        <div class="quiz-options">
+            <button class="quiz-opt" data-q="9" data-correct="false">A — Implementation loss that cannot be recovered</button>
+            <button class="quiz-opt" data-q="9" data-correct="true">B — The margin that forward error correction can recover — the subject of m5-2</button>
+            <button class="quiz-opt" data-q="9" data-correct="false">C — Atmospheric losses</button>
+            <button class="quiz-opt" data-q="9" data-correct="false">D — The cost of Gray coding</button>
+        </div>
+        <div class="quiz-feedback" id="fb9"></div>
+    </div>
+    <div class="quiz-q">
+        <p><strong>Q10.</strong> The raw spectral efficiency η_raw = log₂(M)/(1+α) overstates delivered capacity because:</p>
+        <div class="quiz-options">
+            <button class="quiz-opt" data-q="10" data-correct="false">A — It ignores free-space path loss</button>
+            <button class="quiz-opt" data-q="10" data-correct="true">B — It excludes forward error correction parity, framing, pilots, and headers, which all consume transmitted bits without carrying payload</button>
+            <button class="quiz-opt" data-q="10" data-correct="false">C — Shannon's theorem forbids spectral efficiencies above 2 bit/s/Hz</button>
+            <button class="quiz-opt" data-q="10" data-correct="false">D — The symbol rate cannot actually reach R_s in practice</button>
+        </div>
+        <div class="quiz-feedback" id="fb10"></div>
+    </div>
+    <div class="quiz-score" id="quizScore"></div>
+</div>
+
+<div class="py-block" id="py">
+    <h2>PYTHON EXERCISES</h2>
+    <div class="py-intro">Three exercises; the last extends the module spine project. Run them, then work the numbered follow-ups in the comments — the follow-ups are the exercise.</div>
+    <div class="py-exercise">
+        <h3>Exercise 1 — The uncoded Eb/N₀ ladder</h3>
+        <p>Compute the required Eb/N₀ at a target BER for the PSK/QAM family from the Q-function, and observe the price of constellation density.</p>
+<pre>
+import math
+
+def Q(x):
+    &quot;&quot;&quot;Gaussian tail probability.&quot;&quot;&quot;
+    return 0.5 * math.erfc(x / math.sqrt(2))
+
+def ber_qpsk(ebn0_db):
+    g = 10 ** (ebn0_db / 10)
+    return Q(math.sqrt(2 * g))
+
+def ber_8psk(ebn0_db):
+    g = 10 ** (ebn0_db / 10)
+    return (2/3) * Q(math.sqrt(6 * g) * math.sin(math.pi / 8))
+
+def ber_16qam(ebn0_db):
+    g = 10 ** (ebn0_db / 10); M, k = 16, 4
+    return (4/k) * (1 - 1/math.sqrt(M)) * Q(math.sqrt(3 * k * g / (M - 1)))
+
+def threshold(ber_fn, target=1e-5):
+    &quot;&quot;&quot;Bisect for the Eb/N0 (dB) meeting the target BER.&quot;&quot;&quot;
+    lo, hi = 0.0, 30.0
+    for _ in range(100):
+        mid = (lo + hi) / 2
+        if ber_fn(mid) &gt; target: lo = mid
+        else: hi = mid
+    return mid
+
+print(&quot;Uncoded Eb/N0 thresholds at BER 1e-5 (AWGN, Gray-coded):&quot;)
+for name, fn in [(&quot;BPSK/QPSK&quot;, ber_qpsk), (&quot;8-PSK&quot;, ber_8psk), (&quot;16-QAM&quot;, ber_16qam)]:
+    print(f&quot;  {name:&lt;10} {threshold(fn):&gt;6.2f} dB&quot;)
+
+# 1. Recompute the ladder at BER 1e-4 and 1e-6. How does the
+#    spacing between schemes change with the target BER?
+# 2. QPSK and BPSK share a threshold. Verify numerically, then
+#    explain in one sentence why QPSK is still strictly better.
+# 3. Add the Shannon minimum Eb/N0 for each scheme&#x27;s raw spectral
+#    efficiency (alpha = 0.2) and print the gap to Shannon per scheme.
+</pre>
+    </div>
+    <div class="py-exercise">
+        <h3>Exercise 2 — Roll-off economics</h3>
+        <p>Quantify what roll-off is worth in a fixed spectrum allocation.</p>
+<pre>
+import math
+
+def symbol_rate(bw_hz, alpha):
+    return bw_hz / (1 + alpha)
+
+BW = 250e6   # Ka-band channel allocation, Hz
+
+print(f&quot;{&#x27;alpha&#x27;:&gt;6} {&#x27;Rs (Msym/s)&#x27;:&gt;12} {&#x27;QPSK raw&#x27;:&gt;10} {&#x27;16APSK raw&#x27;:&gt;11} {&#x27;32APSK raw&#x27;:&gt;11}&quot;)
+for alpha in [0.35, 0.25, 0.20, 0.15, 0.10, 0.05]:
+    rs = symbol_rate(BW, alpha)
+    print(f&quot;{alpha:&gt;6.2f} {rs/1e6:&gt;12.1f} {2*rs/1e6:&gt;9.1f}M {4*rs/1e6:&gt;10.1f}M {5*rs/1e6:&gt;10.1f}M&quot;)
+
+# 1. Express the capacity gain of alpha 0.35 -&gt; 0.05 as an equivalent
+#    link budget improvement in dB (hint: same throughput gain could
+#    instead come from more C/N0 via a MODCOD step — compare orders
+#    of magnitude, exact MODCOD math arrives in m5-2).
+# 2. A gateway has 500 MHz. Compare one 500 MHz carrier vs two
+#    250 MHz carriers at alpha = 0.05: identical raw capacity?
+#    What practical considerations (amplifier per carrier, guard
+#    bands) would differentiate them?
+</pre>
+    </div>
+    <div class="py-exercise">
+        <h3>Exercise 3 — Spine Stage 1: The carrier model (seed)</h3>
+        <p>Begin the Module 5 spine project — a Python throughput engine that will be extended in m5-2 through m5-7 and consumes the Module 4 link budget engine's output.</p>
+<pre>
+import math
+
+# ═══════════════════════════════════════════════════════
+# M5 SPINE PROJECT — THROUGHPUT ENGINE
+# Stage 1: carrier model — bandwidth, roll-off, modulation
+#          → symbol rate, raw bit rate, Shannon ceiling
+# Each subsequent lesson adds one stage:
+#   m5-2  MODCOD table + selection from achieved C/N0
+#   m5-3  multiple-access overhead &amp; scheduling efficiency
+#   m5-4  framing overhead (DVB-S2X / proprietary)
+#   m5-5  OFDM/NTN numerology branch
+#   m5-6  D2D narrowband case
+#   m5-7  full assembly: C/(N0+I0) → net beam capacity
+# ═══════════════════════════════════════════════════════
+
+MODULATIONS = {
+    &quot;BPSK&quot;:     1, &quot;QPSK&quot;:     2, &quot;8PSK&quot;:     3,
+    &quot;16APSK&quot;:   4, &quot;32APSK&quot;:   5, &quot;64APSK&quot;:   6, &quot;256APSK&quot;: 8,
+}
+
+class Carrier:
+    &quot;&quot;&quot;
+    Stage-1 carrier model. Raw quantities only — no FEC,
+    no framing, no access overhead yet. Those stages bolt on
+    in later lessons and only ever reduce the numbers here.
+    &quot;&quot;&quot;
+    def __init__(self, name, bw_hz, alpha, modulation):
+        if modulation not in MODULATIONS:
+            raise ValueError(f&quot;Unknown modulation: {modulation}&quot;)
+        self.name       = name
+        self.bw_hz      = bw_hz
+        self.alpha      = alpha
+        self.modulation = modulation
+        self.k          = MODULATIONS[modulation]
+
+    @property
+    def symbol_rate(self):
+        return self.bw_hz / (1 + self.alpha)
+
+    @property
+    def raw_bit_rate(self):
+        return self.k * self.symbol_rate
+
+    @property
+    def raw_spectral_efficiency(self):
+        return self.raw_bit_rate / self.bw_hz     # = k / (1+alpha)
+
+    def shannon_capacity(self, cn0_dbhz):
+        &quot;&quot;&quot;
+        Shannon ceiling for this carrier&#x27;s bandwidth at the
+        C/N0 the Module 4 engine reports. Hard upper bound —
+        every later stage&#x27;s output must sit below this.
+        &quot;&quot;&quot;
+        cn_db  = cn0_dbhz - 10 * math.log10(self.bw_hz)
+        snr    = 10 ** (cn_db / 10)
+        return self.bw_hz * math.log2(1 + snr)
+
+    def report(self, cn0_dbhz=None):
+        print(f&quot;\n{&#x27;─&#x27;*56}&quot;)
+        print(f&quot;  CARRIER — {self.name}&quot;)
+        print(f&quot;{&#x27;─&#x27;*56}&quot;)
+        print(f&quot;  Bandwidth            {self.bw_hz/1e6:&gt;10.1f} MHz&quot;)
+        print(f&quot;  Roll-off α           {self.alpha:&gt;10.2f}&quot;)
+        print(f&quot;  Modulation           {self.modulation:&gt;10} ({self.k} bit/sym)&quot;)
+        print(f&quot;  Symbol rate          {self.symbol_rate/1e6:&gt;10.1f} Msym/s&quot;)
+        print(f&quot;  RAW bit rate         {self.raw_bit_rate/1e6:&gt;10.1f} Mbps&quot;)
+        print(f&quot;  RAW spectral eff.    {self.raw_spectral_efficiency:&gt;10.2f} bit/s/Hz&quot;)
+        if cn0_dbhz is not None:
+            cap = self.shannon_capacity(cn0_dbhz)
+            print(f&quot;  Shannon ceiling      {cap/1e6:&gt;10.1f} Mbps  (C/N0 {cn0_dbhz} dBHz)&quot;)
+            if self.raw_bit_rate &gt; cap:
+                print(f&quot;  ⚠ RAW rate exceeds Shannon ceiling at this C/N0 —&quot;)
+                print(f&quot;    this MODCOD cannot be supported; selection logic&quot;)
+                print(f&quot;    arrives in m5-2.&quot;)
+        print(f&quot;{&#x27;─&#x27;*56}&quot;)
+
+# ── Example: Ka-band forward-link carrier ───────────────
+# C/N0 input taken from the Module 4 spine engine output.
+c = Carrier(&quot;Ka forward, user beam&quot;, bw_hz=250e6, alpha=0.10, modulation=&quot;16APSK&quot;)
+c.report(cn0_dbhz=96.0)
+
+c2 = Carrier(&quot;Same carrier, QPSK&quot;, bw_hz=250e6, alpha=0.10, modulation=&quot;QPSK&quot;)
+c2.report(cn0_dbhz=96.0)
+
+# ── STAGE-2 PREVIEW ────────────────────────────────────
+# m5-2 replaces the fixed `modulation` argument with a MODCOD
+# table lookup: given achieved C/N0, select the highest-rate
+# modulation + code-rate pair whose threshold is met, and
+# multiply the raw bit rate by the code rate to get the
+# information rate.
+
+# 1. At C/N0 = 96 dBHz over 250 MHz, which raw rates in the
+#    MODULATIONS table sit above the Shannon ceiling?
+# 2. Sweep alpha from 0.35 to 0.05 for the 16APSK carrier and
+#    print raw bit rate vs Shannon ceiling — does roll-off
+#    change the ceiling, the rate, or both?
+# 3. Add a `guard_band_hz` parameter that reduces usable
+#    bandwidth and propagate it through all properties.
+</pre>
+    </div>
+</div>
+
+<div class="reflection-block" id="reflect">
+    <h2>REFLECTION</h2>
+    <div class="ref-intro">Four prompts. Each forces a decision — write the position down before moving on; the act of committing is the exercise.</div>
+    <div class="ref-prompt">
+        <h3>PROMPT 01</h3>
+        <p>Section 5 argued that APSK is "designed for the amplifier first and the noise second." Construct the counter-case: describe a satellite link scenario in which QAM is nonetheless the right choice, and identify which assumption of the APSK argument that scenario breaks. (One real system class does exactly this — think about where in the network the best-linearised amplifiers live.)</p>
+    </div>
+    <div class="ref-prompt">
+        <h3>PROMPT 02</h3>
+        <p>Roll-off reduction from 0.20 to 0.05 delivers +14.3% capacity for free at the waveform level. List the places in the real system where that "free" capacity is paid for — filter implementation, timing recovery, adjacent-carrier interference, PAPR — and rank them by which would stop you first from deploying α = 0.05 on a consumer user terminal.</p>
+    </div>
+    <div class="ref-prompt">
+        <h3>PROMPT 03</h3>
+        <p>The Shannon ceiling check in the spine project compares a raw bit rate against capacity. A colleague argues the check is meaningless at Stage 1 because raw rates ignore coding, and a raw rate above capacity might still yield a valid coded rate below it. Is the colleague right? Decide, and specify precisely what the Stage-1 check does and does not guarantee.</p>
+    </div>
+    <div class="ref-prompt">
+        <h3>PROMPT 04</h3>
+        <p>This lesson fixed bits-per-symbol as a per-carrier constant. Real adaptive systems change it per-frame, per-user, as channel conditions move (ACM, m5-2 and m4-4). Sketch what the <code>Carrier</code> class must become to support time-varying modulation: what state does it gain, what does "raw bit rate" even mean when the answer changes every 50 ms, and what statistic should the spine engine report instead of a single number?</p>
+    </div>
+</div>
+
+<div class="cb">
+    <h2>Sources</h2>
+<ul>
+<li>Proakis &amp; Salehi, <em>Digital Communications</em> — constellations, error probability, Gray coding, Q-function analysis.</li>
+<li>ETSI EN 302 307-1/-2 (DVB-S2 / DVB-S2X) — APSK constellation definitions, ring ratios, roll-off factors.</li>
+<li>ETSI TR 102 376 — DVB-S2 implementation guidelines: HPA nonlinearity, back-off, and pre-distortion methodology.</li>
+<li>Maral &amp; Bousquet, <em>Satellite Communications Systems</em> — amplifier characteristics, OBO/IBO, satellite channel nonlinearity.</li>
+<li>Shannon, "A Mathematical Theory of Communication" (1948) — the capacity theorem.</li>
+<li>Sklar, <em>Digital Communications: Fundamentals and Applications</em> — bandwidth efficiency plane, gap-to-capacity framing.</li>
+</ul>
+</div>
+
+<div class="complete-wrap">
+    <button class="complete-btn" id="completeBtn">MARK LESSON COMPLETE</button>
+    <div class="complete-msg" id="completeMsg"></div>
+</div>
+<div class="lesson-nav">
+    <a href="m5.html">← M5 HUB</a>
+    <a href="m5-2.html">LESSON 02 — MODCOD &amp; ACM →</a>
+</div>
+</div>
+
+<button class="back-to-top" id="backToTop" title="Back to top">↑</button>
+<footer>© 2026 LEOAF · M5 · LESSON 01 OF 7</footer>
+<script>
+const canvas=document.getElementById('starsCanvas'),ctx=canvas.getContext('2d');
+let stars=[];
+function initStars(){stars=[];for(let i=0;i<180;i++)stars.push({x:Math.random()*canvas.width,y:Math.random()*canvas.height,size:Math.random()*1.5+0.4,speed:Math.random()*0.18+0.04,hue:Math.random()*360});}
+function resizeCanvas(){canvas.width=window.innerWidth;canvas.height=window.innerHeight;}
+resizeCanvas();initStars();window.addEventListener('resize',resizeCanvas);
+function animateStars(){ctx.clearRect(0,0,canvas.width,canvas.height);stars.forEach(s=>{s.y-=s.speed;if(s.y<0){s.y=canvas.height;s.x=Math.random()*canvas.width;}ctx.beginPath();ctx.fillStyle=`hsl(${s.hue},80%,80%)`;ctx.arc(s.x,s.y,s.size,0,Math.PI*2);ctx.fill();});requestAnimationFrame(animateStars);}
+animateStars();
+</script>
+<script>
+const feedbacks={
+    1:{correct:"16-APSK carries log₂(16) = 4 bits per symbol; 4 × 208.3 = 833.3 Mbps. Bandwidth is spent on symbols; the bit rate is symbols times bits-per-symbol.",wrong:"208.3 Mbps would be 1 bit/symbol (BPSK). 416.7 Mbps is QPSK (2 bits/symbol). 3,333 Mbps mistakes M = 16 for the bits per symbol; the exponent, not the constellation size, is what multiplies."},
+    2:{correct:"B_occ = R_s(1 + α). The roll-off is the excess bandwidth beyond the Nyquist minimum of R_s.",wrong:"R_s/(1+α) is the inverse relation — the symbol rate that fits in a given bandwidth. R_s·α is only the excess portion. Bandwidth is never independent of roll-off for RRC shaping."},
+    3:{correct:"R_s = B/(1+α): 250/1.20 = 208.3 vs 250/1.05 = 238.1 Msym/s — a 14.3% gain, at every modulation order, for no power cost.",wrong:"4% underestimates; 25% would require going from α = 0.25 to α = 0. The symbol rate in a fixed allocation depends directly on roll-off."},
+    4:{correct:"QPSK's I and Q components carry one bit each, independently, with the same energy per bit and the same noise. Per-bit performance is therefore identical to BPSK, while spectral efficiency doubles — which is why QPSK dominates BPSK in almost all applications.",wrong:"They have different point counts (2 vs 4). Gray coding helps both equally. At the same bit rate QPSK occupies half the bandwidth of BPSK, not the same."},
+    5:{correct:"16-APSK confines points to two rings, limiting PAPR so that a TWTA or SSPA can run 2–4 dB from saturation instead of the 5–7 dB back-off grid QAM would demand. On a power-limited spacecraft the back-off saving outweighs QAM's better noise distance.",wrong:"QAM, not APSK, maximises minimum distance at fixed average power — that is precisely the property satellite systems sacrifice. Demodulation complexity is comparable. Patents are not the constraint."},
+    6:{correct:"Backing off the operating point reduces radiated power one-for-one (or worse, given efficiency loss) — a 6 dB OBO on a 100 W amplifier means radiating 25 W. Module 4 established that C/N₀ falls dB-for-dB with EIRP.",wrong:"OBO does not meaningfully change noise figure or lifetime (running cooler, if anything, helps lifetime). Mass is unaffected; what suffers is power efficiency and link performance."},
+    7:{correct:"Noise most often pushes a symbol into an adjacent decision region. With Gray mapping that event costs exactly one bit error, roughly halving BER relative to arbitrary mapping, at zero cost in power or bandwidth.",wrong:"Gray coding is a bit-labelling choice; it changes neither the point geometry (distances, PAPR) nor any regulatory status."},
+    8:{correct:"The bound is information-theoretic and holds for every modulation, every code, and every implementation. Modern LDPC codes approach it to within about 1 dB; nothing crosses it. The spine engine uses it as a hard sanity check on every output.",wrong:"No coding advance, modulation order, or constellation family can exceed capacity — approaching it is the entire game."},
+    9:{correct:"The gap between uncoded performance and the Shannon bound is exactly the territory coding conquers. Modern LDPC closes to within ~1 dB of capacity, which is why coded MODCOD thresholds sit 5–9 dB below the uncoded ladder.",wrong:"It is recoverable — that is the point. Atmospheric losses live in the Module 4 budget, not here. Gray coding costs nothing."},
+    10:{correct:"Net efficiency multiplies raw efficiency by the code rate (m5-2) and the framing efficiency (m5-4), typically dividing the raw figure by 1.5–3. The spine project carries raw and net as separate quantities throughout.",wrong:"Path loss determines whether a MODCOD is usable, not the definition of its efficiency. Shannon permits arbitrary η given sufficient SNR. The symbol rate is real; it is the payload fraction of the bits that shrinks."}
+};
+let answered={};
+document.querySelectorAll('.quiz-opt').forEach(btn=>{
+    btn.addEventListener('click',function(){
+        const q=this.dataset.q;
+        if(answered[q]!==undefined)return;
+        const correct=this.dataset.correct==='true';
+        answered[q]=correct;
+        document.querySelectorAll(`.quiz-opt[data-q="${q}"]`).forEach(b=>{b.disabled=true;if(b.dataset.correct==='true')b.classList.add('correct');});
+        if(!correct)this.classList.add('wrong');
+        const fb=document.getElementById('fb'+q);
+        fb.textContent=(correct?'✓ ':'✗ ')+feedbacks[q][correct?'correct':'wrong'];
+        fb.style.color=correct?'#39ff14':'#ff004f';
+        if(Object.keys(answered).length===10){
+            const total=Object.values(answered).filter(Boolean).length;
+            const sc=document.getElementById('quizScore');
+            sc.style.display='block';
+            const pct=Math.round(total/10*100);
+            sc.textContent=`SCORE: ${total}/10 (${pct}%) — ${pct===100?'PERFECT.':pct>=80?'STRONG.':pct>=60?'ADEQUATE. REVISIT WEAK SECTIONS.':'REVISIT THE LESSON BEFORE PROCEEDING.'}`;
+        }
+    });
+});
+</script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="supabase.js"></script>
+<script src="user_progress.js"></script>
+<script>
+const LESSON_ID='m5-1';
+(function(){
+    function bounceToLogin(r){console.error("Auth guard:",r);window.location.replace("index.html");}
+    async function init(){
+        if(typeof client==="undefined"||!client||!client.auth)return bounceToLogin("Supabase client not loaded");
+        let session=null;
+        try{({data:{session}}=await client.auth.getSession());}
+        catch(e){return bounceToLogin("getSession threw: "+e.message);}
+        if(!session){window.location.replace("index.html");return;}
+        const btn=document.getElementById('completeBtn'),msg=document.getElementById('completeMsg');
+        function setDone(done){
+            if(done){btn.textContent='✓ COMPLETE — CLICK TO UNDO';btn.classList.add('done');btn.style.cssText='border-color:#39ff14;color:#39ff14;background:rgba(57,255,20,0.1);cursor:pointer;opacity:1;';msg.style.color='#39ff14';msg.textContent='Lesson marked complete. Click again to undo.';}
+            else{btn.textContent='MARK LESSON COMPLETE';btn.classList.remove('done');btn.style.cssText='';msg.style.color='#ffffff55';msg.textContent='Not yet marked complete.';}
+        }
+        let mastered=[];
+        try{mastered=await getMasteredSections();}catch(e){console.error(e);}
+        setDone(mastered.includes(LESSON_ID));
+        btn.addEventListener('click',async()=>{
+            const isDone=btn.classList.contains('done');
+            msg.style.color='#00d9ff';msg.textContent='Saving...';
+            const ok=await upsertSection(LESSON_ID,!isDone);
+            if(ok){setDone(!isDone);}else{msg.style.color='#ff004f';msg.textContent='Error saving. Try again.';}
+        });
+        const btt=document.getElementById('backToTop');
+        window.addEventListener('scroll',()=>{btt.classList.toggle('visible',window.scrollY>400);});
+        btt.addEventListener('click',()=>window.scrollTo({top:0,behavior:'smooth'}));
+    }
+    if(document.readyState==="loading")document.addEventListener("DOMContentLoaded",init);
+    else init();
+})();
+</script>
+</body>
+</html>
