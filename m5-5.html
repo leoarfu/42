@@ -1,0 +1,692 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, shrink-to-fit=no">
+<title>M5-5 — The 3GPP NTN Air Interface · LEOAF</title>
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;600;800&family=Share+Tech+Mono&family=Libre+Baskerville:ital,wght@0,400;0,700;1,400&display=swap" rel="stylesheet">
+<link rel="icon" href="favicon.ico" sizes="any" type="image/x-icon">
+<link rel="manifest" href="site.webmanifest">
+<meta name="theme-color" content="#0f0f0f">
+<script>
+window.leoafAbort = async function () {
+    function go() { window.location.replace("index.html?signedout=1"); }
+    try { if (typeof client !== "undefined" && client && client.auth && client.auth.signOut) { try { await client.auth.signOut({ scope: "local" }); } catch (e) {} } } catch (e) {}
+    go();
+};
+</script>
+<style>
+* { box-sizing:border-box; margin:0; padding:0; }
+html { height:100%; -webkit-text-size-adjust:100%; overflow-x:hidden; }
+body { font-family:'Share Tech Mono',monospace; background:#000; color:white; overflow-x:hidden; min-height:100vh; }
+#starsCanvas { position:fixed; inset:0; z-index:-1; }
+header { background:#000; border-bottom:1px solid #ff004f33; position:sticky; top:0; z-index:100; padding:1rem clamp(1.5rem,5vw,4rem); display:flex; justify-content:space-between; align-items:center; }
+.logo { font-family:'Orbitron',sans-serif; font-weight:800; font-size:clamp(16px,2vw,22px); letter-spacing:3px; text-decoration:none; }
+.logo span:first-child { color:white; } .logo span:last-child { color:#ff004f; }
+.nav-right { display:flex; align-items:center; gap:10px; }
+.nav-btn { background:transparent; border:1px solid #ff004f44; color:#ff004f; padding:6px 14px; cursor:pointer; transition:0.3s; font-size:11px; font-family:'Orbitron',sans-serif; letter-spacing:1px; text-decoration:none; display:inline-block; }
+.nav-btn:hover { background:#ff004f; color:black; }
+.breadcrumb { padding:14px clamp(1.5rem,5vw,4rem); font-size:11px; color:#ffffff44; letter-spacing:1px; position:relative; z-index:1; }
+.breadcrumb a { color:#00d9ff66; text-decoration:none; } .breadcrumb a:hover { color:#00d9ff; }
+.breadcrumb span { margin:0 8px; }
+.lesson-wrap { max-width:820px; margin:0 auto; padding:0 clamp(1.5rem,5vw,4rem) 80px; position:relative; z-index:1; }
+.lesson-header { padding:30px 0 28px; border-bottom:1px solid #ffffff11; margin-bottom:36px; }
+.lesson-tag { font-family:'Orbitron',sans-serif; font-size:10px; color:#ff004f; letter-spacing:3px; margin-bottom:10px; }
+.lesson-header h1 { font-family:'Orbitron',sans-serif; font-size:clamp(20px,3.5vw,32px); font-weight:800; line-height:1.2; margin-bottom:12px; }
+.lesson-meta { display:flex; gap:10px; flex-wrap:wrap; margin-bottom:16px; }
+.l-pill { font-family:'Orbitron',sans-serif; font-size:10px; padding:3px 10px; border:1px solid; letter-spacing:1px; }
+.l-pill-q { color:#ff004f; border-color:#ff004f44; } .l-pill-t { color:#39ff14; border-color:#39ff1444; }
+.l-pill-c { color:#ffaa00; border-color:#ffaa0044; }
+.lesson-intro { font-size:13px; line-height:1.85; opacity:0.75; }
+.toc { background:rgba(0,217,255,0.06); border:1px solid #00d9ff33; padding:24px 28px; margin:30px 0; }
+.toc h4 { font-family:'Orbitron',sans-serif; font-size:10px; color:#00d9ff; letter-spacing:2px; margin-bottom:16px; }
+.toc ol { padding-left:20px; } .toc li { font-size:13px; line-height:2.1; }
+.toc li a { color:#00d9ffbb; text-decoration:none; transition:0.15s; } .toc li a:hover { color:#fff; padding-left:4px; }
+.toc li::marker { color:#ff004f; font-family:'Orbitron',sans-serif; font-size:10px; }
+.cb { background:#f5f2ec; color:#1a1a1a; padding:36px clamp(24px,4vw,48px); margin-bottom:24px; border-left:4px solid #00d9ff; position:relative; z-index:1; }
+.cb h2 { font-family:'Orbitron',sans-serif; font-size:13px; color:#003d66; letter-spacing:2px; text-transform:uppercase; margin-bottom:20px; padding-bottom:10px; border-bottom:2px solid #00d9ff66; scroll-margin-top:80px; }
+.cb h3 { font-family:'Orbitron',sans-serif; font-size:11px; color:#444; letter-spacing:1.5px; text-transform:uppercase; margin:28px 0 12px; }
+.cb p { font-family:'Libre Baskerville',Georgia,serif; font-size:15px; line-height:1.9; color:#1a1a1a; margin-bottom:16px; }
+.cb ul { padding-left:0; margin-bottom:16px; }
+.cb ul li { font-family:'Libre Baskerville',Georgia,serif; font-size:14px; line-height:1.85; color:#1a1a1a; padding-left:20px; position:relative; margin-bottom:8px; }
+.cb ul li::before { content:'›'; position:absolute; left:0; color:#0077aa; }
+.cb blockquote { border-left:3px solid #1a7a1a; background:#eafaea; padding:14px 20px; margin:18px 0; font-size:13px; font-family:'Share Tech Mono',monospace; color:#0a3d0a; line-height:1.8; }
+.callout { border-left:3px solid #0088cc; background:#e8f4fb; padding:16px 20px; margin:22px 0; font-size:12px; line-height:1.8; color:#1a1a1a; }
+.callout.red { border-left-color:#cc0033; background:#fdecea; }
+.callout.green { border-left-color:#1a7a1a; background:#eafaea; }
+.callout.amber { border-left-color:#996600; background:#fef9ec; }
+.callout strong { font-family:'Orbitron',sans-serif; font-size:10px; letter-spacing:1px; display:block; margin-bottom:8px; }
+.compare-table { width:100%; border-collapse:collapse; margin:22px 0; font-size:12px; }
+.compare-table th { font-family:'Orbitron',sans-serif; font-size:10px; letter-spacing:1px; color:#003d66; padding:10px 12px; border-bottom:2px solid #00d9ff66; text-align:left; }
+.compare-table td { padding:10px 12px; border-bottom:1px solid #ddd; line-height:1.5; color:#1a1a1a; vertical-align:top; }
+.compare-table tr:hover td { background:#f0f0f0; }
+.key-numbers { display:grid; grid-template-columns:repeat(auto-fit,minmax(140px,1fr)); gap:12px; margin:22px 0; }
+.kn-item { background:#fff; border:1px solid #d0d0d0; padding:16px 12px; text-align:center; }
+.kn-val { font-family:'Orbitron',sans-serif; font-size:clamp(13px,1.8vw,18px); font-weight:800; color:#003d66; display:block; }
+.kn-label { font-size:10px; color:#555; letter-spacing:1px; margin-top:5px; display:block; line-height:1.4; }
+.quiz-block { background:rgba(17,17,17,0.9); border:1px solid #ff004f33; padding:28px; margin:48px 0 32px; }
+.quiz-block h2 { font-family:'Orbitron',sans-serif; font-size:13px; color:#ff004f; letter-spacing:2px; margin-bottom:6px; }
+.quiz-intro { font-size:12px; opacity:0.6; margin-bottom:24px; padding-bottom:16px; border-bottom:1px solid #ff004f22; line-height:1.6; }
+.quiz-q { margin-bottom:28px; }
+.quiz-q p { font-size:13px; opacity:0.9; margin-bottom:12px; line-height:1.65; }
+.quiz-q p strong { color:#00d9ff; }
+.quiz-options { display:flex; flex-direction:column; gap:8px; }
+.quiz-opt { background:rgba(255,255,255,0.03); border:1px solid #ffffff1a; padding:11px 16px; cursor:pointer; font-size:12px; font-family:'Share Tech Mono',monospace; transition:0.2s; text-align:left; color:white; line-height:1.5; }
+.quiz-opt:hover:not(:disabled) { background:rgba(0,217,255,0.08); border-color:#00d9ff44; }
+.quiz-opt.correct { background:rgba(57,255,20,0.1); border-color:#39ff14; color:#39ff14; }
+.quiz-opt.wrong { background:rgba(255,0,79,0.1); border-color:#ff004f; color:#ff004f; }
+.quiz-opt:disabled { cursor:default; }
+.quiz-feedback { font-size:12px; margin-top:10px; min-height:18px; line-height:1.7; opacity:0.9; padding:0 4px; }
+.quiz-score { font-family:'Orbitron',sans-serif; font-size:12px; color:#39ff14; margin-top:20px; letter-spacing:1px; display:none; padding-top:16px; border-top:1px solid #39ff1433; }
+.py-block { background:rgba(10,10,10,0.95); border:1px solid #39ff1422; padding:28px; margin:32px 0; }
+.py-block h2 { font-family:'Orbitron',sans-serif; font-size:13px; color:#39ff14; letter-spacing:2px; margin-bottom:8px; }
+.py-block .py-intro { font-size:12px; opacity:0.7; margin-bottom:20px; padding-bottom:16px; border-bottom:1px solid #39ff1422; line-height:1.7; }
+.py-exercise { margin-bottom:32px; } .py-exercise:last-child { margin-bottom:0; }
+.py-exercise h3 { font-family:'Orbitron',sans-serif; font-size:11px; color:#39ff1499; letter-spacing:1.5px; text-transform:uppercase; margin-bottom:10px; }
+.py-exercise p { font-size:12px; opacity:0.8; margin-bottom:14px; line-height:1.75; }
+.py-block pre { background:#050505; border:1px solid #39ff1433; padding:20px; font-family:'Share Tech Mono',monospace; font-size:11px; line-height:1.7; overflow-x:auto; color:#39ff14; white-space:pre; margin-bottom:12px; }
+.py-note { background:rgba(57,255,20,0.04); border-left:2px solid #39ff14; padding:12px 16px; margin-top:14px; font-size:12px; line-height:1.75; opacity:0.8; }
+.py-note strong { font-family:'Orbitron',sans-serif; font-size:10px; color:#39ff14; display:block; margin-bottom:6px; letter-spacing:1px; }
+.reflection-block { background:rgba(255,170,0,0.04); border:1px solid #ffaa0033; padding:24px; margin:32px 0; }
+.reflection-block h2 { font-family:'Orbitron',sans-serif; font-size:13px; color:#ffaa00; letter-spacing:2px; margin-bottom:8px; }
+.ref-intro { font-size:12px; opacity:0.7; margin-bottom:20px; padding-bottom:14px; border-bottom:1px solid #ffaa0022; line-height:1.7; }
+.ref-prompt { margin-bottom:20px; }
+.ref-prompt h3 { font-family:'Orbitron',sans-serif; font-size:11px; color:#ffaa0099; letter-spacing:1px; margin-bottom:8px; }
+.ref-prompt p { font-size:12px; opacity:0.8; line-height:1.75; }
+.complete-wrap { margin-top:56px; padding-top:30px; border-top:1px solid #ffffff11; text-align:center; }
+.complete-btn { font-family:'Orbitron',sans-serif; font-size:13px; letter-spacing:2px; padding:14px 44px; background:transparent; border:1px solid #39ff14; color:#39ff14; cursor:pointer; transition:0.3s; }
+.complete-btn:hover:not(.done) { background:#39ff14; color:black; box-shadow:0 0 20px rgba(57,255,20,0.4); }
+.complete-btn.done { background:rgba(57,255,20,0.1); cursor:pointer; opacity:1; }
+.complete-msg { font-size:12px; color:#39ff14; margin-top:14px; min-height:18px; letter-spacing:1px; }
+.lesson-nav { display:flex; justify-content:space-between; margin-top:30px; flex-wrap:wrap; gap:10px; }
+.lesson-nav a { font-family:'Orbitron',sans-serif; font-size:11px; color:#00d9ff66; text-decoration:none; letter-spacing:1px; transition:0.2s; }
+.lesson-nav a:hover { color:#00d9ff; }
+.back-to-top { position:fixed; bottom:28px; right:28px; z-index:200; width:44px; height:44px; background:#000; border:1px solid #00d9ff55; color:#00d9ff; font-size:20px; cursor:pointer; display:flex; align-items:center; justify-content:center; opacity:0; pointer-events:none; transition:opacity 0.3s; }
+.back-to-top.visible { opacity:1; pointer-events:auto; } .back-to-top:hover { border-color:#00d9ff; }
+footer { text-align:center; padding:30px; opacity:0.3; font-size:11px; position:relative; z-index:1; letter-spacing:1px; }
+.module-complete { background:rgba(57,255,20,0.06); border:1px solid #39ff1444; padding:24px 28px; margin:40px 0; text-align:center; }
+.module-complete h3 { font-family:'Orbitron',sans-serif; font-size:14px; color:#39ff14; letter-spacing:2px; margin-bottom:10px; }
+.module-complete p { font-size:12px; opacity:0.8; line-height:1.7; }
+</style>
+</head>
+<body>
+<canvas id="starsCanvas"></canvas>
+<header>
+    <a href="dashboard.html" class="logo"><span>LEO</span><span>AF</span></a>
+    <div class="nav-right">
+        <a href="m5.html" class="nav-btn">← M5 HUB</a>
+        <button class="nav-btn" onclick="leoafAbort()">ABORT</button>
+    </div>
+</header>
+<div class="breadcrumb">
+    <a href="dashboard.html">DASHBOARD</a><span>/</span>
+    <a href="m5.html">M5</a><span>/</span>
+    <span style="color:#ffffff88;">LESSON 05 — 3GPP NTN AIR INTERFACE</span>
+</div>
+
+<div class="lesson-wrap">
+<div class="lesson-header">
+    <div class="lesson-tag">M5 · LESSON 05 OF 7</div>
+    <h1>The 3GPP NTN<br>Air Interface</h1>
+    <div class="lesson-meta">
+        <div class="l-pill l-pill-q">MODULE 5</div>
+        <div class="l-pill l-pill-t">AIR INTERFACE &amp; ACCESS</div>
+        <div class="l-pill l-pill-c">CORE</div>
+    </div>
+    <p class="lesson-intro" style="margin-bottom:12px;">Everything in this module so far descended from the satellite industry's own lineage: DVB framing, MF-TDMA returns, MODCOD ladders. This lesson follows the other bloodline. In Release 17 (2022), 3GPP — the body that standardises terrestrial cellular — published Non-Terrestrial Networks (NTN): a set of adaptations that let the 5G NR air interface operate through a satellite. The motivation is not technical superiority; m5-2 established that every modern air interface sits 1–2 dB from Shannon and there is no efficiency prize left to win. The motivation is the ecosystem: three billion NR-capable devices, a silicon industry that amortises modem development across them, and mobile network operators who want satellite coverage as a feature of their existing network rather than a separate system.</p>
+    <p class="lesson-intro" style="margin-bottom:12px;">NTN comes in two families. <strong>NR-NTN</strong> adapts 5G broadband — the subject of this lesson. <strong>IoT-NTN</strong> adapts NB-IoT and eMTC for low-rate sensor traffic and is noted where it differs. Release 17's baseline architecture is <strong>transparent</strong> (bent-pipe): the gNB stays on the ground, the satellite relays waveforms, and the entire air interface — including its timing — stretches across the space segment. Regenerative architectures (gNB functions on the satellite) are later-release territory and reappear in Module 7's networking context.</p>
+    <p class="lesson-intro" style="margin-bottom:12px;">The intellectual core of the lesson is a single pattern: NR was engineered around numerical assumptions — cell radii of kilometres, round trips of microseconds to a few milliseconds, Doppler of hundreds of hertz — and the satellite channel violates every one of them by two to four orders of magnitude. Release 17 is the catalogue of fixes, and most of them formalise exactly the mechanism m5-3 §7 sketched: the terminal knows where the satellite is, and pre-compensates.</p>
+</div>
+
+<div class="toc">
+    <h4>CONTENTS</h4>
+    <ol>
+        <li><a href="#s1">NR in one section: the OFDM resource grid</a></li>
+        <li><a href="#s2">What the satellite channel breaks</a></li>
+        <li><a href="#s3">The Release-17 fixes: ephemeris does the work</a></li>
+        <li><a href="#s4">The HARQ arithmetic</a></li>
+        <li><a href="#s5">NTN throughput arithmetic: the OFDM ledger</a></li>
+        <li><a href="#s6">Cells, bands, and the IoT branch</a></li>
+        <li><a href="#s7">Key facts</a></li>
+        <li><a href="#s8">What this lesson delivers to the design chain</a></li>
+        <li><a href="#quiz">Knowledge check</a></li>
+        <li><a href="#py">Python exercises</a></li>
+        <li><a href="#reflect">Reflection</a></li>
+    </ol>
+</div>
+
+<div class="cb" id="s1">
+    <h2>1. NR in one section: the OFDM resource grid</h2>
+<p>NR transmits OFDM (m5-3 §1) organised in a time-frequency grid:</p>
+<ul>
+<li><strong>Subcarrier spacing (SCS)</strong>: 15 × 2^μ kHz — 15, 30, 60, 120 kHz. Wider spacing means shorter symbols and slots, and more Doppler tolerance.</li>
+<li><strong>Slot</strong>: 14 OFDM symbols, lasting 1 ms / 2^μ — 1 ms at 15 kHz down to 0.125 ms at 120 kHz. The slot is the basic scheduling unit.</li>
+<li><strong>Resource block (RB)</strong>: 12 subcarriers. <strong>Resource element (RE)</strong>: one subcarrier × one symbol — the atomic unit; throughput is REs per second times bits per RE.</li>
+<li><strong>Cyclic prefix (CP)</strong>: a copied tail prepended to each symbol that makes multipath equalisation trivial. Normal CP costs exactly <strong>6.7%</strong> of time (1,024 of every 15,360 samples), at every SCS.</li>
+<li><strong>Channel utilisation</strong>: an NR carrier fills its channel with as many RBs as guard bands allow (TS 38.101):</li>
+</ul>
+<table class="compare-table">
+<thead><tr>
+<th>Channel</th>
+<th>SCS</th>
+<th>N_RB</th>
+<th>Occupied</th>
+<th>Utilisation</th>
+</tr></thead>
+<tbody>
+<tr><td>20 MHz</td><td>15 kHz</td><td>106</td><td>19.08 MHz</td><td>95.4%</td></tr>
+<tr><td>50 MHz</td><td>30 kHz</td><td>133</td><td>47.88 MHz</td><td>95.8%</td></tr>
+<tr><td>100 MHz</td><td>30 kHz</td><td>273</td><td>98.28 MHz</td><td>98.3%</td></tr>
+<tr><td>400 MHz</td><td>120 kHz</td><td>264</td><td>380.16 MHz</td><td>95.0%</td></tr>
+</tbody>
+</table>
+<p>Bits per RE are set by the MCS — modulation up to 256-QAM with LDPC code rates to 948/1024, a ceiling of <strong>7.41 bits/RE</strong>. (QAM, not APSK: NR assumed terrestrial power amplifiers; the uplink's DFT-s-OFDM option is the concession to power-limited transmitters, per m5-3 §1.) On top of CP and guard, control and reference signals — DMRS for channel estimation, PDCCH for scheduling grants, SSB for synchronisation — consume a traffic-dependent 10–20% of REs.</p>
+</div>
+
+<div class="cb" id="s2">
+    <h2>2. What the satellite channel breaks</h2>
+<p>The numbers NR was designed around, against what the satellite delivers:</p>
+<table class="compare-table">
+<thead><tr>
+<th>Quantity</th>
+<th>Terrestrial design envelope</th>
+<th>LEO (600 km)</th>
+<th>GEO</th>
+</tr></thead>
+<tbody>
+<tr><td>One-way propagation</td><td>µs – ~0.3 ms</td><td>2–6.4 ms (service link)</td><td>119.3 ms</td></tr>
+<tr><td>Round trip (transparent, incl. feeder)</td><td>&lt; 1 ms</td><td>up to ~25.8 ms</td><td>~541 ms</td></tr>
+<tr><td>Delay rate of change</td><td>~0</td><td>up to 23 µs/s (m5-3)</td><td>~0</td></tr>
+<tr><td>Doppler at 2 GHz</td><td>&lt; 1 kHz</td><td>up to ~48 kHz</td><td>~0</td></tr>
+<tr><td>Doppler at 30 GHz</td><td>—</td><td>up to ~700 kHz (m5-3)</td><td>~0</td></tr>
+<tr><td>Cell diameter</td><td>0.1–30 km</td><td>50–1,000 km beams</td><td>up to thousands of km</td></tr>
+</tbody>
+</table>
+<p>Four mechanisms break specifically:</p>
+<p><strong>Random access and timing advance.</strong> NR terminals learn their timing correction from the network during random access, and the correction range assumes a small cell. A LEO service link's propagation exceeds the design range outright — and worse, it <em>changes</em> continuously, which terrestrial TA maintenance loops were never built to chase at 23 µs/s.</p>
+<p><strong>Doppler.</strong> NR's frequency synchronisation tolerates terrestrial Doppler. Tens of kilohertz at S-band — several subcarrier spacings — breaks initial acquisition and steady-state tracking alike.</p>
+<p><strong>HARQ.</strong> NR's hybrid-ARQ retransmission protocol is stop-and-wait per process, with 16 parallel processes: a transmitter can have at most 16 transport blocks awaiting acknowledgement. The protocol self-throttles when the round trip exceeds 16 slot durations — section 4 quantifies how badly.</p>
+<p><strong>Scheduling timelines.</strong> NR grants reference slots a few slots ahead ("transmit in slot n+k", k small). When the grant itself takes 13 ms to arrive, the timeline arithmetic breaks.</p>
+</div>
+
+<div class="cb" id="s3">
+    <h2>3. The Release-17 fixes: ephemeris does the work</h2>
+<p>The fixes share one architecture: push knowledge to the terminal and let it pre-compensate.</p>
+<p><strong>Timing: split TA.</strong> The network broadcasts satellite <strong>ephemeris</strong> and a <strong>common TA</strong> (the delay component shared by the whole beam, referenced to the feeder path). Each terminal computes its <strong>UE-specific TA</strong> from its own GNSS position and the broadcast ephemeris, and applies the sum — <em>before</em> random access, and continuously updated thereafter, including a signalled TA drift rate. The terminal arrives at the gNB time-aligned despite 23 µs/s of delay drift. This is m5-3 §7's ephemeris-driven timing advance, now a standardised mandatory feature — and it makes GNSS capability a de facto requirement of an NTN terminal, an assumption m5-6 will have to confront for handsets.</p>
+<p><strong>Frequency: split Doppler compensation.</strong> The network pre-compensates the common (beam-centre) Doppler on the downlink; the terminal computes and pre-compensates its residual from position plus ephemeris on the uplink. Residuals shrink to oscillator-error levels, and the ordinary NR tracking loops handle the remainder.</p>
+<p><strong>Scheduling: K_offset.</strong> A broadcast slot-offset added to every scheduling timeline, sized to the beam's round trip. Mechanically trivial; it simply makes the grant arithmetic honest about propagation.</p>
+<p><strong>HARQ: more processes, or none.</strong> Release 17 extends HARQ to <strong>32 processes</strong> and adds the option to <strong>disable HARQ feedback</strong> per process, falling back on RLC-layer retransmission and more conservative MCS selection. Which option matters when is pure arithmetic — next section.</p>
+</div>
+
+<div class="cb" id="s4">
+    <h2>4. The HARQ arithmetic</h2>
+<p>Stop-and-wait per process means a <strong>single terminal's connection</strong> can have at most N_proc transport blocks in flight per round trip. With one TB per slot, that terminal's duty factor is:</p>
+<blockquote>duty = min(1, N_proc × T_slot / RTT)</blockquote>
+<table class="compare-table">
+<thead><tr>
+<th>Configuration</th>
+<th>RTT</th>
+<th>Duty factor</th>
+</tr></thead>
+<tbody>
+<tr><td>16 processes, 0.5 ms slots</td><td>LEO ~25.8 ms</td><td><strong>31%</strong></td></tr>
+<tr><td>32 processes, 0.5 ms slots</td><td>LEO ~25.8 ms</td><td><strong>62%</strong></td></tr>
+<tr><td>16 processes, 0.5 ms slots</td><td>GEO ~541 ms</td><td>1%</td></tr>
+<tr><td>32 processes, 0.5 ms slots</td><td>GEO ~541 ms</td><td>3%</td></tr>
+</tbody>
+</table>
+<p>The table explains the design cleanly. At LEO, doubling the process count doubles a terminal's usable peak rate and gets within reach of full occupancy (wider SCS — shorter slots — makes it worse, not better; more slots fit in the same RTT). At GEO, no plausible process count closes a 541 ms round trip: HARQ feedback is disabled, reliability moves to the RLC layer and to link margin, and the m5-2 selection margin grows to buy the decode probability that retransmission no longer guarantees. One protocol parameter, two entirely different operating philosophies, decided by orbit geometry.</p>
+<p>Scope this cap correctly: it binds the <strong>per-terminal peak rate</strong>, not the beam. Every terminal runs its own HARQ entity, and the scheduler pipelines transport blocks across hundreds of them — the beam's resource grid stays full even while each individual connection is duty-limited. The cap therefore matters exactly where a single user wants the whole carrier: speed tests, single-stream bulk transfers, backhaul-over-NTN. The spine stage encodes both quantities separately.</p>
+</div>
+
+<div class="cb" id="s5">
+    <h2>5. NTN throughput arithmetic: the OFDM ledger</h2>
+<p>The spine engine's DVB branch multiplied a symbol rate by a Table-13 efficiency and two framing factors. The NR branch counts resource elements:</p>
+<blockquote>RE rate = N_RB × 12 × 14 / T_slot, net of CP by construction<br>
+throughput = RE rate × (1 − control overhead) × bits-per-RE</blockquote>
+<p>Bits-per-RE follows the MCS selection, which — unlike DVB's published Table 13 — has no standardised SNR mapping (CQI reporting is implementation-defined). The spine uses the standard system-study abstraction: an attenuated Shannon curve, η = min(7.41, 0.75 × log₂(1 + SNR)), the ~0.75 factor representing real LDPC/control performance. This is a modelling choice and is labelled as one; it is accurate to within a few tens of percent, which is adequate for architecture comparison and inadequate for equipment specification.</p>
+<p>The honest comparison, same 400 MHz of Ka spectrum, same C/N₀ of 96 dBHz, both branches of the engine:</p>
+<table class="compare-table">
+<thead><tr>
+<th>Branch</th>
+<th>Configuration</th>
+<th>Net throughput</th>
+</tr></thead>
+<tbody>
+<tr><td>NR-NTN</td><td>264 RB @ 120 kHz, SNR 10.2 dB, 14% control</td><td>~806 Mbps</td></tr>
+<tr><td>DVB-S2X</td><td>381 Msym/s (α = 0.05), 8PSK 3/4, pilots + GSE</td><td>~799 Mbps</td></tr>
+</tbody>
+</table>
+<p>Parity, to within the abstraction's error bars — which is the m5-2 conclusion made concrete: <strong>the air-interface decision is not about spectral efficiency</strong>, because nobody is far from Shannon. It is about everything else: ecosystem, mobility, control granularity, and the ownership question of m5-4 §7. Note the overhead structures differ even where the totals converge — NR pays CP (6.7%), guard (~5%), and control (10–20%) for scheduling granularity and mobility management that DVB simply does not have; DVB pays almost nothing beyond FEC because it assumes fixed terminals on a broadcast-descended forward link.</p>
+</div>
+
+<div class="cb" id="s6">
+    <h2>6. Cells, bands, and the IoT branch</h2>
+<p><strong>Earth-moving vs earth-fixed cells.</strong> A LEO satellite's beams either sweep the ground with the spacecraft (earth-moving: simple payload, terminals handover every few tens of seconds even standing still) or are steered to hold fixed ground cells during a pass (earth-fixed: the Module-3 phased-array payload doing beam-pointing work so the network layer sees quasi-static cells). Release 17 supports both; the choice trades payload complexity against handover signalling load — a Module 7 topic seeded here.</p>
+<p><strong>Bands.</strong> Release 17 NTN operates in FR1 satellite bands — n255 (L-band) and n256 (S-band) — the handset-friendly, MSS-allocated spectrum. Release 18 extended NTN to Ka-band (FR2-NTN) for VSAT-class broadband terminals. The physics of m4-3 stands unchanged: L/S-band closes to poor antennas and carries little spectrum; Ka carries the capacity and demands the dish.</p>
+<p><strong>IoT-NTN.</strong> NB-IoT over satellite: ~180 kHz carriers, kilobit rates, extreme link-margin tolerance, latency indifference. The same ephemeris-based compensation machinery applies, and Release 19 adds <strong>store-and-forward</strong> operation — a satellite collecting sensor uplinks without a simultaneous feeder link, which quietly reintroduces the regenerative payload through the back door.</p>
+</div>
+
+<div class="cb" id="s7">
+    <h2>7. Key facts</h2>
+<table class="compare-table">
+<thead><tr>
+<th>Fact</th>
+<th>Value</th>
+<th>Unit</th>
+<th>Source</th>
+</tr></thead>
+<tbody>
+<tr><td>NTN introduced</td><td>3GPP Release 17 (2022), transparent baseline</td><td>—</td><td>TR 38.821 / Rel-17</td></tr>
+<tr><td>SCS ladder</td><td>15 × 2^μ: 15/30/60/120</td><td>kHz</td><td>TS 38.211</td></tr>
+<tr><td>Slot</td><td>14 symbols, 1/2^μ</td><td>ms</td><td>TS 38.211</td></tr>
+<tr><td>Normal CP overhead</td><td>6.7</td><td>%</td><td>TS 38.211 (computed)</td></tr>
+<tr><td>100 MHz @ 30 kHz</td><td>273 RB, 98.3% utilisation</td><td>—</td><td>TS 38.101</td></tr>
+<tr><td>400 MHz @ 120 kHz</td><td>264 RB, 95.0% utilisation</td><td>—</td><td>TS 38.101</td></tr>
+<tr><td>Max bits per RE</td><td>7.41 (256-QAM, R = 948/1024)</td><td>bit</td><td>TS 38.214</td></tr>
+<tr><td>LEO 600 km transparent RTT (worst)</td><td>~25.8</td><td>ms</td><td>TR 38.821</td></tr>
+<tr><td>GEO transparent RTT</td><td>~541</td><td>ms</td><td>TR 38.821</td></tr>
+<tr><td>HARQ processes</td><td>16 → 32 (Rel-17), feedback can be disabled</td><td>—</td><td>Rel-17 NTN</td></tr>
+<tr><td>HARQ duty, 16 proc / 0.5 ms slots / LEO</td><td>31 (per-terminal peak)</td><td>%</td><td>Computed</td></tr>
+<tr><td>TA architecture</td><td>common TA + UE-specific from GNSS + ephemeris</td><td>—</td><td>Rel-17 NTN</td></tr>
+<tr><td>NTN FR1 bands</td><td>n255 (L), n256 (S); Ka via Rel-18 FR2-NTN</td><td>—</td><td>TS 38.101-5</td></tr>
+<tr><td>400 MHz Ka comparison, C/N₀ 96 dBHz</td><td>NR ~806 vs DVB ~799</td><td>Mbps</td><td>Computed (abstraction)</td></tr>
+</tbody>
+</table>
+</div>
+
+<div class="cb" id="s8">
+    <h2>8. What this lesson delivers to the design chain</h2>
+<p>The engine gains its second branch: an NR resource-element ledger alongside the DVB symbol ledger, both consuming the same Module-4 C/N₀ and producing comparable net throughputs — with the comparison demonstrating that the branches differ in structure and ecosystem, not efficiency. The HARQ duty factor enters the engine as a throughput cap that depends on orbit geometry, the first place the module's arithmetic couples to Module 2's, and the RTT values it consumes are exported onward to M7's latency budget alongside m5-3's grant delay.</p>
+<p>Strategically: NTN resolves m5-4's decision table into a third option. Not the satellite industry's standard, not a proprietary waveform, but the terrestrial industry's standard — with the handset ecosystem as its dowry. The next lesson takes that dowry to its limit: closing the link to an unmodified phone in someone's hand.</p>
+</div>
+
+<div class="quiz-block" id="quiz">
+    <h2>KNOWLEDGE CHECK</h2>
+    <div class="quiz-intro">Ten questions. Each option explains itself after you commit. No retries per question — decide first.</div>
+    <div class="quiz-q">
+        <p><strong>Q1.</strong> The primary motivation for adapting NR to satellite, rather than extending DVB, was:</p>
+        <div class="quiz-options">
+            <button class="quiz-opt" data-q="1" data-correct="false">A — NR's superior spectral efficiency</button>
+            <button class="quiz-opt" data-q="1" data-correct="true">B — The device and silicon ecosystem — billions of NR terminals and the MNO integration path — since all modern air interfaces sit 1–2 dB from Shannon</button>
+            <button class="quiz-opt" data-q="1" data-correct="false">C — DVB cannot operate through a satellite</button>
+            <button class="quiz-opt" data-q="1" data-correct="false">D — NR requires no adaptation for satellite use</button>
+        </div>
+        <div class="quiz-feedback" id="fb1"></div>
+    </div>
+    <div class="quiz-q">
+        <p><strong>Q2.</strong> Normal cyclic prefix costs 6.7% of capacity at every subcarrier spacing because:</p>
+        <div class="quiz-options">
+            <button class="quiz-opt" data-q="2" data-correct="false">A — The CP length is fixed at 4.69 µs regardless of SCS</button>
+            <button class="quiz-opt" data-q="2" data-correct="true">B — CP samples scale with the symbol length, so the ratio of CP to total time is constant across the numerology</button>
+            <button class="quiz-opt" data-q="2" data-correct="false">C — The CP is only transmitted at 15 kHz SCS</button>
+            <button class="quiz-opt" data-q="2" data-correct="false">D — Regulation fixes the overhead at 6.7%</button>
+        </div>
+        <div class="quiz-feedback" id="fb2"></div>
+    </div>
+    <div class="quiz-q">
+        <p><strong>Q3.</strong> A LEO NTN terminal can complete random access despite the propagation delay exceeding NR's terrestrial TA range because:</p>
+        <div class="quiz-options">
+            <button class="quiz-opt" data-q="3" data-correct="false">A — The satellite reduces its altitude during random access</button>
+            <button class="quiz-opt" data-q="3" data-correct="true">B — The terminal pre-computes its timing advance from its GNSS position and the broadcast satellite ephemeris, plus a broadcast common TA, before transmitting</button>
+            <button class="quiz-opt" data-q="3" data-correct="false">C — NTN abandons time-division synchronisation</button>
+            <button class="quiz-opt" data-q="3" data-correct="false">D — The gNB tolerates arbitrary timing errors</button>
+        </div>
+        <div class="quiz-feedback" id="fb3"></div>
+    </div>
+    <div class="quiz-q">
+        <p><strong>Q4.</strong> A single terminal's HARQ throughput collapses over long round trips because:</p>
+        <div class="quiz-options">
+            <button class="quiz-opt" data-q="4" data-correct="false">A — The FEC code fails at long delays</button>
+            <button class="quiz-opt" data-q="4" data-correct="true">B — Each HARQ process is stop-and-wait, so at most N_proc of that terminal's transport blocks can be in flight per RTT — 16 processes × 0.5 ms slots fills only 31% of a 25.8 ms LEO round trip; the beam stays full because the scheduler pipelines across terminals</button>
+            <button class="quiz-opt" data-q="4" data-correct="false">C — Retransmissions are forbidden by NTN</button>
+            <button class="quiz-opt" data-q="4" data-correct="false">D — The satellite cannot store acknowledgements</button>
+        </div>
+        <div class="quiz-feedback" id="fb4"></div>
+    </div>
+    <div class="quiz-q">
+        <p><strong>Q5.</strong> At GEO, the standard NTN configuration disables HARQ feedback entirely because:</p>
+        <div class="quiz-options">
+            <button class="quiz-opt" data-q="5" data-correct="false">A — GEO links never experience errors</button>
+            <button class="quiz-opt" data-q="5" data-correct="true">B — No feasible process count fills a 541 ms round trip, so reliability moves to RLC retransmission and to a larger MCS selection margin</button>
+            <button class="quiz-opt" data-q="5" data-correct="false">C — GEO satellites cannot transmit acknowledgements</button>
+            <button class="quiz-opt" data-q="5" data-correct="false">D — HARQ is patented</button>
+        </div>
+        <div class="quiz-feedback" id="fb5"></div>
+    </div>
+    <div class="quiz-q">
+        <p><strong>Q6.</strong> Wider subcarrier spacing (shorter slots) makes the HARQ stall <em>worse</em>, not better, because:</p>
+        <div class="quiz-options">
+            <button class="quiz-opt" data-q="6" data-correct="false">A — Wider SCS increases the propagation delay</button>
+            <button class="quiz-opt" data-q="6" data-correct="true">B — More (shorter) slots fit inside the same RTT, so the fixed process count covers a smaller fraction of them</button>
+            <button class="quiz-opt" data-q="6" data-correct="false">C — Wider SCS reduces the number of resource blocks</button>
+            <button class="quiz-opt" data-q="6" data-correct="false">D — It doesn't — shorter slots always help</button>
+        </div>
+        <div class="quiz-feedback" id="fb6"></div>
+    </div>
+    <div class="quiz-q">
+        <p><strong>Q7.</strong> The NR-vs-DVB throughput comparison at identical spectrum and C/N₀ landed at ~806 vs ~799 Mbps. The correct reading is:</p>
+        <div class="quiz-options">
+            <button class="quiz-opt" data-q="7" data-correct="false">A — NR is 1% better and should always be chosen</button>
+            <button class="quiz-opt" data-q="7" data-correct="true">B — The two are at parity within the model's error bars; the air-interface decision rests on ecosystem, mobility, and ownership — not efficiency</button>
+            <button class="quiz-opt" data-q="7" data-correct="false">C — DVB would win if pilots were disabled</button>
+            <button class="quiz-opt" data-q="7" data-correct="false">D — The NR figure is exact</button>
+        </div>
+        <div class="quiz-feedback" id="fb7"></div>
+    </div>
+    <div class="quiz-q">
+        <p><strong>Q8.</strong> Earth-fixed cells at LEO trade against earth-moving cells as follows:</p>
+        <div class="quiz-options">
+            <button class="quiz-opt" data-q="8" data-correct="false">A — Earth-fixed cells require no satellite antennas</button>
+            <button class="quiz-opt" data-q="8" data-correct="true">B — Earth-fixed cells spend payload complexity (continuous beam steering through the pass) to buy quasi-static cells and far less handover signalling; earth-moving cells do the reverse</button>
+            <button class="quiz-opt" data-q="8" data-correct="false">C — Earth-moving cells eliminate Doppler</button>
+            <button class="quiz-opt" data-q="8" data-correct="false">D — The two are identical in cost</button>
+        </div>
+        <div class="quiz-feedback" id="fb8"></div>
+    </div>
+    <div class="quiz-q">
+        <p><strong>Q9.</strong> GNSS capability became a de facto requirement of NTN terminals because:</p>
+        <div class="quiz-options">
+            <button class="quiz-opt" data-q="9" data-correct="false">A — 3GPP sells GNSS chips</button>
+            <button class="quiz-opt" data-q="9" data-correct="true">B — The Rel-17 compensation architecture assigns the terminal the job of computing its own timing advance and Doppler pre-compensation from its position plus broadcast ephemeris</button>
+            <button class="quiz-opt" data-q="9" data-correct="false">C — GNSS improves the FEC performance</button>
+            <button class="quiz-opt" data-q="9" data-correct="false">D — Regulators require position reporting</button>
+        </div>
+        <div class="quiz-feedback" id="fb9"></div>
+    </div>
+    <div class="quiz-q">
+        <p><strong>Q10.</strong> Release 19's store-and-forward mode for IoT-NTN is architecturally significant because:</p>
+        <div class="quiz-options">
+            <button class="quiz-opt" data-q="10" data-correct="false">A — It increases IoT data rates</button>
+            <button class="quiz-opt" data-q="10" data-correct="true">B — A satellite that collects uplinks without a live feeder link must terminate protocol layers on board — reintroducing the regenerative payload that the Rel-17 transparent baseline avoided</button>
+            <button class="quiz-opt" data-q="10" data-correct="false">C — It eliminates the need for ephemeris</button>
+            <button class="quiz-opt" data-q="10" data-correct="false">D — It only works at GEO</button>
+        </div>
+        <div class="quiz-feedback" id="fb10"></div>
+    </div>
+    <div class="quiz-score" id="quizScore"></div>
+</div>
+
+<div class="py-block" id="py">
+    <h2>PYTHON EXERCISES</h2>
+    <div class="py-intro">Three exercises; the last extends the module spine project. Run them, then work the numbered follow-ups in the comments — the follow-ups are the exercise.</div>
+    <div class="py-exercise">
+        <h3>Exercise 1 — The resource-element ledger</h3>
+        <p>Build NR throughput from the grid arithmetic and locate every overhead.</p>
+<pre>
+import math
+
+NRB_TABLE = {  # (channel MHz, SCS kHz) -&gt; N_RB, per TS 38.101
+    (20, 15): 106, (50, 30): 133, (100, 30): 273, (400, 120): 264,
+}
+
+def nr_ledger(bw_mhz, scs_khz, snr_db, ctrl_oh=0.14):
+    nrb = NRB_TABLE[(bw_mhz, scs_khz)]
+    mu = int(math.log2(scs_khz / 15))
+    slot_s = 1e-3 / 2**mu
+    re_rate = nrb * 12 * 14 / slot_s          # CP excluded by symbol count
+    eta = min(7.406, 0.75 * math.log2(1 + 10**(snr_db/10)))  # link abstraction
+    thr = re_rate * (1 - ctrl_oh) * eta
+    occ = nrb * 12 * scs_khz * 1e3
+    print(f&quot;{bw_mhz} MHz @ {scs_khz} kHz: {nrb} RB, &quot;
+          f&quot;util {occ/(bw_mhz*1e6)*100:.1f}%, slot {slot_s*1e3:.3f} ms&quot;)
+    print(f&quot;  RE rate {re_rate/1e6:.1f} M/s, eta {eta:.2f} b/RE &quot;
+          f&quot;-&gt; {thr/1e6:.0f} Mbps net&quot;)
+    return thr
+
+nr_ledger(20, 15, 2.0)      # S-band handheld class
+nr_ledger(100, 30, 10.0)    # Ka VSAT, moderate SNR
+nr_ledger(400, 120, 10.2)   # Ka VSAT, wideband
+
+# 1. Decompose the total overhead for the 400 MHz case into guard
+#    (utilisation), CP, and control. Which is largest? Compare the
+#    stack against the DVB stack of m5-4 exercise 2.
+# 2. The 0.75 attenuation factor is a modelling choice. Rerun at
+#    0.65 and 0.85 and state the throughput sensitivity — then say
+#    what this implies about trusting single-number NTN capacity claims.
+# 3. Sweep SNR -5..25 dB for the 100 MHz case and find where the
+#    7.406 b/RE cap binds. What hardware/geometry (m4) would ever
+#    put a satellite link above that SNR?
+</pre>
+    </div>
+    <div class="py-exercise">
+        <h3>Exercise 2 — The HARQ stall</h3>
+        <p>Quantify the protocol throttle across orbits and numerologies.</p>
+<pre>
+def harq_duty(n_proc, slot_ms, rtt_ms):
+    return min(1.0, n_proc * slot_ms / rtt_ms)
+
+RTT = {&quot;LEO 600 transparent&quot;: 25.8, &quot;MEO ~8000&quot;: 105.0, &quot;GEO&quot;: 541.0}
+
+print(f&quot;{&#x27;orbit&#x27;:&lt;22}{&#x27;slot&#x27;:&gt;7}{&#x27;16 proc&#x27;:&gt;9}{&#x27;32 proc&#x27;:&gt;9}&quot;)
+for orbit, rtt in RTT.items():
+    for slot in [1.0, 0.5, 0.125]:
+        d16 = harq_duty(16, slot, rtt)
+        d32 = harq_duty(32, slot, rtt)
+        print(f&quot;{orbit:&lt;22}{slot:&gt;6.3f} {d16*100:&gt;8.0f}%{d32*100:&gt;8.0f}%&quot;)
+
+# 1. For LEO at 0.5 ms slots, how many processes would full occupancy
+#    require? Why did 3GPP stop at 32 (hint: what does each process
+#    cost in the receiver)?
+# 2. With HARQ feedback disabled, decode failures are recovered at
+#    RLC with a ~1 RTT penalty. At a 1% BLER target, compute the
+#    effective throughput loss and compare against the HARQ-on duty
+#    factor at GEO. Which mode wins, and by how much?
+# 3. The MEO row: decide, with numbers, which HARQ mode you would
+#    configure and what MCS margin adjustment accompanies it.
+</pre>
+    </div>
+    <div class="py-exercise">
+        <h3>Exercise 3 — Spine Stage 5: the second branch</h3>
+        <p>The engine gains its NR branch and races it against the DVB branch on equal terms.</p>
+<pre>
+import math
+
+# ═══════════════════════════════════════════════════════
+# M5 SPINE PROJECT — THROUGHPUT ENGINE
+# Stage 5: the NR-NTN branch.
+#   DVB branch (stages 1-4): symbol rate x Table-13 eta
+#     x scheduler x pilots x GSE
+#   NR branch (here): RE rate x (1-ctrl) x abstraction eta,
+#     capped by the HARQ duty factor
+# Same input currency both sides: C/N0 from the M4 engine.
+# Next: m5-6 D2D case, m5-7 full assembly.
+# ═══════════════════════════════════════════════════════
+
+MODCOD_TABLE = [
+    (&quot;QPSK 1/4&quot;, 0.490243, -2.35), (&quot;QPSK 1/2&quot;, 0.988858, 1.00),
+    (&quot;QPSK 3/4&quot;, 1.487473, 4.03),  (&quot;8PSK 3/4&quot;, 2.228124, 7.91),
+    (&quot;16APSK 2/3&quot;, 2.637201, 8.97),(&quot;16APSK 3/4&quot;, 2.966728, 10.21),
+    (&quot;32APSK 3/4&quot;, 3.703295, 12.73),(&quot;32APSK 9/10&quot;, 4.453027, 16.05),
+]
+NRB_TABLE = {(20,15):106, (50,30):133, (100,30):273, (400,120):264}
+
+def dvb_branch(bw_hz, alpha, cn0_dbhz, sched=0.97, pilot=0.9763, gse=0.9934):
+    rs = bw_hz / (1 + alpha)
+    esn0 = cn0_dbhz - 10*math.log10(rs)
+    best = None
+    for name, eta, thr in MODCOD_TABLE:
+        if esn0 &gt;= thr + 1.5 and (best is None or eta &gt; best[1]):
+            best = (name, eta, thr)
+    if not best: return 0.0, &quot;no MODCOD&quot;
+    return best[1]*rs*sched*pilot*gse, best[0]
+
+def nr_branch(bw_mhz, scs_khz, cn0_dbhz, ctrl=0.14):
+    &quot;&quot;&quot;BEAM-level net throughput: the scheduler pipelines HARQ across
+    terminals, so no duty cap applies at beam scope.&quot;&quot;&quot;
+    nrb = NRB_TABLE[(bw_mhz, scs_khz)]
+    occ = nrb*12*scs_khz*1e3
+    snr = cn0_dbhz - 10*math.log10(occ)
+    mu = int(math.log2(scs_khz/15)); slot_ms = 1.0/2**mu
+    re_rate = nrb*12*14/(slot_ms*1e-3)
+    eta = min(7.406, 0.75*math.log2(1+10**(snr/10)))
+    return re_rate*(1-ctrl)*eta, f&quot;SNR {snr:.1f} dB&quot;, slot_ms
+
+def ue_peak_duty(n_harq, slot_ms, rtt_ms):
+    &quot;&quot;&quot;PER-TERMINAL peak-rate fraction: the stop-and-wait window.&quot;&quot;&quot;
+    return min(1.0, n_harq*slot_ms/rtt_ms)
+
+# ── Equal-terms race (BEAM level): 400 MHz Ka, C/N0 96 dBHz ──
+cn0 = 96.0
+d, dn = dvb_branch(400e6, 0.05, cn0)
+n, nn, slot_ms = nr_branch(400, 120, cn0)
+print(f&quot;DVB-S2X branch: {d/1e6:7.1f} Mbps  ({dn})&quot;)
+print(f&quot;NR-NTN branch:  {n/1e6:7.1f} Mbps  ({nn})  [beam level]&quot;)
+
+# ── The per-terminal HARQ cap, made visible ─────────────
+# One terminal wanting the whole carrier gets at most duty x beam rate.
+print(f&quot;\n{&#x27;n_harq&#x27;:&gt;7}{&#x27;UE peak duty&#x27;:&gt;13}{&#x27;UE peak (Mbps)&#x27;:&gt;16}&quot;)
+for np_ in [8, 16, 32, 64]:
+    duty = ue_peak_duty(np_, slot_ms, 25.8)
+    print(f&quot;{np_:&gt;7}{duty*100:&gt;12.0f}%{n*duty/1e6:&gt;16.1f}&quot;)
+
+# ── Orbit sensitivity: beam unaffected, UE peak collapses ──
+print(f&quot;\n{&#x27;RTT (ms)&#x27;:&gt;9}{&#x27;beam (Mbps)&#x27;:&gt;13}{&#x27;UE peak, 32 proc&#x27;:&gt;18}&quot;)
+for rtt in [13, 25.8, 105, 541]:
+    duty = ue_peak_duty(32, slot_ms, rtt)
+    print(f&quot;{rtt:&gt;9}{n/1e6:&gt;13.1f}{n*duty/1e6:&gt;17.1f}&quot;)
+
+# ── STAGE-6 PREVIEW ────────────────────────────────────
+# m5-6 pushes both branches to the D2D corner: handset G/T,
+# narrowband carriers, VL-SNR MODCODs, and the link budget
+# doing all the work the terminal cannot.
+
+# 1. The engine now carries beam rate and UE peak separately.
+#    Identify three service classes and state, for each, which of
+#    the two numbers the customer contract actually references —
+#    then explain why a speed test misleads on an NTN link.
+# 2. Race the branches at 100 MHz / C/N0 90 dBHz and at 20 MHz /
+#    C/N0 78 dBHz. Does the parity conclusion survive at low SNR?
+#    Which branch&#x27;s overhead structure hurts more down there?
+# 3. Add the m5-3 grant delay and this lesson&#x27;s RTT into one
+#    latency ledger per orbit — the number M7 will consume.
+</pre>
+    </div>
+</div>
+
+<div class="reflection-block" id="reflect">
+    <h2>REFLECTION</h2>
+    <div class="ref-intro">Four prompts. Each forces a decision — write the position down before moving on; the act of committing is the exercise.</div>
+    <div class="ref-prompt">
+        <h3>PROMPT 01</h3>
+        <p>Section 3's fix catalogue routes everything through terminal self-knowledge: GNSS position plus broadcast ephemeris. Attack the architecture's single point of failure — construct the failure chain for a terminal with a spoofed or jammed GNSS receiver, decide which layer of the NTN stack detects it first, and compare against how the DVB/proprietary world (m5-3 §7, m5-4) handles the same problem. Is the vulnerability intrinsic to the physics or to Release 17's specific design choices?</p>
+    </div>
+    <div class="ref-prompt">
+        <h3>PROMPT 02</h3>
+        <p>The HARQ table shows numerology and protocol fighting each other: wider SCS improves Doppler tolerance and scheduling granularity while worsening the duty factor. You are configuring a Ka-band LEO NTN carrier — pick an SCS, a process count, and a HARQ mode, and defend the triple against both the section-4 arithmetic and the section-2 Doppler column. State what traffic type would make you reverse the choice.</p>
+    </div>
+    <div class="ref-prompt">
+        <h3>PROMPT 03</h3>
+        <p>Section 5 declared efficiency parity and moved the decision to ecosystem. Steelman the opposite: find the operating regime in this module's own numbers where the two branches' overhead structures diverge enough to matter — consider low SNR (where control overhead is regressive), small packets (m5-4 §5), and bursty traffic (m5-3 §4) — and characterise the customer for whom the "parity" conclusion is false.</p>
+    </div>
+    <div class="ref-prompt">
+        <h3>PROMPT 04</h3>
+        <p>Release 17 chose the transparent architecture as baseline, and Release 19's store-and-forward is already reintroducing onboard processing. Extrapolate: list the protocol functions that migrate to the satellite in a regenerative NTN (which pieces of the gNB, in what order, and why), and identify what each migration does to the feeder-link requirements that Module 4 priced and the ISL topics Module 7 will price.</p>
+    </div>
+</div>
+
+<div class="cb">
+    <h2>Sources</h2>
+<ul>
+<li>3GPP TR 38.821 — Solutions for NR to support non-terrestrial networks: scenarios, RTT values, TA/Doppler architecture.</li>
+<li>3GPP TS 38.211 — NR physical channels and modulation: numerology, CP, resource grid.</li>
+<li>3GPP TS 38.101-5 — NR UE radio characteristics for satellite access: NTN bands, channel/RB tables.</li>
+<li>3GPP TS 38.214 — NR physical layer procedures for data: MCS, TBS determination.</li>
+<li>3GPP Release 17/18/19 NTN work-item summaries — HARQ extension, K_offset, FR2-NTN, IoT-NTN store-and-forward.</li>
+<li>Lin et al., "5G from Space: An Overview of 3GPP Non-Terrestrial Networks" — survey context for the Rel-17 design decisions.</li>
+</ul>
+</div>
+
+<div class="complete-wrap">
+    <button class="complete-btn" id="completeBtn">MARK LESSON COMPLETE</button>
+    <div class="complete-msg" id="completeMsg"></div>
+</div>
+<div class="lesson-nav">
+    <a href="m5-4.html">← LESSON 04 — DVB-S2X VS PROPRIETARY</a>
+    <a href="m5-6.html">LESSON 06 — DIRECT-TO-DEVICE PHY →</a>
+</div>
+</div>
+
+<button class="back-to-top" id="backToTop" title="Back to top">↑</button>
+<footer>© 2026 LEOAF · M5 · LESSON 05 OF 7</footer>
+<script>
+const canvas=document.getElementById('starsCanvas'),ctx=canvas.getContext('2d');
+let stars=[];
+function initStars(){stars=[];for(let i=0;i<180;i++)stars.push({x:Math.random()*canvas.width,y:Math.random()*canvas.height,size:Math.random()*1.5+0.4,speed:Math.random()*0.18+0.04,hue:Math.random()*360});}
+function resizeCanvas(){canvas.width=window.innerWidth;canvas.height=window.innerHeight;}
+resizeCanvas();initStars();window.addEventListener('resize',resizeCanvas);
+function animateStars(){ctx.clearRect(0,0,canvas.width,canvas.height);stars.forEach(s=>{s.y-=s.speed;if(s.y<0){s.y=canvas.height;s.x=Math.random()*canvas.width;}ctx.beginPath();ctx.fillStyle=`hsl(${s.hue},80%,80%)`;ctx.arc(s.x,s.y,s.size,0,Math.PI*2);ctx.fill();});requestAnimationFrame(animateStars);}
+animateStars();
+</script>
+<script>
+const feedbacks={
+    1:{correct:"m5-2 closed the efficiency question; no waveform choice wins meaningful dB. What NR brings is the terrestrial ecosystem: handsets, chipsets amortised across billions of units, and operators who can treat satellite as a coverage layer of their existing network.",wrong:"Efficiency is at parity (§5). DVB *is* the satellite standard — that is what it does. NR required an entire release of adaptations; that catalogue is this lesson."},
+    2:{correct:"1,024 CP samples per 15,360 total in every half-subframe, at every µ — the numerology scales symbol and CP together. The overhead buys trivial multipath equalisation, one of OFDM's defining trades.",wrong:"The absolute CP duration halves with each SCS doubling; the *fraction* is what stays fixed. CP exists at all SCS. No regulator is involved."},
+    3:{correct:"The Rel-17 split-TA architecture moves the work to the terminal: position + ephemeris → UE-specific delay, broadcast common TA covers the shared component, and a signalled drift rate keeps it current at 23 µs/s. This is m5-3 §7's mechanism, standardised.",wrong:"Orbits do not participate in the protocol. NTN keeps the NR slot structure — that is the point of the compensation. Uncompensated errors of milliseconds would destroy the uplink slot grid."},
+    4:{correct:"duty = N_proc × T_slot / RTT. The protocol self-throttles when in-flight capacity runs out. Rel-17's answers: double the processes (LEO) or disable feedback and lean on RLC and link margin (GEO, where even 32 processes give 3%).",wrong:"LDPC is delay-indifferent. Retransmission remains available — the question is which layer runs it. Storage is not the constraint; protocol window is."},
+    5:{correct:"32 processes yield 3% duty at GEO — hopeless. Feedback off restores full occupancy; the decode-failure risk that HARQ covered is repriced into a more conservative MCS (the m5-2 margin dial) and slower higher-layer recovery.",wrong:"GEO links fade like any other (m4-4). The bent pipe relays ACKs fine; the arithmetic, not the hardware, is the problem. Patents are irrelevant."},
+    6:{correct:"The stall is measured in slots per RTT. Halving the slot duration doubles the slots the RTT spans while the in-flight window stays at N_proc — duty halves. A counterintuitive interaction between numerology and protocol worth carrying into design reviews.",wrong:"Propagation is geometry, not numerology. RB count per MHz is set separately by the utilisation tables. The intuition that faster slots help is exactly the trap."},
+    7:{correct:"The NR number rides an attenuated-Shannon abstraction (±tens of percent); the DVB number rides real thresholds. The honest conclusion is parity — which is itself the important result, transferring the decision to the m5-4 §7 framework plus the ecosystem argument.",wrong:"A 1% delta inside a ±20% abstraction is noise. Pilot toggling moves 2.4% — still noise at this comparison's resolution. The NR figure is explicitly a modelling estimate."},
+    8:{correct:"Holding a ground cell fixed means the Module-3 phased array re-points continuously — payload work. Letting beams sweep means every terminal, even stationary ones, changes cells every few tens of seconds — network-layer work. Release 17 supports both; the constellation architect chooses which subsystem absorbs the motion.",wrong:"Both need steerable antennas; the question is the steering law. Doppler is orbital velocity, present in both. The cost structures are opposite, not identical."},
+    9:{correct:"The entire fix catalogue routes through terminal self-knowledge: position + ephemeris → delay and delay-rate → TA and frequency pre-compensation. Remove the position and the architecture's foundation goes with it — the exact problem m5-6 inherits for unmodified handsets, which have GNSS but face harder constraints on everything else.",wrong:"3GPP is a standards body. FEC is independent of position. Regulatory position reporting exists in some regimes but is not why the air interface needs position."},
+    10:{correct:"Store-and-forward breaks the bent-pipe assumption: the satellite must receive, decode, store, and later forward — onboard processing and protocol termination. The transparent baseline was a simplification of convenience, and the IoT use case is where it cracks first.",wrong:"Rates stay in the kilobit class. Ephemeris compensation is unchanged. The use case is LEO sensor collection over regions without gateway visibility — GEO always sees its gateway."}
+};
+let answered={};
+document.querySelectorAll('.quiz-opt').forEach(btn=>{
+    btn.addEventListener('click',function(){
+        const q=this.dataset.q;
+        if(answered[q]!==undefined)return;
+        const correct=this.dataset.correct==='true';
+        answered[q]=correct;
+        document.querySelectorAll(`.quiz-opt[data-q="${q}"]`).forEach(b=>{b.disabled=true;if(b.dataset.correct==='true')b.classList.add('correct');});
+        if(!correct)this.classList.add('wrong');
+        const fb=document.getElementById('fb'+q);
+        fb.textContent=(correct?'✓ ':'✗ ')+feedbacks[q][correct?'correct':'wrong'];
+        fb.style.color=correct?'#39ff14':'#ff004f';
+        if(Object.keys(answered).length===10){
+            const total=Object.values(answered).filter(Boolean).length;
+            const sc=document.getElementById('quizScore');
+            sc.style.display='block';
+            const pct=Math.round(total/10*100);
+            sc.textContent=`SCORE: ${total}/10 (${pct}%) — ${pct===100?'PERFECT.':pct>=80?'STRONG.':pct>=60?'ADEQUATE. REVISIT WEAK SECTIONS.':'REVISIT THE LESSON BEFORE PROCEEDING.'}`;
+        }
+    });
+});
+</script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="supabase.js"></script>
+<script src="user_progress.js"></script>
+<script>
+const LESSON_ID='m5-5';
+(function(){
+    function bounceToLogin(r){console.error("Auth guard:",r);window.location.replace("index.html");}
+    async function init(){
+        if(typeof client==="undefined"||!client||!client.auth)return bounceToLogin("Supabase client not loaded");
+        let session=null;
+        try{({data:{session}}=await client.auth.getSession());}
+        catch(e){return bounceToLogin("getSession threw: "+e.message);}
+        if(!session){window.location.replace("index.html");return;}
+        const btn=document.getElementById('completeBtn'),msg=document.getElementById('completeMsg');
+        function setDone(done){
+            if(done){btn.textContent='✓ COMPLETE — CLICK TO UNDO';btn.classList.add('done');btn.style.cssText='border-color:#39ff14;color:#39ff14;background:rgba(57,255,20,0.1);cursor:pointer;opacity:1;';msg.style.color='#39ff14';msg.textContent='Lesson marked complete. Click again to undo.';}
+            else{btn.textContent='MARK LESSON COMPLETE';btn.classList.remove('done');btn.style.cssText='';msg.style.color='#ffffff55';msg.textContent='Not yet marked complete.';}
+        }
+        let mastered=[];
+        try{mastered=await getMasteredSections();}catch(e){console.error(e);}
+        setDone(mastered.includes(LESSON_ID));
+        btn.addEventListener('click',async()=>{
+            const isDone=btn.classList.contains('done');
+            msg.style.color='#00d9ff';msg.textContent='Saving...';
+            const ok=await upsertSection(LESSON_ID,!isDone);
+            if(ok){setDone(!isDone);}else{msg.style.color='#ff004f';msg.textContent='Error saving. Try again.';}
+        });
+        const btt=document.getElementById('backToTop');
+        window.addEventListener('scroll',()=>{btt.classList.toggle('visible',window.scrollY>400);});
+        btt.addEventListener('click',()=>window.scrollTo({top:0,behavior:'smooth'}));
+    }
+    if(document.readyState==="loading")document.addEventListener("DOMContentLoaded",init);
+    else init();
+})();
+</script>
+</body>
+</html>
