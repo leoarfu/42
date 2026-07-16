@@ -1,0 +1,793 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, shrink-to-fit=no">
+<title>M5-7 — Synthesis: Throughput per Beam · LEOAF</title>
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;600;800&family=Share+Tech+Mono&family=Libre+Baskerville:ital,wght@0,400;0,700;1,400&display=swap" rel="stylesheet">
+<link rel="icon" href="favicon.ico" sizes="any" type="image/x-icon">
+<link rel="manifest" href="site.webmanifest">
+<meta name="theme-color" content="#0f0f0f">
+<script>
+window.leoafAbort = async function () {
+    function go() { window.location.replace("index.html?signedout=1"); }
+    try { if (typeof client !== "undefined" && client && client.auth && client.auth.signOut) { try { await client.auth.signOut({ scope: "local" }); } catch (e) {} } } catch (e) {}
+    go();
+};
+</script>
+<style>
+* { box-sizing:border-box; margin:0; padding:0; }
+html { height:100%; -webkit-text-size-adjust:100%; overflow-x:hidden; }
+body { font-family:'Share Tech Mono',monospace; background:#000; color:white; overflow-x:hidden; min-height:100vh; }
+#starsCanvas { position:fixed; inset:0; z-index:-1; }
+header { background:#000; border-bottom:1px solid #ff004f33; position:sticky; top:0; z-index:100; padding:1rem clamp(1.5rem,5vw,4rem); display:flex; justify-content:space-between; align-items:center; }
+.logo { font-family:'Orbitron',sans-serif; font-weight:800; font-size:clamp(16px,2vw,22px); letter-spacing:3px; text-decoration:none; }
+.logo span:first-child { color:white; } .logo span:last-child { color:#ff004f; }
+.nav-right { display:flex; align-items:center; gap:10px; }
+.nav-btn { background:transparent; border:1px solid #ff004f44; color:#ff004f; padding:6px 14px; cursor:pointer; transition:0.3s; font-size:11px; font-family:'Orbitron',sans-serif; letter-spacing:1px; text-decoration:none; display:inline-block; }
+.nav-btn:hover { background:#ff004f; color:black; }
+.breadcrumb { padding:14px clamp(1.5rem,5vw,4rem); font-size:11px; color:#ffffff44; letter-spacing:1px; position:relative; z-index:1; }
+.breadcrumb a { color:#00d9ff66; text-decoration:none; } .breadcrumb a:hover { color:#00d9ff; }
+.breadcrumb span { margin:0 8px; }
+.lesson-wrap { max-width:820px; margin:0 auto; padding:0 clamp(1.5rem,5vw,4rem) 80px; position:relative; z-index:1; }
+.lesson-header { padding:30px 0 28px; border-bottom:1px solid #ffffff11; margin-bottom:36px; }
+.lesson-tag { font-family:'Orbitron',sans-serif; font-size:10px; color:#ff004f; letter-spacing:3px; margin-bottom:10px; }
+.lesson-header h1 { font-family:'Orbitron',sans-serif; font-size:clamp(20px,3.5vw,32px); font-weight:800; line-height:1.2; margin-bottom:12px; }
+.lesson-meta { display:flex; gap:10px; flex-wrap:wrap; margin-bottom:16px; }
+.l-pill { font-family:'Orbitron',sans-serif; font-size:10px; padding:3px 10px; border:1px solid; letter-spacing:1px; }
+.l-pill-q { color:#ff004f; border-color:#ff004f44; } .l-pill-t { color:#39ff14; border-color:#39ff1444; }
+.l-pill-c { color:#ffaa00; border-color:#ffaa0044; }
+.lesson-intro { font-size:13px; line-height:1.85; opacity:0.75; }
+.toc { background:rgba(0,217,255,0.06); border:1px solid #00d9ff33; padding:24px 28px; margin:30px 0; }
+.toc h4 { font-family:'Orbitron',sans-serif; font-size:10px; color:#00d9ff; letter-spacing:2px; margin-bottom:16px; }
+.toc ol { padding-left:20px; } .toc li { font-size:13px; line-height:2.1; }
+.toc li a { color:#00d9ffbb; text-decoration:none; transition:0.15s; } .toc li a:hover { color:#fff; padding-left:4px; }
+.toc li::marker { color:#ff004f; font-family:'Orbitron',sans-serif; font-size:10px; }
+.cb { background:#f5f2ec; color:#1a1a1a; padding:36px clamp(24px,4vw,48px); margin-bottom:24px; border-left:4px solid #00d9ff; position:relative; z-index:1; }
+.cb h2 { font-family:'Orbitron',sans-serif; font-size:13px; color:#003d66; letter-spacing:2px; text-transform:uppercase; margin-bottom:20px; padding-bottom:10px; border-bottom:2px solid #00d9ff66; scroll-margin-top:80px; }
+.cb h3 { font-family:'Orbitron',sans-serif; font-size:11px; color:#444; letter-spacing:1.5px; text-transform:uppercase; margin:28px 0 12px; }
+.cb p { font-family:'Libre Baskerville',Georgia,serif; font-size:15px; line-height:1.9; color:#1a1a1a; margin-bottom:16px; }
+.cb ul { padding-left:0; margin-bottom:16px; }
+.cb ul li { font-family:'Libre Baskerville',Georgia,serif; font-size:14px; line-height:1.85; color:#1a1a1a; padding-left:20px; position:relative; margin-bottom:8px; }
+.cb ul li::before { content:'›'; position:absolute; left:0; color:#0077aa; }
+.cb blockquote { border-left:3px solid #1a7a1a; background:#eafaea; padding:14px 20px; margin:18px 0; font-size:13px; font-family:'Share Tech Mono',monospace; color:#0a3d0a; line-height:1.8; }
+.callout { border-left:3px solid #0088cc; background:#e8f4fb; padding:16px 20px; margin:22px 0; font-size:12px; line-height:1.8; color:#1a1a1a; }
+.callout.red { border-left-color:#cc0033; background:#fdecea; }
+.callout.green { border-left-color:#1a7a1a; background:#eafaea; }
+.callout.amber { border-left-color:#996600; background:#fef9ec; }
+.callout strong { font-family:'Orbitron',sans-serif; font-size:10px; letter-spacing:1px; display:block; margin-bottom:8px; }
+.compare-table { width:100%; border-collapse:collapse; margin:22px 0; font-size:12px; }
+.compare-table th { font-family:'Orbitron',sans-serif; font-size:10px; letter-spacing:1px; color:#003d66; padding:10px 12px; border-bottom:2px solid #00d9ff66; text-align:left; }
+.compare-table td { padding:10px 12px; border-bottom:1px solid #ddd; line-height:1.5; color:#1a1a1a; vertical-align:top; }
+.compare-table tr:hover td { background:#f0f0f0; }
+.key-numbers { display:grid; grid-template-columns:repeat(auto-fit,minmax(140px,1fr)); gap:12px; margin:22px 0; }
+.kn-item { background:#fff; border:1px solid #d0d0d0; padding:16px 12px; text-align:center; }
+.kn-val { font-family:'Orbitron',sans-serif; font-size:clamp(13px,1.8vw,18px); font-weight:800; color:#003d66; display:block; }
+.kn-label { font-size:10px; color:#555; letter-spacing:1px; margin-top:5px; display:block; line-height:1.4; }
+.quiz-block { background:rgba(17,17,17,0.9); border:1px solid #ff004f33; padding:28px; margin:48px 0 32px; }
+.quiz-block h2 { font-family:'Orbitron',sans-serif; font-size:13px; color:#ff004f; letter-spacing:2px; margin-bottom:6px; }
+.quiz-intro { font-size:12px; opacity:0.6; margin-bottom:24px; padding-bottom:16px; border-bottom:1px solid #ff004f22; line-height:1.6; }
+.quiz-q { margin-bottom:28px; }
+.quiz-q p { font-size:13px; opacity:0.9; margin-bottom:12px; line-height:1.65; }
+.quiz-q p strong { color:#00d9ff; }
+.quiz-options { display:flex; flex-direction:column; gap:8px; }
+.quiz-opt { background:rgba(255,255,255,0.03); border:1px solid #ffffff1a; padding:11px 16px; cursor:pointer; font-size:12px; font-family:'Share Tech Mono',monospace; transition:0.2s; text-align:left; color:white; line-height:1.5; }
+.quiz-opt:hover:not(:disabled) { background:rgba(0,217,255,0.08); border-color:#00d9ff44; }
+.quiz-opt.correct { background:rgba(57,255,20,0.1); border-color:#39ff14; color:#39ff14; }
+.quiz-opt.wrong { background:rgba(255,0,79,0.1); border-color:#ff004f; color:#ff004f; }
+.quiz-opt:disabled { cursor:default; }
+.quiz-feedback { font-size:12px; margin-top:10px; min-height:18px; line-height:1.7; opacity:0.9; padding:0 4px; }
+.quiz-score { font-family:'Orbitron',sans-serif; font-size:12px; color:#39ff14; margin-top:20px; letter-spacing:1px; display:none; padding-top:16px; border-top:1px solid #39ff1433; }
+.py-block { background:rgba(10,10,10,0.95); border:1px solid #39ff1422; padding:28px; margin:32px 0; }
+.py-block h2 { font-family:'Orbitron',sans-serif; font-size:13px; color:#39ff14; letter-spacing:2px; margin-bottom:8px; }
+.py-block .py-intro { font-size:12px; opacity:0.7; margin-bottom:20px; padding-bottom:16px; border-bottom:1px solid #39ff1422; line-height:1.7; }
+.py-exercise { margin-bottom:32px; } .py-exercise:last-child { margin-bottom:0; }
+.py-exercise h3 { font-family:'Orbitron',sans-serif; font-size:11px; color:#39ff1499; letter-spacing:1.5px; text-transform:uppercase; margin-bottom:10px; }
+.py-exercise p { font-size:12px; opacity:0.8; margin-bottom:14px; line-height:1.75; }
+.py-block pre { background:#050505; border:1px solid #39ff1433; padding:20px; font-family:'Share Tech Mono',monospace; font-size:11px; line-height:1.7; overflow-x:auto; color:#39ff14; white-space:pre; margin-bottom:12px; }
+.py-note { background:rgba(57,255,20,0.04); border-left:2px solid #39ff14; padding:12px 16px; margin-top:14px; font-size:12px; line-height:1.75; opacity:0.8; }
+.py-note strong { font-family:'Orbitron',sans-serif; font-size:10px; color:#39ff14; display:block; margin-bottom:6px; letter-spacing:1px; }
+.reflection-block { background:rgba(255,170,0,0.04); border:1px solid #ffaa0033; padding:24px; margin:32px 0; }
+.reflection-block h2 { font-family:'Orbitron',sans-serif; font-size:13px; color:#ffaa00; letter-spacing:2px; margin-bottom:8px; }
+.ref-intro { font-size:12px; opacity:0.7; margin-bottom:20px; padding-bottom:14px; border-bottom:1px solid #ffaa0022; line-height:1.7; }
+.ref-prompt { margin-bottom:20px; }
+.ref-prompt h3 { font-family:'Orbitron',sans-serif; font-size:11px; color:#ffaa0099; letter-spacing:1px; margin-bottom:8px; }
+.ref-prompt p { font-size:12px; opacity:0.8; line-height:1.75; }
+.complete-wrap { margin-top:56px; padding-top:30px; border-top:1px solid #ffffff11; text-align:center; }
+.complete-btn { font-family:'Orbitron',sans-serif; font-size:13px; letter-spacing:2px; padding:14px 44px; background:transparent; border:1px solid #39ff14; color:#39ff14; cursor:pointer; transition:0.3s; }
+.complete-btn:hover:not(.done) { background:#39ff14; color:black; box-shadow:0 0 20px rgba(57,255,20,0.4); }
+.complete-btn.done { background:rgba(57,255,20,0.1); cursor:pointer; opacity:1; }
+.complete-msg { font-size:12px; color:#39ff14; margin-top:14px; min-height:18px; letter-spacing:1px; }
+.lesson-nav { display:flex; justify-content:space-between; margin-top:30px; flex-wrap:wrap; gap:10px; }
+.lesson-nav a { font-family:'Orbitron',sans-serif; font-size:11px; color:#00d9ff66; text-decoration:none; letter-spacing:1px; transition:0.2s; }
+.lesson-nav a:hover { color:#00d9ff; }
+.back-to-top { position:fixed; bottom:28px; right:28px; z-index:200; width:44px; height:44px; background:#000; border:1px solid #00d9ff55; color:#00d9ff; font-size:20px; cursor:pointer; display:flex; align-items:center; justify-content:center; opacity:0; pointer-events:none; transition:opacity 0.3s; }
+.back-to-top.visible { opacity:1; pointer-events:auto; } .back-to-top:hover { border-color:#00d9ff; }
+footer { text-align:center; padding:30px; opacity:0.3; font-size:11px; position:relative; z-index:1; letter-spacing:1px; }
+.module-complete { background:rgba(57,255,20,0.06); border:1px solid #39ff1444; padding:24px 28px; margin:40px 0; text-align:center; }
+.module-complete h3 { font-family:'Orbitron',sans-serif; font-size:14px; color:#39ff14; letter-spacing:2px; margin-bottom:10px; }
+.module-complete p { font-size:12px; opacity:0.8; line-height:1.7; }
+</style>
+</head>
+<body>
+<canvas id="starsCanvas"></canvas>
+<header>
+    <a href="dashboard.html" class="logo"><span>LEO</span><span>AF</span></a>
+    <div class="nav-right">
+        <a href="m5.html" class="nav-btn">← M5 HUB</a>
+        <button class="nav-btn" onclick="leoafAbort()">ABORT</button>
+    </div>
+</header>
+<div class="breadcrumb">
+    <a href="dashboard.html">DASHBOARD</a><span>/</span>
+    <a href="m5.html">M5</a><span>/</span>
+    <span style="color:#ffffff88;">LESSON 07 — SYNTHESIS: THROUGHPUT PER BEAM</span>
+</div>
+
+<div class="lesson-wrap">
+<div class="lesson-header">
+    <div class="lesson-tag">M5 · LESSON 07 OF 7 · MODULE CAPSTONE</div>
+    <h1>Synthesis:<br>Throughput per Beam</h1>
+    <div class="lesson-meta">
+        <div class="l-pill l-pill-q">MODULE 5</div>
+        <div class="l-pill l-pill-t">AIR INTERFACE &amp; ACCESS</div>
+        <div class="l-pill l-pill-c">CAPSTONE</div>
+    </div>
+    <p class="lesson-intro" style="margin-bottom:12px;">Module 4 ended with a promise: its engine produced C/(N₀+I₀) in dBHz and deferred the conversion to bits. This lesson delivers the conversion, assembled from six stages: spectrum becomes symbols through roll-off (m5-1), symbols become protected bits through the MODCOD ladder (m5-2), the carrier is shared among users (m5-3), the framing takes its cut (m5-4), and the same machinery re-evaluates for the NR branch (m5-5) and the direct-to-device corner (m5-6). The module's output is one function — net throughput per beam as a function of achieved C/(N₀+I₀), terminal class, and spectrum — and this lesson evaluates it end to end, measures where its leverage lives, and integrates it against rain statistics to produce the module's capstone artefact: the availability-throughput curve.</p>
+    <p class="lesson-intro" style="margin-bottom:12px;">Two results from that evaluation are worth flagging before the arithmetic, because both correct intuitions this program itself taught earlier. First, m4-7's sensitivity rule — <em>a dB gained anywhere is worth roughly one MODCOD rung</em> — is true only below ladder saturation; a link that already selects the top rung gets <strong>nothing</strong> for another dB of C/N₀, and its only remaining capacity levers are the ones that raise the symbol rate or cut overhead. Second, for such a link, ACM converts rain from a capacity problem into a percentile problem: the <em>expected annual</em> throughput is within a rounding error of clear-sky, and what rain actually costs is the peak rate during the worst hours. Both results fall directly out of the assembled chain, and both change how a system engineer should argue about margin.</p>
+</div>
+
+<div class="toc">
+    <h4>CONTENTS</h4>
+    <ol>
+        <li><a href="#s1">The assembled chain</a></li>
+        <li><a href="#s2">Worked example 1: the Module-4 forward link, end to end</a></li>
+        <li><a href="#s3">Worked example 2: the return direction, end to end</a></li>
+        <li><a href="#s4">Worked example 3: the function at the D2D corner</a></li>
+        <li><a href="#s5">Sensitivity: where the leverage lives</a></li>
+        <li><a href="#s6">The availability-throughput curve</a></li>
+        <li><a href="#s7">From beam to constellation, and what the engine exports</a></li>
+        <li><a href="#s8">What the engine still ignores</a></li>
+        <li><a href="#s9">Key facts</a></li>
+        <li><a href="#s10">Module closing</a></li>
+        <li><a href="#quiz">Knowledge check</a></li>
+        <li><a href="#py">Python exercises</a></li>
+        <li><a href="#reflect">Reflection</a></li>
+    </ol>
+</div>
+
+<div class="cb" id="s1">
+    <h2>1. The assembled chain</h2>
+<p>The ledger identity, with each factor's owner:</p>
+<table class="compare-table">
+<thead><tr>
+<th>Stage</th>
+<th>Lesson</th>
+<th>Factor</th>
+<th>Typical value (Ka forward)</th>
+</tr></thead>
+<tbody>
+<tr><td>Symbol rate</td><td>m5-1</td><td>B / (1 + α)</td><td>208.3 Msym/s (250 MHz, α = 0.20)</td></tr>
+<tr><td>MODCOD</td><td>m5-2</td><td>η(Es/N₀) from Table 13, with margin</td><td>0.49–4.45 bit/sym</td></tr>
+<tr><td>Scheduling</td><td>m5-3</td><td>η_sched (forward TDM)</td><td>≈ 0.97</td></tr>
+<tr><td>Pilots</td><td>m5-4</td><td>η_pilot (if on)</td><td>0.976–0.978</td></tr>
+<tr><td>Encapsulation</td><td>m5-4</td><td>η_GSE (packet-size dependent)</td><td>0.993 @ 1,500 B</td></tr>
+<tr><td>—</td><td>—</td><td><strong>Net = R_s × η_MODCOD × η_sched × η_pilot × η_GSE</strong></td><td>—</td></tr>
+</tbody>
+</table>
+<p>Reconciliations that keep the identity honest: Table 13's η already contains the BBHEADER and PLHEADER (m5-4 §3), so they never reappear; the access factor charges sharing only, framing charges structure only (m5-3 boundary); and Es/N₀ = C/(N₀+I₀) − 10·log₁₀(R_s), the single join between Module 4's currency and this module's.</p>
+</div>
+
+<div class="cb" id="s2">
+    <h2>2. Worked example 1: the Module-4 forward link, end to end</h2>
+<p>The m4-7 forward budget, at the module reference carrier, through the full chain (implementation + selection margin 1.5 dB, pilots on, 1,500-byte traffic):</p>
+<table class="compare-table">
+<thead><tr>
+<th>Quantity</th>
+<th>Clear sky</th>
+<th>Rain @ 99.9%</th>
+</tr></thead>
+<tbody>
+<tr><td>C/(N₀+I₀) (from m4-7)</td><td>107.1 dBHz</td><td>99.6 dBHz</td></tr>
+<tr><td>Es/N₀ @ 208.3 Msym/s</td><td>23.9 dB</td><td>16.4 dB</td></tr>
+<tr><td>Selected MODCOD</td><td>32-APSK 9/10</td><td>32-APSK 3/4</td></tr>
+<tr><td>Information rate</td><td>927.6 Mbps</td><td>771.4 Mbps</td></tr>
+<tr><td>× scheduler 0.97 × pilots × GSE</td><td>—</td><td>—</td></tr>
+<tr><td><strong>Net throughput</strong></td><td><strong>874.6 Mbps</strong></td><td><strong>727.4 Mbps</strong></td></tr>
+</tbody>
+</table>
+<p>The loop m4-7 opened is now closed with numbers on both ends: a 7.5 dB rain degradation of the combined budget costs one MODCOD rung and 16.8% of net throughput — service intact, exactly the graceful degradation m5-2's fade sweep promised. Note also what the clear-sky row quietly says: Es/N₀ of 23.9 dB against a top rung needing 17.55 dB means <strong>6.3 dB of C/N₀ is buying nothing</strong>. Section 5 returns to that.</p>
+</div>
+
+<div class="cb" id="s3">
+    <h2>3. Worked example 2: the return direction, end to end</h2>
+<p>The m4-7 return budget (2 W terminal, 99.9% rain condition, C/(N₀+I₀) = 78.2 dBHz) through the m5-3 MF-TDMA grid — 25 carriers of 4.17 Msym/s in 125 MHz, 2 ms slots, 5% contention pool:</p>
+<blockquote>Es/N₀ per carrier = 78.2 − 66.2 = 12.0 dB → 16-APSK 3/4 → 12.4 Mbps information<br>
+× burst efficiency 0.964 × (1 − 0.05) contention = <strong>11.3 Mbps net per terminal-carrier</strong><br>
+Beam aggregate, all 25 carriers occupied: <strong>≈ 283 Mbps</strong></blockquote>
+<p>The forward/return asymmetry, now stated end to end rather than in dBHz: 727 versus 283 Mbps at the same availability point — a factor of ~2.6, produced jointly by the power asymmetry (m4-7), the narrower return spectrum, and the burst overheads that only the return pays (m5-3). And the per-terminal number is the one a customer feels: 11.3 Mbps of committed return capacity per active carrier, before the scheduler divides it further.</p>
+</div>
+
+<div class="cb" id="s4">
+    <h2>4. Worked example 3: the function at the D2D corner</h2>
+<p>The same engine, handset constants frozen (m5-6): 64 m² array, 30 dBW/beam, 5 MHz partner spectrum → <strong>≈ 3.1 Mbps per beam</strong>. Placing all three terminal classes on one line answers m5-6's closing reflection quantitatively:</p>
+<table class="compare-table">
+<thead><tr>
+<th>Terminal class</th>
+<th>G/T</th>
+<th>Spectrum</th>
+<th>Net per beam</th>
+</tr></thead>
+<tbody>
+<tr><td>Ka VSAT (m4-1)</td><td>+12.7 dB/K</td><td>250 MHz</td><td>874.6 Mbps</td></tr>
+<tr><td>Rel-17 NTN VSAT (m5-5, Ka)</td><td>~comparable</td><td>400 MHz</td><td>~806 Mbps (beam)</td></tr>
+<tr><td>Smartphone (m5-6)</td><td>−30 dB/K</td><td>5 MHz</td><td>~3.1 Mbps</td></tr>
+</tbody>
+</table>
+<p>One function, three evaluations, five orders of magnitude of G/T·bandwidth product, two-and-a-half orders of magnitude of output. The industry's segmentation into broadband, mobility, and D2D markets is substantially this table — the physics draws the market boundaries before any business plan does.</p>
+</div>
+
+<div class="cb" id="s5">
+    <h2>5. Sensitivity: where the leverage lives</h2>
+<p>Each lever moved independently against the clear-sky forward baseline (874.6 Mbps):</p>
+<table class="compare-table">
+<thead><tr>
+<th>Lever</th>
+<th>Change</th>
+<th>Net effect</th>
+</tr></thead>
+<tbody>
+<tr><td>C/N₀</td><td>+1 dB</td><td><strong>+0.0%</strong> (ladder saturated)</td></tr>
+<tr><td>Rain fade</td><td>−7.5 dB</td><td>−16.8% (one rung)</td></tr>
+<tr><td>Roll-off</td><td>0.20 → 0.05</td><td><strong>+14.3%</strong></td></tr>
+<tr><td>Pilots</td><td>on → off</td><td>+2.2%</td></tr>
+<tr><td>Scheduler</td><td>0.97 → 0.98</td><td>+1.0%</td></tr>
+<tr><td>Selection margin</td><td>1.5 → 0.5 dB</td><td>+0.0% (no rung crossed here)</td></tr>
+</tbody>
+</table>
+<p>The table's structure is the lesson. This link sits at the top of the DVB-S2 ladder, and <strong>above saturation the currency changes</strong>: decibels of C/N₀ — the entire subject of Module 4 — buy nothing, while the symbol-rate and overhead levers (roll-off above all) buy their full face value. Below saturation the picture changes twice over: a dB near a rung boundary buys 5–20% — and roll-off's 14.3% of extra symbols can even go <em>negative</em>, because tightening α from 0.20 to 0.05 dilutes Es/N₀ by ≈ 0.6 dB (more symbols, same power), and if that crosses a rung boundary downward the rung loss beats the symbol gain. The exercise-1 harness exhibits exactly this at the mid-ladder operating point. The reconciliation with m4-7's sensitivity doctrine: <em>a dB is worth a rung only while there are rungs left to climb</em> — and this is precisely why DVB-S2X extended the ladder upward (m5-4 §6): 64-APSK and beyond exist to give hot gateway links somewhere to spend their excess decibels. A system engineer should ask, of any proposed link improvement, one question first: <strong>where on the ladder does this link sit?</strong></p>
+</div>
+
+<div class="cb" id="s6">
+    <h2>6. The availability-throughput curve</h2>
+<p>Integrating the chain against the m4-4 rain statistics (zone F, corrected model) produces the module's capstone: net throughput as a function of time percentile. For the worked forward link, the curve is nearly flat: combined degradations (fade plus noise-rain coupling, recombined with the interference floor — the full m4-7 chain, which the curve model carries) up to the link's 6.3 dB saturation headroom are absorbed silently, and the zone-F statistics place that crossing at the 99.90th percentile. The curve is flat to three nines, one rung down (−16.8%) in the worst 0.1%, and the expected annual throughput computes to <strong>≥ 99.9% of clear-sky net</strong>.</p>
+<p>State the result carefully, because both halves matter. For a link with headroom, <strong>ACM makes rain an availability-of-peak problem, not a capacity problem</strong> — annual capacity planning can use the clear-sky figure, and the margin debate is really about the worst percentile's user experience. But the result is conditional on where the link sits: a cost-optimised link sized mid-ladder (the m4-4 3–4 dB-margin design) crosses rungs on every moderate fade, its curve slopes visibly, and its expected annual throughput sits measurably below clear-sky. The availability-throughput curve — not the single clear-sky number, not the single 99.9% number — is the honest characterisation of a beam, and the spine engine now draws it.</p>
+</div>
+
+<div class="cb" id="s7">
+    <h2>7. From beam to constellation, and what the engine exports</h2>
+<p>Beam throughput multiplies toward system capacity through factors this module deliberately does not own: beams per satellite and frequency reuse (Module 3's payload), beam-hopping duty cycle where illumination is time-shared (m5-4 §6's superframe as the dwell quantum), satellites in view and handover continuity (Module 2's geometry), and gateway/feeder capacity (Module 8's ground segment). The naive product — beam rate × beam count × reuse factor — is an upper bound that every one of those factors erodes; producing the eroded, honest figure is precisely the work of the modules ahead.</p>
+<p>What Module 5 exports downstream, as declared interfaces: <strong>net throughput per beam per condition</strong> (the curve, both directions, all three terminal classes) to the capacity chain; and the <strong>latency components</strong> — m5-3's grant delay (~25–65 ms LEO DAMA) and m5-5's RTTs (~25.8 ms LEO transparent, ~541 ms GEO) plus the per-UE HARQ ceiling — to Module 7's end-to-end latency budget.</p>
+</div>
+
+<div class="cb" id="s8">
+    <h2>8. What the engine still ignores</h2>
+<p>Stated plainly, so no one mistakes the model for the world: interference enters only as the m4-6 C/I input, not as a coupled function of the reuse pattern and scheduler decisions; traffic is a packet-size constant, not a demand process — no diurnal load, no statistical multiplexing gain, no congestion; the scheduler is an efficiency scalar, not a queueing system; mobility appears only as HARQ RTT, with handover interruption and beam-transition losses unmodelled; rain is spatially uncorrelated across beams, which real weather is not; and the NR branch rides a ±tens-of-percent link abstraction (m5-5 §5). Each omission is a deliberate scope boundary with a forwarding address in Modules 6–9.</p>
+</div>
+
+<div class="cb" id="s9">
+    <h2>9. Key facts</h2>
+<table class="compare-table">
+<thead><tr>
+<th>Fact</th>
+<th>Value</th>
+<th>Unit</th>
+<th>Source</th>
+</tr></thead>
+<tbody>
+<tr><td>Net-throughput identity</td><td>R_s × η_MODCOD × η_sched × η_pilot × η_GSE</td><td>—</td><td>Stages 1–4</td></tr>
+<tr><td>M4→M5 join</td><td>Es/N₀ = C/(N₀+I₀) − 10·log₁₀(R_s)</td><td>—</td><td>Definition</td></tr>
+<tr><td>Forward net, clear / rain 99.9%</td><td>874.6 / 727.4</td><td>Mbps</td><td>Computed (ex. 1)</td></tr>
+<tr><td>Rain cost at 99.9%</td><td>one rung, −16.8%</td><td>—</td><td>Computed</td></tr>
+<tr><td>Return net per carrier / beam (99.9%)</td><td>11.3 / ≈283</td><td>Mbps</td><td>Computed (ex. 2)</td></tr>
+<tr><td>Forward/return asymmetry (net, end-to-end)</td><td>≈ 2.6×</td><td>—</td><td>Computed</td></tr>
+<tr><td>D2D corner</td><td>≈ 3.1</td><td>Mbps/beam</td><td>m5-6 Stage 6</td></tr>
+<tr><td>+1 dB C/N₀ at ladder top</td><td>+0.0%</td><td>—</td><td>Computed</td></tr>
+<tr><td>Roll-off 0.20 → 0.05</td><td>+14.3%</td><td>—</td><td>Computed</td></tr>
+<tr><td>Pilots off / scheduler +0.01</td><td>+2.2% / +1.0%</td><td>—</td><td>Computed</td></tr>
+<tr><td>Expected annual throughput (headroom link)</td><td>≥ 99.9% of clear-sky</td><td>—</td><td>Computed (rain integration)</td></tr>
+<tr><td>Exports to M7</td><td>grant delay, RTT, per-UE HARQ ceiling</td><td>—</td><td>m5-3 / m5-5</td></tr>
+</tbody>
+</table>
+</div>
+
+<div class="cb" id="s10">
+    <h2>10. Module closing</h2>
+<p>Module 5's question was the conversion of decibel-hertz into bits per second, and the answer is now an executable object: a throughput engine whose every factor was derived in a lesson, verified numerically, and reconciled against double counting — from m5-1's symbol rate to m5-6's frozen handset, across two air-interface families and three terminal classes. The two summary judgements the module leaves behind: the air-interface efficiency war is over (everything sits 1–2 dB from Shannon; the decisions that remain are ecosystem, ownership, and overhead structure), and the meaningful engineering questions have moved to <em>where a link sits on its ladder</em> and <em>how its capacity distributes over time and users</em> — which is exactly the terrain of the modules ahead: user terminals, networking, ground segment, and operations.</p>
+</div>
+
+<div class="quiz-block" id="quiz">
+    <h2>KNOWLEDGE CHECK</h2>
+    <div class="quiz-intro">Ten questions. Each option explains itself after you commit. No retries per question — decide first.</div>
+    <div class="quiz-q">
+        <p><strong>Q1.</strong> The single join between Module 4's output and Module 5's chain is:</p>
+        <div class="quiz-options">
+            <button class="quiz-opt" data-q="1" data-correct="false">A — EIRP = C/N₀ + FSPL</button>
+            <button class="quiz-opt" data-q="1" data-correct="true">B — Es/N₀ = C/(N₀+I₀) − 10·log₁₀(R_s) — the symbol rate converts the link budget's currency into the air interface's</button>
+            <button class="quiz-opt" data-q="1" data-correct="false">C — η = R_s / B</button>
+            <button class="quiz-opt" data-q="1" data-correct="false">D — There is no numerical connection between the modules</button>
+        </div>
+        <div class="quiz-feedback" id="fb1"></div>
+    </div>
+    <div class="quiz-q">
+        <p><strong>Q2.</strong> In worked example 1, the 99.9% rain event (−7.5 dB of combined C/(N₀+I₀)) costs 16.8% of net throughput rather than the link, because:</p>
+        <div class="quiz-options">
+            <button class="quiz-opt" data-q="2" data-correct="false">A — Rain does not affect Ka-band</button>
+            <button class="quiz-opt" data-q="2" data-correct="true">B — ACM steps the link down one MODCOD rung (32-APSK 9/10 → 3/4), trading spectral efficiency for threshold while the service continues</button>
+            <button class="quiz-opt" data-q="2" data-correct="false">C — The scheduler compensates by working harder</button>
+            <button class="quiz-opt" data-q="2" data-correct="false">D — Pilots absorb the fade</button>
+        </div>
+        <div class="quiz-feedback" id="fb2"></div>
+    </div>
+    <div class="quiz-q">
+        <p><strong>Q3.</strong> The end-to-end forward/return net asymmetry (~2.6×) is produced by:</p>
+        <div class="quiz-options">
+            <button class="quiz-opt" data-q="3" data-correct="false">A — The return link using worse FEC codes</button>
+            <button class="quiz-opt" data-q="3" data-correct="true">B — The joint action of the power asymmetry (satellite vs 2 W terminal), the narrower return spectrum, and the burst/contention overheads only the return pays</button>
+            <button class="quiz-opt" data-q="3" data-correct="false">C — Regulation limiting return throughput</button>
+            <button class="quiz-opt" data-q="3" data-correct="false">D — Rain affecting only the uplink</button>
+        </div>
+        <div class="quiz-feedback" id="fb3"></div>
+    </div>
+    <div class="quiz-q">
+        <p><strong>Q4.</strong> The +1 dB C/N₀ row of the sensitivity table reads +0.0% because:</p>
+        <div class="quiz-options">
+            <button class="quiz-opt" data-q="4" data-correct="false">A — The engine has a bug</button>
+            <button class="quiz-opt" data-q="4" data-correct="true">B — The link already selects the ladder's top rung; with no higher MODCOD to step to, additional decibels purchase nothing</button>
+            <button class="quiz-opt" data-q="4" data-correct="false">C — One dB is always negligible</button>
+            <button class="quiz-opt" data-q="4" data-correct="false">D — The scheduler discards the extra margin</button>
+        </div>
+        <div class="quiz-feedback" id="fb4"></div>
+    </div>
+    <div class="quiz-q">
+        <p><strong>Q5.</strong> Roll-off tightening (0.20 → 0.05) delivers its full +14.3% even at ladder saturation because:</p>
+        <div class="quiz-options">
+            <button class="quiz-opt" data-q="5" data-correct="false">A — Roll-off improves the C/N₀</button>
+            <button class="quiz-opt" data-q="5" data-correct="true">B — It raises the symbol rate in fixed spectrum — multiplying every downstream factor — rather than competing for MODCOD headroom</button>
+            <button class="quiz-opt" data-q="5" data-correct="false">C — It reduces rain attenuation</button>
+            <button class="quiz-opt" data-q="5" data-correct="false">D — It only works with pilots off</button>
+        </div>
+        <div class="quiz-feedback" id="fb5"></div>
+    </div>
+    <div class="quiz-q">
+        <p><strong>Q6.</strong> DVB-S2X's extension of the ladder to 64-APSK and beyond exists, in this lesson's terms, to:</p>
+        <div class="quiz-options">
+            <button class="quiz-opt" data-q="6" data-correct="false">A — Reduce receiver cost</button>
+            <button class="quiz-opt" data-q="6" data-correct="true">B — Give links with large saturation headroom — gateway feeders above all — rungs on which to spend their excess decibels</button>
+            <button class="quiz-opt" data-q="6" data-correct="false">C — Improve rain performance</button>
+            <button class="quiz-opt" data-q="6" data-correct="false">D — Replace roll-off as a lever</button>
+        </div>
+        <div class="quiz-feedback" id="fb6"></div>
+    </div>
+    <div class="quiz-q">
+        <p><strong>Q7.</strong> For the worked link, expected annual throughput computes to ≥ 99.9% of clear-sky. The correct generalisation is:</p>
+        <div class="quiz-options">
+            <button class="quiz-opt" data-q="7" data-correct="false">A — Rain never matters for any link</button>
+            <button class="quiz-opt" data-q="7" data-correct="true">B — For a link with saturation headroom, ACM converts rain into a worst-percentile peak-rate problem; for a mid-ladder link, fades cross rungs routinely and annual capacity is measurably below clear-sky</button>
+            <button class="quiz-opt" data-q="7" data-correct="false">C — Rain always costs exactly 16.8%</button>
+            <button class="quiz-opt" data-q="7" data-correct="false">D — ACM eliminates the need for link margin</button>
+        </div>
+        <div class="quiz-feedback" id="fb7"></div>
+    </div>
+    <div class="quiz-q">
+        <p><strong>Q8.</strong> The naive constellation capacity — beam rate × beam count × reuse — is an upper bound because:</p>
+        <div class="quiz-options">
+            <button class="quiz-opt" data-q="8" data-correct="false">A — It double-counts the spectrum</button>
+            <button class="quiz-opt" data-q="8" data-correct="true">B — Beam-hopping duty, demand-to-beam mismatch, gateway/feeder limits, handover continuity, and correlated weather each erode it — the accounting owned by Modules 2, 3, 6, and 7</button>
+            <button class="quiz-opt" data-q="8" data-correct="false">C — Beams cannot be counted</button>
+            <button class="quiz-opt" data-q="8" data-correct="false">D — Reuse is prohibited at LEO</button>
+        </div>
+        <div class="quiz-feedback" id="fb8"></div>
+    </div>
+    <div class="quiz-q">
+        <p><strong>Q9.</strong> The engine's declared exports to Module 7 are:</p>
+        <div class="quiz-options">
+            <button class="quiz-opt" data-q="9" data-correct="false">A — EIRP and G/T</button>
+            <button class="quiz-opt" data-q="9" data-correct="true">B — Net throughput per beam per condition, plus the latency components: DAMA grant delay, transparent RTTs, and the per-UE HARQ ceiling</button>
+            <button class="quiz-opt" data-q="9" data-correct="false">C — The MODCOD table only</button>
+            <button class="quiz-opt" data-q="9" data-correct="false">D — Rain attenuation statistics</button>
+        </div>
+        <div class="quiz-feedback" id="fb9"></div>
+    </div>
+    <div class="quiz-q">
+        <p><strong>Q10.</strong> The module's closing judgement — "the air-interface efficiency war is over" — rests on:</p>
+        <div class="quiz-options">
+            <button class="quiz-opt" data-q="10" data-correct="false">A — A ban on new waveform research</button>
+            <button class="quiz-opt" data-q="10" data-correct="true">B — Every modern family (DVB-S2X, NR-NTN, published proprietary designs) operating 1–2 dB from the Shannon bound, so remaining differentiation lives in ecosystem, ownership, and overhead structure</button>
+            <button class="quiz-opt" data-q="10" data-correct="false">C — DVB having defeated 3GPP</button>
+            <button class="quiz-opt" data-q="10" data-correct="false">D — Regulators freezing waveform designs</button>
+        </div>
+        <div class="quiz-feedback" id="fb10"></div>
+    </div>
+    <div class="quiz-score" id="quizScore"></div>
+</div>
+
+<div class="py-block" id="py">
+    <h2>PYTHON EXERCISES</h2>
+    <div class="py-intro">Three exercises; the last extends the module spine project. Run them, then work the numbered follow-ups in the comments — the follow-ups are the exercise.</div>
+    <div class="py-exercise">
+        <h3>Exercise 1 — The leverage harness</h3>
+        <p>Move every lever independently and rank the returns, at two ladder positions.</p>
+<pre>
+import math
+db = lambda x: 10*math.log10(x)
+
+MODCOD = [(&quot;QPSK 1/4&quot;,0.490243,-2.35),(&quot;QPSK 1/2&quot;,0.988858,1.00),
+          (&quot;QPSK 3/4&quot;,1.487473,4.03),(&quot;8PSK 3/4&quot;,2.228124,7.91),
+          (&quot;16APSK 2/3&quot;,2.637201,8.97),(&quot;16APSK 3/4&quot;,2.966728,10.21),
+          (&quot;32APSK 3/4&quot;,3.703295,12.73),(&quot;32APSK 9/10&quot;,4.453027,16.05)]
+PILOT = {&quot;QPSK&quot;:0.9762,&quot;8PSK&quot;:0.9773,&quot;16APSK&quot;:0.9763,&quot;32APSK&quot;:0.9784}
+
+def net(cn0, bw=250e6, alpha=0.20, sched=0.97, gse=0.9934,
+        margin=1.5, pilots=True):
+    rs = bw/(1+alpha)
+    es = cn0 - db(rs)
+    best = None
+    for n,e,t in MODCOD:
+        if es &gt;= t+margin and (best is None or e &gt; best[1]): best = (n,e)
+    if not best: return 0.0
+    p = PILOT[[k for k in PILOT if best[0].startswith(k)][0]] if pilots else 1.0
+    return best[1]*rs*sched*p*gse
+
+for label, cn0 in [(&quot;LADDER-TOP link&quot;, 107.1), (&quot;MID-LADDER link&quot;, 94.0)]:
+    base = net(cn0)
+    print(f&quot;\n{label}  (C/N0 {cn0} dBHz, base {base/1e6:.1f} Mbps)&quot;)
+    levers = [(&quot;+1 dB C/N0&quot;,        net(cn0+1)),
+              (&quot;+3 dB C/N0&quot;,        net(cn0+3)),
+              (&quot;alpha 0.20-&gt;0.05&quot;,  net(cn0, alpha=0.05)),
+              (&quot;pilots off&quot;,        net(cn0, pilots=False)),
+              (&quot;sched 0.97-&gt;0.98&quot;,  net(cn0, sched=0.98)),
+              (&quot;margin 1.5-&gt;0.5&quot;,   net(cn0, margin=0.5))]
+    for name, v in sorted(levers, key=lambda x: -x[1]):
+        print(f&quot;  {name:&lt;18} {v/1e6:&gt;8.1f} Mbps  ({v/base-1:+6.1%})&quot;)
+
+# 1. Explain every sign and zero in the mid-ladder column, rung by rung.
+# 2. Find the C/N0 at which &#x27;+1 dB&#x27; switches from worthless to worth a
+#    rung. What is that point&#x27;s name in this module&#x27;s vocabulary?
+# 3. Add a &#x27;ladder extended to 64APSK (eta 5.9, thr ~19.5 dB)&#x27; lever
+#    and show which link benefits — connecting quiz Q6 to arithmetic.
+</pre>
+    </div>
+    <div class="py-exercise">
+        <h3>Exercise 2 — The availability-throughput curve</h3>
+        <p>Integrate the chain against zone-F rain statistics; produce the module's capstone number.</p>
+<pre>
+import math
+db = lambda x: 10*math.log10(x)
+# paste net() and tables from exercise 1 before running
+
+def rain_f(avail, R001=28, f=20, elev=30):        # m4-4 corrected model
+    p = max(100-avail, 0.01); e = math.radians(elev)
+    Ls = 3.9/math.sin(e); L0 = 35*math.exp(-0.015*R001)
+    k, a = 0.0751, 1.099
+    A0 = k*R001**a * Ls * (1/(1+Ls*math.cos(e)/L0))
+    if p == 0.01: return A0
+    return A0*(p/0.01)**(-(0.655+0.033*math.log(p)-0.045*math.log(A0)))
+
+def combined_degradation(fade_db, t_clear=142.0, ci0=109.0, cn0_th_clear=111.5):
+    &quot;&quot;&quot;Full m4-7 chain: fade + noise-rain coupling on the thermal C/N0,
+    then recombination with the interference floor. Rain fade alone
+    UNDERSTATES the hit (and, in clear-interference-limited links,
+    the recombination partially compresses it back).&quot;&quot;&quot;
+    t = t_clear + 273*(1 - 10**(-fade_db/10))
+    cn0_th = cn0_th_clear - fade_db - db(t/t_clear)
+    comb = -db(10**(-cn0_th/10) + 10**(-ci0/10))
+    clear = -db(10**(-cn0_th_clear/10) + 10**(-ci0/10))
+    return clear - comb          # dB of combined degradation
+
+def annual(cn0_clear, **kw):
+    pts = [50, 95, 99, 99.5, 99.9, 99.99, 99.999]
+    total = pts[0]/100 * net(cn0_clear, **kw)          # clear below median
+    for i in range(len(pts)-1):
+        frac = (pts[i+1]-pts[i])/100
+        deg = combined_degradation(rain_f((pts[i]+pts[i+1])/2))
+        total += frac * net(cn0_clear - deg, **kw)
+    return total
+
+for label, cn0 in [(&quot;ladder-top&quot;, 107.1), (&quot;mid-ladder&quot;, 94.0)]:
+    clear = net(cn0); exp = annual(cn0)
+    print(f&quot;{label:&lt;11} clear {clear/1e6:7.1f} Mbps | annual expectation &quot;
+          f&quot;{exp/1e6:7.1f} Mbps = {exp/clear*100:5.1f}% of clear-sky&quot;)
+print(&quot;\npercentile curve (ladder-top), full degradation:&quot;)
+for a in [50, 95, 99, 99.5, 99.9, 99.99]:
+    deg = combined_degradation(rain_f(a))
+    print(f&quot;  {a:&gt;6}%: fade {rain_f(a):5.2f} dB -&gt; deg {deg:5.2f} dB&quot;
+          f&quot; -&gt; {net(107.1-deg)/1e6:7.1f} Mbps&quot;)
+
+# 1. The ladder-top curve is flat until 99.9%. Compute the exact fade
+#    depth at which the first rung transition occurs and the availability
+#    percentile it corresponds to — the link&#x27;s &#x27;knee&#x27;.
+# 2. Answer m4-7 reflection 1 properly: a beam delivering 200 Mbps in
+#    clear sky (scale the mid-ladder case) — expected annual throughput?
+# 3. Re-run for zone N (R001=95). Which design — headroom or mid-ladder —
+#    degrades more gracefully in the tropics, and what does that imply
+#    about where ACM is worth the most?
+</pre>
+    </div>
+    <div class="py-exercise">
+        <h3>Exercise 3 — Spine final assembly: THE THROUGHPUT ENGINE</h3>
+        <p>All six stages, both branches, three terminal classes, one object. The module's public artefact.</p>
+<pre>
+import math
+db = lambda x: 10*math.log10(x)
+
+# ═══════════════════════════════════════════════════════
+# M5 SPINE PROJECT — THROUGHPUT ENGINE (final assembly)
+#   Stage 1  carrier      (m5-1): spectrum, roll-off -&gt; Rs
+#   Stage 2  MODCOD       (m5-2): Es/N0 -&gt; eta, margins
+#   Stage 3  access       (m5-3): sched eff / MF-TDMA bursts
+#   Stage 4  framing      (m5-4): pilots + GSE (Table-13
+#            reconciliation: BB/PLHEADER already in eta)
+#   Stage 5  NR branch    (m5-5): RE ledger, beam vs UE-peak
+#   Stage 6  D2D corner   (m5-6): frozen handset
+#   This stage: assembly, availability curve, M7 exports.
+# ═══════════════════════════════════════════════════════
+
+MODCOD = [(&quot;QPSK 1/4&quot;,0.490243,-2.35),(&quot;QPSK 1/2&quot;,0.988858,1.00),
+          (&quot;QPSK 3/4&quot;,1.487473,4.03),(&quot;8PSK 3/4&quot;,2.228124,7.91),
+          (&quot;16APSK 2/3&quot;,2.637201,8.97),(&quot;16APSK 3/4&quot;,2.966728,10.21),
+          (&quot;32APSK 3/4&quot;,3.703295,12.73),(&quot;32APSK 9/10&quot;,4.453027,16.05)]
+PILOT = {&quot;QPSK&quot;:0.9762,&quot;8PSK&quot;:0.9773,&quot;16APSK&quot;:0.9763,&quot;32APSK&quot;:0.9784}
+NRB   = {(20,15):106,(50,30):133,(100,30):273,(400,120):264}
+
+class ThroughputEngine:
+    def __init__(self, name, margin_db=1.5):
+        self.name, self.margin = name, margin_db
+
+    # ── stage 2 ──
+    def _select(self, esn0):
+        best = None
+        for n,e,t in MODCOD:
+            if esn0 &gt;= t+self.margin and (best is None or e &gt; best[1]):
+                best = (n,e,t)
+        return best
+
+    # ── DVB forward: stages 1-4 ──
+    def dvb_forward(self, bw_hz, alpha, cn0, sched=0.97,
+                    pilots=True, pkt=1500):
+        rs = bw_hz/(1+alpha)
+        s  = self._select(cn0 - db(rs))
+        if not s: return dict(net=0.0, modcod=None)
+        p  = PILOT[[k for k in PILOT if s[0].startswith(k)][0]] if pilots else 1.0
+        g  = pkt/(pkt+10)
+        return dict(modcod=s[0], info=s[1]*rs,
+                    net=s[1]*rs*sched*p*g)
+
+    # ── DVB return: stages 1-4 with the m5-3 burst model ──
+    def dvb_return(self, bw_hz, n_car, alpha, cn0_per_carrier,
+                   slot_ms=2.0, oh_sym=300, contention=0.05):
+        rc = (bw_hz/n_car)/(1+alpha)
+        s  = self._select(cn0_per_carrier - db(rc))
+        if not s: return dict(net=0.0, modcod=None)
+        syms  = rc*slot_ms/1e3
+        burst = (syms-oh_sym)/syms
+        per   = s[1]*rc*burst*(1-contention)
+        return dict(modcod=s[0], per_carrier=per, beam=per*n_car)
+
+    # ── NR branch: stage 5 ──
+    def nr_beam(self, bw_mhz, scs_khz, cn0, ctrl=0.14):
+        nrb = NRB[(bw_mhz, scs_khz)]
+        occ = nrb*12*scs_khz*1e3
+        snr = cn0 - db(occ)
+        mu  = int(math.log2(scs_khz/15)); slot = 1.0/2**mu
+        eta = min(7.406, 0.75*math.log2(1+10**(snr/10)))
+        beam = nrb*12*14/(slot*1e-3)*(1-ctrl)*eta
+        return dict(beam=beam, slot_ms=slot,
+                    ue_peak=lambda n_harq, rtt: beam*min(1, n_harq*slot/rtt))
+
+    # ── D2D corner: stage 6 ──
+    def d2d_beam(self, array_m2, eirp_dbw, spectrum_hz=5e6,
+                 f_ghz=2.0, slant_km=1000, losses=4.0):
+        fspl = 92.45 + 20*math.log10(slant_km) + 20*math.log10(f_ghz)
+        lam  = 0.3/f_ghz
+        gt_sat = db(4*math.pi*array_m2/lam**2*0.7) - db(500)
+        dl = eirp_dbw - fspl - losses - 30.0 + 228.6     # handset G/T -30
+        ul = -10.0    - fspl - losses + gt_sat + 228.6   # handset EIRP -10
+        cn0 = min(dl, ul)
+        for bw in [5e6, 1.4e6, 720e3, 360e3, 180e3]:
+            if cn0 - db(bw) &gt;= 4.0:
+                n = int(spectrum_hz//bw)
+                snr = cn0 - db(n) - db(bw)               # power split
+                eta = min(7.406, 0.75*math.log2(1+10**(snr/10)))
+                return dict(beam=n*bw*eta, dl_cn0=dl, ul_cn0=ul)
+        return dict(beam=0.0, dl_cn0=dl, ul_cn0=ul)
+
+    # ── the capstone: availability-throughput curve ──
+    @staticmethod
+    def _combined_degradation(fade_db, t_clear=142.0, ci0=109.0,
+                              cn0_th_clear=111.5):
+        # Full m4-7 chain: fade + noise-rain coupling, recombined
+        # with the interference floor. Fade alone understates the hit.
+        t = t_clear + 273*(1 - 10**(-fade_db/10))
+        cn0_th = cn0_th_clear - fade_db - db(t/t_clear)
+        comb  = -db(10**(-cn0_th/10) + 10**(-ci0/10))
+        clear = -db(10**(-cn0_th_clear/10) + 10**(-ci0/10))
+        return clear - comb
+
+    def availability_curve(self, cn0_clear, bw_hz, alpha,
+                           rain_fn, points=(50,95,99,99.5,99.9,99.99)):
+        rows = []
+        for a in points:
+            deg = self._combined_degradation(rain_fn(a))
+            rows.append((a, deg,
+                         self.dvb_forward(bw_hz, alpha, cn0_clear-deg)))
+        return rows
+
+# ── zone-F rain (m4-4 corrected) ────────────────────────
+def rain_f(avail, R001=28):
+    p = max(100-avail, 0.01); e = math.radians(30)
+    Ls = 3.9/math.sin(e); L0 = 35*math.exp(-0.015*R001)
+    A0 = 0.0751*R001**1.099*Ls/(1+Ls*math.cos(e)/L0)
+    if p == 0.01: return A0
+    return A0*(p/0.01)**(-(0.655+0.033*math.log(p)-0.045*math.log(A0)))
+
+# ═══ THE MODULE, EXECUTED ═══
+eng = ThroughputEngine(&quot;M5 final&quot;)
+
+f = eng.dvb_forward(250e6, 0.20, 107.1)
+print(f&quot;FORWARD  clear : {f[&#x27;modcod&#x27;]:&lt;12} net {f[&#x27;net&#x27;]/1e6:7.1f} Mbps&quot;)
+f9 = eng.dvb_forward(250e6, 0.20, 99.6)
+print(f&quot;FORWARD  99.9% : {f9[&#x27;modcod&#x27;]:&lt;12} net {f9[&#x27;net&#x27;]/1e6:7.1f} Mbps&quot;
+      f&quot;  ({f9[&#x27;net&#x27;]/f[&#x27;net&#x27;]-1:+.1%})&quot;)
+
+r = eng.dvb_return(125e6, 25, 0.20, 78.2)
+print(f&quot;RETURN   99.9% : {r[&#x27;modcod&#x27;]:&lt;12} per-carrier {r[&#x27;per_carrier&#x27;]/1e6:5.1f}&quot;
+      f&quot; | beam {r[&#x27;beam&#x27;]/1e6:5.0f} Mbps&quot;)
+
+nr = eng.nr_beam(400, 120, 96.0)
+print(f&quot;NR BEAM        : {nr[&#x27;beam&#x27;]/1e6:7.1f} Mbps | UE peak @LEO &quot;
+      f&quot;{nr[&#x27;ue_peak&#x27;](32, 25.8)/1e6:.1f} Mbps&quot;)
+
+d = eng.d2d_beam(64, 30)
+print(f&quot;D2D CORNER     : {d[&#x27;beam&#x27;]/1e6:7.2f} Mbps/beam &quot;
+      f&quot;(DL {d[&#x27;dl_cn0&#x27;]:.1f} / UL {d[&#x27;ul_cn0&#x27;]:.1f} dBHz)&quot;)
+
+print(f&quot;\nAVAILABILITY-THROUGHPUT CURVE (forward beam, full degradation):&quot;)
+for a, deg, row in eng.availability_curve(107.1, 250e6, 0.20, rain_f):
+    print(f&quot;  {a:&gt;6}%  deg {deg:5.2f} dB  {row[&#x27;modcod&#x27;]:&lt;12}&quot;
+          f&quot; {row[&#x27;net&#x27;]/1e6:7.1f} Mbps&quot;)
+
+print(f&quot;\nM7 EXPORTS: grant delay ~34 ms (m5-3) | RTT 25.8/541 ms LEO/GEO&quot;
+      f&quot; (m5-5) | per-UE HARQ ceiling (above)&quot;)
+
+# 1. Verify every printed figure against its source lesson&#x27;s table.
+#    Any mismatch is a bug in the engine or the lesson — find which.
+# 2. Add a second availability curve for the mid-ladder link (94 dBHz)
+#    and plot both (text is fine). Mark each curve&#x27;s knee.
+# 3. The engine is now the module&#x27;s public artefact. Write its README
+#    paragraph: inputs, outputs, the three reconciliations that keep
+#    it honest, and the §8 list of what it does not model.
+</pre>
+    </div>
+</div>
+
+<div class="reflection-block" id="reflect">
+    <h2>REFLECTION</h2>
+    <div class="ref-intro">Four prompts. Each forces a decision — write the position down before moving on; the act of committing is the exercise.</div>
+    <div class="ref-prompt">
+        <h3>PROMPT 01</h3>
+        <p>Section 5's sensitivity table would have a system engineer choose roll-off and overhead work over link-budget work for the ladder-top beam. Argue the procurement consequence: the m4 levers (power, antennas) are hardware locked at CDR, while the m5 levers (roll-off, pilots, margin, scheduler) are largely software and configuration. What does that asymmetry imply about which margins to buy in hardware <em>before</em> launch and which capacity to plan on recovering <em>after</em> — and where has this program already shown a counterexample where the software lever was locked by the terminal fleet instead?</p>
+    </div>
+    <div class="ref-prompt">
+        <h3>PROMPT 02</h3>
+        <p>Section 6 concluded that a headroom link's annual capacity is rain-immune while its worst percentile is not. A commercial team wants to sell "874 Mbps beams"; a network engineer wants to advertise the 99.9% figure of 727. Both numbers are in this lesson. Decide what the datasheet should say, design the minimal disclosure that is neither fraudulent nor self-defeating, and identify which historical satcom marketing habit (named in m5-1 §4) your disclosure rule is designed to kill.</p>
+    </div>
+    <div class="ref-prompt">
+        <h3>PROMPT 03</h3>
+        <p>The return beam's 283 Mbps assumed all 25 carriers occupied by terminals at the 99.9% rain condition simultaneously — a worst-case coincidence the m4-4 statistics say is rare for a beam smaller than a rain cell but common for a beam larger than one. Determine which regime the m5-6 aperture table's beams fall into versus a classic wide GEO beam, and what that implies about where per-beam ACM statistics can be treated as independent — the assumption §8 confessed the engine makes.</p>
+    </div>
+    <div class="ref-prompt">
+        <h3>PROMPT 04</h3>
+        <p>The module closes claiming the meaningful questions have moved to "where a link sits on its ladder and how its capacity distributes over time and users." Audit the claim against the curriculum ahead: for each of Modules 6 (user terminals and the device side of D2D), 7 (networking, inter-satellite links and routing), and 8 (ground segment and operations), name the single quantity this module exports to it and the single question this module cannot answer without it. If any module receives no export and supplies no missing answer, the claim — or the curriculum map — needs revision. Say which.</p>
+    </div>
+</div>
+
+<div class="cb">
+    <h2>Sources</h2>
+<ul>
+<li>Lessons m5-1 through m5-6 — every factor in the assembled chain, with per-lesson sources.</li>
+<li>ETSI EN 302 307-1/-2 — Table 13, PLFRAME structure, pilots, VL-SNR, superframing.</li>
+<li>3GPP TR 38.821 / TS 38.211 / TS 38.101-5 — NTN RTTs, numerology, RB tables.</li>
+<li>ITU-R P.618 / P.837 / P.838 — the rain statistics integrated in section 6 (via the m4-4 corrected model).</li>
+<li>Module 4, lessons m4-1 through m4-7 — the C/(N₀+I₀) budgets consumed by every worked example.</li>
+</ul>
+</div>
+
+<div class="module-complete">
+    <h3>MODULE 5 COMPLETE</h3>
+    <p>Seven lessons, one engine: from a spectrum allocation and a C/(N₀+I₀) figure to net throughput per beam, across two air-interface families and three terminal classes — every factor derived, verified, and reconciled. Module 6 turns to the other end of every link built here: the user terminal.</p>
+</div>
+
+<div class="complete-wrap">
+    <button class="complete-btn" id="completeBtn">MARK LESSON COMPLETE</button>
+    <div class="complete-msg" id="completeMsg"></div>
+</div>
+<div class="lesson-nav">
+    <a href="m5-6.html">← LESSON 06 — DIRECT-TO-DEVICE PHY</a>
+    <a href="m5.html">M5 HUB →</a>
+</div>
+</div>
+
+<button class="back-to-top" id="backToTop" title="Back to top">↑</button>
+<footer>© 2026 LEOAF · M5 · LESSON 07 OF 7 · MODULE CAPSTONE</footer>
+<script>
+const canvas=document.getElementById('starsCanvas'),ctx=canvas.getContext('2d');
+let stars=[];
+function initStars(){stars=[];for(let i=0;i<180;i++)stars.push({x:Math.random()*canvas.width,y:Math.random()*canvas.height,size:Math.random()*1.5+0.4,speed:Math.random()*0.18+0.04,hue:Math.random()*360});}
+function resizeCanvas(){canvas.width=window.innerWidth;canvas.height=window.innerHeight;}
+resizeCanvas();initStars();window.addEventListener('resize',resizeCanvas);
+function animateStars(){ctx.clearRect(0,0,canvas.width,canvas.height);stars.forEach(s=>{s.y-=s.speed;if(s.y<0){s.y=canvas.height;s.x=Math.random()*canvas.width;}ctx.beginPath();ctx.fillStyle=`hsl(${s.hue},80%,80%)`;ctx.arc(s.x,s.y,s.size,0,Math.PI*2);ctx.fill();});requestAnimationFrame(animateStars);}
+animateStars();
+</script>
+<script>
+const feedbacks={
+    1:{correct:"Everything upstream (m4) accumulates into one dBHz figure; everything downstream (m5) keys off per-symbol energy. The symbol rate — itself set by spectrum and roll-off — is the exchange rate, which is also why required-C/N₀ figures without a stated R_s are meaningless (m5-2 §5).",wrong:"A is a rearranged fragment of the m4 chain, not the join. C defines utilisation, not energy. D is refuted by the worked examples."},
+    2:{correct:"The fade moves Es/N₀ from 23.9 to 16.4 dB; the ladder's next rung down (12.73 dB threshold) still clears with margin. This is m5-2's graceful degradation, now carried through every overhead factor to the net figure a user would measure.",wrong:"Ka rain is the m4-4 subject — very real. Scheduler efficiency is a structural constant. Pilots are phase-tracking symbols, not margin."},
+    3:{correct:"No single factor produces 2.6×; the chain multiplies three structural disadvantages. The decomposition matters because each term has a different owner: power is m4/payload, spectrum is licensing, burst overhead is m5-3 configuration.",wrong:"Identical LDPC families both ways. No such regulation exists. Rain hits 30 GHz harder (m4-4) but both directions fade."},
+    4:{correct:"Saturation inverts the m4-7 doctrine: below the top rung a dB is worth a rung (5–20%); at the top it is worth zero, and only symbol-rate and overhead levers still pay. Diagnosing ladder position is therefore the first step of any link-improvement argument.",wrong:"The result is verified arithmetic, not a defect. Mid-ladder, one dB near a boundary is worth up to 20% — hardly negligible. Schedulers do not consume margin; the ladder's ceiling does."},
+    5:{correct:"The net identity is R_s × (efficiencies). Levers that scale R_s act multiplicatively regardless of ladder position; levers that raise Es/N₀ act only through rung transitions. Tighter roll-off very slightly *lowers* Es/N₀ (more symbols, same power) — trivially absorbed by 6.3 dB of saturation headroom here.",wrong:"Roll-off is a filter parameter, not a power one. Rain is untouched. Pilots are orthogonal."},
+    6:{correct:"The +0.0% row is a symptom of a ladder ending too early for the link's quality. Extending the ladder converts stranded dB back into throughput — for the few links (large antennas, linearised amplifiers, m5-1 §5) that can actually reach those rungs.",wrong:"Higher-order demodulation raises receiver complexity. Rain performance lives at the ladder's *bottom*. Roll-off and ladder height are independent multiplicative levers."},
+    7:{correct:"The flat curve is conditional: 6.3 dB of headroom silently absorbs everything gentler than the 99.9% event. Strip the headroom (cost-optimised design) and the curve slopes. The availability-throughput curve, not either endpoint, characterises a beam honestly.",wrong:"The conditionality is the content — B's second clause is the counterexample to A. 16.8% is one link's one-rung cost at one percentile. Margin and ACM are complements (m5-2 §7), not substitutes."},
+    8:{correct:"A hopped beam illuminates part-time; capacity parked over oceans serves no one; feeders bottleneck aggregate; and rain cells cover many beams at once. Module 5's export is deliberately the per-beam figure — the honest input to that erosion chain, not its output.",wrong:"The product counts spectrum once per reuse cell, correctly. Beam counts are payload facts. Reuse is the entire point of small beams (m3, m5-6 §3)."},
+    9:{correct:"M7's end-to-end budgets need capacity (the curve) and delay (access + propagation + protocol). All three latency terms were computed in this module — m5-3 §5, m5-5 §2/§4 — and flagged as exports when they appeared.",wrong:"EIRP/G/T are M4 inputs, already consumed. The MODCOD table is internal machinery. Rain statistics belong to m4-4 and are already integrated into the curve."},
+    10:{correct:"m5-2 measured the gap; m5-5 raced the branches to parity at equal spectrum and C/N₀; m5-4 §7 located the real decision axis. A vendor claiming a revolutionary waveform is claiming decibels that Shannon says do not exist — the module's most portable piece of due-diligence equipment.",wrong:"Research continues at the margins (VL-SNR, nonlinear-optimised constellations) — the *war* over, not the work. No standards body defeated the other; they converged. Regulators govern spectrum and flux, not waveforms."}
+};
+let answered={};
+document.querySelectorAll('.quiz-opt').forEach(btn=>{
+    btn.addEventListener('click',function(){
+        const q=this.dataset.q;
+        if(answered[q]!==undefined)return;
+        const correct=this.dataset.correct==='true';
+        answered[q]=correct;
+        document.querySelectorAll(`.quiz-opt[data-q="${q}"]`).forEach(b=>{b.disabled=true;if(b.dataset.correct==='true')b.classList.add('correct');});
+        if(!correct)this.classList.add('wrong');
+        const fb=document.getElementById('fb'+q);
+        fb.textContent=(correct?'✓ ':'✗ ')+feedbacks[q][correct?'correct':'wrong'];
+        fb.style.color=correct?'#39ff14':'#ff004f';
+        if(Object.keys(answered).length===10){
+            const total=Object.values(answered).filter(Boolean).length;
+            const sc=document.getElementById('quizScore');
+            sc.style.display='block';
+            const pct=Math.round(total/10*100);
+            sc.textContent=`SCORE: ${total}/10 (${pct}%) — ${pct===100?'PERFECT.':pct>=80?'STRONG.':pct>=60?'ADEQUATE. REVISIT WEAK SECTIONS.':'REVISIT THE LESSON BEFORE PROCEEDING.'}`;
+        }
+    });
+});
+</script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="supabase.js"></script>
+<script src="user_progress.js"></script>
+<script>
+const LESSON_ID='m5-7';
+(function(){
+    function bounceToLogin(r){console.error("Auth guard:",r);window.location.replace("index.html");}
+    async function init(){
+        if(typeof client==="undefined"||!client||!client.auth)return bounceToLogin("Supabase client not loaded");
+        let session=null;
+        try{({data:{session}}=await client.auth.getSession());}
+        catch(e){return bounceToLogin("getSession threw: "+e.message);}
+        if(!session){window.location.replace("index.html");return;}
+        const btn=document.getElementById('completeBtn'),msg=document.getElementById('completeMsg');
+        function setDone(done){
+            if(done){btn.textContent='✓ COMPLETE — CLICK TO UNDO';btn.classList.add('done');btn.style.cssText='border-color:#39ff14;color:#39ff14;background:rgba(57,255,20,0.1);cursor:pointer;opacity:1;';msg.style.color='#39ff14';msg.textContent='Lesson marked complete. Click again to undo.';}
+            else{btn.textContent='MARK LESSON COMPLETE';btn.classList.remove('done');btn.style.cssText='';msg.style.color='#ffffff55';msg.textContent='Not yet marked complete.';}
+        }
+        let mastered=[];
+        try{mastered=await getMasteredSections();}catch(e){console.error(e);}
+        setDone(mastered.includes(LESSON_ID));
+        btn.addEventListener('click',async()=>{
+            const isDone=btn.classList.contains('done');
+            msg.style.color='#00d9ff';msg.textContent='Saving...';
+            const ok=await upsertSection(LESSON_ID,!isDone);
+            if(ok){setDone(!isDone);}else{msg.style.color='#ff004f';msg.textContent='Error saving. Try again.';}
+        });
+        const btt=document.getElementById('backToTop');
+        window.addEventListener('scroll',()=>{btt.classList.toggle('visible',window.scrollY>400);});
+        btt.addEventListener('click',()=>window.scrollTo({top:0,behavior:'smooth'}));
+    }
+    if(document.readyState==="loading")document.addEventListener("DOMContentLoaded",init);
+    else init();
+})();
+</script>
+</body>
+</html>
