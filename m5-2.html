@@ -1,0 +1,746 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, shrink-to-fit=no">
+<title>M5-2 — MODCOD &amp; Adaptive Coding/Modulation · LEOAF</title>
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;600;800&family=Share+Tech+Mono&family=Libre+Baskerville:ital,wght@0,400;0,700;1,400&display=swap" rel="stylesheet">
+<link rel="icon" href="favicon.ico" sizes="any" type="image/x-icon">
+<link rel="manifest" href="site.webmanifest">
+<meta name="theme-color" content="#0f0f0f">
+<script>
+window.leoafAbort = async function () {
+    function go() { window.location.replace("index.html?signedout=1"); }
+    try { if (typeof client !== "undefined" && client && client.auth && client.auth.signOut) { try { await client.auth.signOut({ scope: "local" }); } catch (e) {} } } catch (e) {}
+    go();
+};
+</script>
+<style>
+* { box-sizing:border-box; margin:0; padding:0; }
+html { height:100%; -webkit-text-size-adjust:100%; overflow-x:hidden; }
+body { font-family:'Share Tech Mono',monospace; background:#000; color:white; overflow-x:hidden; min-height:100vh; }
+#starsCanvas { position:fixed; inset:0; z-index:-1; }
+header { background:#000; border-bottom:1px solid #ff004f33; position:sticky; top:0; z-index:100; padding:1rem clamp(1.5rem,5vw,4rem); display:flex; justify-content:space-between; align-items:center; }
+.logo { font-family:'Orbitron',sans-serif; font-weight:800; font-size:clamp(16px,2vw,22px); letter-spacing:3px; text-decoration:none; }
+.logo span:first-child { color:white; } .logo span:last-child { color:#ff004f; }
+.nav-right { display:flex; align-items:center; gap:10px; }
+.nav-btn { background:transparent; border:1px solid #ff004f44; color:#ff004f; padding:6px 14px; cursor:pointer; transition:0.3s; font-size:11px; font-family:'Orbitron',sans-serif; letter-spacing:1px; text-decoration:none; display:inline-block; }
+.nav-btn:hover { background:#ff004f; color:black; }
+.breadcrumb { padding:14px clamp(1.5rem,5vw,4rem); font-size:11px; color:#ffffff44; letter-spacing:1px; position:relative; z-index:1; }
+.breadcrumb a { color:#00d9ff66; text-decoration:none; } .breadcrumb a:hover { color:#00d9ff; }
+.breadcrumb span { margin:0 8px; }
+.lesson-wrap { max-width:820px; margin:0 auto; padding:0 clamp(1.5rem,5vw,4rem) 80px; position:relative; z-index:1; }
+.lesson-header { padding:30px 0 28px; border-bottom:1px solid #ffffff11; margin-bottom:36px; }
+.lesson-tag { font-family:'Orbitron',sans-serif; font-size:10px; color:#ff004f; letter-spacing:3px; margin-bottom:10px; }
+.lesson-header h1 { font-family:'Orbitron',sans-serif; font-size:clamp(20px,3.5vw,32px); font-weight:800; line-height:1.2; margin-bottom:12px; }
+.lesson-meta { display:flex; gap:10px; flex-wrap:wrap; margin-bottom:16px; }
+.l-pill { font-family:'Orbitron',sans-serif; font-size:10px; padding:3px 10px; border:1px solid; letter-spacing:1px; }
+.l-pill-q { color:#ff004f; border-color:#ff004f44; } .l-pill-t { color:#39ff14; border-color:#39ff1444; }
+.l-pill-c { color:#ffaa00; border-color:#ffaa0044; }
+.lesson-intro { font-size:13px; line-height:1.85; opacity:0.75; }
+.toc { background:rgba(0,217,255,0.06); border:1px solid #00d9ff33; padding:24px 28px; margin:30px 0; }
+.toc h4 { font-family:'Orbitron',sans-serif; font-size:10px; color:#00d9ff; letter-spacing:2px; margin-bottom:16px; }
+.toc ol { padding-left:20px; } .toc li { font-size:13px; line-height:2.1; }
+.toc li a { color:#00d9ffbb; text-decoration:none; transition:0.15s; } .toc li a:hover { color:#fff; padding-left:4px; }
+.toc li::marker { color:#ff004f; font-family:'Orbitron',sans-serif; font-size:10px; }
+.cb { background:#f5f2ec; color:#1a1a1a; padding:36px clamp(24px,4vw,48px); margin-bottom:24px; border-left:4px solid #00d9ff; position:relative; z-index:1; }
+.cb h2 { font-family:'Orbitron',sans-serif; font-size:13px; color:#003d66; letter-spacing:2px; text-transform:uppercase; margin-bottom:20px; padding-bottom:10px; border-bottom:2px solid #00d9ff66; scroll-margin-top:80px; }
+.cb h3 { font-family:'Orbitron',sans-serif; font-size:11px; color:#444; letter-spacing:1.5px; text-transform:uppercase; margin:28px 0 12px; }
+.cb p { font-family:'Libre Baskerville',Georgia,serif; font-size:15px; line-height:1.9; color:#1a1a1a; margin-bottom:16px; }
+.cb ul { padding-left:0; margin-bottom:16px; }
+.cb ul li { font-family:'Libre Baskerville',Georgia,serif; font-size:14px; line-height:1.85; color:#1a1a1a; padding-left:20px; position:relative; margin-bottom:8px; }
+.cb ul li::before { content:'›'; position:absolute; left:0; color:#0077aa; }
+.cb blockquote { border-left:3px solid #1a7a1a; background:#eafaea; padding:14px 20px; margin:18px 0; font-size:13px; font-family:'Share Tech Mono',monospace; color:#0a3d0a; line-height:1.8; }
+.callout { border-left:3px solid #0088cc; background:#e8f4fb; padding:16px 20px; margin:22px 0; font-size:12px; line-height:1.8; color:#1a1a1a; }
+.callout.red { border-left-color:#cc0033; background:#fdecea; }
+.callout.green { border-left-color:#1a7a1a; background:#eafaea; }
+.callout.amber { border-left-color:#996600; background:#fef9ec; }
+.callout strong { font-family:'Orbitron',sans-serif; font-size:10px; letter-spacing:1px; display:block; margin-bottom:8px; }
+.compare-table { width:100%; border-collapse:collapse; margin:22px 0; font-size:12px; }
+.compare-table th { font-family:'Orbitron',sans-serif; font-size:10px; letter-spacing:1px; color:#003d66; padding:10px 12px; border-bottom:2px solid #00d9ff66; text-align:left; }
+.compare-table td { padding:10px 12px; border-bottom:1px solid #ddd; line-height:1.5; color:#1a1a1a; vertical-align:top; }
+.compare-table tr:hover td { background:#f0f0f0; }
+.key-numbers { display:grid; grid-template-columns:repeat(auto-fit,minmax(140px,1fr)); gap:12px; margin:22px 0; }
+.kn-item { background:#fff; border:1px solid #d0d0d0; padding:16px 12px; text-align:center; }
+.kn-val { font-family:'Orbitron',sans-serif; font-size:clamp(13px,1.8vw,18px); font-weight:800; color:#003d66; display:block; }
+.kn-label { font-size:10px; color:#555; letter-spacing:1px; margin-top:5px; display:block; line-height:1.4; }
+.quiz-block { background:rgba(17,17,17,0.9); border:1px solid #ff004f33; padding:28px; margin:48px 0 32px; }
+.quiz-block h2 { font-family:'Orbitron',sans-serif; font-size:13px; color:#ff004f; letter-spacing:2px; margin-bottom:6px; }
+.quiz-intro { font-size:12px; opacity:0.6; margin-bottom:24px; padding-bottom:16px; border-bottom:1px solid #ff004f22; line-height:1.6; }
+.quiz-q { margin-bottom:28px; }
+.quiz-q p { font-size:13px; opacity:0.9; margin-bottom:12px; line-height:1.65; }
+.quiz-q p strong { color:#00d9ff; }
+.quiz-options { display:flex; flex-direction:column; gap:8px; }
+.quiz-opt { background:rgba(255,255,255,0.03); border:1px solid #ffffff1a; padding:11px 16px; cursor:pointer; font-size:12px; font-family:'Share Tech Mono',monospace; transition:0.2s; text-align:left; color:white; line-height:1.5; }
+.quiz-opt:hover:not(:disabled) { background:rgba(0,217,255,0.08); border-color:#00d9ff44; }
+.quiz-opt.correct { background:rgba(57,255,20,0.1); border-color:#39ff14; color:#39ff14; }
+.quiz-opt.wrong { background:rgba(255,0,79,0.1); border-color:#ff004f; color:#ff004f; }
+.quiz-opt:disabled { cursor:default; }
+.quiz-feedback { font-size:12px; margin-top:10px; min-height:18px; line-height:1.7; opacity:0.9; padding:0 4px; }
+.quiz-score { font-family:'Orbitron',sans-serif; font-size:12px; color:#39ff14; margin-top:20px; letter-spacing:1px; display:none; padding-top:16px; border-top:1px solid #39ff1433; }
+.py-block { background:rgba(10,10,10,0.95); border:1px solid #39ff1422; padding:28px; margin:32px 0; }
+.py-block h2 { font-family:'Orbitron',sans-serif; font-size:13px; color:#39ff14; letter-spacing:2px; margin-bottom:8px; }
+.py-block .py-intro { font-size:12px; opacity:0.7; margin-bottom:20px; padding-bottom:16px; border-bottom:1px solid #39ff1422; line-height:1.7; }
+.py-exercise { margin-bottom:32px; } .py-exercise:last-child { margin-bottom:0; }
+.py-exercise h3 { font-family:'Orbitron',sans-serif; font-size:11px; color:#39ff1499; letter-spacing:1.5px; text-transform:uppercase; margin-bottom:10px; }
+.py-exercise p { font-size:12px; opacity:0.8; margin-bottom:14px; line-height:1.75; }
+.py-block pre { background:#050505; border:1px solid #39ff1433; padding:20px; font-family:'Share Tech Mono',monospace; font-size:11px; line-height:1.7; overflow-x:auto; color:#39ff14; white-space:pre; margin-bottom:12px; }
+.py-note { background:rgba(57,255,20,0.04); border-left:2px solid #39ff14; padding:12px 16px; margin-top:14px; font-size:12px; line-height:1.75; opacity:0.8; }
+.py-note strong { font-family:'Orbitron',sans-serif; font-size:10px; color:#39ff14; display:block; margin-bottom:6px; letter-spacing:1px; }
+.reflection-block { background:rgba(255,170,0,0.04); border:1px solid #ffaa0033; padding:24px; margin:32px 0; }
+.reflection-block h2 { font-family:'Orbitron',sans-serif; font-size:13px; color:#ffaa00; letter-spacing:2px; margin-bottom:8px; }
+.ref-intro { font-size:12px; opacity:0.7; margin-bottom:20px; padding-bottom:14px; border-bottom:1px solid #ffaa0022; line-height:1.7; }
+.ref-prompt { margin-bottom:20px; }
+.ref-prompt h3 { font-family:'Orbitron',sans-serif; font-size:11px; color:#ffaa0099; letter-spacing:1px; margin-bottom:8px; }
+.ref-prompt p { font-size:12px; opacity:0.8; line-height:1.75; }
+.complete-wrap { margin-top:56px; padding-top:30px; border-top:1px solid #ffffff11; text-align:center; }
+.complete-btn { font-family:'Orbitron',sans-serif; font-size:13px; letter-spacing:2px; padding:14px 44px; background:transparent; border:1px solid #39ff14; color:#39ff14; cursor:pointer; transition:0.3s; }
+.complete-btn:hover:not(.done) { background:#39ff14; color:black; box-shadow:0 0 20px rgba(57,255,20,0.4); }
+.complete-btn.done { background:rgba(57,255,20,0.1); cursor:pointer; opacity:1; }
+.complete-msg { font-size:12px; color:#39ff14; margin-top:14px; min-height:18px; letter-spacing:1px; }
+.lesson-nav { display:flex; justify-content:space-between; margin-top:30px; flex-wrap:wrap; gap:10px; }
+.lesson-nav a { font-family:'Orbitron',sans-serif; font-size:11px; color:#00d9ff66; text-decoration:none; letter-spacing:1px; transition:0.2s; }
+.lesson-nav a:hover { color:#00d9ff; }
+.back-to-top { position:fixed; bottom:28px; right:28px; z-index:200; width:44px; height:44px; background:#000; border:1px solid #00d9ff55; color:#00d9ff; font-size:20px; cursor:pointer; display:flex; align-items:center; justify-content:center; opacity:0; pointer-events:none; transition:opacity 0.3s; }
+.back-to-top.visible { opacity:1; pointer-events:auto; } .back-to-top:hover { border-color:#00d9ff; }
+footer { text-align:center; padding:30px; opacity:0.3; font-size:11px; position:relative; z-index:1; letter-spacing:1px; }
+.module-complete { background:rgba(57,255,20,0.06); border:1px solid #39ff1444; padding:24px 28px; margin:40px 0; text-align:center; }
+.module-complete h3 { font-family:'Orbitron',sans-serif; font-size:14px; color:#39ff14; letter-spacing:2px; margin-bottom:10px; }
+.module-complete p { font-size:12px; opacity:0.8; line-height:1.7; }
+</style>
+</head>
+<body>
+<canvas id="starsCanvas"></canvas>
+<header>
+    <a href="dashboard.html" class="logo"><span>LEO</span><span>AF</span></a>
+    <div class="nav-right">
+        <a href="m5.html" class="nav-btn">← M5 HUB</a>
+        <button class="nav-btn" onclick="leoafAbort()">ABORT</button>
+    </div>
+</header>
+<div class="breadcrumb">
+    <a href="dashboard.html">DASHBOARD</a><span>/</span>
+    <a href="m5.html">M5</a><span>/</span>
+    <span style="color:#ffffff88;">LESSON 02 — MODCOD &amp; ACM</span>
+</div>
+
+<div class="lesson-wrap">
+<div class="lesson-header">
+    <div class="lesson-tag">M5 · LESSON 02 OF 7</div>
+    <h1>MODCOD &amp; Adaptive<br>Coding/Modulation</h1>
+    <div class="lesson-meta">
+        <div class="l-pill l-pill-q">MODULE 5</div>
+        <div class="l-pill l-pill-t">AIR INTERFACE &amp; ACCESS</div>
+        <div class="l-pill l-pill-c">CORE</div>
+    </div>
+    <p class="lesson-intro" style="margin-bottom:12px;">Lesson m5-1 ended with a 7.8 dB indictment: uncoded QPSK needs 9.6 dB Eb/N₀ for a working link, while Shannon says 2 bit/s/Hz is achievable at 1.8 dB. This lesson is about the machinery that closes that gap — forward error correction — and about the operational structure built on top of it: the MODCOD table, a ladder of modulation-plus-code-rate combinations, each with a precise signal-quality threshold, that lets a link trade throughput for robustness in fine steps and in real time.</p>
+    <p class="lesson-intro" style="margin-bottom:12px;">The MODCOD table is the single most consequential object in this module. It is the lookup that converts the Module 4 link budget's output (achieved C/N₀) into an information rate. The spine project gains that lookup in this lesson: Stage 2 attaches a DVB-S2 MODCOD table and selection logic to the Stage-1 carrier model, and demonstrates the defining behaviour of a modern satellite link — throughput that degrades gracefully through a rain fade instead of failing.</p>
+    <p class="lesson-intro" style="margin-bottom:12px;">One warning applies throughout. MODCOD thresholds are quoted in the literature in three different currencies — Eb/N₀, Es/N₀, and required C/N₀ — and figures in the last currency are meaningless unless the symbol rate is stated alongside them, because required C/N₀ = Es/N₀ + 10·log₁₀(R_s). A great deal of confusion in datasheets and marketing material traces to comparing dBHz figures computed at different, unstated symbol rates. This lesson fixes the conversions once, precisely.</p>
+</div>
+
+<div class="toc">
+    <h4>CONTENTS</h4>
+    <ol>
+        <li><a href="#s1">The forward error correction principle</a></li>
+        <li><a href="#s2">Code families, and why LDPC won</a></li>
+        <li><a href="#s3">The threshold: quasi-error-free</a></li>
+        <li><a href="#s4">The MODCOD table</a></li>
+        <li><a href="#s5">From threshold to required C/N₀ — always with a symbol rate</a></li>
+        <li><a href="#s6">The gap to Shannon, closed</a></li>
+        <li><a href="#s7">ACM: the ladder in motion</a></li>
+        <li><a href="#s8">Implementation margin</a></li>
+        <li><a href="#s9">Key facts</a></li>
+        <li><a href="#s10">What this lesson delivers to the design chain</a></li>
+        <li><a href="#quiz">Knowledge check</a></li>
+        <li><a href="#py">Python exercises</a></li>
+        <li><a href="#reflect">Reflection</a></li>
+    </ol>
+</div>
+
+<div class="cb" id="s1">
+    <h2>1. The forward error correction principle</h2>
+<p>Forward error correction (FEC) adds structured redundancy to the transmitted bit stream. An encoder takes k information bits and produces n &gt; k coded bits; the ratio r = k/n is the <strong>code rate</strong>. The receiver's decoder exploits the redundancy to identify and correct errors introduced by noise — without retransmission, hence "forward."</p>
+<p>The cost is rate: at code rate 1/2, half of every transmitted bit is parity, so the information rate is half the raw bit rate of m5-1:</p>
+<blockquote>R_info = r · R_b = r · log₂(M) · R_s</blockquote>
+<p>The benefit is <strong>coding gain</strong>: the reduction in required Eb/N₀ to achieve a target error rate, compared to the uncoded system. Modern codes buy 5–9 dB of coding gain for their rate cost — and section 6 shows this is a spectacular trade, because the gain lands within 1–2 dB of the Shannon bound.</p>
+<p>The intuition for why redundancy beats raw repetition: a good code spreads each information bit's influence across many transmitted bits in a pseudo-random pattern, so that noise must corrupt a coordinated set of symbols — not just one — to destroy information. The decoder then performs probabilistic inference over the whole block. Long blocks average over the noise; DVB-S2's normal frame is 64,800 coded bits precisely because length is where the performance comes from.</p>
+</div>
+
+<div class="cb" id="s2">
+    <h2>2. Code families, and why LDPC won</h2>
+<p>Three generations of codes carried satellite communications to the Shannon bound:</p>
+<p><strong>Convolutional codes with Viterbi decoding</strong> (1960s–1990s): the classical workhorse, typically concatenated with an outer Reed–Solomon code. Coding gain around 5–6 dB; a gap to Shannon of 3–5 dB remained. This is the DVB-S generation.</p>
+<p><strong>Turbo codes</strong> (1993): two convolutional encoders and an interleaver, decoded iteratively. The first practical near-capacity codes — within ~1 dB of Shannon — and the shock that reset the field. Adopted in 3G/4G cellular and several satellite systems.</p>
+<p><strong>Low-density parity-check (LDPC) codes</strong>: invented by Gallager in 1962, forgotten for thirty years because the decoding was computationally infeasible, then rediscovered in the 1990s. LDPC codes match turbo performance with a decisive practical advantage: the belief-propagation decoder is massively parallelisable, which suits hardware implementation at high symbol rates. DVB-S2 (2005) selected LDPC with a small outer BCH code to clean up the error floor, and essentially every subsequent satellite standard — DVB-S2X, 5G NR (and therefore 3GPP NTN, m5-5) — followed.</p>
+<p>The DVB-S2 FEC structure, which the rest of this module assumes: information bits → BCH outer encoder → LDPC inner encoder → a FECFRAME of 64,800 bits (normal) or 16,200 bits (short) → bit interleaver → constellation mapper. Eleven code rates from 1/4 to 9/10 are defined; combined with the four DVB-S2 constellations they produce the MODCOD table.</p>
+</div>
+
+<div class="cb" id="s3">
+    <h2>3. The threshold: quasi-error-free</h2>
+<p>Every MODCOD in the table carries one number: the minimum signal quality at which its decoder achieves <strong>quasi-error-free (QEF)</strong> operation. DVB-S2 defines QEF as a frame error rate better than 10⁻⁷ — one lost frame per ten million, roughly one error event per hour at typical rates. The practical meaning: below threshold the LDPC decoder fails frequently and the link is unusable; above it, errors are so rare the link behaves as a clean pipe.</p>
+<p>This cliff-edge behaviour is characteristic of capacity-approaching codes. Uncoded links degrade gradually — BER worsens smoothly as Eb/N₀ falls. LDPC-coded links have a <strong>waterfall</strong>: over a fraction of a dB, the frame error rate moves from negligible to total. The threshold is therefore sharp and meaningful in a way an uncoded "required Eb/N₀" never was, and it is why link adaptation (section 7) can be built on simple threshold comparisons.</p>
+<p>Thresholds are specified as <strong>Es/N₀</strong> — energy per symbol over noise density, equivalently C/N measured in the symbol-rate bandwidth. Es/N₀ relates to the other currencies as:</p>
+<blockquote>Es/N₀ [dB] = Eb/N₀ [dB] + 10·log₁₀(η)        where η = r · log₂(M) bits per symbol<br>
+C/N₀ [dBHz] = Es/N₀ [dB] + 10·log₁₀(R_s)</blockquote>
+</div>
+
+<div class="cb" id="s4">
+    <h2>4. The MODCOD table</h2>
+<p>An excerpt of the DVB-S2 MODCOD table (ETSI EN 302 307-1, Table 13: normal FECFRAME, AWGN channel, ideal demodulation). η is the spectral efficiency in bits per symbol, including the FEC but not framing overhead (m5-4's business):</p>
+<table class="compare-table">
+<thead><tr>
+<th>MODCOD</th>
+<th>η (bit/sym)</th>
+<th>Es/N₀ threshold (dB)</th>
+</tr></thead>
+<tbody>
+<tr><td>QPSK 1/4</td><td>0.490</td><td>−2.35</td></tr>
+<tr><td>QPSK 1/2</td><td>0.989</td><td>1.00</td></tr>
+<tr><td>QPSK 3/4</td><td>1.487</td><td>4.03</td></tr>
+<tr><td>QPSK 9/10</td><td>1.789</td><td>6.42</td></tr>
+<tr><td>8PSK 2/3</td><td>1.981</td><td>6.62</td></tr>
+<tr><td>8PSK 3/4</td><td>2.228</td><td>7.91</td></tr>
+<tr><td>16APSK 2/3</td><td>2.637</td><td>8.97</td></tr>
+<tr><td>16APSK 3/4</td><td>2.967</td><td>10.21</td></tr>
+<tr><td>16APSK 5/6</td><td>3.300</td><td>11.61</td></tr>
+<tr><td>32APSK 3/4</td><td>3.703</td><td>12.73</td></tr>
+<tr><td>32APSK 4/5</td><td>3.952</td><td>13.64</td></tr>
+<tr><td>32APSK 9/10</td><td>4.453</td><td>16.05</td></tr>
+</tbody>
+</table>
+<p>Read the table as a ladder. Each rung upward buys spectral efficiency and costs threshold — and the two currencies move together in remarkably uniform steps: adjacent rungs are typically 0.5–1.5 dB and 0.1–0.3 bit/symbol apart. This fine granularity is deliberate. It means that whatever C/N₀ a link achieves, there is a rung close beneath it, and little signal quality is wasted as unusable margin. DVB-S2X extended the ladder further — more rungs (finer steps), 64/128/256-APSK at the top, and very-low-SNR MODCODs down to −10 dB Es/N₀ at the bottom for mobile and D2D applications (m5-6).</p>
+<p>Note two structural features. QPSK 9/10 (η = 1.789) and 8PSK 2/3 (η = 1.981) sit almost adjacent in threshold (6.42 vs 6.62 dB): near the crossover points, a denser constellation with a stronger code and a sparser constellation with a weaker code are nearly interchangeable, and the choice is made by secondary effects — amplifier back-off (m5-1 section 5) favouring the sparser constellation. And the ladder's top rung is not "best": 32APSK 9/10 exists for gateway feeder links with large antennas and linearised amplifiers, not for consumer terminals that will rarely see 16 dB Es/N₀.</p>
+</div>
+
+<div class="cb" id="s5">
+    <h2>5. From threshold to required C/N₀ — always with a symbol rate</h2>
+<p>Converting the table to the link budget currency requires the symbol rate. For the 208.3 Msym/s carrier established in m5-1 (250 MHz, α = 0.20), 10·log₁₀(R_s) = 83.2 dBHz:</p>
+<table class="compare-table">
+<thead><tr>
+<th>MODCOD</th>
+<th>Es/N₀ (dB)</th>
+<th>Required C/N₀ (dBHz)</th>
+<th>Information rate</th>
+</tr></thead>
+<tbody>
+<tr><td>QPSK 1/2</td><td>1.00</td><td>84.2</td><td>206.0 Mbps</td></tr>
+<tr><td>8PSK 3/4</td><td>7.91</td><td>91.1</td><td>464.1 Mbps</td></tr>
+<tr><td>16APSK 3/4</td><td>10.21</td><td>93.4</td><td>618.0 Mbps</td></tr>
+<tr><td>32APSK 3/4</td><td>12.73</td><td>95.9</td><td>771.4 Mbps</td></tr>
+</tbody>
+</table>
+<p>Two observations. First, the entire usable ladder spans about 12 dB of C/N₀ (84 to 96 dBHz at this symbol rate) — this is the operating window the Module 4 link budget must be designed against, and it is why the m4-7 sensitivity analysis mattered: a dB gained anywhere in the budget converts directly into roughly one rung of the ladder, which is 5–15% more throughput.</p>
+<p>Second — the warning from the introduction, now concrete: these dBHz figures are properties of <em>this carrier's symbol rate</em>. Halve the symbol rate and every required C/N₀ drops by 3 dB while every information rate halves. A required-C/N₀ figure without a stated symbol rate is not a specification; it is noise. When this module's numbers are cross-referenced against Module 4's worked examples, the reconciliation must always pass through R_s.</p>
+</div>
+
+<div class="cb" id="s6">
+    <h2>6. The gap to Shannon, closed</h2>
+<p>m5-1 measured uncoded QPSK's gap to the Shannon bound at 7.8 dB. Repeating the measurement for the coded table — comparing each MODCOD's Es/N₀ threshold against the Shannon minimum SNR for its spectral efficiency, 10·log₁₀(2^η − 1):</p>
+<table class="compare-table">
+<thead><tr>
+<th>MODCOD</th>
+<th>η</th>
+<th>Threshold (dB)</th>
+<th>Shannon minimum (dB)</th>
+<th>Gap</th>
+</tr></thead>
+<tbody>
+<tr><td>QPSK 1/2</td><td>0.989</td><td>1.00</td><td>−0.07</td><td>1.07 dB</td></tr>
+<tr><td>QPSK 3/4</td><td>1.487</td><td>4.03</td><td>2.56</td><td>1.47 dB</td></tr>
+<tr><td>8PSK 2/3</td><td>1.981</td><td>6.62</td><td>4.69</td><td>1.93 dB</td></tr>
+<tr><td>16APSK 3/4</td><td>2.967</td><td>10.21</td><td>8.34</td><td>1.87 dB</td></tr>
+<tr><td>32APSK 3/4</td><td>3.703</td><td>12.73</td><td>10.80</td><td>1.93 dB</td></tr>
+</tbody>
+</table>
+<p>The 7.8 dB uncoded gap has collapsed to 1–2 dB across the whole ladder. This is the quantitative meaning of "modern coding is near-capacity," and it carries a strategic implication worth stating bluntly: the physical layer is essentially finished. There is no future code that will find another 5 dB, because Shannon says the 5 dB does not exist. System capacity gains now come from elsewhere — more spectrum (m4-3), more aggressive frequency reuse and beam density (Module 3's payload), tighter roll-off (m5-1), and less overhead (m5-3, m5-4). An architect evaluating a vendor's claimed "revolutionary waveform" should reach for this table first.</p>
+</div>
+
+<div class="cb" id="s7">
+    <h2>7. ACM: the ladder in motion</h2>
+<p>The MODCOD table is static; the channel is not. Module 4 established that a Ka-band link's C/N₀ moves over tens of dB-seconds — rain fades of 5–15 dB developing over seconds to minutes (m4-4), slant-range variation of several dB across a LEO pass (m4-1, m4-7). Three operating disciplines exist for coping:</p>
+<p><strong>CCM — constant coding and modulation</strong>: one MODCOD, chosen so the link closes at the worst tolerated condition. Simple, and wasteful: in clear sky — the overwhelming majority of the time — the link runs far above threshold and the excess C/N₀ buys nothing.</p>
+<p><strong>VCM — variable coding and modulation</strong>: the MODCOD varies on a fixed schedule (per service, per time slot), not in response to the channel. Used where no return channel exists to report conditions — broadcast, some downlink-only Earth observation.</p>
+<p><strong>ACM — adaptive coding and modulation</strong>: the receiver continuously estimates its Es/N₀, reports it over the return channel, and the transmitter selects the highest rung whose threshold the reported quality clears (plus margin). This is the operating mode of every modern broadband satellite system, and it converts the CCM's wasted clear-sky margin directly into throughput.</p>
+<p>The control loop's engineering details decide whether ACM works well:</p>
+<ul>
+<li><strong>Measurement and reporting delay</strong>: the loop must outrun the fade. Rain fade slopes at Ka-band are commonly 0.1–1 dB/s; LEO geometry adds slower, predictable variation. Reporting intervals are tens of milliseconds to seconds. If the fade outruns the loop, frames are lost at the old MODCOD before the step-down lands — this is the ACM response-latency problem posed in m4-7's reflection.</li>
+<li><strong>Hysteresis</strong>: step down at threshold + margin_down, step back up only at threshold + margin_up, with margin_up &gt; margin_down. Without hysteresis, a link sitting at a rung boundary oscillates between MODCODs every reporting interval, and every switch has a cost.</li>
+<li><strong>Margin policy</strong>: the selection margin (typically 0.5–2 dB above the ideal threshold) absorbs estimation error, loop delay, and implementation loss (section 8). Larger margin means fewer decoder failures and less throughput. This single parameter is a direct availability-versus-capacity dial.</li>
+</ul>
+<p>The system-level consequence is the defining behaviour of modern satellite broadband: <strong>graceful degradation</strong>. Through a 9 dB rain fade, a 618 Mbps 16APSK-3/4 carrier steps down the ladder and emerges at QPSK 1/2 carrying 206 Mbps — one-third the throughput, zero loss of service. The uncoded, un-adaptive link of m5-1 would simply have died. The spine project's Stage-2 demonstration is exactly this sweep.</p>
+</div>
+
+<div class="cb" id="s8">
+    <h2>8. Implementation margin</h2>
+<p>The Table 13 thresholds are ideal: AWGN channel, perfect synchronisation, infinite-precision decoding. Real modems miss them by an <strong>implementation margin</strong> — typically 0.5–1.5 dB, covering imperfect carrier and timing recovery, quantisation, phase noise, and residual amplifier distortion after the back-off and pre-distortion of m5-1. System engineering practice adds this margin to every threshold before it enters a link budget or an ACM selection rule.</p>
+<p>This is also where the m5-1 amplifier discussion closes its loop: the nonlinear distortion that APSK tolerates and QAM does not shows up here, as a modulation-dependent implementation margin. The DVB-S2 implementation guidelines (ETSI TR 102 376) quantify the total degradation over a nonlinear channel per MODCOD — the higher rungs lose more — and a careful system model uses those degraded thresholds, not the ideal ones.</p>
+</div>
+
+<div class="cb" id="s9">
+    <h2>9. Key facts</h2>
+<table class="compare-table">
+<thead><tr>
+<th>Fact</th>
+<th>Value</th>
+<th>Unit</th>
+<th>Source</th>
+</tr></thead>
+<tbody>
+<tr><td>Code rate</td><td>r = k/n</td><td>—</td><td>Definition</td></tr>
+<tr><td>Information rate</td><td>r · log₂(M) · R_s</td><td>bit/s</td><td>Definition</td></tr>
+<tr><td>DVB-S2 FECFRAME (normal)</td><td>64,800</td><td>bits</td><td>ETSI EN 302 307-1</td></tr>
+<tr><td>DVB-S2 FEC structure</td><td>BCH outer + LDPC inner</td><td>—</td><td>ETSI EN 302 307-1</td></tr>
+<tr><td>QEF criterion</td><td>FER ≤ 10⁻⁷</td><td>—</td><td>ETSI EN 302 307-1</td></tr>
+<tr><td>QPSK 1/2 threshold</td><td>1.00 (η = 0.989)</td><td>dB Es/N₀</td><td>EN 302 307-1 Table 13</td></tr>
+<tr><td>16APSK 3/4 threshold</td><td>10.21 (η = 2.967)</td><td>dB Es/N₀</td><td>EN 302 307-1 Table 13</td></tr>
+<tr><td>32APSK 3/4 threshold</td><td>12.73 (η = 3.703)</td><td>dB Es/N₀</td><td>EN 302 307-1 Table 13</td></tr>
+<tr><td>C/N₀ from Es/N₀</td><td>+ 10·log₁₀(R_s)</td><td>dBHz</td><td>Definition</td></tr>
+<tr><td>Required C/N₀, QPSK 1/2 @ 208.3 Msym/s</td><td>84.2</td><td>dBHz</td><td>Computed</td></tr>
+<tr><td>Required C/N₀, 16APSK 3/4 @ 208.3 Msym/s</td><td>93.4</td><td>dBHz</td><td>Computed</td></tr>
+<tr><td>Coded gap to Shannon</td><td>≈ 1–2</td><td>dB</td><td>Computed from Table 13</td></tr>
+<tr><td>ACM step 16APSK 3/4 → QPSK 1/2</td><td>−9.21 dB threshold, ×1/3 throughput</td><td>—</td><td>Computed</td></tr>
+<tr><td>Typical implementation margin</td><td>0.5–1.5</td><td>dB</td><td>ETSI TR 102 376</td></tr>
+</tbody>
+</table>
+</div>
+
+<div class="cb" id="s10">
+    <h2>10. What this lesson delivers to the design chain</h2>
+<p>The link budget's C/N₀ is now convertible into bits. Given an achieved C/(N₀+I₀) from the Module 4 engine and a symbol rate from the m5-1 carrier model, the MODCOD table selects the operating point and yields an information rate — and under ACM, that conversion re-runs continuously as the channel moves, producing throughput that bends through fades instead of breaking.</p>
+<p>The spine project's Stage 2 implements exactly this: a <code>ModCodTable</code> with the DVB-S2 thresholds, a selection rule with configurable margin, and a fade-sweep demonstration of graceful degradation. What the engine still ignores: the carrier is assumed to serve one user with zero framing cost. m5-3 introduces the sharing problem — multiple access and scheduling, where a beam's information rate is divided among hundreds of terminals — and m5-4 charges the framing, pilot, and signalling overhead that separates the information rate computed here from the throughput a user actually measures.</p>
+</div>
+
+<div class="quiz-block" id="quiz">
+    <h2>KNOWLEDGE CHECK</h2>
+    <div class="quiz-intro">Ten questions. Each option explains itself after you commit. No retries per question — decide first.</div>
+    <div class="quiz-q">
+        <p><strong>Q1.</strong> A code of rate 3/4 applied to a 16APSK carrier at 208.3 Msym/s yields an information rate of approximately:</p>
+        <div class="quiz-options">
+            <button class="quiz-opt" data-q="1" data-correct="false">A — 833 Mbps</button>
+            <button class="quiz-opt" data-q="1" data-correct="true">B — 625 Mbps</button>
+            <button class="quiz-opt" data-q="1" data-correct="false">C — 156 Mbps</button>
+            <button class="quiz-opt" data-q="1" data-correct="false">D — 208 Mbps</button>
+        </div>
+        <div class="quiz-feedback" id="fb1"></div>
+    </div>
+    <div class="quiz-q">
+        <p><strong>Q2.</strong> Quasi-error-free (QEF) in DVB-S2 means:</p>
+        <div class="quiz-options">
+            <button class="quiz-opt" data-q="2" data-correct="false">A — Bit error rate below 10⁻⁵</button>
+            <button class="quiz-opt" data-q="2" data-correct="true">B — Frame error rate below 10⁻⁷</button>
+            <button class="quiz-opt" data-q="2" data-correct="false">C — Zero errors, guaranteed by the BCH code</button>
+            <button class="quiz-opt" data-q="2" data-correct="false">D — Errors only during rain fades</button>
+        </div>
+        <div class="quiz-feedback" id="fb2"></div>
+    </div>
+    <div class="quiz-q">
+        <p><strong>Q3.</strong> LDPC codes displaced turbo codes in satellite standards primarily because:</p>
+        <div class="quiz-options">
+            <button class="quiz-opt" data-q="3" data-correct="false">A — LDPC has fundamentally better error performance</button>
+            <button class="quiz-opt" data-q="3" data-correct="true">B — The LDPC belief-propagation decoder parallelises well in hardware, suiting high symbol rates</button>
+            <button class="quiz-opt" data-q="3" data-correct="false">C — LDPC codes are not patented</button>
+            <button class="quiz-opt" data-q="3" data-correct="false">D — Turbo codes cannot approach the Shannon bound</button>
+        </div>
+        <div class="quiz-feedback" id="fb3"></div>
+    </div>
+    <div class="quiz-q">
+        <p><strong>Q4.</strong> The "waterfall" behaviour of capacity-approaching codes means:</p>
+        <div class="quiz-options">
+            <button class="quiz-opt" data-q="4" data-correct="false">A — Performance improves gradually as Es/N₀ increases</button>
+            <button class="quiz-opt" data-q="4" data-correct="true">B — Frame error rate transitions from near-total failure to negligible over a fraction of a dB, making the threshold sharp</button>
+            <button class="quiz-opt" data-q="4" data-correct="false">C — The code fails completely in rain</button>
+            <button class="quiz-opt" data-q="4" data-correct="false">D — Higher code rates always perform better</button>
+        </div>
+        <div class="quiz-feedback" id="fb4"></div>
+    </div>
+    <div class="quiz-q">
+        <p><strong>Q5.</strong> A required C/N₀ figure quoted without a symbol rate is uninterpretable because:</p>
+        <div class="quiz-options">
+            <button class="quiz-opt" data-q="5" data-correct="false">A — C/N₀ depends on the modulation only</button>
+            <button class="quiz-opt" data-q="5" data-correct="true">B — Required C/N₀ = Es/N₀ threshold + 10·log₁₀(R_s), so the same MODCOD needs 3 dB more C/N₀ every time the symbol rate doubles</button>
+            <button class="quiz-opt" data-q="5" data-correct="false">C — C/N₀ cannot be measured at the receiver</button>
+            <button class="quiz-opt" data-q="5" data-correct="false">D — The ITU forbids quoting C/N₀</button>
+        </div>
+        <div class="quiz-feedback" id="fb5"></div>
+    </div>
+    <div class="quiz-q">
+        <p><strong>Q6.</strong> QPSK 9/10 (η = 1.789, threshold 6.42 dB) and 8PSK 2/3 (η = 1.981, threshold 6.62 dB) sit nearly adjacent on the ladder. At such crossover points the practical tiebreaker is:</p>
+        <div class="quiz-options">
+            <button class="quiz-opt" data-q="6" data-correct="false">A — The denser constellation always wins</button>
+            <button class="quiz-opt" data-q="6" data-correct="true">B — Amplifier back-off — the sparser constellation tolerates a nonlinear amplifier better, so its real (degraded) threshold advantage is larger than the ideal table shows</button>
+            <button class="quiz-opt" data-q="6" data-correct="false">C — QPSK is obsolete and should be avoided</button>
+            <button class="quiz-opt" data-q="6" data-correct="false">D — The choice is arbitrary</button>
+        </div>
+        <div class="quiz-feedback" id="fb6"></div>
+    </div>
+    <div class="quiz-q">
+        <p><strong>Q7.</strong> Compared to CCM sized for a 99.9%-availability rain condition, ACM improves a link's average throughput because:</p>
+        <div class="quiz-options">
+            <button class="quiz-opt" data-q="7" data-correct="false">A — ACM increases the transmit power during fades</button>
+            <button class="quiz-opt" data-q="7" data-correct="true">B — In clear sky — most of the time — ACM converts the C/N₀ that CCM holds as idle margin into higher-order MODCODs and more bits</button>
+            <button class="quiz-opt" data-q="7" data-correct="false">C — ACM eliminates rain fades</button>
+            <button class="quiz-opt" data-q="7" data-correct="false">D — ACM reduces the free-space path loss</button>
+        </div>
+        <div class="quiz-feedback" id="fb7"></div>
+    </div>
+    <div class="quiz-q">
+        <p><strong>Q8.</strong> Hysteresis in the ACM control loop exists to:</p>
+        <div class="quiz-options">
+            <button class="quiz-opt" data-q="8" data-correct="false">A — Increase the maximum throughput</button>
+            <button class="quiz-opt" data-q="8" data-correct="true">B — Prevent oscillation between adjacent MODCODs when the channel sits near a threshold</button>
+            <button class="quiz-opt" data-q="8" data-correct="false">C — Compensate for rain fades</button>
+            <button class="quiz-opt" data-q="8" data-correct="false">D — Reduce the decoder's power consumption</button>
+        </div>
+        <div class="quiz-feedback" id="fb8"></div>
+    </div>
+    <div class="quiz-q">
+        <p><strong>Q9.</strong> The coded MODCOD ladder sits 1–2 dB from the Shannon bound. The correct strategic conclusion is:</p>
+        <div class="quiz-options">
+            <button class="quiz-opt" data-q="9" data-correct="false">A — A better code could still find 5 dB of gain</button>
+            <button class="quiz-opt" data-q="9" data-correct="true">B — Physical-layer coding is nearly exhausted; future capacity gains must come from spectrum, reuse, beam density, roll-off, and overhead reduction</button>
+            <button class="quiz-opt" data-q="9" data-correct="false">C — The Shannon bound will be raised by future research</button>
+            <button class="quiz-opt" data-q="9" data-correct="false">D — Satellite links should revert to uncoded operation for simplicity</button>
+        </div>
+        <div class="quiz-feedback" id="fb9"></div>
+    </div>
+    <div class="quiz-q">
+        <p><strong>Q10.</strong> Implementation margin is added to the ideal Table-13 thresholds because:</p>
+        <div class="quiz-options">
+            <button class="quiz-opt" data-q="10" data-correct="false">A — The ITU requires a safety factor</button>
+            <button class="quiz-opt" data-q="10" data-correct="true">B — Real modems lose 0.5–1.5 dB to synchronisation error, quantisation, phase noise, and residual nonlinear distortion relative to the ideal-AWGN assumption</button>
+            <button class="quiz-opt" data-q="10" data-correct="false">C — Rain attenuation must be included in the threshold</button>
+            <button class="quiz-opt" data-q="10" data-correct="false">D — LDPC decoding is unreliable</button>
+        </div>
+        <div class="quiz-feedback" id="fb10"></div>
+    </div>
+    <div class="quiz-score" id="quizScore"></div>
+</div>
+
+<div class="py-block" id="py">
+    <h2>PYTHON EXERCISES</h2>
+    <div class="py-intro">Three exercises; the last extends the module spine project. Run them, then work the numbered follow-ups in the comments — the follow-ups are the exercise.</div>
+    <div class="py-exercise">
+        <h3>Exercise 1 — The three currencies</h3>
+        <p>Convert MODCOD thresholds between Es/N₀, Eb/N₀, and required C/N₀, and demonstrate why the symbol rate must always be attached to a dBHz figure.</p>
+<pre>
+import math
+
+# (name, eta bit/sym, EsN0 threshold dB) — EN 302 307-1 Table 13 excerpt
+MODCODS = [
+    (&quot;QPSK 1/2&quot;,   0.988858,  1.00),
+    (&quot;QPSK 3/4&quot;,   1.487473,  4.03),
+    (&quot;8PSK 3/4&quot;,   2.228124,  7.91),
+    (&quot;16APSK 3/4&quot;, 2.966728, 10.21),
+    (&quot;32APSK 3/4&quot;, 3.703295, 12.73),
+]
+
+def ebn0(esn0_db, eta):    return esn0_db - 10*math.log10(eta)
+def req_cn0(esn0_db, rs):  return esn0_db + 10*math.log10(rs)
+
+for rs in [50e6, 208.3e6]:
+    print(f&quot;\nSymbol rate {rs/1e6:.1f} Msym/s  (10log10 Rs = {10*math.log10(rs):.1f} dBHz)&quot;)
+    print(f&quot;{&#x27;MODCOD&#x27;:&lt;12}{&#x27;Es/N0&#x27;:&gt;8}{&#x27;Eb/N0&#x27;:&gt;8}{&#x27;req C/N0&#x27;:&gt;10}{&#x27;info rate&#x27;:&gt;12}&quot;)
+    for name, eta, es in MODCODS:
+        print(f&quot;{name:&lt;12}{es:&gt;7.2f} {ebn0(es,eta):&gt;7.2f} &quot;
+              f&quot;{req_cn0(es,rs):&gt;9.1f} {eta*rs/1e6:&gt;9.1f} Mbps&quot;)
+
+# 1. The same MODCOD&#x27;s required C/N0 differs by 6.2 dB between the
+#    two symbol rates. Verify this equals 10*log10(208.3/50).
+# 2. Which currency (Es/N0, Eb/N0, C/N0) is invariant to symbol
+#    rate? Which is invariant to modulation? State when each is
+#    the right one to quote.
+# 3. Add the Shannon minimum Es/N0 per MODCOD (10*log10(2**eta - 1))
+#    and print the gap column. Confirm the 1-2 dB result.
+</pre>
+    </div>
+    <div class="py-exercise">
+        <h3>Exercise 2 — The margin dial</h3>
+        <p>Quantify the ACM selection margin's availability-versus-capacity trade.</p>
+<pre>
+import math
+
+MODCODS = [
+    (&quot;QPSK 1/4&quot;,   0.490243, -2.35), (&quot;QPSK 1/2&quot;,   0.988858,  1.00),
+    (&quot;QPSK 3/4&quot;,   1.487473,  4.03), (&quot;QPSK 9/10&quot;,  1.788612,  6.42),
+    (&quot;8PSK 3/4&quot;,   2.228124,  7.91), (&quot;16APSK 2/3&quot;, 2.637201,  8.97),
+    (&quot;16APSK 3/4&quot;, 2.966728, 10.21), (&quot;16APSK 5/6&quot;, 3.300184, 11.61),
+    (&quot;32APSK 3/4&quot;, 3.703295, 12.73), (&quot;32APSK 9/10&quot;,4.453027, 16.05),
+]
+
+def select(esn0_db, margin_db):
+    &quot;&quot;&quot;Highest-eta MODCOD whose threshold + margin is met.&quot;&quot;&quot;
+    best = None
+    for name, eta, thr in MODCODS:
+        if esn0_db &gt;= thr + margin_db and (best is None or eta &gt; best[1]):
+            best = (name, eta, thr)
+    return best
+
+RS = 208.3e6
+achieved = 11.5   # dB Es/N0, from the Module 4 engine + carrier
+
+print(f&quot;Achieved Es/N0 = {achieved} dB&quot;)
+for margin in [0.0, 0.5, 1.0, 1.5, 2.0]:
+    sel = select(achieved, margin)
+    if sel:
+        name, eta, thr = sel
+        print(f&quot;  margin {margin:&gt;3.1f} dB -&gt; {name:&lt;12} &quot;
+              f&quot;{eta*RS/1e6:&gt;7.1f} Mbps  (headroom {achieved-thr:.2f} dB)&quot;)
+    else:
+        print(f&quot;  margin {margin:&gt;3.1f} dB -&gt; no MODCOD selectable&quot;)
+
+# 1. At what margin does the selection drop a rung? What is the
+#    throughput cost of that rung, in percent?
+# 2. The margin absorbs estimation error and loop delay. If the
+#    Es/N0 estimator has a standard deviation of 0.4 dB, what
+#    margin keeps the probability of selecting an unsupportable
+#    MODCOD below ~1%? (Gaussian assumption; think in sigmas.)
+# 3. Implement hysteresis: separate margins for stepping up (2.0 dB)
+#    and down (0.5 dB), with state. Feed it an Es/N0 sequence that
+#    hovers around a threshold and show the oscillation disappear.
+</pre>
+    </div>
+    <div class="py-exercise">
+        <h3>Exercise 3 — Spine Stage 2: MODCOD selection and the fade sweep</h3>
+        <p>The throughput engine gains its lookup: achieved C/N₀ in, information rate out — and the graceful-degradation demonstration.</p>
+<pre>
+import math
+
+# ═══════════════════════════════════════════════════════
+# M5 SPINE PROJECT — THROUGHPUT ENGINE
+# Stage 2: MODCOD table + ACM selection.
+#   Stage 1 (m5-1) gave: bandwidth, roll-off -&gt; symbol rate.
+#   Stage 2 adds: achieved C/N0 -&gt; MODCOD -&gt; information rate.
+# Next stages: m5-3 access overhead, m5-4 framing overhead,
+#              m5-5 NTN branch, m5-6 D2D, m5-7 full assembly.
+# ═══════════════════════════════════════════════════════
+
+MODCOD_TABLE = [
+    # (name, eta bit/sym, EsN0 threshold dB) — EN 302 307-1 Table 13
+    (&quot;QPSK 1/4&quot;,    0.490243, -2.35),
+    (&quot;QPSK 1/2&quot;,    0.988858,  1.00),
+    (&quot;QPSK 3/4&quot;,    1.487473,  4.03),
+    (&quot;QPSK 9/10&quot;,   1.788612,  6.42),
+    (&quot;8PSK 3/4&quot;,    2.228124,  7.91),
+    (&quot;16APSK 2/3&quot;,  2.637201,  8.97),
+    (&quot;16APSK 3/4&quot;,  2.966728, 10.21),
+    (&quot;16APSK 5/6&quot;,  3.300184, 11.61),
+    (&quot;32APSK 3/4&quot;,  3.703295, 12.73),
+    (&quot;32APSK 9/10&quot;, 4.453027, 16.05),
+]
+
+class ThroughputEngine:
+    &quot;&quot;&quot;
+    Stage-2 engine: carrier geometry (Stage 1) + MODCOD selection.
+    Information rate only — access and framing overhead arrive in
+    m5-3/m5-4 and will strictly reduce these numbers.
+    &quot;&quot;&quot;
+    def __init__(self, name, bw_hz, alpha, impl_margin_db=1.0,
+                 select_margin_db=0.5):
+        self.name  = name
+        self.bw_hz = bw_hz
+        self.alpha = alpha
+        self.impl_margin   = impl_margin_db     # modem reality vs Table 13
+        self.select_margin = select_margin_db   # ACM safety margin
+
+    @property
+    def symbol_rate(self):
+        return self.bw_hz / (1 + self.alpha)    # Stage 1
+
+    def esn0_from_cn0(self, cn0_dbhz):
+        return cn0_dbhz - 10 * math.log10(self.symbol_rate)
+
+    def select_modcod(self, cn0_dbhz):
+        &quot;&quot;&quot;Highest-eta MODCOD supportable at this C/N0, or None.&quot;&quot;&quot;
+        esn0 = self.esn0_from_cn0(cn0_dbhz)
+        need = self.impl_margin + self.select_margin
+        best = None
+        for name, eta, thr in MODCOD_TABLE:
+            if esn0 &gt;= thr + need and (best is None or eta &gt; best[1]):
+                best = (name, eta, thr)
+        return best
+
+    def info_rate(self, cn0_dbhz):
+        sel = self.select_modcod(cn0_dbhz)
+        return sel[1] * self.symbol_rate if sel else 0.0
+
+    def report(self, cn0_dbhz):
+        esn0 = self.esn0_from_cn0(cn0_dbhz)
+        sel  = self.select_modcod(cn0_dbhz)
+        print(f&quot;\n{&#x27;─&#x27;*58}&quot;)
+        print(f&quot;  THROUGHPUT ENGINE — {self.name}&quot;)
+        print(f&quot;{&#x27;─&#x27;*58}&quot;)
+        print(f&quot;  Symbol rate        {self.symbol_rate/1e6:&gt;10.1f} Msym/s&quot;)
+        print(f&quot;  Achieved C/N0      {cn0_dbhz:&gt;10.1f} dBHz&quot;)
+        print(f&quot;  Achieved Es/N0     {esn0:&gt;10.2f} dB&quot;)
+        print(f&quot;  Margins (impl+sel) {self.impl_margin:&gt;6.1f} + {self.select_margin:.1f} dB&quot;)
+        if sel:
+            name, eta, thr = sel
+            print(f&quot;  Selected MODCOD    {name:&gt;10}  (thr {thr:.2f} dB)&quot;)
+            print(f&quot;  INFORMATION RATE   {eta*self.symbol_rate/1e6:&gt;10.1f} Mbps&quot;)
+        else:
+            print(f&quot;  Selected MODCOD          NONE — link does not close&quot;)
+        print(f&quot;{&#x27;─&#x27;*58}&quot;)
+
+# ── The graceful-degradation sweep ──────────────────────
+# Clear-sky C/N0 from the Module 4 engine, then a rain fade
+# develops. Watch the ladder do its job.
+eng = ThroughputEngine(&quot;Ka forward, user beam&quot;, bw_hz=250e6, alpha=0.10)
+
+clear_sky_cn0 = 96.0
+print(f&quot;Rain fade sweep — clear-sky C/N0 = {clear_sky_cn0} dBHz&quot;)
+print(f&quot;{&#x27;fade (dB)&#x27;:&gt;10}{&#x27;C/N0&#x27;:&gt;8}{&#x27;Es/N0&#x27;:&gt;8}{&#x27;MODCOD&#x27;:&gt;14}{&#x27;Mbps&#x27;:&gt;9}&quot;)
+for fade in [0, 2, 4, 6, 8, 10, 12, 14, 16]:
+    cn0  = clear_sky_cn0 - fade
+    esn0 = eng.esn0_from_cn0(cn0)
+    sel  = eng.select_modcod(cn0)
+    name = sel[0] if sel else &quot;— LINK DOWN&quot;
+    rate = eng.info_rate(cn0) / 1e6
+    print(f&quot;{fade:&gt;10}{cn0:&gt;8.1f}{esn0:&gt;8.2f}{name:&gt;14}{rate:&gt;8.1f}M&quot;)
+
+eng.report(cn0_dbhz=96.0)
+
+# ── STAGE-3 PREVIEW ────────────────────────────────────
+# m5-3 divides this information rate among N terminals via a
+# multiple-access scheme: the engine gains an access-efficiency
+# factor and a per-user allocation model.
+
+# 1. Rerun the sweep with impl_margin_db=0. Which fade depths
+#    change their selected MODCOD? What does that say about how
+#    optimistic modelling mispredicts availability?
+# 2. Find the fade depth at which the link stops closing entirely.
+#    Cross-check: does it equal clear-sky Es/N0 minus (lowest
+#    threshold + margins)?
+# 3. Add QPSK 1/3 (eta 0.656448, thr -1.24 dB) and QPSK 2/5
+#    (eta 0.789412, thr -0.30 dB) to the table. How much extra
+#    fade depth does the link survive?
+</pre>
+    </div>
+</div>
+
+<div class="reflection-block" id="reflect">
+    <h2>REFLECTION</h2>
+    <div class="ref-intro">Four prompts. Each forces a decision — write the position down before moving on; the act of committing is the exercise.</div>
+    <div class="ref-prompt">
+        <h3>PROMPT 01</h3>
+        <p>Section 6 concluded "the physical layer is essentially finished" because the ladder sits 1–2 dB from Shannon. Attack this conclusion: identify at least two assumptions baked into the Table-13 framing (channel model, single-link perspective, threshold definition) under which meaningful physical-layer gains remain, and judge whether any of them matters for a LEO broadband operator.</p>
+    </div>
+    <div class="ref-prompt">
+        <h3>PROMPT 02</h3>
+        <p>The ACM margin dial (exercise 2) trades throughput against the probability of selecting an unsupportable MODCOD. A product manager wants the margin set to zero to maximise advertised speeds; a network engineer wants 2 dB to protect the error budget. Construct the quantitative argument that settles this — what user-visible metric does each dB of margin actually cost, what does each dB buy, and who is right for a consumer broadband service versus an aviation safety-services link?</p>
+    </div>
+    <div class="ref-prompt">
+        <h3>PROMPT 03</h3>
+        <p>The fade sweep shows throughput stepping down smoothly through a fade — from the network's perspective. From a single user's perspective, their allocated capacity during the fade depends on how the scheduler (m5-3) redistributes the shrunken beam capacity. Decide: during a beam-wide fade, should the scheduler preserve per-user fairness (everyone degrades equally) or protect a premium tier (some users see no change, others lose service)? Defend your choice, and identify what contractual instrument encodes it.</p>
+    </div>
+    <div class="ref-prompt">
+        <h3>PROMPT 04</h3>
+        <p>VCM exists for links with no return channel. A LEO Earth-observation constellation downlinks imagery over high-latitude ground stations with a strong, predictable elevation profile per pass. Design a VCM schedule for one pass in outline: what drives the MODCOD change points, how would you compute them from the m2-3/m2-4 pass geometry plus the m4 link budget, and what residual inefficiency does VCM carry versus true ACM on this specific link?</p>
+    </div>
+</div>
+
+<div class="cb">
+    <h2>Sources</h2>
+<ul>
+<li>ETSI EN 302 307-1 (DVB-S2) — MODCOD definitions, Table 13 Es/N₀ thresholds and spectral efficiencies, QEF criterion.</li>
+<li>ETSI EN 302 307-2 (DVB-S2X) — extended MODCOD set, very-low-SNR modes, finer roll-offs.</li>
+<li>ETSI TR 102 376 — DVB-S2 implementation guidelines: nonlinear channel degradation, implementation margin methodology.</li>
+<li>Gallager, <em>Low-Density Parity-Check Codes</em> (1962) — the original LDPC construction.</li>
+<li>Berrou, Glavieux &amp; Thitimajshima, "Near Shannon limit error-correcting coding and decoding: Turbo-codes" (1993).</li>
+<li>Richardson &amp; Urbanke, <em>Modern Coding Theory</em> — LDPC analysis, waterfall behaviour, density evolution.</li>
+<li>Maral &amp; Bousquet, <em>Satellite Communications Systems</em> — ACM/VCM/CCM system operation, link adaptation loops.</li>
+</ul>
+</div>
+
+<div class="complete-wrap">
+    <button class="complete-btn" id="completeBtn">MARK LESSON COMPLETE</button>
+    <div class="complete-msg" id="completeMsg"></div>
+</div>
+<div class="lesson-nav">
+    <a href="m5-1.html">← LESSON 01 — WAVEFORMS &amp; MODULATION</a>
+    <a href="m5-3.html">LESSON 03 — MULTIPLE ACCESS &amp; SCHEDULING →</a>
+</div>
+</div>
+
+<button class="back-to-top" id="backToTop" title="Back to top">↑</button>
+<footer>© 2026 LEOAF · M5 · LESSON 02 OF 7</footer>
+<script>
+const canvas=document.getElementById('starsCanvas'),ctx=canvas.getContext('2d');
+let stars=[];
+function initStars(){stars=[];for(let i=0;i<180;i++)stars.push({x:Math.random()*canvas.width,y:Math.random()*canvas.height,size:Math.random()*1.5+0.4,speed:Math.random()*0.18+0.04,hue:Math.random()*360});}
+function resizeCanvas(){canvas.width=window.innerWidth;canvas.height=window.innerHeight;}
+resizeCanvas();initStars();window.addEventListener('resize',resizeCanvas);
+function animateStars(){ctx.clearRect(0,0,canvas.width,canvas.height);stars.forEach(s=>{s.y-=s.speed;if(s.y<0){s.y=canvas.height;s.x=Math.random()*canvas.width;}ctx.beginPath();ctx.fillStyle=`hsl(${s.hue},80%,80%)`;ctx.arc(s.x,s.y,s.size,0,Math.PI*2);ctx.fill();});requestAnimationFrame(animateStars);}
+animateStars();
+</script>
+<script>
+const feedbacks={
+    1:{correct:"R_info ≈ r · log₂(M) · R_s = 0.75 × 4 × 208.3 ≈ 625 Mbps (the exact Table-13 figure, 618 Mbps, is slightly lower because η = 2.967 rather than 3.0 — the BCH outer code and frame structure shave the ideal value).",wrong:"833 Mbps is the raw rate with no coding. 156 Mbps applies the code rate but forgets the 4 bits/symbol. 208 Mbps is the symbol rate mistaken for a bit rate."},
+    2:{correct:"QEF is defined as FER ≤ 10⁻⁷ — about one lost frame per hour at typical rates. It is the error rate at which the MODCOD thresholds in Table 13 are specified.",wrong:"The criterion is per frame, not per bit, and is not zero — no code guarantees zero errors. Fade behaviour is an ACM matter, not the QEF definition."},
+    3:{correct:"Turbo and LDPC performance are comparable — both near-capacity. LDPC's decisive edge is implementability: belief propagation maps onto massively parallel hardware, sustaining hundreds of Msym/s in affordable silicon.",wrong:"Performance is roughly equal (both within ~1 dB of Shannon), and turbo codes were the first to demonstrate near-capacity operation. Patent considerations existed but were not the deciding factor for DVB-S2's selection."},
+    4:{correct:"LDPC decoding has a steep FER-vs-Es/N₀ characteristic. This sharpness is what makes threshold-based ACM selection logic viable — the link is cleanly \"closed\" or \"not closed\" at each rung.",wrong:"Gradual degradation describes uncoded links. Rain moves the operating point; it does not change the code's characteristic. Higher rate means less protection, not better performance."},
+    5:{correct:"The threshold is a per-symbol quantity; converting it to the link budget's bandwidth-independent currency reintroduces the symbol rate. Comparing dBHz figures computed at different unstated symbol rates is a classic datasheet error.",wrong:"C/N₀ depends on both the threshold and R_s. It is routinely measured. No regulatory prohibition exists."},
+    6:{correct:"Ideal AWGN thresholds ignore the nonlinear channel. Per m5-1 and the implementation guidelines, higher-order constellations suffer more distortion and demand more back-off; near a crossover, that modulation-dependent penalty decides. The strong-code-sparse-constellation option usually wins on a saturated satellite HPA.",wrong:"Density is a cost, not a virtue, at fixed efficiency. QPSK with a high-rate LDPC code is thoroughly modern. The choice is driven by real channel effects, not arbitrary."},
+    7:{correct:"CCM runs the worst-case MODCOD always; its clear-sky excess margin buys nothing. ACM rides the highest rung the current channel supports, harvesting the margin as throughput and stepping down only when fades arrive.",wrong:"Power adaptation is a separate mechanism (uplink power control, m4-4). Fades and path loss are physics; ACM changes the response, not the channel."},
+    8:{correct:"With a single switching threshold, measurement noise flips the selection every reporting interval when Es/N₀ hovers at a rung boundary. Separated down/up thresholds (step down early, step up late) stabilise the loop at a small average-throughput cost.",wrong:"Hysteresis slightly reduces average throughput. Fade compensation is the job of the step itself; hysteresis governs switching discipline. Power draw is unrelated."},
+    9:{correct:"The remaining 1–2 dB is the entire theoretical headroom, and chasing it costs complexity for marginal return. Capacity engineering has moved to the system level — bandwidth, reuse, and overhead — which is precisely the itinerary of the rest of this program.",wrong:"The bound is a theorem, not a technology level; nothing raises it, and no code crosses it. Uncoded operation surrenders 8 dB for nothing."},
+    10:{correct:"Table 13 assumes perfect synchronisation and a linear AWGN channel. Hardware reality misses that by a modulation-dependent margin, quantified in the implementation guidelines; system engineering budgets it explicitly on every threshold.",wrong:"No regulatory mandate — it is engineering honesty. Rain lives in the Module 4 budget as a loss, not in the threshold. LDPC is highly reliable above threshold; the margin covers everything around the decoder, not the decoder."}
+};
+let answered={};
+document.querySelectorAll('.quiz-opt').forEach(btn=>{
+    btn.addEventListener('click',function(){
+        const q=this.dataset.q;
+        if(answered[q]!==undefined)return;
+        const correct=this.dataset.correct==='true';
+        answered[q]=correct;
+        document.querySelectorAll(`.quiz-opt[data-q="${q}"]`).forEach(b=>{b.disabled=true;if(b.dataset.correct==='true')b.classList.add('correct');});
+        if(!correct)this.classList.add('wrong');
+        const fb=document.getElementById('fb'+q);
+        fb.textContent=(correct?'✓ ':'✗ ')+feedbacks[q][correct?'correct':'wrong'];
+        fb.style.color=correct?'#39ff14':'#ff004f';
+        if(Object.keys(answered).length===10){
+            const total=Object.values(answered).filter(Boolean).length;
+            const sc=document.getElementById('quizScore');
+            sc.style.display='block';
+            const pct=Math.round(total/10*100);
+            sc.textContent=`SCORE: ${total}/10 (${pct}%) — ${pct===100?'PERFECT.':pct>=80?'STRONG.':pct>=60?'ADEQUATE. REVISIT WEAK SECTIONS.':'REVISIT THE LESSON BEFORE PROCEEDING.'}`;
+        }
+    });
+});
+</script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="supabase.js"></script>
+<script src="user_progress.js"></script>
+<script>
+const LESSON_ID='m5-2';
+(function(){
+    function bounceToLogin(r){console.error("Auth guard:",r);window.location.replace("index.html");}
+    async function init(){
+        if(typeof client==="undefined"||!client||!client.auth)return bounceToLogin("Supabase client not loaded");
+        let session=null;
+        try{({data:{session}}=await client.auth.getSession());}
+        catch(e){return bounceToLogin("getSession threw: "+e.message);}
+        if(!session){window.location.replace("index.html");return;}
+        const btn=document.getElementById('completeBtn'),msg=document.getElementById('completeMsg');
+        function setDone(done){
+            if(done){btn.textContent='✓ COMPLETE — CLICK TO UNDO';btn.classList.add('done');btn.style.cssText='border-color:#39ff14;color:#39ff14;background:rgba(57,255,20,0.1);cursor:pointer;opacity:1;';msg.style.color='#39ff14';msg.textContent='Lesson marked complete. Click again to undo.';}
+            else{btn.textContent='MARK LESSON COMPLETE';btn.classList.remove('done');btn.style.cssText='';msg.style.color='#ffffff55';msg.textContent='Not yet marked complete.';}
+        }
+        let mastered=[];
+        try{mastered=await getMasteredSections();}catch(e){console.error(e);}
+        setDone(mastered.includes(LESSON_ID));
+        btn.addEventListener('click',async()=>{
+            const isDone=btn.classList.contains('done');
+            msg.style.color='#00d9ff';msg.textContent='Saving...';
+            const ok=await upsertSection(LESSON_ID,!isDone);
+            if(ok){setDone(!isDone);}else{msg.style.color='#ff004f';msg.textContent='Error saving. Try again.';}
+        });
+        const btt=document.getElementById('backToTop');
+        window.addEventListener('scroll',()=>{btt.classList.toggle('visible',window.scrollY>400);});
+        btt.addEventListener('click',()=>window.scrollTo({top:0,behavior:'smooth'}));
+    }
+    if(document.readyState==="loading")document.addEventListener("DOMContentLoaded",init);
+    else init();
+})();
+</script>
+</body>
+</html>
