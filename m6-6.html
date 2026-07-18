@@ -1,0 +1,664 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, shrink-to-fit=no">
+<title>M6-6 — Terminal Types by Segment &amp; Aviation Certification · LEOAF</title>
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;600;800&family=Share+Tech+Mono&family=Libre+Baskerville:ital,wght@0,400;0,700;1,400&display=swap" rel="stylesheet">
+<link rel="icon" href="favicon.ico" sizes="any" type="image/x-icon">
+<link rel="manifest" href="site.webmanifest">
+<meta name="theme-color" content="#0f0f0f">
+<script>
+window.leoafAbort = async function () {
+    function go() { window.location.replace("index.html?signedout=1"); }
+    try { if (typeof client !== "undefined" && client && client.auth && client.auth.signOut) { try { await client.auth.signOut({ scope: "local" }); } catch (e) {} } } catch (e) {}
+    go();
+};
+</script>
+<style>
+* { box-sizing:border-box; margin:0; padding:0; }
+html { height:100%; -webkit-text-size-adjust:100%; overflow-x:hidden; }
+body { font-family:'Share Tech Mono',monospace; background:#000; color:white; overflow-x:hidden; min-height:100vh; }
+#starsCanvas { position:fixed; inset:0; z-index:-1; }
+header { background:#000; border-bottom:1px solid #ff004f33; position:sticky; top:0; z-index:100; padding:1rem clamp(1.5rem,5vw,4rem); display:flex; justify-content:space-between; align-items:center; }
+.logo { font-family:'Orbitron',sans-serif; font-weight:800; font-size:clamp(16px,2vw,22px); letter-spacing:3px; text-decoration:none; }
+.logo span:first-child { color:white; } .logo span:last-child { color:#ff004f; }
+.nav-right { display:flex; align-items:center; gap:10px; }
+.nav-btn { background:transparent; border:1px solid #ff004f44; color:#ff004f; padding:6px 14px; cursor:pointer; transition:0.3s; font-size:11px; font-family:'Orbitron',sans-serif; letter-spacing:1px; text-decoration:none; display:inline-block; }
+.nav-btn:hover { background:#ff004f; color:black; }
+.breadcrumb { padding:14px clamp(1.5rem,5vw,4rem); font-size:11px; color:#ffffff44; letter-spacing:1px; position:relative; z-index:1; }
+.breadcrumb a { color:#00d9ff66; text-decoration:none; } .breadcrumb a:hover { color:#00d9ff; }
+.breadcrumb span { margin:0 8px; }
+.lesson-wrap { max-width:820px; margin:0 auto; padding:0 clamp(1.5rem,5vw,4rem) 80px; position:relative; z-index:1; }
+.lesson-header { padding:30px 0 28px; border-bottom:1px solid #ffffff11; margin-bottom:36px; }
+.lesson-tag { font-family:'Orbitron',sans-serif; font-size:10px; color:#ff004f; letter-spacing:3px; margin-bottom:10px; }
+.lesson-header h1 { font-family:'Orbitron',sans-serif; font-size:clamp(20px,3.5vw,32px); font-weight:800; line-height:1.2; margin-bottom:12px; }
+.lesson-meta { display:flex; gap:10px; flex-wrap:wrap; margin-bottom:16px; }
+.l-pill { font-family:'Orbitron',sans-serif; font-size:10px; padding:3px 10px; border:1px solid; letter-spacing:1px; }
+.l-pill-q { color:#ff004f; border-color:#ff004f44; } .l-pill-t { color:#39ff14; border-color:#39ff1444; }
+.l-pill-c { color:#ffaa00; border-color:#ffaa0044; }
+.lesson-intro { font-size:13px; line-height:1.85; opacity:0.75; }
+.toc { background:rgba(0,217,255,0.06); border:1px solid #00d9ff33; padding:24px 28px; margin:30px 0; }
+.toc h4 { font-family:'Orbitron',sans-serif; font-size:10px; color:#00d9ff; letter-spacing:2px; margin-bottom:16px; }
+.toc ol { padding-left:20px; } .toc li { font-size:13px; line-height:2.1; }
+.toc li a { color:#00d9ffbb; text-decoration:none; transition:0.15s; } .toc li a:hover { color:#fff; padding-left:4px; }
+.toc li::marker { color:#ff004f; font-family:'Orbitron',sans-serif; font-size:10px; }
+.cb { background:#f5f2ec; color:#1a1a1a; padding:36px clamp(24px,4vw,48px); margin-bottom:24px; border-left:4px solid #00d9ff; position:relative; z-index:1; }
+.cb h2 { font-family:'Orbitron',sans-serif; font-size:13px; color:#003d66; letter-spacing:2px; text-transform:uppercase; margin-bottom:20px; padding-bottom:10px; border-bottom:2px solid #00d9ff66; scroll-margin-top:80px; }
+.cb h3 { font-family:'Orbitron',sans-serif; font-size:11px; color:#444; letter-spacing:1.5px; text-transform:uppercase; margin:28px 0 12px; }
+.cb p { font-family:'Libre Baskerville',Georgia,serif; font-size:15px; line-height:1.9; color:#1a1a1a; margin-bottom:16px; }
+.cb ul { padding-left:0; margin-bottom:16px; }
+.cb ul li { font-family:'Libre Baskerville',Georgia,serif; font-size:14px; line-height:1.85; color:#1a1a1a; padding-left:20px; position:relative; margin-bottom:8px; }
+.cb ul li::before { content:'›'; position:absolute; left:0; color:#0077aa; }
+.cb blockquote { border-left:3px solid #1a7a1a; background:#eafaea; padding:14px 20px; margin:18px 0; font-size:13px; font-family:'Share Tech Mono',monospace; color:#0a3d0a; line-height:1.8; }
+.callout { border-left:3px solid #0088cc; background:#e8f4fb; padding:16px 20px; margin:22px 0; font-size:12px; line-height:1.8; color:#1a1a1a; }
+.callout.red { border-left-color:#cc0033; background:#fdecea; }
+.callout.green { border-left-color:#1a7a1a; background:#eafaea; }
+.callout.amber { border-left-color:#996600; background:#fef9ec; }
+.callout strong { font-family:'Orbitron',sans-serif; font-size:10px; letter-spacing:1px; display:block; margin-bottom:8px; }
+.compare-table { width:100%; border-collapse:collapse; margin:22px 0; font-size:12px; }
+.compare-table th { font-family:'Orbitron',sans-serif; font-size:10px; letter-spacing:1px; color:#003d66; padding:10px 12px; border-bottom:2px solid #00d9ff66; text-align:left; }
+.compare-table td { padding:10px 12px; border-bottom:1px solid #ddd; line-height:1.5; color:#1a1a1a; vertical-align:top; }
+.compare-table tr:hover td { background:#f0f0f0; }
+.key-numbers { display:grid; grid-template-columns:repeat(auto-fit,minmax(140px,1fr)); gap:12px; margin:22px 0; }
+.kn-item { background:#fff; border:1px solid #d0d0d0; padding:16px 12px; text-align:center; }
+.kn-val { font-family:'Orbitron',sans-serif; font-size:clamp(13px,1.8vw,18px); font-weight:800; color:#003d66; display:block; }
+.kn-label { font-size:10px; color:#555; letter-spacing:1px; margin-top:5px; display:block; line-height:1.4; }
+.quiz-block { background:rgba(17,17,17,0.9); border:1px solid #ff004f33; padding:28px; margin:48px 0 32px; }
+.quiz-block h2 { font-family:'Orbitron',sans-serif; font-size:13px; color:#ff004f; letter-spacing:2px; margin-bottom:6px; }
+.quiz-intro { font-size:12px; opacity:0.6; margin-bottom:24px; padding-bottom:16px; border-bottom:1px solid #ff004f22; line-height:1.6; }
+.quiz-q { margin-bottom:28px; }
+.quiz-q p { font-size:13px; opacity:0.9; margin-bottom:12px; line-height:1.65; }
+.quiz-q p strong { color:#00d9ff; }
+.quiz-options { display:flex; flex-direction:column; gap:8px; }
+.quiz-opt { background:rgba(255,255,255,0.03); border:1px solid #ffffff1a; padding:11px 16px; cursor:pointer; font-size:12px; font-family:'Share Tech Mono',monospace; transition:0.2s; text-align:left; color:white; line-height:1.5; }
+.quiz-opt:hover:not(:disabled) { background:rgba(0,217,255,0.08); border-color:#00d9ff44; }
+.quiz-opt.correct { background:rgba(57,255,20,0.1); border-color:#39ff14; color:#39ff14; }
+.quiz-opt.wrong { background:rgba(255,0,79,0.1); border-color:#ff004f; color:#ff004f; }
+.quiz-opt:disabled { cursor:default; }
+.quiz-feedback { font-size:12px; margin-top:10px; min-height:18px; line-height:1.7; opacity:0.9; padding:0 4px; }
+.quiz-score { font-family:'Orbitron',sans-serif; font-size:12px; color:#39ff14; margin-top:20px; letter-spacing:1px; display:none; padding-top:16px; border-top:1px solid #39ff1433; }
+.py-block { background:rgba(10,10,10,0.95); border:1px solid #39ff1422; padding:28px; margin:32px 0; }
+.py-block h2 { font-family:'Orbitron',sans-serif; font-size:13px; color:#39ff14; letter-spacing:2px; margin-bottom:8px; }
+.py-block .py-intro { font-size:12px; opacity:0.7; margin-bottom:20px; padding-bottom:16px; border-bottom:1px solid #39ff1422; line-height:1.7; }
+.py-exercise { margin-bottom:32px; } .py-exercise:last-child { margin-bottom:0; }
+.py-exercise h3 { font-family:'Orbitron',sans-serif; font-size:11px; color:#39ff1499; letter-spacing:1.5px; text-transform:uppercase; margin-bottom:10px; }
+.py-exercise p { font-size:12px; opacity:0.8; margin-bottom:14px; line-height:1.75; }
+.py-block pre { background:#050505; border:1px solid #39ff1433; padding:20px; font-family:'Share Tech Mono',monospace; font-size:11px; line-height:1.7; overflow-x:auto; color:#39ff14; white-space:pre; margin-bottom:12px; }
+.py-note { background:rgba(57,255,20,0.04); border-left:2px solid #39ff14; padding:12px 16px; margin-top:14px; font-size:12px; line-height:1.75; opacity:0.8; }
+.py-note strong { font-family:'Orbitron',sans-serif; font-size:10px; color:#39ff14; display:block; margin-bottom:6px; letter-spacing:1px; }
+.reflection-block { background:rgba(255,170,0,0.04); border:1px solid #ffaa0033; padding:24px; margin:32px 0; }
+.reflection-block h2 { font-family:'Orbitron',sans-serif; font-size:13px; color:#ffaa00; letter-spacing:2px; margin-bottom:8px; }
+.ref-intro { font-size:12px; opacity:0.7; margin-bottom:20px; padding-bottom:14px; border-bottom:1px solid #ffaa0022; line-height:1.7; }
+.ref-prompt { margin-bottom:20px; }
+.ref-prompt h3 { font-family:'Orbitron',sans-serif; font-size:11px; color:#ffaa0099; letter-spacing:1px; margin-bottom:8px; }
+.ref-prompt p { font-size:12px; opacity:0.8; line-height:1.75; }
+.complete-wrap { margin-top:56px; padding-top:30px; border-top:1px solid #ffffff11; text-align:center; }
+.complete-btn { font-family:'Orbitron',sans-serif; font-size:13px; letter-spacing:2px; padding:14px 44px; background:transparent; border:1px solid #39ff14; color:#39ff14; cursor:pointer; transition:0.3s; }
+.complete-btn:hover:not(.done) { background:#39ff14; color:black; box-shadow:0 0 20px rgba(57,255,20,0.4); }
+.complete-btn.done { background:rgba(57,255,20,0.1); cursor:pointer; opacity:1; }
+.complete-msg { font-size:12px; color:#39ff14; margin-top:14px; min-height:18px; letter-spacing:1px; }
+.lesson-nav { display:flex; justify-content:space-between; margin-top:30px; flex-wrap:wrap; gap:10px; }
+.lesson-nav a { font-family:'Orbitron',sans-serif; font-size:11px; color:#00d9ff66; text-decoration:none; letter-spacing:1px; transition:0.2s; }
+.lesson-nav a:hover { color:#00d9ff; }
+.back-to-top { position:fixed; bottom:28px; right:28px; z-index:200; width:44px; height:44px; background:#000; border:1px solid #00d9ff55; color:#00d9ff; font-size:20px; cursor:pointer; display:flex; align-items:center; justify-content:center; opacity:0; pointer-events:none; transition:opacity 0.3s; }
+.back-to-top.visible { opacity:1; pointer-events:auto; } .back-to-top:hover { border-color:#00d9ff; }
+footer { text-align:center; padding:30px; opacity:0.3; font-size:11px; position:relative; z-index:1; letter-spacing:1px; }
+.module-complete { background:rgba(57,255,20,0.06); border:1px solid #39ff1444; padding:24px 28px; margin:40px 0; text-align:center; }
+.module-complete h3 { font-family:'Orbitron',sans-serif; font-size:14px; color:#39ff14; letter-spacing:2px; margin-bottom:10px; }
+.module-complete p { font-size:12px; opacity:0.8; line-height:1.7; }
+</style>
+</head>
+<body>
+<canvas id="starsCanvas"></canvas>
+<header>
+    <a href="dashboard.html" class="logo"><span>LEO</span><span>AF</span></a>
+    <div class="nav-right">
+        <a href="m6.html" class="nav-btn">← M6 HUB</a>
+        <button class="nav-btn" onclick="leoafAbort()">ABORT</button>
+    </div>
+</header>
+<div class="breadcrumb">
+    <a href="dashboard.html">DASHBOARD</a><span>/</span>
+    <a href="m6.html">M6</a><span>/</span>
+    <span style="color:#ffffff88;">LESSON 06 — SEGMENTS &amp; AVIATION CERT</span>
+</div>
+
+<div class="lesson-wrap">
+<div class="lesson-header">
+    <div class="lesson-tag">M6 · LESSON 06 OF 7</div>
+    <h1>Terminal Types<br>&amp; Aviation Certification</h1>
+    <div class="lesson-meta">
+        <div class="l-pill l-pill-q">MODULE 6</div>
+        <div class="l-pill l-pill-t">USER TERMINALS &amp; D2D</div>
+        <div class="l-pill l-pill-c">ADVANCED</div>
+    </div>
+    <p class="lesson-intro" style="margin-bottom:12px;">Five lessons built the physics of a terminal; this lesson maps it onto the market. The mapping is not arbitrary: each segment weights m6-1's three currencies — performance, cost, form factor — differently, and the weighting selects an aperture family (m6-1), an architecture (m6-3), a tracking approach (m6-5), and a compliance envelope (m6-4). The segment table is the module's design space evaluated at the points where real money is spent.</p>
+    <p class="lesson-intro" style="margin-bottom:12px;">One segment then gets a deep treatment, because it is the one where the terminal stops being a communications problem and becomes a <strong>certification</strong> problem: aviation. An aircraft terminal must survive a qualification regime (DO-160), install against standardised mechanical and electrical provisions (ARINC 791/792), and earn airworthiness approval (the STC path) before it carries a single bit. This lesson treats that regime at the level of the public standards themselves — what DO-160 tests, what ARINC 791 specifies, how an STC is structured — because the standards are public, teachable, and the reason an aero terminal costs and weighs what it does. It deliberately carries <strong>no operator- or programme-specific content</strong>; every concrete number traces to the spine's own verified figures or to a published standard's structure.</p>
+    <p class="lesson-intro" style="margin-bottom:12px;">The through-line: the same 1,280-element panel that costs a few hundred euros on a suburban roof becomes, with a DO-160 qualification campaign, an ARINC 791 adapter plate, a radome, and an STC behind it, a six-figure aviation line-replaceable unit — and every increment of that cost is a named requirement, not a markup.</p>
+</div>
+
+<div class="toc">
+    <h4>CONTENTS</h4>
+    <ol>
+        <li><a href="#s1">The segment map</a></li>
+        <li><a href="#s2">Segment requirements, beyond the link budget</a></li>
+        <li><a href="#s3">Why aviation is different: the terminal joins the aircraft</a></li>
+        <li><a href="#s4">DO-160: environmental qualification</a></li>
+        <li><a href="#s5">ARINC 791 and 792: the installation interface</a></li>
+        <li><a href="#s6">The STC: making a specific installation airworthy</a></li>
+        <li><a href="#s7">What certification does to the module's numbers</a></li>
+        <li><a href="#s8">Key facts</a></li>
+        <li><a href="#s9">What this lesson delivers to the design chain</a></li>
+        <li><a href="#quiz">Knowledge check</a></li>
+        <li><a href="#py">Python exercises</a></li>
+        <li><a href="#reflect">Reflection</a></li>
+    </ol>
+</div>
+
+<div class="cb" id="s1">
+    <h2>1. The segment map</h2>
+<p>Assembling the module's figures into the parameter table the industry actually buys against (Ka-band; panel figures are the m6-5 <em>served</em> values, dishes carry their gimbal's full gain, radome loss debited where present):</p>
+<table class="compare-table">
+<thead><tr>
+<th>Segment</th>
+<th>Typical terminal</th>
+<th>G/T (dB/K)</th>
+<th>EIRP (dBW)</th>
+<th>Deciding currency</th>
+</tr></thead>
+<tbody>
+<tr><td>Consumer NGSO</td><td>1,280-el ESA, tilt + selection</td><td>~10.9</td><td>~36</td><td>Cost, then handover</td></tr>
+<tr><td>Enterprise fixed</td><td>75 cm dish</td><td>~21</td><td>~48</td><td>G/T per euro</td></tr>
+<tr><td>Maritime</td><td>1 m stabilised dish / VICTS, radome</td><td>~21</td><td>~50</td><td>Motion + lifetime cost</td></tr>
+<tr><td>Aviation</td><td>Low-profile ESA / VICTS, radome</td><td>~11</td><td>~36</td><td>Drag, height, certification</td></tr>
+<tr><td>Land mobile</td><td>Conformal ESA</td><td>~9–11</td><td>~34</td><td>Conformality, cost</td></tr>
+<tr><td>Government</td><td>Any, often redundant</td><td>mission-set</td><td>mission-set</td><td>Resilience</td></tr>
+</tbody>
+</table>
+<p>The table restates the module's central finding once more, now priced: stationary, decibel-rational buyers take the dish and its ~10 dB G/T advantage; anything that moves — or that must handover on the NGSO cadence — pays that advantage away for agility, conformality, and reliability. The maritime row is the interesting hybrid: a ship has the deck space and power for a stabilised dish, so it often keeps the decibels and buys a mechanical stabiliser instead of surrendering to a panel — the one moving segment where the dish frequently survives, because its currency (lifetime G/T per euro across a 20-year hull) still favours metal.</p>
+</div>
+
+<div class="cb" id="s2">
+    <h2>2. Segment requirements, beyond the link budget</h2>
+<p>Each segment adds constraints the link budget never sees:</p>
+<p><strong>Consumer</strong> — self-install (the m6-5 sky-search dependency), a domestic power and thermal envelope, aesthetic acceptability, and a bill of materials that survives contact with a mass market. The hardest requirement is the one with no decibels: <em>a non-expert must make it work in ten minutes.</em></p>
+<p><strong>Enterprise / cellular backhaul</strong> — availability first (the SLA is contractual, so the m5-7 availability curve becomes a penalty clause), managed installation, often frequency and orbit diversity for the five-nines that backhaul demands. Here the dish's decibels buy margin that is worth real contractual money.</p>
+<p><strong>Maritime</strong> — stabilisation against sea state (m6-5 §6), salt-fog and vibration survival, a radome that is also a structural and safety item, and multi-year unattended reliability at sea. Power and space are relatively abundant; environment and reliability bind.</p>
+<p><strong>Land mobile</strong> — conformality above all (a vehicle-height antenna is often simply unacceptable), sharp attitude transients, and cost pressure approaching consumer. The ESA is nearly mandatory; the only question is how low-profile.</p>
+<p><strong>Aviation</strong> — every other segment's constraints at once, plus flight safety, plus certification — and the height/drag currency is measured in fuel over the airframe's life. This is the segment the rest of the lesson dissects.</p>
+</div>
+
+<div class="cb" id="s3">
+    <h2>3. Why aviation is different: the terminal joins the aircraft</h2>
+<p>A rooftop terminal that fails inconveniences a household. An aircraft terminal that fails — or worse, that fails <em>unsafely</em>, shedding a radome at altitude, radiating into avionics, feeding fire through a penetration — is a flight-safety item on a certificated vehicle. The consequence is categorical: the terminal must prove, by test and analysis, that it cannot compromise the aircraft under any condition of the flight envelope, and it must do so under a regulatory framework (FAA, EASA and equivalents) whose burden of proof is total. Three public standards structure that proof: <strong>DO-160</strong> (does the box survive the environment?), <strong>ARINC 791/792</strong> (does it install to a common mechanical and electrical interface?), and the <strong>STC</strong> (is this specific installation on this aircraft type airworthy?). The rest of the lesson takes them in turn.</p>
+</div>
+
+<div class="cb" id="s4">
+    <h2>4. DO-160: environmental qualification</h2>
+<p>RTCA <strong>DO-160</strong> (with its EUROCAE equivalent ED-14) is the environmental qualification standard for airborne equipment — the catalogue of tests a box must pass to be considered airworthy hardware. It is organised as ~26 sections, each a category of environmental stress with defined test procedures and severity categories the equipment is qualified <em>to</em>. The sections most consequential for a satcom antenna and its electronics:</p>
+<ul>
+<li><strong>Temperature and altitude</strong> (§4) — operation and survival across the flight envelope's temperature range and reduced pressure, including rapid decompression; a panel's sun-loaded BFICs (m6-1 §6) meet their thermal worst case here.</li>
+<li><strong>Temperature variation, humidity</strong> (§5–6) — thermal cycling and moisture ingress.</li>
+<li><strong>Vibration</strong> (§8) — the airframe's spectrum, which for a fuselage-top antenna includes aerodynamic buffet; the aperture and every solder joint must survive it for the design life.</li>
+<li><strong>Explosive atmosphere</strong> (§9) — the equipment must not ignite a flammable mixture, a real constraint for anything with power near fuel systems.</li>
+<li><strong>Waterproofness, fluids susceptibility</strong> (§10–11) — rain, spray, and the aircraft's own fluids.</li>
+<li><strong>Magnetic effect, power input</strong> (§15–16) — behaviour on the aircraft's electrical bus, including transients.</li>
+<li><strong>RF susceptibility and emission</strong> (§20–21) — the antenna must neither be disrupted by, nor disrupt, the aircraft's other radios and avionics: the aviation form of the m4-6 / m6-4 interference discipline, now safety-critical.</li>
+<li><strong>Lightning</strong> (§22–23) — induced transients and, for an externally mounted item, direct-strike considerations; a fuselage-top radome is in a lightning zone by definition.</li>
+</ul>
+<p>The engineering point for this module: DO-160 does not change the terminal's <em>communications</em> design — the G/T and EIRP are what m6-1 through m6-5 made them — but it dominates the terminal's mass, cost, and schedule. Qualifying a box to DO-160 is a test campaign of months and a mechanical design driven by vibration, lightning, and thermal rather than by RF. The consumer panel and the aero panel can share a beamforming architecture and differ by an order of magnitude in price entirely because of this section.</p>
+</div>
+
+<div class="cb" id="s5">
+    <h2>5. ARINC 791 and 792: the installation interface</h2>
+<p>Where DO-160 qualifies the box, the <strong>ARINC 791</strong> (and the newer <strong>ARINC 792</strong> for the second-generation / flat-panel-friendly interface) characteristics standardise how a satcom antenna <em>installs</em> on the aircraft. They define the common mechanical and electrical interface so that antennas from different vendors fit a common provision — the aviation analogue of a standardised bracket, cabling, and connector set. The structure worth knowing:</p>
+<ul>
+<li><strong>The mounting provision</strong> — a defined adapter-plate interface on the fuselage crown, so the airframe is modified once (the structural penetration, the doubler, the wiring) and antennas become comparatively interchangeable above it. This is what lets an airline re-fit a newer antenna without re-opening the airframe structure.</li>
+<li><strong>Outside/inside split</strong> — the standard partitions the system into the outside antenna assembly (under the radome) and inside equipment (modem, power), with a defined interface between, so the pressure-vessel penetration is controlled and standardised.</li>
+<li><strong>Radome</strong> — an aerodynamic fairing that is simultaneously an RF window (its loss, ~0.3–0.5 dB, debited to both G/T and EIRP in §1's table), a structural member (it carries flight loads and must not depart the aircraft), and a lightning-zone component. The radome is where the antenna's electromagnetic, structural, and safety requirements collide, and it is a certification artefact in its own right.</li>
+</ul>
+<p>ARINC 791's value is economic: it converts a bespoke integration into a repeatable one, amortising the airframe's structural certification across many antenna generations. For a flat panel the low-profile form factor (m6-3's VICTS and conformal ESAs) pays directly in drag — and drag is fuel, integrated over the airframe's remaining life, which is why aviation weights the form-factor currency in a way no other segment does.</p>
+</div>
+
+<div class="cb" id="s6">
+    <h2>6. The STC: making a specific installation airworthy</h2>
+<p>DO-160 qualifies the equipment and ARINC 791 standardises the interface, but airworthiness attaches to a <strong>specific installation on a specific aircraft type</strong>. The instrument is the <strong>Supplemental Type Certificate (STC)</strong> — an approval, granted by the airworthiness authority, that a defined modification to a type-certificated aircraft remains airworthy. Its public structure:</p>
+<ul>
+<li><strong>Engineering substantiation</strong> — structural analysis of the penetration and doubler, electrical load analysis, a safety assessment showing no hazardous failure mode, and the DO-160 qualification evidence for the equipment.</li>
+<li><strong>EMC/EMI demonstration</strong> — proof, by test on the actual aircraft, that the terminal does not interfere with the type's avionics and radios (the §4 RF sections, now in situ) — the empirical closure of the m6-4 mask discipline against the aircraft's own systems rather than other satellites.</li>
+<li><strong>Ground and flight test</strong> — verification that the installation performs and does no harm through the flight envelope.</li>
+<li><strong>Continued airworthiness</strong> — the maintenance and inspection requirements that keep the modification valid over its life (the m6-1 §7 graceful-degradation property becomes a dispatch-reliability argument here: a panel that loses elements gracefully can fly to a scheduled maintenance action rather than grounding the aircraft).</li>
+</ul>
+<p>The STC's cost and duration are why aviation connectivity moves slowly relative to consumer: a new antenna is not a product launch but a certification programme, per aircraft type, and the amortisation is over a fleet and a decade. It is also why ARINC 791's interchangeability matters so much — an STC written against the standardised provision can, in principle, accommodate a qualified successor antenna with far less re-certification than a bespoke installation would demand.</p>
+</div>
+
+<div class="cb" id="s7">
+    <h2>7. What certification does to the module's numbers</h2>
+<p>Certification changes the terminal's cost, mass, schedule, and reliability requirements — and leaves its communications numbers almost untouched. The aero ESA's ~11 dB/K G/T and ~36 dBW EIRP (§1) are the m6-5 served figures minus a radome's ~0.4 dB; the physics is the physics. What certification adds is everything around the physics: the qualified enclosure, the standardised installation, the airworthiness approval, and the continued-airworthiness tail. The module's spine can therefore carry a single terminal object across segments by attaching a <strong>certification profile</strong> — a multiplier on cost, mass, and lead time, and a set of environmental and reliability requirements — to the <em>same</em> aperture, architecture, and pass model. That is exactly what Stage 6 does: the physics is computed once; the segment decides what wraps it.</p>
+<p>A closing calibration on scope: this lesson has stayed at the level of what the public standards contain and why they drive cost — DO-160's section structure, ARINC 791's interface partition, the STC's substantiation elements. The detailed conduct of a qualification or certification campaign is specialised engineering beyond a self-directed curriculum's remit, and where a learner needs it, the standards themselves (and the authorities' advisory material) are the reference. The curriculum's claim is narrower and sound: you now know <em>why</em> an aviation terminal is a certification artefact, and what that does to the trade space m6-7 will close.</p>
+</div>
+
+<div class="cb" id="s8">
+    <h2>8. Key facts</h2>
+<table class="compare-table">
+<thead><tr>
+<th>Fact</th>
+<th>Value / structure</th>
+<th>Source</th>
+</tr></thead>
+<tbody>
+<tr><td>Segment currencies</td><td>performance / cost / form factor, weighted per segment</td><td>m6-1</td></tr>
+<tr><td>Consumer NGSO terminal</td><td>~10.9 dB/K served, ~36 dBW (ESA)</td><td>m6-5</td></tr>
+<tr><td>Enterprise fixed</td><td>~21 dB/K, ~48 dBW (75 cm dish)</td><td>m6-1</td></tr>
+<tr><td>Maritime</td><td>dish often survives — lifetime G/T per euro</td><td>§1</td></tr>
+<tr><td>Radome loss</td><td>~0.3–0.5 dB, debited to G/T and EIRP</td><td>ARINC 791</td></tr>
+<tr><td>DO-160 (ED-14)</td><td>~26 sections of environmental qualification</td><td>RTCA DO-160</td></tr>
+<tr><td>DO-160 satcom-critical sections</td><td>temp/altitude, vibration, RF emission/susceptibility, lightning</td><td>RTCA DO-160</td></tr>
+<tr><td>ARINC 791 / 792</td><td>standardised mechanical + electrical install interface</td><td>ARINC</td></tr>
+<tr><td>ARINC 791 structure</td><td>fuselage adapter provision, outside/inside split, radome</td><td>ARINC</td></tr>
+<tr><td>STC</td><td>airworthiness approval for a specific install on a type</td><td>FAA/EASA</td></tr>
+<tr><td>STC substantiation</td><td>structural, electrical, safety, EMC, ground/flight test</td><td>FAA/EASA</td></tr>
+<tr><td>Certification effect</td><td>cost/mass/schedule ↑↑, comms numbers ~unchanged</td><td>§7</td></tr>
+<tr><td>Graceful degradation → dispatch</td><td>element loss flies to scheduled maintenance</td><td>m6-1 §7</td></tr>
+</tbody>
+</table>
+</div>
+
+<div class="cb" id="s9">
+    <h2>9. What this lesson delivers to the design chain</h2>
+<p>Stage 6 of the spine attaches a <strong>certification profile</strong> to any terminal: a segment tag that carries environmental and reliability requirements and multipliers on cost, mass, and lead time, applied to the same physics the earlier stages computed. The parameter table of §1 is now the terminal model's output for any segment, and the deciding currency per row is explicit. The module's design space is fully populated: aperture (m6-1), pattern (m6-2), architecture (m6-3), scan and mask (m6-4), pass and pointing (m6-5), and now segment and certification.</p>
+<p>What remains is to <em>use</em> it: to run each segment's terminal through the Module 4 link budget and the Module 5 throughput engine and ask, for each, whether it closes the target service — and where the cost-versus-G/T frontier actually sits. That synthesis, and the degenerate terminal at the bottom of the trade space (the m5-6 handset, revisited from the terminal side), is m6-7.</p>
+</div>
+
+<div class="quiz-block" id="quiz">
+    <h2>KNOWLEDGE CHECK</h2>
+    <div class="quiz-intro">Ten questions. Each option explains itself after you commit. No retries per question — decide first.</div>
+    <div class="quiz-q">
+        <p><strong>Q1.</strong> The segment table selects a terminal by:</p>
+        <div class="quiz-options">
+            <button class="quiz-opt" data-q="1" data-correct="false">A — Choosing the highest G/T available</button>
+            <button class="quiz-opt" data-q="1" data-correct="true">B — Weighting m6-1's three currencies — performance, cost, form factor — differently per segment, which then selects aperture, architecture, tracking, and compliance envelope</button>
+            <button class="quiz-opt" data-q="1" data-correct="false">C — Regulatory mandate per segment</button>
+            <button class="quiz-opt" data-q="1" data-correct="false">D — The cheapest option always</button>
+        </div>
+        <div class="quiz-feedback" id="fb1"></div>
+    </div>
+    <div class="quiz-q">
+        <p><strong>Q2.</strong> Maritime is the one moving segment where the dish frequently survives because:</p>
+        <div class="quiz-options">
+            <button class="quiz-opt" data-q="2" data-correct="false">A — Ships cannot use phased arrays</button>
+            <button class="quiz-opt" data-q="2" data-correct="true">B — A vessel has the deck space and power for a stabilised dish, so its lifetime-G/T-per-euro currency still favours keeping the decibels and buying a mechanical stabiliser</button>
+            <button class="quiz-opt" data-q="2" data-correct="false">C — Salt water blocks phased arrays</button>
+            <button class="quiz-opt" data-q="2" data-correct="false">D — Regulation requires dishes at sea</button>
+        </div>
+        <div class="quiz-feedback" id="fb2"></div>
+    </div>
+    <div class="quiz-q">
+        <p><strong>Q3.</strong> Aviation is categorically different from other segments because:</p>
+        <div class="quiz-options">
+            <button class="quiz-opt" data-q="3" data-correct="false">A — Aircraft fly higher</button>
+            <button class="quiz-opt" data-q="3" data-correct="true">B — The terminal becomes a flight-safety item on a certificated vehicle — it must prove by test and analysis that it cannot compromise the aircraft, under a total burden of proof</button>
+            <button class="quiz-opt" data-q="3" data-correct="false">C — Aircraft antennas need more gain</button>
+            <button class="quiz-opt" data-q="3" data-correct="false">D — Airlines pay more</button>
+        </div>
+        <div class="quiz-feedback" id="fb3"></div>
+    </div>
+    <div class="quiz-q">
+        <p><strong>Q4.</strong> DO-160's role in the terminal's design is:</p>
+        <div class="quiz-options">
+            <button class="quiz-opt" data-q="4" data-correct="false">A — It sets the G/T and EIRP</button>
+            <button class="quiz-opt" data-q="4" data-correct="true">B — It qualifies the box against the flight environment — temperature, vibration, lightning, RF emission/susceptibility — dominating mass, cost, and schedule while leaving the communications numbers unchanged</button>
+            <button class="quiz-opt" data-q="4" data-correct="false">C — It defines the modulation</button>
+            <button class="quiz-opt" data-q="4" data-correct="false">D — It grants airworthiness</button>
+        </div>
+        <div class="quiz-feedback" id="fb4"></div>
+    </div>
+    <div class="quiz-q">
+        <p><strong>Q5.</strong> ARINC 791/792 provide value by:</p>
+        <div class="quiz-options">
+            <button class="quiz-opt" data-q="5" data-correct="false">A — Improving antenna gain</button>
+            <button class="quiz-opt" data-q="5" data-correct="true">B — Standardising the mechanical and electrical installation interface, so the airframe is modified once and qualified antennas become comparatively interchangeable above a common provision</button>
+            <button class="quiz-opt" data-q="5" data-correct="false">C — Replacing the STC</button>
+            <button class="quiz-opt" data-q="5" data-correct="false">D — Setting the link budget</button>
+        </div>
+        <div class="quiz-feedback" id="fb5"></div>
+    </div>
+    <div class="quiz-q">
+        <p><strong>Q6.</strong> The radome is a certification artefact in its own right because it is simultaneously:</p>
+        <div class="quiz-options">
+            <button class="quiz-opt" data-q="6" data-correct="false">A — Only an RF window</button>
+            <button class="quiz-opt" data-q="6" data-correct="true">B — An RF window (~0.3–0.5 dB loss), a structural member carrying flight loads that must not depart the aircraft, and a lightning-zone component</button>
+            <button class="quiz-opt" data-q="6" data-correct="false">C — Purely decorative</button>
+            <button class="quiz-opt" data-q="6" data-correct="false">D — Only a lightning conductor</button>
+        </div>
+        <div class="quiz-feedback" id="fb6"></div>
+    </div>
+    <div class="quiz-q">
+        <p><strong>Q7.</strong> The STC differs from DO-160 qualification in that it:</p>
+        <div class="quiz-options">
+            <button class="quiz-opt" data-q="7" data-correct="false">A — Is the same thing</button>
+            <button class="quiz-opt" data-q="7" data-correct="true">B — Approves a specific installation on a specific aircraft type as airworthy — with structural, electrical, safety, EMC, and flight-test substantiation — whereas DO-160 qualifies the equipment in isolation</button>
+            <button class="quiz-opt" data-q="7" data-correct="false">C — Tests the box on a bench</button>
+            <button class="quiz-opt" data-q="7" data-correct="false">D — Is granted by the manufacturer</button>
+        </div>
+        <div class="quiz-feedback" id="fb7"></div>
+    </div>
+    <div class="quiz-q">
+        <p><strong>Q8.</strong> Graceful degradation (m6-1 §7) acquires specific value in aviation because:</p>
+        <div class="quiz-options">
+            <button class="quiz-opt" data-q="8" data-correct="false">A — It improves the G/T</button>
+            <button class="quiz-opt" data-q="8" data-correct="true">B — A panel that loses elements gradually can fly to a scheduled maintenance action rather than grounding the aircraft — a dispatch-reliability argument in the continued-airworthiness case</button>
+            <button class="quiz-opt" data-q="8" data-correct="false">C — It eliminates the need for an STC</button>
+            <button class="quiz-opt" data-q="8" data-correct="false">D — It is required by DO-160</button>
+        </div>
+        <div class="quiz-feedback" id="fb8"></div>
+    </div>
+    <div class="quiz-q">
+        <p><strong>Q9.</strong> The claim that certification "leaves the communications numbers almost untouched" means:</p>
+        <div class="quiz-options">
+            <button class="quiz-opt" data-q="9" data-correct="false">A — Certification is irrelevant</button>
+            <button class="quiz-opt" data-q="9" data-correct="true">B — The aero terminal's G/T and EIRP are the m6-5 served figures minus a radome's ~0.4 dB — the physics is the physics, and certification adds cost, mass, schedule, and reliability requirements around it</button>
+            <button class="quiz-opt" data-q="9" data-correct="false">C — Certified terminals perform worse</button>
+            <button class="quiz-opt" data-q="9" data-correct="false">D — The link budget must be redone for aviation</button>
+        </div>
+        <div class="quiz-feedback" id="fb9"></div>
+    </div>
+    <div class="quiz-q">
+        <p><strong>Q10.</strong> This lesson deliberately stayed at public-standards depth because:</p>
+        <div class="quiz-options">
+            <button class="quiz-opt" data-q="10" data-correct="false">A — The standards are secret</button>
+            <button class="quiz-opt" data-q="10" data-correct="true">B — The section structure of DO-160, the interface partition of ARINC 791, and the substantiation elements of the STC are public, teachable, and sufficient to explain why an aero terminal costs what it does — while campaign-conduct detail is specialised practice beyond the curriculum's remit</button>
+            <button class="quiz-opt" data-q="10" data-correct="false">C — Aviation is unimportant</button>
+            <button class="quiz-opt" data-q="10" data-correct="false">D — Certification has no effect on cost</button>
+        </div>
+        <div class="quiz-feedback" id="fb10"></div>
+    </div>
+    <div class="quiz-score" id="quizScore"></div>
+</div>
+
+<div class="py-block" id="py">
+    <h2>PYTHON EXERCISES</h2>
+    <div class="py-intro">Three exercises; the last extends the module spine project. Run them, then work the numbered follow-ups in the comments — the follow-ups are the exercise.</div>
+    <div class="py-exercise">
+        <h3>Exercise 1 — Assemble the segment table</h3>
+        <p>Build §1's parameter table from the module's own verified physics, with radome loss.</p>
+<pre>
+import math
+db = lambda x: 10*math.log10(x)
+
+def dish_terminal(D_m, f_rx=20, f_tx=30, eta=0.65, pa_w=2.0,
+                  tx_loss=0.5, radome_db=0.0, t_sys_clear=122.0):
+    lam_r, lam_t = 0.3/f_rx, 0.3/f_tx
+    g_rx = db(eta*(math.pi*D_m/lam_r)**2) - radome_db
+    g_tx = db(eta*(math.pi*D_m/lam_t)**2) - radome_db
+    L = 10**(radome_db/10)
+    t_sys = t_sys_clear*L + 290*(L-1)             # radome adds noise too
+    return g_rx - db(t_sys), db(pa_w) - tx_loss + g_tx
+
+def esa_terminal(served_gt, eirp0=36.2, radome_db=0.0):
+    return served_gt - radome_db, eirp0 - radome_db
+
+rows = [
+    (&quot;consumer NGSO&quot;, *esa_terminal(10.9)),                 # m6-5 served
+    (&quot;enterprise fixed&quot;, *dish_terminal(0.75)),
+    (&quot;maritime (dish)&quot;, *dish_terminal(1.0, radome_db=0.5)),
+    (&quot;aviation (ESA)&quot;, *esa_terminal(11.5, radome_db=0.4)),
+]
+print(f&quot;{&#x27;segment&#x27;:&lt;20}{&#x27;G/T&#x27;:&gt;8}{&#x27;EIRP&#x27;:&gt;8}&quot;)
+for name, gt, eirp in rows:
+    print(f&quot;{name:&lt;20}{gt:&gt;7.1f} {eirp:&gt;7.1f}&quot;)
+
+# 1. Add the radome to the aviation dish alternative (1 m, 0.4 dB) and
+#    compare G/T against the aero ESA. Why does maritime keep the dish
+#    but aviation usually does not, given similar physics?
+# 2. Radome loss hits BOTH directions and adds noise. Decompose the
+#    0.5 dB maritime radome into its G/T penalty (gain loss + noise)
+#    vs its EIRP penalty (gain loss only). Which direction pays more?
+# 3. Sweep the aero ESA served G/T 9..13 (element count / selection)
+#    and find the value at which it matches the m4-1 downlink margin.
+#    That is the aero panel&#x27;s minimum viable size.
+</pre>
+    </div>
+    <div class="py-exercise">
+        <h3>Exercise 2 — The certification cost profile</h3>
+        <p>Model what wraps the physics, per segment.</p>
+<pre>
+# A certification profile: multipliers on a common physics BOM, plus
+# a lead-time and an environmental-requirement tag. Illustrative
+# structure — the multipliers are teaching placeholders, not quotes.
+
+PROFILES = {
+    &quot;consumer&quot;:   dict(cost_mult=1.0,  mass_mult=1.0, lead_months=0,
+                       env=&quot;domestic&quot;, cert=&quot;none&quot;),
+    &quot;enterprise&quot;: dict(cost_mult=2.0,  mass_mult=1.5, lead_months=1,
+                       env=&quot;outdoor&quot;,  cert=&quot;type-approval&quot;),
+    &quot;maritime&quot;:   dict(cost_mult=4.0,  mass_mult=3.0, lead_months=3,
+                       env=&quot;salt/vib&quot;, cert=&quot;marine-class&quot;),
+    &quot;aviation&quot;:   dict(cost_mult=15.0, mass_mult=2.5, lead_months=18,
+                       env=&quot;DO-160&quot;,   cert=&quot;STC&quot;),
+}
+
+BASE_COST_EUR = 300     # the consumer panel BOM, from m6-3 territory
+BASE_MASS_KG  = 3.0
+
+print(f&quot;{&#x27;segment&#x27;:&lt;12}{&#x27;cost €&#x27;:&gt;9}{&#x27;mass kg&#x27;:&gt;9}{&#x27;lead mo&#x27;:&gt;9}  {&#x27;cert&#x27;}&quot;)
+for seg, p in PROFILES.items():
+    c = BASE_COST_EUR * p[&quot;cost_mult&quot;]
+    m = BASE_MASS_KG  * p[&quot;mass_mult&quot;]
+    print(f&quot;{seg:&lt;12}{c:&gt;9.0f}{m:&gt;9.1f}{p[&#x27;lead_months&#x27;]:&gt;9}  {p[&#x27;cert&#x27;]}&quot;)
+
+# 1. The aviation cost multiplier is dominated by certification, not
+#    hardware. Split it: if the qualified HARDWARE is 3x consumer and
+#    the STC/DO-160 campaign amortises over a fleet of N aircraft,
+#    write per-aircraft cost as a function of N. At what fleet size
+#    does certification stop dominating?
+# 2. Lead time is the hidden currency: an 18-month aviation lead vs a
+#    consumer product cycle. Argue why ARINC 791 interchangeability is
+#    worth more than any hardware saving, using this number.
+# 3. Add a &#x27;reliability&#x27; field (MTBF requirement) per segment and
+#    connect it to m6-1&#x27;s graceful-degradation property: which segment
+#    values soft-failure most, and why does that change its BOM?
+</pre>
+    </div>
+    <div class="py-exercise">
+        <h3>Exercise 3 — Spine Stage 6: the certification profile</h3>
+        <p>The terminal model becomes segment-aware; physics computed once, wrapped per market.</p>
+<pre>
+import math
+db = lambda x: 10*math.log10(x)
+
+# ═══════════════════════════════════════════════════════
+# M6 SPINE PROJECT — TERMINAL MODEL
+# Stage 6: segment &amp; certification profile.
+#   Stages 1-5 computed the PHYSICS (G/T, EIRP, pass, pointing).
+#   Stage 6 attaches a SEGMENT: radome loss, environmental and
+#   reliability requirements, and cost/mass/lead multipliers —
+#   the same physics wrapped for each market.
+# Next: m6-7 runs each wrapped terminal through M4 + M5 and
+#       finds the cost-vs-G/T frontier.
+# ═══════════════════════════════════════════════════════
+
+class Terminal:
+    &quot;&quot;&quot;Carries physics from Stages 1-5; Stage 6 wraps it per segment.&quot;&quot;&quot;
+    def __init__(self, name, gt_served, eirp, beamwidth_deg):
+        self.name = name
+        self.gt_phys, self.eirp_phys, self.bw = gt_served, eirp, beamwidth_deg
+
+class SegmentProfile:
+    def __init__(self, segment, radome_db, cost_mult, mass_mult,
+                 lead_months, env, cert, mtbf_hr):
+        self.segment, self.radome = segment, radome_db
+        self.cost_mult, self.mass_mult = cost_mult, mass_mult
+        self.lead_months, self.env, self.cert = lead_months, env, cert
+        self.mtbf_hr = mtbf_hr
+
+    def apply(self, t: Terminal, base_cost=300, base_mass=3.0):
+        return dict(
+            segment   = self.segment,
+            gt        = t.gt_phys - self.radome,      # radome both ways
+            eirp      = t.eirp_phys - self.radome,
+            cost_eur  = base_cost * self.cost_mult,
+            mass_kg   = base_mass * self.mass_mult,
+            lead_mo   = self.lead_months,
+            env       = self.env, cert = self.cert, mtbf = self.mtbf_hr)
+
+PROFILES = [
+    SegmentProfile(&quot;consumer&quot;,   0.0,  1.0, 1.0,  0, &quot;domestic&quot;, &quot;none&quot;,          20000),
+    SegmentProfile(&quot;enterprise&quot;, 0.0,  2.0, 1.5,  1, &quot;outdoor&quot;,  &quot;type-approval&quot;, 50000),
+    SegmentProfile(&quot;maritime&quot;,   0.5,  4.0, 3.0,  3, &quot;salt/vib&quot;, &quot;marine-class&quot;,  60000),
+    SegmentProfile(&quot;aviation&quot;,   0.4, 15.0, 2.5, 18, &quot;DO-160&quot;,   &quot;STC&quot;,          100000),
+]
+
+panel = Terminal(&quot;1,280-el Ka ESA&quot;, gt_served=11.3, eirp=36.2, beamwidth_deg=3.2)
+
+print(f&quot;{&#x27;segment&#x27;:&lt;12}{&#x27;G/T&#x27;:&gt;6}{&#x27;EIRP&#x27;:&gt;7}{&#x27;cost €&#x27;:&gt;9}{&#x27;mass&#x27;:&gt;7}{&#x27;lead&#x27;:&gt;6}  {&#x27;cert&#x27;}&quot;)
+for p in PROFILES:
+    r = p.apply(panel)
+    print(f&quot;{r[&#x27;segment&#x27;]:&lt;12}{r[&#x27;gt&#x27;]:&gt;6.1f}{r[&#x27;eirp&#x27;]:&gt;7.1f}&quot;
+          f&quot;{r[&#x27;cost_eur&#x27;]:&gt;9.0f}{r[&#x27;mass_kg&#x27;]:&gt;7.1f}{r[&#x27;lead_mo&#x27;]:&gt;5}mo  {r[&#x27;cert&#x27;]}&quot;)
+
+# ── the m6-7 handoff ────────────────────────────────────
+# Each wrapped terminal&#x27;s (gt, eirp) drops into the M4 LinkBudget;
+# the M5 ThroughputEngine prices the service; the cost field puts
+# it on the frontier. m6-7 closes the loop: silicon -&gt; service.
+
+# 1. Run all four wrapped panels through the m4-1 downlink (same
+#    satellite/geometry) and report which segments close the target
+#    MODCOD. Does the radome ever change the MODCOD rung (m5-2)?
+# 2. The same PHYSICS terminal serves every segment here. Now vary the
+#    physics per segment (element count by form-factor limit) and find
+#    the aviation panel&#x27;s minimum viable element count.
+# 3. Add a &#x27;dish alternative&#x27; Terminal per segment and let m6-7&#x27;s
+#    logic pick the cheaper terminal that closes the service. Which
+#    segments pick the dish? Compare against §1&#x27;s table.
+</pre>
+    </div>
+</div>
+
+<div class="reflection-block" id="reflect">
+    <h2>REFLECTION</h2>
+    <div class="ref-intro">Four prompts. Each forces a decision — write the position down before moving on; the act of committing is the exercise.</div>
+    <div class="ref-prompt">
+        <h3>PROMPT 01</h3>
+        <p>Section 1's table shows aviation and consumer terminals with nearly identical communications numbers (~11 dB/K, ~36 dBW) but, by exercise 2's structure, an order-of-magnitude cost gap driven entirely by certification. Argue the strategic consequence for a terminal vendor: does the certification moat protect incumbents (the campaign cost deters entrants) or expose them (a consumer-scale manufacturer who <em>does</em> certify undercuts the traditional aero-only vendor)? Identify which way the module's own economics (m6-3's amortisation axis) tips the answer, and what a rational consumer-LEO operator entering aviation would do first.</p>
+    </div>
+    <div class="ref-prompt">
+        <h3>PROMPT 02</h3>
+        <p>Section 6 made the STC attach to a specific aircraft type, and ARINC 791 the mechanism that amortises the airframe modification across antenna generations. Frame the tension: the standardised interface lowers the cost of the <em>next</em> antenna but constrains its form factor to the provision defined years earlier. For a technology moving as fast as flat-panel ESAs (m6-3's digital-DBF timeline), is a frozen interface a net accelerant or a net brake? Take a position and defend it with a specific capability from m6-3 or m6-5 that a fixed ARINC 791 provision would or would not accommodate.</p>
+    </div>
+    <div class="ref-prompt">
+        <h3>PROMPT 03</h3>
+        <p>This lesson kept a hard scope boundary — public standards only, no programme-derived content — and stated it explicitly. Interrogate the boundary as an epistemics question, not a confidentiality one: what can a self-directed learner <em>genuinely</em> know about certification from public standards alone, versus what requires campaign experience that no curriculum can supply? Identify the specific point at which reading DO-160 stops teaching and doing DO-160 begins, and design the honest disclaimer a curriculum should carry at that boundary so a learner does not mistake standards-literacy for qualification competence.</p>
+    </div>
+    <div class="ref-prompt">
+        <h3>PROMPT 04</h3>
+        <p>Section 7's claim — physics unchanged, everything around it certified — let the spine carry one terminal object across segments with a wrapper. Stress-test the abstraction: name the segment or requirement where certification <em>does</em> reach back and change the physics (hint: consider a DO-160 thermal or vibration limit forcing an element, lattice, or power change from m6-1/m6-2/m6-3). If you can find one, the clean physics/certification separation is a simplification — state where the spine's Stage 6 wrapper would have to become a feedback loop instead, and what that costs the model's tidiness.</p>
+    </div>
+</div>
+
+<div class="cb">
+    <h2>Sources</h2>
+<ul>
+<li>RTCA DO-160 (EUROCAE ED-14), <em>Environmental Conditions and Test Procedures for Airborne Equipment</em> — section structure and test categories.</li>
+<li>ARINC Characteristic 791 and 792 — aeronautical satcom antenna installation interface standards.</li>
+<li>FAA / EASA Supplemental Type Certificate process (public advisory and guidance material) — STC substantiation structure.</li>
+<li>Modules 6 lessons m6-1 through m6-5 — the physics (G/T, EIRP, pattern, scan, pass, pointing) this lesson wraps per segment.</li>
+<li>Module 4 (m4-1), Module 5 (m5-6, m5-7) — the link budget and service the wrapped terminals will be run through in m6-7.</li>
+<li>General aeronautical/maritime satcom terminal literature — segment characteristics at class level; no operator- or programme-specific content.</li>
+</ul>
+</div>
+
+<div class="complete-wrap">
+    <button class="complete-btn" id="completeBtn">MARK LESSON COMPLETE</button>
+    <div class="complete-msg" id="completeMsg"></div>
+</div>
+<div class="lesson-nav">
+    <a href="m6-5.html">← LESSON 05 — POINTING, TRACKING &amp; HANDOVER</a>
+    <a href="m6-7.html">LESSON 07 — SYNTHESIS: TERMINAL TRADE SPACE →</a>
+</div>
+</div>
+
+<button class="back-to-top" id="backToTop" title="Back to top">↑</button>
+<footer>© 2026 LEOAF · M6 · LESSON 06 OF 7</footer>
+<script>
+const canvas=document.getElementById('starsCanvas'),ctx=canvas.getContext('2d');
+let stars=[];
+function initStars(){stars=[];for(let i=0;i<180;i++)stars.push({x:Math.random()*canvas.width,y:Math.random()*canvas.height,size:Math.random()*1.5+0.4,speed:Math.random()*0.18+0.04,hue:Math.random()*360});}
+function resizeCanvas(){canvas.width=window.innerWidth;canvas.height=window.innerHeight;}
+resizeCanvas();initStars();window.addEventListener('resize',resizeCanvas);
+function animateStars(){ctx.clearRect(0,0,canvas.width,canvas.height);stars.forEach(s=>{s.y-=s.speed;if(s.y<0){s.y=canvas.height;s.x=Math.random()*canvas.width;}ctx.beginPath();ctx.fillStyle=`hsl(${s.hue},80%,80%)`;ctx.arc(s.x,s.y,s.size,0,Math.PI*2);ctx.fill();});requestAnimationFrame(animateStars);}
+animateStars();
+</script>
+<script>
+const feedbacks={
+    1:{correct:"The module's whole apparatus resolves to a currency weighting per row. Consumer weights cost and handover; enterprise weights G/T-per-euro; aviation weights form factor and certification. The physics is common; the weighting selects the point in the design space.",wrong:"Highest G/T is the enterprise answer, not the universal one — the panel deliberately surrenders G/T for agility. Regulation constrains all segments (m6-4) but does not pick the terminal. Cheapest ignores the SLA-bearing and safety-bearing segments entirely."},
+    2:{correct:"The moving-platform logic (m6-5 §6) usually favours the ESA, but maritime relaxes the form-factor and power constraints that force the panel elsewhere — leaving the dish's ~10 dB G/T advantage worth a stabiliser across a 20-year hull. VICTS and ESAs are advancing here, but the dish is not yet displaced.",wrong:"Ships use ESAs too — it is a trade, not a prohibition. Salt fog is a survival requirement (DO-160-like), not a showstopper. No such regulation."},
+    3:{correct:"The failure consequence changes category: a shed radome, RF into avionics, or fire through a penetration are safety events, not service outages. That is what invokes DO-160, ARINC 791, and the STC — and what makes the same panel an order of magnitude more expensive.",wrong:"Altitude is an environmental parameter (DO-160 §4), not the categorical difference. Aero G/T is comparable to consumer (§1). Willingness to pay is a consequence of the certification cost, not its cause."},
+    4:{correct:"DO-160 is the environmental catalogue (~26 sections). It is why the aero panel and the consumer panel can share an architecture yet differ by an order of magnitude in price: the qualification campaign, not the RF, drives the aero cost.",wrong:"G/T and EIRP come from m6-1..m6-5's physics. Modulation is Module 5. Airworthiness for a specific install is the STC's job, not DO-160's — DO-160 qualifies the equipment, the STC approves the installation."},
+    5:{correct:"The standard partitions the system (outside/inside split, adapter provision, radome) so structural certification amortises across antenna generations. It is the reason an airline can re-fit a newer antenna without re-opening the airframe structure — economic, not electromagnetic.",wrong:"Gain is aperture physics. ARINC 791 complements the STC (it does not replace airworthiness approval). The link budget is Module 4."},
+    6:{correct:"The radome is where the antenna's electromagnetic, structural, and safety requirements collide — its loss debits the link budget both ways, its structure carries loads, and its position puts it in a lightning zone. Each facet is a separate substantiation.",wrong:"Each single-role answer misses the collision that makes it a certification item. The loss is real (debited in §1); the structure is flight-critical; the lightning exposure is inherent to a fuselage-top position."},
+    7:{correct:"Airworthiness attaches to the installation, not the part. The STC closes the loop DO-160 opens: qualified equipment, installed on this type, demonstrated (including EMC on the actual aircraft) to remain airworthy through the envelope.",wrong:"They are distinct and sequential. Bench testing is DO-160's domain. The STC is granted by the airworthiness authority (FAA/EASA), not the vendor."},
+    8:{correct:"The distributed-failure property becomes an economic and operational argument: dispatch reliability. An aircraft that must not be grounded by a single antenna fault values the panel's soft failure mode in a way a consumer roof never quantifies.",wrong:"Degradation costs G/T (−0.46 dB at 10% loss), it does not improve it. It supports, not replaces, certification. DO-160 tests survival, not this system-level reliability property."},
+    9:{correct:"This is what lets the spine carry one physics computation across segments and attach a certification *profile* (cost/mass/lead-time multipliers, environmental requirements). The radome loss is the only communications delta; everything else certification adds is non-RF.",wrong:"Certification is decisive for cost and safety — just not for the link budget. Performance is essentially the same minus radome loss. The budget consumes the same G/T/EIRP with the radome debited."},
+    10:{correct:"The teachable claim is bounded and sound: you know why aviation terminals are certification artefacts and what that does to the trade space. The detailed conduct of a qualification programme is specialist engineering, and the standards themselves are the reference where a practitioner needs it.",wrong:"The standards are public documents. Aviation is a major connectivity market. Certification is precisely what drives the aero cost (§4, §7)."}
+};
+let answered={};
+document.querySelectorAll('.quiz-opt').forEach(btn=>{
+    btn.addEventListener('click',function(){
+        const q=this.dataset.q;
+        if(answered[q]!==undefined)return;
+        const correct=this.dataset.correct==='true';
+        answered[q]=correct;
+        document.querySelectorAll(`.quiz-opt[data-q="${q}"]`).forEach(b=>{b.disabled=true;if(b.dataset.correct==='true')b.classList.add('correct');});
+        if(!correct)this.classList.add('wrong');
+        const fb=document.getElementById('fb'+q);
+        fb.textContent=(correct?'✓ ':'✗ ')+feedbacks[q][correct?'correct':'wrong'];
+        fb.style.color=correct?'#39ff14':'#ff004f';
+        if(Object.keys(answered).length===10){
+            const total=Object.values(answered).filter(Boolean).length;
+            const sc=document.getElementById('quizScore');
+            sc.style.display='block';
+            const pct=Math.round(total/10*100);
+            sc.textContent=`SCORE: ${total}/10 (${pct}%) — ${pct===100?'PERFECT.':pct>=80?'STRONG.':pct>=60?'ADEQUATE. REVISIT WEAK SECTIONS.':'REVISIT THE LESSON BEFORE PROCEEDING.'}`;
+        }
+    });
+});
+</script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="supabase.js"></script>
+<script src="user_progress.js"></script>
+<script>
+const LESSON_ID='m6-6';
+(function(){
+    function bounceToLogin(r){console.error("Auth guard:",r);window.location.replace("index.html");}
+    async function init(){
+        if(typeof client==="undefined"||!client||!client.auth)return bounceToLogin("Supabase client not loaded");
+        let session=null;
+        try{({data:{session}}=await client.auth.getSession());}
+        catch(e){return bounceToLogin("getSession threw: "+e.message);}
+        if(!session){window.location.replace("index.html");return;}
+        const btn=document.getElementById('completeBtn'),msg=document.getElementById('completeMsg');
+        function setDone(done){
+            if(done){btn.textContent='✓ COMPLETE — CLICK TO UNDO';btn.classList.add('done');btn.style.cssText='border-color:#39ff14;color:#39ff14;background:rgba(57,255,20,0.1);cursor:pointer;opacity:1;';msg.style.color='#39ff14';msg.textContent='Lesson marked complete. Click again to undo.';}
+            else{btn.textContent='MARK LESSON COMPLETE';btn.classList.remove('done');btn.style.cssText='';msg.style.color='#ffffff55';msg.textContent='Not yet marked complete.';}
+        }
+        let mastered=[];
+        try{mastered=await getMasteredSections();}catch(e){console.error(e);}
+        setDone(mastered.includes(LESSON_ID));
+        btn.addEventListener('click',async()=>{
+            const isDone=btn.classList.contains('done');
+            msg.style.color='#00d9ff';msg.textContent='Saving...';
+            const ok=await upsertSection(LESSON_ID,!isDone);
+            if(ok){setDone(!isDone);}else{msg.style.color='#ff004f';msg.textContent='Error saving. Try again.';}
+        });
+        const btt=document.getElementById('backToTop');
+        window.addEventListener('scroll',()=>{btt.classList.toggle('visible',window.scrollY>400);});
+        btt.addEventListener('click',()=>window.scrollTo({top:0,behavior:'smooth'}));
+    }
+    if(document.readyState==="loading")document.addEventListener("DOMContentLoaded",init);
+    else init();
+})();
+</script>
+</body>
+</html>
