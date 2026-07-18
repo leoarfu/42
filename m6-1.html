@@ -1,0 +1,709 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, shrink-to-fit=no">
+<title>M6-1 — The Terminal Design Problem · LEOAF</title>
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;600;800&family=Share+Tech+Mono&family=Libre+Baskerville:ital,wght@0,400;0,700;1,400&display=swap" rel="stylesheet">
+<link rel="icon" href="favicon.ico" sizes="any" type="image/x-icon">
+<link rel="manifest" href="site.webmanifest">
+<meta name="theme-color" content="#0f0f0f">
+<script>
+window.leoafAbort = async function () {
+    function go() { window.location.replace("index.html?signedout=1"); }
+    try { if (typeof client !== "undefined" && client && client.auth && client.auth.signOut) { try { await client.auth.signOut({ scope: "local" }); } catch (e) {} } } catch (e) {}
+    go();
+};
+</script>
+<style>
+* { box-sizing:border-box; margin:0; padding:0; }
+html { height:100%; -webkit-text-size-adjust:100%; overflow-x:hidden; }
+body { font-family:'Share Tech Mono',monospace; background:#000; color:white; overflow-x:hidden; min-height:100vh; }
+#starsCanvas { position:fixed; inset:0; z-index:-1; }
+header { background:#000; border-bottom:1px solid #ff004f33; position:sticky; top:0; z-index:100; padding:1rem clamp(1.5rem,5vw,4rem); display:flex; justify-content:space-between; align-items:center; }
+.logo { font-family:'Orbitron',sans-serif; font-weight:800; font-size:clamp(16px,2vw,22px); letter-spacing:3px; text-decoration:none; }
+.logo span:first-child { color:white; } .logo span:last-child { color:#ff004f; }
+.nav-right { display:flex; align-items:center; gap:10px; }
+.nav-btn { background:transparent; border:1px solid #ff004f44; color:#ff004f; padding:6px 14px; cursor:pointer; transition:0.3s; font-size:11px; font-family:'Orbitron',sans-serif; letter-spacing:1px; text-decoration:none; display:inline-block; }
+.nav-btn:hover { background:#ff004f; color:black; }
+.breadcrumb { padding:14px clamp(1.5rem,5vw,4rem); font-size:11px; color:#ffffff44; letter-spacing:1px; position:relative; z-index:1; }
+.breadcrumb a { color:#00d9ff66; text-decoration:none; } .breadcrumb a:hover { color:#00d9ff; }
+.breadcrumb span { margin:0 8px; }
+.lesson-wrap { max-width:820px; margin:0 auto; padding:0 clamp(1.5rem,5vw,4rem) 80px; position:relative; z-index:1; }
+.lesson-header { padding:30px 0 28px; border-bottom:1px solid #ffffff11; margin-bottom:36px; }
+.lesson-tag { font-family:'Orbitron',sans-serif; font-size:10px; color:#ff004f; letter-spacing:3px; margin-bottom:10px; }
+.lesson-header h1 { font-family:'Orbitron',sans-serif; font-size:clamp(20px,3.5vw,32px); font-weight:800; line-height:1.2; margin-bottom:12px; }
+.lesson-meta { display:flex; gap:10px; flex-wrap:wrap; margin-bottom:16px; }
+.l-pill { font-family:'Orbitron',sans-serif; font-size:10px; padding:3px 10px; border:1px solid; letter-spacing:1px; }
+.l-pill-q { color:#ff004f; border-color:#ff004f44; } .l-pill-t { color:#39ff14; border-color:#39ff1444; }
+.l-pill-c { color:#ffaa00; border-color:#ffaa0044; }
+.lesson-intro { font-size:13px; line-height:1.85; opacity:0.75; }
+.toc { background:rgba(0,217,255,0.06); border:1px solid #00d9ff33; padding:24px 28px; margin:30px 0; }
+.toc h4 { font-family:'Orbitron',sans-serif; font-size:10px; color:#00d9ff; letter-spacing:2px; margin-bottom:16px; }
+.toc ol { padding-left:20px; } .toc li { font-size:13px; line-height:2.1; }
+.toc li a { color:#00d9ffbb; text-decoration:none; transition:0.15s; } .toc li a:hover { color:#fff; padding-left:4px; }
+.toc li::marker { color:#ff004f; font-family:'Orbitron',sans-serif; font-size:10px; }
+.cb { background:#f5f2ec; color:#1a1a1a; padding:36px clamp(24px,4vw,48px); margin-bottom:24px; border-left:4px solid #00d9ff; position:relative; z-index:1; }
+.cb h2 { font-family:'Orbitron',sans-serif; font-size:13px; color:#003d66; letter-spacing:2px; text-transform:uppercase; margin-bottom:20px; padding-bottom:10px; border-bottom:2px solid #00d9ff66; scroll-margin-top:80px; }
+.cb h3 { font-family:'Orbitron',sans-serif; font-size:11px; color:#444; letter-spacing:1.5px; text-transform:uppercase; margin:28px 0 12px; }
+.cb p { font-family:'Libre Baskerville',Georgia,serif; font-size:15px; line-height:1.9; color:#1a1a1a; margin-bottom:16px; }
+.cb ul { padding-left:0; margin-bottom:16px; }
+.cb ul li { font-family:'Libre Baskerville',Georgia,serif; font-size:14px; line-height:1.85; color:#1a1a1a; padding-left:20px; position:relative; margin-bottom:8px; }
+.cb ul li::before { content:'›'; position:absolute; left:0; color:#0077aa; }
+.cb blockquote { border-left:3px solid #1a7a1a; background:#eafaea; padding:14px 20px; margin:18px 0; font-size:13px; font-family:'Share Tech Mono',monospace; color:#0a3d0a; line-height:1.8; }
+.callout { border-left:3px solid #0088cc; background:#e8f4fb; padding:16px 20px; margin:22px 0; font-size:12px; line-height:1.8; color:#1a1a1a; }
+.callout.red { border-left-color:#cc0033; background:#fdecea; }
+.callout.green { border-left-color:#1a7a1a; background:#eafaea; }
+.callout.amber { border-left-color:#996600; background:#fef9ec; }
+.callout strong { font-family:'Orbitron',sans-serif; font-size:10px; letter-spacing:1px; display:block; margin-bottom:8px; }
+.compare-table { width:100%; border-collapse:collapse; margin:22px 0; font-size:12px; }
+.compare-table th { font-family:'Orbitron',sans-serif; font-size:10px; letter-spacing:1px; color:#003d66; padding:10px 12px; border-bottom:2px solid #00d9ff66; text-align:left; }
+.compare-table td { padding:10px 12px; border-bottom:1px solid #ddd; line-height:1.5; color:#1a1a1a; vertical-align:top; }
+.compare-table tr:hover td { background:#f0f0f0; }
+.key-numbers { display:grid; grid-template-columns:repeat(auto-fit,minmax(140px,1fr)); gap:12px; margin:22px 0; }
+.kn-item { background:#fff; border:1px solid #d0d0d0; padding:16px 12px; text-align:center; }
+.kn-val { font-family:'Orbitron',sans-serif; font-size:clamp(13px,1.8vw,18px); font-weight:800; color:#003d66; display:block; }
+.kn-label { font-size:10px; color:#555; letter-spacing:1px; margin-top:5px; display:block; line-height:1.4; }
+.quiz-block { background:rgba(17,17,17,0.9); border:1px solid #ff004f33; padding:28px; margin:48px 0 32px; }
+.quiz-block h2 { font-family:'Orbitron',sans-serif; font-size:13px; color:#ff004f; letter-spacing:2px; margin-bottom:6px; }
+.quiz-intro { font-size:12px; opacity:0.6; margin-bottom:24px; padding-bottom:16px; border-bottom:1px solid #ff004f22; line-height:1.6; }
+.quiz-q { margin-bottom:28px; }
+.quiz-q p { font-size:13px; opacity:0.9; margin-bottom:12px; line-height:1.65; }
+.quiz-q p strong { color:#00d9ff; }
+.quiz-options { display:flex; flex-direction:column; gap:8px; }
+.quiz-opt { background:rgba(255,255,255,0.03); border:1px solid #ffffff1a; padding:11px 16px; cursor:pointer; font-size:12px; font-family:'Share Tech Mono',monospace; transition:0.2s; text-align:left; color:white; line-height:1.5; }
+.quiz-opt:hover:not(:disabled) { background:rgba(0,217,255,0.08); border-color:#00d9ff44; }
+.quiz-opt.correct { background:rgba(57,255,20,0.1); border-color:#39ff14; color:#39ff14; }
+.quiz-opt.wrong { background:rgba(255,0,79,0.1); border-color:#ff004f; color:#ff004f; }
+.quiz-opt:disabled { cursor:default; }
+.quiz-feedback { font-size:12px; margin-top:10px; min-height:18px; line-height:1.7; opacity:0.9; padding:0 4px; }
+.quiz-score { font-family:'Orbitron',sans-serif; font-size:12px; color:#39ff14; margin-top:20px; letter-spacing:1px; display:none; padding-top:16px; border-top:1px solid #39ff1433; }
+.py-block { background:rgba(10,10,10,0.95); border:1px solid #39ff1422; padding:28px; margin:32px 0; }
+.py-block h2 { font-family:'Orbitron',sans-serif; font-size:13px; color:#39ff14; letter-spacing:2px; margin-bottom:8px; }
+.py-block .py-intro { font-size:12px; opacity:0.7; margin-bottom:20px; padding-bottom:16px; border-bottom:1px solid #39ff1422; line-height:1.7; }
+.py-exercise { margin-bottom:32px; } .py-exercise:last-child { margin-bottom:0; }
+.py-exercise h3 { font-family:'Orbitron',sans-serif; font-size:11px; color:#39ff1499; letter-spacing:1.5px; text-transform:uppercase; margin-bottom:10px; }
+.py-exercise p { font-size:12px; opacity:0.8; margin-bottom:14px; line-height:1.75; }
+.py-block pre { background:#050505; border:1px solid #39ff1433; padding:20px; font-family:'Share Tech Mono',monospace; font-size:11px; line-height:1.7; overflow-x:auto; color:#39ff14; white-space:pre; margin-bottom:12px; }
+.py-note { background:rgba(57,255,20,0.04); border-left:2px solid #39ff14; padding:12px 16px; margin-top:14px; font-size:12px; line-height:1.75; opacity:0.8; }
+.py-note strong { font-family:'Orbitron',sans-serif; font-size:10px; color:#39ff14; display:block; margin-bottom:6px; letter-spacing:1px; }
+.reflection-block { background:rgba(255,170,0,0.04); border:1px solid #ffaa0033; padding:24px; margin:32px 0; }
+.reflection-block h2 { font-family:'Orbitron',sans-serif; font-size:13px; color:#ffaa00; letter-spacing:2px; margin-bottom:8px; }
+.ref-intro { font-size:12px; opacity:0.7; margin-bottom:20px; padding-bottom:14px; border-bottom:1px solid #ffaa0022; line-height:1.7; }
+.ref-prompt { margin-bottom:20px; }
+.ref-prompt h3 { font-family:'Orbitron',sans-serif; font-size:11px; color:#ffaa0099; letter-spacing:1px; margin-bottom:8px; }
+.ref-prompt p { font-size:12px; opacity:0.8; line-height:1.75; }
+.complete-wrap { margin-top:56px; padding-top:30px; border-top:1px solid #ffffff11; text-align:center; }
+.complete-btn { font-family:'Orbitron',sans-serif; font-size:13px; letter-spacing:2px; padding:14px 44px; background:transparent; border:1px solid #39ff14; color:#39ff14; cursor:pointer; transition:0.3s; }
+.complete-btn:hover:not(.done) { background:#39ff14; color:black; box-shadow:0 0 20px rgba(57,255,20,0.4); }
+.complete-btn.done { background:rgba(57,255,20,0.1); cursor:pointer; opacity:1; }
+.complete-msg { font-size:12px; color:#39ff14; margin-top:14px; min-height:18px; letter-spacing:1px; }
+.lesson-nav { display:flex; justify-content:space-between; margin-top:30px; flex-wrap:wrap; gap:10px; }
+.lesson-nav a { font-family:'Orbitron',sans-serif; font-size:11px; color:#00d9ff66; text-decoration:none; letter-spacing:1px; transition:0.2s; }
+.lesson-nav a:hover { color:#00d9ff; }
+.back-to-top { position:fixed; bottom:28px; right:28px; z-index:200; width:44px; height:44px; background:#000; border:1px solid #00d9ff55; color:#00d9ff; font-size:20px; cursor:pointer; display:flex; align-items:center; justify-content:center; opacity:0; pointer-events:none; transition:opacity 0.3s; }
+.back-to-top.visible { opacity:1; pointer-events:auto; } .back-to-top:hover { border-color:#00d9ff; }
+footer { text-align:center; padding:30px; opacity:0.3; font-size:11px; position:relative; z-index:1; letter-spacing:1px; }
+.module-complete { background:rgba(57,255,20,0.06); border:1px solid #39ff1444; padding:24px 28px; margin:40px 0; text-align:center; }
+.module-complete h3 { font-family:'Orbitron',sans-serif; font-size:14px; color:#39ff14; letter-spacing:2px; margin-bottom:10px; }
+.module-complete p { font-size:12px; opacity:0.8; line-height:1.7; }
+</style>
+</head>
+<body>
+<canvas id="starsCanvas"></canvas>
+<header>
+    <a href="dashboard.html" class="logo"><span>LEO</span><span>AF</span></a>
+    <div class="nav-right">
+        <a href="m6.html" class="nav-btn">← M6 HUB</a>
+        <button class="nav-btn" onclick="leoafAbort()">ABORT</button>
+    </div>
+</header>
+<div class="breadcrumb">
+    <a href="dashboard.html">DASHBOARD</a><span>/</span>
+    <a href="m6.html">M6</a><span>/</span>
+    <span style="color:#ffffff88;">LESSON 01 — THE TERMINAL DESIGN PROBLEM</span>
+</div>
+
+<div class="lesson-wrap">
+<div class="lesson-header">
+    <div class="lesson-tag">M6 · LESSON 01 OF 7</div>
+    <h1>The Terminal<br>Design Problem</h1>
+    <div class="lesson-meta">
+        <div class="l-pill l-pill-q">MODULE 6</div>
+        <div class="l-pill l-pill-t">USER TERMINALS &amp; D2D</div>
+        <div class="l-pill l-pill-c">FOUNDATION</div>
+    </div>
+    <p class="lesson-intro" style="margin-bottom:12px;">To everything built so far, a terminal is three numbers. Module 4 consumed its G/T on the downlink and its EIRP on the uplink; Module 5 assumed it could point — continuously, at a satellite crossing the sky in minutes — and, for the NGSO case, re-point to the next satellite without dropping a session. This module designs the hardware behind those numbers: the antennas, amplifiers, and tracking systems that turn a customer's roof, mast, fuselage, or vehicle into a node of the network. A fourth number joins in lesson m6-4 — regulatory off-axis compliance — and the module's spine project, a Python <code>TerminalModel</code>, will end by feeding all of them back into the Module 4 and 5 engines, closing the loop from silicon to service.</p>
+    <p class="lesson-intro" style="margin-bottom:12px;">This first lesson frames the problem. It establishes what a terminal is as a system (five subsystems, one budget), sets the reflector antenna as the performance benchmark it has been for seventy years, explains why the NGSO era broke the reflector's monopoly and put electronically steered flat panels on a million roofs, and derives the first-order physics of both aperture families — including the two comparisons that define the whole module: a 1,280-element flat panel matches a 65 cm dish's <em>area efficiency</em> at broadside while conceding <strong>~9 dB of G/T</strong> to it, and recovers ground on the transmit side through power aggregated across hundreds of small amplifiers.</p>
+    <p class="lesson-intro" style="margin-bottom:12px;">The frame to hold for seven lessons: terminal engineering trades in three currencies — <strong>performance</strong> (G/T, EIRP, availability), <strong>cost</strong> (hardware, installation, certification), and <strong>form factor</strong> (size, height, conformality, power draw) — and every market segment weights them differently. The dish is the performance-per-euro champion; the flat panel exists because two segments (NGSO consumer and anything that moves) price the other currencies higher.</p>
+</div>
+
+<div class="toc">
+    <h4>CONTENTS</h4>
+    <ol>
+        <li><a href="#s1">The terminal as the chain sees it</a></li>
+        <li><a href="#s2">Anatomy of a terminal</a></li>
+        <li><a href="#s3">The reflector benchmark</a></li>
+        <li><a href="#s4">Why NGSO broke the dish's monopoly</a></li>
+        <li><a href="#s5">The flat panel: gain from count</a></li>
+        <li><a href="#s6">G/T at the hardware level</a></li>
+        <li><a href="#s7">EIRP at the hardware level</a></li>
+        <li><a href="#s8">The three currencies, by segment</a></li>
+        <li><a href="#s9">Key facts</a></li>
+        <li><a href="#s10">What this lesson delivers to the design chain</a></li>
+        <li><a href="#quiz">Knowledge check</a></li>
+        <li><a href="#py">Python exercises</a></li>
+        <li><a href="#reflect">Reflection</a></li>
+    </ol>
+</div>
+
+<div class="cb" id="s1">
+    <h2>1. The terminal as the chain sees it</h2>
+<p>The upstream modules have already priced three terminal classes without ever opening one:</p>
+<table class="compare-table">
+<thead><tr>
+<th>Terminal</th>
+<th>Rx gain / G/T</th>
+<th>EIRP</th>
+<th>Pointing</th>
+<th>Priced in</th>
+</tr></thead>
+<tbody>
+<tr><td>Ka VSAT</td><td>37.5 dBi / +12.7 dB/K</td><td>~44 dBW</td><td>tracked</td><td>m4-1, m4-7</td></tr>
+<tr><td>NTN VSAT class</td><td>comparable</td><td>comparable</td><td>tracked, Rel-17</td><td>m5-5</td></tr>
+<tr><td>Smartphone</td><td>−3 dBi / −30 dB/K</td><td>−10 dBW</td><td>none</td><td>m5-6</td></tr>
+</tbody>
+</table>
+<p>Each row is an interface contract: given these numbers and the geometry, the M4 engine produces C/(N₀+I₀) and the M5 engine produces net throughput. What the contract hides is that each number is itself a budget. G/T is an antenna gain minus a noise-temperature chain (m4-2's Friis cascade, now with hardware attached). EIRP is amplifier watts through antenna gain, minus everything lossy in between. Pointing is an acquisition-and-tracking control problem whose failure shows up in m4-1's pointing-loss line. This module opens each budget.</p>
+</div>
+
+<div class="cb" id="s2">
+    <h2>2. Anatomy of a terminal</h2>
+<p>Five subsystems, whatever the segment:</p>
+<p><strong>The aperture</strong> — the antenna proper: a parabolic reflector with a feed, or a planar array of hundreds to thousands of radiating elements. Sets the gain, the beamwidth, and most of the form factor. Lessons m6-1 through m6-4 live here.</p>
+<p><strong>The RF chain</strong> — between aperture and modem. In a dish terminal: a low-noise block (LNB) on receive and a block upconverter (BUC) with a power amplifier on transmit, both at the feed. In a phased array: the chain shatters into per-element or per-subarray pieces — low-noise amplifiers, phase shifters, power amplifiers — integrated into beamformer ICs behind the aperture. Where the first LNA sits, and what losses precede it, decides the noise temperature (section 6).</p>
+<p><strong>The modem</strong> — Module 5 in silicon: demodulation, LDPC decoding, the MODCOD and access machinery, the network interface. This module treats it as done.</p>
+<p><strong>Pointing and tracking</strong> — from a one-time manual peak-up on a GEO dish, to a two-axis gimbal, to fully electronic steering with no moving parts, plus the control loops and (on mobile platforms) the inertial aiding that keep the beam on a moving satellite from a moving vehicle. Lesson m6-5.</p>
+<p><strong>Power and environment</strong> — the DC budget (a consumer ESA draws on the order of 100 W — a real constraint indoors, a defining one on aircraft), thermal design, and the enclosure or radome that lets all of it survive weather, vibration, and lightning zones. The certification face of this subsystem is lesson m6-6.</p>
+</div>
+
+<div class="cb" id="s3">
+    <h2>3. The reflector benchmark</h2>
+<p>A parabolic reflector converts physical area into gain at an <strong>aperture efficiency</strong> η of 55–70% — feed illumination taper, spillover, blockage, and surface accuracy each shaving a few percent:</p>
+<blockquote>G = η · (πD/λ)²    Beamwidth ≈ 70·λ/D degrees</blockquote>
+<p>At 20 GHz (λ = 15 mm), verified:</p>
+<table class="compare-table">
+<thead><tr>
+<th>Diameter</th>
+<th>Gain (η = 0.65)</th>
+<th>Beamwidth</th>
+</tr></thead>
+<tbody>
+<tr><td>45 cm</td><td>37.6 dBi</td><td>2.3°</td></tr>
+<tr><td>65 cm</td><td>40.8 dBi</td><td>1.6°</td></tr>
+<tr><td>75 cm</td><td>42.1 dBi</td><td>1.4°</td></tr>
+</tbody>
+</table>
+<p>Note the calibration against the program's own history: the m4-1 terminal's 37.5 dBi is a <strong>45 cm-class</strong> dish at honest efficiency, not a 65 cm one — a label this module's arithmetic corrects. The reflector's virtues are structural: one feed, one LNB, one PA, passive metal doing the gain work for the cost of stamped aluminium. Per decibel of G/T, nothing beats it, and nothing in this module will. Its vices are equally structural: the gain points where the metal points, so tracking means moving the metal — motors, gimbals, radomes sized for the swept volume, and a mechanical reliability budget.</p>
+</div>
+
+<div class="cb" id="s4">
+    <h2>4. Why NGSO broke the dish's monopoly</h2>
+<p>A GEO dish is installed once and pointed forever. A LEO terminal tracks a satellite that crosses the visible sky in minutes, then must acquire the next one — and m5-3's session continuity demands <strong>make-before-break</strong>: the terminal must be receiving on the new link before releasing the old. A mechanical gimbal can track one satellite beautifully; it cannot be in two places during the handover instant, and at consumer price and reliability points, a motorised two-axis positioner cycling every few minutes for years is a warranty catastrophe in waiting.</p>
+<p>The electronically steered array (ESA) answers both problems at once: beam repointing in microseconds by rewriting phase settings, no wear mechanism, and — with digital or multi-beam architectures (m6-3) — two simultaneous beams for seamless handover. That is why the NGSO consumer era arrived on flat panels: not because the panel outperforms the dish (section 6 shows it does not), but because the dish's one weakness — mechanical pointing — sits exactly on the NGSO era's critical requirement. Mobility markets (maritime, aero, land) reached the same conclusion a step earlier for the same reason: the platform moves even when the satellite doesn't.</p>
+</div>
+
+<div class="cb" id="s5">
+    <h2>5. The flat panel: gain from count</h2>
+<p>A planar phased array builds gain from element count. With elements of gain G_e (≈ 5 dBi for a λ/2-spaced patch) and front-end losses L (taper, feed network, radome — ≈ 1.5 dB as a first-order allowance):</p>
+<blockquote>G_array ≈ 10·log₁₀(N) + G_e − L</blockquote>
+<table class="compare-table">
+<thead><tr>
+<th>Elements N</th>
+<th>Gain</th>
+<th>Physical aperture (λ/2 lattice, 20 GHz)</th>
+</tr></thead>
+<tbody>
+<tr><td>1,024</td><td>33.6 dBi</td><td>576 cm² (24 cm square)</td></tr>
+<tr><td>1,280</td><td>34.6 dBi</td><td>720 cm² (27 cm square)</td></tr>
+<tr><td>2,500</td><td>37.5 dBi</td><td>1,406 cm² (38 cm square)</td></tr>
+<tr><td>5,000</td><td>40.5 dBi</td><td>2,812 cm² (53 cm square)</td></tr>
+</tbody>
+</table>
+<p>Two readings. First, the panel is area-efficient at broadside: 2,500 elements match the 45 cm dish's 37.5 dBi from a comparable footprint, because a well-fed lattice approaches unity aperture efficiency where a reflector loses 35% to feed physics. (Public teardowns of first-generation consumer LEO panels report on the order of 1,300 elements — consistent, per the table, with a mid-30s dBi broadside gain.) Second, the honest caveat that lesson m6-4 will quantify: <strong>every number in this table is a broadside number</strong>. Steer the beam 60° off boresight and the projected aperture, the element pattern, and the lattice all conspire to take several dB back. The dish never pays that tax; it moves instead. The module's central trade is exactly here.</p>
+</div>
+
+<div class="cb" id="s6">
+    <h2>6. G/T at the hardware level</h2>
+<p>m4-2's Friis cascade, now with named hardware. The noise temperature is decided by what sits in front of the first LNA and how good that LNA is:</p>
+<p><strong>Dish chain</strong>: antenna (T_ant ≈ 30 K, sky-pointing) → 0.3 dB of feed/OMT loss → LNB with 1.0 dB noise figure. T_sys ≈ <strong>122 K</strong>. With the 65 cm dish's 40.8 dBi: <strong>G/T ≈ +19.9 dB/K</strong>.</p>
+<p><strong>Array chain</strong>: antenna (30 K) → ≈ 0.5 dB of pre-LNA loss (element, transition, T/R switch) → per-element LNA at ≈ 2.0 dB noise figure, set by silicon beamformer ICs running warm behind a sun-loaded panel. T_sys ≈ <strong>228 K</strong>. With the 1,280-element panel's 34.6 dBi: <strong>G/T ≈ +11.0 dB/K</strong>.</p>
+<p>The ~9 dB gap decomposes into ~6 dB of gain (element count versus a bigger dish) and ~3 dB of noise (integrated silicon versus a discrete GaAs LNB). One array subtlety deserves respect: because every element has its own LNA, all the <em>combining</em> losses downstream — the entire beamforming network — come <strong>after</strong> low-noise gain and barely touch T_sys. This is why arrays are viable at all: a passive array combining 1,280 elements before a single LNA would drown in feed-network loss. The per-element LNA is the architectural move that makes the flat panel's noise merely worse, rather than fatal — and its noise figure is the single most valuable dB in the panel's bill of materials.</p>
+</div>
+
+<div class="cb" id="s7">
+    <h2>7. EIRP at the hardware level</h2>
+<p><strong>Dish</strong>: one power amplifier (the BUC) into one high-gain aperture. 2 W through the 45 cm dish's 41.1 dBi transmit gain (30 GHz): <strong>EIRP ≈ 44.1 dBW</strong>.</p>
+<p><strong>Array</strong>: N small PAs, one per element, combining coherently in space:</p>
+<blockquote>EIRP = 20·log₁₀(N) + G_e + 10·log₁₀(P_e)</blockquote>
+<p>The 20·log₁₀(N) is the array's transmit magic — power and gain each scale with N, so EIRP scales with N². For N = 1,280 at a modest P_e = 0.8 mW: <strong>EIRP ≈ 36.2 dBW</strong> — within 8 dB of the dish from milliwatt-class amplifiers that ship inside beamformer ICs. Raising P_e is the panel's EIRP lever, paid in DC power and thermal design (the §2 power subsystem, and a preview of m6-3's architecture economics).</p>
+<p>Distributed transmit brings a reliability dividend the dish cannot match: element failures degrade, never kill. Ten percent of elements dead costs <strong>−0.92 dB of EIRP and −0.46 dB of receive gain</strong> — the beam broadens slightly, sidelobes rise slightly, service continues. A dish's single BUC is a single point of failure. For a consumer product with no service technician, and for an aircraft terminal dispatched on a maintenance schedule (m6-6), graceful degradation is worth real money.</p>
+</div>
+
+<div class="cb" id="s8">
+    <h2>8. The three currencies, by segment</h2>
+<p>A first pass over the market map — lesson m6-6 does the depth:</p>
+<table class="compare-table">
+<thead><tr>
+<th>Segment</th>
+<th>Dominant currency</th>
+<th>Typical answer today</th>
+</tr></thead>
+<tbody>
+<tr><td>Consumer NGSO</td><td>cost, then form factor</td><td>ESA panel — handover requirement decides (§4)</td></tr>
+<tr><td>Enterprise / cellular backhaul</td><td>performance (availability)</td><td>Dish, tracked or fixed — G/T per euro decides (§6)</td></tr>
+<tr><td>Maritime</td><td>performance + motion</td><td>Stabilised dish under radome; ESAs advancing</td></tr>
+<tr><td>Aviation</td><td>form factor (drag, height) + certification</td><td>Low-profile ESA / hybrid — the fuselage decides</td></tr>
+<tr><td>Land mobile</td><td>form factor + cost</td><td>ESA — conformality is non-negotiable</td></tr>
+<tr><td>Government / defence</td><td>performance + resilience</td><td>Everything, often redundant</td></tr>
+</tbody>
+</table>
+<p>The pattern the table already shows: wherever the terminal is stationary and the buyer is rational about decibels, the dish persists; wherever the terminal moves — or the satellite does, cheaply — the array wins the other two currencies and takes the market. The remaining lessons put numbers under every cell.</p>
+</div>
+
+<div class="cb" id="s9">
+    <h2>9. Key facts</h2>
+<table class="compare-table">
+<thead><tr>
+<th>Fact</th>
+<th>Value</th>
+<th>Unit</th>
+<th>Source</th>
+</tr></thead>
+<tbody>
+<tr><td>Reflector gain</td><td>η·(πD/λ)², η ≈ 0.55–0.70</td><td>—</td><td>Antenna theory</td></tr>
+<tr><td>Reflector beamwidth</td><td>≈ 70·λ/D</td><td>deg</td><td>Antenna theory</td></tr>
+<tr><td>45 / 65 cm dish @ 20 GHz (η = 0.65)</td><td>37.6 / 40.8</td><td>dBi</td><td>Computed</td></tr>
+<tr><td>m4-1 terminal (37.5 dBi)</td><td>45 cm-class dish</td><td>—</td><td>Computed (label corrected)</td></tr>
+<tr><td>Array gain</td><td>≈ 10·log₁₀(N) + G_e − L</td><td>dBi</td><td>Array theory</td></tr>
+<tr><td>1,280-element panel @ 20 GHz</td><td>34.6 dBi, 27 cm square</td><td>—</td><td>Computed</td></tr>
+<tr><td>Dish chain T_sys / G/T (65 cm)</td><td>122 K / +19.9 dB/K</td><td>—</td><td>Computed (Friis, m4-2)</td></tr>
+<tr><td>Array chain T_sys / G/T (N = 1,280)</td><td>228 K / +11.0 dB/K</td><td>—</td><td>Computed</td></tr>
+<tr><td>Dish-vs-panel G/T gap</td><td>≈ 9 (≈6 gain + ≈3 noise)</td><td>dB</td><td>Computed</td></tr>
+<tr><td>Array EIRP</td><td>20·log₁₀(N) + G_e + 10·log₁₀(P_e)</td><td>dBW</td><td>Array theory</td></tr>
+<tr><td>N = 1,280, P_e = 0.8 mW</td><td>36.2</td><td>dBW</td><td>Computed</td></tr>
+<tr><td>Dish EIRP (45 cm, 2 W, 30 GHz)</td><td>44.1</td><td>dBW</td><td>Computed</td></tr>
+<tr><td>10% element failure</td><td>−0.92 EIRP / −0.46 Rx gain</td><td>dB</td><td>Computed</td></tr>
+<tr><td>Consumer ESA DC draw</td><td>order 100</td><td>W</td><td>Public teardowns (order only)</td></tr>
+</tbody>
+</table>
+</div>
+
+<div class="cb" id="s10">
+    <h2>10. What this lesson delivers to the design chain</h2>
+<p>The terminal is no longer a table row. Its three numbers are now open budgets — gain from aperture physics, temperature from a named chain, EIRP from an amplifier architecture — and the module's central trade is on the table with first numbers attached: the dish wins ~9 dB of G/T; the panel wins pointing, handover, reliability, and form factor, and claws back transmit performance through N² aggregation. The spine project begins as an <code>ApertureModel</code> that computes both families' budgets from their physical parameters and hands (G/T, EIRP) to the Module 4 engine.</p>
+<p>What this lesson deliberately deferred: the array's gain law was quoted at broadside. m6-2 derives it honestly — element spacing, the array factor, grating lobes, taper — and m6-4 presents the scan-loss bill. The 9 dB gap measured here is the gap at the panel's <em>best</em> angle.</p>
+</div>
+
+<div class="quiz-block" id="quiz">
+    <h2>KNOWLEDGE CHECK</h2>
+    <div class="quiz-intro">Ten questions. Each option explains itself after you commit. No retries per question — decide first.</div>
+    <div class="quiz-q">
+        <p><strong>Q1.</strong> To the Module 4 and 5 engines, a terminal is fully described by:</p>
+        <div class="quiz-options">
+            <button class="quiz-opt" data-q="1" data-correct="false">A — Its price and its brand</button>
+            <button class="quiz-opt" data-q="1" data-correct="true">B — G/T, EIRP, and pointing capability — plus, from m6-4 onward, regulatory off-axis compliance</button>
+            <button class="quiz-opt" data-q="1" data-correct="false">C — Its diameter</button>
+            <button class="quiz-opt" data-q="1" data-correct="false">D — Its modem chipset</button>
+        </div>
+        <div class="quiz-feedback" id="fb1"></div>
+    </div>
+    <div class="quiz-q">
+        <p><strong>Q2.</strong> A 45 cm dish at η = 0.65 and 20 GHz delivers approximately:</p>
+        <div class="quiz-options">
+            <button class="quiz-opt" data-q="2" data-correct="false">A — 31 dBi</button>
+            <button class="quiz-opt" data-q="2" data-correct="true">B — 37.6 dBi</button>
+            <button class="quiz-opt" data-q="2" data-correct="false">C — 40.8 dBi</button>
+            <button class="quiz-opt" data-q="2" data-correct="false">D — 44 dBi</button>
+        </div>
+        <div class="quiz-feedback" id="fb2"></div>
+    </div>
+    <div class="quiz-q">
+        <p><strong>Q3.</strong> The structural reason electronically steered arrays took the NGSO consumer market is:</p>
+        <div class="quiz-options">
+            <button class="quiz-opt" data-q="3" data-correct="false">A — Arrays have better G/T than dishes</button>
+            <button class="quiz-opt" data-q="3" data-correct="true">B — LEO tracking plus make-before-break handover demands repointing agility — microseconds and two simultaneous beams — that consumer-grade mechanics cannot deliver reliably</button>
+            <button class="quiz-opt" data-q="3" data-correct="false">C — Arrays are cheaper per dBi</button>
+            <button class="quiz-opt" data-q="3" data-correct="false">D — Regulators banned consumer dishes</button>
+        </div>
+        <div class="quiz-feedback" id="fb3"></div>
+    </div>
+    <div class="quiz-q">
+        <p><strong>Q4.</strong> A 1,280-element panel matches which statement:</p>
+        <div class="quiz-options">
+            <button class="quiz-opt" data-q="4" data-correct="true">A — ~34.6 dBi from a ~27 cm square at broadside</button>
+            <button class="quiz-opt" data-q="4" data-correct="false">B — ~40.8 dBi at all scan angles</button>
+            <button class="quiz-opt" data-q="4" data-correct="false">C — ~37.5 dBi from a 65 cm square</button>
+            <button class="quiz-opt" data-q="4" data-correct="false">D — Gain independent of element count</button>
+        </div>
+        <div class="quiz-feedback" id="fb4"></div>
+    </div>
+    <div class="quiz-q">
+        <p><strong>Q5.</strong> The ~9 dB G/T gap between the 65 cm dish and the 1,280-element panel decomposes as:</p>
+        <div class="quiz-options">
+            <button class="quiz-opt" data-q="5" data-correct="false">A — All antenna gain</button>
+            <button class="quiz-opt" data-q="5" data-correct="true">B — ≈ 6 dB of gain (aperture size vs element count) plus ≈ 3 dB of noise (integrated silicon LNAs behind losses vs a discrete LNB)</button>
+            <button class="quiz-opt" data-q="5" data-correct="false">C — All noise temperature</button>
+            <button class="quiz-opt" data-q="5" data-correct="false">D — Polarisation mismatch</button>
+        </div>
+        <div class="quiz-feedback" id="fb5"></div>
+    </div>
+    <div class="quiz-q">
+        <p><strong>Q6.</strong> Per-element LNAs are the architectural move that makes large receive arrays viable because:</p>
+        <div class="quiz-options">
+            <button class="quiz-opt" data-q="6" data-correct="false">A — They increase the element gain</button>
+            <button class="quiz-opt" data-q="6" data-correct="true">B — They place low-noise gain ahead of the entire beamforming/combining network, so its losses barely raise T_sys — a passive array combining first would drown in feed loss</button>
+            <button class="quiz-opt" data-q="6" data-correct="false">C — They eliminate the need for phase shifters</button>
+            <button class="quiz-opt" data-q="6" data-correct="false">D — They reduce the array's DC power draw</button>
+        </div>
+        <div class="quiz-feedback" id="fb6"></div>
+    </div>
+    <div class="quiz-q">
+        <p><strong>Q7.</strong> Array EIRP scales as N² (20·log₁₀ N) because:</p>
+        <div class="quiz-options">
+            <button class="quiz-opt" data-q="7" data-correct="false">A — Each element's amplifier doubles in power as N grows</button>
+            <button class="quiz-opt" data-q="7" data-correct="true">B — Total radiated power scales with N while array gain also scales with N, and coherent combination multiplies them</button>
+            <button class="quiz-opt" data-q="7" data-correct="false">C — The formula is empirical, not physical</button>
+            <button class="quiz-opt" data-q="7" data-correct="false">D — It doesn't — EIRP scales as 10·log₁₀(N)</button>
+        </div>
+        <div class="quiz-feedback" id="fb7"></div>
+    </div>
+    <div class="quiz-q">
+        <p><strong>Q8.</strong> Ten percent of a panel's elements failing costs:</p>
+        <div class="quiz-options">
+            <button class="quiz-opt" data-q="8" data-correct="false">A — The terminal — total failure</button>
+            <button class="quiz-opt" data-q="8" data-correct="true">B — −0.92 dB of EIRP and −0.46 dB of receive gain: graceful degradation, versus the dish's single-BUC single point of failure</button>
+            <button class="quiz-opt" data-q="8" data-correct="false">C — Exactly 10% of the gain in dB</button>
+            <button class="quiz-opt" data-q="8" data-correct="false">D — Nothing at all</button>
+        </div>
+        <div class="quiz-feedback" id="fb8"></div>
+    </div>
+    <div class="quiz-q">
+        <p><strong>Q9.</strong> The segment table's pattern — dishes persist where terminals are stationary, arrays win where something moves — reflects:</p>
+        <div class="quiz-options">
+            <button class="quiz-opt" data-q="9" data-correct="false">A — Fashion in terminal design</button>
+            <button class="quiz-opt" data-q="9" data-correct="true">B — The dish's superiority in performance-per-cost being decisive exactly until its one weakness, mechanical pointing, lands on the segment's critical requirement</button>
+            <button class="quiz-opt" data-q="9" data-correct="false">C — Arrays being universally superior</button>
+            <button class="quiz-opt" data-q="9" data-correct="false">D — Regulatory pressure per segment</button>
+        </div>
+        <div class="quiz-feedback" id="fb9"></div>
+    </div>
+    <div class="quiz-q">
+        <p><strong>Q10.</strong> This lesson's array numbers carry one systematic caveat, resolved in m6-4:</p>
+        <div class="quiz-options">
+            <button class="quiz-opt" data-q="10" data-correct="false">A — They ignore the speed of light</button>
+            <button class="quiz-opt" data-q="10" data-correct="true">B — They are broadside figures — scanning the beam off boresight reduces projected aperture and element gain, taking back several dB that the mechanically pointed dish never pays</button>
+            <button class="quiz-opt" data-q="10" data-correct="false">C — They assume zero element failures</button>
+            <button class="quiz-opt" data-q="10" data-correct="false">D — They apply only at Ku-band</button>
+        </div>
+        <div class="quiz-feedback" id="fb10"></div>
+    </div>
+    <div class="quiz-score" id="quizScore"></div>
+</div>
+
+<div class="py-block" id="py">
+    <h2>PYTHON EXERCISES</h2>
+    <div class="py-intro">Three exercises; the last extends the module spine project. Run them, then work the numbered follow-ups in the comments — the follow-ups are the exercise.</div>
+    <div class="py-exercise">
+        <h3>Exercise 1 — Two gain laws</h3>
+        <p>Compute both aperture families from first principles and reproduce every table in the lesson.</p>
+<pre>
+import math
+db = lambda x: 10*math.log10(x)
+
+def dish_gain(D_m, f_ghz, eta=0.65):
+    lam = 0.3/f_ghz
+    return db(eta*(math.pi*D_m/lam)**2), 70*lam/D_m   # dBi, beamwidth deg
+
+def array_gain(N, Ge_dbi=5.0, loss_db=1.5):
+    return db(N) + Ge_dbi - loss_db
+
+def array_area(N, f_ghz):
+    lam = 0.3/f_ghz
+    return N*(lam/2)**2                                # m2, lambda/2 lattice
+
+print(&quot;Dishes @ 20 GHz:&quot;)
+for D in [0.45, 0.65, 0.75]:
+    g, bw = dish_gain(D, 20)
+    print(f&quot;  {D*100:.0f} cm: {g:.1f} dBi, {bw:.2f} deg&quot;)
+
+print(&quot;Arrays @ 20 GHz:&quot;)
+for N in [1024, 1280, 2500, 5000]:
+    A = array_area(N, 20)
+    print(f&quot;  N={N:&gt;4}: {array_gain(N):.1f} dBi, {A*1e4:.0f} cm2&quot;
+          f&quot; ({math.sqrt(A)*100:.0f} cm square)&quot;)
+
+# 1. Find the element count that matches each dish in the first table.
+#    Then compare physical areas: at which gain does the dish&#x27;s footprint
+#    advantage disappear, and why (hint: eta vs lattice fill)?
+# 2. Both laws scale with frequency. Recompute both tables at 12 GHz
+#    (Ku) and state what happens to the array&#x27;s element COUNT for fixed
+#    physical size — and therefore to its cost (preview of m6-3).
+# 3. The 1.5 dB array loss allowance bundles taper, feed and radome.
+#    Split it: budget 0.8 taper + 0.4 network + 0.3 radome, and identify
+#    which term m6-2 will show is actually a design CHOICE, not a loss.
+</pre>
+    </div>
+    <div class="py-exercise">
+        <h3>Exercise 2 — The two noise chains</h3>
+        <p>m4-2's Friis cascade with hardware names attached: reproduce the 9 dB decomposition.</p>
+<pre>
+import math
+db = lambda x: 10*math.log10(x)
+T0 = 290.0
+
+def chain_temp(t_ant, pre_lna_loss_db, lna_nf_db):
+    &quot;&quot;&quot;T_sys referenced to the aperture: antenna through loss, then LNA.
+    Post-LNA contributions neglected (that is the LNA&#x27;s whole job).&quot;&quot;&quot;
+    L = 10**(pre_lna_loss_db/10)
+    return t_ant/L + T0*(1 - 1/L) + T0*(10**(lna_nf_db/10) - 1)
+
+dish_T  = chain_temp(30, 0.3, 1.0)     # feed/OMT loss, discrete LNB
+array_T = chain_temp(30, 0.5, 2.0)     # element/switch loss, SiGe BFIC
+
+G_dish, _ = 40.8, None
+G_arr = 34.6
+print(f&quot;dish : T_sys {dish_T:5.0f} K -&gt; G/T {G_dish - db(dish_T):+.1f} dB/K&quot;)
+print(f&quot;array: T_sys {array_T:5.0f} K -&gt; G/T {G_arr - db(array_T):+.1f} dB/K&quot;)
+print(f&quot;gap  : {(G_dish-db(dish_T)) - (G_arr-db(array_T)):.1f} dB &quot;
+      f&quot;= {G_dish-G_arr:.1f} gain + {db(array_T/dish_T):.1f} noise&quot;)
+
+# 1. Sweep the array LNA noise figure 1.2..3.0 dB and plot G/T. How many
+#    dB/K does the best silicon buy, and why did §6 call this the most
+#    valuable dB in the panel&#x27;s bill of materials?
+# 2. A sun-loaded panel runs its BFICs at +85 C. LNA noise figure
+#    typically degrades ~0.005-0.01 dB/K of junction temperature: estimate
+#    the G/T swing between a winter morning and a summer noon, and name
+#    the m4-4 concept this hands a statistic to.
+# 3. Recompute the dish chain with the LNB moved indoors behind 3 m of
+#    coax (2 dB). State the lesson in one sentence.
+</pre>
+    </div>
+    <div class="py-exercise">
+        <h3>Exercise 3 — Spine seed: ApertureModel</h3>
+        <p>The M6 spine begins: both families as objects, handing (G/T, EIRP) to the Module 4 engine.</p>
+<pre>
+import math
+db = lambda x: 10*math.log10(x)
+T0 = 290.0
+
+# ═══════════════════════════════════════════════════════
+# M6 SPINE PROJECT — TERMINAL MODEL
+# Stage 1 (here): ApertureModel — dish and array budgets:
+#                 gain, beamwidth, T_sys, G/T, EIRP.
+# Growth path:
+#   m6-2  honest array factor (lattice, grating lobes, taper)
+#   m6-3  beamforming architecture: power &amp; cost vs N
+#   m6-4  scan loss + regulatory off-axis mask
+#   m6-5  pointing/tracking budget &amp; handover
+#   m6-6  terminal-class parameter table by segment
+#   m6-7  terminal evaluator -&gt; M4 LinkBudget -&gt; M5 engine
+# ═══════════════════════════════════════════════════════
+
+class Dish:
+    def __init__(self, name, D_m, f_rx_ghz, f_tx_ghz, eta=0.65,
+                 t_ant=30, feed_loss_db=0.3, lnb_nf_db=1.0,
+                 pa_w=2.0, tx_loss_db=0.5):
+        self.name = name
+        lam_rx, lam_tx = 0.3/f_rx_ghz, 0.3/f_tx_ghz
+        self.g_rx = db(eta*(math.pi*D_m/lam_rx)**2)
+        self.g_tx = db(eta*(math.pi*D_m/lam_tx)**2)
+        L = 10**(feed_loss_db/10)
+        self.t_sys = t_ant/L + T0*(1-1/L) + T0*(10**(lnb_nf_db/10)-1)
+        self.gt   = self.g_rx - db(self.t_sys)
+        self.eirp = db(pa_w) - tx_loss_db + self.g_tx
+        self.beamwidth = 70*lam_rx/D_m
+
+class Array:
+    def __init__(self, name, N, f_rx_ghz, f_tx_ghz, Ge=5.0, loss_db=1.5,
+                 t_ant=30, pre_lna_db=0.5, lna_nf_db=2.0, pe_w=0.8e-3):
+        self.name = name
+        self.N = N
+        self.g_rx = db(N) + Ge - loss_db
+        self.g_tx = self.g_rx                       # same lattice; m6-2 refines
+        L = 10**(pre_lna_db/10)
+        self.t_sys = t_ant/L + T0*(1-1/L) + T0*(10**(lna_nf_db/10)-1)
+        self.gt   = self.g_rx - db(self.t_sys)
+        self.eirp = 20*db(N)/10 + Ge + db(pe_w)     # 20log10(N)+Ge+10log10(Pe)
+        lam = 0.3/f_rx_ghz
+        self.area_m2 = N*(lam/2)**2
+
+    def degrade(self, fail_frac):
+        self.eirp += 20*math.log10(1-fail_frac)
+        self.g_rx += db(1-fail_frac)
+        self.gt    = self.g_rx - db(self.t_sys)
+
+def report(t):
+    print(f&quot;\n{&#x27;─&#x27;*54}&quot;)
+    print(f&quot;  APERTURE — {t.name}&quot;)
+    print(f&quot;{&#x27;─&#x27;*54}&quot;)
+    print(f&quot;  Rx gain        {t.g_rx:&gt;8.1f} dBi&quot;)
+    print(f&quot;  T_sys          {t.t_sys:&gt;8.0f} K&quot;)
+    print(f&quot;  G/T            {t.gt:&gt;+8.1f} dB/K&quot;)
+    print(f&quot;  EIRP           {t.eirp:&gt;8.1f} dBW&quot;)
+    if hasattr(t, &#x27;beamwidth&#x27;): print(f&quot;  Beamwidth      {t.beamwidth:&gt;8.2f} deg&quot;)
+    if hasattr(t, &#x27;area_m2&#x27;):   print(f&quot;  Panel area     {t.area_m2*1e4:&gt;8.0f} cm2&quot;)
+    print(f&quot;{&#x27;─&#x27;*54}&quot;)
+
+dish  = Dish(&quot;65 cm Ka dish&quot;, 0.65, 20, 30)
+panel = Array(&quot;1,280-element Ka panel&quot;, 1280, 20, 30)
+report(dish); report(panel)
+
+print(f&quot;\nG/T gap dish-panel: {dish.gt - panel.gt:.1f} dB&quot;)
+panel.degrade(0.10)
+print(f&quot;panel after 10% element failure: G/T {panel.gt:+.1f} dB/K, &quot;
+      f&quot;EIRP {panel.eirp:.1f} dBW&quot;)
+
+# ── the handoff the module will complete ────────────────
+# m6-7 wires these numbers into the M4 LinkBudget:
+#   lb.set_receiver(panel.g_rx, panel.t_sys) ... etc.
+# and the M5 ThroughputEngine prices the difference in Mbps.
+
+# 1. Feed both terminals&#x27; (G/T) into the m4-1 downlink example by hand
+#    (same satellite, same geometry): how many dB of C/N0 separate them,
+#    and — per m5-7 §5 — does that gap matter at ladder-top or mid-ladder?
+# 2. Give the panel enough elements to MATCH the dish&#x27;s G/T. Report N,
+#    panel size, and (using 20log10 N) the EIRP that comes along free.
+# 3. Add a `cost_class` sketch: dish cost ~ fixed + D^2.7 (structure),
+#    array cost ~ N x cost_per_element. At what gain does the crossover
+#    sit for 5, 10, 20 EUR/element? (m6-3 makes this rigorous.)
+</pre>
+    </div>
+</div>
+
+<div class="reflection-block" id="reflect">
+    <h2>REFLECTION</h2>
+    <div class="ref-intro">Four prompts. Each forces a decision — write the position down before moving on; the act of committing is the exercise.</div>
+    <div class="ref-prompt">
+        <h3>PROMPT 01</h3>
+        <p>Section 4 argued that the array won the NGSO consumer market because the dish's mechanical weakness landed on the era's critical requirement. Test the argument's edges: GEO consumer broadband still ships dishes, and some NGSO systems have shipped gimballed dishes to enterprise sites. Identify the exact parameter — satellites in view, handover interval, price point, service SLA — whose value flips the answer, and state where that parameter would have to move for the dish to return to the NGSO consumer market.</p>
+    </div>
+    <div class="ref-prompt">
+        <h3>PROMPT 02</h3>
+        <p>Section 6 called the per-element LNA's noise figure "the single most valuable dB in the panel's bill of materials," and exercise 2 priced its temperature sensitivity. Take the manufacturer's seat: you can spend one incremental euro per terminal on (a) a lower-NF LNA process, (b) 10% more elements, or (c) a better radome. Rank the three for a consumer LEO panel using this lesson's scaling laws, state which ranking changes for an aero terminal, and identify what information from m6-4 you are still missing to make the call properly.</p>
+    </div>
+    <div class="ref-prompt">
+        <h3>PROMPT 03</h3>
+        <p>The N² EIRP law means transmit performance is the flat panel's strong suit while G/T is its weakness — yet m4-7 and m5-7 showed the <em>return</em> link (where the terminal transmits) is the capacity-starved direction. Reconcile: does the panel's EIRP advantage land exactly where the system needs it, or does the §6 G/T deficit on the forward link dominate the user experience anyway? Use the m5-7 asymmetry numbers (727 vs 283 Mbps) to commit to an answer.</p>
+    </div>
+    <div class="ref-prompt">
+        <h3>PROMPT 04</h3>
+        <p>This lesson corrected the program's own m4-1 label (37.5 dBi ↔ 45 cm, not 65 cm) — a 3 dB bookkeeping error that survived four modules because nothing downstream consumed the diameter, only the gain. Generalise the incident: in a real program, which terminal parameters are load-bearing interfaces (consumed downstream, errors propagate) and which are decorative labels (errors dormant)? Propose the one-line rule a requirements database should enforce so that dormant errors cannot later become load-bearing when someone finally consumes the label.</p>
+    </div>
+</div>
+
+<div class="cb">
+    <h2>Sources</h2>
+<ul>
+<li>Balanis, <em>Antenna Theory: Analysis and Design</em> — reflector gain, aperture efficiency, array fundamentals.</li>
+<li>Mailloux, <em>Phased Array Antenna Handbook</em> — array gain, element patterns, per-element architectures.</li>
+<li>Maral &amp; Bousquet, <em>Satellite Communications Systems</em> — terminal architecture, LNB/BUC chains, G/T budgets.</li>
+<li>ITU-R and FCC off-axis EIRP-density frameworks — previewed here, treated in m6-4.</li>
+<li>Public teardowns of first-generation consumer LEO flat panels — element-count and power-draw anchors, order-of-magnitude only.</li>
+<li>Module 4 (m4-1, m4-2) and Module 5 (m5-3, m5-6, m5-7) — the interfaces this module's hardware must satisfy.</li>
+</ul>
+</div>
+
+<div class="complete-wrap">
+    <button class="complete-btn" id="completeBtn">MARK LESSON COMPLETE</button>
+    <div class="complete-msg" id="completeMsg"></div>
+</div>
+<div class="lesson-nav">
+    <a href="m6.html">← M6 HUB</a>
+    <a href="m6-2.html">LESSON 02 — PHASED ARRAYS &amp; THE ARRAY FACTOR →</a>
+</div>
+</div>
+
+<button class="back-to-top" id="backToTop" title="Back to top">↑</button>
+<footer>© 2026 LEOAF · M6 · LESSON 01 OF 7</footer>
+<script>
+const canvas=document.getElementById('starsCanvas'),ctx=canvas.getContext('2d');
+let stars=[];
+function initStars(){stars=[];for(let i=0;i<180;i++)stars.push({x:Math.random()*canvas.width,y:Math.random()*canvas.height,size:Math.random()*1.5+0.4,speed:Math.random()*0.18+0.04,hue:Math.random()*360});}
+function resizeCanvas(){canvas.width=window.innerWidth;canvas.height=window.innerHeight;}
+resizeCanvas();initStars();window.addEventListener('resize',resizeCanvas);
+function animateStars(){ctx.clearRect(0,0,canvas.width,canvas.height);stars.forEach(s=>{s.y-=s.speed;if(s.y<0){s.y=canvas.height;s.x=Math.random()*canvas.width;}ctx.beginPath();ctx.fillStyle=`hsl(${s.hue},80%,80%)`;ctx.arc(s.x,s.y,s.size,0,Math.PI*2);ctx.fill();});requestAnimationFrame(animateStars);}
+animateStars();
+</script>
+<script>
+const feedbacks={
+    1:{correct:"The upstream chain consumes exactly these interfaces: G/T on the downlink budget, EIRP on the uplink, pointing as a loss line and a handover capability. Everything in this module exists to produce those numbers; everything upstream is indifferent to how.",wrong:"Price is a currency of the design, invisible to the link. Diameter is one way to buy gain, not the interface itself. The modem implements Module 5 and is common across aperture families."},
+    2:{correct:"G = 0.65·(π·0.45/0.015)² → 37.6 dBi. This is the honest pairing behind the m4-1 terminal's 37.5 dBi — a 45 cm-class dish, whatever the original label said. Verify it; the formula is one line.",wrong:"31 dBi is a ~22 cm dish. 40.8 dBi is the 65 cm dish. 44 dBi needs ~95 cm at this band and efficiency."},
+    3:{correct:"The dish's only structural weakness is that its gain points where the metal points. NGSO put continuous tracking and seamless handover — m5-3's session-continuity requirement — directly on that weakness, at a price point where gimbals fail warranties. The array's electronics solve exactly this, and nothing else about it is superior.",wrong:"The dish wins G/T by ~9 dB (§6) and wins cost-per-dBi decisively. No such regulation exists."},
+    4:{correct:"10·log₁₀(1280) + 5 − 1.5 ≈ 34.6 dBi, on a λ/2 lattice occupying ~720 cm². The figure is consistent with public teardowns of first-generation consumer LEO panels — and it is a broadside figure; scan takes several dB back (m6-4).",wrong:"40.8 dBi is the 65 cm dish, and no array holds its gain at all scan angles. 37.5 dBi needs ~2,500 elements (~38 cm). Gain grows as 10·log₁₀(N) — count is the whole mechanism."},
+    5:{correct:"40.8 − 34.6 ≈ 6 dB of gain; 10·log₁₀(228/122) ≈ 2.7 dB of temperature. Two different budgets, two different fixes: more elements buys gain at N-scaling cost; a better per-element LNA buys temperature and is the panel's most valuable dB.",wrong:"Both terms contribute, in a 2:1 split. Polarisation is matched in both designs and budgeted elsewhere."},
+    6:{correct:"Friis (m4-2): losses after the first high-gain low-noise stage are divided by that gain. Distributing the LNA to every element converts hundreds of combiner-loss decibels from noise-critical to merely inefficient. The LNB plays the same role at a dish's feed — the array just needs 1,280 of them.",wrong:"Element gain is set by the radiator geometry. Phase shifters remain essential to steering. Per-element active silicon raises DC draw — the price, not the benefit."},
+    7:{correct:"N amplifiers of P_e give N·P_e watts; the same N elements give gain ∝ N; EIRP = power × gain ∝ N². This is how 0.8 mW amplifiers reach 36 dBW — and why doubling element count buys 6 dB of EIRP but only 3 dB of G/T.",wrong:"P_e is fixed per element. The scaling is exact coherent-array physics. 10·log₁₀(N) is the receive-gain scaling; transmit gets both factors."},
+    8:{correct:"EIRP ∝ ((1−f)·N)² → 20·log₁₀(0.9); receive gain ∝ (1−f)·N → 10·log₁₀(0.9). The beam broadens marginally and service continues — a reliability property with direct economic value in unserviceable consumer units and dispatch-scheduled aviation terminals.",wrong:"Distributed failure is the opposite of total failure. dB are logarithmic — 10% of elements is not 10% of dB. \"Nothing\" overstates it: a decibel is a decibel, and sidelobes also rise (m6-2)."},
+    9:{correct:"The three-currency frame resolves every row: stationary buyers price decibels, and the dish is the decibel champion; moving platforms (or moving satellites at consumer price points) price agility and reliability, and the array is the agility champion. Neither is \"better\" — the segment's currency weighting decides.",wrong:"The pattern is structural, not aesthetic. §6's 9 dB says arrays are not universally superior. Regulation constrains both families alike (m6-4)."},
+    10:{correct:"The panel's gain table is its best-case table. At 60° scan the effective aperture shrinks roughly with cos θ and the element pattern rolls off further — the scan-loss bill, plus the regulatory mask that shapes what an NGSO terminal may radiate off-axis, is m6-4's whole subject. The dish moves its metal instead and holds its gain to the horizon.",wrong:"Propagation physics is upstream (m4). Failure effects were quantified and are small. The physics is band-independent; only λ changes the lattice dimensions."}
+};
+let answered={};
+document.querySelectorAll('.quiz-opt').forEach(btn=>{
+    btn.addEventListener('click',function(){
+        const q=this.dataset.q;
+        if(answered[q]!==undefined)return;
+        const correct=this.dataset.correct==='true';
+        answered[q]=correct;
+        document.querySelectorAll(`.quiz-opt[data-q="${q}"]`).forEach(b=>{b.disabled=true;if(b.dataset.correct==='true')b.classList.add('correct');});
+        if(!correct)this.classList.add('wrong');
+        const fb=document.getElementById('fb'+q);
+        fb.textContent=(correct?'✓ ':'✗ ')+feedbacks[q][correct?'correct':'wrong'];
+        fb.style.color=correct?'#39ff14':'#ff004f';
+        if(Object.keys(answered).length===10){
+            const total=Object.values(answered).filter(Boolean).length;
+            const sc=document.getElementById('quizScore');
+            sc.style.display='block';
+            const pct=Math.round(total/10*100);
+            sc.textContent=`SCORE: ${total}/10 (${pct}%) — ${pct===100?'PERFECT.':pct>=80?'STRONG.':pct>=60?'ADEQUATE. REVISIT WEAK SECTIONS.':'REVISIT THE LESSON BEFORE PROCEEDING.'}`;
+        }
+    });
+});
+</script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="supabase.js"></script>
+<script src="user_progress.js"></script>
+<script>
+const LESSON_ID='m6-1';
+(function(){
+    function bounceToLogin(r){console.error("Auth guard:",r);window.location.replace("index.html");}
+    async function init(){
+        if(typeof client==="undefined"||!client||!client.auth)return bounceToLogin("Supabase client not loaded");
+        let session=null;
+        try{({data:{session}}=await client.auth.getSession());}
+        catch(e){return bounceToLogin("getSession threw: "+e.message);}
+        if(!session){window.location.replace("index.html");return;}
+        const btn=document.getElementById('completeBtn'),msg=document.getElementById('completeMsg');
+        function setDone(done){
+            if(done){btn.textContent='✓ COMPLETE — CLICK TO UNDO';btn.classList.add('done');btn.style.cssText='border-color:#39ff14;color:#39ff14;background:rgba(57,255,20,0.1);cursor:pointer;opacity:1;';msg.style.color='#39ff14';msg.textContent='Lesson marked complete. Click again to undo.';}
+            else{btn.textContent='MARK LESSON COMPLETE';btn.classList.remove('done');btn.style.cssText='';msg.style.color='#ffffff55';msg.textContent='Not yet marked complete.';}
+        }
+        let mastered=[];
+        try{mastered=await getMasteredSections();}catch(e){console.error(e);}
+        setDone(mastered.includes(LESSON_ID));
+        btn.addEventListener('click',async()=>{
+            const isDone=btn.classList.contains('done');
+            msg.style.color='#00d9ff';msg.textContent='Saving...';
+            const ok=await upsertSection(LESSON_ID,!isDone);
+            if(ok){setDone(!isDone);}else{msg.style.color='#ff004f';msg.textContent='Error saving. Try again.';}
+        });
+        const btt=document.getElementById('backToTop');
+        window.addEventListener('scroll',()=>{btt.classList.toggle('visible',window.scrollY>400);});
+        btt.addEventListener('click',()=>window.scrollTo({top:0,behavior:'smooth'}));
+    }
+    if(document.readyState==="loading")document.addEventListener("DOMContentLoaded",init);
+    else init();
+})();
+</script>
+</body>
+</html>
