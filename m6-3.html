@@ -1,0 +1,705 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, shrink-to-fit=no">
+<title>M6-3 — Beamforming Architectures · LEOAF</title>
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;600;800&family=Share+Tech+Mono&family=Libre+Baskerville:ital,wght@0,400;0,700;1,400&display=swap" rel="stylesheet">
+<link rel="icon" href="favicon.ico" sizes="any" type="image/x-icon">
+<link rel="manifest" href="site.webmanifest">
+<meta name="theme-color" content="#0f0f0f">
+<script>
+window.leoafAbort = async function () {
+    function go() { window.location.replace("index.html?signedout=1"); }
+    try { if (typeof client !== "undefined" && client && client.auth && client.auth.signOut) { try { await client.auth.signOut({ scope: "local" }); } catch (e) {} } } catch (e) {}
+    go();
+};
+</script>
+<style>
+* { box-sizing:border-box; margin:0; padding:0; }
+html { height:100%; -webkit-text-size-adjust:100%; overflow-x:hidden; }
+body { font-family:'Share Tech Mono',monospace; background:#000; color:white; overflow-x:hidden; min-height:100vh; }
+#starsCanvas { position:fixed; inset:0; z-index:-1; }
+header { background:#000; border-bottom:1px solid #ff004f33; position:sticky; top:0; z-index:100; padding:1rem clamp(1.5rem,5vw,4rem); display:flex; justify-content:space-between; align-items:center; }
+.logo { font-family:'Orbitron',sans-serif; font-weight:800; font-size:clamp(16px,2vw,22px); letter-spacing:3px; text-decoration:none; }
+.logo span:first-child { color:white; } .logo span:last-child { color:#ff004f; }
+.nav-right { display:flex; align-items:center; gap:10px; }
+.nav-btn { background:transparent; border:1px solid #ff004f44; color:#ff004f; padding:6px 14px; cursor:pointer; transition:0.3s; font-size:11px; font-family:'Orbitron',sans-serif; letter-spacing:1px; text-decoration:none; display:inline-block; }
+.nav-btn:hover { background:#ff004f; color:black; }
+.breadcrumb { padding:14px clamp(1.5rem,5vw,4rem); font-size:11px; color:#ffffff44; letter-spacing:1px; position:relative; z-index:1; }
+.breadcrumb a { color:#00d9ff66; text-decoration:none; } .breadcrumb a:hover { color:#00d9ff; }
+.breadcrumb span { margin:0 8px; }
+.lesson-wrap { max-width:820px; margin:0 auto; padding:0 clamp(1.5rem,5vw,4rem) 80px; position:relative; z-index:1; }
+.lesson-header { padding:30px 0 28px; border-bottom:1px solid #ffffff11; margin-bottom:36px; }
+.lesson-tag { font-family:'Orbitron',sans-serif; font-size:10px; color:#ff004f; letter-spacing:3px; margin-bottom:10px; }
+.lesson-header h1 { font-family:'Orbitron',sans-serif; font-size:clamp(20px,3.5vw,32px); font-weight:800; line-height:1.2; margin-bottom:12px; }
+.lesson-meta { display:flex; gap:10px; flex-wrap:wrap; margin-bottom:16px; }
+.l-pill { font-family:'Orbitron',sans-serif; font-size:10px; padding:3px 10px; border:1px solid; letter-spacing:1px; }
+.l-pill-q { color:#ff004f; border-color:#ff004f44; } .l-pill-t { color:#39ff14; border-color:#39ff1444; }
+.l-pill-c { color:#ffaa00; border-color:#ffaa0044; }
+.lesson-intro { font-size:13px; line-height:1.85; opacity:0.75; }
+.toc { background:rgba(0,217,255,0.06); border:1px solid #00d9ff33; padding:24px 28px; margin:30px 0; }
+.toc h4 { font-family:'Orbitron',sans-serif; font-size:10px; color:#00d9ff; letter-spacing:2px; margin-bottom:16px; }
+.toc ol { padding-left:20px; } .toc li { font-size:13px; line-height:2.1; }
+.toc li a { color:#00d9ffbb; text-decoration:none; transition:0.15s; } .toc li a:hover { color:#fff; padding-left:4px; }
+.toc li::marker { color:#ff004f; font-family:'Orbitron',sans-serif; font-size:10px; }
+.cb { background:#f5f2ec; color:#1a1a1a; padding:36px clamp(24px,4vw,48px); margin-bottom:24px; border-left:4px solid #00d9ff; position:relative; z-index:1; }
+.cb h2 { font-family:'Orbitron',sans-serif; font-size:13px; color:#003d66; letter-spacing:2px; text-transform:uppercase; margin-bottom:20px; padding-bottom:10px; border-bottom:2px solid #00d9ff66; scroll-margin-top:80px; }
+.cb h3 { font-family:'Orbitron',sans-serif; font-size:11px; color:#444; letter-spacing:1.5px; text-transform:uppercase; margin:28px 0 12px; }
+.cb p { font-family:'Libre Baskerville',Georgia,serif; font-size:15px; line-height:1.9; color:#1a1a1a; margin-bottom:16px; }
+.cb ul { padding-left:0; margin-bottom:16px; }
+.cb ul li { font-family:'Libre Baskerville',Georgia,serif; font-size:14px; line-height:1.85; color:#1a1a1a; padding-left:20px; position:relative; margin-bottom:8px; }
+.cb ul li::before { content:'›'; position:absolute; left:0; color:#0077aa; }
+.cb blockquote { border-left:3px solid #1a7a1a; background:#eafaea; padding:14px 20px; margin:18px 0; font-size:13px; font-family:'Share Tech Mono',monospace; color:#0a3d0a; line-height:1.8; }
+.callout { border-left:3px solid #0088cc; background:#e8f4fb; padding:16px 20px; margin:22px 0; font-size:12px; line-height:1.8; color:#1a1a1a; }
+.callout.red { border-left-color:#cc0033; background:#fdecea; }
+.callout.green { border-left-color:#1a7a1a; background:#eafaea; }
+.callout.amber { border-left-color:#996600; background:#fef9ec; }
+.callout strong { font-family:'Orbitron',sans-serif; font-size:10px; letter-spacing:1px; display:block; margin-bottom:8px; }
+.compare-table { width:100%; border-collapse:collapse; margin:22px 0; font-size:12px; }
+.compare-table th { font-family:'Orbitron',sans-serif; font-size:10px; letter-spacing:1px; color:#003d66; padding:10px 12px; border-bottom:2px solid #00d9ff66; text-align:left; }
+.compare-table td { padding:10px 12px; border-bottom:1px solid #ddd; line-height:1.5; color:#1a1a1a; vertical-align:top; }
+.compare-table tr:hover td { background:#f0f0f0; }
+.key-numbers { display:grid; grid-template-columns:repeat(auto-fit,minmax(140px,1fr)); gap:12px; margin:22px 0; }
+.kn-item { background:#fff; border:1px solid #d0d0d0; padding:16px 12px; text-align:center; }
+.kn-val { font-family:'Orbitron',sans-serif; font-size:clamp(13px,1.8vw,18px); font-weight:800; color:#003d66; display:block; }
+.kn-label { font-size:10px; color:#555; letter-spacing:1px; margin-top:5px; display:block; line-height:1.4; }
+.quiz-block { background:rgba(17,17,17,0.9); border:1px solid #ff004f33; padding:28px; margin:48px 0 32px; }
+.quiz-block h2 { font-family:'Orbitron',sans-serif; font-size:13px; color:#ff004f; letter-spacing:2px; margin-bottom:6px; }
+.quiz-intro { font-size:12px; opacity:0.6; margin-bottom:24px; padding-bottom:16px; border-bottom:1px solid #ff004f22; line-height:1.6; }
+.quiz-q { margin-bottom:28px; }
+.quiz-q p { font-size:13px; opacity:0.9; margin-bottom:12px; line-height:1.65; }
+.quiz-q p strong { color:#00d9ff; }
+.quiz-options { display:flex; flex-direction:column; gap:8px; }
+.quiz-opt { background:rgba(255,255,255,0.03); border:1px solid #ffffff1a; padding:11px 16px; cursor:pointer; font-size:12px; font-family:'Share Tech Mono',monospace; transition:0.2s; text-align:left; color:white; line-height:1.5; }
+.quiz-opt:hover:not(:disabled) { background:rgba(0,217,255,0.08); border-color:#00d9ff44; }
+.quiz-opt.correct { background:rgba(57,255,20,0.1); border-color:#39ff14; color:#39ff14; }
+.quiz-opt.wrong { background:rgba(255,0,79,0.1); border-color:#ff004f; color:#ff004f; }
+.quiz-opt:disabled { cursor:default; }
+.quiz-feedback { font-size:12px; margin-top:10px; min-height:18px; line-height:1.7; opacity:0.9; padding:0 4px; }
+.quiz-score { font-family:'Orbitron',sans-serif; font-size:12px; color:#39ff14; margin-top:20px; letter-spacing:1px; display:none; padding-top:16px; border-top:1px solid #39ff1433; }
+.py-block { background:rgba(10,10,10,0.95); border:1px solid #39ff1422; padding:28px; margin:32px 0; }
+.py-block h2 { font-family:'Orbitron',sans-serif; font-size:13px; color:#39ff14; letter-spacing:2px; margin-bottom:8px; }
+.py-block .py-intro { font-size:12px; opacity:0.7; margin-bottom:20px; padding-bottom:16px; border-bottom:1px solid #39ff1422; line-height:1.7; }
+.py-exercise { margin-bottom:32px; } .py-exercise:last-child { margin-bottom:0; }
+.py-exercise h3 { font-family:'Orbitron',sans-serif; font-size:11px; color:#39ff1499; letter-spacing:1.5px; text-transform:uppercase; margin-bottom:10px; }
+.py-exercise p { font-size:12px; opacity:0.8; margin-bottom:14px; line-height:1.75; }
+.py-block pre { background:#050505; border:1px solid #39ff1433; padding:20px; font-family:'Share Tech Mono',monospace; font-size:11px; line-height:1.7; overflow-x:auto; color:#39ff14; white-space:pre; margin-bottom:12px; }
+.py-note { background:rgba(57,255,20,0.04); border-left:2px solid #39ff14; padding:12px 16px; margin-top:14px; font-size:12px; line-height:1.75; opacity:0.8; }
+.py-note strong { font-family:'Orbitron',sans-serif; font-size:10px; color:#39ff14; display:block; margin-bottom:6px; letter-spacing:1px; }
+.reflection-block { background:rgba(255,170,0,0.04); border:1px solid #ffaa0033; padding:24px; margin:32px 0; }
+.reflection-block h2 { font-family:'Orbitron',sans-serif; font-size:13px; color:#ffaa00; letter-spacing:2px; margin-bottom:8px; }
+.ref-intro { font-size:12px; opacity:0.7; margin-bottom:20px; padding-bottom:14px; border-bottom:1px solid #ffaa0022; line-height:1.7; }
+.ref-prompt { margin-bottom:20px; }
+.ref-prompt h3 { font-family:'Orbitron',sans-serif; font-size:11px; color:#ffaa0099; letter-spacing:1px; margin-bottom:8px; }
+.ref-prompt p { font-size:12px; opacity:0.8; line-height:1.75; }
+.complete-wrap { margin-top:56px; padding-top:30px; border-top:1px solid #ffffff11; text-align:center; }
+.complete-btn { font-family:'Orbitron',sans-serif; font-size:13px; letter-spacing:2px; padding:14px 44px; background:transparent; border:1px solid #39ff14; color:#39ff14; cursor:pointer; transition:0.3s; }
+.complete-btn:hover:not(.done) { background:#39ff14; color:black; box-shadow:0 0 20px rgba(57,255,20,0.4); }
+.complete-btn.done { background:rgba(57,255,20,0.1); cursor:pointer; opacity:1; }
+.complete-msg { font-size:12px; color:#39ff14; margin-top:14px; min-height:18px; letter-spacing:1px; }
+.lesson-nav { display:flex; justify-content:space-between; margin-top:30px; flex-wrap:wrap; gap:10px; }
+.lesson-nav a { font-family:'Orbitron',sans-serif; font-size:11px; color:#00d9ff66; text-decoration:none; letter-spacing:1px; transition:0.2s; }
+.lesson-nav a:hover { color:#00d9ff; }
+.back-to-top { position:fixed; bottom:28px; right:28px; z-index:200; width:44px; height:44px; background:#000; border:1px solid #00d9ff55; color:#00d9ff; font-size:20px; cursor:pointer; display:flex; align-items:center; justify-content:center; opacity:0; pointer-events:none; transition:opacity 0.3s; }
+.back-to-top.visible { opacity:1; pointer-events:auto; } .back-to-top:hover { border-color:#00d9ff; }
+footer { text-align:center; padding:30px; opacity:0.3; font-size:11px; position:relative; z-index:1; letter-spacing:1px; }
+.module-complete { background:rgba(57,255,20,0.06); border:1px solid #39ff1444; padding:24px 28px; margin:40px 0; text-align:center; }
+.module-complete h3 { font-family:'Orbitron',sans-serif; font-size:14px; color:#39ff14; letter-spacing:2px; margin-bottom:10px; }
+.module-complete p { font-size:12px; opacity:0.8; line-height:1.7; }
+</style>
+</head>
+<body>
+<canvas id="starsCanvas"></canvas>
+<header>
+    <a href="dashboard.html" class="logo"><span>LEO</span><span>AF</span></a>
+    <div class="nav-right">
+        <a href="m6.html" class="nav-btn">← M6 HUB</a>
+        <button class="nav-btn" onclick="leoafAbort()">ABORT</button>
+    </div>
+</header>
+<div class="breadcrumb">
+    <a href="dashboard.html">DASHBOARD</a><span>/</span>
+    <a href="m6.html">M6</a><span>/</span>
+    <span style="color:#ffffff88;">LESSON 03 — BEAMFORMING ARCHITECTURES</span>
+</div>
+
+<div class="lesson-wrap">
+<div class="lesson-header">
+    <div class="lesson-tag">M6 · LESSON 03 OF 7</div>
+    <h1>Beamforming<br>Architectures</h1>
+    <div class="lesson-meta">
+        <div class="l-pill l-pill-q">MODULE 6</div>
+        <div class="l-pill l-pill-t">USER TERMINALS &amp; D2D</div>
+        <div class="l-pill l-pill-c">CORE</div>
+    </div>
+    <p class="lesson-intro" style="margin-bottom:12px;">m6-2 finished the geometry: pitch from the scan requirement, element count from the gain requirement, taper from the mask. What it left undetermined is everything that costs money: behind each of 1,280 elements sits electronics that must control phase and amplitude, amplify, and — somewhere — combine 1,280 signals into one beam, or several. <em>Where</em> that combination happens is the architecture decision, and it is the decision that sets the terminal's power draw, its bill of materials, its beam count, and therefore which m6-1 segments it can serve. Three pure answers exist — combine in RF hardware (<strong>analog</strong>), combine in software after per-element digitisation (<strong>digital</strong>), or combine in stages (<strong>hybrid</strong>) — plus a family of mechanical hybrids that steer without per-element phase control at all.</p>
+    <p class="lesson-intro" style="margin-bottom:12px;">The lesson's verified anchors, stated up front because they overturn two common intuitions. First, the classic objection to digital beamforming — "the converters would melt" — is dead: modern ADC efficiency puts full per-element conversion of a 1,280-element, 500 MHz panel at ~65 W of converters. What actually walls off consumer DBF is the <strong>12.8 Tb/s</strong> of raw digital samples those converters emit, and the interconnect and processing that must swallow it. Second, the flat panel does not beat the dish on cost — at any gain, at any plausible per-element price, a fixed dish is cheaper. What the panel beats is the <strong>dish plus the tracking gimbal</strong> that NGSO forces onto it. The ESA's economic case was never against the reflector; it was against the motor.</p>
+</div>
+
+<div class="toc">
+    <h4>CONTENTS</h4>
+    <ol>
+        <li><a href="#s1">The question behind each element</a></li>
+        <li><a href="#s2">Analog beamforming: the consumer default</a></li>
+        <li><a href="#s3">Digital beamforming: beams as software</a></li>
+        <li><a href="#s4">Hybrid beamforming: K chains, N elements</a></li>
+        <li><a href="#s5">The power scaling laws</a></li>
+        <li><a href="#s6">Multi-beam, and m6-2's handover question answered</a></li>
+        <li><a href="#s7">The mechanical hybrids</a></li>
+        <li><a href="#s8">Cost scaling and the honest crossover</a></li>
+        <li><a href="#s9">Architecture by segment</a></li>
+        <li><a href="#s10">Key facts</a></li>
+        <li><a href="#s11">What this lesson delivers to the design chain</a></li>
+        <li><a href="#quiz">Knowledge check</a></li>
+        <li><a href="#py">Python exercises</a></li>
+        <li><a href="#reflect">Reflection</a></li>
+    </ol>
+</div>
+
+<div class="cb" id="s1">
+    <h2>1. The question behind each element</h2>
+<p>Each element's signal path needs, at minimum: a low-noise amplifier (receive) or power amplifier (transmit) — m6-1 placed these and priced their noise and EIRP roles — a <strong>phase shifter</strong> implementing m6-2's steering table, and usually a <strong>variable-gain stage</strong> implementing the taper. The architecture question is what happens next: 1,280 controlled signals must become one (or K) beams. Combine them as RF voltages in a passive network and you have analog beamforming — cheap combination, but the beam is formed once, in copper, and exists singularly. Digitise each element and combine as numbers, and beams become software — plural, reconfigurable, simultaneous — at the price of per-element converters and a torrent of data. Everything else in this lesson is the working-out of that one sentence.</p>
+</div>
+
+<div class="cb" id="s2">
+    <h2>2. Analog beamforming: the consumer default</h2>
+<p>The consumer NGSO panel's architecture: <strong>beamformer ICs</strong> (BFICs), each serving 4–8 elements with per-element LNA/PA, phase shifter (5–6 bits typical), and gain control, feeding a corporate RF combining network to a single up/down-converter and one modem chain. A 1,280-element panel is ~200–320 BFICs of silicon-germanium plus a passive combiner — which, per m6-1 §6, sits <em>after</em> per-element low-noise gain and is therefore merely inefficient rather than noise-fatal.</p>
+<p>The verified power budget at consumer scale: receive chains ≈ 25 mW/element (32 W), transmit chains ≈ 45 mW/element at milliwatt output powers and realistic back-off efficiency (58 W), control, clocking and conversion ~15 W — <strong>order 105 W for the panel</strong>, matching the ~100 W class that public teardowns report. The architecture's defining limit: the combining network embodies exactly one set of weights, so the aperture produces <strong>one beam per beamforming layer</strong>. Handover and multi-beam service must be bought another way (section 6).</p>
+</div>
+
+<div class="cb" id="s3">
+    <h2>3. Digital beamforming: beams as software</h2>
+<p>Digitise every element — ADC per element per polarisation on receive, DAC on transmit — and beamforming becomes multiplication and addition in a processor. The rewards are total: as many simultaneous beams as processing affords, each with its own adaptive weights; nulls steered onto interferers; calibration in software; patterns changed per packet.</p>
+<p>The cost, priced honestly with the converter figure of merit (P ≈ FOM · 2^ENOB · f_s):</p>
+<table class="compare-table">
+<thead><tr>
+<th>Item</th>
+<th>Value</th>
+</tr></thead>
+<tbody>
+<tr><td>One ADC, 10-bit ENOB, 500 Msps, FOM 50 fJ/step</td><td>25.6 mW</td></tr>
+<tr><td>1,280 elements × 2 (I/Q)</td><td><strong>65.5 W of converters</strong></td></tr>
+<tr><td>Aggregate raw sample stream</td><td><strong>12.8 Tb/s</strong></td></tr>
+</tbody>
+</table>
+<p>The converters are a solved problem — 65 W is real but survivable, and better FOMs halve it. The wall is the second row: moving and multiplying twelve terabits per second of samples means serialised links, distribution ASICs, and beamforming silicon whose power and cost dwarf the ADCs. That is why full DBF lives where the economics invert: <strong>satellite payloads</strong> (Module 3's flexible beams — one spacecraft's DBF serves a million users, so its cost amortises), <strong>gateways</strong> (few sites, extreme performance), and <strong>defence</strong> (nulling and LPI justify anything). The consumer terminal, which must amortise its silicon over one user, stays analog.</p>
+</div>
+
+<div class="cb" id="s4">
+    <h2>4. Hybrid beamforming: K chains, N elements</h2>
+<p>The compromise: partition N elements into K <strong>subarrays</strong> of M each (N = K·M); beamform each subarray in analog; digitise only the K subarray outputs. Converter and processing cost scales with K, not N — a K = 16 partition of the 1,280 panel needs <strong>0.8 W of converters</strong> and a thoroughly ordinary digital section — while the system gains up to K independently steerable digital degrees of freedom: multiple beams, adaptive combining across subarrays, per-subarray calibration.</p>
+<p>The catch is geometric: the analog subarray has its own fixed-ish pattern, and steering the <em>digital</em> combination far from the subarrays' analog pointing raises <strong>quantisation lobes</strong> — the subarray lattice behaves like a coarse array with M-element spacing, and m6-2's grating mathematics returns at the subarray scale. Hybrid architectures therefore suit systems whose simultaneous beams cluster within a modest angular neighbourhood — which describes a satellite payload's coverage region well, and is exactly where hybrid DBF dominates (the Module 3 architecture, now with its terminal-side rationale visible).</p>
+</div>
+
+<div class="cb" id="s5">
+    <h2>5. The power scaling laws</h2>
+<p>Assembled, for the 1,280-element / 500 MHz reference panel:</p>
+<table class="compare-table">
+<thead><tr>
+<th>Architecture</th>
+<th>Converter power</th>
+<th>Digital stream</th>
+<th>RF chain power</th>
+<th>Beams</th>
+</tr></thead>
+<tbody>
+<tr><td>Analog</td><td>~0 (one pair)</td><td>one modem's worth</td><td>~90 W</td><td>1 per layer</td></tr>
+<tr><td>Hybrid K = 16</td><td>0.8 W</td><td>160 Gb/s</td><td>~90 W</td><td>≤ 16</td></tr>
+<tr><td>Full digital</td><td>65.5 W</td><td>12.8 Tb/s</td><td>~90 W</td><td>processing-limited</td></tr>
+</tbody>
+</table>
+<p>Note what is architecture-<em>independent</em>: the per-element RF chains (~90 W here) exist in every column — the LNAs, PAs and phase control are the price of being a phased array at all, and m6-1's element-count decisions set them. The architecture decision prices only what happens after the elements — and its real currency at scale is the digital stream column, not the converter column.</p>
+</div>
+
+<div class="cb" id="s6">
+    <h2>6. Multi-beam, and m6-2's handover question answered</h2>
+<p>m6-2's reflection asked what make-before-break actually costs an analog terminal. The three ways to hold two beams, now priced:</p>
+<p><strong>Split the aperture</strong> — half the elements per beam: per-beam EIRP falls <strong>−6.0 dB</strong> (N² law: half the power <em>and</em> half the gain) and G/T falls <strong>−3.0 dB</strong>, for the duration of the overlap. Against m5-2's ladder that is one to several rungs during every handover — visible, frequent, and at exactly the moment the link is changing satellites. A real design only if the overlap is very short and the ladder has headroom.</p>
+<p><strong>A second analog beamforming layer</strong> — duplicate phase shifters and combiner behind the same elements: two full-gain beams, at nearly 2× the beamforming silicon. This is the honest consumer solution, and multi-layer BFICs exist precisely for it.</p>
+<p><strong>Go hybrid or digital</strong> — beams are cheap once the digital section exists; handover is a software event.</p>
+<p>The architecture decision and the m5-3 session-continuity requirement are thus the same decision viewed from two modules — and the consumer panel's second beamforming layer is a line item that exists <em>because</em> of a protocol requirement three layers up.</p>
+</div>
+
+<div class="cb" id="s7">
+    <h2>7. The mechanical hybrids</h2>
+<p>One family refuses the premise that steering needs per-element electronics. <strong>VICTS</strong> apertures (variable-inclination continuous transverse stub — commercial implementations are well established in aero and maritime) steer by mechanically rotating two low-profile plates against each other: elevation from the plates' relative angle, azimuth from rotating the assembly. No phase shifters, no BFICs — the aperture is essentially passive metal with two motors, so its efficiency and noise behaviour approach a fixed aperture's, and its cost has no per-element term at all. Low-profile gimballed panels make the adjacent trade.</p>
+<p>What returns with the motors: single beam, mechanical slew rates, wear — and the handover problem of §6 in its hardest form, since a mechanically steered aperture cannot be in two places at all. Where they win is where their weaknesses are least binding and their strengths priceless: <strong>aero and maritime</strong>, where a platform tracks one GEO (or schedules generous NGSO handovers), where height and drag are the binding currency (m6-6), and where the G/T-per-euro of quasi-passive metal beats silicon across the operating life. The mechanical hybrid is not a transitional technology; it is the correct answer to a particular weighting of m6-1's three currencies.</p>
+</div>
+
+<div class="cb" id="s8">
+    <h2>8. Cost scaling and the honest crossover</h2>
+<p>Parametric models — dish cost ≈ fixed + b·D^2.7 (structure and stiffness scale super-quadratically), array cost ≈ overhead + c·N — with the m6-2 gain laws linking D and N to the same dBi:</p>
+<table class="compare-table">
+<thead><tr>
+<th>Gain</th>
+<th>Dish</th>
+<th>Dish cost (param.)</th>
+<th>N</th>
+<th>Array @ €0.5/el</th>
+<th>@ €1.5/el</th>
+<th>@ €3/el</th>
+</tr></thead>
+<tbody>
+<tr><td>33 dBi</td><td>26 cm</td><td>~175</td><td>891</td><td>~505</td><td>~1,395</td><td>~2,735</td></tr>
+<tr><td>36 dBi</td><td>37 cm</td><td>~215</td><td>1,778</td><td>~950</td><td>~2,725</td><td>~5,395</td></tr>
+<tr><td>39 dBi</td><td>53 cm</td><td>~310</td><td>3,548</td><td>~1,835</td><td>~5,380</td><td>~10,700</td></tr>
+<tr><td>42 dBi</td><td>75 cm</td><td>~555</td><td>7,079</td><td>~3,600</td><td>~10,680</td><td>~21,300</td></tr>
+</tbody>
+</table>
+<p>The table's verdict is unambiguous and worth stating without flinching: <strong>for a fixed, pointed terminal, the dish wins at every gain and every plausible per-element cost</strong> — stamped metal converting area to gain is unbeatable economics, which is why GEO consumer broadband never left it. The array's case appears only when the comparison is honest about NGSO: add a consumer-grade tracking gimbal (hundreds of euros, plus the §m6-1 warranty exposure) and a second one for make-before-break, and the analog panel at aggressive per-element cost crosses over — while also deleting the radome volume, the installation constraints, and the moving-part failure modes. The units of the ESA revolution were never dBi per euro; they were <strong>dBi per euro <em>while tracking</strong></em>.</p>
+</div>
+
+<div class="cb" id="s9">
+    <h2>9. Architecture by segment</h2>
+<table class="compare-table">
+<thead><tr>
+<th>Segment</th>
+<th>Architecture today</th>
+<th>Deciding factor</th>
+</tr></thead>
+<tbody>
+<tr><td>Consumer NGSO</td><td>Analog, 2 beamforming layers</td><td>Per-unit cost; handover via §6</td></tr>
+<tr><td>Enterprise fixed</td><td>Dish (no array)</td><td>§8's table — decibels per euro</td></tr>
+<tr><td>Gateway</td><td>Dish farms; digital arrays emerging</td><td>Performance; few units amortise DBF</td></tr>
+<tr><td>Maritime</td><td>Stabilised dish / VICTS / analog ESA</td><td>Motion + G/T per euro across life</td></tr>
+<tr><td>Aviation</td><td>VICTS and low-profile analog ESA</td><td>Drag, height, certification (m6-6)</td></tr>
+<tr><td>Defence</td><td>Digital and hybrid</td><td>Nulling, LPI, multi-beam — cost secondary</td></tr>
+<tr><td>Satellite payload (m3)</td><td>Hybrid → digital</td><td>One aperture amortised over all users</td></tr>
+</tbody>
+</table>
+<p>The column that predicts the row is always the same: <strong>how many users amortise the silicon</strong>. One user per aperture → analog or metal. All users per aperture → digital. The payload and the terminal sit at opposite ends of one economic axis, running the same mathematics from m6-2.</p>
+</div>
+
+<div class="cb" id="s10">
+    <h2>10. Key facts</h2>
+<table class="compare-table">
+<thead><tr>
+<th>Fact</th>
+<th>Value</th>
+<th>Unit</th>
+<th>Source</th>
+</tr></thead>
+<tbody>
+<tr><td>Analog architecture</td><td>BFICs (4–8 el/IC) + RF combiner, 1 beam/layer</td><td>—</td><td>§2</td></tr>
+<tr><td>Consumer panel power</td><td>order 105 (≈25 + 45 mW/el + overhead)</td><td>W</td><td>Computed; teardown order</td></tr>
+<tr><td>ADC power law</td><td>FOM · 2^ENOB · f_s</td><td>W</td><td>Murmann survey</td></tr>
+<tr><td>One 10-bit / 500 Msps ADC</td><td>25.6 (FOM 50 fJ)</td><td>mW</td><td>Computed</td></tr>
+<tr><td>Full-digital 1,280-el converters</td><td>65.5</td><td>W</td><td>Computed</td></tr>
+<tr><td>Full-digital raw stream</td><td>12.8</td><td>Tb/s</td><td>Computed — the real DBF wall</td></tr>
+<tr><td>Hybrid K = 16 converters</td><td>0.8 W, ≤ 16 beams</td><td>—</td><td>Computed</td></tr>
+<tr><td>Split-aperture beam penalty</td><td>−6.0 EIRP / −3.0 G/T</td><td>dB</td><td>Computed (N² law)</td></tr>
+<tr><td>Second analog layer</td><td>~2× beamforming silicon, 2 full beams</td><td>—</td><td>§6</td></tr>
+<tr><td>VICTS class</td><td>mechanical steer, no per-element ICs, 1 beam</td><td>—</td><td>§7</td></tr>
+<tr><td>Dish vs array (fixed terminal)</td><td>dish cheaper at every gain</td><td>—</td><td>Computed (§8 table)</td></tr>
+<tr><td>The ESA's real comparison</td><td>dish + tracking gimbal(s)</td><td>—</td><td>§8</td></tr>
+</tbody>
+</table>
+</div>
+
+<div class="cb" id="s11">
+    <h2>11. What this lesson delivers to the design chain</h2>
+<p>The spine gains Stage 3: an <code>ArchitectureModel</code> that, given element count, bandwidth, and required beams, prices each architecture's converter power, digital stream, RF power, silicon count, and per-beam performance penalty — and a cost model that finally makes m6-1's dish-versus-panel question answerable in euros, provided the question includes the gimbal. Two module threads resolved: m6-2's handover reflection now has numbers (−6 dB split versus a second layer versus digital-free), and the Module 3 payload's hybrid-digital architecture now has its terminal-side economic mirror.</p>
+<p>What the architecture cannot fix: physics at scan. However the beam is formed, the embedded element pattern rolls off (aperture projection included) — and the regulator is waiting at the off-axis angles. m6-4 presents that bill.</p>
+</div>
+
+<div class="quiz-block" id="quiz">
+    <h2>KNOWLEDGE CHECK</h2>
+    <div class="quiz-intro">Ten questions. Each option explains itself after you commit. No retries per question — decide first.</div>
+    <div class="quiz-q">
+        <p><strong>Q1.</strong> The beamforming architecture decision is fundamentally about:</p>
+        <div class="quiz-options">
+            <button class="quiz-opt" data-q="1" data-correct="false">A — Which modulation the terminal uses</button>
+            <button class="quiz-opt" data-q="1" data-correct="true">B — Where the N element signals combine into beams — RF hardware, digital processing, or staged between — which sets power, cost, and beam count</button>
+            <button class="quiz-opt" data-q="1" data-correct="false">C — The element spacing</button>
+            <button class="quiz-opt" data-q="1" data-correct="false">D — The colour of the radome</button>
+        </div>
+        <div class="quiz-feedback" id="fb1"></div>
+    </div>
+    <div class="quiz-q">
+        <p><strong>Q2.</strong> A 1,280-element analog consumer panel draws on the order of 100 W, dominated by:</p>
+        <div class="quiz-options">
+            <button class="quiz-opt" data-q="2" data-correct="false">A — The ADCs</button>
+            <button class="quiz-opt" data-q="2" data-correct="true">B — The per-element RF chains — ~25 mW receive and ~45 mW transmit per element — which exist in every architecture</button>
+            <button class="quiz-opt" data-q="2" data-correct="false">C — The motors</button>
+            <button class="quiz-opt" data-q="2" data-correct="false">D — The modem's LDPC decoder</button>
+        </div>
+        <div class="quiz-feedback" id="fb2"></div>
+    </div>
+    <div class="quiz-q">
+        <p><strong>Q3.</strong> The classic objection that digital beamforming's converters would consume kilowatts is obsolete because:</p>
+        <div class="quiz-options">
+            <button class="quiz-opt" data-q="3" data-correct="false">A — Converters are no longer needed</button>
+            <button class="quiz-opt" data-q="3" data-correct="true">B — Modern ADC figures of merit put full per-element conversion of the reference panel at ~65 W — the binding constraint moved to the 12.8 Tb/s sample stream and its processing</button>
+            <button class="quiz-opt" data-q="3" data-correct="false">C — Digital beamforming uses no power</button>
+            <button class="quiz-opt" data-q="3" data-correct="false">D — ENOB requirements dropped to 1 bit</button>
+        </div>
+        <div class="quiz-feedback" id="fb3"></div>
+    </div>
+    <div class="quiz-q">
+        <p><strong>Q4.</strong> Full digital beamforming is economically rational in satellite payloads and gateways, but not consumer terminals, because:</p>
+        <div class="quiz-options">
+            <button class="quiz-opt" data-q="4" data-correct="false">A — Consumer terminals have smaller elements</button>
+            <button class="quiz-opt" data-q="4" data-correct="true">B — The DBF silicon amortises over the users the aperture serves: one payload serves everyone, one gateway serves a region, one consumer terminal serves one household</button>
+            <button class="quiz-opt" data-q="4" data-correct="false">C — Payloads are exempt from power constraints</button>
+            <button class="quiz-opt" data-q="4" data-correct="false">D — Gateways do not need beams</button>
+        </div>
+        <div class="quiz-feedback" id="fb4"></div>
+    </div>
+    <div class="quiz-q">
+        <p><strong>Q5.</strong> Hybrid beamforming's quantisation-lobe limitation arises because:</p>
+        <div class="quiz-options">
+            <button class="quiz-opt" data-q="5" data-correct="false">A — The ADCs quantise too coarsely</button>
+            <button class="quiz-opt" data-q="5" data-correct="true">B — The K analog subarrays form a coarse lattice with M-element pitch, so steering the digital combination far from the subarrays' analog pointing re-runs m6-2's grating mathematics at subarray scale</button>
+            <button class="quiz-opt" data-q="5" data-correct="false">C — Hybrid systems cannot steer at all</button>
+            <button class="quiz-opt" data-q="5" data-correct="false">D — The phase shifters are digital</button>
+        </div>
+        <div class="quiz-feedback" id="fb5"></div>
+    </div>
+    <div class="quiz-q">
+        <p><strong>Q6.</strong> During a make-before-break handover, a split-aperture analog terminal pays, per beam:</p>
+        <div class="quiz-options">
+            <button class="quiz-opt" data-q="6" data-correct="false">A — Nothing</button>
+            <button class="quiz-opt" data-q="6" data-correct="true">B — −6.0 dB of EIRP and −3.0 dB of G/T — the N² transmit law and N receive law evaluated at N/2</button>
+            <button class="quiz-opt" data-q="6" data-correct="false">C — −3.0 dB of EIRP and −6.0 dB of G/T</button>
+            <button class="quiz-opt" data-q="6" data-correct="false">D — Total loss of service</button>
+        </div>
+        <div class="quiz-feedback" id="fb6"></div>
+    </div>
+    <div class="quiz-q">
+        <p><strong>Q7.</strong> VICTS-class mechanically steered apertures remain competitive in aero and maritime because:</p>
+        <div class="quiz-options">
+            <button class="quiz-opt" data-q="7" data-correct="false">A — They form multiple simultaneous beams</button>
+            <button class="quiz-opt" data-q="7" data-correct="true">B — Quasi-passive metal delivers dish-like efficiency and G/T-per-euro with no per-element silicon, and those segments' currencies (drag, height, lifetime cost) reward exactly that — while tolerating single-beam mechanical steering</button>
+            <button class="quiz-opt" data-q="7" data-correct="false">C — They have no moving parts</button>
+            <button class="quiz-opt" data-q="7" data-correct="false">D — Regulation forbids ESAs on aircraft</button>
+        </div>
+        <div class="quiz-feedback" id="fb7"></div>
+    </div>
+    <div class="quiz-q">
+        <p><strong>Q8.</strong> The §8 cost table's honest conclusion is:</p>
+        <div class="quiz-options">
+            <button class="quiz-opt" data-q="8" data-correct="false">A — Arrays are always cheaper than dishes</button>
+            <button class="quiz-opt" data-q="8" data-correct="true">B — For a fixed terminal the dish wins at every gain; the array's case begins only when the dish must carry tracking gimbals — the ESA competes against the dish-plus-motor, not the dish</button>
+            <button class="quiz-opt" data-q="8" data-correct="false">C — Dishes and arrays always cost the same</button>
+            <button class="quiz-opt" data-q="8" data-correct="false">D — Cost is irrelevant to terminal design</button>
+        </div>
+        <div class="quiz-feedback" id="fb8"></div>
+    </div>
+    <div class="quiz-q">
+        <p><strong>Q9.</strong> The architecture-independent ~90 W in the §5 table teaches that:</p>
+        <div class="quiz-options">
+            <button class="quiz-opt" data-q="9" data-correct="false">A — Architecture choice does not affect power</button>
+            <button class="quiz-opt" data-q="9" data-correct="true">B — The per-element RF chains are the price of being a phased array at all — set by m6-1's element-count decision — and the architecture prices only what happens after the elements</button>
+            <button class="quiz-opt" data-q="9" data-correct="false">C — Amplifiers should be removed</button>
+            <button class="quiz-opt" data-q="9" data-correct="false">D — Analog panels use no RF power</button>
+        </div>
+        <div class="quiz-feedback" id="fb9"></div>
+    </div>
+    <div class="quiz-q">
+        <p><strong>Q10.</strong> The single economic axis that §9's table runs on is:</p>
+        <div class="quiz-options">
+            <button class="quiz-opt" data-q="10" data-correct="false">A — Frequency band</button>
+            <button class="quiz-opt" data-q="10" data-correct="true">B — How many users amortise the beamforming silicon — from one household per aperture (analog/metal) to an entire service area per aperture (digital payload)</button>
+            <button class="quiz-opt" data-q="10" data-correct="false">C — Country of manufacture</button>
+            <button class="quiz-opt" data-q="10" data-correct="false">D — Antenna colour</button>
+        </div>
+        <div class="quiz-feedback" id="fb10"></div>
+    </div>
+    <div class="quiz-score" id="quizScore"></div>
+</div>
+
+<div class="py-block" id="py">
+    <h2>PYTHON EXERCISES</h2>
+    <div class="py-intro">Three exercises; the last extends the module spine project. Run them, then work the numbered follow-ups in the comments — the follow-ups are the exercise.</div>
+    <div class="py-exercise">
+        <h3>Exercise 1 — The converter law and the real wall</h3>
+        <p>Price digital beamforming honestly: converters, then the stream.</p>
+<pre>
+import math
+
+def adc_power_w(fom_fj, enob, fs_hz):
+    return fom_fj*1e-15 * 2**enob * fs_hz
+
+def dbf_bill(N, fs_hz, enob=10, fom_fj=50, bits=None):
+    bits = bits or enob
+    conv = N * 2 * adc_power_w(fom_fj, enob, fs_hz)      # I/Q per element
+    stream = N * 2 * bits * fs_hz                        # raw samples out
+    return conv, stream
+
+print(f&quot;{&#x27;N&#x27;:&gt;6}{&#x27;fs (MHz)&#x27;:&gt;10}{&#x27;converters (W)&#x27;:&gt;16}{&#x27;stream (Tb/s)&#x27;:&gt;15}&quot;)
+for N, fs in [(256, 500e6), (1280, 500e6), (1280, 100e6), (5000, 500e6)]:
+    c, s = dbf_bill(N, fs)
+    print(f&quot;{N:&gt;6}{fs/1e6:&gt;10.0f}{c:&gt;16.1f}{s/1e12:&gt;15.2f}&quot;)
+
+# 1. Halve the FOM (silicon progress) and halve ENOB-? No: reduce ENOB
+#    by 2 bits instead. Which lever moves the converter bill more, and
+#    why does the STREAM not care about either? State what the stream
+#    responds to, and what that implies about DBF&#x27;s long-term trajectory.
+# 2. A gateway array digitises at the element but decimates each element
+#    to its 50 MHz sub-band of interest before combining. Recompute the
+#    stream. Which architecture did you just reinvent, approximately?
+# 3. Estimate the processing load: 1 complex MAC per element per beam
+#    per sample. At 10 beams, how many TMAC/s? Compare against a current
+#    mobile SoC (~1-10 TMAC/s class) and place consumer DBF on a timeline.
+</pre>
+    </div>
+    <div class="py-exercise">
+        <h3>Exercise 2 — The crossover, with and without the gimbal</h3>
+        <p>Reproduce §8 and then make it honest about NGSO.</p>
+<pre>
+import math
+db = lambda x: 10*math.log10(x)
+
+def dish_cost(D_m, fixed=150, b=900, exp=2.7):
+    return fixed + b*D_m**exp
+
+def dish_D_for_gain(G_dbi, f_ghz=20, eta=0.65):
+    lam = 0.3/f_ghz
+    return lam/math.pi * math.sqrt(10**(G_dbi/10)/eta)
+
+def array_N_for_gain(G_dbi, Ge=5.0, loss=1.5):
+    return round(10**((G_dbi - Ge + loss)/10))
+
+def array_cost(N, per_el, overhead=60):
+    return overhead + N*per_el
+
+GIMBAL = 800          # consumer-grade tracking positioner, parametric
+print(f&quot;{&#x27;gain&#x27;:&gt;5}{&#x27;dish&#x27;:&gt;7}{&#x27;dish+gimbal&#x27;:&gt;12}{&#x27;N&#x27;:&gt;7}&quot;
+      f&quot;{&#x27;array@0.5&#x27;:&gt;11}{&#x27;@1.5&#x27;:&gt;8}{&#x27;@3.0&#x27;:&gt;8}&quot;)
+for G in [33, 36, 39, 42]:
+    D = dish_D_for_gain(G); N = array_N_for_gain(G)
+    dc = dish_cost(D)
+    row = [f&quot;{G:&gt;5}&quot;, f&quot;{dc:&gt;7.0f}&quot;, f&quot;{dc+GIMBAL:&gt;12.0f}&quot;, f&quot;{N:&gt;7}&quot;]
+    row += [f&quot;{array_cost(N, p):&gt;8.0f}&quot; for p in (0.5, 1.5, 3.0)]
+    print(&quot;&quot;.join(row))
+
+# 1. Find, per per-element price, the gain at which the ANALOG array
+#    beats dish+gimbal. Then add a second gimbal (make-before-break,
+#    §6) and repeat. Write the one-sentence conclusion §8 wrote.
+# 2. The dish exponent 2.7 is parametric. Sweep 2.2..3.0 and report how
+#    sensitive the fixed-terminal conclusion is. Does ANY exponent let
+#    the array win a fixed-terminal comparison at €0.5/element?
+# 3. Add the panel&#x27;s SECOND beamforming layer at +40% of array cost and
+#    re-run question 1. Which segment&#x27;s purchasing decision did you
+#    just model, and what real product config does it predict?
+</pre>
+    </div>
+    <div class="py-exercise">
+        <h3>Exercise 3 — Spine Stage 3: the architecture model</h3>
+        <p>Every architecture priced from one parameter set; the panel's electronics join the spine.</p>
+<pre>
+import math
+db = lambda x: 10*math.log10(x)
+
+# ═══════════════════════════════════════════════════════
+# M6 SPINE PROJECT — TERMINAL MODEL
+# Stage 3: beamforming architecture — power, silicon,
+#          beams, and per-beam penalties behind the
+#          Stage-1/2 aperture.
+# Next: m6-4 scan loss + regulatory mask (physics returns);
+#       m6-5 pointing/tracking; m6-6 segment table;
+#       m6-7 evaluator -&gt; M4 -&gt; M5.
+# ═══════════════════════════════════════════════════════
+
+class ArchitectureModel:
+    RX_MW, TX_MW, OVERHEAD_W = 25.0, 45.0, 15.0
+    def __init__(self, name, N, fs_hz=500e6, arch=&quot;analog&quot;,
+                 layers=1, K=16, enob=10, fom_fj=50, el_per_ic=6):
+        self.name, self.N, self.arch = name, N, arch
+        self.layers, self.K = layers, K
+        rf = N*(self.RX_MW + self.TX_MW)/1e3
+        rf += (layers-1)*N*5.0/1e3      # extra beamforming layer: shifter+ctrl
+        adc = lambda: fom_fj*1e-15 * 2**enob * fs_hz
+        if arch == &quot;analog&quot;:
+            self.conv_w  = 0.1
+            self.stream  = 0.0
+            self.beams   = layers
+            self.bfics   = math.ceil(N/el_per_ic)*layers
+        elif arch == &quot;hybrid&quot;:
+            self.conv_w  = K*2*adc()
+            self.stream  = K*2*enob*fs_hz
+            self.beams   = K
+            self.bfics   = math.ceil(N/el_per_ic)
+        elif arch == &quot;digital&quot;:
+            self.conv_w  = N*2*adc()
+            self.stream  = N*2*enob*fs_hz
+            self.beams   = 10**9          # processing-limited
+            self.bfics   = 0
+        elif arch == &quot;victs&quot;:
+            self.conv_w, self.stream, self.beams, self.bfics = 0.05, 0.0, 1, 0
+            rf = 8.0                      # motors + converter, no per-el chains
+        self.power_w = rf + self.conv_w + self.OVERHEAD_W
+
+    def beam_penalty(self, simultaneous):
+        &quot;&quot;&quot;dB (EIRP, G/T) penalty per beam for `simultaneous` beams.&quot;&quot;&quot;
+        if self.arch == &quot;analog&quot; and simultaneous &gt; self.layers:
+            frac = self.layers/simultaneous          # aperture split
+            return 20*math.log10(frac), 10*math.log10(frac)
+        if self.arch == &quot;victs&quot; and simultaneous &gt; 1:
+            return -999.0, -999.0                    # cannot
+        return 0.0, 0.0
+
+    def report(self):
+        s = f&quot;{self.stream/1e12:.2f} Tb/s&quot; if self.stream &gt;= 1e12 else \
+            (f&quot;{self.stream/1e9:.0f} Gb/s&quot; if self.stream else &quot;—&quot;)
+        print(f&quot;  {self.name:&lt;28} {self.power_w:&gt;6.0f} W | conv {self.conv_w:&gt;6.1f} W&quot;
+              f&quot; | stream {s:&gt;10} | beams {min(self.beams, 99):&gt;2}&quot;
+              f&quot; | BFICs {self.bfics:&gt;3}&quot;)
+
+print(f&quot;{&#x27;architecture&#x27;:&lt;30}{&#x27;power&#x27;:&gt;8}   converters      stream     beams   silicon&quot;)
+for a in [ArchitectureModel(&quot;analog, 1 layer&quot;,   1280, arch=&quot;analog&quot;, layers=1),
+          ArchitectureModel(&quot;analog, 2 layers&quot;,  1280, arch=&quot;analog&quot;, layers=2),
+          ArchitectureModel(&quot;hybrid K=16&quot;,       1280, arch=&quot;hybrid&quot;),
+          ArchitectureModel(&quot;full digital&quot;,      1280, arch=&quot;digital&quot;),
+          ArchitectureModel(&quot;VICTS-class&quot;,       1280, arch=&quot;victs&quot;)]:
+    a.report()
+
+one = ArchitectureModel(&quot;analog, 1 layer&quot;, 1280, arch=&quot;analog&quot;, layers=1)
+e, g = one.beam_penalty(2)
+print(f&quot;\nsplit-aperture handover on 1-layer analog: EIRP {e:+.1f} dB, G/T {g:+.1f} dB per beam&quot;)
+
+# ── the Stage-1/2 handoff ───────────────────────────────
+# ApertureModel gave (G/T, EIRP); ArrayGainModel made them scan-aware;
+# this stage attaches (power_w, beams, penalties, silicon count).
+# m6-7&#x27;s evaluator will carry all of it into the M4/M5 engines.
+
+# 1. The VICTS row shows ~23 W against the ESA&#x27;s ~105 W. For a 12 V
+#    vehicle roof and for an aircraft&#x27;s power budget, state which rows
+#    are even admissible — before performance is discussed at all.
+# 2. Make beams honest for &#x27;digital&#x27;: cap them by a processing budget
+#    (say 5 TMAC/s at 1 MAC/el/beam/sample) and print the real beam
+#    count at fs=500 MHz. Does &#x27;processing-limited&#x27; still mean &#x27;many&#x27;?
+# 3. Wire beam_penalty(2) into the m5-2 fade-sweep: at the m5-7 forward
+#    link&#x27;s clear-sky Es/N0, does a −3 dB G/T handover dip cross a rung?
+#    Answer for ladder-top AND mid-ladder, per m5-7 §5&#x27;s doctrine.
+</pre>
+    </div>
+</div>
+
+<div class="reflection-block" id="reflect">
+    <h2>REFLECTION</h2>
+    <div class="ref-intro">Four prompts. Each forces a decision — write the position down before moving on; the act of committing is the exercise.</div>
+    <div class="ref-prompt">
+        <h3>PROMPT 01</h3>
+        <p>Section 9's amortisation axis predicts every architecture in the table — but it treats the terminal fleet as static. A consumer operator with ten million analog terminals wants adaptive interference nulling (a digital capability) against a rising noise floor. Enumerate the realistic paths — fleet replacement, hybrid retrofit at the next hardware revision, network-side mitigation instead — price each qualitatively against the §5/§8 scalings, and identify which m4-6 quantity would have to degrade, and by how much, before any path clears its cost.</p>
+    </div>
+    <div class="ref-prompt">
+        <h3>PROMPT 02</h3>
+        <p>Section 6 priced three multi-beam routes and noted consumer panels ship a second analog layer "because of a protocol requirement three layers up" (m5-3's make-before-break). Invert the dependency: suppose the air-interface designers had instead specified break-before-make with a 50 ms gap. Trace the consequences downward (terminal silicon deleted, cost saved) and upward (m5 session behaviour, TCP, user experience), and judge whether the protocol requirement or the silicon was the cheaper place to solve handover. What does this say about who should sit in air-interface standardisation meetings?</p>
+    </div>
+    <div class="ref-prompt">
+        <h3>PROMPT 03</h3>
+        <p>The §8 crossover buried a time dimension: the dish+gimbal's cost includes a mechanical wear-out and truck-roll model, while the ESA's includes silicon infant mortality and graceful degradation (m6-1 §7). Rebuild the comparison as five-year total cost of ownership for (a) a suburban consumer, (b) a maritime vessel, (c) a rural site with no service access. Identify which cost term flips which comparison, and what warranty structure each answer implies the vendor must sell.</p>
+    </div>
+    <div class="ref-prompt">
+        <h3>PROMPT 04</h3>
+        <p>Section 3 concluded the DBF wall is the sample stream, and exercise 1's question 3 timelines consumer DBF against mobile-SoC processing curves. Take a position: name the year-range in which full-digital consumer terminals become rational, state the two exogenous curves your estimate rides on (converter FOM, TMAC/s per euro), and — the real question — identify what a consumer terminal would actually <em>do</em> with software-defined beams that its analog second layer cannot. If you cannot name a capability with revenue attached, what does that imply about whether the transition ever happens at the consumer tier?</p>
+    </div>
+</div>
+
+<div class="cb">
+    <h2>Sources</h2>
+<ul>
+<li>Murmann, "ADC Performance Survey" (ongoing) — converter figure-of-merit data behind the §3/§5 power laws.</li>
+<li>Mailloux, <em>Phased Array Antenna Handbook</em> — subarray architectures, quantisation lobes.</li>
+<li>Herd &amp; Conway, "The Evolution to Modern Phased Array Architectures" (Proc. IEEE, 2016) — analog/hybrid/digital taxonomy and scaling.</li>
+<li>Commercial VICTS implementations (aero/maritime) — architecture class anchor; specific vendor figures deliberately not asserted.</li>
+<li>Public teardowns of consumer LEO panels — power-draw and BFIC-count order anchors only.</li>
+<li>Module 3 (payload beamforming), m5-3 (make-before-break), m6-1/m6-2 — the requirements this lesson prices.</li>
+</ul>
+</div>
+
+<div class="complete-wrap">
+    <button class="complete-btn" id="completeBtn">MARK LESSON COMPLETE</button>
+    <div class="complete-msg" id="completeMsg"></div>
+</div>
+<div class="lesson-nav">
+    <a href="m6-2.html">← LESSON 02 — PHASED ARRAYS &amp; THE ARRAY FACTOR</a>
+    <a href="m6-4.html">LESSON 04 — SCAN LOSS &amp; THE MASK →</a>
+</div>
+</div>
+
+<button class="back-to-top" id="backToTop" title="Back to top">↑</button>
+<footer>© 2026 LEOAF · M6 · LESSON 03 OF 7</footer>
+<script>
+const canvas=document.getElementById('starsCanvas'),ctx=canvas.getContext('2d');
+let stars=[];
+function initStars(){stars=[];for(let i=0;i<180;i++)stars.push({x:Math.random()*canvas.width,y:Math.random()*canvas.height,size:Math.random()*1.5+0.4,speed:Math.random()*0.18+0.04,hue:Math.random()*360});}
+function resizeCanvas(){canvas.width=window.innerWidth;canvas.height=window.innerHeight;}
+resizeCanvas();initStars();window.addEventListener('resize',resizeCanvas);
+function animateStars(){ctx.clearRect(0,0,canvas.width,canvas.height);stars.forEach(s=>{s.y-=s.speed;if(s.y<0){s.y=canvas.height;s.x=Math.random()*canvas.width;}ctx.beginPath();ctx.fillStyle=`hsl(${s.hue},80%,80%)`;ctx.arc(s.x,s.y,s.size,0,Math.PI*2);ctx.fill();});requestAnimationFrame(animateStars);}
+animateStars();
+</script>
+<script>
+const feedbacks={
+    1:{correct:"Everything upstream of combination (LNAs, PAs, phase control) exists in every architecture; everything downstream (beam count, reconfigurability, silicon and power bills) follows from where the sum happens. One sentence, whole lesson.",wrong:"Modulation is Module 5, identical across architectures. Spacing was fixed by m6-2's grating rule before this lesson began. The radome belongs to m6-6."},
+    2:{correct:"32 W receive + 58 W transmit + ~15 W of control and conversion. The architecture-independent term dominates: being a phased array costs ~90 W here before any beamforming choice is made — the §5 table's most important row.",wrong:"Analog has essentially one converter pair. No motors exist — that was the point (m6-1 §4). The modem is real but small against 2,560 amplifier chains."},
+    3:{correct:"P ≈ FOM·2^ENOB·f_s at 50 fJ/step gives 25.6 mW per 10-bit/500 Msps ADC. Sixty-five watts is survivable; twelve terabits per second of interconnect and multiply-accumulate is what keeps DBF out of consumer terminals — a wall of silicon economics, not converter physics.",wrong:"DBF is defined by per-element conversion. The processing power is precisely the new wall. Ten-ish effective bits remain necessary for the dynamic range a satellite receiver needs."},
+    4:{correct:"The §9 table's single predictive column. Identical mathematics, opposite economics: cost-per-user of the digital section differs by six orders of magnitude between the payload and the roof.",wrong:"Element physics is common. Payloads are the *most* power-constrained platforms in the program (m3/m4) — they pay DBF's power because its flexibility earns revenue. Gateways need many beams; that is half their case for DBF."},
+    5:{correct:"Pattern multiplication again: (subarray pattern) × (K-element array factor with huge spacing). Keep the digital beams within the subarrays' analog beamwidth and all is well — which suits a payload's clustered coverage and explains where hybrid lives.",wrong:"Converter resolution is a separate budget. Hybrids steer fine within the neighbourhood. Phase-shifter quantisation is a real but different (and smaller) lobe mechanism."},
+    6:{correct:"Half the elements per beam: transmit loses half the power and half the gain (−6.0), receive loses half the gain (−3.0). Against m5-2's rung spacing that is one to several rungs at the exact moment of satellite transition — the quantified answer to m6-2's reflection, and the reason consumer panels carry a second beamforming layer instead.",wrong:"The overlap is not free — that is the point. The asymmetry runs transmit-heavy (N² vs N). Service continues; that is what the −6 dB purchases."},
+    7:{correct:"No per-element cost term, near-fixed-aperture noise behaviour, low profile. The price — one beam, motors, slew limits, hard handovers — is least binding where platforms track a GEO or accept scheduled NGSO transitions. A correct answer to a particular currency weighting, not a legacy.",wrong:"Single beam is their defining limit. The motors are exactly what returned. ESAs fly on aircraft today; certification (m6-6) constrains both families."},
+    8:{correct:"Stamped metal converting area to gain has no per-element term to lose to. NGSO's tracking requirement (and make-before-break's second positioner) is what loads the dish's column until the analog panel crosses over — \"dBi per euro while tracking.\"",wrong:"The table shows the dish cheaper in every row as a fixed terminal. The whole §8 exercise is that they do not cost the same. Cost is one of m6-1's three currencies and often the deciding one."},
+    9:{correct:"LNAs, PAs, and phase control exist in every column. Architecture moves the converter and processing terms; element count moves the RF term. Two different design levers, two different lessons (m6-1 and here), one power budget.",wrong:"Architecture moves tens of watts (converters) to unbounded (processing) — it matters after the common term. Amplification is the terminal's function. The 90 W is mostly analog RF."},
+    10:{correct:"Every row's architecture is predicted by users-per-aperture: consumer → analog, gateway → digital emerging, payload → hybrid/digital, defence → mission value overrides. The same array factor, priced per beneficiary.",wrong:"Band changes λ and N, not the amortisation logic. The rest is noise."}
+};
+let answered={};
+document.querySelectorAll('.quiz-opt').forEach(btn=>{
+    btn.addEventListener('click',function(){
+        const q=this.dataset.q;
+        if(answered[q]!==undefined)return;
+        const correct=this.dataset.correct==='true';
+        answered[q]=correct;
+        document.querySelectorAll(`.quiz-opt[data-q="${q}"]`).forEach(b=>{b.disabled=true;if(b.dataset.correct==='true')b.classList.add('correct');});
+        if(!correct)this.classList.add('wrong');
+        const fb=document.getElementById('fb'+q);
+        fb.textContent=(correct?'✓ ':'✗ ')+feedbacks[q][correct?'correct':'wrong'];
+        fb.style.color=correct?'#39ff14':'#ff004f';
+        if(Object.keys(answered).length===10){
+            const total=Object.values(answered).filter(Boolean).length;
+            const sc=document.getElementById('quizScore');
+            sc.style.display='block';
+            const pct=Math.round(total/10*100);
+            sc.textContent=`SCORE: ${total}/10 (${pct}%) — ${pct===100?'PERFECT.':pct>=80?'STRONG.':pct>=60?'ADEQUATE. REVISIT WEAK SECTIONS.':'REVISIT THE LESSON BEFORE PROCEEDING.'}`;
+        }
+    });
+});
+</script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="supabase.js"></script>
+<script src="user_progress.js"></script>
+<script>
+const LESSON_ID='m6-3';
+(function(){
+    function bounceToLogin(r){console.error("Auth guard:",r);window.location.replace("index.html");}
+    async function init(){
+        if(typeof client==="undefined"||!client||!client.auth)return bounceToLogin("Supabase client not loaded");
+        let session=null;
+        try{({data:{session}}=await client.auth.getSession());}
+        catch(e){return bounceToLogin("getSession threw: "+e.message);}
+        if(!session){window.location.replace("index.html");return;}
+        const btn=document.getElementById('completeBtn'),msg=document.getElementById('completeMsg');
+        function setDone(done){
+            if(done){btn.textContent='✓ COMPLETE — CLICK TO UNDO';btn.classList.add('done');btn.style.cssText='border-color:#39ff14;color:#39ff14;background:rgba(57,255,20,0.1);cursor:pointer;opacity:1;';msg.style.color='#39ff14';msg.textContent='Lesson marked complete. Click again to undo.';}
+            else{btn.textContent='MARK LESSON COMPLETE';btn.classList.remove('done');btn.style.cssText='';msg.style.color='#ffffff55';msg.textContent='Not yet marked complete.';}
+        }
+        let mastered=[];
+        try{mastered=await getMasteredSections();}catch(e){console.error(e);}
+        setDone(mastered.includes(LESSON_ID));
+        btn.addEventListener('click',async()=>{
+            const isDone=btn.classList.contains('done');
+            msg.style.color='#00d9ff';msg.textContent='Saving...';
+            const ok=await upsertSection(LESSON_ID,!isDone);
+            if(ok){setDone(!isDone);}else{msg.style.color='#ff004f';msg.textContent='Error saving. Try again.';}
+        });
+        const btt=document.getElementById('backToTop');
+        window.addEventListener('scroll',()=>{btt.classList.toggle('visible',window.scrollY>400);});
+        btt.addEventListener('click',()=>window.scrollTo({top:0,behavior:'smooth'}));
+    }
+    if(document.readyState==="loading")document.addEventListener("DOMContentLoaded",init);
+    else init();
+})();
+</script>
+</body>
+</html>
