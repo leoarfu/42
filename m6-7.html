@@ -1,0 +1,699 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, shrink-to-fit=no">
+<title>M6-7 — Synthesis: The Terminal Trade Space · LEOAF</title>
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;600;800&family=Share+Tech+Mono&family=Libre+Baskerville:ital,wght@0,400;0,700;1,400&display=swap" rel="stylesheet">
+<link rel="icon" href="favicon.ico" sizes="any" type="image/x-icon">
+<link rel="manifest" href="site.webmanifest">
+<meta name="theme-color" content="#0f0f0f">
+<script>
+window.leoafAbort = async function () {
+    function go() { window.location.replace("index.html?signedout=1"); }
+    try { if (typeof client !== "undefined" && client && client.auth && client.auth.signOut) { try { await client.auth.signOut({ scope: "local" }); } catch (e) {} } } catch (e) {}
+    go();
+};
+</script>
+<style>
+* { box-sizing:border-box; margin:0; padding:0; }
+html { height:100%; -webkit-text-size-adjust:100%; overflow-x:hidden; }
+body { font-family:'Share Tech Mono',monospace; background:#000; color:white; overflow-x:hidden; min-height:100vh; }
+#starsCanvas { position:fixed; inset:0; z-index:-1; }
+header { background:#000; border-bottom:1px solid #ff004f33; position:sticky; top:0; z-index:100; padding:1rem clamp(1.5rem,5vw,4rem); display:flex; justify-content:space-between; align-items:center; }
+.logo { font-family:'Orbitron',sans-serif; font-weight:800; font-size:clamp(16px,2vw,22px); letter-spacing:3px; text-decoration:none; }
+.logo span:first-child { color:white; } .logo span:last-child { color:#ff004f; }
+.nav-right { display:flex; align-items:center; gap:10px; }
+.nav-btn { background:transparent; border:1px solid #ff004f44; color:#ff004f; padding:6px 14px; cursor:pointer; transition:0.3s; font-size:11px; font-family:'Orbitron',sans-serif; letter-spacing:1px; text-decoration:none; display:inline-block; }
+.nav-btn:hover { background:#ff004f; color:black; }
+.breadcrumb { padding:14px clamp(1.5rem,5vw,4rem); font-size:11px; color:#ffffff44; letter-spacing:1px; position:relative; z-index:1; }
+.breadcrumb a { color:#00d9ff66; text-decoration:none; } .breadcrumb a:hover { color:#00d9ff; }
+.breadcrumb span { margin:0 8px; }
+.lesson-wrap { max-width:820px; margin:0 auto; padding:0 clamp(1.5rem,5vw,4rem) 80px; position:relative; z-index:1; }
+.lesson-header { padding:30px 0 28px; border-bottom:1px solid #ffffff11; margin-bottom:36px; }
+.lesson-tag { font-family:'Orbitron',sans-serif; font-size:10px; color:#ff004f; letter-spacing:3px; margin-bottom:10px; }
+.lesson-header h1 { font-family:'Orbitron',sans-serif; font-size:clamp(20px,3.5vw,32px); font-weight:800; line-height:1.2; margin-bottom:12px; }
+.lesson-meta { display:flex; gap:10px; flex-wrap:wrap; margin-bottom:16px; }
+.l-pill { font-family:'Orbitron',sans-serif; font-size:10px; padding:3px 10px; border:1px solid; letter-spacing:1px; }
+.l-pill-q { color:#ff004f; border-color:#ff004f44; } .l-pill-t { color:#39ff14; border-color:#39ff1444; }
+.l-pill-c { color:#ffaa00; border-color:#ffaa0044; }
+.lesson-intro { font-size:13px; line-height:1.85; opacity:0.75; }
+.toc { background:rgba(0,217,255,0.06); border:1px solid #00d9ff33; padding:24px 28px; margin:30px 0; }
+.toc h4 { font-family:'Orbitron',sans-serif; font-size:10px; color:#00d9ff; letter-spacing:2px; margin-bottom:16px; }
+.toc ol { padding-left:20px; } .toc li { font-size:13px; line-height:2.1; }
+.toc li a { color:#00d9ffbb; text-decoration:none; transition:0.15s; } .toc li a:hover { color:#fff; padding-left:4px; }
+.toc li::marker { color:#ff004f; font-family:'Orbitron',sans-serif; font-size:10px; }
+.cb { background:#f5f2ec; color:#1a1a1a; padding:36px clamp(24px,4vw,48px); margin-bottom:24px; border-left:4px solid #00d9ff; position:relative; z-index:1; }
+.cb h2 { font-family:'Orbitron',sans-serif; font-size:13px; color:#003d66; letter-spacing:2px; text-transform:uppercase; margin-bottom:20px; padding-bottom:10px; border-bottom:2px solid #00d9ff66; scroll-margin-top:80px; }
+.cb h3 { font-family:'Orbitron',sans-serif; font-size:11px; color:#444; letter-spacing:1.5px; text-transform:uppercase; margin:28px 0 12px; }
+.cb p { font-family:'Libre Baskerville',Georgia,serif; font-size:15px; line-height:1.9; color:#1a1a1a; margin-bottom:16px; }
+.cb ul { padding-left:0; margin-bottom:16px; }
+.cb ul li { font-family:'Libre Baskerville',Georgia,serif; font-size:14px; line-height:1.85; color:#1a1a1a; padding-left:20px; position:relative; margin-bottom:8px; }
+.cb ul li::before { content:'›'; position:absolute; left:0; color:#0077aa; }
+.cb blockquote { border-left:3px solid #1a7a1a; background:#eafaea; padding:14px 20px; margin:18px 0; font-size:13px; font-family:'Share Tech Mono',monospace; color:#0a3d0a; line-height:1.8; }
+.callout { border-left:3px solid #0088cc; background:#e8f4fb; padding:16px 20px; margin:22px 0; font-size:12px; line-height:1.8; color:#1a1a1a; }
+.callout.red { border-left-color:#cc0033; background:#fdecea; }
+.callout.green { border-left-color:#1a7a1a; background:#eafaea; }
+.callout.amber { border-left-color:#996600; background:#fef9ec; }
+.callout strong { font-family:'Orbitron',sans-serif; font-size:10px; letter-spacing:1px; display:block; margin-bottom:8px; }
+.compare-table { width:100%; border-collapse:collapse; margin:22px 0; font-size:12px; }
+.compare-table th { font-family:'Orbitron',sans-serif; font-size:10px; letter-spacing:1px; color:#003d66; padding:10px 12px; border-bottom:2px solid #00d9ff66; text-align:left; }
+.compare-table td { padding:10px 12px; border-bottom:1px solid #ddd; line-height:1.5; color:#1a1a1a; vertical-align:top; }
+.compare-table tr:hover td { background:#f0f0f0; }
+.key-numbers { display:grid; grid-template-columns:repeat(auto-fit,minmax(140px,1fr)); gap:12px; margin:22px 0; }
+.kn-item { background:#fff; border:1px solid #d0d0d0; padding:16px 12px; text-align:center; }
+.kn-val { font-family:'Orbitron',sans-serif; font-size:clamp(13px,1.8vw,18px); font-weight:800; color:#003d66; display:block; }
+.kn-label { font-size:10px; color:#555; letter-spacing:1px; margin-top:5px; display:block; line-height:1.4; }
+.quiz-block { background:rgba(17,17,17,0.9); border:1px solid #ff004f33; padding:28px; margin:48px 0 32px; }
+.quiz-block h2 { font-family:'Orbitron',sans-serif; font-size:13px; color:#ff004f; letter-spacing:2px; margin-bottom:6px; }
+.quiz-intro { font-size:12px; opacity:0.6; margin-bottom:24px; padding-bottom:16px; border-bottom:1px solid #ff004f22; line-height:1.6; }
+.quiz-q { margin-bottom:28px; }
+.quiz-q p { font-size:13px; opacity:0.9; margin-bottom:12px; line-height:1.65; }
+.quiz-q p strong { color:#00d9ff; }
+.quiz-options { display:flex; flex-direction:column; gap:8px; }
+.quiz-opt { background:rgba(255,255,255,0.03); border:1px solid #ffffff1a; padding:11px 16px; cursor:pointer; font-size:12px; font-family:'Share Tech Mono',monospace; transition:0.2s; text-align:left; color:white; line-height:1.5; }
+.quiz-opt:hover:not(:disabled) { background:rgba(0,217,255,0.08); border-color:#00d9ff44; }
+.quiz-opt.correct { background:rgba(57,255,20,0.1); border-color:#39ff14; color:#39ff14; }
+.quiz-opt.wrong { background:rgba(255,0,79,0.1); border-color:#ff004f; color:#ff004f; }
+.quiz-opt:disabled { cursor:default; }
+.quiz-feedback { font-size:12px; margin-top:10px; min-height:18px; line-height:1.7; opacity:0.9; padding:0 4px; }
+.quiz-score { font-family:'Orbitron',sans-serif; font-size:12px; color:#39ff14; margin-top:20px; letter-spacing:1px; display:none; padding-top:16px; border-top:1px solid #39ff1433; }
+.py-block { background:rgba(10,10,10,0.95); border:1px solid #39ff1422; padding:28px; margin:32px 0; }
+.py-block h2 { font-family:'Orbitron',sans-serif; font-size:13px; color:#39ff14; letter-spacing:2px; margin-bottom:8px; }
+.py-block .py-intro { font-size:12px; opacity:0.7; margin-bottom:20px; padding-bottom:16px; border-bottom:1px solid #39ff1422; line-height:1.7; }
+.py-exercise { margin-bottom:32px; } .py-exercise:last-child { margin-bottom:0; }
+.py-exercise h3 { font-family:'Orbitron',sans-serif; font-size:11px; color:#39ff1499; letter-spacing:1.5px; text-transform:uppercase; margin-bottom:10px; }
+.py-exercise p { font-size:12px; opacity:0.8; margin-bottom:14px; line-height:1.75; }
+.py-block pre { background:#050505; border:1px solid #39ff1433; padding:20px; font-family:'Share Tech Mono',monospace; font-size:11px; line-height:1.7; overflow-x:auto; color:#39ff14; white-space:pre; margin-bottom:12px; }
+.py-note { background:rgba(57,255,20,0.04); border-left:2px solid #39ff14; padding:12px 16px; margin-top:14px; font-size:12px; line-height:1.75; opacity:0.8; }
+.py-note strong { font-family:'Orbitron',sans-serif; font-size:10px; color:#39ff14; display:block; margin-bottom:6px; letter-spacing:1px; }
+.reflection-block { background:rgba(255,170,0,0.04); border:1px solid #ffaa0033; padding:24px; margin:32px 0; }
+.reflection-block h2 { font-family:'Orbitron',sans-serif; font-size:13px; color:#ffaa00; letter-spacing:2px; margin-bottom:8px; }
+.ref-intro { font-size:12px; opacity:0.7; margin-bottom:20px; padding-bottom:14px; border-bottom:1px solid #ffaa0022; line-height:1.7; }
+.ref-prompt { margin-bottom:20px; }
+.ref-prompt h3 { font-family:'Orbitron',sans-serif; font-size:11px; color:#ffaa0099; letter-spacing:1px; margin-bottom:8px; }
+.ref-prompt p { font-size:12px; opacity:0.8; line-height:1.75; }
+.complete-wrap { margin-top:56px; padding-top:30px; border-top:1px solid #ffffff11; text-align:center; }
+.complete-btn { font-family:'Orbitron',sans-serif; font-size:13px; letter-spacing:2px; padding:14px 44px; background:transparent; border:1px solid #39ff14; color:#39ff14; cursor:pointer; transition:0.3s; }
+.complete-btn:hover:not(.done) { background:#39ff14; color:black; box-shadow:0 0 20px rgba(57,255,20,0.4); }
+.complete-btn.done { background:rgba(57,255,20,0.1); cursor:pointer; opacity:1; }
+.complete-msg { font-size:12px; color:#39ff14; margin-top:14px; min-height:18px; letter-spacing:1px; }
+.lesson-nav { display:flex; justify-content:space-between; margin-top:30px; flex-wrap:wrap; gap:10px; }
+.lesson-nav a { font-family:'Orbitron',sans-serif; font-size:11px; color:#00d9ff66; text-decoration:none; letter-spacing:1px; transition:0.2s; }
+.lesson-nav a:hover { color:#00d9ff; }
+.back-to-top { position:fixed; bottom:28px; right:28px; z-index:200; width:44px; height:44px; background:#000; border:1px solid #00d9ff55; color:#00d9ff; font-size:20px; cursor:pointer; display:flex; align-items:center; justify-content:center; opacity:0; pointer-events:none; transition:opacity 0.3s; }
+.back-to-top.visible { opacity:1; pointer-events:auto; } .back-to-top:hover { border-color:#00d9ff; }
+footer { text-align:center; padding:30px; opacity:0.3; font-size:11px; position:relative; z-index:1; letter-spacing:1px; }
+.module-complete { background:rgba(57,255,20,0.06); border:1px solid #39ff1444; padding:24px 28px; margin:40px 0; text-align:center; }
+.module-complete h3 { font-family:'Orbitron',sans-serif; font-size:14px; color:#39ff14; letter-spacing:2px; margin-bottom:10px; }
+.module-complete p { font-size:12px; opacity:0.8; line-height:1.7; }
+</style>
+</head>
+<body>
+<canvas id="starsCanvas"></canvas>
+<header>
+    <a href="dashboard.html" class="logo"><span>LEO</span><span>AF</span></a>
+    <div class="nav-right">
+        <a href="m6.html" class="nav-btn">← M6 HUB</a>
+        <button class="nav-btn" onclick="leoafAbort()">ABORT</button>
+    </div>
+</header>
+<div class="breadcrumb">
+    <a href="dashboard.html">DASHBOARD</a><span>/</span>
+    <a href="m6.html">M6</a><span>/</span>
+    <span style="color:#ffffff88;">LESSON 07 — SYNTHESIS: TERMINAL TRADE SPACE</span>
+</div>
+
+<div class="lesson-wrap">
+<div class="lesson-header">
+    <div class="lesson-tag">M6 · LESSON 07 OF 7 · MODULE CAPSTONE</div>
+    <h1>Synthesis:<br>The Terminal Trade Space</h1>
+    <div class="lesson-meta">
+        <div class="l-pill l-pill-q">MODULE 6</div>
+        <div class="l-pill l-pill-t">USER TERMINALS &amp; D2D</div>
+        <div class="l-pill l-pill-c">CAPSTONE</div>
+    </div>
+    <p class="lesson-intro" style="margin-bottom:12px;">Six lessons built a terminal from the aperture outward: gain and G/T (m6-1), the array factor (m6-2), the beamforming architecture (m6-3), scan loss and the regulatory mask (m6-4), pointing and the pass-weighted served G/T (m6-5), and the segment-and-certification wrapper (m6-6). This lesson runs the result through the machinery of the two modules before it. Every terminal class becomes a (G/T, EIRP) pair; that pair enters the Module 4 link budget; the resulting C/(N₀+I₀) enters the Module 5 throughput engine; and the answer — net throughput, at a cost, closing or not closing a target service — is the thing the whole program has been building toward from the terminal side. The spine's final stage is the evaluator that does this for any terminal, and the module's central question finally gets a quantitative answer: <strong>what does the dish's ~9 dB of G/T actually buy?</strong></p>
+    <p class="lesson-intro" style="margin-bottom:12px;">The answer is the lesson's spine, and it is not what a datasheet-reader expects. In clear sky, on a wideband forward carrier, the dish's advantage buys <em>nothing</em>: every broadband terminal saturates the MODCOD ladder and delivers the identical 954 Mbps, because — per m5-7 §5 — decibels above the top rung purchase no throughput. The G/T gap is invisible exactly where marketing points its cameras. It becomes decisive somewhere else entirely: <strong>availability</strong>. Under a 20 dB rain fade the dish still delivers 794 Mbps while the worst-case flat panel has collapsed to 211; at 25 dB the panel outages and the dish holds 477. The terminal choice does not buy peak throughput. It buys the <em>right tail of the availability curve</em> — the m5-7 lesson, now written in hardware. This reframes the entire module: the dish-versus-panel decision is a decision about rain margin, session continuity, and the worst 0.1% of hours, not about the headline megabits every terminal shares.</p>
+</div>
+
+<div class="toc">
+    <h4>CONTENTS</h4>
+    <ol>
+        <li><a href="#s1">The evaluator: terminal → M4 → M5</a></li>
+        <li><a href="#s2">The clear-sky result: saturation hides the gap</a></li>
+        <li><a href="#s3">The availability result: where the gap lives</a></li>
+        <li><a href="#s4">The return direction: where G/T never hid</a></li>
+        <li><a href="#s5">The cost-versus-G/T frontier</a></li>
+        <li><a href="#s6">The device side of D2D: the handset revisited</a></li>
+        <li><a href="#s7">The module, closed</a></li>
+        <li><a href="#s8">Key facts</a></li>
+        <li><a href="#s9">What this lesson delivers to the design chain</a></li>
+        <li><a href="#quiz">Knowledge check</a></li>
+        <li><a href="#py">Python exercises</a></li>
+        <li><a href="#reflect">Reflection</a></li>
+    </ol>
+</div>
+
+<div class="cb" id="s1">
+    <h2>1. The evaluator: terminal → M4 → M5</h2>
+<p>The chain, assembled from the two prior modules' engines:</p>
+<blockquote>(G/T, EIRP) → Module 4 downlink/uplink budget → C/(N₀+I₀) → Es/N₀ = C/(N₀+I₀) − 10·log₁₀(R_s) → MODCOD selection → net throughput</blockquote>
+<p>Every arrow is code already written and verified: the link budget is m4-1's <code>LinkBudget</code>, the MODCOD ladder and overhead chain are m5-2 through m5-4, and the terminal side is m6-1 through m6-6. The evaluator is the wiring, and its value is that it makes the terminal's honest interface — the m6-5 <em>served</em> G/T, not the broadside datasheet number — the thing that flows into the service calculation. A terminal is not its best angle; it is its pass-weighted performance under its segment's operations, and the evaluator enforces that.</p>
+</div>
+
+<div class="cb" id="s2">
+    <h2>2. The clear-sky result: saturation hides the gap</h2>
+<p>Running the broadband terminals through a common LEO downlink (satellite EIRP ~52 dBW/beam, 1,200 km slant, 250 MHz Ka forward carrier):</p>
+<table class="compare-table">
+<thead><tr>
+<th>Terminal</th>
+<th>Served G/T</th>
+<th>C/N₀</th>
+<th>MODCOD</th>
+<th>Net</th>
+</tr></thead>
+<tbody>
+<tr><td>Enterprise 75 cm dish</td><td>21.2 dB/K</td><td>120.2 dBHz</td><td>32-APSK 9/10</td><td>954 Mbps</td></tr>
+<tr><td>Ka VSAT 65 cm dish</td><td>19.9 dB/K</td><td>118.9 dBHz</td><td>32-APSK 9/10</td><td>954 Mbps</td></tr>
+<tr><td>Aviation ESA</td><td>11.1 dB/K</td><td>110.1 dBHz</td><td>32-APSK 9/10</td><td>954 Mbps</td></tr>
+<tr><td>Consumer ESA (served)</td><td>10.9 dB/K</td><td>109.9 dBHz</td><td>32-APSK 9/10</td><td>954 Mbps</td></tr>
+<tr><td>Consumer ESA (worst case)</td><td>7.7 dB/K</td><td>106.7 dBHz</td><td>32-APSK 9/10</td><td>954 Mbps</td></tr>
+</tbody>
+</table>
+<p>Eleven decibels of G/T span this table and every broadband row delivers the same 954 Mbps. The reason is m5-7 §5 in one line: at 250 MHz even the worst panel's Es/N₀ (23.2 dB) sits far above the top rung's 16.05 dB threshold, so the ladder saturates and the surplus C/N₀ — 7 dB of it for the worst panel, 20 dB for the enterprise dish — buys nothing. A datasheet comparing these terminals on clear-sky throughput would find them identical and conclude, wrongly, that G/T does not matter. It matters enormously; it just does not matter <em>here</em>.</p>
+</div>
+
+<div class="cb" id="s3">
+    <h2>3. The availability result: where the gap lives</h2>
+<p>The same terminals, same link, under increasing rain fade — the m4-4 / m5-7 degradation applied to each:</p>
+<table class="compare-table">
+<thead><tr>
+<th>Fade</th>
+<th>Dish (19.9)</th>
+<th>ESA served (10.9)</th>
+<th>ESA worst (7.7)</th>
+</tr></thead>
+<tbody>
+<tr><td>0 dB</td><td>954</td><td>954</td><td>954</td></tr>
+<tr><td>5 dB</td><td>954</td><td>954</td><td>954</td></tr>
+<tr><td>10 dB</td><td>954</td><td>794</td><td>634</td></tr>
+<tr><td>15 dB</td><td>954</td><td>564</td><td>318</td></tr>
+<tr><td>20 dB</td><td>794</td><td>318</td><td>211</td></tr>
+<tr><td>25 dB</td><td>477</td><td>105</td><td><strong>outage</strong></td></tr>
+</tbody>
+</table>
+<p>Now the 9 dB gap is the whole story. The dish holds its top MODCOD through a 15 dB fade that has already stepped the served panel down two rungs and the worst-case panel to a quarter of peak; at 25 dB the worst panel has left the air while the dish still carries 477 Mbps. The terminal's G/T is, precisely, its position on the availability curve — its margin against the m4-4 rain statistics — and that is what the enterprise SLA (m6-6 §2) is buying when it specifies a dish it does not, in clear sky, need. The consumer panel's answer to the same physics is not more G/T but <em>satellite selection</em> (m6-5 §4): staying at high elevation keeps the fade path short, moving the panel's whole availability curve without adding a decibel of hardware.</p>
+</div>
+
+<div class="cb" id="s4">
+    <h2>4. The return direction: where G/T never hid</h2>
+<p>The forward link saturated; the return link cannot. The terminal transmits into the satellite's fixed G/T over a narrow carrier (m4-7, m5-3), and there the terminal's EIRP is the binding term with no ladder ceiling to hide behind. The dish's single high-power BUC through high gain (44.1 dBW EIRP, m6-1) and the panel's N²-aggregated milliwatts (36.2 dBW) differ by ~8 dB, and on a return carrier into a realistic small-satellite receive G/T (~−2 dB/K, 20 MHz) that difference is throughput, directly: <strong>the dish closes 16-APSK 3/4 at ~50 Mbps while the panel manages only QPSK 1/2 at ~17 Mbps</strong> — a 3× gap, the full 8 dB EIRP difference converted to rungs with no ladder ceiling to absorb it. The m5-7 §3 forward/return asymmetry (727 vs 283 Mbps) is partly this terminal-EIRP story. The module's two apertures thus separate on <em>both</em> the availability of the forward link and the raw capacity of the return, while tying on the one metric — clear-sky forward throughput — that a naive comparison would use. A terminal trade study that measures only the tie is measuring the wrong thing.</p>
+</div>
+
+<div class="cb" id="s5">
+    <h2>5. The cost-versus-G/T frontier</h2>
+<p>The evaluator plus m6-3's cost model draws the frontier — what a decibel of served G/T costs, by aperture family:</p>
+<table class="compare-table">
+<thead><tr>
+<th>Served G/T</th>
+<th>Dish (fixed)</th>
+<th>Array (N, cost)</th>
+</tr></thead>
+<tbody>
+<tr><td>8 dB/K</td><td>16 cm, ~€160</td><td>~640 el, ~€1,000</td></tr>
+<tr><td>11 dB/K</td><td>23 cm, ~€170</td><td>~1,280 el, ~€2,000</td></tr>
+<tr><td>14 dB/K</td><td>33 cm, ~€195</td><td>~2,560 el, ~€3,900</td></tr>
+<tr><td>17 dB/K</td><td>46 cm, ~€265</td><td>~5,100 el, ~€7,700</td></tr>
+<tr><td>20 dB/K</td><td>65 cm, ~€435</td><td>~10,200 el, ~€15,300</td></tr>
+</tbody>
+</table>
+<p>The frontier restates m6-3's honest crossover with the served figures attached: for a fixed terminal the dish dominates at every G/T, and the array's cost climbs steeply because G/T is bought with element count (N per dB). The array wins only when the comparison is loaded with what the dish needs and the panel does not — the tracking gimbal, the second positioner for make-before-break, the radome volume, the moving-part warranty exposure (m6-3 §8) — and when the segment's currency (m6-6) prices agility, conformality, or self-installation above the raw decibels. The frontier is not a technology ranking; it is the input to a currency-weighted decision, and the weight is the segment.</p>
+</div>
+
+<div class="cb" id="s6">
+    <h2>6. The device side of D2D: the handset revisited</h2>
+<p>m5-6 built the direct-to-device link from the network's side, freezing the handset at −10 dBW EIRP and −30 dB/K G/T. This module reaches the same terminal from the opposite direction, and the two derivations meet: the handset is simply the terminal trade space evaluated at its degenerate corner — an aperture of one near-omni element (m6-1's array with N = 1), no pointing (m6-5's budget with the attitude term unbounded and no gain to protect), no scan management because there is no beam to scan, and a certification profile (m6-6) written by consumer-electronics regulators rather than the FAA. Every knob this module turned is turned to its minimum, and the result is the −30 dB/K that made D2D a coverage product.</p>
+<p>Running it through the evaluator confirms m5-6 from the terminal side: at the handset's G/T the forward link closes only a narrow carrier (5 MHz, ~2 Mbps at the module's reference geometry — the coverage-not-capacity result), and no amount of the satellite's EIRP saturates it into the broadband regime, because the handset's aperture, not the link's power, is the binding constraint. The device side of D2D is therefore not a special case; it is the terminal trade space's boundary condition, the point where the aperture shrinks to a single unpointed element and the entire burden of closing the link moves to the space segment. The module's span — from the enterprise dish's 21 dB/K to the handset's −30 — is 51 dB of G/T across one design space, three orders of magnitude, evaluated through one engine.</p>
+</div>
+
+<div class="cb" id="s7">
+    <h2>7. The module, closed</h2>
+<p>Module 6's question was what produces the (G/T, EIRP, pointing) that Modules 4 and 5 consumed as given. The answer is a design space with a small number of axes — aperture family, element count and lattice, beamforming architecture, scan and mask compliance, tracking and pass geometry, segment and certification — and a small number of hard trades among them, every one of which this module made quantitative. The two portable conclusions:</p>
+<p>First, <strong>the dish-versus-panel decision is an availability decision, not a throughput decision.</strong> Clear-sky broadband throughput is a tie that saturation enforces; the dish's G/T buys the right tail of the availability curve and the raw return-link capacity, and the panel buys agility, conformality, self-installation, and — through satellite selection — much of the availability back without hardware. A trade study that compares peak megabits compares the one number the physics has already equalised.</p>
+<p>Second, <strong>operations and geometry co-produce terminal performance as much as hardware does.</strong> The m6-5 served G/T spanned 3.2 dB across identical silicon on selection and tilt alone; the availability curve is shaped by the scheduler's satellite choice; the segment wraps the same physics in wildly different cost. The terminal is not a component with a datasheet number. It is a component operated within a constellation under a segment's constraints, and its honest performance figure exists only at that intersection — which is exactly where this module's evaluator computes it, and exactly what Module 7 (networking, inter-satellite links, and the routing that the handover choreography feeds) will build upon.</p>
+</div>
+
+<div class="cb" id="s8">
+    <h2>8. Key facts</h2>
+<table class="compare-table">
+<thead><tr>
+<th>Fact</th>
+<th>Value</th>
+<th>Source</th>
+</tr></thead>
+<tbody>
+<tr><td>Evaluator chain</td><td>(G/T, EIRP) → M4 budget → C/(N₀+I₀) → M5 engine → net</td><td>m6-1..6, m4, m5</td></tr>
+<tr><td>Terminal interface to M4</td><td>m6-5 <em>served</em> G/T, not broadside</td><td>m6-5 §8</td></tr>
+<tr><td>Clear-sky broadband (all terminals)</td><td>954 Mbps — saturated, identical</td><td>Computed</td></tr>
+<tr><td>G/T span, broadband terminals</td><td>11 dB, zero throughput difference clear-sky</td><td>Computed</td></tr>
+<tr><td>Availability: dish vs worst panel @ 20 dB fade</td><td>794 vs 211 Mbps</td><td>Computed</td></tr>
+<tr><td>Availability: @ 25 dB fade</td><td>dish 477, worst panel outage</td><td>Computed</td></tr>
+<tr><td>What G/T buys</td><td>availability right-tail + return capacity, not clear-sky peak</td><td>§2–4</td></tr>
+<tr><td>Return separation (20 MHz, sat G/T −2)</td><td>dish ~50 vs panel ~17 Mbps (8 dB EIRP → 3×)</td><td>Computed</td></tr>
+<tr><td>Cost frontier (fixed terminal)</td><td>dish dominates at every G/T</td><td>§5, m6-3</td></tr>
+<tr><td>Array's real competition</td><td>dish + gimbal(s) + radome + warranty</td><td>m6-3 §8</td></tr>
+<tr><td>Handset as terminal</td><td>N=1, unpointed — the design space's degenerate corner</td><td>§6, m5-6</td></tr>
+<tr><td>G/T span of the module</td><td>enterprise +21 to handset −30 = 51 dB</td><td>Computed</td></tr>
+</tbody>
+</table>
+</div>
+
+<div class="cb" id="s9">
+    <h2>9. What this lesson delivers to the design chain</h2>
+<p>The spine is complete: <code>TerminalEvaluator</code> takes any terminal (aperture, architecture, served-G/T, EIRP, segment) and returns its net throughput and availability curve through the actual M4 and M5 engines, plus its position on the cost frontier. The module's deliverable to the rest of the program is the honest terminal interface — a served G/T and an EIRP with their provenance intact, and an availability curve rather than a single number — for every class from enterprise dish to handset. Module 7 consumes the handover choreography (m6-5 §7) and the satellite-selection freedom (m6-5 §4) as inputs to routing and inter-satellite topology; the terminal, having been built from the aperture out and validated through the link, becomes a solved node.</p>
+<p>The program's arc to here: Module 4 turned a link into decibels, Module 5 turned decibels into bits, and Module 6 turned hardware into the decibels — closing the loop from a customer's roof or fuselage or hand to the throughput they experience. What remains is the network above the links: how the bits, once a terminal has earned them, are routed across a constellation in motion. That is Module 7.</p>
+</div>
+
+<div class="quiz-block" id="quiz">
+    <h2>KNOWLEDGE CHECK</h2>
+    <div class="quiz-intro">Ten questions. Each option explains itself after you commit. No retries per question — decide first.</div>
+    <div class="quiz-q">
+        <p><strong>Q1.</strong> The evaluator feeds the Module 4 budget with the m6-5 <em>served</em> G/T rather than the broadside datasheet figure because:</p>
+        <div class="quiz-options">
+            <button class="quiz-opt" data-q="1" data-correct="false">A — The served figure is larger</button>
+            <button class="quiz-opt" data-q="1" data-correct="true">B — A terminal's honest performance is its pass-weighted value under its segment's operations — a flat panel spends most of its time at scan, and the broadside number overstates service by several dB</button>
+            <button class="quiz-opt" data-q="1" data-correct="false">C — Module 4 requires broadside figures</button>
+            <button class="quiz-opt" data-q="1" data-correct="false">D — The two are always equal</button>
+        </div>
+        <div class="quiz-feedback" id="fb1"></div>
+    </div>
+    <div class="quiz-q">
+        <p><strong>Q2.</strong> In clear sky on a 250 MHz forward carrier, an 11 dB G/T span across terminals produces identical 954 Mbps because:</p>
+        <div class="quiz-options">
+            <button class="quiz-opt" data-q="2" data-correct="false">A — The terminals have the same G/T</button>
+            <button class="quiz-opt" data-q="2" data-correct="true">B — Every terminal's Es/N₀ sits above the top MODCOD rung, so the ladder saturates and surplus C/N₀ buys no throughput (m5-7 §5)</button>
+            <button class="quiz-opt" data-q="2" data-correct="false">C — The satellite limits all terminals equally</button>
+            <button class="quiz-opt" data-q="2" data-correct="false">D — 954 Mbps is a regulatory cap</button>
+        </div>
+        <div class="quiz-feedback" id="fb2"></div>
+    </div>
+    <div class="quiz-q">
+        <p><strong>Q3.</strong> The dish's ~9 dB G/T advantage becomes decisive in:</p>
+        <div class="quiz-options">
+            <button class="quiz-opt" data-q="3" data-correct="false">A — Clear-sky forward throughput</button>
+            <button class="quiz-opt" data-q="3" data-correct="true">B — Availability — under a 20 dB fade the dish holds 794 Mbps while the worst panel drops to 211, and at 25 dB the panel outages while the dish carries 477</button>
+            <button class="quiz-opt" data-q="3" data-correct="false">C — Regulatory compliance</button>
+            <button class="quiz-opt" data-q="3" data-correct="false">D — Installation time</button>
+        </div>
+        <div class="quiz-feedback" id="fb3"></div>
+    </div>
+    <div class="quiz-q">
+        <p><strong>Q4.</strong> The consumer panel's answer to the availability gap, without adding G/T, is:</p>
+        <div class="quiz-options">
+            <button class="quiz-opt" data-q="4" data-correct="false">A — Higher transmit power</button>
+            <button class="quiz-opt" data-q="4" data-correct="true">B — Satellite selection — staying at high elevation (m6-5 §4) shortens the fade path and moves the whole availability curve</button>
+            <button class="quiz-opt" data-q="4" data-correct="false">C — A larger radome</button>
+            <button class="quiz-opt" data-q="4" data-correct="false">D — Nothing can help it</button>
+        </div>
+        <div class="quiz-feedback" id="fb4"></div>
+    </div>
+    <div class="quiz-q">
+        <p><strong>Q5.</strong> The return link separates the terminals where the forward link tied because:</p>
+        <div class="quiz-options">
+            <button class="quiz-opt" data-q="5" data-correct="false">A — Return carriers are wider</button>
+            <button class="quiz-opt" data-q="5" data-correct="true">B — The terminal transmits into the satellite's fixed (and modest) G/T with no ladder ceiling, so the ~8 dB EIRP gap becomes rungs directly — dish ~50 vs panel ~17 Mbps on a 20 MHz return</button>
+            <button class="quiz-opt" data-q="5" data-correct="false">C — Rain only affects the return</button>
+            <button class="quiz-opt" data-q="5" data-correct="false">D — The satellite has infinite G/T</button>
+        </div>
+        <div class="quiz-feedback" id="fb5"></div>
+    </div>
+    <div class="quiz-q">
+        <p><strong>Q6.</strong> The cost-versus-G/T frontier shows the dish dominating at every G/T for a fixed terminal because:</p>
+        <div class="quiz-options">
+            <button class="quiz-opt" data-q="6" data-correct="false">A — Dishes have better electronics</button>
+            <button class="quiz-opt" data-q="6" data-correct="true">B — G/T is bought with element count in an array (N per dB), while a dish buys it with passive area — the array's cost climbs steeply and only crosses over when loaded with the gimbal the dish needs and the panel does not</button>
+            <button class="quiz-opt" data-q="6" data-correct="false">C — Arrays are always more expensive to manufacture</button>
+            <button class="quiz-opt" data-q="6" data-correct="false">D — The frontier is arbitrary</button>
+        </div>
+        <div class="quiz-feedback" id="fb6"></div>
+    </div>
+    <div class="quiz-q">
+        <p><strong>Q7.</strong> The handset is described as the terminal trade space's "degenerate corner" because:</p>
+        <div class="quiz-options">
+            <button class="quiz-opt" data-q="7" data-correct="false">A — It is poorly designed</button>
+            <button class="quiz-opt" data-q="7" data-correct="true">B — It is the design space evaluated at its boundary: an aperture of one unpointed element, no scan management, no gain to protect — every knob this module turned set to its minimum</button>
+            <button class="quiz-opt" data-q="7" data-correct="false">C — It uses a different physics</button>
+            <button class="quiz-opt" data-q="7" data-correct="false">D — It is not really a terminal</button>
+        </div>
+        <div class="quiz-feedback" id="fb7"></div>
+    </div>
+    <div class="quiz-q">
+        <p><strong>Q8.</strong> Running the handset through the evaluator confirms the m5-6 coverage-not-capacity result because:</p>
+        <div class="quiz-options">
+            <button class="quiz-opt" data-q="8" data-correct="false">A — The satellite refuses to serve it</button>
+            <button class="quiz-opt" data-q="8" data-correct="true">B — At −30 dB/K the forward link closes only a narrow carrier (~2 Mbps), and no satellite EIRP saturates it into broadband — the aperture, not the link power, binds</button>
+            <button class="quiz-opt" data-q="8" data-correct="false">C — Regulators cap handset throughput</button>
+            <button class="quiz-opt" data-q="8" data-correct="false">D — The handset has no antenna</button>
+        </div>
+        <div class="quiz-feedback" id="fb8"></div>
+    </div>
+    <div class="quiz-q">
+        <p><strong>Q9.</strong> The module's two portable conclusions are:</p>
+        <div class="quiz-options">
+            <button class="quiz-opt" data-q="9" data-correct="false">A — Bigger antennas are always better; cost is irrelevant</button>
+            <button class="quiz-opt" data-q="9" data-correct="true">B — The dish-vs-panel decision is an availability (not throughput) decision, and operations plus geometry co-produce terminal performance as much as hardware does</button>
+            <button class="quiz-opt" data-q="9" data-correct="false">C — Flat panels always win; dishes are obsolete</button>
+            <button class="quiz-opt" data-q="9" data-correct="false">D — G/T is the only figure that matters</button>
+        </div>
+        <div class="quiz-feedback" id="fb9"></div>
+    </div>
+    <div class="quiz-q">
+        <p><strong>Q10.</strong> The evaluator makes the terminal a "solved node" for Module 7 by delivering:</p>
+        <div class="quiz-options">
+            <button class="quiz-opt" data-q="10" data-correct="false">A — A single peak-throughput number</button>
+            <button class="quiz-opt" data-q="10" data-correct="true">B — The honest terminal interface — served G/T, EIRP, and an availability curve with provenance — plus the handover choreography and satellite-selection freedom that routing will consume</button>
+            <button class="quiz-opt" data-q="10" data-correct="false">C — The antenna's physical dimensions</button>
+            <button class="quiz-opt" data-q="10" data-correct="false">D — Nothing Module 7 can use</button>
+        </div>
+        <div class="quiz-feedback" id="fb10"></div>
+    </div>
+    <div class="quiz-score" id="quizScore"></div>
+</div>
+
+<div class="py-block" id="py">
+    <h2>PYTHON EXERCISES</h2>
+    <div class="py-intro">Three exercises; the last extends the module spine project. Run them, then work the numbered follow-ups in the comments — the follow-ups are the exercise.</div>
+    <div class="py-exercise">
+        <h3>Exercise 1 — The evaluator</h3>
+        <p>Run every terminal class through the actual M4 → M5 chain.</p>
+<pre>
+import math
+db = lambda x: 10*math.log10(x) if x &gt; 0 else -999.0
+
+MODCOD = [(&quot;QPSK 1/4&quot;,0.490243,-2.35),(&quot;QPSK 1/2&quot;,0.988858,1.00),
+          (&quot;QPSK 3/4&quot;,1.487473,4.03),(&quot;8PSK 3/4&quot;,2.228124,7.91),
+          (&quot;16APSK 2/3&quot;,2.637201,8.97),(&quot;16APSK 3/4&quot;,2.966728,10.21),
+          (&quot;32APSK 3/4&quot;,3.703295,12.73),(&quot;32APSK 9/10&quot;,4.453027,16.05)]
+PILOT = {&quot;QPSK&quot;:0.9762,&quot;8PSK&quot;:0.9773,&quot;16APSK&quot;:0.9763,&quot;32APSK&quot;:0.9784}
+
+def select(es, margin=1.5):
+    best = None
+    for n,e,t in MODCOD:
+        if es &gt;= t+margin and (best is None or e &gt; best[1]): best = (n,e,t)
+    return best
+
+def fspl(d_km, f_ghz):
+    return 92.45 + 20*math.log10(d_km) + 20*math.log10(f_ghz)
+
+def evaluate(name, gt, bw_hz, sat_eirp=52.0, slant_km=1200, f_ghz=20,
+             atm_db=1.5, fade_db=0.0, alpha=0.10):
+    cn0 = sat_eirp - fspl(slant_km, f_ghz) - atm_db - fade_db + gt + 228.6
+    rs = bw_hz/(1+alpha)
+    s = select(cn0 - db(rs))
+    if not s: return name, cn0, &quot;OUTAGE&quot;, 0.0
+    p = PILOT[[k for k in PILOT if s[0].startswith(k)][0]]
+    net = s[1]*rs*0.97*p*0.9934
+    return name, cn0, s[0], net
+
+TERMS = [(&quot;enterprise 75cm&quot;, 21.2, 250e6), (&quot;Ka VSAT 65cm&quot;, 19.9, 250e6),
+         (&quot;aviation ESA&quot;, 11.1, 250e6), (&quot;consumer ESA served&quot;, 10.9, 250e6),
+         (&quot;consumer ESA worst&quot;, 7.7, 250e6), (&quot;handset D2D&quot;, -30.0, 5e6)]
+
+print(f&quot;CLEAR SKY:  {&#x27;terminal&#x27;:&lt;22}{&#x27;C/N0&#x27;:&gt;8}{&#x27;MODCOD&#x27;:&gt;13}{&#x27;net Mbps&#x27;:&gt;10}&quot;)
+for n, gt, bw in TERMS:
+    name, cn0, mc, net = evaluate(n, gt, bw)
+    print(f&quot;            {name:&lt;22}{cn0:&gt;8.1f}{mc:&gt;13}{net/1e6:&gt;10.1f}&quot;)
+
+# 1. The broadband terminals tie at 954 Mbps. Prove it is saturation:
+#    print each terminal&#x27;s Es/N0 and its margin above the top rung.
+#    At what satellite EIRP would the terminals START to separate?
+# 2. Add the return direction: terminal EIRP into a fixed satellite
+#    G/T (say +5 dB/K) over a 4 MHz carrier. Now do they tie? Explain
+#    which m5-7 asymmetry you just reproduced.
+# 3. The handset closes ~2 Mbps. Sweep sat_eirp 40..70 dBW and show
+#    it never reaches broadband — name the binding constraint.
+</pre>
+    </div>
+    <div class="py-exercise">
+        <h3>Exercise 2 — The availability curve, per terminal</h3>
+        <p>Where the G/T gap actually lives.</p>
+<pre>
+# paste evaluate() and tables from exercise 1
+
+print(f&quot;{&#x27;fade&#x27;:&gt;6}{&#x27;dish 19.9&#x27;:&gt;11}{&#x27;ESA 10.9&#x27;:&gt;11}{&#x27;ESA 7.7&#x27;:&gt;10}&quot;)
+for fade in [0, 5, 10, 15, 20, 25, 30]:
+    row = [f&quot;{fade:&gt;5}&quot;]
+    for gt in [19.9, 10.9, 7.7]:
+        _, _, mc, net = evaluate(&quot;t&quot;, gt, 250e6, fade_db=fade)
+        row.append(f&quot;{net/1e6:&gt;10.0f}&quot; if net &gt; 0 else f&quot;{&#x27;OUT&#x27;:&gt;10}&quot;)
+    print(&quot;&quot;.join(row))
+
+# 1. Map fade depth to availability percentile via the m4-4 zone-F
+#    model (import it), and re-plot the table as throughput vs
+#    availability %. This is each terminal&#x27;s m5-7 availability curve.
+# 2. Compute expected annual throughput for each terminal (integrate
+#    over the fade distribution, m5-7 exercise 2 method). The dish&#x27;s
+#    advantage in ONE number — how many Mbps of annual expectation?
+# 3. Add satellite selection to the two ESAs: shorten the fade path by
+#    the elevation gain from max-of-8 (m6-5). How much availability
+#    does selection buy the panel — and does it close the dish gap?
+</pre>
+    </div>
+    <div class="py-exercise">
+        <h3>Exercise 3 — Spine final: the TerminalEvaluator</h3>
+        <p>The module's capstone object: any terminal, through the whole program.</p>
+<pre>
+import math
+db = lambda x: 10*math.log10(x) if x &gt; 0 else -999.0
+
+# ═══════════════════════════════════════════════════════
+# M6 SPINE PROJECT — TERMINAL MODEL (final assembly)
+#   Stage 1 aperture (m6-1)      Stage 4 scan+mask (m6-4)
+#   Stage 2 array factor (m6-2)  Stage 5 pass+pointing (m6-5)
+#   Stage 3 architecture (m6-3)  Stage 6 segment (m6-6)
+#   This stage: run the terminal through M4 + M5 and return
+#   net throughput, availability curve, cost-frontier position.
+#   The loop closes: aperture -&gt; decibels -&gt; bits -&gt; service.
+# ═══════════════════════════════════════════════════════
+
+MODCOD = [(&quot;QPSK 1/4&quot;,0.490243,-2.35),(&quot;QPSK 1/2&quot;,0.988858,1.00),
+          (&quot;QPSK 3/4&quot;,1.487473,4.03),(&quot;8PSK 3/4&quot;,2.228124,7.91),
+          (&quot;16APSK 2/3&quot;,2.637201,8.97),(&quot;16APSK 3/4&quot;,2.966728,10.21),
+          (&quot;32APSK 3/4&quot;,3.703295,12.73),(&quot;32APSK 9/10&quot;,4.453027,16.05)]
+PILOT = {&quot;QPSK&quot;:0.9762,&quot;8PSK&quot;:0.9773,&quot;16APSK&quot;:0.9763,&quot;32APSK&quot;:0.9784}
+
+class Terminal:
+    def __init__(self, name, gt_served, eirp, bw_fwd=250e6, bw_ret=4e6,
+                 aperture=&quot;array&quot;, cost_eur=2000, segment=&quot;consumer&quot;):
+        self.name, self.gt, self.eirp = name, gt_served, eirp
+        self.bw_fwd, self.bw_ret = bw_fwd, bw_ret
+        self.aperture, self.cost, self.segment = aperture, cost_eur, segment
+
+class TerminalEvaluator:
+    def __init__(self, sat_eirp=52.0, sat_gt=-2.0, slant_km=1200,
+                 f_fwd=20, f_ret=30, atm_db=1.5):
+        # sat_gt modest: a small LEO satellite&#x27;s receive G/T, so the
+        # return does NOT saturate and terminal EIRP binds (§4).
+        self.sat_eirp, self.sat_gt = sat_eirp, sat_gt
+        self.slant, self.f_fwd, self.f_ret, self.atm = slant_km, f_fwd, f_ret, atm_db
+    def _fspl(self, f):
+        return 92.45 + 20*math.log10(self.slant) + 20*math.log10(f)
+    def _select(self, es, margin=1.5):
+        best = None
+        for n,e,t in MODCOD:
+            if es &gt;= t+margin and (best is None or e &gt; best[1]): best = (n,e,t)
+        return best
+    def _net(self, cn0, bw, alpha=0.10):
+        rs = bw/(1+alpha); s = self._select(cn0 - db(rs))
+        if not s: return &quot;OUTAGE&quot;, 0.0
+        p = PILOT[[k for k in PILOT if s[0].startswith(k)][0]]
+        return s[0], s[1]*rs*0.97*p*0.9934
+    def forward(self, t, fade_db=0.0):
+        cn0 = self.sat_eirp - self._fspl(self.f_fwd) - self.atm - fade_db + t.gt + 228.6
+        return self._net(cn0, t.bw_fwd)
+    def ret(self, t, fade_db=0.0):
+        cn0 = t.eirp - self._fspl(self.f_ret) - self.atm - fade_db + self.sat_gt + 228.6
+        return self._net(cn0, t.bw_ret)
+    def availability(self, t, fades=(0,5,10,15,20,25)):
+        return [(f,) + self.forward(t, f) for f in fades]
+    def report(self, t):
+        mc_f, net_f = self.forward(t)
+        mc_r, net_r = self.ret(t)
+        print(f&quot;\n{&#x27;─&#x27;*56}&quot;)
+        print(f&quot;  TERMINAL — {t.name} ({t.segment}, €{t.cost})&quot;)
+        print(f&quot;{&#x27;─&#x27;*56}&quot;)
+        print(f&quot;  G/T {t.gt:+.1f} dB/K   EIRP {t.eirp:.1f} dBW&quot;)
+        print(f&quot;  forward: {mc_f:&lt;12} {net_f/1e6:7.1f} Mbps&quot;)
+        print(f&quot;  return:  {mc_r:&lt;12} {net_r/1e6:7.1f} Mbps&quot;)
+        print(f&quot;  availability (fade → fwd Mbps):&quot;)
+        for f, mc, net in self.availability(t):
+            bar = f&quot;{net/1e6:6.0f}&quot; if net &gt; 0 else &quot;  OUT &quot;
+            print(f&quot;     {f:&gt;2} dB  {bar}  {mc}&quot;)
+        print(f&quot;{&#x27;─&#x27;*56}&quot;)
+
+ev = TerminalEvaluator()
+fleet = [
+    Terminal(&quot;enterprise 75cm dish&quot;, 21.2, 44.1, bw_ret=20e6, aperture=&quot;dish&quot;,
+             cost_eur=450, segment=&quot;enterprise&quot;),
+    Terminal(&quot;consumer ESA (served)&quot;, 10.9, 36.2, bw_ret=20e6, cost_eur=500,
+             segment=&quot;consumer&quot;),
+    Terminal(&quot;consumer ESA (worst)&quot;,  7.7, 36.2, bw_ret=20e6, cost_eur=500,
+             segment=&quot;consumer&quot;),
+    Terminal(&quot;handset D2D&quot;, -30.0, -10.0, bw_fwd=5e6, bw_ret=0.18e6,
+             aperture=&quot;omni&quot;, cost_eur=0, segment=&quot;D2D&quot;),
+]
+for t in fleet:
+    ev.report(t)
+
+# ── the program&#x27;s loop, closed ──────────────────────────
+# aperture (m6-1) -&gt; pattern (m6-2) -&gt; architecture (m6-3) -&gt;
+# scan/mask (m6-4) -&gt; served G/T (m6-5) -&gt; segment (m6-6) -&gt;
+# THIS: net throughput + availability, via M4 + M5.
+# Module 7 takes the terminal as a solved node and builds the
+# network above the links.
+
+# 1. Add satellite selection to the ESAs (raise served G/T by the
+#    m6-5 max-of-8 gain) and re-run availability. Report how much of
+#    the dish&#x27;s availability advantage the panel recovers for free.
+# 2. Put each terminal on the cost frontier (§5): plot net-throughput-
+#    at-99.9%-availability per euro. Which terminal wins per segment,
+#    and does it match m6-6&#x27;s table?
+# 3. The evaluator assumes one satellite. Chain m6-5&#x27;s handover: at a
+#    switch, apply the split-aperture penalty (m6-3, −3 dB G/T) for the
+#    overlap and show the availability notch. Is it visible at the two
+#    m5-7 ladder positions?
+</pre>
+    </div>
+</div>
+
+<div class="reflection-block" id="reflect">
+    <h2>REFLECTION</h2>
+    <div class="ref-intro">Four prompts. Each forces a decision — write the position down before moving on; the act of committing is the exercise.</div>
+    <div class="ref-prompt">
+        <h3>PROMPT 01</h3>
+        <p>The lesson's central finding — clear-sky throughput ties while availability separates — means a terminal trade study that measures peak megabits measures the one quantity physics has equalised. Yet peak throughput is exactly what consumer marketing advertises and what review sites test. Construct the argument a technically honest operator would make to reframe the comparison around availability, identify why the market resists it (what makes availability hard to advertise and easy to ignore), and find the one customer segment that already buys on availability and pays for it — connecting the answer to m6-6's SLA discussion.</p>
+    </div>
+    <div class="ref-prompt">
+        <h3>PROMPT 02</h3>
+        <p>Section 4 showed the return link separates terminals where the forward link ties, and m5-7 showed the return is the capacity-starved direction. A flat panel's N²-EIRP advantage (m6-1) partly offsets its G/T deficit — but only on the return. Work the full asymmetry for a consumer panel versus a dish: on which direction does each terminal win, how does the m5-3 forward/return traffic ratio weight the two wins, and does the panel's return-EIRP strength actually matter to a user whose traffic is download-dominated? Decide whether the module has been measuring the right link all along.</p>
+    </div>
+    <div class="ref-prompt">
+        <h3>PROMPT 03</h3>
+        <p>Section 6 reached the handset as the design space's degenerate corner — every knob at minimum. Invert the exercise: if the handset is the boundary at one extreme, what terminal sits at the <em>opposite</em> boundary, where every knob is at maximum (aperture, element count, tracking precision, certification)? Name the real terminal class it corresponds to, compute roughly where it lands on the module's 51 dB G/T span, and identify which of this module's trades stops being a trade at that extreme (i.e., which currency goes to zero weight when cost is no object).</p>
+    </div>
+    <div class="ref-prompt">
+        <h3>PROMPT 04</h3>
+        <p>The module closed by claiming the terminal is a "solved node" for Module 7. Test the claim's completeness: Module 7 builds networking, inter-satellite links, and routing on top of the links this module characterised. List the terminal properties Module 7 will actually need (handover cadence, selection freedom, availability curve, per-node capacity) and check each against what this module's evaluator produces. Identify the one terminal property Module 7 will need that Module 6 did <em>not</em> compute — the honest gap in the "solved node" — and specify which lesson should have produced it or whether it legitimately belongs to Module 7 itself.</p>
+    </div>
+</div>
+
+<div class="cb">
+    <h2>Sources</h2>
+<ul>
+<li>Modules 6 (m6-1 through m6-6) — the terminal physics and segment wrapper this lesson evaluates.</li>
+<li>Module 4 (m4-1 <code>LinkBudget</code>, m4-4 rain, m4-7 asymmetry) — the link budget the evaluator calls.</li>
+<li>Module 5 (m5-2 MODCOD, m5-3 access, m5-6 D2D, m5-7 availability curve and saturation doctrine) — the throughput engine and the saturation result this lesson's central finding rests on.</li>
+<li>Module 2 — the pass geometry behind the served G/T and satellite selection.</li>
+<li>The module spine (<code>ApertureModel</code> → <code>TerminalEvaluator</code>) — the assembled code artefact.</li>
+</ul>
+</div>
+
+<div class="module-complete">
+    <h3>MODULE 6 COMPLETE</h3>
+    <p>Seven lessons, one evaluator: from an aperture&#39;s physics to net throughput and an availability curve, across every terminal class from the enterprise dish to the unpointed handset — 51 dB of G/T through one engine. The dish&#39;s advantage turned out to be availability, not throughput. Module 7 takes the terminal as a solved node and builds the network above the links.</p>
+</div>
+
+<div class="complete-wrap">
+    <button class="complete-btn" id="completeBtn">MARK LESSON COMPLETE</button>
+    <div class="complete-msg" id="completeMsg"></div>
+</div>
+<div class="lesson-nav">
+    <a href="m6-6.html">← LESSON 06 — SEGMENTS &amp; AVIATION CERT</a>
+    <a href="m6.html">M6 HUB →</a>
+</div>
+</div>
+
+<button class="back-to-top" id="backToTop" title="Back to top">↑</button>
+<footer>© 2026 LEOAF · M6 · LESSON 07 OF 7 · MODULE CAPSTONE</footer>
+<script>
+const canvas=document.getElementById('starsCanvas'),ctx=canvas.getContext('2d');
+let stars=[];
+function initStars(){stars=[];for(let i=0;i<180;i++)stars.push({x:Math.random()*canvas.width,y:Math.random()*canvas.height,size:Math.random()*1.5+0.4,speed:Math.random()*0.18+0.04,hue:Math.random()*360});}
+function resizeCanvas(){canvas.width=window.innerWidth;canvas.height=window.innerHeight;}
+resizeCanvas();initStars();window.addEventListener('resize',resizeCanvas);
+function animateStars(){ctx.clearRect(0,0,canvas.width,canvas.height);stars.forEach(s=>{s.y-=s.speed;if(s.y<0){s.y=canvas.height;s.x=Math.random()*canvas.width;}ctx.beginPath();ctx.fillStyle=`hsl(${s.hue},80%,80%)`;ctx.arc(s.x,s.y,s.size,0,Math.PI*2);ctx.fill();});requestAnimationFrame(animateStars);}
+animateStars();
+</script>
+<script>
+const feedbacks={
+    1:{correct:"m6-5 §8 established the served G/T (7.7 to 10.9 dB/K depending on tilt and selection) as the number the link actually sees. Feeding the broadside 11.0 would price a link the terminal cannot deliver at the elevations where it mostly operates.",wrong:"The served figure is *smaller* than broadside (scan loss). Module 4 consumes whatever G/T it is given. They differ by exactly the scan penalty, which is the point."},
+    2:{correct:"Even the worst panel's 23.2 dB Es/N₀ exceeds the 16.05 dB top-rung threshold by 7 dB; the dish exceeds it by 20. Above saturation, decibels are worthless — the ladder has no higher rung to climb. The gap is real and entirely hidden here.",wrong:"The G/T span is 11 dB — they differ substantially. The satellite EIRP is common but the terminals' C/N₀ differ by 11 dB; saturation, not the satellite, equalises them. No regulatory cap is involved."},
+    3:{correct:"The G/T advantage is margin against the m4-4 rain statistics — the right tail of the m5-7 availability curve. What the enterprise SLA buys with a dish it does not need in clear sky is exactly this fade survival.",wrong:"Clear-sky forward is the saturated tie. Compliance is the mask (m6-4), family-neutral. Installation favours the panel (self-install), the opposite direction."},
+    4:{correct:"max-of-K selection keeps the served elevation high, which both raises the served G/T and shortens the slant rain path — improving availability through geometry rather than hardware. The scheduler is an availability instrument, not only a capacity one.",wrong:"Transmit power is a return-link/EIRP lever, not a forward-availability one. Radomes add loss. The panel has a real, hardware-free lever — selection."},
+    5:{correct:"m5-7 §3's forward/return asymmetry is partly a terminal-EIRP story: the dish's 44.1 dBW versus the panel's 36.2 dBW, on a narrow return carrier, does not saturate and therefore shows up as capacity. A trade study measuring only the saturated forward tie misses this.",wrong:"Return carriers are *narrower* (m5-3). Rain affects both directions. The satellite's G/T is finite and fixed — that is why the terminal's EIRP binds."},
+    6:{correct:"m6-3 §8's honest crossover with served figures attached: stamped metal has no per-decibel element term. The array wins on the *loaded* comparison (tracking, second positioner, radome, warranty) and on the segment's non-decibel currencies — never on raw G/T-per-euro for a fixed mount.",wrong:"The comparison is architecture-neutral on electronics. Arrays are not universally costlier — they win the loaded, moving-platform comparison. The frontier is computed from the two cost models, not arbitrary."},
+    7:{correct:"m5-6's frozen handset and this module's terminal are the same object reached from two directions. N = 1, no pointing, no beam to scan, consumer-electronics certification — the −30 dB/K falls out of the same equations at their limit. D2D is not a special case; it is the boundary condition.",wrong:"It is optimised for a different purpose (being a phone), not poorly designed. The physics is identical — m6-1's array law at N = 1. It is exactly a terminal, the smallest one."},
+    8:{correct:"Unlike the broadband terminals (whose links saturate), the handset's tiny aperture keeps its C/N₀ far below the broadband regime regardless of satellite power. The binding constraint is the terminal, which is why D2D capacity is bought with narrow carriers across many small beams (m5-6 §8).",wrong:"The satellite serves it — at low rate. No regulatory cap; physics caps it. It has an antenna (~−3 dBi near-omni) — that is the −30 dB/K's origin."},
+    9:{correct:"Saturation equalises clear-sky throughput, so the dish's G/T buys the availability tail and return capacity; and the served G/T spans 3.2 dB on selection and tilt alone, with the segment wrapping identical physics in different cost. The terminal is a component operated in a constellation under a segment — its honest figure exists only at that intersection.",wrong:"Bigger is better only in availability, and cost is central (the frontier). Neither family is obsolete — each wins its currency weighting. G/T is one of several figures, and even it is availability-relevant more than throughput-relevant."},
+    10:{correct:"Module 7 (networking, ISL, routing) needs the terminal as a characterised node: what it delivers, how its availability behaves, when it hands over, and what selection freedom the scheduler has. The evaluator provides all of it, computed through the real link — not a datasheet abstraction.",wrong:"A single number is exactly what the module argued against. Physical dimensions are inputs, not the deliverable. The handover and selection outputs are precisely Module 7's inputs."}
+};
+let answered={};
+document.querySelectorAll('.quiz-opt').forEach(btn=>{
+    btn.addEventListener('click',function(){
+        const q=this.dataset.q;
+        if(answered[q]!==undefined)return;
+        const correct=this.dataset.correct==='true';
+        answered[q]=correct;
+        document.querySelectorAll(`.quiz-opt[data-q="${q}"]`).forEach(b=>{b.disabled=true;if(b.dataset.correct==='true')b.classList.add('correct');});
+        if(!correct)this.classList.add('wrong');
+        const fb=document.getElementById('fb'+q);
+        fb.textContent=(correct?'✓ ':'✗ ')+feedbacks[q][correct?'correct':'wrong'];
+        fb.style.color=correct?'#39ff14':'#ff004f';
+        if(Object.keys(answered).length===10){
+            const total=Object.values(answered).filter(Boolean).length;
+            const sc=document.getElementById('quizScore');
+            sc.style.display='block';
+            const pct=Math.round(total/10*100);
+            sc.textContent=`SCORE: ${total}/10 (${pct}%) — ${pct===100?'PERFECT.':pct>=80?'STRONG.':pct>=60?'ADEQUATE. REVISIT WEAK SECTIONS.':'REVISIT THE LESSON BEFORE PROCEEDING.'}`;
+        }
+    });
+});
+</script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="supabase.js"></script>
+<script src="user_progress.js"></script>
+<script>
+const LESSON_ID='m6-7';
+(function(){
+    function bounceToLogin(r){console.error("Auth guard:",r);window.location.replace("index.html");}
+    async function init(){
+        if(typeof client==="undefined"||!client||!client.auth)return bounceToLogin("Supabase client not loaded");
+        let session=null;
+        try{({data:{session}}=await client.auth.getSession());}
+        catch(e){return bounceToLogin("getSession threw: "+e.message);}
+        if(!session){window.location.replace("index.html");return;}
+        const btn=document.getElementById('completeBtn'),msg=document.getElementById('completeMsg');
+        function setDone(done){
+            if(done){btn.textContent='✓ COMPLETE — CLICK TO UNDO';btn.classList.add('done');btn.style.cssText='border-color:#39ff14;color:#39ff14;background:rgba(57,255,20,0.1);cursor:pointer;opacity:1;';msg.style.color='#39ff14';msg.textContent='Lesson marked complete. Click again to undo.';}
+            else{btn.textContent='MARK LESSON COMPLETE';btn.classList.remove('done');btn.style.cssText='';msg.style.color='#ffffff55';msg.textContent='Not yet marked complete.';}
+        }
+        let mastered=[];
+        try{mastered=await getMasteredSections();}catch(e){console.error(e);}
+        setDone(mastered.includes(LESSON_ID));
+        btn.addEventListener('click',async()=>{
+            const isDone=btn.classList.contains('done');
+            msg.style.color='#00d9ff';msg.textContent='Saving...';
+            const ok=await upsertSection(LESSON_ID,!isDone);
+            if(ok){setDone(!isDone);}else{msg.style.color='#ff004f';msg.textContent='Error saving. Try again.';}
+        });
+        const btt=document.getElementById('backToTop');
+        window.addEventListener('scroll',()=>{btt.classList.toggle('visible',window.scrollY>400);});
+        btt.addEventListener('click',()=>window.scrollTo({top:0,behavior:'smooth'}));
+    }
+    if(document.readyState==="loading")document.addEventListener("DOMContentLoaded",init);
+    else init();
+})();
+</script>
+</body>
+</html>
