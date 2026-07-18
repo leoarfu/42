@@ -1,0 +1,349 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, shrink-to-fit=no">
+<title>M6 — User Terminals &amp; Direct-to-Device · LEOAF</title>
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;600;800&family=Share+Tech+Mono&display=swap" rel="stylesheet">
+
+<!-- Favicons -->
+<link rel="icon" href="favicon.ico" sizes="any" type="image/x-icon">
+<link rel="icon" href="favicon.svg" type="image/svg+xml">
+<link rel="icon" type="image/png" sizes="96x96" href="favicon-96x96.png">
+<link rel="apple-touch-icon" sizes="180x180" href="apple-touch-icon.png">
+<link rel="manifest" href="site.webmanifest">
+<meta name="theme-color" content="#0f0f0f">
+
+<script>
+// Bulletproof ABORT: inline onclick calls this. Awaits a local-scope sign-out
+// (clears the stored token immediately), then leaves with the signedout flag so
+// index.html does not bounce straight back. Always redirects, even on failure.
+window.leoafAbort = async function () {
+    function go() { window.location.replace("index.html?signedout=1"); }
+    try {
+        if (typeof client !== "undefined" && client && client.auth && client.auth.signOut) {
+            try { await client.auth.signOut({ scope: "local" }); } catch (e) {}
+        }
+    } catch (e) {}
+    go();
+};
+</script>
+
+<style>
+* { box-sizing: border-box; margin:0; padding:0; }
+html { height:100%; -webkit-text-size-adjust:100%; overflow-x:hidden; }
+body {
+    font-family: 'Share Tech Mono', monospace;
+    background:#000; color:white;
+    overflow-x:hidden; position:relative; min-height:100vh;
+}
+#starsCanvas { position:fixed; inset:0; z-index:-1; }
+
+/* HEADER */
+header {
+    background:#000; border-bottom:1px solid #ff004f33;
+    position:sticky; top:0; z-index:100;
+    padding:1rem clamp(1.5rem,5vw,4rem);
+    display:flex; justify-content:space-between; align-items:center;
+    box-shadow:0 4px 16px #0008;
+}
+.logo { font-family:'Orbitron',sans-serif; font-weight:800; font-size:clamp(16px,2vw,22px); letter-spacing:3px; text-decoration:none; }
+.logo span:first-child { color:white; }
+.logo span:last-child { color:#ff004f; }
+.nav-right { display:flex; align-items:center; gap:12px; }
+.nav-btn {
+    background:transparent; border:1px solid #ff004f44; color:#ff004f;
+    padding:6px 14px; cursor:pointer; transition:0.3s ease;
+    font-size:11px; font-family:'Orbitron',sans-serif; letter-spacing:1px;
+    text-decoration:none; display:inline-block;
+}
+.nav-btn:hover { background:#ff004f; color:black; }
+
+/* BREADCRUMB */
+.breadcrumb {
+    padding: 14px clamp(1.5rem,5vw,4rem);
+    font-size:11px; color:#ffffff44; letter-spacing:1px;
+    position:relative; z-index:1;
+}
+.breadcrumb a { color:#00d9ff66; text-decoration:none; }
+.breadcrumb a:hover { color:#00d9ff; }
+.breadcrumb span { margin:0 8px; }
+
+/* HERO */
+.q-hero {
+    padding: clamp(30px,5vw,60px) clamp(1.5rem,5vw,4rem) 30px;
+    position:relative; z-index:1;
+    max-width:960px; margin:0 auto;
+}
+.q-tag { font-family:'Orbitron',sans-serif; font-size:11px; color:#ff004f; letter-spacing:3px; margin-bottom:12px; }
+.q-hero h1 { font-family:'Orbitron',sans-serif; font-size:clamp(22px,4vw,36px); font-weight:800; margin-bottom:14px; line-height:1.2; }
+.q-hero p { font-size:13px; line-height:1.7; opacity:0.75; max-width:680px; margin-bottom:24px; }
+
+/* META ROW */
+.meta-row { display:flex; flex-wrap:wrap; gap:10px; margin-bottom:30px; }
+.meta-pill {
+    font-family:'Orbitron',sans-serif; font-size:10px; letter-spacing:1.5px;
+    padding:5px 12px; border:1px solid;
+}
+.pill-phase  { color:#00d9ff; border-color:#00d9ff44; }
+.pill-lessons { color:#ff004f; border-color:#ff004f44; }
+.pill-spine { color:#39ff14; border-color:#39ff1444; }
+
+/* PROGRESS BLOCK */
+.q-progress {
+    background:rgba(17,17,17,0.8); border:1px solid rgba(0,217,255,0.2);
+    padding:20px; margin-bottom:36px;
+    max-width:960px; margin-left:auto; margin-right:auto;
+    position:relative; z-index:1;
+    padding-left: clamp(1.5rem,5vw,4rem);
+    padding-right: clamp(1.5rem,5vw,4rem);
+}
+.progress-header { display:flex; justify-content:space-between; align-items:flex-end; margin-bottom:12px; }
+.progress-header h2 { font-family:'Orbitron',sans-serif; font-size:11px; color:#00d9ff; letter-spacing:2px; }
+.progress-pct { font-family:'Orbitron',sans-serif; font-size:13px; color:#39ff14; }
+.progress-track { width:100%; height:8px; background:rgba(255,255,255,0.08); }
+.progress-fill {
+    height:100%; width:0%;
+    background:linear-gradient(90deg,#00d9ff,#39ff14);
+    box-shadow:0 0 8px rgba(57,255,20,0.4);
+    transition:width 0.8s cubic-bezier(0.4,0,0.2,1);
+}
+
+/* LESSON LIST */
+.lesson-list {
+    max-width:960px; margin:0 auto 60px;
+    padding:0 clamp(1.5rem,5vw,4rem);
+    position:relative; z-index:1;
+    display:flex; flex-direction:column; gap:8px;
+}
+.lesson-card {
+    display:flex; align-items:center; gap:16px;
+    background:rgba(255,255,255,0.03); border-left:3px solid #ff004f;
+    padding:16px 18px; text-decoration:none; color:white;
+    transition:0.3s ease;
+}
+.lesson-card:hover { background:rgba(0,217,255,0.08); transform:translateX(4px); border-left-color:#00d9ff; }
+.lesson-card.completed { border-left-color:#39ff14; background:rgba(57,255,20,0.04); }
+
+.lesson-num {
+    font-family:'Orbitron',sans-serif; font-size:11px; color:#ff004f;
+    min-width:32px; opacity:0.7;
+}
+.lesson-card.completed .lesson-num { color:#39ff14; }
+
+.lesson-body { flex:1; }
+.lesson-body h3 {
+    font-family:'Orbitron',sans-serif; font-size:12px; letter-spacing:1px;
+    text-transform:uppercase; margin-bottom:5px; color:#fff;
+}
+.lesson-card.completed .lesson-body h3 { color:#39ff14; text-decoration:line-through; }
+.lesson-body p { font-size:11px; color:#888; line-height:1.5; }
+
+.lesson-right { display:flex; flex-direction:column; align-items:flex-end; gap:6px; }
+.check-icon { font-size:18px; opacity:0; transition:0.3s; color:#39ff14; }
+.lesson-card.completed .check-icon { opacity:1; }
+
+/* SECTION DIVIDERS */
+.section-label {
+    font-family:'Orbitron',sans-serif; font-size:10px; color:#ffffff33;
+    letter-spacing:3px; text-transform:uppercase;
+    padding:20px 0 8px; border-bottom:1px solid #ffffff11; margin-bottom:4px;
+}
+
+/* FOOTER */
+footer { text-align:center; padding:30px; opacity:0.3; font-size:11px; position:relative; z-index:1; letter-spacing:1px; }
+</style>
+
+</head>
+<body>
+
+<canvas id="starsCanvas"></canvas>
+
+<header>
+    <a href="dashboard.html" class="logo"><span>LEO</span><span>AF</span></a>
+    <div class="nav-right">
+        <a href="dashboard.html" class="nav-btn">← DASHBOARD</a>
+        <button class="nav-btn" onclick="leoafAbort()">ABORT</button>
+    </div>
+</header>
+
+<div class="breadcrumb">
+    <a href="dashboard.html">DASHBOARD</a>
+    <span>/</span>
+    <span style="color:#ffffff88;">M6 — USER TERMINALS &amp; D2D</span>
+</div>
+
+<div class="q-hero">
+    <div class="q-tag">MODULE 6 · PHASE 2 · ENGINEERING THE SYSTEM</div>
+    <h1>User Terminals<br>&amp; Direct-to-Device</h1>
+    <p>Modules 4 and 5 consumed the terminal as three given numbers — a G/T, an EIRP, a pointing capability. This module builds the hardware behind them: parabolic reflectors and phased-array flat panels, the array factor and its grating lobes, analog versus digital beamforming, scan loss and the regulatory off-axis mask, pointing and handover dynamics, and the segment-and-certification wrapper that turns a &#8364;300 panel into a six-figure aviation unit. The spine is a Python terminal evaluator that runs every class — from the enterprise dish to the unpointed handset, 51 dB of G/T — back through the Module 4 link budget and Module 5 throughput engine. The finding: the dish&#39;s advantage is availability, not throughput.</p>
+    <div class="meta-row">
+        <div class="meta-pill pill-phase">PHASE 2 · ENGINEERING THE SYSTEM</div>
+        <div class="meta-pill pill-lessons">7 LESSONS</div>
+        <div class="meta-pill pill-spine">SPINE: TERMINAL EVALUATOR</div>
+    </div>
+</div>
+
+<div class="q-progress">
+    <div class="progress-header">
+        <h2>M6 PROGRESS</h2>
+        <span class="progress-pct" id="progressPct">0 / 7 COMPLETE</span>
+    </div>
+    <div class="progress-track">
+        <div class="progress-fill" id="progressFill"></div>
+    </div>
+</div>
+
+<div class="lesson-list">
+
+    <!-- PART -->
+    <div class="section-label">Part I — The Aperture</div>
+
+    <a href="m6-1.html" class="lesson-card" data-id="m6-1">
+        <div class="lesson-num">01</div>
+        <div class="lesson-body">
+            <h3>The Terminal Design Problem</h3>
+            <p>What a terminal is to the M4/M5 chain: five subsystems, one budget. Parabolic dish versus flat panel, the three currencies of terminal engineering, and the module&#39;s central number — a 1,280-element panel concedes ~9 dB of G/T to a 65 cm dish and claws back transmit performance through N&#178;-aggregated power.</p>
+        </div>
+        <div class="lesson-right"><div class="check-icon">✓</div></div>
+    </a>
+
+    <a href="m6-2.html" class="lesson-card" data-id="m6-2">
+        <div class="lesson-num">02</div>
+        <div class="lesson-body">
+            <h3>Phased Arrays: Elements, Lattices & the Array Factor</h3>
+            <p>Pattern multiplication opened: the array factor, steering as a phase table, beamwidth versus element count, the &#8722;13.2 dB uniform sidelobe, the taper trade, grating lobes and the half-wavelength spacing rule. Every classical result reproduced numerically before it is used.</p>
+        </div>
+        <div class="lesson-right"><div class="check-icon">✓</div></div>
+    </a>
+
+    <a href="m6-3.html" class="lesson-card" data-id="m6-3">
+        <div class="lesson-num">03</div>
+        <div class="lesson-body">
+            <h3>Beamforming Architectures</h3>
+            <p>Where the N element signals combine: analog BFICs, full digital, hybrid subarrays, and the mechanical hybrids. The digital wall is not the converters (~65 W) but the 12.8 Tb/s sample stream — and the honest cost verdict: the dish beats the array at every gain, until you add the gimbal.</p>
+        </div>
+        <div class="lesson-right"><div class="check-icon">✓</div></div>
+    </a>
+
+    <!-- PART -->
+    <div class="section-label">Part II — The Terminal in the Field</div>
+
+    <a href="m6-4.html" class="lesson-card" data-id="m6-4">
+        <div class="lesson-num">04</div>
+        <div class="lesson-body">
+            <h3>Scan Loss, Skew & the Regulatory Mask</h3>
+            <p>The scan-loss law spent: elevation is scan, the mechanical tilt as a site parameter, the G/T gap re-measured at 25&#176; elevation (13.8 dB), polarisation at scan, and the off-axis EIRP-density mask — where bandwidth becomes a compliance instrument and the GSO arc must be avoided.</p>
+        </div>
+        <div class="lesson-right"><div class="check-icon">✓</div></div>
+    </a>
+
+    <a href="m6-5.html" class="lesson-card" data-id="m6-5">
+        <div class="lesson-num">05</div>
+        <div class="lesson-body">
+            <h3>Pointing, Tracking & Handover Dynamics</h3>
+            <p>Acquisition, tracking, and make-before-break handover. The quadratic pointing-loss law, the real elevation distribution (median 35&#176;), and the module&#39;s system-level result: satellite selection is a G/T strategy — max-of-8 buys more than the tilt. The served G/T, honestly derived.</p>
+        </div>
+        <div class="lesson-right"><div class="check-icon">✓</div></div>
+    </a>
+
+    <a href="m6-6.html" class="lesson-card" data-id="m6-6">
+        <div class="lesson-num">06</div>
+        <div class="lesson-body">
+            <h3>Terminal Types by Segment & Aviation Certification</h3>
+            <p>The design space evaluated at the market&#39;s points: consumer, enterprise, maritime, aviation, land, government. Then aviation in depth at public-standards level — DO-160 environmental qualification, ARINC 791/792 installation, and the STC path that makes a terminal airworthy.</p>
+        </div>
+        <div class="lesson-right"><div class="check-icon">✓</div></div>
+    </a>
+
+    <!-- PART -->
+    <div class="section-label">Part III — Synthesis</div>
+
+    <a href="m6-7.html" class="lesson-card" data-id="m6-7">
+        <div class="lesson-num">07</div>
+        <div class="lesson-body">
+            <h3>Synthesis: The Terminal Trade Space</h3>
+            <p>The evaluator runs every class through the M4 and M5 engines. The finding: clear-sky broadband ties at 954 Mbps (saturation hides the G/T gap); the gap lives in availability and the return link. The handset as the design space&#39;s degenerate corner — and the loop closed, aperture to service.</p>
+        </div>
+        <div class="lesson-right"><div class="check-icon">✓</div></div>
+    </a>
+
+</div>
+
+<footer>© 2026 LEOAF · MODULE 6 OF 12</footer>
+
+<!-- Stars -->
+<script>
+function setVH() { document.documentElement.style.setProperty('--vh', `${window.innerHeight * 0.01}px`); }
+setVH(); window.addEventListener('resize', setVH);
+const canvas = document.getElementById('starsCanvas');
+const ctx = canvas.getContext('2d');
+let stars = [];
+function initStars() { stars = []; for (let i=0;i<200;i++) stars.push({x:Math.random()*canvas.width,y:Math.random()*canvas.height,size:Math.random()*1.5+0.5,speed:Math.random()*0.2+0.05,hue:Math.random()*360}); }
+function resizeCanvas() { canvas.width=window.innerWidth; canvas.height=window.innerHeight; }
+resizeCanvas(); initStars(); window.addEventListener('resize', resizeCanvas);
+function animateStars() { ctx.clearRect(0,0,canvas.width,canvas.height); stars.forEach(s=>{s.y-=s.speed; if(s.y<0){s.y=canvas.height;s.x=Math.random()*canvas.width;} ctx.beginPath();ctx.fillStyle=`hsl(${s.hue},80%,80%)`;ctx.arc(s.x,s.y,s.size,0,Math.PI*2);ctx.fill();}); requestAnimationFrame(animateStars); }
+animateStars();
+</script>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="supabase.js"></script>
+<script src="user_progress.js"></script>
+
+<script>
+(function () {
+
+    function bounceToLogin(reason) {
+        console.error("Auth guard:", reason, "- redirecting to index.html");
+        window.location.replace("index.html");
+    }
+
+    async function init() {
+        // Fail CLOSED: if the session cannot be confirmed, leave the page.
+        if (typeof client === "undefined" || !client || !client.auth) {
+            return bounceToLogin("Supabase client not loaded (is supabase.js in this directory?)");
+        }
+
+        let session = null;
+        try {
+            ({ data: { session } } = await client.auth.getSession());
+        } catch (e) {
+            return bounceToLogin("getSession threw: " + e.message);
+        }
+        if (!session) { window.location.replace("index.html"); return; }
+
+        // Progress is derived from this module's own lesson keys (m6-1 … m6-7).
+        const cards = document.querySelectorAll(".lesson-card");
+        const total = cards.length;
+        let done = 0;
+
+        let mastered = [];
+        try {
+            mastered = await getMasteredSections();
+        } catch (e) {
+            console.error("getMasteredSections failed:", e);
+        }
+
+        cards.forEach(card => {
+            if (mastered.includes(card.dataset.id)) {
+                card.classList.add("completed");
+                done++;
+            }
+        });
+
+        const pct = total > 0 ? Math.round((done / total) * 100) : 0;
+        document.getElementById("progressFill").style.width = pct + "%";
+        document.getElementById("progressPct").textContent = `${done} / ${total} COMPLETE`;
+    }
+
+    if (document.readyState === "loading") {
+        document.addEventListener("DOMContentLoaded", init);
+    } else {
+        init();
+    }
+
+})();
+</script>
+
+</body>
+</html>
