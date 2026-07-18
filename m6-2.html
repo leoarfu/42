@@ -1,0 +1,689 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, shrink-to-fit=no">
+<title>M6-2 — Phased Arrays: Elements, Lattices &amp; the Array Factor · LEOAF</title>
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;600;800&family=Share+Tech+Mono&family=Libre+Baskerville:ital,wght@0,400;0,700;1,400&display=swap" rel="stylesheet">
+<link rel="icon" href="favicon.ico" sizes="any" type="image/x-icon">
+<link rel="manifest" href="site.webmanifest">
+<meta name="theme-color" content="#0f0f0f">
+<script>
+window.leoafAbort = async function () {
+    function go() { window.location.replace("index.html?signedout=1"); }
+    try { if (typeof client !== "undefined" && client && client.auth && client.auth.signOut) { try { await client.auth.signOut({ scope: "local" }); } catch (e) {} } } catch (e) {}
+    go();
+};
+</script>
+<style>
+* { box-sizing:border-box; margin:0; padding:0; }
+html { height:100%; -webkit-text-size-adjust:100%; overflow-x:hidden; }
+body { font-family:'Share Tech Mono',monospace; background:#000; color:white; overflow-x:hidden; min-height:100vh; }
+#starsCanvas { position:fixed; inset:0; z-index:-1; }
+header { background:#000; border-bottom:1px solid #ff004f33; position:sticky; top:0; z-index:100; padding:1rem clamp(1.5rem,5vw,4rem); display:flex; justify-content:space-between; align-items:center; }
+.logo { font-family:'Orbitron',sans-serif; font-weight:800; font-size:clamp(16px,2vw,22px); letter-spacing:3px; text-decoration:none; }
+.logo span:first-child { color:white; } .logo span:last-child { color:#ff004f; }
+.nav-right { display:flex; align-items:center; gap:10px; }
+.nav-btn { background:transparent; border:1px solid #ff004f44; color:#ff004f; padding:6px 14px; cursor:pointer; transition:0.3s; font-size:11px; font-family:'Orbitron',sans-serif; letter-spacing:1px; text-decoration:none; display:inline-block; }
+.nav-btn:hover { background:#ff004f; color:black; }
+.breadcrumb { padding:14px clamp(1.5rem,5vw,4rem); font-size:11px; color:#ffffff44; letter-spacing:1px; position:relative; z-index:1; }
+.breadcrumb a { color:#00d9ff66; text-decoration:none; } .breadcrumb a:hover { color:#00d9ff; }
+.breadcrumb span { margin:0 8px; }
+.lesson-wrap { max-width:820px; margin:0 auto; padding:0 clamp(1.5rem,5vw,4rem) 80px; position:relative; z-index:1; }
+.lesson-header { padding:30px 0 28px; border-bottom:1px solid #ffffff11; margin-bottom:36px; }
+.lesson-tag { font-family:'Orbitron',sans-serif; font-size:10px; color:#ff004f; letter-spacing:3px; margin-bottom:10px; }
+.lesson-header h1 { font-family:'Orbitron',sans-serif; font-size:clamp(20px,3.5vw,32px); font-weight:800; line-height:1.2; margin-bottom:12px; }
+.lesson-meta { display:flex; gap:10px; flex-wrap:wrap; margin-bottom:16px; }
+.l-pill { font-family:'Orbitron',sans-serif; font-size:10px; padding:3px 10px; border:1px solid; letter-spacing:1px; }
+.l-pill-q { color:#ff004f; border-color:#ff004f44; } .l-pill-t { color:#39ff14; border-color:#39ff1444; }
+.l-pill-c { color:#ffaa00; border-color:#ffaa0044; }
+.lesson-intro { font-size:13px; line-height:1.85; opacity:0.75; }
+.toc { background:rgba(0,217,255,0.06); border:1px solid #00d9ff33; padding:24px 28px; margin:30px 0; }
+.toc h4 { font-family:'Orbitron',sans-serif; font-size:10px; color:#00d9ff; letter-spacing:2px; margin-bottom:16px; }
+.toc ol { padding-left:20px; } .toc li { font-size:13px; line-height:2.1; }
+.toc li a { color:#00d9ffbb; text-decoration:none; transition:0.15s; } .toc li a:hover { color:#fff; padding-left:4px; }
+.toc li::marker { color:#ff004f; font-family:'Orbitron',sans-serif; font-size:10px; }
+.cb { background:#f5f2ec; color:#1a1a1a; padding:36px clamp(24px,4vw,48px); margin-bottom:24px; border-left:4px solid #00d9ff; position:relative; z-index:1; }
+.cb h2 { font-family:'Orbitron',sans-serif; font-size:13px; color:#003d66; letter-spacing:2px; text-transform:uppercase; margin-bottom:20px; padding-bottom:10px; border-bottom:2px solid #00d9ff66; scroll-margin-top:80px; }
+.cb h3 { font-family:'Orbitron',sans-serif; font-size:11px; color:#444; letter-spacing:1.5px; text-transform:uppercase; margin:28px 0 12px; }
+.cb p { font-family:'Libre Baskerville',Georgia,serif; font-size:15px; line-height:1.9; color:#1a1a1a; margin-bottom:16px; }
+.cb ul { padding-left:0; margin-bottom:16px; }
+.cb ul li { font-family:'Libre Baskerville',Georgia,serif; font-size:14px; line-height:1.85; color:#1a1a1a; padding-left:20px; position:relative; margin-bottom:8px; }
+.cb ul li::before { content:'›'; position:absolute; left:0; color:#0077aa; }
+.cb blockquote { border-left:3px solid #1a7a1a; background:#eafaea; padding:14px 20px; margin:18px 0; font-size:13px; font-family:'Share Tech Mono',monospace; color:#0a3d0a; line-height:1.8; }
+.callout { border-left:3px solid #0088cc; background:#e8f4fb; padding:16px 20px; margin:22px 0; font-size:12px; line-height:1.8; color:#1a1a1a; }
+.callout.red { border-left-color:#cc0033; background:#fdecea; }
+.callout.green { border-left-color:#1a7a1a; background:#eafaea; }
+.callout.amber { border-left-color:#996600; background:#fef9ec; }
+.callout strong { font-family:'Orbitron',sans-serif; font-size:10px; letter-spacing:1px; display:block; margin-bottom:8px; }
+.compare-table { width:100%; border-collapse:collapse; margin:22px 0; font-size:12px; }
+.compare-table th { font-family:'Orbitron',sans-serif; font-size:10px; letter-spacing:1px; color:#003d66; padding:10px 12px; border-bottom:2px solid #00d9ff66; text-align:left; }
+.compare-table td { padding:10px 12px; border-bottom:1px solid #ddd; line-height:1.5; color:#1a1a1a; vertical-align:top; }
+.compare-table tr:hover td { background:#f0f0f0; }
+.key-numbers { display:grid; grid-template-columns:repeat(auto-fit,minmax(140px,1fr)); gap:12px; margin:22px 0; }
+.kn-item { background:#fff; border:1px solid #d0d0d0; padding:16px 12px; text-align:center; }
+.kn-val { font-family:'Orbitron',sans-serif; font-size:clamp(13px,1.8vw,18px); font-weight:800; color:#003d66; display:block; }
+.kn-label { font-size:10px; color:#555; letter-spacing:1px; margin-top:5px; display:block; line-height:1.4; }
+.quiz-block { background:rgba(17,17,17,0.9); border:1px solid #ff004f33; padding:28px; margin:48px 0 32px; }
+.quiz-block h2 { font-family:'Orbitron',sans-serif; font-size:13px; color:#ff004f; letter-spacing:2px; margin-bottom:6px; }
+.quiz-intro { font-size:12px; opacity:0.6; margin-bottom:24px; padding-bottom:16px; border-bottom:1px solid #ff004f22; line-height:1.6; }
+.quiz-q { margin-bottom:28px; }
+.quiz-q p { font-size:13px; opacity:0.9; margin-bottom:12px; line-height:1.65; }
+.quiz-q p strong { color:#00d9ff; }
+.quiz-options { display:flex; flex-direction:column; gap:8px; }
+.quiz-opt { background:rgba(255,255,255,0.03); border:1px solid #ffffff1a; padding:11px 16px; cursor:pointer; font-size:12px; font-family:'Share Tech Mono',monospace; transition:0.2s; text-align:left; color:white; line-height:1.5; }
+.quiz-opt:hover:not(:disabled) { background:rgba(0,217,255,0.08); border-color:#00d9ff44; }
+.quiz-opt.correct { background:rgba(57,255,20,0.1); border-color:#39ff14; color:#39ff14; }
+.quiz-opt.wrong { background:rgba(255,0,79,0.1); border-color:#ff004f; color:#ff004f; }
+.quiz-opt:disabled { cursor:default; }
+.quiz-feedback { font-size:12px; margin-top:10px; min-height:18px; line-height:1.7; opacity:0.9; padding:0 4px; }
+.quiz-score { font-family:'Orbitron',sans-serif; font-size:12px; color:#39ff14; margin-top:20px; letter-spacing:1px; display:none; padding-top:16px; border-top:1px solid #39ff1433; }
+.py-block { background:rgba(10,10,10,0.95); border:1px solid #39ff1422; padding:28px; margin:32px 0; }
+.py-block h2 { font-family:'Orbitron',sans-serif; font-size:13px; color:#39ff14; letter-spacing:2px; margin-bottom:8px; }
+.py-block .py-intro { font-size:12px; opacity:0.7; margin-bottom:20px; padding-bottom:16px; border-bottom:1px solid #39ff1422; line-height:1.7; }
+.py-exercise { margin-bottom:32px; } .py-exercise:last-child { margin-bottom:0; }
+.py-exercise h3 { font-family:'Orbitron',sans-serif; font-size:11px; color:#39ff1499; letter-spacing:1.5px; text-transform:uppercase; margin-bottom:10px; }
+.py-exercise p { font-size:12px; opacity:0.8; margin-bottom:14px; line-height:1.75; }
+.py-block pre { background:#050505; border:1px solid #39ff1433; padding:20px; font-family:'Share Tech Mono',monospace; font-size:11px; line-height:1.7; overflow-x:auto; color:#39ff14; white-space:pre; margin-bottom:12px; }
+.py-note { background:rgba(57,255,20,0.04); border-left:2px solid #39ff14; padding:12px 16px; margin-top:14px; font-size:12px; line-height:1.75; opacity:0.8; }
+.py-note strong { font-family:'Orbitron',sans-serif; font-size:10px; color:#39ff14; display:block; margin-bottom:6px; letter-spacing:1px; }
+.reflection-block { background:rgba(255,170,0,0.04); border:1px solid #ffaa0033; padding:24px; margin:32px 0; }
+.reflection-block h2 { font-family:'Orbitron',sans-serif; font-size:13px; color:#ffaa00; letter-spacing:2px; margin-bottom:8px; }
+.ref-intro { font-size:12px; opacity:0.7; margin-bottom:20px; padding-bottom:14px; border-bottom:1px solid #ffaa0022; line-height:1.7; }
+.ref-prompt { margin-bottom:20px; }
+.ref-prompt h3 { font-family:'Orbitron',sans-serif; font-size:11px; color:#ffaa0099; letter-spacing:1px; margin-bottom:8px; }
+.ref-prompt p { font-size:12px; opacity:0.8; line-height:1.75; }
+.complete-wrap { margin-top:56px; padding-top:30px; border-top:1px solid #ffffff11; text-align:center; }
+.complete-btn { font-family:'Orbitron',sans-serif; font-size:13px; letter-spacing:2px; padding:14px 44px; background:transparent; border:1px solid #39ff14; color:#39ff14; cursor:pointer; transition:0.3s; }
+.complete-btn:hover:not(.done) { background:#39ff14; color:black; box-shadow:0 0 20px rgba(57,255,20,0.4); }
+.complete-btn.done { background:rgba(57,255,20,0.1); cursor:pointer; opacity:1; }
+.complete-msg { font-size:12px; color:#39ff14; margin-top:14px; min-height:18px; letter-spacing:1px; }
+.lesson-nav { display:flex; justify-content:space-between; margin-top:30px; flex-wrap:wrap; gap:10px; }
+.lesson-nav a { font-family:'Orbitron',sans-serif; font-size:11px; color:#00d9ff66; text-decoration:none; letter-spacing:1px; transition:0.2s; }
+.lesson-nav a:hover { color:#00d9ff; }
+.back-to-top { position:fixed; bottom:28px; right:28px; z-index:200; width:44px; height:44px; background:#000; border:1px solid #00d9ff55; color:#00d9ff; font-size:20px; cursor:pointer; display:flex; align-items:center; justify-content:center; opacity:0; pointer-events:none; transition:opacity 0.3s; }
+.back-to-top.visible { opacity:1; pointer-events:auto; } .back-to-top:hover { border-color:#00d9ff; }
+footer { text-align:center; padding:30px; opacity:0.3; font-size:11px; position:relative; z-index:1; letter-spacing:1px; }
+.module-complete { background:rgba(57,255,20,0.06); border:1px solid #39ff1444; padding:24px 28px; margin:40px 0; text-align:center; }
+.module-complete h3 { font-family:'Orbitron',sans-serif; font-size:14px; color:#39ff14; letter-spacing:2px; margin-bottom:10px; }
+.module-complete p { font-size:12px; opacity:0.8; line-height:1.7; }
+</style>
+</head>
+<body>
+<canvas id="starsCanvas"></canvas>
+<header>
+    <a href="dashboard.html" class="logo"><span>LEO</span><span>AF</span></a>
+    <div class="nav-right">
+        <a href="m6.html" class="nav-btn">← M6 HUB</a>
+        <button class="nav-btn" onclick="leoafAbort()">ABORT</button>
+    </div>
+</header>
+<div class="breadcrumb">
+    <a href="dashboard.html">DASHBOARD</a><span>/</span>
+    <a href="m6.html">M6</a><span>/</span>
+    <span style="color:#ffffff88;">LESSON 02 — PHASED ARRAYS &amp; THE ARRAY FACTOR</span>
+</div>
+
+<div class="lesson-wrap">
+<div class="lesson-header">
+    <div class="lesson-tag">M6 · LESSON 02 OF 7</div>
+    <h1>Phased Arrays:<br>Elements &amp; the Array Factor</h1>
+    <div class="lesson-meta">
+        <div class="l-pill l-pill-q">MODULE 6</div>
+        <div class="l-pill l-pill-t">USER TERMINALS &amp; D2D</div>
+        <div class="l-pill l-pill-c">CORE</div>
+    </div>
+    <p class="lesson-intro" style="margin-bottom:12px;">Lesson m6-1 used the array gain law — 10·log₁₀(N) plus an element gain minus an allowance — as a black box. This lesson opens it. The tool that opens it is one of the most economical ideas in antenna engineering, <strong>pattern multiplication</strong>: the radiation pattern of an array of identical elements is the pattern of one element multiplied by a purely geometric term, the <strong>array factor</strong>, that depends only on where the elements sit and what phases they are fed. Everything a flat panel does — steering, beamwidth, sidelobes, grating lobes — lives in the array factor; everything it cannot escape — scan roll-off, polarisation degradation — lives in the element. Design cleanly separates into geometry and electromagnetics, and this lesson takes them in that order.</p>
+    <p class="lesson-intro" style="margin-bottom:12px;">The numbers in this lesson are produced by a pattern engine the spine project gains as Stage 2 — a numerical array-factor calculator with an honest measurement routine (main-lobe nulls located before sidelobes are searched; the difference between −5.6 dB and the correct −13.2 dB is exactly that bookkeeping). Every classical result is reproduced numerically before it is used: the 0.886·λ/(N·d) beamwidth, the −13.2 dB uniform sidelobe, the grating-lobe condition, the taper trade. The lesson's deliverable is the honest version of m6-1's gain law, with every constant accounted for.</p>
+    <p class="lesson-intro" style="margin-bottom:12px;">One orientation note. This module cares about arrays as <em>terminals</em>, but nothing here is terminal-specific: the identical mathematics sized the Module 3 payload's beams and will reappear whenever this program touches an aperture. Learn it once, here, with runnable code.</p>
+</div>
+
+<div class="toc">
+    <h4>CONTENTS</h4>
+    <ol>
+        <li><a href="#s1">Pattern multiplication</a></li>
+        <li><a href="#s2">The array factor, derived</a></li>
+        <li><a href="#s3">Beamwidth: aperture measured in wavelengths</a></li>
+        <li><a href="#s4">Sidelobes and the taper trade</a></li>
+        <li><a href="#s5">Grating lobes and the spacing rule</a></li>
+        <li><a href="#s6">Planar lattices</a></li>
+        <li><a href="#s7">The element itself</a></li>
+        <li><a href="#s8">The broadside budget, honestly assembled</a></li>
+        <li><a href="#s9">Key facts</a></li>
+        <li><a href="#s10">What this lesson delivers to the design chain</a></li>
+        <li><a href="#quiz">Knowledge check</a></li>
+        <li><a href="#py">Python exercises</a></li>
+        <li><a href="#reflect">Reflection</a></li>
+    </ol>
+</div>
+
+<div class="cb" id="s1">
+    <h2>1. Pattern multiplication</h2>
+<p>For N identical elements at positions r_n, fed with complex weights w_n, the far-field pattern factorises:</p>
+<blockquote>E_total(θ, φ) = E_element(θ, φ) × AF(θ, φ),  AF = Σ w_n · e^(jk·r_n·û)</blockquote>
+<p>The factorisation holds exactly when every element has the same pattern — an idealisation that mutual coupling perturbs (section 7) but that organises all first-order design. The division of labour: the <strong>array factor</strong> is pure geometry plus feeding — it steers, it sets beamwidth and sidelobes, it is what software controls at microsecond timescales. The <strong>element pattern</strong> is fixed hardware — it bounds what any steering can achieve, and it is what decays as the beam scans away from broadside. m6-1's black-box law is this factorisation evaluated at one angle; this lesson evaluates it everywhere.</p>
+</div>
+
+<div class="cb" id="s2">
+    <h2>2. The array factor, derived</h2>
+<p>Take the uniform linear array (ULA): N elements spaced d along a line, element n fed with phase n·β. At angle θ from broadside, the path difference between adjacent elements is d·sin θ, so the phase difference per element is ψ = k·d·sin θ + β (k = 2π/λ). The array factor is a geometric series:</p>
+<blockquote>AF(ψ) = Σₙ e^(jnψ) → |AF| = |sin(Nψ/2) / sin(ψ/2)|</blockquote>
+<p>Its peak, |AF| = N, occurs where ψ = 0 — where the feeding phase exactly cancels the geometric phase. <strong>Steering is therefore nothing but choosing β</strong>: setting β = −k·d·sin θ₀ moves the peak to θ₀. No metal moves; a table of phase settings rewrites and the beam is elsewhere within the settling time of the phase shifters — the microsecond agility that won the NGSO market in m6-1 §4, now with its mechanism visible. Planar arrays extend the same formula to two dimensions; every result below carries over per axis.</p>
+</div>
+
+<div class="cb" id="s3">
+    <h2>3. Beamwidth: aperture measured in wavelengths</h2>
+<p>The main lobe's half-power width for a uniform ULA:</p>
+<blockquote>θ₃dB ≈ 0.886 · λ / (N·d·cos θ₀)</blockquote>
+<p>Verified numerically for N = 32, d = λ/2:</p>
+<table class="compare-table">
+<thead><tr>
+<th>Steer θ₀</th>
+<th>Beamwidth (engine)</th>
+<th>Theory</th>
+</tr></thead>
+<tbody>
+<tr><td>0°</td><td>3.16°</td><td>3.17°</td></tr>
+<tr><td>45°</td><td>4.48°</td><td>3.17°/cos 45° = 4.49°</td></tr>
+<tr><td>60°</td><td>6.36°</td><td>3.17°/cos 60° = 6.34°</td></tr>
+</tbody>
+</table>
+<p>Two readings. First, beamwidth is set by the aperture's extent <em>in wavelengths</em> — N·d — exactly as the dish's 70·λ/D; the two families obey one law. Second, the cos θ₀ in the denominator is the first appearance of the module's central tax: a scanned array's effective aperture is its physical aperture <em>projected</em> toward the target, and the beam broadens as 1/cos θ₀. Broadening is the benign face of scan loss; the gain consequence is m6-4's subject.</p>
+</div>
+
+<div class="cb" id="s4">
+    <h2>4. Sidelobes and the taper trade</h2>
+<p>A uniformly weighted array radiates its highest sidelobe at <strong>−13.2 dB</strong> relative to the main beam — a mathematical constant of the uniform aperture, independent of N. Sidelobes matter twice in a terminal: they receive interference from directions the user never chose (m4-6's C/I has a hardware ancestry), and they <em>transmit</em> toward other operators' satellites — which is precisely what the m6-4 regulatory off-axis mask constrains. A consumer NGSO terminal's sidelobe envelope is a compliance document, not an aesthetic.</p>
+<p>Sidelobes are bought down by <strong>amplitude taper</strong> — feeding edge elements more weakly than central ones. The engine's verified example: a cosine-on-pedestal taper (pedestal 0.3) moves the first sidelobe from −13.2 to <strong>−20.3 dB</strong>, at the cost of <strong>0.35 dB of gain</strong> (taper efficiency 0.923) and a beamwidth of 3.68° versus 3.16°. That is the shape of the whole trade: smoother illumination → lower sidelobes, wider beam, less gain. Classical syntheses (Taylor, Chebyshev) make the trade optimally; the engine's simple taper makes it visibly. This resolves m6-1's flagged item: the "taper loss" inside the 1.5 dB allowance is not a loss at all — <strong>it is sidelobe performance, purchased deliberately</strong>, and the m6-4 mask decides how much a terminal must buy.</p>
+</div>
+
+<div class="cb" id="s5">
+    <h2>5. Grating lobes and the spacing rule</h2>
+<p>The array factor is periodic in ψ: whenever k·d·sin θ + β passes through a multiple of 2π, a <em>second full-strength main beam</em> appears — a <strong>grating lobe</strong>, at</p>
+<blockquote>sin θ_g = sin θ₀ − m·λ/d</blockquote>
+<p>A grating lobe is not a large sidelobe; it is a complete copy of the main beam (the engine's demonstration: d = 0.7λ steered to 40° puts a <strong>0.0 dB</strong> lobe at 51.8° on the other side of broadside). For a terminal it is disqualifying twice over — the receive copy admits interference at full gain, and the transmit copy radiates a second beam across the GEO arc, which no regulatory mask on Earth permits.</p>
+<p>Keeping every grating lobe out of visible space while scanning to ±θ_max requires:</p>
+<blockquote>d/λ ≤ 1 / (1 + sin θ_max)</blockquote>
+<p>For ±60° scan: <strong>d ≤ 0.536 λ</strong>. This single inequality explains why every wide-scanning panel sits near half-wavelength spacing — and therefore why m6-1's element counts are what they are: the lattice pitch is regulated by grating-lobe physics, the aperture size by the gain requirement, and N is just their quotient squared. The temptation to space wider (fewer elements, less cost — m6-3's economics) is real and is paid in scan range: at d = 0.7λ the grating-lobe-free scan collapses to ±25°, a lattice for a satellite that stays overhead, not for a LEO terminal that must reach toward the horizon.</p>
+</div>
+
+<div class="cb" id="s6">
+    <h2>6. Planar lattices</h2>
+<p>Real panels are two-dimensional, and the grid choice matters. On a <strong>rectangular lattice</strong> the spacing rule applies per axis. On a <strong>triangular (hexagonal) lattice</strong>, the grating lobes of the two axes interleave less efficiently in sine-space, and the classical result (Sharp, 1961) follows: a triangular lattice covers the same grating-lobe-free scan volume with about <strong>13% fewer elements</strong> than a rectangular one. Thirteen percent of element count is thirteen percent of the beamformer silicon, the assembly, and the DC power — m6-3 will price it — which is why triangular lattices are common in cost-driven panels. The aperture <em>boundary</em> matters separately: a circular boundary tapers the sidelobes of the two principal planes more evenly than a square one, one reason consumer panels tend toward rounded outlines rather than sharp rectangles.</p>
+</div>
+
+<div class="cb" id="s7">
+    <h2>7. The element itself</h2>
+<p>What the array factor multiplies. Terminal arrays overwhelmingly use printed <strong>patch</strong> radiators — planar, cheap, integrable above the beamformer ICs — with an embedded element gain near 5 dBi and a pattern the standard model captures as cos^q θ with q ≈ 1.2–1.5 — and one convention to fix precisely: <strong>the exponent's first power is the aperture projection itself</strong>. Aperture theory makes an ideal element in an ideal lattice scan as cos θ exactly (the array's directivity is its projected area, shared N ways); the excess above 1 is impedance mismatch and pattern deviation. cos^q is therefore the <em>total</em> scan behaviour, not a term to be multiplied by a separate projection factor. The roll-off, verified at q = 1.3:</p>
+<table class="compare-table">
+<thead><tr>
+<th>Scan angle</th>
+<th>Element loss</th>
+</tr></thead>
+<tbody>
+<tr><td>30°</td><td>−0.8 dB</td></tr>
+<tr><td>45°</td><td>−2.0 dB</td></tr>
+<tr><td>60°</td><td>−3.9 dB</td></tr>
+<tr><td>75°</td><td>−7.6 dB</td></tr>
+</tbody>
+</table>
+<p>This table <em>is</em> the main term of m6-4's scan-loss bill — aperture projection included, per the convention just fixed: unlike beamwidth broadening, it is pure lost gain, and no phase setting recovers it. Three second-order realities to file: <strong>mutual coupling</strong> — elements half a wavelength apart are not electromagnetically independent, so the honest element pattern is the <em>embedded</em> pattern, measured or simulated in the lattice, not in isolation; <strong>scan blindness</strong> — at particular scan angles the lattice can couple into a surface wave and the active reflection coefficient spikes toward unity, a design check every panel must clear (kept qualitative here); and <strong>polarisation</strong> — satellite terminals radiate circular polarisation, and a patch's axial ratio degrades off boresight, so the m4-1 polarisation-loss line is scan-dependent for a panel in a way it never was for a dish.</p>
+</div>
+
+<div class="cb" id="s8">
+    <h2>8. The broadside budget, honestly assembled</h2>
+<p>m6-1 wrote G_array ≈ 10·log₁₀(N) + 5 − 1.5. The constants, now with owners:</p>
+<table class="compare-table">
+<thead><tr>
+<th>Term</th>
+<th>Value</th>
+<th>Owner</th>
+</tr></thead>
+<tbody>
+<tr><td>Coherent combination</td><td>10·log₁₀(N)</td><td>Array factor (§2)</td></tr>
+<tr><td>Embedded element gain</td><td>≈ +5 dBi</td><td>Patch in lattice (§7)</td></tr>
+<tr><td>Taper</td><td>−0.3 to −0.9 dB</td><td>Sidelobe spec (§4) — a choice</td></tr>
+<tr><td>Feed/beamformer network</td><td>−0.3 to −0.6 dB</td><td>m6-3's architecture</td></tr>
+<tr><td>Radome</td><td>−0.2 to −0.5 dB</td><td>Environment (m6-6)</td></tr>
+</tbody>
+</table>
+<p>Broadside only, still: the full gain law is G(θ₀) = 10·log₁₀(N) + G_e + 10·q·log₁₀(cos θ₀) − losses, and its scan term — the §7 table, joined by polarisation degradation and the regulatory off-axis mask — is where m6-4 begins. The lattice pitch is fixed by §5, the element count by the gain requirement, the taper by the mask: the panel's geometry is now fully determined by requirements, which is what "design" means.</p>
+</div>
+
+<div class="cb" id="s9">
+    <h2>9. Key facts</h2>
+<table class="compare-table">
+<thead><tr>
+<th>Fact</th>
+<th>Value</th>
+<th>Unit</th>
+<th>Source</th>
+</tr></thead>
+<tbody>
+<tr><td>Pattern multiplication</td><td>E_total = E_element × AF</td><td>—</td><td>Array theory</td></tr>
+<tr><td>ULA array factor</td><td>sin(Nψ/2)/sin(ψ/2), ψ = kd·sinθ + β</td><td>—</td><td>Derived</td></tr>
+<tr><td>Steering</td><td>β = −kd·sin θ₀</td><td>—</td><td>Derived</td></tr>
+<tr><td>Beamwidth</td><td>0.886·λ/(N·d·cos θ₀)</td><td>rad</td><td>Verified (3.16° @ N=32, d=λ/2)</td></tr>
+<tr><td>Scan broadening</td><td>∝ 1/cos θ₀</td><td>—</td><td>Verified (4.48° @ 45°)</td></tr>
+<tr><td>Uniform first sidelobe</td><td>−13.2</td><td>dB</td><td>Verified</td></tr>
+<tr><td>Cos-on-pedestal (p = 0.3)</td><td>SLL −20.3, gain −0.35</td><td>dB</td><td>Verified</td></tr>
+<tr><td>Grating-lobe condition</td><td>sin θ_g = sin θ₀ − mλ/d</td><td>—</td><td>Derived</td></tr>
+<tr><td>Spacing for ±60° scan</td><td>d ≤ 0.536 λ</td><td>—</td><td>Computed</td></tr>
+<tr><td>Grating lobe level</td><td>0.0 (full main-beam copy)</td><td>dB</td><td>Verified</td></tr>
+<tr><td>Triangular-lattice saving</td><td>≈ 13% fewer elements</td><td>—</td><td>Sharp (1961)</td></tr>
+<tr><td>Embedded element roll-off (q=1.3)</td><td>−0.8 / −2.0 / −3.9 / −7.6 @ 30/45/60/75°</td><td>dB</td><td>Verified</td></tr>
+</tbody>
+</table>
+</div>
+
+<div class="cb" id="s10">
+    <h2>10. What this lesson delivers to the design chain</h2>
+<p>The spine gains Stage 2: a pattern engine that computes any lattice-and-taper's array factor, steers it, and measures it honestly — beamwidth from the half-power points inside the null-bounded main lobe, sidelobes searched only beyond the first nulls, grating lobes flagged when the spacing rule is violated. m6-1's gain allowance is now an itemised budget, and the panel's geometry (pitch from the scan requirement, N from the gain requirement, taper from the sidelobe requirement) is a solved design procedure rather than a datasheet mystery.</p>
+<p>What the geometry cannot answer: what electronics sit behind each element, what they cost, and what they draw — the difference between a 1,280-element pattern on a screen and a 1,280-element product at a consumer price. That is m6-3. And the scan tax this lesson quantified — the embedded element's cos^q roll-off, projection included — meets polarisation degradation and the regulatory off-axis mask in m6-4, where the panel's low-elevation performance is settled.</p>
+</div>
+
+<div class="quiz-block" id="quiz">
+    <h2>KNOWLEDGE CHECK</h2>
+    <div class="quiz-intro">Ten questions. Each option explains itself after you commit. No retries per question — decide first.</div>
+    <div class="quiz-q">
+        <p><strong>Q1.</strong> Pattern multiplication factorises an array's pattern into element pattern × array factor. The engineering value of the factorisation is:</p>
+        <div class="quiz-options">
+            <button class="quiz-opt" data-q="1" data-correct="false">A — It makes the pattern isotropic</button>
+            <button class="quiz-opt" data-q="1" data-correct="true">B — It separates what software controls at microseconds (the array factor: steering, beamwidth, sidelobes) from what hardware fixes forever (the element: scan roll-off, polarisation)</button>
+            <button class="quiz-opt" data-q="1" data-correct="false">C — It eliminates mutual coupling</button>
+            <button class="quiz-opt" data-q="1" data-correct="false">D — It only applies to two-element arrays</button>
+        </div>
+        <div class="quiz-feedback" id="fb1"></div>
+    </div>
+    <div class="quiz-q">
+        <p><strong>Q2.</strong> Steering an array's beam to θ₀ is accomplished by:</p>
+        <div class="quiz-options">
+            <button class="quiz-opt" data-q="2" data-correct="false">A — Rotating the panel by θ₀</button>
+            <button class="quiz-opt" data-q="2" data-correct="true">B — Applying a progressive per-element phase β = −k·d·sin θ₀, which relocates the array factor's peak — no motion involved</button>
+            <button class="quiz-opt" data-q="2" data-correct="false">C — Increasing each element's power</button>
+            <button class="quiz-opt" data-q="2" data-correct="false">D — Widening the element spacing</button>
+        </div>
+        <div class="quiz-feedback" id="fb2"></div>
+    </div>
+    <div class="quiz-q">
+        <p><strong>Q3.</strong> For N = 32 at d = λ/2, the broadside beamwidth is ~3.2°; steered to 60° it is ~6.4°, because:</p>
+        <div class="quiz-options">
+            <button class="quiz-opt" data-q="3" data-correct="false">A — The phase shifters lose resolution at large angles</button>
+            <button class="quiz-opt" data-q="3" data-correct="true">B — The aperture the target sees is the physical aperture projected by cos θ₀ — half the wavelengths of extent at 60°, hence twice the beamwidth</button>
+            <button class="quiz-opt" data-q="3" data-correct="false">C — The element pattern widens the beam</button>
+            <button class="quiz-opt" data-q="3" data-correct="false">D — Grating lobes absorb the energy</button>
+        </div>
+        <div class="quiz-feedback" id="fb3"></div>
+    </div>
+    <div class="quiz-q">
+        <p><strong>Q4.</strong> The −13.2 dB first sidelobe of a uniform array is:</p>
+        <div class="quiz-options">
+            <button class="quiz-opt" data-q="4" data-correct="false">A — A defect of cheap arrays</button>
+            <button class="quiz-opt" data-q="4" data-correct="true">B — A mathematical constant of uniform illumination, independent of N — the starting point from which taper buys lower sidelobes at a gain and beamwidth cost</button>
+            <button class="quiz-opt" data-q="4" data-correct="false">C — Caused by element failures</button>
+            <button class="quiz-opt" data-q="4" data-correct="false">D — Only present on transmit</button>
+        </div>
+        <div class="quiz-feedback" id="fb4"></div>
+    </div>
+    <div class="quiz-q">
+        <p><strong>Q5.</strong> A grating lobe differs from a sidelobe in that it is:</p>
+        <div class="quiz-options">
+            <button class="quiz-opt" data-q="5" data-correct="false">A — Slightly higher than −13 dB</button>
+            <button class="quiz-opt" data-q="5" data-correct="true">B — A full-strength copy of the main beam (0 dB), appearing when element spacing lets the array-factor phase alias through a full 2π</button>
+            <button class="quiz-opt" data-q="5" data-correct="false">C — Only a receive phenomenon</button>
+            <button class="quiz-opt" data-q="5" data-correct="false">D — Removable by taper</button>
+        </div>
+        <div class="quiz-feedback" id="fb5"></div>
+    </div>
+    <div class="quiz-q">
+        <p><strong>Q6.</strong> Wide-scanning terminals sit near half-wavelength element spacing because:</p>
+        <div class="quiz-options">
+            <button class="quiz-opt" data-q="6" data-correct="false">A — λ/2 maximises element gain</button>
+            <button class="quiz-opt" data-q="6" data-correct="true">B — d ≤ λ/(1 + sin θ_max) keeps grating lobes invisible over the scan range — 0.536 λ for ±60° — and a LEO terminal must scan toward the horizon</button>
+            <button class="quiz-opt" data-q="6" data-correct="false">C — λ/2 minimises mutual coupling</button>
+            <button class="quiz-opt" data-q="6" data-correct="false">D — Regulation mandates the pitch directly</button>
+        </div>
+        <div class="quiz-feedback" id="fb6"></div>
+    </div>
+    <div class="quiz-q">
+        <p><strong>Q7.</strong> The triangular lattice's ~13% element saving over rectangular arises because:</p>
+        <div class="quiz-options">
+            <button class="quiz-opt" data-q="7" data-correct="false">A — Triangular elements are smaller</button>
+            <button class="quiz-opt" data-q="7" data-correct="true">B — Its grating lobes pack less efficiently in sine-space, so the same grating-lobe-free scan volume is achieved at lower element density</button>
+            <button class="quiz-opt" data-q="7" data-correct="false">C — It needs no taper</button>
+            <button class="quiz-opt" data-q="7" data-correct="false">D — It has higher element gain</button>
+        </div>
+        <div class="quiz-feedback" id="fb7"></div>
+    </div>
+    <div class="quiz-q">
+        <p><strong>Q8.</strong> The embedded element pattern (cos^q, q ≈ 1.3) matters to the terminal because:</p>
+        <div class="quiz-options">
+            <button class="quiz-opt" data-q="8" data-correct="false">A — It sets the array's beamwidth</button>
+            <button class="quiz-opt" data-q="8" data-correct="true">B — It is pure, unrecoverable gain loss at scan — −3.9 dB at 60°, aperture projection included in the exponent's first power — that no phase setting can restore, and it meets the regulatory mask in m6-4</button>
+            <button class="quiz-opt" data-q="8" data-correct="false">C — It only affects the sidelobes</button>
+            <button class="quiz-opt" data-q="8" data-correct="false">D — It disappears in large arrays</button>
+        </div>
+        <div class="quiz-feedback" id="fb8"></div>
+    </div>
+    <div class="quiz-q">
+        <p><strong>Q9.</strong> "Taper loss" was reclassified in this lesson as a design choice because:</p>
+        <div class="quiz-options">
+            <button class="quiz-opt" data-q="9" data-correct="false">A — It can be set to zero at no cost</button>
+            <button class="quiz-opt" data-q="9" data-correct="true">B — It is the gain price of a purchased sidelobe specification — the m6-4 regulatory mask and the interference budget decide how much sidelobe suppression a terminal must buy</button>
+            <button class="quiz-opt" data-q="9" data-correct="false">C — Modern arrays do not use taper</button>
+            <button class="quiz-opt" data-q="9" data-correct="false">D — It only applies to dishes</button>
+        </div>
+        <div class="quiz-feedback" id="fb9"></div>
+    </div>
+    <div class="quiz-q">
+        <p><strong>Q10.</strong> After this lesson, the panel's geometry is "fully determined by requirements" in the sense that:</p>
+        <div class="quiz-options">
+            <button class="quiz-opt" data-q="10" data-correct="false">A — All panels are now identical</button>
+            <button class="quiz-opt" data-q="10" data-correct="true">B — Pitch follows from the scan requirement (grating-lobe rule), element count from the gain requirement, taper from the sidelobe/mask requirement — three requirements, three parameters, no freedom left at the geometry level</button>
+            <button class="quiz-opt" data-q="10" data-correct="false">C — The element design is irrelevant</button>
+            <button class="quiz-opt" data-q="10" data-correct="false">D — Cost no longer matters</button>
+        </div>
+        <div class="quiz-feedback" id="fb10"></div>
+    </div>
+    <div class="quiz-score" id="quizScore"></div>
+</div>
+
+<div class="py-block" id="py">
+    <h2>PYTHON EXERCISES</h2>
+    <div class="py-intro">Three exercises; the last extends the module spine project. Run them, then work the numbered follow-ups in the comments — the follow-ups are the exercise.</div>
+    <div class="py-exercise">
+        <h3>Exercise 1 — The pattern engine</h3>
+        <p>Compute, steer, and honestly measure an array factor. This function set is spine Stage 2's core.</p>
+<pre>
+import math, cmath
+db = lambda x: 10*math.log10(x) if x &gt; 0 else -999.0
+
+def pattern(N, d_lam, steer_deg, taper=None, step=0.02):
+    &quot;&quot;&quot;|AF|^2 vs angle, normalised to the taper&#x27;s coherent sum.&quot;&quot;&quot;
+    k = 2*math.pi
+    w = taper or [1.0]*N
+    psi0 = -k*d_lam*math.sin(math.radians(steer_deg))
+    pts, t = [], -90.0
+    while t &lt;= 90.0:
+        s = sum(w[n]*cmath.exp(1j*n*(k*d_lam*math.sin(math.radians(t)) + psi0))
+                for n in range(N))
+        pts.append((t, abs(s)**2/sum(w)**2))
+        t += step
+    return pts
+
+def measure(pts, steer):
+    &quot;&quot;&quot;Peak, 3 dB beamwidth, first sidelobe — nulls located FIRST.
+    Searching sidelobes without bounding the main lobe reads the
+    main-lobe skirt (~ -5 dB) as a sidelobe. The nulls are the fence.&quot;&quot;&quot;
+    ipk = max(range(len(pts)), key=lambda i: pts[i][1] - abs(pts[i][0]-steer)*1e-9)
+    pk_t, pk_v = pts[ipk]
+    def first_null(direction):
+        i = ipk
+        while 0 &lt; i &lt; len(pts)-1:
+            i += direction
+            if pts[i][1] &lt; pts[i-direction][1] and pts[i][1] &lt; 0.01*pk_v:
+                while 0 &lt; i &lt; len(pts)-1 and pts[i+direction][1] &lt; pts[i][1]:
+                    i += direction
+                return i
+        return i
+    lo, hi = first_null(-1), first_null(+1)
+    half = [t for t, v in pts[lo:hi+1] if v &gt;= 0.5*pk_v]
+    bw = max(half) - min(half)
+    sll = max([v for _, v in pts[:lo]] + [v for _, v in pts[hi+1:]], default=0)
+    return pk_t, bw, db(sll/pk_v)
+
+for steer in [0, 30, 45, 60]:
+    pk, bw, sll = measure(pattern(32, 0.5, steer), steer)
+    print(f&quot;N=32 d=0.5λ steer {steer:&gt;2}°: peak {pk:6.2f}°, &quot;
+          f&quot;BW {bw:5.2f}°, first SLL {sll:6.1f} dB&quot;)
+
+# 1. Verify the beamwidth law: BW*cos(steer) should be constant. Then
+#    double N and confirm BW halves while SLL stays at -13.2 dB — state
+#    in one sentence why sidelobe LEVEL is N-independent.
+# 2. Break measure() deliberately: search sidelobes from the 3 dB points
+#    instead of the nulls, and report the wrong answer you get. This is
+#    a real measurement error class, not a coding exercise.
+# 3. Sweep step size 0.5 -&gt; 0.02 and find where the SLL reading
+#    stabilises. What does this say about angular sampling of patterns
+#    with N in the thousands?
+</pre>
+    </div>
+    <div class="py-exercise">
+        <h3>Exercise 2 — Spacing, scan, and the lattice</h3>
+        <p>Design the lattice from the scan requirement; watch the grating lobe arrive.</p>
+<pre>
+import math
+# paste pattern() and measure() from exercise 1
+
+def gl_free_pitch(scan_max_deg):
+    return 1.0/(1.0 + math.sin(math.radians(scan_max_deg)))
+
+print(&quot;Grating-lobe-free pitch vs scan requirement:&quot;)
+for s in [25, 45, 60, 75, 90]:
+    print(f&quot;  ±{s:&gt;2}°: d ≤ {gl_free_pitch(s):.3f} λ&quot;)
+
+print(&quot;\nThe violation, demonstrated (N=32, d=0.7λ):&quot;)
+for steer in [0, 20, 30, 40]:
+    pk, bw, sll = measure(pattern(32, 0.7, steer), steer)
+    tag = &quot;  &lt;- GRATING LOBE&quot; if sll &gt; -3 else &quot;&quot;
+    print(f&quot;  steer {steer:&gt;2}°: highest outside lobe {sll:6.1f} dB{tag}&quot;)
+th = math.degrees(math.asin(1/0.7 - 1))
+print(f&quot;  rule: grating lobe enters visible space beyond steer &quot;
+      f&quot;{th:.1f}°  [sin θ0 = λ/d − 1]&quot;)
+
+# 1. For a Ku (12 GHz) and a Ka (20 GHz) panel both requiring ±60°,
+#    compute the pitch in millimetres. Which band packs more elements
+#    per cm² — and per m6-1&#x27;s gain law, what does that do to the gain
+#    available from a fixed panel OUTLINE at each band?
+# 2. A vendor proposes d = 0.6λ to cut element count 30%. Compute the
+#    scan range that survives, and name the orbit/geometry (m2 vocab)
+#    for which the proposal is actually sound.
+# 3. Apply the ~13% triangular-lattice saving to m6-1&#x27;s 2,500-element
+#    dish-equivalent panel and express it in beamformer-IC count at
+#    4 elements per IC (m6-3 preview).
+</pre>
+    </div>
+    <div class="py-exercise">
+        <h3>Exercise 3 — Spine Stage 2: the honest gain law</h3>
+        <p>Assemble G(θ₀) from its verified parts and hand it to the aperture model.</p>
+<pre>
+import math
+db = lambda x: 10*math.log10(x) if x &gt; 0 else -999.0
+
+# ═══════════════════════════════════════════════════════
+# M6 SPINE PROJECT — TERMINAL MODEL
+# Stage 2: the array&#x27;s gain law, honestly assembled.
+#   Stage 1 (m6-1) used G = 10log10(N) + Ge − L at broadside.
+#   Stage 2 itemises L and adds the scan dependence:
+#     G(θ0) = 10log10(N) + Ge + 10·q·log10(cos θ0)
+#             − taper − network − radome
+#   plus the lattice legality check (grating-lobe rule).
+# Next: m6-3 puts electronics and euros behind each element;
+#       m6-4 adds polarisation-at-scan and the off-axis mask
+#       (cos^q above is TOTAL scan loss — projection included).
+# ═══════════════════════════════════════════════════════
+
+class ArrayGainModel:
+    def __init__(self, name, N, pitch_lam, scan_req_deg,
+                 Ge_dbi=5.0, q=1.3,
+                 taper_db=0.35, network_db=0.45, radome_db=0.3):
+        self.name = name; self.N = N
+        self.pitch = pitch_lam; self.scan_req = scan_req_deg
+        self.Ge, self.q = Ge_dbi, q
+        self.losses = taper_db + network_db + radome_db
+        # lattice legality (rectangular; triangular relaxes ~13%)
+        self.pitch_limit = 1.0/(1.0 + math.sin(math.radians(scan_req_deg)))
+        self.legal = pitch_lam &lt;= self.pitch_limit + 1e-9
+
+    def gain(self, scan_deg):
+        elem = 10*self.q*math.log10(math.cos(math.radians(scan_deg))) \
+               if scan_deg &lt; 90 else -999
+        return db(self.N) + self.Ge + elem - self.losses
+
+    def report(self):
+        print(f&quot;\n{&#x27;─&#x27;*56}&quot;)
+        print(f&quot;  ARRAY GAIN MODEL — {self.name}&quot;)
+        print(f&quot;{&#x27;─&#x27;*56}&quot;)
+        print(f&quot;  N = {self.N}, pitch {self.pitch:.3f} λ &quot;
+              f&quot;(limit {self.pitch_limit:.3f} λ for ±{self.scan_req}°)&quot;
+              f&quot;  {&#x27;OK&#x27; if self.legal else &#x27;** GRATING LOBES **&#x27;}&quot;)
+        print(f&quot;  losses: {self.losses:.2f} dB itemised &quot;
+              f&quot;(taper+network+radome)&quot;)
+        print(f&quot;  {&#x27;scan&#x27;:&gt;6} {&#x27;element&#x27;:&gt;9} {&#x27;G (dBi)&#x27;:&gt;9}&quot;)
+        for s in [0, 30, 45, 60, 70]:
+            e = 10*self.q*math.log10(math.cos(math.radians(s)))
+            print(f&quot;  {s:&gt;5}° {e:&gt;8.2f} {self.gain(s):&gt;9.2f}&quot;)
+        print(f&quot;{&#x27;─&#x27;*56}&quot;)
+
+panel = ArrayGainModel(&quot;1,280-el consumer Ka panel&quot;, 1280, 0.5, 60)
+panel.report()
+
+bad = ArrayGainModel(&quot;cost-reduced d=0.7λ variant&quot;, 900, 0.7, 60)
+bad.report()
+
+# ── the m6-1 handoff, scan-aware ────────────────────────
+# The Stage-1 ApertureModel&#x27;s g_rx becomes gain(scan): a LEO pass
+# spends most of its time OFF broadside, so the G/T that the M4
+# engine should consume is a pass-weighted value, not the broadside
+# datasheet number. m6-4 finishes this with polarisation and the
+# regulatory mask; m6-5 supplies the pass geometry from Module 2.
+
+# 1. The cos^q already CONTAINS the aperture projection (first power
+#    of the exponent). Prove it: derive the ideal embedded element
+#    pattern from aperture theory (array directivity ∝ A·cos θ, shared
+#    over N elements) and identify what the 0.3 excess physically is.
+#    Then state why adding a separate cos θ term would double-count.
+# 2. Compute the pass-average gain for the panel over elevation 25-90°
+#    assuming time-uniform elevation (crude; m6-5 does it right), and
+#    compare with the broadside figure a datasheet would quote.
+# 3. Rebuild m6-1&#x27;s dish-vs-panel G/T gap at 30° elevation (60° scan
+#    for a flat-mounted panel). What happened to the 8.9 dB?
+</pre>
+    </div>
+</div>
+
+<div class="reflection-block" id="reflect">
+    <h2>REFLECTION</h2>
+    <div class="ref-intro">Four prompts. Each forces a decision — write the position down before moving on; the act of committing is the exercise.</div>
+    <div class="ref-prompt">
+        <h3>PROMPT 01</h3>
+        <p>Section 2 showed steering is a phase table, and m6-1 §4 credited make-before-break handover to it. But two simultaneous beams from one aperture require either splitting the array (two half-gain beams) or duplicating electronics per element (m6-3's digital option). Work the handover instant quantitatively: how many dB does a split-aperture terminal give up during the overlap, for how long per m5-3's handover cadence, and does the m5-2 ladder absorb it silently or visibly? Decide whether split-aperture handover is a real design or a datasheet trick.</p>
+    </div>
+    <div class="ref-prompt">
+        <h3>PROMPT 02</h3>
+        <p>The taper trade was priced at −0.35 dB of gain for 7 dB of sidelobe suppression. A colleague argues the terminal should therefore always run maximum taper "to be safe" against the m6-4 mask. Construct the counter-position from this module's own numbers: what does 0.35–0.9 dB of G/T cost at the m5-7 sensitivity table's two ladder positions, when is uniform illumination plus a <em>smaller mechanical tilt</em> the better compliance strategy, and what does your answer imply about designing the taper per-product versus configuring it per-installation?</p>
+    </div>
+    <div class="ref-prompt">
+        <h3>PROMPT 03</h3>
+        <p>Section 5 fixed the pitch at ≤ 0.536 λ for ±60° scan, and exercise 2's vendor wanted 0.7 λ. A LEO operator can <em>choose</em> to schedule its terminals only onto satellites above 40° elevation (m2 geometry: more satellites required). Frame the system-level trade honestly: terminal cost saved per unit at the wider pitch versus constellation cost added for the elevation floor — which side of the ledger dominates at one million terminals, and at one hundred thousand? Identify the actor in the value chain who gets to make this decision, and why that matters.</p>
+    </div>
+    <div class="ref-prompt">
+        <h3>PROMPT 04</h3>
+        <p>The lesson kept scan blindness qualitative: at certain angles the lattice couples into a surface wave and the panel goes briefly deaf. For a consumer terminal this is a design-verification item; for an aviation terminal (m6-6) it intersects certification. Reason about the difference: what test evidence would convince you a blindness angle cannot occur inside the operational scan volume, who bears the consequence if it appears in service in each segment, and what does that asymmetry do to the engineering margin each segment's designer will demand around the same physics?</p>
+    </div>
+</div>
+
+<div class="cb">
+    <h2>Sources</h2>
+<ul>
+<li>Mailloux, <em>Phased Array Antenna Handbook</em> — array factor, grating lobes, lattices, scan blindness, embedded element.</li>
+<li>Balanis, <em>Antenna Theory</em> — pattern multiplication, ULA derivations, taper synthesis.</li>
+<li>Hansen, <em>Phased Array Antennas</em> — beamwidth and sidelobe relations, taper efficiency.</li>
+<li>Sharp, "A triangular arrangement of planar-array elements that reduces the number needed" (IRE Trans., 1961) — the ~13% lattice result.</li>
+<li>Module 6 lesson m6-1 — the gain-law black box this lesson opened; Module 4 (m4-1, m4-6) — the pointing-loss and C/I lines with hardware ancestry here.</li>
+</ul>
+</div>
+
+<div class="complete-wrap">
+    <button class="complete-btn" id="completeBtn">MARK LESSON COMPLETE</button>
+    <div class="complete-msg" id="completeMsg"></div>
+</div>
+<div class="lesson-nav">
+    <a href="m6-1.html">← LESSON 01 — THE TERMINAL DESIGN PROBLEM</a>
+    <a href="m6-3.html">LESSON 03 — BEAMFORMING ARCHITECTURES →</a>
+</div>
+</div>
+
+<button class="back-to-top" id="backToTop" title="Back to top">↑</button>
+<footer>© 2026 LEOAF · M6 · LESSON 02 OF 7</footer>
+<script>
+const canvas=document.getElementById('starsCanvas'),ctx=canvas.getContext('2d');
+let stars=[];
+function initStars(){stars=[];for(let i=0;i<180;i++)stars.push({x:Math.random()*canvas.width,y:Math.random()*canvas.height,size:Math.random()*1.5+0.4,speed:Math.random()*0.18+0.04,hue:Math.random()*360});}
+function resizeCanvas(){canvas.width=window.innerWidth;canvas.height=window.innerHeight;}
+resizeCanvas();initStars();window.addEventListener('resize',resizeCanvas);
+function animateStars(){ctx.clearRect(0,0,canvas.width,canvas.height);stars.forEach(s=>{s.y-=s.speed;if(s.y<0){s.y=canvas.height;s.x=Math.random()*canvas.width;}ctx.beginPath();ctx.fillStyle=`hsl(${s.hue},80%,80%)`;ctx.arc(s.x,s.y,s.size,0,Math.PI*2);ctx.fill();});requestAnimationFrame(animateStars);}
+animateStars();
+</script>
+<script>
+const feedbacks={
+    1:{correct:"The split is the discipline's organising principle: geometry and feeding are reconfigurable and carry all the agility; the radiator is committed at manufacture and bounds every achievable pattern. Design assigns each requirement to the right factor.",wrong:"Nothing is isotropic — the product shapes the beam. Coupling perturbs the factorisation (§7) rather than being removed by it. The result holds for any N of identical elements."},
+    2:{correct:"The AF peaks where feeding phase cancels geometric path phase. Rewriting one phase table moves the beam within the phase shifters' settling time — the mechanism behind m6-1's microsecond repointing and make-before-break handover.",wrong:"Rotation is what the dish does — the array's whole point is avoiding it. Power scaling changes EIRP, not direction. Spacing is fixed at manufacture and governed by §5."},
+    3:{correct:"Beamwidth is set by aperture extent in wavelengths along the view direction; scanning shrinks the projection by cos θ₀ and the verified 1/cos broadening follows. It is the benign face of the projection tax whose gain face is m6-4's scan loss.",wrong:"Phase resolution is an implementation detail, not the physics. The element pattern attenuates, it does not set the AF width. No grating lobes exist at λ/2 spacing."},
+    4:{correct:"It is the first sidelobe of sin(Nx)/sin(x) — the same −13 dB the uniformly illuminated dish or slit exhibits. The verified taper example (−20.3 dB for −0.35 dB of gain) shows the purchase price; the m6-4 mask sets the required purchase.",wrong:"The most expensive array in the world shows −13.2 dB if fed uniformly. Failures raise sidelobes further but do not create this one. Reciprocity: the pattern is identical both ways."},
+    5:{correct:"The AF is periodic in ψ; at d = 0.7λ steered 40°, the engine shows a 0.0 dB lobe at 51.8°. On receive it admits full-gain interference; on transmit it radiates a second beam across the sky — regulatory disqualification, not degradation.",wrong:"0 dB, not −13-ish. Reciprocity again. Taper shapes sidelobes between nulls; a grating lobe is another main lobe and no amplitude weighting removes it — only spacing does."},
+    6:{correct:"The spacing rule is the lattice's governing inequality. Wider pitch (fewer, cheaper elements) collapses scan range — d = 0.7λ allows only ±25° — which a terminal tracking LEO passes cannot accept. Pitch from scan, N from gain: the panel's geometry in one sentence.",wrong:"Element gain is set by the radiator, and coupling is *worst* near λ/2. Regulators constrain radiated masks (m6-4); the pitch rule is physics serving that constraint."},
+    7:{correct:"Sharp's classical result: the hexagonal grid's aliasing structure permits larger effective pitch for the same visible-space exclusion. Thirteen percent fewer elements is thirteen percent less silicon, assembly, and DC power — real money at m6-3's per-element economics.",wrong:"The elements are identical; the *grid* changes. Taper and element gain are independent of lattice choice."},
+    8:{correct:"The array factor's peak value is N at any steer; what decays is the element factor multiplying it. Measured in the lattice (embedded, coupling included), it is the hardware bound on low-elevation performance — the panel's structural disadvantage against the dish that simply rotates.",wrong:"Beamwidth is the AF's business (§3). The element factor scales the whole pattern, main lobe first. It is per-element physics — N cannot dilute it."},
+    9:{correct:"Uniform feeding maximises gain and fixes sidelobes at −13.2 dB; every dB of sidelobe suppression below that is bought with taper efficiency (−0.35 dB for the verified −20 dB example). The line item belongs to the compliance spec, not to the loss column.",wrong:"Zero taper means −13.2 dB sidelobes — often non-compliant. Arrays use taper routinely; dishes achieve theirs via feed illumination, the same physics under another name."},
+    10:{correct:"The design procedure closed: §5 fixes d, m6-1's gain law fixes N given d, §4 fixes the weighting given the mask. Remaining freedom lives below the geometry — the element (§7) and, decisively, the electronics architecture and its economics, which is m6-3 entire.",wrong:"Different requirements yield different panels — that is the procedure working. The element bounds everything (§7). Cost is exactly what m6-3 shows drives the architecture choice within this geometry."}
+};
+let answered={};
+document.querySelectorAll('.quiz-opt').forEach(btn=>{
+    btn.addEventListener('click',function(){
+        const q=this.dataset.q;
+        if(answered[q]!==undefined)return;
+        const correct=this.dataset.correct==='true';
+        answered[q]=correct;
+        document.querySelectorAll(`.quiz-opt[data-q="${q}"]`).forEach(b=>{b.disabled=true;if(b.dataset.correct==='true')b.classList.add('correct');});
+        if(!correct)this.classList.add('wrong');
+        const fb=document.getElementById('fb'+q);
+        fb.textContent=(correct?'✓ ':'✗ ')+feedbacks[q][correct?'correct':'wrong'];
+        fb.style.color=correct?'#39ff14':'#ff004f';
+        if(Object.keys(answered).length===10){
+            const total=Object.values(answered).filter(Boolean).length;
+            const sc=document.getElementById('quizScore');
+            sc.style.display='block';
+            const pct=Math.round(total/10*100);
+            sc.textContent=`SCORE: ${total}/10 (${pct}%) — ${pct===100?'PERFECT.':pct>=80?'STRONG.':pct>=60?'ADEQUATE. REVISIT WEAK SECTIONS.':'REVISIT THE LESSON BEFORE PROCEEDING.'}`;
+        }
+    });
+});
+</script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="supabase.js"></script>
+<script src="user_progress.js"></script>
+<script>
+const LESSON_ID='m6-2';
+(function(){
+    function bounceToLogin(r){console.error("Auth guard:",r);window.location.replace("index.html");}
+    async function init(){
+        if(typeof client==="undefined"||!client||!client.auth)return bounceToLogin("Supabase client not loaded");
+        let session=null;
+        try{({data:{session}}=await client.auth.getSession());}
+        catch(e){return bounceToLogin("getSession threw: "+e.message);}
+        if(!session){window.location.replace("index.html");return;}
+        const btn=document.getElementById('completeBtn'),msg=document.getElementById('completeMsg');
+        function setDone(done){
+            if(done){btn.textContent='✓ COMPLETE — CLICK TO UNDO';btn.classList.add('done');btn.style.cssText='border-color:#39ff14;color:#39ff14;background:rgba(57,255,20,0.1);cursor:pointer;opacity:1;';msg.style.color='#39ff14';msg.textContent='Lesson marked complete. Click again to undo.';}
+            else{btn.textContent='MARK LESSON COMPLETE';btn.classList.remove('done');btn.style.cssText='';msg.style.color='#ffffff55';msg.textContent='Not yet marked complete.';}
+        }
+        let mastered=[];
+        try{mastered=await getMasteredSections();}catch(e){console.error(e);}
+        setDone(mastered.includes(LESSON_ID));
+        btn.addEventListener('click',async()=>{
+            const isDone=btn.classList.contains('done');
+            msg.style.color='#00d9ff';msg.textContent='Saving...';
+            const ok=await upsertSection(LESSON_ID,!isDone);
+            if(ok){setDone(!isDone);}else{msg.style.color='#ff004f';msg.textContent='Error saving. Try again.';}
+        });
+        const btt=document.getElementById('backToTop');
+        window.addEventListener('scroll',()=>{btt.classList.toggle('visible',window.scrollY>400);});
+        btt.addEventListener('click',()=>window.scrollTo({top:0,behavior:'smooth'}));
+    }
+    if(document.readyState==="loading")document.addEventListener("DOMContentLoaded",init);
+    else init();
+})();
+</script>
+</body>
+</html>
