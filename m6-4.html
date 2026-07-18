@@ -1,0 +1,682 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, shrink-to-fit=no">
+<title>M6-4 — Scan Loss, Skew &amp; the Regulatory Mask · LEOAF</title>
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;600;800&family=Share+Tech+Mono&family=Libre+Baskerville:ital,wght@0,400;0,700;1,400&display=swap" rel="stylesheet">
+<link rel="icon" href="favicon.ico" sizes="any" type="image/x-icon">
+<link rel="manifest" href="site.webmanifest">
+<meta name="theme-color" content="#0f0f0f">
+<script>
+window.leoafAbort = async function () {
+    function go() { window.location.replace("index.html?signedout=1"); }
+    try { if (typeof client !== "undefined" && client && client.auth && client.auth.signOut) { try { await client.auth.signOut({ scope: "local" }); } catch (e) {} } } catch (e) {}
+    go();
+};
+</script>
+<style>
+* { box-sizing:border-box; margin:0; padding:0; }
+html { height:100%; -webkit-text-size-adjust:100%; overflow-x:hidden; }
+body { font-family:'Share Tech Mono',monospace; background:#000; color:white; overflow-x:hidden; min-height:100vh; }
+#starsCanvas { position:fixed; inset:0; z-index:-1; }
+header { background:#000; border-bottom:1px solid #ff004f33; position:sticky; top:0; z-index:100; padding:1rem clamp(1.5rem,5vw,4rem); display:flex; justify-content:space-between; align-items:center; }
+.logo { font-family:'Orbitron',sans-serif; font-weight:800; font-size:clamp(16px,2vw,22px); letter-spacing:3px; text-decoration:none; }
+.logo span:first-child { color:white; } .logo span:last-child { color:#ff004f; }
+.nav-right { display:flex; align-items:center; gap:10px; }
+.nav-btn { background:transparent; border:1px solid #ff004f44; color:#ff004f; padding:6px 14px; cursor:pointer; transition:0.3s; font-size:11px; font-family:'Orbitron',sans-serif; letter-spacing:1px; text-decoration:none; display:inline-block; }
+.nav-btn:hover { background:#ff004f; color:black; }
+.breadcrumb { padding:14px clamp(1.5rem,5vw,4rem); font-size:11px; color:#ffffff44; letter-spacing:1px; position:relative; z-index:1; }
+.breadcrumb a { color:#00d9ff66; text-decoration:none; } .breadcrumb a:hover { color:#00d9ff; }
+.breadcrumb span { margin:0 8px; }
+.lesson-wrap { max-width:820px; margin:0 auto; padding:0 clamp(1.5rem,5vw,4rem) 80px; position:relative; z-index:1; }
+.lesson-header { padding:30px 0 28px; border-bottom:1px solid #ffffff11; margin-bottom:36px; }
+.lesson-tag { font-family:'Orbitron',sans-serif; font-size:10px; color:#ff004f; letter-spacing:3px; margin-bottom:10px; }
+.lesson-header h1 { font-family:'Orbitron',sans-serif; font-size:clamp(20px,3.5vw,32px); font-weight:800; line-height:1.2; margin-bottom:12px; }
+.lesson-meta { display:flex; gap:10px; flex-wrap:wrap; margin-bottom:16px; }
+.l-pill { font-family:'Orbitron',sans-serif; font-size:10px; padding:3px 10px; border:1px solid; letter-spacing:1px; }
+.l-pill-q { color:#ff004f; border-color:#ff004f44; } .l-pill-t { color:#39ff14; border-color:#39ff1444; }
+.l-pill-c { color:#ffaa00; border-color:#ffaa0044; }
+.lesson-intro { font-size:13px; line-height:1.85; opacity:0.75; }
+.toc { background:rgba(0,217,255,0.06); border:1px solid #00d9ff33; padding:24px 28px; margin:30px 0; }
+.toc h4 { font-family:'Orbitron',sans-serif; font-size:10px; color:#00d9ff; letter-spacing:2px; margin-bottom:16px; }
+.toc ol { padding-left:20px; } .toc li { font-size:13px; line-height:2.1; }
+.toc li a { color:#00d9ffbb; text-decoration:none; transition:0.15s; } .toc li a:hover { color:#fff; padding-left:4px; }
+.toc li::marker { color:#ff004f; font-family:'Orbitron',sans-serif; font-size:10px; }
+.cb { background:#f5f2ec; color:#1a1a1a; padding:36px clamp(24px,4vw,48px); margin-bottom:24px; border-left:4px solid #00d9ff; position:relative; z-index:1; }
+.cb h2 { font-family:'Orbitron',sans-serif; font-size:13px; color:#003d66; letter-spacing:2px; text-transform:uppercase; margin-bottom:20px; padding-bottom:10px; border-bottom:2px solid #00d9ff66; scroll-margin-top:80px; }
+.cb h3 { font-family:'Orbitron',sans-serif; font-size:11px; color:#444; letter-spacing:1.5px; text-transform:uppercase; margin:28px 0 12px; }
+.cb p { font-family:'Libre Baskerville',Georgia,serif; font-size:15px; line-height:1.9; color:#1a1a1a; margin-bottom:16px; }
+.cb ul { padding-left:0; margin-bottom:16px; }
+.cb ul li { font-family:'Libre Baskerville',Georgia,serif; font-size:14px; line-height:1.85; color:#1a1a1a; padding-left:20px; position:relative; margin-bottom:8px; }
+.cb ul li::before { content:'›'; position:absolute; left:0; color:#0077aa; }
+.cb blockquote { border-left:3px solid #1a7a1a; background:#eafaea; padding:14px 20px; margin:18px 0; font-size:13px; font-family:'Share Tech Mono',monospace; color:#0a3d0a; line-height:1.8; }
+.callout { border-left:3px solid #0088cc; background:#e8f4fb; padding:16px 20px; margin:22px 0; font-size:12px; line-height:1.8; color:#1a1a1a; }
+.callout.red { border-left-color:#cc0033; background:#fdecea; }
+.callout.green { border-left-color:#1a7a1a; background:#eafaea; }
+.callout.amber { border-left-color:#996600; background:#fef9ec; }
+.callout strong { font-family:'Orbitron',sans-serif; font-size:10px; letter-spacing:1px; display:block; margin-bottom:8px; }
+.compare-table { width:100%; border-collapse:collapse; margin:22px 0; font-size:12px; }
+.compare-table th { font-family:'Orbitron',sans-serif; font-size:10px; letter-spacing:1px; color:#003d66; padding:10px 12px; border-bottom:2px solid #00d9ff66; text-align:left; }
+.compare-table td { padding:10px 12px; border-bottom:1px solid #ddd; line-height:1.5; color:#1a1a1a; vertical-align:top; }
+.compare-table tr:hover td { background:#f0f0f0; }
+.key-numbers { display:grid; grid-template-columns:repeat(auto-fit,minmax(140px,1fr)); gap:12px; margin:22px 0; }
+.kn-item { background:#fff; border:1px solid #d0d0d0; padding:16px 12px; text-align:center; }
+.kn-val { font-family:'Orbitron',sans-serif; font-size:clamp(13px,1.8vw,18px); font-weight:800; color:#003d66; display:block; }
+.kn-label { font-size:10px; color:#555; letter-spacing:1px; margin-top:5px; display:block; line-height:1.4; }
+.quiz-block { background:rgba(17,17,17,0.9); border:1px solid #ff004f33; padding:28px; margin:48px 0 32px; }
+.quiz-block h2 { font-family:'Orbitron',sans-serif; font-size:13px; color:#ff004f; letter-spacing:2px; margin-bottom:6px; }
+.quiz-intro { font-size:12px; opacity:0.6; margin-bottom:24px; padding-bottom:16px; border-bottom:1px solid #ff004f22; line-height:1.6; }
+.quiz-q { margin-bottom:28px; }
+.quiz-q p { font-size:13px; opacity:0.9; margin-bottom:12px; line-height:1.65; }
+.quiz-q p strong { color:#00d9ff; }
+.quiz-options { display:flex; flex-direction:column; gap:8px; }
+.quiz-opt { background:rgba(255,255,255,0.03); border:1px solid #ffffff1a; padding:11px 16px; cursor:pointer; font-size:12px; font-family:'Share Tech Mono',monospace; transition:0.2s; text-align:left; color:white; line-height:1.5; }
+.quiz-opt:hover:not(:disabled) { background:rgba(0,217,255,0.08); border-color:#00d9ff44; }
+.quiz-opt.correct { background:rgba(57,255,20,0.1); border-color:#39ff14; color:#39ff14; }
+.quiz-opt.wrong { background:rgba(255,0,79,0.1); border-color:#ff004f; color:#ff004f; }
+.quiz-opt:disabled { cursor:default; }
+.quiz-feedback { font-size:12px; margin-top:10px; min-height:18px; line-height:1.7; opacity:0.9; padding:0 4px; }
+.quiz-score { font-family:'Orbitron',sans-serif; font-size:12px; color:#39ff14; margin-top:20px; letter-spacing:1px; display:none; padding-top:16px; border-top:1px solid #39ff1433; }
+.py-block { background:rgba(10,10,10,0.95); border:1px solid #39ff1422; padding:28px; margin:32px 0; }
+.py-block h2 { font-family:'Orbitron',sans-serif; font-size:13px; color:#39ff14; letter-spacing:2px; margin-bottom:8px; }
+.py-block .py-intro { font-size:12px; opacity:0.7; margin-bottom:20px; padding-bottom:16px; border-bottom:1px solid #39ff1422; line-height:1.7; }
+.py-exercise { margin-bottom:32px; } .py-exercise:last-child { margin-bottom:0; }
+.py-exercise h3 { font-family:'Orbitron',sans-serif; font-size:11px; color:#39ff1499; letter-spacing:1.5px; text-transform:uppercase; margin-bottom:10px; }
+.py-exercise p { font-size:12px; opacity:0.8; margin-bottom:14px; line-height:1.75; }
+.py-block pre { background:#050505; border:1px solid #39ff1433; padding:20px; font-family:'Share Tech Mono',monospace; font-size:11px; line-height:1.7; overflow-x:auto; color:#39ff14; white-space:pre; margin-bottom:12px; }
+.py-note { background:rgba(57,255,20,0.04); border-left:2px solid #39ff14; padding:12px 16px; margin-top:14px; font-size:12px; line-height:1.75; opacity:0.8; }
+.py-note strong { font-family:'Orbitron',sans-serif; font-size:10px; color:#39ff14; display:block; margin-bottom:6px; letter-spacing:1px; }
+.reflection-block { background:rgba(255,170,0,0.04); border:1px solid #ffaa0033; padding:24px; margin:32px 0; }
+.reflection-block h2 { font-family:'Orbitron',sans-serif; font-size:13px; color:#ffaa00; letter-spacing:2px; margin-bottom:8px; }
+.ref-intro { font-size:12px; opacity:0.7; margin-bottom:20px; padding-bottom:14px; border-bottom:1px solid #ffaa0022; line-height:1.7; }
+.ref-prompt { margin-bottom:20px; }
+.ref-prompt h3 { font-family:'Orbitron',sans-serif; font-size:11px; color:#ffaa0099; letter-spacing:1px; margin-bottom:8px; }
+.ref-prompt p { font-size:12px; opacity:0.8; line-height:1.75; }
+.complete-wrap { margin-top:56px; padding-top:30px; border-top:1px solid #ffffff11; text-align:center; }
+.complete-btn { font-family:'Orbitron',sans-serif; font-size:13px; letter-spacing:2px; padding:14px 44px; background:transparent; border:1px solid #39ff14; color:#39ff14; cursor:pointer; transition:0.3s; }
+.complete-btn:hover:not(.done) { background:#39ff14; color:black; box-shadow:0 0 20px rgba(57,255,20,0.4); }
+.complete-btn.done { background:rgba(57,255,20,0.1); cursor:pointer; opacity:1; }
+.complete-msg { font-size:12px; color:#39ff14; margin-top:14px; min-height:18px; letter-spacing:1px; }
+.lesson-nav { display:flex; justify-content:space-between; margin-top:30px; flex-wrap:wrap; gap:10px; }
+.lesson-nav a { font-family:'Orbitron',sans-serif; font-size:11px; color:#00d9ff66; text-decoration:none; letter-spacing:1px; transition:0.2s; }
+.lesson-nav a:hover { color:#00d9ff; }
+.back-to-top { position:fixed; bottom:28px; right:28px; z-index:200; width:44px; height:44px; background:#000; border:1px solid #00d9ff55; color:#00d9ff; font-size:20px; cursor:pointer; display:flex; align-items:center; justify-content:center; opacity:0; pointer-events:none; transition:opacity 0.3s; }
+.back-to-top.visible { opacity:1; pointer-events:auto; } .back-to-top:hover { border-color:#00d9ff; }
+footer { text-align:center; padding:30px; opacity:0.3; font-size:11px; position:relative; z-index:1; letter-spacing:1px; }
+.module-complete { background:rgba(57,255,20,0.06); border:1px solid #39ff1444; padding:24px 28px; margin:40px 0; text-align:center; }
+.module-complete h3 { font-family:'Orbitron',sans-serif; font-size:14px; color:#39ff14; letter-spacing:2px; margin-bottom:10px; }
+.module-complete p { font-size:12px; opacity:0.8; line-height:1.7; }
+</style>
+</head>
+<body>
+<canvas id="starsCanvas"></canvas>
+<header>
+    <a href="dashboard.html" class="logo"><span>LEO</span><span>AF</span></a>
+    <div class="nav-right">
+        <a href="m6.html" class="nav-btn">← M6 HUB</a>
+        <button class="nav-btn" onclick="leoafAbort()">ABORT</button>
+    </div>
+</header>
+<div class="breadcrumb">
+    <a href="dashboard.html">DASHBOARD</a><span>/</span>
+    <a href="m6.html">M6</a><span>/</span>
+    <span style="color:#ffffff88;">LESSON 04 — SCAN LOSS &amp; THE MASK</span>
+</div>
+
+<div class="lesson-wrap">
+<div class="lesson-header">
+    <div class="lesson-tag">M6 · LESSON 04 OF 7</div>
+    <h1>Scan Loss, Skew<br>&amp; the Regulatory Mask</h1>
+    <div class="lesson-meta">
+        <div class="l-pill l-pill-q">MODULE 6</div>
+        <div class="l-pill l-pill-t">USER TERMINALS &amp; D2D</div>
+        <div class="l-pill l-pill-c">CORE</div>
+    </div>
+    <p class="lesson-intro" style="margin-bottom:12px;">Every array number in this module so far was a broadside number, and m6-2 fixed the convention that prices the departure: the embedded element pattern cos^q θ, with q ≈ 1.2–1.5, is the <em>total</em> scan-loss law — its first cosine power is the aperture projection itself, the excess is mismatch. This lesson spends that convention. It converts scan loss from a table into terminal performance versus elevation, re-measures m6-1's dish-versus-panel G/T gap where a LEO terminal actually operates, adds the polarisation term that scanning degrades, and then meets the constraint that shapes all of it from outside the physics: the <strong>regulatory off-axis mask</strong>, the envelope of EIRP density a terminal may radiate toward directions it is not pointing — above all, toward the geostationary arc that NGSO systems are legally obliged to protect.</p>
+    <p class="lesson-intro" style="margin-bottom:12px;">The lesson's through-line is a single reframing. A flat panel's datasheet gain is its best number; its <em>service</em> is delivered mostly at scan, because orbital geometry (Module 2) puts satellites at low elevation most of the time. And its transmit behaviour is regulated not at the beam peak but across the whole pattern — sidelobes, taper, carrier bandwidth, and even <em>when it is allowed to transmit at all</em> are compliance instruments. The terminal design closes only when the scan-dependent physics and the angle-dependent law are solved together, and the spine's Stage 4 does exactly that: a scan-aware gain model with a mask-compliance checker attached.</p>
+</div>
+
+<div class="toc">
+    <h4>CONTENTS</h4>
+    <ol>
+        <li><a href="#s1">The scan-loss law, spent</a></li>
+        <li><a href="#s2">Elevation is scan: the flat-mount geometry</a></li>
+        <li><a href="#s3">The G/T gap, re-measured where it matters</a></li>
+        <li><a href="#s4">Polarisation at scan</a></li>
+        <li><a href="#s5">The off-axis mask: the law at every angle</a></li>
+        <li><a href="#s6">Compliance arithmetic</a></li>
+        <li><a href="#s7">The NGSO-specific geometry: the arc and the avoidance zone</a></li>
+        <li><a href="#s8">Key facts</a></li>
+        <li><a href="#s9">What this lesson delivers to the design chain</a></li>
+        <li><a href="#quiz">Knowledge check</a></li>
+        <li><a href="#py">Python exercises</a></li>
+        <li><a href="#reflect">Reflection</a></li>
+    </ol>
+</div>
+
+<div class="cb" id="s1">
+    <h2>1. The scan-loss law, spent</h2>
+<p>The verified total scan loss at q = 1.3, both directions of the link paying it (receive gain and transmit EIRP each carry the aperture):</p>
+<table class="compare-table">
+<thead><tr>
+<th>Scan angle</th>
+<th>Loss</th>
+</tr></thead>
+<tbody>
+<tr><td>0°</td><td>0.0 dB</td></tr>
+<tr><td>30°</td><td>−0.8 dB</td></tr>
+<tr><td>45°</td><td>−2.0 dB</td></tr>
+<tr><td>60°</td><td>−3.9 dB</td></tr>
+<tr><td>70°</td><td>−6.1 dB</td></tr>
+<tr><td>75°</td><td>−7.6 dB</td></tr>
+</tbody>
+</table>
+<p>The exponent is a design property: a well-matched, wide-scan element design earns q near 1.2; a cheap or narrowband element drifts toward 1.5, and at 60° the difference between them is a full decibel. This one parameter — set by the radiator design of m6-2 §7 and frozen at manufacture — is the panel's low-elevation destiny.</p>
+</div>
+
+<div class="cb" id="s2">
+    <h2>2. Elevation is scan: the flat-mount geometry</h2>
+<p>A panel lying flat on a roof has its broadside at zenith, so <strong>scan angle = 90° − elevation</strong>. Combine with the scan law:</p>
+<table class="compare-table">
+<thead><tr>
+<th>Satellite elevation</th>
+<th>Flat-mount scan</th>
+<th>Loss (q = 1.3)</th>
+<th>With 25° tilt</th>
+<th>Loss</th>
+</tr></thead>
+<tbody>
+<tr><td>90°</td><td>0°</td><td>0.0 dB</td><td>25°</td><td>−0.6 dB</td></tr>
+<tr><td>60°</td><td>30°</td><td>−0.8 dB</td><td>5°</td><td>−0.0 dB</td></tr>
+<tr><td>40°</td><td>50°</td><td>−2.5 dB</td><td>25°</td><td>−0.6 dB</td></tr>
+<tr><td>25°</td><td>65°</td><td>−4.9 dB</td><td>40°</td><td>−1.5 dB</td></tr>
+<tr><td>15°</td><td>75°</td><td>−7.6 dB</td><td>50°</td><td>−2.5 dB</td></tr>
+</tbody>
+</table>
+<p>Module 2's geometry makes the left columns painful: solid-angle statistics put most of a constellation's visible satellites at low-to-middle elevations, and high-latitude users see their satellites systematically toward one horizon. Hence the <strong>mechanical tilt</strong> — the one degree of mechanical freedom the "no moving parts" terminal quietly keeps. Tilting the panel toward the mean satellite direction re-centres the scan range: the table's right columns show a 25° tilt converting the 25°-elevation case from −4.9 to −1.5 dB. This is why consumer NGSO terminals at high latitude mount visibly tilted, and why the installation app cares which way the roof faces: the tilt angle is a per-site optimisation of a physics tax, and the spine's Stage 4 includes the optimiser.</p>
+</div>
+
+<div class="cb" id="s3">
+    <h2>3. The G/T gap, re-measured where it matters</h2>
+<p>m6-1 measured the dish-versus-panel G/T gap at 8.9 dB — at broadside. The dish's gimbal holds its full gain to the horizon; the flat panel pays the §2 table. At 25° elevation, flat-mounted:</p>
+<blockquote>Gap = 8.9 dB (broadside) + 4.9 dB (scan at 65°) ≈ <strong>13.8 dB</strong></blockquote>
+<p>With the 25° tilt the scan penalty drops to 1.5 dB and the gap returns to ~10.4 dB. Three readings. First, the panel's honest datasheet is a <em>curve</em> — G/T versus elevation — and a single broadside figure overstates typical service by several dB, exactly the marketing pattern m5-1 §4 warned about, one module later and one layer down. Second, the M4 engine should consume a <strong>pass-weighted</strong> G/T, not the peak; the m6-5 pass geometry supplies the weights and the spine already anticipates the integral. Third, the tilt is not cosmetic: 3.4 dB recovered at the worst elevations is worth more than any component upgrade in the terminal's bill of materials — a site-configuration parameter outperforming hardware, the m5-7 procurement lesson in miniature.</p>
+</div>
+
+<div class="cb" id="s4">
+    <h2>4. Polarisation at scan</h2>
+<p>Satellite links run circular polarisation, and a planar element's axial ratio — excellent at boresight — degrades off boresight: the two orthogonal components that make circularity stop being equal and quadrature at wide scan. Two costs follow. The <strong>co-polar mismatch loss</strong> grows from ~0.1 dB near boresight toward 0.5–1 dB at 60°+ scan — a line the m4-1 budget carried as a constant and a flat panel must carry as a function of geometry. And the <strong>cross-polar discrimination (XPD)</strong> collapses faster: a system reusing spectrum on orthogonal polarisations (the m3/m4-6 reuse machinery) finds its polarisation isolation eroding exactly at the scan angles where gain is already scarce. Dishes with well-designed feeds hold axial ratio essentially constant across their (mechanically pointed) operation — one more entry on the gimbal's side of the ledger, and one more reason wide-scan element design (§1's q) is where panel engineering quality concentrates.</p>
+<p><strong>Skew</strong>, while polarisation is on the table: for <em>linear</em>-polarisation systems (much of GEO Ku), a terminal off the satellite's longitude sees the polarisation frame rotated — the skew angle — and mobile terminals (aero especially) must de-rotate continuously as the platform moves. NGSO consumer systems largely sidestep this by running circular; aero GEO terminals live with it, and m6-6 inherits the mechanism.</p>
+</div>
+
+<div class="cb" id="s5">
+    <h2>5. The off-axis mask: the law at every angle</h2>
+<p>A transmitting terminal is regulated across its entire pattern. The instrument is an <strong>off-axis EIRP density mask</strong>: a ceiling, in dBW per reference bandwidth (4 kHz in the classic FCC Part 25 formulation), as a function of the angle θ away from the intended direction — falling as <strong>−25·log₁₀ θ</strong>, the slope chosen decades ago to match well-behaved reflector sidelobe envelopes. The Ku-band routine-licensing values toward the GSO arc are the canonical example: a 15 − 25·log₁₀ θ dBW/4 kHz class of envelope in the first degrees, stepping down further beyond (exact constants are band- and regime-specific; the structure is universal, and ETSI's harmonised standards for terminal classes — including the aero VSAT standards m6-6 will meet — carry the same shape).</p>
+<p>The mask's logic: your beam peak is your business; your sidelobes land on <em>other operators' satellites</em>, spaced along the GSO arc a couple of degrees apart, and the mask is the interference budget of the whole orbital neighbourhood written as a terminal requirement. For NGSO systems the obligation is sharpened by the ITU <strong>EPFD</strong> (equivalent power flux-density) limits protecting GSO networks from NGSO constellations in aggregate — a system-level budget that flows down to every terminal's off-axis behaviour and to operational rules (§7).</p>
+</div>
+
+<div class="cb" id="s6">
+    <h2>6. Compliance arithmetic</h2>
+<p>Compliance is one inequality: at every angle θ,</p>
+<blockquote>EIRP density on-axis + relative pattern level(θ) ≤ mask(θ)<br>
+where EIRP density = EIRP − 10·log₁₀(B_occupied / 4 kHz)</blockquote>
+<p>Worked, with the module's own terminals (mask class 15 − 25·log₁₀ θ; values at 1.5°/3°/7°: 10.6 / 3.1 / −6.1 dBW/4 kHz):</p>
+<p><strong>The consumer panel, wideband</strong>: 36.2 dBW spread over 250 MHz → on-axis density <strong>−11.8 dBW/4 kHz</strong> — below the mask <em>at the beam peak</em>. Its −13.2 dB uniform sidelobes sit at −25.0; with the m6-2 taper, −32.1. Compliance with room to spare — and the reason is the denominator: <strong>bandwidth is a compliance instrument</strong>. The m5-1 wideband carrier and the m5-6 spreading waveforms are, among everything else, mask engineering.</p>
+<p><strong>The 65 cm dish, narrowband</strong>: 44.1 dBW in a 5 MHz carrier → on-axis density <strong>13.1 dBW/4 kHz</strong>. At θ = 1.5° — barely off its 1.6° beamwidth — the pattern is only a few dB down, and the density rides directly against the 10.6 dBW/4 kHz ceiling. This is why small-dish, narrow-carrier uplinks are the historically regulated species (the mask was written about them), why uplink power control exists as a compliance function and not only a rain function (m4-4), and why "just add transmit power" is never a free option on any terminal.</p>
+<p>The general lesson: the mask couples m6-2's taper, m5-1's bandwidth, m5-3's power control, and this lesson's pattern into one constraint surface — the terminal's transmit design is the simultaneous solution.</p>
+</div>
+
+<div class="cb" id="s7">
+    <h2>7. The NGSO-specific geometry: the arc and the avoidance zone</h2>
+<p>An NGSO terminal's beam sweeps the sky as it tracks; sometimes the line from terminal through satellite passes close to the <strong>geostationary arc</strong>. At those instants the terminal's <em>main beam</em> — not a sidelobe — points near GSO satellites, and no taper can help. The operational answer, embedded in NGSO licensing worldwide: <strong>GSO-arc avoidance</strong> — the system computes each link's angular separation from the arc and, inside a protection zone of a few degrees, reduces power or refuses the link entirely, handing the user to a different satellite whose geometry clears the zone. The terminal's scheduler (m5-3) and the constellation's satellite-selection logic thus carry a regulatory geometry term; capacity planning at latitudes where the arc sits high in the sky must account for the excluded cone. Skew-adjacent trivia becomes system design: the arc's apparent position is a function of the user's latitude, and so, therefore, is the fraction of sky — and of satellites — a compliant terminal may use.</p>
+</div>
+
+<div class="cb" id="s8">
+    <h2>8. Key facts</h2>
+<table class="compare-table">
+<thead><tr>
+<th>Fact</th>
+<th>Value</th>
+<th>Unit</th>
+<th>Source</th>
+</tr></thead>
+<tbody>
+<tr><td>Total scan loss</td><td>10·q·log₁₀(cos θ), q ≈ 1.2–1.5 (projection included)</td><td>dB</td><td>m6-2 convention, verified</td></tr>
+<tr><td>Loss at 60° / 75° (q = 1.3)</td><td>−3.9 / −7.6</td><td>dB</td><td>Computed</td></tr>
+<tr><td>Flat mount</td><td>scan = 90° − elevation</td><td>—</td><td>Geometry</td></tr>
+<tr><td>25° tilt at 25° elevation</td><td>−4.9 → −1.5</td><td>dB</td><td>Computed</td></tr>
+<tr><td>G/T gap at 25° elev (flat)</td><td>≈ 13.8 (8.9 broadside + 4.9 scan)</td><td>dB</td><td>Computed</td></tr>
+<tr><td>Polarisation loss at wide scan</td><td>~0.1 → 0.5–1</td><td>dB</td><td>Axial-ratio degradation</td></tr>
+<tr><td>Mask class (Ku GSO routine)</td><td>15 − 25·log₁₀ θ</td><td>dBW/4 kHz</td><td>FCC Part 25 class (structure)</td></tr>
+<tr><td>Mask at 1.5° / 3° / 7°</td><td>10.6 / 3.1 / −6.1</td><td>dBW/4 kHz</td><td>Computed</td></tr>
+<tr><td>Panel on-axis density (36.2 dBW / 250 MHz)</td><td>−11.8</td><td>dBW/4 kHz</td><td>Computed</td></tr>
+<tr><td>Dish on-axis density (44.1 dBW / 5 MHz)</td><td>13.1 — rides the mask</td><td>dBW/4 kHz</td><td>Computed</td></tr>
+<tr><td>Bandwidth as compliance</td><td>density = EIRP − 10·log₁₀(B/4 kHz)</td><td>—</td><td>Definition</td></tr>
+<tr><td>NGSO obligation</td><td>EPFD limits + GSO-arc avoidance zone</td><td>—</td><td>ITU RR Art. 22 / licensing</td></tr>
+</tbody>
+</table>
+</div>
+
+<div class="cb" id="s9">
+    <h2>9. What this lesson delivers to the design chain</h2>
+<p>Stage 4 of the spine: the array's gain and EIRP become functions of elevation (with the tilt as an optimisable site parameter), polarisation loss becomes a scan-dependent line, and a mask checker tests any (EIRP, bandwidth, pattern envelope) triple against the −25·log₁₀ θ law — plus the arc-avoidance geometry as an operational constraint the m6-5 tracking logic and the m5-3 scheduler must respect. The panel's honest datasheet — the G/T-versus-elevation curve — now exists as code, and m6-1's headline gap has its full range: 8.9 dB at the panel's best angle, ~13.8 at its worst flat-mounted service angle, ~10.4 with the tilt doing its work.</p>
+<p>What remains before the segments can be priced: the terminal must <em>find and follow</em> the satellite that all this geometry assumes — acquisition, tracking, and the handover choreography whose silicon m6-3 already priced. That is m6-5.</p>
+</div>
+
+<div class="quiz-block" id="quiz">
+    <h2>KNOWLEDGE CHECK</h2>
+    <div class="quiz-intro">Ten questions. Each option explains itself after you commit. No retries per question — decide first.</div>
+    <div class="quiz-q">
+        <p><strong>Q1.</strong> The scan-loss law 10·q·log₁₀(cos θ) with q ≈ 1.3 is the <em>total</em> loss because:</p>
+        <div class="quiz-options">
+            <button class="quiz-opt" data-q="1" data-correct="false">A — Arrays have no aperture projection</button>
+            <button class="quiz-opt" data-q="1" data-correct="true">B — The embedded element pattern's first cosine power <em>is</em> the aperture projection (ideal lattice scans exactly as cos θ); the excess above 1 is mismatch — adding a separate projection factor would double-count</button>
+            <button class="quiz-opt" data-q="1" data-correct="false">C — Regulation caps the loss at cos^1.3</button>
+            <button class="quiz-opt" data-q="1" data-correct="false">D — q is always exactly 1.3</button>
+        </div>
+        <div class="quiz-feedback" id="fb1"></div>
+    </div>
+    <div class="quiz-q">
+        <p><strong>Q2.</strong> For a flat-mounted panel, a satellite at 25° elevation costs ~4.9 dB of gain because:</p>
+        <div class="quiz-options">
+            <button class="quiz-opt" data-q="2" data-correct="false">A — The atmosphere absorbs it</button>
+            <button class="quiz-opt" data-q="2" data-correct="true">B — Flat mounting makes scan = 90° − elevation, so 25° elevation is a 65° scan, and cos^1.3(65°) does the rest</button>
+            <button class="quiz-opt" data-q="2" data-correct="false">C — The satellite is farther away</button>
+            <button class="quiz-opt" data-q="2" data-correct="false">D — The phase shifters saturate</button>
+        </div>
+        <div class="quiz-feedback" id="fb2"></div>
+    </div>
+    <div class="quiz-q">
+        <p><strong>Q3.</strong> The mechanical tilt on a high-latitude consumer terminal exists because:</p>
+        <div class="quiz-options">
+            <button class="quiz-opt" data-q="3" data-correct="false">A — It looks better tilted</button>
+            <button class="quiz-opt" data-q="3" data-correct="true">B — Re-centring the panel's scan range on the mean satellite direction converts worst-case scans of 65–75° into 40–50°, recovering 3–5 dB at exactly the elevations where the geometry concentrates service</button>
+            <button class="quiz-opt" data-q="3" data-correct="false">C — Rain slides off better</button>
+            <button class="quiz-opt" data-q="3" data-correct="false">D — The gimbal failed</button>
+        </div>
+        <div class="quiz-feedback" id="fb3"></div>
+    </div>
+    <div class="quiz-q">
+        <p><strong>Q4.</strong> The honest dish-versus-panel G/T comparison is a curve, not a number, because:</p>
+        <div class="quiz-options">
+            <button class="quiz-opt" data-q="4" data-correct="false">A — Dishes also lose gain with elevation</button>
+            <button class="quiz-opt" data-q="4" data-correct="true">B — The panel's G/T is elevation-dependent through scan loss while the tracked dish's is not — the gap runs from 8.9 dB at the panel's broadside to ~13.8 dB flat-mounted at 25° elevation</button>
+            <button class="quiz-opt" data-q="4" data-correct="false">C — G/T cannot be measured</button>
+            <button class="quiz-opt" data-q="4" data-correct="false">D — The comparison depends on the modem</button>
+        </div>
+        <div class="quiz-feedback" id="fb4"></div>
+    </div>
+    <div class="quiz-q">
+        <p><strong>Q5.</strong> Circular-polarisation axial ratio degrading at wide scan costs the system twice:</p>
+        <div class="quiz-options">
+            <button class="quiz-opt" data-q="5" data-correct="false">A — Only the co-polar loss matters</button>
+            <button class="quiz-opt" data-q="5" data-correct="true">B — Co-polar mismatch grows (0.1 → 0.5–1 dB) <em>and</em> cross-polar discrimination collapses — eroding dual-polarisation frequency reuse at exactly the scan angles where gain is already scarce</button>
+            <button class="quiz-opt" data-q="5" data-correct="false">C — It only affects transmit</button>
+            <button class="quiz-opt" data-q="5" data-correct="false">D — Dishes suffer it equally</button>
+        </div>
+        <div class="quiz-feedback" id="fb5"></div>
+    </div>
+    <div class="quiz-q">
+        <p><strong>Q6.</strong> The off-axis mask falls as −25·log₁₀ θ because:</p>
+        <div class="quiz-options">
+            <button class="quiz-opt" data-q="6" data-correct="false">A — It is an arbitrary number</button>
+            <button class="quiz-opt" data-q="6" data-correct="true">B — The slope was set to envelope well-behaved reflector sidelobe patterns, making the mask the GSO neighbourhood's interference budget written as a per-terminal pattern requirement</button>
+            <button class="quiz-opt" data-q="6" data-correct="false">C — It matches the scan-loss law</button>
+            <button class="quiz-opt" data-q="6" data-correct="false">D — It applies only to phased arrays</button>
+        </div>
+        <div class="quiz-feedback" id="fb6"></div>
+    </div>
+    <div class="quiz-q">
+        <p><strong>Q7.</strong> In the compliance arithmetic, the consumer panel (36.2 dBW / 250 MHz) clears the mask easily while the dish (44.1 dBW / 5 MHz) rides it, because:</p>
+        <div class="quiz-options">
+            <button class="quiz-opt" data-q="7" data-correct="false">A — Panels are legally privileged</button>
+            <button class="quiz-opt" data-q="7" data-correct="true">B — EIRP <em>density</em> is what the mask caps, and spreading over 250 MHz buys 10·log₁₀(250 MHz/4 kHz) = 48 dB of denominator — bandwidth is a compliance instrument</button>
+            <button class="quiz-opt" data-q="7" data-correct="false">C — The dish has worse sidelobes</button>
+            <button class="quiz-opt" data-q="7" data-correct="false">D — 44.1 dBW is illegal outright</button>
+        </div>
+        <div class="quiz-feedback" id="fb7"></div>
+    </div>
+    <div class="quiz-q">
+        <p><strong>Q8.</strong> GSO-arc avoidance exists because:</p>
+        <div class="quiz-options">
+            <button class="quiz-opt" data-q="8" data-correct="false">A — NGSO satellites might collide with GSO satellites</button>
+            <button class="quiz-opt" data-q="8" data-correct="true">B — When an NGSO terminal's tracked beam passes near the arc, its <em>main beam</em> — which no taper can suppress — points at GSO satellites, so the system must reduce power or hand the user to a satellite whose geometry clears the protection zone</button>
+            <button class="quiz-opt" data-q="8" data-correct="false">C — GSO operators pay NGSO operators</button>
+            <button class="quiz-opt" data-q="8" data-correct="false">D — It reduces rain fade</button>
+        </div>
+        <div class="quiz-feedback" id="fb8"></div>
+    </div>
+    <div class="quiz-q">
+        <p><strong>Q9.</strong> The claim "bandwidth is a compliance instrument" means:</p>
+        <div class="quiz-options">
+            <button class="quiz-opt" data-q="9" data-correct="false">A — Wider carriers are always legal</button>
+            <button class="quiz-opt" data-q="9" data-correct="true">B — Since the mask caps dBW per 4 kHz, the same total EIRP spread over a wider occupied bandwidth presents a lower density at every angle — coupling the m5-1 carrier design directly into regulatory feasibility</button>
+            <button class="quiz-opt" data-q="9" data-correct="false">C — Regulators assign bandwidth randomly</button>
+            <button class="quiz-opt" data-q="9" data-correct="false">D — Narrow carriers are prohibited</button>
+        </div>
+        <div class="quiz-feedback" id="fb9"></div>
+    </div>
+    <div class="quiz-q">
+        <p><strong>Q10.</strong> Stage 4's deliverable — G/T and EIRP as functions of elevation plus a mask checker — matters to the upstream engines because:</p>
+        <div class="quiz-options">
+            <button class="quiz-opt" data-q="10" data-correct="false">A — It replaces the link budget</button>
+            <button class="quiz-opt" data-q="10" data-correct="true">B — The M4 engine should consume pass-weighted, geometry-dependent terminal figures (with tilt optimised per site) rather than broadside datasheet numbers, and the transmit design must satisfy the mask inequality at every angle simultaneously</button>
+            <button class="quiz-opt" data-q="10" data-correct="false">C — Regulation only affects paperwork</button>
+            <button class="quiz-opt" data-q="10" data-correct="false">D — The M5 engine ignores G/T</button>
+        </div>
+        <div class="quiz-feedback" id="fb10"></div>
+    </div>
+    <div class="quiz-score" id="quizScore"></div>
+</div>
+
+<div class="py-block" id="py">
+    <h2>PYTHON EXERCISES</h2>
+    <div class="py-intro">Three exercises; the last extends the module spine project. Run them, then work the numbered follow-ups in the comments — the follow-ups are the exercise.</div>
+    <div class="py-exercise">
+        <h3>Exercise 1 — The elevation curve and the tilt optimiser</h3>
+        <p>Turn the scan law into the panel's honest datasheet.</p>
+<pre>
+import math
+db = lambda x: 10*math.log10(x) if x &gt; 0 else -999.0
+
+def scan_loss_db(scan_deg, q=1.3):
+    c = math.cos(math.radians(min(abs(scan_deg), 89.9)))
+    return 10*q*math.log10(c)
+
+def panel_gt(elev_deg, tilt_deg=0.0, gt_broadside=11.0, q=1.3):
+    scan = abs(90.0 - elev_deg - tilt_deg)
+    return gt_broadside + scan_loss_db(scan, q)
+
+print(f&quot;{&#x27;elev&#x27;:&gt;5} {&#x27;flat G/T&#x27;:&gt;9} {&#x27;tilt 25°&#x27;:&gt;9} {&#x27;dish&#x27;:&gt;6}&quot;)
+for e in [90, 60, 40, 25, 15]:
+    print(f&quot;{e:&gt;4}° {panel_gt(e):&gt;8.1f} {panel_gt(e, 25):&gt;9.1f} {19.9:&gt;6.1f}&quot;)
+
+def best_tilt(elev_samples, q=1.3):
+    &quot;&quot;&quot;Tilt maximising the mean G/T over an elevation distribution.&quot;&quot;&quot;
+    best = max(range(0, 61), key=lambda t:
+               sum(panel_gt(e, t, q=q) for e in elev_samples))
+    return best
+
+# crude elevation distribution: uniform 25..90 (m6-5 supplies the real one)
+samples = list(range(25, 91, 5))
+t = best_tilt(samples)
+print(f&quot;\nbest tilt for uniform 25–90° service: {t}°&quot;)
+print(f&quot;mean G/T flat {sum(panel_gt(e) for e in samples)/len(samples):.1f}&quot;
+      f&quot; vs tilted {sum(panel_gt(e, t) for e in samples)/len(samples):.1f} dB/K&quot;)
+
+# 1. Sweep q from 1.2 to 1.5 and report the mean-G/T spread. This is
+#    the value of element-design quality, in dB/K, at system level.
+# 2. High latitude: satellites concentrated at elevations 25–50° toward
+#    one azimuth. Re-run best_tilt on samples 25..50 and explain the
+#    installer-app behaviour it predicts.
+# 3. The 2D truth: tilt helps along one azimuth and hurts opposite it.
+#    Extend panel_gt with an azimuth offset (scan from two components)
+#    and find the tilt that maximises mean G/T over a full azimuth ring.
+</pre>
+    </div>
+    <div class="py-exercise">
+        <h3>Exercise 2 — The mask checker</h3>
+        <p>One inequality, every angle: is this terminal legal?</p>
+<pre>
+import math
+db = lambda x: 10*math.log10(x)
+
+def mask_dbw_4khz(theta_deg):
+    &quot;&quot;&quot;Ku GSO routine-licensing class: 15 − 25·log10 θ (1.5°..7°),
+    stepped continuation beyond (structure per FCC Part 25 class).&quot;&quot;&quot;
+    t = max(theta_deg, 1.5)
+    if t &lt;= 7.0:  return 15 - 25*math.log10(t)
+    if t &lt;= 9.2:  return -6.0
+    if t &lt;= 48.0: return 18 - 25*math.log10(t)
+    return -24.0
+
+def offaxis_density(eirp_dbw, bw_hz, rel_pattern_db):
+    return eirp_dbw - db(bw_hz/4e3) + rel_pattern_db
+
+def check(name, eirp, bw, pattern):
+    &quot;&quot;&quot;pattern: list of (theta_deg, relative level dB).&quot;&quot;&quot;
+    print(f&quot;\n{name}: on-axis density {eirp - db(bw/4e3):+.1f} dBW/4kHz&quot;)
+    worst = -99
+    for th, rel in pattern:
+        d, m = offaxis_density(eirp, bw, rel), mask_dbw_4khz(th)
+        margin = m - d
+        worst = max(worst, -margin)
+        flag = &quot;  ** VIOLATION **&quot; if margin &lt; 0 else &quot;&quot;
+        print(f&quot;  θ={th:&gt;4.1f}°  density {d:&gt;6.1f}  mask {m:&gt;6.1f}&quot;
+              f&quot;  margin {margin:+5.1f} dB{flag}&quot;)
+    print(f&quot;  verdict: {&#x27;FAILS&#x27; if worst &gt; 0 else &#x27;complies&#x27;}&quot;
+          f&quot; (worst margin {-worst:+.1f} dB)&quot;)
+
+# uniform-illumination panel envelope vs tapered (m6-2 numbers)
+panel_uni = [(1.5, -3), (3, -13.2), (7, -17), (20, -25)]
+panel_tap = [(1.5, -4), (3, -20.3), (7, -25), (20, -32)]
+dish      = [(1.5, -3), (3, -20),   (7, -30), (20, -40)]
+
+check(&quot;Panel, 36.2 dBW / 250 MHz, uniform&quot;, 36.2, 250e6, panel_uni)
+check(&quot;Panel, 36.2 dBW / 250 MHz, tapered&quot;, 36.2, 250e6, panel_tap)
+check(&quot;Dish, 44.1 dBW / 5 MHz&quot;,             44.1, 5e6,  dish)
+check(&quot;Dish, 44.1 dBW / 250 kHz (!)&quot;,       44.1, 250e3, dish)
+
+# 1. The last case fails. List the three levers that restore compliance
+#    (power, bandwidth, pattern) and the dB each must move — then say
+#    which one the OPERATOR controls in real time (m4-4 vocabulary).
+# 2. Rebuild panel_uni for the m6-2 grating-lobe case (0 dB lobe at
+#    51.8°). What does the checker say, and why did m6-2 call grating
+#    lobes disqualifying rather than degrading?
+# 3. The mask reference bandwidth is 4 kHz for historical reasons.
+#    Re-express the whole check in dBW/MHz and confirm verdicts are
+#    invariant — then state why the reference choice still matters
+#    for narrowband carriers specifically.
+</pre>
+    </div>
+    <div class="py-exercise">
+        <h3>Exercise 3 — Spine Stage 4: scan, tilt, and the law</h3>
+        <p>The terminal model becomes geometry-aware and legally aware.</p>
+<pre>
+import math
+db = lambda x: 10*math.log10(x) if x &gt; 0 else -999.0
+
+# ═══════════════════════════════════════════════════════
+# M6 SPINE PROJECT — TERMINAL MODEL
+# Stage 4: elevation-dependent performance + mask compliance.
+#   Stage 2 gave G(scan) with cos^q TOTAL (projection incl.)
+#   Stage 3 gave power/beams/silicon per architecture.
+#   Stage 4: elevation &amp; tilt geometry, polarisation-at-scan,
+#            off-axis mask check, arc-avoidance hook.
+# Next: m6-5 pointing/tracking + the real pass geometry;
+#       m6-6 segment table; m6-7 evaluator -&gt; M4 -&gt; M5.
+# ═══════════════════════════════════════════════════════
+
+class ScanMaskModel:
+    def __init__(self, name, gt_broadside, eirp_broadside, q=1.3,
+                 tilt_deg=0.0, polar_wide_db=0.6):
+        self.name = name
+        self.gt0, self.eirp0, self.q = gt_broadside, eirp_broadside, q
+        self.tilt = tilt_deg
+        self.polar_wide = polar_wide_db          # extra pol loss at 60°+
+
+    def scan(self, elev_deg):
+        return abs(90.0 - elev_deg - self.tilt)
+
+    def _loss(self, scan_deg):
+        c = math.cos(math.radians(min(scan_deg, 89.9)))
+        pol = self.polar_wide * max(0.0, (scan_deg-30)/30)   # ramps 30→60°
+        return 10*self.q*math.log10(c) - min(pol, self.polar_wide)
+
+    def gt(self, elev):    return self.gt0   + self._loss(self.scan(elev))
+    def eirp(self, elev):  return self.eirp0 + self._loss(self.scan(elev))
+
+    def mask_ok(self, bw_hz, pattern, elev=30.0):
+        e = self.eirp(elev)
+        for th, rel in pattern:
+            t = max(th, 1.5)
+            m = (15-25*math.log10(t)) if t &lt;= 7 else (-6 if t &lt;= 9.2
+                 else (18-25*math.log10(t) if t &lt;= 48 else -24))
+            if e - db(bw_hz/4e3) + rel &gt; m:
+                return False, th
+        return True, None
+
+    def arc_ok(self, arc_separation_deg, zone_deg=4.0):
+        &quot;&quot;&quot;GSO-arc avoidance: refuse the link inside the zone.&quot;&quot;&quot;
+        return arc_separation_deg &gt;= zone_deg
+
+    def curve(self):
+        print(f&quot;\n{&#x27;─&#x27;*54}&quot;)
+        print(f&quot;  SCAN/MASK MODEL — {self.name} (tilt {self.tilt}°)&quot;)
+        print(f&quot;{&#x27;─&#x27;*54}&quot;)
+        print(f&quot;  {&#x27;elev&#x27;:&gt;5} {&#x27;scan&#x27;:&gt;6} {&#x27;G/T&#x27;:&gt;7} {&#x27;EIRP&#x27;:&gt;7}&quot;)
+        for e in [90, 60, 40, 25, 15]:
+            print(f&quot;  {e:&gt;4}° {self.scan(e):&gt;5.0f}° {self.gt(e):&gt;7.1f}&quot;
+                  f&quot; {self.eirp(e):&gt;7.1f}&quot;)
+        print(f&quot;{&#x27;─&#x27;*54}&quot;)
+
+flat   = ScanMaskModel(&quot;1,280-el panel, flat&quot;,   11.0, 36.2)
+tilted = ScanMaskModel(&quot;1,280-el panel, tilted&quot;, 11.0, 36.2, tilt_deg=25)
+flat.curve(); tilted.curve()
+
+pat = [(1.5, -4), (3, -20.3), (7, -25), (20, -32)]
+ok, at = tilted.mask_ok(250e6, pat)
+print(f&quot;\nmask check (250 MHz, tapered): {&#x27;complies&#x27; if ok else f&#x27;FAILS at {at}°&#x27;}&quot;)
+for sep in [8, 4, 2]:
+    print(f&quot;arc separation {sep}°: {&#x27;link allowed&#x27; if tilted.arc_ok(sep) else &#x27;AVOIDANCE — reselect satellite&#x27;}&quot;)
+
+# 1. Chain gt(25°) into the m4-1 downlink budget and report the C/N0
+#    delta versus the broadside figure. Then state, per m5-7 §5, whether
+#    that delta crosses rungs at the two ladder positions.
+# 2. The polarisation ramp is a placeholder. Replace it with an axial-
+#    ratio model: AR(scan) = 1 + scan/45 (linear, in dB), pol loss from
+#    the standard AR-mismatch formula. Compare against the placeholder.
+# 3. Combine arc_ok with a satellite-selection stub: given three visible
+#    satellites at (elev, arc_sep) tuples, pick the best legal one by
+#    gt(elev). What did you just prototype from m5-3&#x27;s scheduler?
+</pre>
+    </div>
+</div>
+
+<div class="reflection-block" id="reflect">
+    <h2>REFLECTION</h2>
+    <div class="ref-intro">Four prompts. Each forces a decision — write the position down before moving on; the act of committing is the exercise.</div>
+    <div class="ref-prompt">
+        <h3>PROMPT 01</h3>
+        <p>Section 3's re-measured gap makes the panel's <em>worst-service</em> deficit ~13.8 dB, and section 2's tilt recovers 3.4 of it as a site parameter. Argue the product-architecture question: should the tilt be (a) a fixed bracket chosen at installation, (b) a slow motor under network control, or (c) deleted in favour of more elements? Price each against m6-3's cost model and m6-1's warranty logic, and identify which choice real consumer products made — and what that reveals about where the industry believes the motor-reliability frontier sits.</p>
+    </div>
+    <div class="ref-prompt">
+        <h3>PROMPT 02</h3>
+        <p>Section 6 showed the mask's −25·log₁₀ θ slope has reflector ancestry, forcing arrays to buy taper to live under a dish-shaped law. Take the regulator's seat: an array-era revision could instead cap <em>integrated</em> off-axis power, or per-satellite received interference, or aggregate EPFD only. For each alternative, identify who wins, who loses, and what measurement infrastructure enforcement would require. Then predict — with the m6-2/m6-3 economics in hand — which incumbent class lobbies hardest to keep the current mask, and why.</p>
+    </div>
+    <div class="ref-prompt">
+        <h3>PROMPT 03</h3>
+        <p>Section 7's arc-avoidance zone excludes a latitude-dependent cone of sky, and the exclusion lands on m5-3's scheduler as a constraint. Quantify the system cost for a mid-latitude user (arc high in the southern sky): estimate the solid-angle fraction excluded at a 4° zone, translate it into satellites-unavailable versus a constellation's visibility statistics (m2 vocabulary), and determine whether the cost appears as capacity, availability, or merely scheduling complexity. State which latitude band pays the most and check it against where NGSO operators actually report service constraints.</p>
+    </div>
+    <div class="ref-prompt">
+        <h3>PROMPT 04</h3>
+        <p>This lesson corrected the module's own double-count risk (projection inside cos^q) before it could propagate — caught because m6-4's drafting audited m6-2's forward references. Generalise into method: the module's lessons make claims <em>about future lessons</em> (X will add Y), and those claims are the highest-risk sentences in the corpus, since nothing verifies them at writing time. Propose the concrete authoring rule that would catch such errors systematically, and weigh its cost against the correction pass this program has already paid twice (M4's thresholds, m6-2's projection).</p>
+    </div>
+</div>
+
+<div class="cb">
+    <h2>Sources</h2>
+<ul>
+<li>Mailloux, <em>Phased Array Antenna Handbook</em> — scan element pattern, cos^q convention, projection derivation.</li>
+<li>Pozar, "The active element pattern" (IEEE Trans. AP) — embedded pattern including projection and mismatch.</li>
+<li>FCC Part 25 (§25.209 antenna performance, §25.218 routine licensing classes) — the off-axis EIRP-density mask structure; constants quoted as class values.</li>
+<li>ITU Radio Regulations Article 22 — EPFD limits protecting GSO from NGSO systems.</li>
+<li>ETSI harmonised standards for satellite terminal classes (incl. aero VSAT families) — the mask structure in European form; m6-6 territory.</li>
+<li>Modules 2 (elevation statistics), 4 (budget lines), 5 (bandwidth, scheduler), 6 (m6-1..m6-3) — everything this lesson's constraint surface couples.</li>
+</ul>
+</div>
+
+<div class="complete-wrap">
+    <button class="complete-btn" id="completeBtn">MARK LESSON COMPLETE</button>
+    <div class="complete-msg" id="completeMsg"></div>
+</div>
+<div class="lesson-nav">
+    <a href="m6-3.html">← LESSON 03 — BEAMFORMING ARCHITECTURES</a>
+    <a href="m6-5.html">LESSON 05 — POINTING, TRACKING &amp; HANDOVER →</a>
+</div>
+</div>
+
+<button class="back-to-top" id="backToTop" title="Back to top">↑</button>
+<footer>© 2026 LEOAF · M6 · LESSON 04 OF 7</footer>
+<script>
+const canvas=document.getElementById('starsCanvas'),ctx=canvas.getContext('2d');
+let stars=[];
+function initStars(){stars=[];for(let i=0;i<180;i++)stars.push({x:Math.random()*canvas.width,y:Math.random()*canvas.height,size:Math.random()*1.5+0.4,speed:Math.random()*0.18+0.04,hue:Math.random()*360});}
+function resizeCanvas(){canvas.width=window.innerWidth;canvas.height=window.innerHeight;}
+resizeCanvas();initStars();window.addEventListener('resize',resizeCanvas);
+function animateStars(){ctx.clearRect(0,0,canvas.width,canvas.height);stars.forEach(s=>{s.y-=s.speed;if(s.y<0){s.y=canvas.height;s.x=Math.random()*canvas.width;}ctx.beginPath();ctx.fillStyle=`hsl(${s.hue},80%,80%)`;ctx.arc(s.x,s.y,s.size,0,Math.PI*2);ctx.fill();});requestAnimationFrame(animateStars);}
+animateStars();
+</script>
+<script>
+const feedbacks={
+    1:{correct:"The m6-2 convention, spent here: aperture theory puts the projection inside the embedded pattern, and datasheet scan-loss exponents of 1.2–1.5 are total figures. Getting this bookkeeping wrong by one cosine is a ~3 dB error at 60° — the kind of error that survives until someone measures a terminal.",wrong:"Projection is real physics and is *included*, not absent. No regulator touches this. q is a design property spanning 1.2–1.5, worth a dB at wide scan."},
+    2:{correct:"Two lines of geometry and one law. The same satellite costs the gimballed dish nothing but slant range — which is answer C's separate, real, m4-1 effect, already in the FSPL, not in the antenna.",wrong:"Atmospheric elevation dependence lives in m4-3/m4-4 and is additional. Range is FSPL's business. Phase shifters steer fine; the element pattern is what rolls off."},
+    3:{correct:"The §2 table's right columns: one fixed mechanical degree of freedom, set per site, outperforming any component upgrade. The installation app's obsession with mounting orientation is this table in consumer clothing.",wrong:"The tilt angle tracks latitude, not aesthetics or drainage. There is no gimbal — that is the product's premise; the tilt is its one, static, concession."},
+    4:{correct:"One family pays a geometric tax the other pays with a motor. Quoting the panel's broadside figure as its performance is the m5-1 §4 marketing pattern relocated one layer down — and the pass-weighted value is what the M4 engine should consume.",wrong:"The tracked dish holds its aperture to the horizon (atmosphere excepted, which both pay). G/T is routinely measured. The modem is downstream and common."},
+    5:{correct:"The first cost is a budget line turning geometry-dependent; the second attacks the m3/m4-6 reuse isolation. Both concentrate at low elevation — compounding with §1's scan loss into the panel's low-elevation character.",wrong:"XPD is a system cost beyond the link's own loss line. Reciprocity: both directions degrade. A pointed dish's feed sees the satellite on boresight always — its axial ratio is essentially constant."},
+    6:{correct:"The arc's satellites sit ~2° apart; the mask guarantees any compliant terminal's off-axis radiation toward its neighbours is bounded, regardless of vendor. The slope's reflector ancestry explains why arrays — whose uniform-illumination sidelobes are shallower — must buy taper (m6-2 §4) to live under a dish-shaped law.",wrong:"Decades of coordination practice, not arbitrariness. Scan loss (cos^q) is unrelated mathematics. The mask predates arrays and binds every transmitting terminal class."},
+    7:{correct:"−11.8 versus +13.1 dBW/4 kHz on-axis: the whole difference is the carrier width. The m5-1 wideband and m5-6 spreading choices are simultaneously capacity engineering and mask engineering — and narrowband high-EIRP uplinks are why the mask, power control as compliance, and coordination practice exist in their historical form.",wrong:"The mask is vendor- and family-neutral. The dish's sidelobes are *better* than a uniform array's — its problem is density, not pattern. Total EIRP is not capped; density at angle is."},
+    8:{correct:"The mask disciplines sidelobes; the avoidance zone disciplines the one angle the mask cannot: boresight. The exclusion propagates upward into m5-3's scheduling and the constellation's satellite-selection logic, and its capacity cost varies with latitude through the arc's apparent position.",wrong:"Physical collision is a Module 2/debris matter at wholly different altitudes. No such payments; the obligation is regulatory (ITU EPFD framework). Rain is indifferent to the arc."},
+    9:{correct:"density = EIRP − 10·log₁₀(B/4 kHz): each decade of bandwidth is 10 dB of compliance headroom. It is one of the quiet reasons NGSO broadband uplinks are wideband and why VL-SNR spreading (m5-6) has a regulatory face as well as a link-budget one.",wrong:"Wide carriers still must clear the mask — they just start lower. Spectrum assignment is coordination, not randomness. Narrow carriers are legal where their density fits — with power control doing the fitting."},
+    10:{correct:"The terminal's honest interface to m4-1 is a curve; feeding the peak overstates service by 3–5 dB at the elevations where users actually spend time. And the transmit triple (EIRP, bandwidth, pattern) is jointly constrained — the simultaneous solution is the design, which m6-7's evaluator will automate.",wrong:"The link budget consumes these figures; nothing replaces it. The mask shapes hardware (taper), waveforms (bandwidth), and operations (avoidance) — the opposite of paperwork. G/T drives the M5 chain through C/N₀."}
+};
+let answered={};
+document.querySelectorAll('.quiz-opt').forEach(btn=>{
+    btn.addEventListener('click',function(){
+        const q=this.dataset.q;
+        if(answered[q]!==undefined)return;
+        const correct=this.dataset.correct==='true';
+        answered[q]=correct;
+        document.querySelectorAll(`.quiz-opt[data-q="${q}"]`).forEach(b=>{b.disabled=true;if(b.dataset.correct==='true')b.classList.add('correct');});
+        if(!correct)this.classList.add('wrong');
+        const fb=document.getElementById('fb'+q);
+        fb.textContent=(correct?'✓ ':'✗ ')+feedbacks[q][correct?'correct':'wrong'];
+        fb.style.color=correct?'#39ff14':'#ff004f';
+        if(Object.keys(answered).length===10){
+            const total=Object.values(answered).filter(Boolean).length;
+            const sc=document.getElementById('quizScore');
+            sc.style.display='block';
+            const pct=Math.round(total/10*100);
+            sc.textContent=`SCORE: ${total}/10 (${pct}%) — ${pct===100?'PERFECT.':pct>=80?'STRONG.':pct>=60?'ADEQUATE. REVISIT WEAK SECTIONS.':'REVISIT THE LESSON BEFORE PROCEEDING.'}`;
+        }
+    });
+});
+</script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="supabase.js"></script>
+<script src="user_progress.js"></script>
+<script>
+const LESSON_ID='m6-4';
+(function(){
+    function bounceToLogin(r){console.error("Auth guard:",r);window.location.replace("index.html");}
+    async function init(){
+        if(typeof client==="undefined"||!client||!client.auth)return bounceToLogin("Supabase client not loaded");
+        let session=null;
+        try{({data:{session}}=await client.auth.getSession());}
+        catch(e){return bounceToLogin("getSession threw: "+e.message);}
+        if(!session){window.location.replace("index.html");return;}
+        const btn=document.getElementById('completeBtn'),msg=document.getElementById('completeMsg');
+        function setDone(done){
+            if(done){btn.textContent='✓ COMPLETE — CLICK TO UNDO';btn.classList.add('done');btn.style.cssText='border-color:#39ff14;color:#39ff14;background:rgba(57,255,20,0.1);cursor:pointer;opacity:1;';msg.style.color='#39ff14';msg.textContent='Lesson marked complete. Click again to undo.';}
+            else{btn.textContent='MARK LESSON COMPLETE';btn.classList.remove('done');btn.style.cssText='';msg.style.color='#ffffff55';msg.textContent='Not yet marked complete.';}
+        }
+        let mastered=[];
+        try{mastered=await getMasteredSections();}catch(e){console.error(e);}
+        setDone(mastered.includes(LESSON_ID));
+        btn.addEventListener('click',async()=>{
+            const isDone=btn.classList.contains('done');
+            msg.style.color='#00d9ff';msg.textContent='Saving...';
+            const ok=await upsertSection(LESSON_ID,!isDone);
+            if(ok){setDone(!isDone);}else{msg.style.color='#ff004f';msg.textContent='Error saving. Try again.';}
+        });
+        const btt=document.getElementById('backToTop');
+        window.addEventListener('scroll',()=>{btt.classList.toggle('visible',window.scrollY>400);});
+        btt.addEventListener('click',()=>window.scrollTo({top:0,behavior:'smooth'}));
+    }
+    if(document.readyState==="loading")document.addEventListener("DOMContentLoaded",init);
+    else init();
+})();
+</script>
+</body>
+</html>
