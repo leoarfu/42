@@ -1,0 +1,721 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, shrink-to-fit=no">
+<title>M6-5 — Pointing, Tracking &amp; Handover Dynamics · LEOAF</title>
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;600;800&family=Share+Tech+Mono&family=Libre+Baskerville:ital,wght@0,400;0,700;1,400&display=swap" rel="stylesheet">
+<link rel="icon" href="favicon.ico" sizes="any" type="image/x-icon">
+<link rel="manifest" href="site.webmanifest">
+<meta name="theme-color" content="#0f0f0f">
+<script>
+window.leoafAbort = async function () {
+    function go() { window.location.replace("index.html?signedout=1"); }
+    try { if (typeof client !== "undefined" && client && client.auth && client.auth.signOut) { try { await client.auth.signOut({ scope: "local" }); } catch (e) {} } } catch (e) {}
+    go();
+};
+</script>
+<style>
+* { box-sizing:border-box; margin:0; padding:0; }
+html { height:100%; -webkit-text-size-adjust:100%; overflow-x:hidden; }
+body { font-family:'Share Tech Mono',monospace; background:#000; color:white; overflow-x:hidden; min-height:100vh; }
+#starsCanvas { position:fixed; inset:0; z-index:-1; }
+header { background:#000; border-bottom:1px solid #ff004f33; position:sticky; top:0; z-index:100; padding:1rem clamp(1.5rem,5vw,4rem); display:flex; justify-content:space-between; align-items:center; }
+.logo { font-family:'Orbitron',sans-serif; font-weight:800; font-size:clamp(16px,2vw,22px); letter-spacing:3px; text-decoration:none; }
+.logo span:first-child { color:white; } .logo span:last-child { color:#ff004f; }
+.nav-right { display:flex; align-items:center; gap:10px; }
+.nav-btn { background:transparent; border:1px solid #ff004f44; color:#ff004f; padding:6px 14px; cursor:pointer; transition:0.3s; font-size:11px; font-family:'Orbitron',sans-serif; letter-spacing:1px; text-decoration:none; display:inline-block; }
+.nav-btn:hover { background:#ff004f; color:black; }
+.breadcrumb { padding:14px clamp(1.5rem,5vw,4rem); font-size:11px; color:#ffffff44; letter-spacing:1px; position:relative; z-index:1; }
+.breadcrumb a { color:#00d9ff66; text-decoration:none; } .breadcrumb a:hover { color:#00d9ff; }
+.breadcrumb span { margin:0 8px; }
+.lesson-wrap { max-width:820px; margin:0 auto; padding:0 clamp(1.5rem,5vw,4rem) 80px; position:relative; z-index:1; }
+.lesson-header { padding:30px 0 28px; border-bottom:1px solid #ffffff11; margin-bottom:36px; }
+.lesson-tag { font-family:'Orbitron',sans-serif; font-size:10px; color:#ff004f; letter-spacing:3px; margin-bottom:10px; }
+.lesson-header h1 { font-family:'Orbitron',sans-serif; font-size:clamp(20px,3.5vw,32px); font-weight:800; line-height:1.2; margin-bottom:12px; }
+.lesson-meta { display:flex; gap:10px; flex-wrap:wrap; margin-bottom:16px; }
+.l-pill { font-family:'Orbitron',sans-serif; font-size:10px; padding:3px 10px; border:1px solid; letter-spacing:1px; }
+.l-pill-q { color:#ff004f; border-color:#ff004f44; } .l-pill-t { color:#39ff14; border-color:#39ff1444; }
+.l-pill-c { color:#ffaa00; border-color:#ffaa0044; }
+.lesson-intro { font-size:13px; line-height:1.85; opacity:0.75; }
+.toc { background:rgba(0,217,255,0.06); border:1px solid #00d9ff33; padding:24px 28px; margin:30px 0; }
+.toc h4 { font-family:'Orbitron',sans-serif; font-size:10px; color:#00d9ff; letter-spacing:2px; margin-bottom:16px; }
+.toc ol { padding-left:20px; } .toc li { font-size:13px; line-height:2.1; }
+.toc li a { color:#00d9ffbb; text-decoration:none; transition:0.15s; } .toc li a:hover { color:#fff; padding-left:4px; }
+.toc li::marker { color:#ff004f; font-family:'Orbitron',sans-serif; font-size:10px; }
+.cb { background:#f5f2ec; color:#1a1a1a; padding:36px clamp(24px,4vw,48px); margin-bottom:24px; border-left:4px solid #00d9ff; position:relative; z-index:1; }
+.cb h2 { font-family:'Orbitron',sans-serif; font-size:13px; color:#003d66; letter-spacing:2px; text-transform:uppercase; margin-bottom:20px; padding-bottom:10px; border-bottom:2px solid #00d9ff66; scroll-margin-top:80px; }
+.cb h3 { font-family:'Orbitron',sans-serif; font-size:11px; color:#444; letter-spacing:1.5px; text-transform:uppercase; margin:28px 0 12px; }
+.cb p { font-family:'Libre Baskerville',Georgia,serif; font-size:15px; line-height:1.9; color:#1a1a1a; margin-bottom:16px; }
+.cb ul { padding-left:0; margin-bottom:16px; }
+.cb ul li { font-family:'Libre Baskerville',Georgia,serif; font-size:14px; line-height:1.85; color:#1a1a1a; padding-left:20px; position:relative; margin-bottom:8px; }
+.cb ul li::before { content:'›'; position:absolute; left:0; color:#0077aa; }
+.cb blockquote { border-left:3px solid #1a7a1a; background:#eafaea; padding:14px 20px; margin:18px 0; font-size:13px; font-family:'Share Tech Mono',monospace; color:#0a3d0a; line-height:1.8; }
+.callout { border-left:3px solid #0088cc; background:#e8f4fb; padding:16px 20px; margin:22px 0; font-size:12px; line-height:1.8; color:#1a1a1a; }
+.callout.red { border-left-color:#cc0033; background:#fdecea; }
+.callout.green { border-left-color:#1a7a1a; background:#eafaea; }
+.callout.amber { border-left-color:#996600; background:#fef9ec; }
+.callout strong { font-family:'Orbitron',sans-serif; font-size:10px; letter-spacing:1px; display:block; margin-bottom:8px; }
+.compare-table { width:100%; border-collapse:collapse; margin:22px 0; font-size:12px; }
+.compare-table th { font-family:'Orbitron',sans-serif; font-size:10px; letter-spacing:1px; color:#003d66; padding:10px 12px; border-bottom:2px solid #00d9ff66; text-align:left; }
+.compare-table td { padding:10px 12px; border-bottom:1px solid #ddd; line-height:1.5; color:#1a1a1a; vertical-align:top; }
+.compare-table tr:hover td { background:#f0f0f0; }
+.key-numbers { display:grid; grid-template-columns:repeat(auto-fit,minmax(140px,1fr)); gap:12px; margin:22px 0; }
+.kn-item { background:#fff; border:1px solid #d0d0d0; padding:16px 12px; text-align:center; }
+.kn-val { font-family:'Orbitron',sans-serif; font-size:clamp(13px,1.8vw,18px); font-weight:800; color:#003d66; display:block; }
+.kn-label { font-size:10px; color:#555; letter-spacing:1px; margin-top:5px; display:block; line-height:1.4; }
+.quiz-block { background:rgba(17,17,17,0.9); border:1px solid #ff004f33; padding:28px; margin:48px 0 32px; }
+.quiz-block h2 { font-family:'Orbitron',sans-serif; font-size:13px; color:#ff004f; letter-spacing:2px; margin-bottom:6px; }
+.quiz-intro { font-size:12px; opacity:0.6; margin-bottom:24px; padding-bottom:16px; border-bottom:1px solid #ff004f22; line-height:1.6; }
+.quiz-q { margin-bottom:28px; }
+.quiz-q p { font-size:13px; opacity:0.9; margin-bottom:12px; line-height:1.65; }
+.quiz-q p strong { color:#00d9ff; }
+.quiz-options { display:flex; flex-direction:column; gap:8px; }
+.quiz-opt { background:rgba(255,255,255,0.03); border:1px solid #ffffff1a; padding:11px 16px; cursor:pointer; font-size:12px; font-family:'Share Tech Mono',monospace; transition:0.2s; text-align:left; color:white; line-height:1.5; }
+.quiz-opt:hover:not(:disabled) { background:rgba(0,217,255,0.08); border-color:#00d9ff44; }
+.quiz-opt.correct { background:rgba(57,255,20,0.1); border-color:#39ff14; color:#39ff14; }
+.quiz-opt.wrong { background:rgba(255,0,79,0.1); border-color:#ff004f; color:#ff004f; }
+.quiz-opt:disabled { cursor:default; }
+.quiz-feedback { font-size:12px; margin-top:10px; min-height:18px; line-height:1.7; opacity:0.9; padding:0 4px; }
+.quiz-score { font-family:'Orbitron',sans-serif; font-size:12px; color:#39ff14; margin-top:20px; letter-spacing:1px; display:none; padding-top:16px; border-top:1px solid #39ff1433; }
+.py-block { background:rgba(10,10,10,0.95); border:1px solid #39ff1422; padding:28px; margin:32px 0; }
+.py-block h2 { font-family:'Orbitron',sans-serif; font-size:13px; color:#39ff14; letter-spacing:2px; margin-bottom:8px; }
+.py-block .py-intro { font-size:12px; opacity:0.7; margin-bottom:20px; padding-bottom:16px; border-bottom:1px solid #39ff1422; line-height:1.7; }
+.py-exercise { margin-bottom:32px; } .py-exercise:last-child { margin-bottom:0; }
+.py-exercise h3 { font-family:'Orbitron',sans-serif; font-size:11px; color:#39ff1499; letter-spacing:1.5px; text-transform:uppercase; margin-bottom:10px; }
+.py-exercise p { font-size:12px; opacity:0.8; margin-bottom:14px; line-height:1.75; }
+.py-block pre { background:#050505; border:1px solid #39ff1433; padding:20px; font-family:'Share Tech Mono',monospace; font-size:11px; line-height:1.7; overflow-x:auto; color:#39ff14; white-space:pre; margin-bottom:12px; }
+.py-note { background:rgba(57,255,20,0.04); border-left:2px solid #39ff14; padding:12px 16px; margin-top:14px; font-size:12px; line-height:1.75; opacity:0.8; }
+.py-note strong { font-family:'Orbitron',sans-serif; font-size:10px; color:#39ff14; display:block; margin-bottom:6px; letter-spacing:1px; }
+.reflection-block { background:rgba(255,170,0,0.04); border:1px solid #ffaa0033; padding:24px; margin:32px 0; }
+.reflection-block h2 { font-family:'Orbitron',sans-serif; font-size:13px; color:#ffaa00; letter-spacing:2px; margin-bottom:8px; }
+.ref-intro { font-size:12px; opacity:0.7; margin-bottom:20px; padding-bottom:14px; border-bottom:1px solid #ffaa0022; line-height:1.7; }
+.ref-prompt { margin-bottom:20px; }
+.ref-prompt h3 { font-family:'Orbitron',sans-serif; font-size:11px; color:#ffaa0099; letter-spacing:1px; margin-bottom:8px; }
+.ref-prompt p { font-size:12px; opacity:0.8; line-height:1.75; }
+.complete-wrap { margin-top:56px; padding-top:30px; border-top:1px solid #ffffff11; text-align:center; }
+.complete-btn { font-family:'Orbitron',sans-serif; font-size:13px; letter-spacing:2px; padding:14px 44px; background:transparent; border:1px solid #39ff14; color:#39ff14; cursor:pointer; transition:0.3s; }
+.complete-btn:hover:not(.done) { background:#39ff14; color:black; box-shadow:0 0 20px rgba(57,255,20,0.4); }
+.complete-btn.done { background:rgba(57,255,20,0.1); cursor:pointer; opacity:1; }
+.complete-msg { font-size:12px; color:#39ff14; margin-top:14px; min-height:18px; letter-spacing:1px; }
+.lesson-nav { display:flex; justify-content:space-between; margin-top:30px; flex-wrap:wrap; gap:10px; }
+.lesson-nav a { font-family:'Orbitron',sans-serif; font-size:11px; color:#00d9ff66; text-decoration:none; letter-spacing:1px; transition:0.2s; }
+.lesson-nav a:hover { color:#00d9ff; }
+.back-to-top { position:fixed; bottom:28px; right:28px; z-index:200; width:44px; height:44px; background:#000; border:1px solid #00d9ff55; color:#00d9ff; font-size:20px; cursor:pointer; display:flex; align-items:center; justify-content:center; opacity:0; pointer-events:none; transition:opacity 0.3s; }
+.back-to-top.visible { opacity:1; pointer-events:auto; } .back-to-top:hover { border-color:#00d9ff; }
+footer { text-align:center; padding:30px; opacity:0.3; font-size:11px; position:relative; z-index:1; letter-spacing:1px; }
+.module-complete { background:rgba(57,255,20,0.06); border:1px solid #39ff1444; padding:24px 28px; margin:40px 0; text-align:center; }
+.module-complete h3 { font-family:'Orbitron',sans-serif; font-size:14px; color:#39ff14; letter-spacing:2px; margin-bottom:10px; }
+.module-complete p { font-size:12px; opacity:0.8; line-height:1.7; }
+</style>
+</head>
+<body>
+<canvas id="starsCanvas"></canvas>
+<header>
+    <a href="dashboard.html" class="logo"><span>LEO</span><span>AF</span></a>
+    <div class="nav-right">
+        <a href="m6.html" class="nav-btn">← M6 HUB</a>
+        <button class="nav-btn" onclick="leoafAbort()">ABORT</button>
+    </div>
+</header>
+<div class="breadcrumb">
+    <a href="dashboard.html">DASHBOARD</a><span>/</span>
+    <a href="m6.html">M6</a><span>/</span>
+    <span style="color:#ffffff88;">LESSON 05 — POINTING, TRACKING &amp; HANDOVER</span>
+</div>
+
+<div class="lesson-wrap">
+<div class="lesson-header">
+    <div class="lesson-tag">M6 · LESSON 05 OF 7</div>
+    <h1>Pointing, Tracking<br>&amp; Handover Dynamics</h1>
+    <div class="lesson-meta">
+        <div class="l-pill l-pill-q">MODULE 6</div>
+        <div class="l-pill l-pill-t">USER TERMINALS &amp; D2D</div>
+        <div class="l-pill l-pill-c">CORE</div>
+    </div>
+    <p class="lesson-intro" style="margin-bottom:12px;">Everything in this module so far assumed the beam is on the satellite. This lesson earns that assumption. A terminal must <strong>acquire</strong> a satellite it has never seen, <strong>track</strong> it across the sky at up to ~0.8° per second — possibly from a platform that is itself rolling through tens of degrees — and <strong>switch</strong> to the next satellite every few minutes without the session noticing. Each task has an error budget, the error budget has a price in decibels, and the price law is quadratic: small sloppiness is nearly free, moderate sloppiness is ruinous.</p>
+    <p class="lesson-intro" style="margin-bottom:12px;">The lesson also pays two debts. m6-4's tilt optimiser ran on a placeholder uniform elevation distribution; this lesson computes the real one from constellation geometry — and the real one is worse than uniform (median serving elevation of a <em>single</em> tracked satellite above a 25° mask: just 35°). But the same computation delivers the module's most system-level result: with a dense constellation, the terminal serves the <em>best</em> of many visible satellites, and max-of-K selection moves the median elevation from 35° to 61° (K = 8) — worth more G/T to a flat panel than the mechanical tilt itself. <strong>Satellite selection is a G/T strategy</strong>, constellation density is a terminal-performance parameter, and the m2 geometry and the m6 hardware turn out to be one budget. The pass-weighted G/T that the Module 4 engine should consume finally exists at the end of this lesson, honestly derived.</p>
+</div>
+
+<div class="toc">
+    <h4>CONTENTS</h4>
+    <ol>
+        <li><a href="#s1">The price of mispointing</a></li>
+        <li><a href="#s2">The dynamics of a pass</a></li>
+        <li><a href="#s3">Where the satellites actually are</a></li>
+        <li><a href="#s4">Satellite selection as a G/T strategy</a></li>
+        <li><a href="#s5">Acquisition: finding a satellite from a cold start</a></li>
+        <li><a href="#s6">Platforms that move</a></li>
+        <li><a href="#s7">Handover: the switch, choreographed</a></li>
+        <li><a href="#s8">The deliverable: pass-weighted G/T, honestly</a></li>
+        <li><a href="#s9">Key facts</a></li>
+        <li><a href="#s10">What this lesson delivers to the design chain</a></li>
+        <li><a href="#quiz">Knowledge check</a></li>
+        <li><a href="#py">Python exercises</a></li>
+        <li><a href="#reflect">Reflection</a></li>
+    </ol>
+</div>
+
+<div class="cb" id="s1">
+    <h2>1. The price of mispointing</h2>
+<p>For errors small against the beamwidth, gain loss follows the main lobe's parabolic top:</p>
+<blockquote>L ≈ 12 · (θ_err / θ₃dB)² dB</blockquote>
+<p>Verified anchor: an error of half the beamwidth costs exactly 3.0 dB (it is the half-power point). The law's quadratic shape sets the engineering tone: at one-tenth of a beamwidth the loss is 0.12 dB — negligible; at a third, 1.3 dB — visible; at a half, a MODCOD rung (m5-2). The m4-1 budget's innocuous "pointing loss: 0.3 dB" line is therefore a hardware commitment: it licenses a total pointing error of √(0.3/12) ≈ 0.16 beamwidths, and everything in this lesson is the machinery that delivers it.</p>
+<p>The beamwidth denominator makes the commitment terminal-specific. The 65 cm dish (1.6° beamwidth, m6-1) must hold <strong>~0.25°</strong> total error for its 0.3 dB; a gimbal, its resolvers, and its control loop must deliver that against §2's dynamics. The 1,280-element panel (≈3.2° beamwidth) enjoys twice the angular tolerance — and steers electronically with essentially perfect knowledge of its own commanded angle, so its pointing error is dominated not by actuation but by <em>knowledge</em>: where the satellite is, where the terminal is, and — decisively on vehicles — which way the terminal is facing (§6).</p>
+</div>
+
+<div class="cb" id="s2">
+    <h2>2. The dynamics of a pass</h2>
+<p>How fast the target moves, from the m2 geometry at 550 km (orbital velocity 7.59 km/s):</p>
+<table class="compare-table">
+<thead><tr>
+<th>Culmination elevation</th>
+<th>Peak angular rate</th>
+</tr></thead>
+<tbody>
+<tr><td>90° (overhead)</td><td>0.79 °/s</td></tr>
+<tr><td>60°</td><td>0.69 °/s</td></tr>
+<tr><td>30°</td><td>0.44 °/s</td></tr>
+<tr><td>25°</td><td>0.39 °/s</td></tr>
+</tbody>
+</table>
+<p>The rate peaks at culmination (closest approach), and angular <em>acceleration</em> peaks there too — the classic sizing case for a mechanical positioner is the near-overhead pass, where azimuth rate diverges as the trajectory passes close to the gimbal's zenith singularity (the "keyhole": an elevation-over-azimuth mount must spin its azimuth axis violently to follow a pass near straight up). Electronic steering has no keyhole and no rate limit; a gimballed dish needs either rate margin, a mount geometry chosen for the traffic (tilted-axis mounts), or a scheduler that avoids handing it near-zenith passes. One more line item on the m6-3 ledger between motors and silicon.</p>
+</div>
+
+<div class="cb" id="s3">
+    <h2>3. Where the satellites actually are</h2>
+<p>m6-4 optimised the tilt against a uniform elevation distribution, flagged as crude. The honest distribution, computed from geometry — satellites uniformly distributed on their shell, terminal serving whatever is above a 25° mask:</p>
+<table class="compare-table">
+<thead><tr>
+<th>Statistic (single satellite, ergodic)</th>
+<th>Value</th>
+</tr></thead>
+<tbody>
+<tr><td>Median elevation</td><td><strong>35°</strong></td></tr>
+<tr><td>Mean elevation</td><td>39°</td></tr>
+<tr><td>Fraction of time above 60°</td><td><strong>9%</strong></td></tr>
+</tbody>
+</table>
+<p>The sky is bottom-heavy: the solid-angle geometry that made low elevations dominant for coverage (m2) makes them dominant for service too. Consequence for the flat panel: the ergodic pass-weighted G/T, through the m6-4 scan model, is <strong>7.7 dB/K</strong> — 3.3 dB below the broadside datasheet figure. Flat-mounted and served by a lone satellite, the panel spends its life at wide scan. Mechanical tilt claws back 2.5 dB (to 10.2 at 25° tilt). But the stronger lever is the next section's.</p>
+</div>
+
+<div class="cb" id="s4">
+    <h2>4. Satellite selection as a G/T strategy</h2>
+<p>A constellation dense enough to show K satellites above the mask lets the system serve the best of them. The max-of-K elevation statistics, Monte-Carlo verified:</p>
+<table class="compare-table">
+<thead><tr>
+<th>Visible satellites K</th>
+<th>Median serving elevation</th>
+<th>Flat-panel pass-weighted G/T</th>
+</tr></thead>
+<tbody>
+<tr><td>1</td><td>35°</td><td>7.7 dB/K</td></tr>
+<tr><td>4</td><td>53°</td><td>—</td></tr>
+<tr><td>8</td><td><strong>61°</strong></td><td><strong>10.0 dB/K</strong></td></tr>
+<tr><td>16</td><td>69°</td><td>—</td></tr>
+</tbody>
+</table>
+<p>Selection at K = 8 is worth <strong>+2.3 dB</strong> to the flat panel — more than the tilt — and it compresses the tilt's marginal value from 2.5 dB to <strong>0.9 dB</strong> (tilted, max-of-8: 10.9 dB/K). Three system-level readings. First, constellation density is a terminal-performance parameter: every satellite added to the shell buys decibels at every terminal on the ground, through geometry alone. Second, the serving-elevation distribution is a <em>choice</em> the scheduler makes (m5-3), coupled to load balancing and the m6-4 arc-avoidance exclusions — the same selection logic serves three masters. Third, the tilt's residual value concentrates exactly where selection is weakest: at high latitude, where visible satellites cluster toward one azimuth band and K-effective is small — which is why the tilt survives in real products as a latitude-dependent installation parameter rather than dying of redundancy.</p>
+</div>
+
+<div class="cb" id="s5">
+    <h2>5. Acquisition: finding a satellite from a cold start</h2>
+<p>Open-loop pointing, the NGSO norm (and the terminal-side mirror of m5-3 §7 / m5-5's ephemeris machinery): commanded angles = f(satellite ephemeris, own position, own attitude, time). The error budget that must sum below §1's tolerance:</p>
+<table class="compare-table">
+<thead><tr>
+<th>Term</th>
+<th>Fixed terminal</th>
+<th>Vehicle-mounted</th>
+</tr></thead>
+<tbody>
+<tr><td>Ephemeris (broadcast, fresh)</td><td>small (millidegree class)</td><td>same</td></tr>
+<tr><td>Own position (GNSS)</td><td>negligible at these ranges</td><td>negligible</td></tr>
+<tr><td>Time</td><td>negligible with GNSS</td><td>same</td></tr>
+<tr><td><strong>Attitude knowledge</strong></td><td>one-time calibration (sky search)</td><td><strong>dominant — continuous, dynamic</strong></td></tr>
+</tbody>
+</table>
+<p>For a fixed terminal the open-loop budget closes trivially once installed orientation is calibrated — which the terminal does itself at first light: a slow electronic <strong>sky search</strong> correlating found satellites against ephemeris solves the mounting orientation, no installer skill required (the consumer product's quiet dependence on this is total). For anything that moves, attitude is the budget, and §6 takes it.</p>
+<p>Closed-loop refinement then holds the peak: a dish uses <strong>conical scan</strong> or <strong>step-track</strong> (dither the mechanical pointing, climb the signal gradient) or, in high-end form, <strong>monopulse</strong> (simultaneous sum/difference patterns give the error angle in one measurement, no dithering). An array dithers electronically for free — microsecond beam offsets measuring the gradient without moving anything — one more small structural advantage of steering in phase.</p>
+</div>
+
+<div class="cb" id="s6">
+    <h2>6. Platforms that move</h2>
+<p>The attitude term, by segment. A <strong>maritime</strong> platform rolls with periods of ~8–12 s and amplitudes from a few degrees to 25–30° in heavy seas — rates of several degrees per second, rhythmic and INS-predictable. An <strong>aircraft</strong> adds bank angles to 25–30° in normal manoeuvres with roll rates that dwarf the pass dynamics of §2, plus fuselage flexure and vibration; a <strong>land vehicle</strong> is the worst per degree — sharp, unpredictable attitude transients on rough ground. In every case the terminal must counter-rotate its beam at the platform rate <em>plus</em> the pass rate, using inertial attitude (dedicated IMU or the platform's own INS feed on aircraft — m6-6's installation interface), with GNSS-aided alignment.</p>
+<p>The architecture consequence is the m6-3 ledger again, sharpened: a mechanical tracker needs rate and acceleration margin above the platform's worst dynamics (motors sized for the sea state, not the average), while an ESA needs only <em>attitude data</em> fast and fresh enough — its correction is computation. Latency is the ESA's exposure: 20 ms of stale attitude at 10°/s of roll is 0.2° of transient error — fine inside a 3° beamwidth, marginal inside 1.6°. Beamwidth tolerance, attitude latency, and platform dynamics form one inequality, and it, not preference, decides which segments went electronic first.</p>
+</div>
+
+<div class="cb" id="s7">
+    <h2>7. Handover: the switch, choreographed</h2>
+<p>The serving satellite changes on a cadence set by geometry and scheduling — operators reassign on intervals from tens of seconds to a few minutes (class figure; the constellation's scheduler owns the exact number). The choreography per switch:</p>
+<p>1. <strong>Candidate selection</strong> — next satellite chosen by the §4 logic (elevation/load/arc-legality), from ephemeris, ahead of need. 2. <strong>Prepare</strong> — the second beam (m6-3's second analog layer, or a digital beam) acquires the candidate: pointing, then the m5-5 machinery — timing advance and Doppler pre-compensation from the same ephemeris. 3. <strong>Make</strong> — traffic authorised on the new path while the old still carries; the m5-3 scheduler grants on both. 4. <strong>Break</strong> — the old beam releases; the layer frees for the <em>next</em> candidate.</p>
+<p>Executed cleanly, the user-visible interruption is bounded by the network-side switching, not the RF — target figures in the low tens of milliseconds, small against m5-5's RTT and invisible to TCP. Executed without a second beam (single-layer analog, or any mechanical tracker), the same choreography forces a break-before-make gap of at least the repointing time — which for a gimbal slewing tens of degrees is <em>seconds</em>, the difference between a handover and an outage. This is m6-3 §6's silicon justified by m5-3's session-continuity requirement, now with the timeline that connects them.</p>
+</div>
+
+<div class="cb" id="s8">
+    <h2>8. The deliverable: pass-weighted G/T, honestly</h2>
+<p>Assembling §3–§4 into the number the Module 4 engine should consume for the 1,280-element panel (broadside 11.0 dB/K):</p>
+<table class="compare-table">
+<thead><tr>
+<th>Configuration</th>
+<th>Pass-weighted G/T</th>
+</tr></thead>
+<tbody>
+<tr><td>Flat, single-satellite ergodic</td><td>7.7 dB/K</td></tr>
+<tr><td>Flat + 25° tilt, ergodic</td><td>10.2 dB/K</td></tr>
+<tr><td>Flat, max-of-8 selection</td><td>10.0 dB/K</td></tr>
+<tr><td>Tilted 25°, max-of-8 selection</td><td><strong>10.9 dB/K</strong></td></tr>
+</tbody>
+</table>
+<p>The honest chain from datasheet to service: 11.0 broadside → 10.9 served, <em>only because</em> selection and tilt both do their work — and 7.7 if neither does. The 3.2 dB spread across this table is pure operations and geometry: no hardware differs between its rows. m6-7's evaluator will carry the served figure, not the broadside one, into the M4 budget — and the same logic prices the dish's alternative: a tracked dish holds 19.9 dB/K across every row, its gimbal buying with motors what the panel buys with satellites.</p>
+</div>
+
+<div class="cb" id="s9">
+    <h2>9. Key facts</h2>
+<table class="compare-table">
+<thead><tr>
+<th>Fact</th>
+<th>Value</th>
+<th>Unit</th>
+<th>Source</th>
+</tr></thead>
+<tbody>
+<tr><td>Pointing loss law</td><td>≈ 12·(θ_err/θ₃dB)²</td><td>dB</td><td>Parabolic main lobe (verified: bw/2 → 3.0 dB)</td></tr>
+<tr><td>0.3 dB budget line licenses</td><td>~0.16 beamwidths total error</td><td>—</td><td>Computed</td></tr>
+<tr><td>Dish (1.6° bw) tolerance for 0.3 dB</td><td>~0.25</td><td>deg</td><td>Computed</td></tr>
+<tr><td>Peak pass angular rate (550 km, overhead)</td><td>0.79</td><td>°/s</td><td>Computed</td></tr>
+<tr><td>Rate at 25° culmination</td><td>0.39</td><td>°/s</td><td>Computed</td></tr>
+<tr><td>Keyhole</td><td>az-rate divergence near zenith (el-over-az mounts)</td><td>—</td><td>Mount geometry</td></tr>
+<tr><td>Single-satellite median elevation (&gt;25° mask)</td><td>35 (mean 39; 9% above 60°)</td><td>deg</td><td>Computed</td></tr>
+<tr><td>Max-of-8 median serving elevation</td><td>61</td><td>deg</td><td>Monte Carlo</td></tr>
+<tr><td>Selection worth (flat panel, K=8)</td><td>+2.3</td><td>dB</td><td>Computed</td></tr>
+<tr><td>Tilt's marginal value under selection</td><td>2.5 → 0.9</td><td>dB</td><td>Computed</td></tr>
+<tr><td>Pass-weighted G/T (tilt + selection)</td><td>10.9 (vs 11.0 broadside, 7.7 worst)</td><td>dB/K</td><td>Computed</td></tr>
+<tr><td>Handover interruption (make-before-break)</td><td>low tens</td><td>ms</td><td>Class figure; m5 exports</td></tr>
+<tr><td>Mechanical repoint (break-before-make)</td><td>seconds</td><td>—</td><td>Slew arithmetic</td></tr>
+</tbody>
+</table>
+</div>
+
+<div class="cb" id="s10">
+    <h2>10. What this lesson delivers to the design chain</h2>
+<p>Stage 5 of the spine: a <strong>PassModel</strong> (the ergodic and max-of-K elevation samplers, the pass-weighted integrator) and a <strong>PointingBudget</strong> (error terms RSS'd into the §1 loss law, with a gimbal-rate check against §2's dynamics). m6-4's tilt optimiser now runs on the real distribution; the M4 engine receives a served G/T with its provenance visible; and the module's central comparison gains its final term — the dish holds its 19.9 dB/K with motors and a keyhole, the panel reaches 10.9 with satellites, silicon, and a bracket.</p>
+<p>Two threads hand forward. The platform-dynamics inequality of §6 and the INS/installation interfaces are m6-6's territory, where segment requirements and aviation certification make them contractual. And the handover choreography's network side — what the constellation's scheduler does with the selection freedom §4 exposed — is Module 7's, where this lesson's exports (serving-elevation statistics, switch cadence, interruption budget) become inputs.</p>
+</div>
+
+<div class="quiz-block" id="quiz">
+    <h2>KNOWLEDGE CHECK</h2>
+    <div class="quiz-intro">Ten questions. Each option explains itself after you commit. No retries per question — decide first.</div>
+    <div class="quiz-q">
+        <p><strong>Q1.</strong> The pointing-loss law L ≈ 12·(θ_err/θ₃dB)² makes pointing economics quadratic, which means:</p>
+        <div class="quiz-options">
+            <button class="quiz-opt" data-q="1" data-correct="false">A — All pointing errors are equally costly</button>
+            <button class="quiz-opt" data-q="1" data-correct="true">B — Errors small against the beamwidth are nearly free (0.1 bw → 0.12 dB) while half-beamwidth errors cost a full 3 dB — budgets are set as fractions of beamwidth, not absolute degrees</button>
+            <button class="quiz-opt" data-q="1" data-correct="false">C — Pointing loss is linear in error</button>
+            <button class="quiz-opt" data-q="1" data-correct="false">D — The law only applies to dishes</button>
+        </div>
+        <div class="quiz-feedback" id="fb1"></div>
+    </div>
+    <div class="quiz-q">
+        <p><strong>Q2.</strong> The 65 cm dish must track to ~0.25° while the 1,280-element panel tolerates ~0.5° for the same 0.3 dB because:</p>
+        <div class="quiz-options">
+            <button class="quiz-opt" data-q="2" data-correct="false">A — Dishes have worse motors</button>
+            <button class="quiz-opt" data-q="2" data-correct="true">B — The tolerance is a fixed fraction of beamwidth, and the dish's 1.6° beam is half the panel's 3.2° — higher gain buys tighter pointing obligations</button>
+            <button class="quiz-opt" data-q="2" data-correct="false">C — Panels do not need pointing</button>
+            <button class="quiz-opt" data-q="2" data-correct="false">D — The dish operates at higher frequency</button>
+        </div>
+        <div class="quiz-feedback" id="fb2"></div>
+    </div>
+    <div class="quiz-q">
+        <p><strong>Q3.</strong> The mechanical positioner's classic sizing case is the near-overhead pass because:</p>
+        <div class="quiz-options">
+            <button class="quiz-opt" data-q="3" data-correct="false">A — The satellite is faintest overhead</button>
+            <button class="quiz-opt" data-q="3" data-correct="true">B — Angular rate peaks at culmination (~0.8°/s at 550 km) and an elevation-over-azimuth mount's azimuth rate diverges near zenith — the keyhole</button>
+            <button class="quiz-opt" data-q="3" data-correct="false">C — Rain is worst at zenith</button>
+            <button class="quiz-opt" data-q="3" data-correct="false">D — Ephemeris fails at high elevation</button>
+        </div>
+        <div class="quiz-feedback" id="fb3"></div>
+    </div>
+    <div class="quiz-q">
+        <p><strong>Q4.</strong> The single-satellite ergodic elevation distribution (median 35°, only 9% above 60°) matters because:</p>
+        <div class="quiz-options">
+            <button class="quiz-opt" data-q="4" data-correct="false">A — It proves LEO is infeasible</button>
+            <button class="quiz-opt" data-q="4" data-correct="true">B — It is the honest weighting for a flat panel's service: pass-weighted G/T lands at 7.7 dB/K, 3.3 dB below the broadside datasheet — the solid-angle geometry that shaped m2's coverage shapes m6's performance</button>
+            <button class="quiz-opt" data-q="4" data-correct="false">C — Satellites avoid high elevations deliberately</button>
+            <button class="quiz-opt" data-q="4" data-correct="false">D — It only applies at the equator</button>
+        </div>
+        <div class="quiz-feedback" id="fb4"></div>
+    </div>
+    <div class="quiz-q">
+        <p><strong>Q5.</strong> "Satellite selection is a G/T strategy" summarises the verified result that:</p>
+        <div class="quiz-options">
+            <button class="quiz-opt" data-q="5" data-correct="false">A — Bigger satellites have more gain</button>
+            <button class="quiz-opt" data-q="5" data-correct="true">B — Serving the best of K visible satellites moves the median elevation from 35° (K=1) to 61° (K=8), worth +2.3 dB of pass-weighted G/T to a flat panel — more than the mechanical tilt</button>
+            <button class="quiz-opt" data-q="5" data-correct="false">C — Selection changes the satellite's transmit power</button>
+            <button class="quiz-opt" data-q="5" data-correct="false">D — G/T is a scheduling protocol</button>
+        </div>
+        <div class="quiz-feedback" id="fb5"></div>
+    </div>
+    <div class="quiz-q">
+        <p><strong>Q6.</strong> Under max-of-8 selection, the mechanical tilt's marginal value compresses from 2.5 dB to 0.9 dB, yet real products keep it, because:</p>
+        <div class="quiz-options">
+            <button class="quiz-opt" data-q="6" data-correct="false">A — Tilt brackets are profitable accessories</button>
+            <button class="quiz-opt" data-q="6" data-correct="true">B — Selection is weakest exactly where tilt is strongest — high latitudes, where visible satellites cluster toward one azimuth and effective K is small — so the tilt survives as a latitude-dependent installation parameter</button>
+            <button class="quiz-opt" data-q="6" data-correct="false">C — The tilt reduces rain accumulation</button>
+            <button class="quiz-opt" data-q="6" data-correct="false">D — Regulation requires tilting</button>
+        </div>
+        <div class="quiz-feedback" id="fb6"></div>
+    </div>
+    <div class="quiz-q">
+        <p><strong>Q7.</strong> On a moving platform, the ESA's pointing exposure is attitude-data latency rather than actuation, because:</p>
+        <div class="quiz-options">
+            <button class="quiz-opt" data-q="7" data-correct="false">A — ESAs cannot steer quickly</button>
+            <button class="quiz-opt" data-q="7" data-correct="true">B — Electronic steering executes commanded angles essentially perfectly; the error is stale knowledge — 20 ms of latency at 10°/s of roll is 0.2° of transient, priced by the §1 law against the beamwidth</button>
+            <button class="quiz-opt" data-q="7" data-correct="false">C — IMUs do not work on ships</button>
+            <button class="quiz-opt" data-q="7" data-correct="false">D — Attitude does not affect pointing</button>
+        </div>
+        <div class="quiz-feedback" id="fb7"></div>
+    </div>
+    <div class="quiz-q">
+        <p><strong>Q8.</strong> Make-before-break handover bounds the user-visible interruption to network-switching timescales (low tens of ms) because:</p>
+        <div class="quiz-options">
+            <button class="quiz-opt" data-q="8" data-correct="false">A — The satellites synchronise their clocks</button>
+            <button class="quiz-opt" data-q="8" data-correct="true">B — The second beam acquires, pre-compensates (m5-5 TA/Doppler), and carries authorised traffic before the old path releases — the RF transition itself contributes no gap</button>
+            <button class="quiz-opt" data-q="8" data-correct="false">C — TCP retransmits instantly</button>
+            <button class="quiz-opt" data-q="8" data-correct="false">D — Handover only happens at night</button>
+        </div>
+        <div class="quiz-feedback" id="fb8"></div>
+    </div>
+    <div class="quiz-q">
+        <p><strong>Q9.</strong> A consumer terminal solves its own mounting orientation via sky search because:</p>
+        <div class="quiz-options">
+            <button class="quiz-opt" data-q="9" data-correct="false">A — Installers are legally barred from aligning antennas</button>
+            <button class="quiz-opt" data-q="9" data-correct="true">B — Correlating found satellites against ephemeris solves the attitude calibration once, converting the open-loop error budget's hardest term into software — the product's no-skill-installation premise depends on it</button>
+            <button class="quiz-opt" data-q="9" data-correct="false">C — GNSS provides orientation directly</button>
+            <button class="quiz-opt" data-q="9" data-correct="false">D — Orientation does not matter for arrays</button>
+        </div>
+        <div class="quiz-feedback" id="fb9"></div>
+    </div>
+    <div class="quiz-q">
+        <p><strong>Q10.</strong> The §8 table's 3.2 dB spread across identical hardware teaches that:</p>
+        <div class="quiz-options">
+            <button class="quiz-opt" data-q="10" data-correct="false">A — G/T measurements are unreliable</button>
+            <button class="quiz-opt" data-q="10" data-correct="true">B — Served performance is co-produced by operations and geometry — selection, tilt, and scheduling move a panel's effective G/T as much as major hardware changes would, and the M4 engine must consume the served figure, not the datasheet one</button>
+            <button class="quiz-opt" data-q="10" data-correct="false">C — Broadside G/T is the honest service figure</button>
+            <button class="quiz-opt" data-q="10" data-correct="false">D — The dish shows the same spread</button>
+        </div>
+        <div class="quiz-feedback" id="fb10"></div>
+    </div>
+    <div class="quiz-score" id="quizScore"></div>
+</div>
+
+<div class="py-block" id="py">
+    <h2>PYTHON EXERCISES</h2>
+    <div class="py-intro">Three exercises; the last extends the module spine project. Run them, then work the numbered follow-ups in the comments — the follow-ups are the exercise.</div>
+    <div class="py-exercise">
+        <h3>Exercise 1 — The loss law and the dynamics</h3>
+        <p>Price pointing error and size the tracker.</p>
+<pre>
+import math
+
+def pointing_loss_db(err_deg, bw_deg):
+    return 12.0 * (err_deg/bw_deg)**2
+
+print(&quot;loss vs error (fraction of beamwidth):&quot;)
+for f in [0.05, 0.1, 0.16, 0.25, 0.33, 0.5]:
+    print(f&quot;  {f:&gt;4.2f} bw: {pointing_loss_db(f,1.0):5.2f} dB&quot;)
+
+Re, h = 6371.0, 550.0
+v = math.sqrt(398600.4/(Re+h))
+def culm_rate_deg_s(e_deg):
+    e = math.radians(e_deg)
+    d = Re*(math.sqrt(((Re+h)/Re)**2 - math.cos(e)**2) - math.sin(e))
+    return math.degrees(v/d)
+
+print(&quot;\npeak LOS rate by culmination elevation:&quot;)
+for e in [90, 60, 40, 30, 25]:
+    print(f&quot;  {e:&gt;2}°: {culm_rate_deg_s(e):.2f} °/s&quot;)
+
+# 1. Invert the loss law: what total error (deg) may the 65 cm dish
+#    (bw 1.6°) and the panel (bw 3.2°) carry for the m4-1 0.3 dB line?
+#    Then split each into a static (calibration) and dynamic (tracking)
+#    allocation and defend the split.
+# 2. A gimbal tracks with first-order lag time-constant tau. At the
+#    overhead pass&#x27;s 0.79 °/s, what tau keeps the lag error inside the
+#    dish&#x27;s dynamic allocation from question 1?
+# 3. The keyhole: for an el-over-az mount, azimuth rate = LOS_az_rate /
+#    cos(elevation). Tabulate the multiplier at elev 80/85/88° and
+#    state the scheduling rule it implies for gimballed terminals.
+</pre>
+    </div>
+    <div class="py-exercise">
+        <h3>Exercise 2 — Where the satellites are</h3>
+        <p>Build the elevation distributions and measure what selection buys.</p>
+<pre>
+import math, random
+Re, h, EMIN = 6371.0, 550.0, 25.0
+
+def elev_to_psi(e_deg):
+    e = math.radians(e_deg)
+    return math.acos(Re/(Re+h)*math.cos(e)) - e
+
+def sample_elev():
+    &quot;&quot;&quot;One satellite, uniform on the shell within the visibility cap.&quot;&quot;&quot;
+    psi_max = elev_to_psi(EMIN)
+    cospsi = 1 - random.random()*(1 - math.cos(psi_max))
+    psi = math.acos(cospsi)
+    lo, hi = EMIN, 90.0
+    for _ in range(40):
+        m = (lo+hi)/2
+        if elev_to_psi(m) &gt; psi: lo = m
+        else: hi = m
+    return m
+
+random.seed(7)
+def stats(samples):
+    s = sorted(samples)
+    return s[len(s)//2], sum(s)/len(s)
+
+single = [sample_elev() for _ in range(6000)]
+med, mean = stats(single)
+print(f&quot;single satellite: median {med:.0f}°, mean {mean:.0f}°, &quot;
+      f&quot;P(&gt;60°) {sum(1 for e in single if e&gt;60)/len(single):.1%}&quot;)
+
+for K in [2, 4, 8, 16]:
+    served = [max(sample_elev() for _ in range(K)) for _ in range(4000)]
+    med, mean = stats(served)
+    print(f&quot;max-of-{K:&gt;2}:      median {med:.0f}°, mean {mean:.0f}°&quot;)
+
+# 1. Tabulate the single-satellite pdf in 5° bins and explain its
+#    shape from the annulus areas on the shell — why is the sky
+#    bottom-heavy even though zenith is &#x27;closest&#x27;?
+# 2. K is not a free choice: relate it to constellation size via the
+#    visible-shell fraction (m2). How many satellites on the 550 km
+#    shell give K≈8 above a 25° mask?
+# 3. High latitude: restrict azimuths to a 120° southern sector (crude
+#    polar-gap model) and recompute max-of-8. How much of the selection
+#    benefit survives, and what does that do to the tilt&#x27;s value there?
+</pre>
+    </div>
+    <div class="py-exercise">
+        <h3>Exercise 3 — Spine Stage 5: PassModel and PointingBudget</h3>
+        <p>The served G/T, honestly derived, joins the terminal model.</p>
+<pre>
+import math, random
+db = lambda x: 10*math.log10(x) if x &gt; 0 else -999.0
+
+# ═══════════════════════════════════════════════════════
+# M6 SPINE PROJECT — TERMINAL MODEL
+# Stage 5: pass geometry + pointing budget.
+#   Stage 4 gave G/T(elevation, tilt) + the mask.
+#   Stage 5 supplies the elevation DISTRIBUTION (ergodic and
+#   max-of-K serving), the pass-weighted G/T the M4 engine
+#   should consume, and the pointing-error budget -&gt; loss.
+# Next: m6-6 segment requirements table; m6-7 evaluator.
+# ═══════════════════════════════════════════════════════
+
+Re, h = 6371.0, 550.0
+
+class PassModel:
+    def __init__(self, emin_deg=25.0, seed=7):
+        self.emin = emin_deg
+        random.seed(seed)
+    def _psi(self, e_deg):
+        e = math.radians(e_deg)
+        return math.acos(Re/(Re+h)*math.cos(e)) - e
+    def sample(self):
+        psi_max = self._psi(self.emin)
+        cospsi = 1 - random.random()*(1 - math.cos(psi_max))
+        psi = math.acos(cospsi)
+        lo, hi = self.emin, 90.0
+        for _ in range(40):
+            m = (lo+hi)/2
+            if self._psi(m) &gt; psi: lo = m
+            else: hi = m
+        return m
+    def serving_elevations(self, K=8, n=4000):
+        return [max(self.sample() for _ in range(K)) for _ in range(n)]
+
+class PointingBudget:
+    def __init__(self, bw_deg, terms_deg):
+        &quot;&quot;&quot;terms_deg: dict of independent error terms, RSS&#x27;d.&quot;&quot;&quot;
+        self.bw = bw_deg
+        self.terms = terms_deg
+    @property
+    def total_deg(self):
+        return math.sqrt(sum(v*v for v in self.terms.values()))
+    @property
+    def loss_db(self):
+        return 12.0*(self.total_deg/self.bw)**2
+    def report(self, name):
+        print(f&quot;\n  POINTING BUDGET — {name} (bw {self.bw}°)&quot;)
+        for k, v in self.terms.items():
+            print(f&quot;    {k:&lt;26} {v:&gt;6.3f}°&quot;)
+        print(f&quot;    {&#x27;TOTAL (RSS)&#x27;:&lt;26} {self.total_deg:&gt;6.3f}°&quot;
+              f&quot;  -&gt; loss {self.loss_db:.2f} dB&quot;)
+
+def scan_gt(elev, tilt, gt0=11.0, q=1.3, pol_wide=0.6):   # Stage-4 model
+    scan = abs(90 - elev - tilt)
+    pol = min(pol_wide, pol_wide*max(0, (scan-30)/30))
+    return gt0 + 10*q*math.log10(math.cos(math.radians(min(scan, 89.9)))) - pol
+
+pm = PassModel()
+print(&quot;PASS-WEIGHTED G/T (1,280-el panel, broadside 11.0 dB/K):&quot;)
+for K, tilt in [(1, 0), (1, 25), (8, 0), (8, 25)]:
+    elevs = pm.serving_elevations(K=K)
+    gt = sum(scan_gt(e, tilt) for e in elevs)/len(elevs)
+    print(f&quot;  K={K:&gt;2}, tilt {tilt:&gt;2}°: served G/T {gt:5.1f} dB/K&quot;)
+
+dish = PointingBudget(1.6, {&quot;install calibration&quot;: 0.05,
+                            &quot;ephemeris+geometry&quot;: 0.02,
+                            &quot;tracking lag&quot;:       0.12,
+                            &quot;wind/structure&quot;:     0.10})
+dish.report(&quot;65 cm gimballed dish&quot;)
+
+panel = PointingBudget(3.2, {&quot;attitude (IMU, 20 ms)&quot;: 0.20,
+                             &quot;ephemeris+geometry&quot;:    0.02,
+                             &quot;phase quantisation&quot;:    0.05})
+panel.report(&quot;ESA on vehicle&quot;)
+
+# ── the handoff ─────────────────────────────────────────
+# m6-7&#x27;s evaluator consumes: served G/T (not broadside), the
+# pointing loss as an m4-1 budget line, and the handover mode
+# (make-before-break capable or not) from Stage 3.
+
+# 1. Chain the K=8/tilt-25 served G/T into the m4-1 downlink and
+#    report the C/N0 delta vs the broadside figure. Rungs crossed,
+#    at both m5-7 ladder positions?
+# 2. Give PassModel a &#x27;polar gap&#x27; mode (azimuth-restricted, per
+#    exercise 2 Q3) and re-derive the tilt&#x27;s value at 60° latitude.
+# 3. The dish budget&#x27;s biggest term is tracking lag; the panel&#x27;s is
+#    attitude latency. Halve each and compare dB bought per term —
+#    then name the engineering discipline each halving belongs to.
+</pre>
+    </div>
+</div>
+
+<div class="reflection-block" id="reflect">
+    <h2>REFLECTION</h2>
+    <div class="ref-intro">Four prompts. Each forces a decision — write the position down before moving on; the act of committing is the exercise.</div>
+    <div class="ref-prompt">
+        <h3>PROMPT 01</h3>
+        <p>Section 4 made constellation density a terminal-performance parameter: +2.3 dB of served G/T from K = 8 selection. Invert the ownership: the constellation operator pays for density; the terminal vendor pockets the decibels (smaller panel for the same service). In a vertically integrated system this nets out internally — but in an open ecosystem (m5-4's standards world), who captures the value, and what does that imply about whether open NGSO systems will ever publish serving-elevation statistics in their terminal interface specs? Find the analogous asymmetry somewhere else in this program.</p>
+    </div>
+    <div class="ref-prompt">
+        <h3>PROMPT 02</h3>
+        <p>Section 6's inequality — beamwidth tolerance vs attitude latency vs platform dynamics — decided which segments electrified first. Run it forward: gateway-class apertures (very high gain, sub-0.2° beams) on ships are appearing for feeder-diversity concepts. Work the numbers: what attitude latency does a 0.15° beam on a 10°/s-roll platform demand, is that achievable with current INS classes, and if not, which of the three variables gives — beamwidth (smaller aperture), platform (stabilised pedestal returns), or a hybrid? What did your answer just reinvent?</p>
+    </div>
+    <div class="ref-prompt">
+        <h3>PROMPT 03</h3>
+        <p>Section 7 bounded make-before-break interruption at network timescales but assumed the second beam is free to prepare. Under load, the second beamforming layer may be <em>serving traffic</em> (m6-3 sold it as a multi-beam asset too). Construct the conflict: a terminal at capacity using both layers must drop one to prepare a handover. Decide the scheduling policy — which beam yields, how early, at what throughput cost per m5-2's ladder — and identify whether this is a terminal decision or a network decision, and why that allocation of authority matters.</p>
+    </div>
+    <div class="ref-prompt">
+        <h3>PROMPT 04</h3>
+        <p>This lesson computed the elevation distribution from a uniform-shell assumption and flagged the real constellation's phasing, inclination bands, and polar gaps as deviations. m6-4's reflection asked for an authoring rule against unverified forward references; apply the complementary rule here: the uniform-shell result is now load-bearing (the served G/T feeds m6-7 and then M4). State precisely which conclusions of §4/§8 survive a realistic Walker-constellation distribution and which are at risk, and specify the cheapest computation (m2 vocabulary) that would upgrade the load-bearing number before m6-7 consumes it.</p>
+    </div>
+</div>
+
+<div class="cb">
+    <h2>Sources</h2>
+<ul>
+<li>Mailloux, <em>Phased Array Antenna Handbook</em>; Balanis — main-lobe approximation behind the 12·(θ/θ₃)² law.</li>
+<li>Maral &amp; Bousquet, <em>Satellite Communications Systems</em> — tracking techniques (step-track, conical scan, monopulse), mount geometries.</li>
+<li>Module 2 — orbital velocity, visibility geometry, and the shell statistics this lesson's distributions are computed from.</li>
+<li>m5-3 §7 / m5-5 — the ephemeris, timing-advance and Doppler machinery the terminal-side acquisition mirrors.</li>
+<li>m6-3 (second beamforming layer economics), m6-4 (scan model and tilt) — the hardware and geometry this lesson operates.</li>
+<li>Public NGSO operator filings and system descriptions — handover cadence and selection behaviour, class figures only.</li>
+</ul>
+</div>
+
+<div class="complete-wrap">
+    <button class="complete-btn" id="completeBtn">MARK LESSON COMPLETE</button>
+    <div class="complete-msg" id="completeMsg"></div>
+</div>
+<div class="lesson-nav">
+    <a href="m6-4.html">← LESSON 04 — SCAN LOSS &amp; THE MASK</a>
+    <a href="m6-6.html">LESSON 06 — SEGMENTS &amp; AVIATION CERT →</a>
+</div>
+</div>
+
+<button class="back-to-top" id="backToTop" title="Back to top">↑</button>
+<footer>© 2026 LEOAF · M6 · LESSON 05 OF 7</footer>
+<script>
+const canvas=document.getElementById('starsCanvas'),ctx=canvas.getContext('2d');
+let stars=[];
+function initStars(){stars=[];for(let i=0;i<180;i++)stars.push({x:Math.random()*canvas.width,y:Math.random()*canvas.height,size:Math.random()*1.5+0.4,speed:Math.random()*0.18+0.04,hue:Math.random()*360});}
+function resizeCanvas(){canvas.width=window.innerWidth;canvas.height=window.innerHeight;}
+resizeCanvas();initStars();window.addEventListener('resize',resizeCanvas);
+function animateStars(){ctx.clearRect(0,0,canvas.width,canvas.height);stars.forEach(s=>{s.y-=s.speed;if(s.y<0){s.y=canvas.height;s.x=Math.random()*canvas.width;}ctx.beginPath();ctx.fillStyle=`hsl(${s.hue},80%,80%)`;ctx.arc(s.x,s.y,s.size,0,Math.PI*2);ctx.fill();});requestAnimationFrame(animateStars);}
+animateStars();
+</script>
+<script>
+const feedbacks={
+    1:{correct:"The parabolic main-lobe top prices error in beamwidth-relative terms; the verified anchor (bw/2 = the half-power point = 3.0 dB) pins the constant. The m4-1 \"0.3 dB\" line is thus a commitment to ~0.16 beamwidths RSS — terminal-specific through the denominator.",wrong:"The quadratic is the whole point — cost accelerates. It applies to any main lobe near its peak, array or reflector alike."},
+    2:{correct:"Same law, different denominator. The general trade: every dB of aperture gain narrows the beam and tightens the tracking spec — gain is never free of its pointing bill, which is why very-high-gain terminals (gateways) carry monopulse-class tracking.",wrong:"Motor quality is a consequence, not the cause. Panels absolutely point — electronically, with knowledge-dominated error (§5). Both examples are at 20 GHz."},
+    3:{correct:"Closest approach maximises rate and acceleration, and the mount geometry adds a singularity: tracking through near-zenith demands azimuth slews far beyond the geometric LOS rate. Electronic steering has neither limit — one more entry on m6-3's motors-versus-silicon ledger.",wrong:"Overhead is the *strongest* geometry (shortest range, m4-1). Rain path is shortest at zenith (m4-4). Ephemeris is orbit knowledge, elevation-independent."},
+    4:{correct:"The sky is bottom-heavy by geometry; a scan-taxed aperture served by a lone satellite lives at wide scan. The figure corrects m6-4's uniform placeholder — and sets up §4's counter-move.",wrong:"It quantifies, not disqualifies — selection and tilt recover most of the loss. Orbital mechanics, not intent, places satellites. The shape holds broadly with latitude modulation."},
+    5:{correct:"Max-of-K statistics turn constellation density into terminal decibels through geometry alone: every satellite added to the shell improves every panel on the ground. The scheduler's satellite choice (m5-3) is thereby an RF performance decision, coupled to load and arc-legality.",wrong:"The satellites are identical; the *geometry served* changes. Power and protocol are untouched — the panel's scan angle is what improves."},
+    6:{correct:"The two levers overlap but do not coincide: selection needs angular diversity, which mid-latitudes have and polar-adjacent service areas lack toward the pole. The residual 0.9 dB average conceals several dB at the sites that need it — the installer app's latitude logic, explained.",wrong:"The bracket is physics, not merchandising. Drainage and regulation are not the mechanism."},
+    7:{correct:"The mechanical tracker's binding spec is rate/acceleration margin (motors sized to the sea state); the ESA's is data freshness (its correction is computation). Beamwidth tolerance vs attitude latency vs platform dynamics is one inequality, and it decided which segments electrified first.",wrong:"Microsecond steering is the ESA's defining strength. Marine INS is mature. Attitude is the dominant mobile error term — that is the point."},
+    8:{correct:"The §7 choreography: candidate chosen ahead by the §4 logic, prepared from ephemeris, made, then broken. The silicon m6-3 priced (second analog layer) exists to execute step 3; without it, a mechanical repoint of seconds turns the same event into an outage.",wrong:"Clock sync is the m5-5 machinery's input, not the bound. TCP tolerates the gap because it is small — it does not create the smallness. Cadence is geometry, continuous."},
+    9:{correct:"Position and time come from GNSS; orientation does not (a stationary single antenna gets no heading from GNSS). The slow electronic search at first light is the fixed-terminal answer; vehicles need continuous inertial attitude instead (§6).",wrong:"No such law. Single-antenna GNSS gives position/time only. Orientation sets the scan mapping — it is exactly what must be known."},
+    10:{correct:"7.7 to 10.9 dB/K with no component changed: the constellation's density, the scheduler's choice, and a bracket did all of it. m6-7's evaluator carries the served figure with provenance — the module's answer to datasheet-versus-service, in code.",wrong:"The spread is real physics, not measurement noise. Broadside is the *best-case* figure (m6-4 §3's warning). The tracked dish is the control: 19.9 dB/K in every row — its gimbal flattens the table."}
+};
+let answered={};
+document.querySelectorAll('.quiz-opt').forEach(btn=>{
+    btn.addEventListener('click',function(){
+        const q=this.dataset.q;
+        if(answered[q]!==undefined)return;
+        const correct=this.dataset.correct==='true';
+        answered[q]=correct;
+        document.querySelectorAll(`.quiz-opt[data-q="${q}"]`).forEach(b=>{b.disabled=true;if(b.dataset.correct==='true')b.classList.add('correct');});
+        if(!correct)this.classList.add('wrong');
+        const fb=document.getElementById('fb'+q);
+        fb.textContent=(correct?'✓ ':'✗ ')+feedbacks[q][correct?'correct':'wrong'];
+        fb.style.color=correct?'#39ff14':'#ff004f';
+        if(Object.keys(answered).length===10){
+            const total=Object.values(answered).filter(Boolean).length;
+            const sc=document.getElementById('quizScore');
+            sc.style.display='block';
+            const pct=Math.round(total/10*100);
+            sc.textContent=`SCORE: ${total}/10 (${pct}%) — ${pct===100?'PERFECT.':pct>=80?'STRONG.':pct>=60?'ADEQUATE. REVISIT WEAK SECTIONS.':'REVISIT THE LESSON BEFORE PROCEEDING.'}`;
+        }
+    });
+});
+</script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="supabase.js"></script>
+<script src="user_progress.js"></script>
+<script>
+const LESSON_ID='m6-5';
+(function(){
+    function bounceToLogin(r){console.error("Auth guard:",r);window.location.replace("index.html");}
+    async function init(){
+        if(typeof client==="undefined"||!client||!client.auth)return bounceToLogin("Supabase client not loaded");
+        let session=null;
+        try{({data:{session}}=await client.auth.getSession());}
+        catch(e){return bounceToLogin("getSession threw: "+e.message);}
+        if(!session){window.location.replace("index.html");return;}
+        const btn=document.getElementById('completeBtn'),msg=document.getElementById('completeMsg');
+        function setDone(done){
+            if(done){btn.textContent='✓ COMPLETE — CLICK TO UNDO';btn.classList.add('done');btn.style.cssText='border-color:#39ff14;color:#39ff14;background:rgba(57,255,20,0.1);cursor:pointer;opacity:1;';msg.style.color='#39ff14';msg.textContent='Lesson marked complete. Click again to undo.';}
+            else{btn.textContent='MARK LESSON COMPLETE';btn.classList.remove('done');btn.style.cssText='';msg.style.color='#ffffff55';msg.textContent='Not yet marked complete.';}
+        }
+        let mastered=[];
+        try{mastered=await getMasteredSections();}catch(e){console.error(e);}
+        setDone(mastered.includes(LESSON_ID));
+        btn.addEventListener('click',async()=>{
+            const isDone=btn.classList.contains('done');
+            msg.style.color='#00d9ff';msg.textContent='Saving...';
+            const ok=await upsertSection(LESSON_ID,!isDone);
+            if(ok){setDone(!isDone);}else{msg.style.color='#ff004f';msg.textContent='Error saving. Try again.';}
+        });
+        const btt=document.getElementById('backToTop');
+        window.addEventListener('scroll',()=>{btt.classList.toggle('visible',window.scrollY>400);});
+        btt.addEventListener('click',()=>window.scrollTo({top:0,behavior:'smooth'}));
+    }
+    if(document.readyState==="loading")document.addEventListener("DOMContentLoaded",init);
+    else init();
+})();
+</script>
+</body>
+</html>
