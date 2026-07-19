@@ -1,0 +1,632 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, shrink-to-fit=no">
+<title>M7-5 — SDN &amp; Segment Routing in Space · LEOAF</title>
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;600;800&family=Share+Tech+Mono&family=Libre+Baskerville:ital,wght@0,400;0,700;1,400&display=swap" rel="stylesheet">
+<link rel="icon" href="favicon.ico" sizes="any" type="image/x-icon">
+<link rel="manifest" href="site.webmanifest">
+<meta name="theme-color" content="#0f0f0f">
+<script>
+window.leoafAbort = async function () {
+    function go() { window.location.replace("index.html?signedout=1"); }
+    try { if (typeof client !== "undefined" && client && client.auth && client.auth.signOut) { try { await client.auth.signOut({ scope: "local" }); } catch (e) {} } } catch (e) {}
+    go();
+};
+</script>
+<style>
+* { box-sizing:border-box; margin:0; padding:0; }
+html { height:100%; -webkit-text-size-adjust:100%; overflow-x:hidden; }
+body { font-family:'Share Tech Mono',monospace; background:#000; color:white; overflow-x:hidden; min-height:100vh; }
+#starsCanvas { position:fixed; inset:0; z-index:-1; }
+header { background:#000; border-bottom:1px solid #ff004f33; position:sticky; top:0; z-index:100; padding:1rem clamp(1.5rem,5vw,4rem); display:flex; justify-content:space-between; align-items:center; }
+.logo { font-family:'Orbitron',sans-serif; font-weight:800; font-size:clamp(16px,2vw,22px); letter-spacing:3px; text-decoration:none; }
+.logo span:first-child { color:white; } .logo span:last-child { color:#ff004f; }
+.nav-right { display:flex; align-items:center; gap:10px; }
+.nav-btn { background:transparent; border:1px solid #ff004f44; color:#ff004f; padding:6px 14px; cursor:pointer; transition:0.3s; font-size:11px; font-family:'Orbitron',sans-serif; letter-spacing:1px; text-decoration:none; display:inline-block; }
+.nav-btn:hover { background:#ff004f; color:black; }
+.breadcrumb { padding:14px clamp(1.5rem,5vw,4rem); font-size:11px; color:#ffffff44; letter-spacing:1px; position:relative; z-index:1; }
+.breadcrumb a { color:#00d9ff66; text-decoration:none; } .breadcrumb a:hover { color:#00d9ff; }
+.breadcrumb span { margin:0 8px; }
+.lesson-wrap { max-width:820px; margin:0 auto; padding:0 clamp(1.5rem,5vw,4rem) 80px; position:relative; z-index:1; }
+.lesson-header { padding:30px 0 28px; border-bottom:1px solid #ffffff11; margin-bottom:36px; }
+.lesson-tag { font-family:'Orbitron',sans-serif; font-size:10px; color:#ff004f; letter-spacing:3px; margin-bottom:10px; }
+.lesson-header h1 { font-family:'Orbitron',sans-serif; font-size:clamp(20px,3.5vw,32px); font-weight:800; line-height:1.2; margin-bottom:12px; }
+.lesson-meta { display:flex; gap:10px; flex-wrap:wrap; margin-bottom:16px; }
+.l-pill { font-family:'Orbitron',sans-serif; font-size:10px; padding:3px 10px; border:1px solid; letter-spacing:1px; }
+.l-pill-q { color:#ff004f; border-color:#ff004f44; } .l-pill-t { color:#39ff14; border-color:#39ff1444; }
+.l-pill-c { color:#ffaa00; border-color:#ffaa0044; }
+.lesson-intro { font-size:13px; line-height:1.85; opacity:0.75; }
+.toc { background:rgba(0,217,255,0.06); border:1px solid #00d9ff33; padding:24px 28px; margin:30px 0; }
+.toc h4 { font-family:'Orbitron',sans-serif; font-size:10px; color:#00d9ff; letter-spacing:2px; margin-bottom:16px; }
+.toc ol { padding-left:20px; } .toc li { font-size:13px; line-height:2.1; }
+.toc li a { color:#00d9ffbb; text-decoration:none; transition:0.15s; } .toc li a:hover { color:#fff; padding-left:4px; }
+.toc li::marker { color:#ff004f; font-family:'Orbitron',sans-serif; font-size:10px; }
+.cb { background:#f5f2ec; color:#1a1a1a; padding:36px clamp(24px,4vw,48px); margin-bottom:24px; border-left:4px solid #00d9ff; position:relative; z-index:1; }
+.cb h2 { font-family:'Orbitron',sans-serif; font-size:13px; color:#003d66; letter-spacing:2px; text-transform:uppercase; margin-bottom:20px; padding-bottom:10px; border-bottom:2px solid #00d9ff66; scroll-margin-top:80px; }
+.cb h3 { font-family:'Orbitron',sans-serif; font-size:11px; color:#444; letter-spacing:1.5px; text-transform:uppercase; margin:28px 0 12px; }
+.cb p { font-family:'Libre Baskerville',Georgia,serif; font-size:15px; line-height:1.9; color:#1a1a1a; margin-bottom:16px; }
+.cb ul { padding-left:0; margin-bottom:16px; }
+.cb ul li { font-family:'Libre Baskerville',Georgia,serif; font-size:14px; line-height:1.85; color:#1a1a1a; padding-left:20px; position:relative; margin-bottom:8px; }
+.cb ul li::before { content:'›'; position:absolute; left:0; color:#0077aa; }
+.cb blockquote { border-left:3px solid #1a7a1a; background:#eafaea; padding:14px 20px; margin:18px 0; font-size:13px; font-family:'Share Tech Mono',monospace; color:#0a3d0a; line-height:1.8; }
+.callout { border-left:3px solid #0088cc; background:#e8f4fb; padding:16px 20px; margin:22px 0; font-size:12px; line-height:1.8; color:#1a1a1a; }
+.callout.red { border-left-color:#cc0033; background:#fdecea; }
+.callout.green { border-left-color:#1a7a1a; background:#eafaea; }
+.callout.amber { border-left-color:#996600; background:#fef9ec; }
+.callout strong { font-family:'Orbitron',sans-serif; font-size:10px; letter-spacing:1px; display:block; margin-bottom:8px; }
+.compare-table { width:100%; border-collapse:collapse; margin:22px 0; font-size:12px; }
+.compare-table th { font-family:'Orbitron',sans-serif; font-size:10px; letter-spacing:1px; color:#003d66; padding:10px 12px; border-bottom:2px solid #00d9ff66; text-align:left; }
+.compare-table td { padding:10px 12px; border-bottom:1px solid #ddd; line-height:1.5; color:#1a1a1a; vertical-align:top; }
+.compare-table tr:hover td { background:#f0f0f0; }
+.key-numbers { display:grid; grid-template-columns:repeat(auto-fit,minmax(140px,1fr)); gap:12px; margin:22px 0; }
+.kn-item { background:#fff; border:1px solid #d0d0d0; padding:16px 12px; text-align:center; }
+.kn-val { font-family:'Orbitron',sans-serif; font-size:clamp(13px,1.8vw,18px); font-weight:800; color:#003d66; display:block; }
+.kn-label { font-size:10px; color:#555; letter-spacing:1px; margin-top:5px; display:block; line-height:1.4; }
+.quiz-block { background:rgba(17,17,17,0.9); border:1px solid #ff004f33; padding:28px; margin:48px 0 32px; }
+.quiz-block h2 { font-family:'Orbitron',sans-serif; font-size:13px; color:#ff004f; letter-spacing:2px; margin-bottom:6px; }
+.quiz-intro { font-size:12px; opacity:0.6; margin-bottom:24px; padding-bottom:16px; border-bottom:1px solid #ff004f22; line-height:1.6; }
+.quiz-q { margin-bottom:28px; }
+.quiz-q p { font-size:13px; opacity:0.9; margin-bottom:12px; line-height:1.65; }
+.quiz-q p strong { color:#00d9ff; }
+.quiz-options { display:flex; flex-direction:column; gap:8px; }
+.quiz-opt { background:rgba(255,255,255,0.03); border:1px solid #ffffff1a; padding:11px 16px; cursor:pointer; font-size:12px; font-family:'Share Tech Mono',monospace; transition:0.2s; text-align:left; color:white; line-height:1.5; }
+.quiz-opt:hover:not(:disabled) { background:rgba(0,217,255,0.08); border-color:#00d9ff44; }
+.quiz-opt.correct { background:rgba(57,255,20,0.1); border-color:#39ff14; color:#39ff14; }
+.quiz-opt.wrong { background:rgba(255,0,79,0.1); border-color:#ff004f; color:#ff004f; }
+.quiz-opt:disabled { cursor:default; }
+.quiz-feedback { font-size:12px; margin-top:10px; min-height:18px; line-height:1.7; opacity:0.9; padding:0 4px; }
+.quiz-score { font-family:'Orbitron',sans-serif; font-size:12px; color:#39ff14; margin-top:20px; letter-spacing:1px; display:none; padding-top:16px; border-top:1px solid #39ff1433; }
+.py-block { background:rgba(10,10,10,0.95); border:1px solid #39ff1422; padding:28px; margin:32px 0; }
+.py-block h2 { font-family:'Orbitron',sans-serif; font-size:13px; color:#39ff14; letter-spacing:2px; margin-bottom:8px; }
+.py-block .py-intro { font-size:12px; opacity:0.7; margin-bottom:20px; padding-bottom:16px; border-bottom:1px solid #39ff1422; line-height:1.7; }
+.py-exercise { margin-bottom:32px; } .py-exercise:last-child { margin-bottom:0; }
+.py-exercise h3 { font-family:'Orbitron',sans-serif; font-size:11px; color:#39ff1499; letter-spacing:1.5px; text-transform:uppercase; margin-bottom:10px; }
+.py-exercise p { font-size:12px; opacity:0.8; margin-bottom:14px; line-height:1.75; }
+.py-block pre { background:#050505; border:1px solid #39ff1433; padding:20px; font-family:'Share Tech Mono',monospace; font-size:11px; line-height:1.7; overflow-x:auto; color:#39ff14; white-space:pre; margin-bottom:12px; }
+.py-note { background:rgba(57,255,20,0.04); border-left:2px solid #39ff14; padding:12px 16px; margin-top:14px; font-size:12px; line-height:1.75; opacity:0.8; }
+.py-note strong { font-family:'Orbitron',sans-serif; font-size:10px; color:#39ff14; display:block; margin-bottom:6px; letter-spacing:1px; }
+.reflection-block { background:rgba(255,170,0,0.04); border:1px solid #ffaa0033; padding:24px; margin:32px 0; }
+.reflection-block h2 { font-family:'Orbitron',sans-serif; font-size:13px; color:#ffaa00; letter-spacing:2px; margin-bottom:8px; }
+.ref-intro { font-size:12px; opacity:0.7; margin-bottom:20px; padding-bottom:14px; border-bottom:1px solid #ffaa0022; line-height:1.7; }
+.ref-prompt { margin-bottom:20px; }
+.ref-prompt h3 { font-family:'Orbitron',sans-serif; font-size:11px; color:#ffaa0099; letter-spacing:1px; margin-bottom:8px; }
+.ref-prompt p { font-size:12px; opacity:0.8; line-height:1.75; }
+.complete-wrap { margin-top:56px; padding-top:30px; border-top:1px solid #ffffff11; text-align:center; }
+.complete-btn { font-family:'Orbitron',sans-serif; font-size:13px; letter-spacing:2px; padding:14px 44px; background:transparent; border:1px solid #39ff14; color:#39ff14; cursor:pointer; transition:0.3s; }
+.complete-btn:hover:not(.done) { background:#39ff14; color:black; box-shadow:0 0 20px rgba(57,255,20,0.4); }
+.complete-btn.done { background:rgba(57,255,20,0.1); cursor:pointer; opacity:1; }
+.complete-msg { font-size:12px; color:#39ff14; margin-top:14px; min-height:18px; letter-spacing:1px; }
+.lesson-nav { display:flex; justify-content:space-between; margin-top:30px; flex-wrap:wrap; gap:10px; }
+.lesson-nav a { font-family:'Orbitron',sans-serif; font-size:11px; color:#00d9ff66; text-decoration:none; letter-spacing:1px; transition:0.2s; }
+.lesson-nav a:hover { color:#00d9ff; }
+.back-to-top { position:fixed; bottom:28px; right:28px; z-index:200; width:44px; height:44px; background:#000; border:1px solid #00d9ff55; color:#00d9ff; font-size:20px; cursor:pointer; display:flex; align-items:center; justify-content:center; opacity:0; pointer-events:none; transition:opacity 0.3s; }
+.back-to-top.visible { opacity:1; pointer-events:auto; } .back-to-top:hover { border-color:#00d9ff; }
+footer { text-align:center; padding:30px; opacity:0.3; font-size:11px; position:relative; z-index:1; letter-spacing:1px; }
+.module-complete { background:rgba(57,255,20,0.06); border:1px solid #39ff1444; padding:24px 28px; margin:40px 0; text-align:center; }
+.module-complete h3 { font-family:'Orbitron',sans-serif; font-size:14px; color:#39ff14; letter-spacing:2px; margin-bottom:10px; }
+.module-complete p { font-size:12px; opacity:0.8; line-height:1.7; }
+</style>
+</head>
+<body>
+<canvas id="starsCanvas"></canvas>
+<header>
+    <a href="dashboard.html" class="logo"><span>LEO</span><span>AF</span></a>
+    <div class="nav-right">
+        <a href="m7.html" class="nav-btn">← M7 HUB</a>
+        <button class="nav-btn" onclick="leoafAbort()">ABORT</button>
+    </div>
+</header>
+<div class="breadcrumb">
+    <a href="dashboard.html">DASHBOARD</a><span>/</span>
+    <a href="m7.html">M7</a><span>/</span>
+    <span style="color:#ffffff88;">LESSON 05 — SDN &amp; SEGMENT ROUTING</span>
+</div>
+
+<div class="lesson-wrap">
+<div class="lesson-header">
+    <div class="lesson-tag">M7 · LESSON 05 OF 7</div>
+    <h1>SDN &amp; Segment<br>Routing in Space</h1>
+    <div class="lesson-meta">
+        <div class="l-pill l-pill-q">MODULE 7</div>
+        <div class="l-pill l-pill-t">NETWORKING, ISL &amp; ROUTING</div>
+        <div class="l-pill l-pill-c">CORE</div>
+    </div>
+    <p class="lesson-intro" style="margin-bottom:12px;">m7-4 established that a constellation should route proactively — precompute a path table for each known future topology and switch on schedule. This lesson builds the machinery that makes that possible at constellation scale: a <strong>control plane</strong> that computes the tables and gets them onto 1,584 satellites moving at 7.6 km/s, before each is needed. The answer the industry converged on is <strong>software-defined networking (SDN)</strong> — separate the decision-making (the control plane, which computes paths) from the packet-forwarding (the data plane, which executes them) — and it fits a constellation almost too well, because the one thing SDN needs to be practical is exactly the thing a constellation has for free: a <strong>predictable network</strong>. On the terrestrial internet, centralised control fights an unpredictable topology; in space, the deterministic ephemeris (m7-3) hands the controller the entire future, and the control problem collapses from "react to what the network is doing" to "compute what the network will do and tell it ahead of time."</p>
+    <p class="lesson-intro" style="margin-bottom:12px;">The lesson's verified anchors show why this is tractable rather than daunting: a full forwarding table for the whole constellation is a destination-to-next-hop map of ~2.2 KB per satellite (3.4 MB across all 1,584); refreshing them on a 15-second snapshot costs well under 100 kbps per satellite when only the changed entries are pushed; and computing all snapshots for an entire orbit is milliseconds of server time. The control plane is <em>small</em> — not because the network is simple, but because determinism lets it be precomputed on the ground and delivered ahead of need. The lesson also introduces <strong>segment routing</strong>, which moves the path decision into the packet header itself, letting the source specify the route as a stack of waypoints — a natural fit for a network whose paths are computed centrally and change on a schedule. The spine gains the precomputed path-table sequence and the source-routing option.</p>
+</div>
+
+<div class="toc">
+    <h4>CONTENTS</h4>
+    <ol>
+        <li><a href="#s1">The SDN idea, and why space wants it</a></li>
+        <li><a href="#s2">Where the controller lives</a></li>
+        <li><a href="#s3">The control plane is small</a></li>
+        <li><a href="#s4">Segment routing: the path in the packet</a></li>
+        <li><a href="#s5">The control plane meets the data plane</a></li>
+        <li><a href="#s6">What SDN does not fix</a></li>
+        <li><a href="#s7">Key facts</a></li>
+        <li><a href="#s8">What this lesson delivers to the design chain</a></li>
+        <li><a href="#quiz">Knowledge check</a></li>
+        <li><a href="#py">Python exercises</a></li>
+        <li><a href="#reflect">Reflection</a></li>
+    </ol>
+</div>
+
+<div class="cb" id="s1">
+    <h2>1. The SDN idea, and why space wants it</h2>
+<p>Software-defined networking splits a router's two jobs. The <strong>data plane</strong> is the fast path: a packet arrives, the router looks up its destination in a forwarding table, and sends it out the right port — simple, fast, done in hardware. The <strong>control plane</strong> is the slow path: deciding <em>what the forwarding tables should say</em> — running the routing algorithms, responding to topology, setting policy. In a traditional router the two live in the same box, coupled. SDN pulls the control plane out into a separate <strong>controller</strong> (often centralised) that computes the forwarding tables and installs them into the switches, which become pure data-plane devices executing decisions made elsewhere.</p>
+<p>SDN's promise on the terrestrial internet is central visibility and control; its perennial difficulty is that the controller must track a large, changing, partially unpredictable network, and the control loop (controller sees change → recomputes → installs new tables) has latency that fights fast events. A constellation removes the difficulty entirely. The topology is <em>not</em> unpredictable — it is the deterministic +grid of m7-3, computable arbitrarily far ahead. The controller does not need to <em>see</em> a change and react; it <em>computes</em> the change from orbital mechanics before it happens and installs the tables in advance. The control loop is no longer in the critical path, because there is nothing to react to. SDN's one weakness — control-loop latency against unpredictable change — is exactly the weakness a deterministic network deletes. Space is the environment SDN was waiting for.</p>
+</div>
+
+<div class="cb" id="s2">
+    <h2>2. Where the controller lives</h2>
+<p>A centralised controller for a network moving at 7.6 km/s raises an obvious question: where is it, and how does it reach the satellites in time? Two structures, often combined:</p>
+<p><strong>Ground-based control.</strong> The controller runs on the ground — in a data centre with the compute to precompute the whole schedule and the orbit-determination feeds (Module 2) that anchor the ephemeris. It pushes tables up through gateways and across the ISL mesh to every satellite. Because the tables are precomputed and delivered <em>ahead</em> of their activation time, the ground-to-satellite control latency (an access RTT of milliseconds, plus mesh delivery) is irrelevant — it is slack absorbed by the lead time, not delay in a reaction loop. The controller computes at hour-scale lead and delivers at minute-scale lead; the second-scale control latency vanishes into the margin.</p>
+<p><strong>Distributed / onboard execution.</strong> Each satellite holds its precomputed table sequence and a clock, and switches tables autonomously at each snapshot boundary — no per-switch instruction from the ground, just a schedule loaded ahead of time. The ground controller's job is to compute and distribute the schedule; the satellites execute it independently, which means a temporary loss of the control link does not stop routing (the satellite runs its loaded schedule) and only threatens future updates. This decoupling — compute centrally, execute locally, on a shared clock — is the architecture's resilience, and it is only possible because the schedule is deterministic and can be loaded in advance.</p>
+<p>The synthesis: a ground controller that precomputes and distributes, satellites that execute a loaded schedule autonomously, and a control loop whose latency is hidden entirely behind the precompute lead time. The 7.6 km/s network is controllable precisely because nobody has to keep up with it in real time.</p>
+</div>
+
+<div class="cb" id="s3">
+    <h2>3. The control plane is small</h2>
+<p>The intuition that controlling 1,584 satellites must be a heavy data problem is wrong, and the numbers show why. A satellite's forwarding table maps each of the ~1,584 possible destinations to a next-hop neighbour. A satellite ID fits in 11 bits, so a full table is 1,584 × 11 bits ≈ <strong>2.2 KB</strong> — and the entire constellation's tables total ~<strong>3.4 MB</strong>, a rounding error against the terabit-per-second data plane the ISLs carry (m7-2). Refreshing them costs even less: between consecutive snapshots only a few percent of entries change (the topology reconfigures at the edges, not wholesale), so a satellite's own table delta is a few hundred bits per snapshot, and even the aggregate update stream relayed across the mesh to refresh the whole constellation stays in the low kbps per link — a whisper of control traffic riding a mesh built for tens of gigabits per link.</p>
+<p>Computing the tables is equally cheap. All-pairs shortest paths on the ~1,584-node grid is 1,584 Dijkstra runs, milliseconds on a server; a full orbit at a 15-second snapshot is ~380 snapshots, computable in seconds and precomputable hours ahead. The control plane is small in every dimension — table size, update bandwidth, compute — and it is small <em>because</em> of determinism: a reactive controller would need to carry state about an evolving network and push updates at the churn rate, but a proactive one computes a compact schedule once and streams tiny deltas. The lesson's quiet result: the hard problem of m7-4 (routing a churning network) produces an <em>easy</em> control plane, because the churn's predictability turns a real-time reaction problem into a batch precomputation problem.</p>
+</div>
+
+<div class="cb" id="s4">
+    <h2>4. Segment routing: the path in the packet</h2>
+<p>Traditional forwarding is hop-by-hop: each router independently looks up the destination and picks the next hop, and the path emerges from many independent decisions. This works, but it means every satellite must hold a consistent, current table, and a packet's path is only as good as the agreement between all the tables along it. <strong>Segment routing</strong> offers an alternative that suits a centrally computed network: the <em>source</em> encodes the path into the packet header as an ordered stack of <strong>segment identifiers</strong> (SIDs) — waypoints the packet must traverse — and each router simply forwards to the next segment in the stack, popping it off as it goes. The path is carried by the packet, not reconstructed hop by hop.</p>
+<p>For a constellation this is a natural fit. The controller has already computed the whole path (§3); segment routing lets it <em>express</em> that path directly, pushing a SID stack at the ingress satellite rather than relying on every satellite along the route to independently agree on the next hop. The stack is tiny — a transcontinental path of 8 hops is 8 SIDs at ~2 bytes each, a <strong>16-byte header</strong>; even a 15-hop path is 30 bytes — negligible overhead for the benefit of explicit, source-specified, centrally-controlled paths. It also makes traffic engineering trivial: to route a flow around a congested region or along a latency-optimal path, the controller simply pushes a different SID stack at the ingress, without touching any intermediate satellite's table. Segment routing turns the controller's global path knowledge into per-packet instructions, and the deterministic topology makes those instructions valid for the snapshot they were computed for.</p>
+</div>
+
+<div class="cb" id="s5">
+    <h2>5. The control plane meets the data plane</h2>
+<p>The two planes operate on different clocks, and the interface between them is the snapshot. The control plane, on the ground, computes the schedule at hour-scale lead and streams tables and SID policies to the satellites at minute-scale lead. The data plane, on the satellites, forwards packets at line rate using the currently active table, and switches to the next snapshot's table at the scheduled boundary — synchronously across the constellation, so that no packet is forwarded by a satellite whose table disagrees with its neighbours' about the current topology. Clock synchronisation across the constellation (the same timing infrastructure that serves m5-5's timing advance) is what makes the synchronous switch possible: every satellite changes tables at the same instant, and the mesh transitions cleanly from one snapshot's routing to the next.</p>
+<p>This is the make-before-break pattern once more, at the whole-network scale: the next snapshot's tables are loaded and validated before the current snapshot expires, and the switch is instantaneous and coordinated. The reactive floor of m7-4 sits underneath — if a link fails unexpectedly between snapshots, the affected satellites reroute locally on the current table without waiting for the ground — but the common case is a smooth, scheduled, constellation-wide table switch that the users never perceive. The network moves at 7.6 km/s and reconfigures every fifteen seconds, and to a packet crossing it, nothing is happening at all.</p>
+</div>
+
+<div class="cb" id="s6">
+    <h2>6. What SDN does not fix</h2>
+<p>The same honesty m7-4 applied to snapshot routing applies here. SDN and precomputation handle the <em>deterministic</em> part beautifully and leave the <em>non-deterministic</em> part exactly where it was. Traffic is still unpredictable, so the controller's precomputed paths are geometry-optimal, not traffic-optimal, and congestion still requires the fast local reaction of m7-4 §5 — SDN can <em>help</em> (the controller has global traffic visibility and can push new SID stacks to steer flows) but its control loop, even shortened by precomputation, is slower than a traffic microburst. Failures are still unscheduled, so the reactive floor remains essential. And the controller itself is a dependency: a centralised control plane is a centralised point of failure, mitigated by the onboard schedule execution (§2) that lets satellites run without the controller for a while, but not eliminated. SDN makes the deterministic problem small; it does not make the non-deterministic problems disappear. The constellation's routing system is proactive-where-it-can-be and reactive-where-it-must-be, and SDN is the machinery of the proactive half.</p>
+</div>
+
+<div class="cb" id="s7">
+    <h2>7. Key facts</h2>
+<table class="compare-table">
+<thead><tr>
+<th>Fact</th>
+<th>Value</th>
+<th>Unit</th>
+<th>Source</th>
+</tr></thead>
+<tbody>
+<tr><td>SDN split</td><td>control plane (compute paths) / data plane (forward)</td><td>—</td><td>§1</td></tr>
+<tr><td>Why space suits SDN</td><td>deterministic topology deletes control-loop-vs-change latency</td><td>—</td><td>§1</td></tr>
+<tr><td>Controller placement</td><td>ground compute + onboard scheduled execution</td><td>—</td><td>§2</td></tr>
+<tr><td>Satellite ID</td><td>11</td><td>bits</td><td>log₂(1,584)</td></tr>
+<tr><td>Full forwarding table per satellite</td><td>~2.2</td><td>KB</td><td>Computed</td></tr>
+<tr><td>All constellation tables</td><td>~3.4</td><td>MB</td><td>Computed</td></tr>
+<tr><td>Own-table delta (15 s snapshot, ~5% churn)</td><td>few hundred</td><td>bps/sat</td><td>Computed</td></tr>
+<tr><td>All-pairs compute per snapshot</td><td>milliseconds</td><td>—</td><td>Computed</td></tr>
+<tr><td>Snapshots per orbit (15 s)</td><td>~380</td><td>—</td><td>Computed</td></tr>
+<tr><td>Segment routing</td><td>source encodes path as a SID stack in the header</td><td>—</td><td>§4</td></tr>
+<tr><td>SID stack (8-hop / 15-hop path)</td><td>16 / 30</td><td>bytes</td><td>Computed</td></tr>
+<tr><td>Snapshot switch</td><td>synchronous, clock-coordinated, make-before-break</td><td>—</td><td>§5</td></tr>
+</tbody>
+</table>
+</div>
+
+<div class="cb" id="s8">
+    <h2>8. What this lesson delivers to the design chain</h2>
+<p>Stage 5 of the spine is the <strong>control plane</strong>: it takes m7-4's per-snapshot path tables and produces the deliverables a real constellation needs — compact per-satellite forwarding tables, delta updates between snapshots, and (optionally) segment-routing SID stacks for source-specified paths — plus the schedule that says which table is active when. It models the control-plane budget (table size, update bandwidth, precompute lead) and confirms it is small. The router of m7-4 knew <em>what</em> the paths are; Stage 5 knows <em>how to deliver and activate them</em> across a moving constellation, on a shared clock, ahead of need.</p>
+<p>What remains is the packet's experience of all this. The routing and control machinery exists to move a packet from a terminal, across the mesh, to a destination — and the packet's end-to-end latency (access + propagation across the scheduled path + queuing + ground) is what the <em>transport layer</em> sees, and it is where TCP and QUIC, built for stable terrestrial paths, meet a network whose RTT changes on the snapshot schedule. Assembling that end-to-end latency and confronting the transport layer with it is m7-6, the last piece before the synthesis.</p>
+</div>
+
+<div class="quiz-block" id="quiz">
+    <h2>KNOWLEDGE CHECK</h2>
+    <div class="quiz-intro">Ten questions. Each option explains itself after you commit. No retries per question — decide first.</div>
+    <div class="quiz-q">
+        <p><strong>Q1.</strong> Software-defined networking splits a router into:</p>
+        <div class="quiz-options">
+            <button class="quiz-opt" data-q="1" data-correct="false">A — Hardware and software versions</button>
+            <button class="quiz-opt" data-q="1" data-correct="true">B — A control plane that computes forwarding tables and a data plane that executes them — pulling the control plane out into a separate (often centralised) controller</button>
+            <button class="quiz-opt" data-q="1" data-correct="false">C — Uplink and downlink halves</button>
+            <button class="quiz-opt" data-q="1" data-correct="false">D — Optical and RF sections</button>
+        </div>
+        <div class="quiz-feedback" id="fb1"></div>
+    </div>
+    <div class="quiz-q">
+        <p><strong>Q2.</strong> SDN suits a constellation almost too well because:</p>
+        <div class="quiz-options">
+            <button class="quiz-opt" data-q="2" data-correct="false">A — Satellites are cheap</button>
+            <button class="quiz-opt" data-q="2" data-correct="true">B — SDN's one weakness — control-loop latency fighting unpredictable change — is deleted by the deterministic topology, which the controller computes ahead rather than reacting to</button>
+            <button class="quiz-opt" data-q="2" data-correct="false">C — Space has no interference</button>
+            <button class="quiz-opt" data-q="2" data-correct="false">D — Optical links are fast</button>
+        </div>
+        <div class="quiz-feedback" id="fb2"></div>
+    </div>
+    <div class="quiz-q">
+        <p><strong>Q3.</strong> A ground-based controller's control latency to the satellites is irrelevant because:</p>
+        <div class="quiz-options">
+            <button class="quiz-opt" data-q="3" data-correct="false">A — Light is instantaneous</button>
+            <button class="quiz-opt" data-q="3" data-correct="true">B — The tables are precomputed and delivered ahead of their activation time — the control latency is slack absorbed by the lead time, not delay in a reaction loop</button>
+            <button class="quiz-opt" data-q="3" data-correct="false">C — The controller is actually onboard</button>
+            <button class="quiz-opt" data-q="3" data-correct="false">D — Satellites do not need control</button>
+        </div>
+        <div class="quiz-feedback" id="fb3"></div>
+    </div>
+    <div class="quiz-q">
+        <p><strong>Q4.</strong> The whole constellation's forwarding tables total only ~3.4 MB because:</p>
+        <div class="quiz-options">
+            <button class="quiz-opt" data-q="4" data-correct="false">A — The tables are compressed</button>
+            <button class="quiz-opt" data-q="4" data-correct="true">B — Each satellite's table maps ~1,584 destinations to an 11-bit next-hop ID (~2.2 KB), and there are ~1,584 of them — tiny against a terabit-per-second data plane</button>
+            <button class="quiz-opt" data-q="4" data-correct="false">C — Most satellites share one table</button>
+            <button class="quiz-opt" data-q="4" data-correct="false">D — The tables are stored on the ground only</button>
+        </div>
+        <div class="quiz-feedback" id="fb4"></div>
+    </div>
+    <div class="quiz-q">
+        <p><strong>Q5.</strong> Delta updates keep control traffic under ~100 kbps per satellite because:</p>
+        <div class="quiz-options">
+            <button class="quiz-opt" data-q="5" data-correct="false">A — The links are slow</button>
+            <button class="quiz-opt" data-q="5" data-correct="true">B — Between consecutive snapshots only a few percent of table entries change — the topology reconfigures at the edges, not wholesale — so only the changes are pushed</button>
+            <button class="quiz-opt" data-q="5" data-correct="false">C — Updates happen once per orbit</button>
+            <button class="quiz-opt" data-q="5" data-correct="false">D — The tables never change</button>
+        </div>
+        <div class="quiz-feedback" id="fb5"></div>
+    </div>
+    <div class="quiz-q">
+        <p><strong>Q6.</strong> Segment routing differs from hop-by-hop forwarding in that:</p>
+        <div class="quiz-options">
+            <button class="quiz-opt" data-q="6" data-correct="false">A — It uses no header</button>
+            <button class="quiz-opt" data-q="6" data-correct="true">B — The source encodes the path as an ordered stack of segment IDs in the packet header, and each router forwards to the next segment and pops it — the path is carried by the packet, not reconstructed at each hop</button>
+            <button class="quiz-opt" data-q="6" data-correct="false">C — It requires no controller</button>
+            <button class="quiz-opt" data-q="6" data-correct="false">D — It only works on the ground</button>
+        </div>
+        <div class="quiz-feedback" id="fb6"></div>
+    </div>
+    <div class="quiz-q">
+        <p><strong>Q7.</strong> Segment routing makes traffic engineering trivial because:</p>
+        <div class="quiz-options">
+            <button class="quiz-opt" data-q="7" data-correct="false">A — It eliminates congestion</button>
+            <button class="quiz-opt" data-q="7" data-correct="true">B — To steer a flow around congestion or onto a latency-optimal path, the controller pushes a different SID stack at the ingress — without touching any intermediate satellite's table</button>
+            <button class="quiz-opt" data-q="7" data-correct="false">C — It increases bandwidth</button>
+            <button class="quiz-opt" data-q="7" data-correct="false">D — It removes the need for routing</button>
+        </div>
+        <div class="quiz-feedback" id="fb7"></div>
+    </div>
+    <div class="quiz-q">
+        <p><strong>Q8.</strong> The snapshot table switch must be synchronous across the constellation because:</p>
+        <div class="quiz-options">
+            <button class="quiz-opt" data-q="8" data-correct="false">A — It saves power</button>
+            <button class="quiz-opt" data-q="8" data-correct="true">B — No packet should be forwarded by a satellite whose table disagrees with its neighbours' about the current topology — clock synchronisation lets every satellite switch at the same instant</button>
+            <button class="quiz-opt" data-q="8" data-correct="false">C — The controller demands it</button>
+            <button class="quiz-opt" data-q="8" data-correct="false">D — Optical links require it</button>
+        </div>
+        <div class="quiz-feedback" id="fb8"></div>
+    </div>
+    <div class="quiz-q">
+        <p><strong>Q9.</strong> The relationship between the control and data planes is described as make-before-break because:</p>
+        <div class="quiz-options">
+            <button class="quiz-opt" data-q="9" data-correct="false">A — They never interact</button>
+            <button class="quiz-opt" data-q="9" data-correct="true">B — The next snapshot's tables are loaded and validated before the current snapshot expires, so the switch is instantaneous and coordinated — the pattern m6-5 used for terminals, at network scale</button>
+            <button class="quiz-opt" data-q="9" data-correct="false">C — The data plane breaks first</button>
+            <button class="quiz-opt" data-q="9" data-correct="false">D — They run on the same clock as the ground</button>
+        </div>
+        <div class="quiz-feedback" id="fb9"></div>
+    </div>
+    <div class="quiz-q">
+        <p><strong>Q10.</strong> SDN and precomputation do not fix:</p>
+        <div class="quiz-options">
+            <button class="quiz-opt" data-q="10" data-correct="false">A — Anything — they solve everything</button>
+            <button class="quiz-opt" data-q="10" data-correct="true">B — The non-deterministic problems: traffic-driven congestion (needs fast local reaction) and unscheduled failures (need the reactive floor), plus the controller as a central dependency</button>
+            <button class="quiz-opt" data-q="10" data-correct="false">C — The link budget</button>
+            <button class="quiz-opt" data-q="10" data-correct="false">D — Only the segment-routing header size</button>
+        </div>
+        <div class="quiz-feedback" id="fb10"></div>
+    </div>
+    <div class="quiz-score" id="quizScore"></div>
+</div>
+
+<div class="py-block" id="py">
+    <h2>PYTHON EXERCISES</h2>
+    <div class="py-intro">Three exercises; the last extends the module spine project. Run them, then work the numbered follow-ups in the comments — the follow-ups are the exercise.</div>
+    <div class="py-exercise">
+        <h3>Exercise 1 — The control-plane budget</h3>
+        <p>Show the control plane is small.</p>
+<pre>
+import math
+N = 1584
+
+id_bits = math.ceil(math.log2(N))
+table_bytes = N * id_bits / 8
+print(f&quot;satellite ID: {id_bits} bits&quot;)
+print(f&quot;forwarding table per satellite: {table_bytes:.0f} bytes&quot;)
+print(f&quot;whole constellation: {N*table_bytes/1e6:.2f} MB&quot;)
+
+print(&quot;\nupdate bandwidth per satellite:&quot;)
+for interval_s in [5, 15, 30]:
+    full = table_bytes*8/interval_s
+    for churn in [0.02, 0.05, 0.10]:
+        print(f&quot;  {interval_s:&gt;2}s snapshot, {churn:.0%} changed: &quot;
+              f&quot;{full*churn/1e3:.1f} kbps&quot;)
+
+# 1. Compare the control traffic to the data-plane capacity: one ISL
+#    carries ~10-100 Gbps (m7-2). What FRACTION of one link&#x27;s capacity
+#    does the entire control plane&#x27;s update stream consume? State the
+#    conclusion in one sentence.
+# 2. Full-table refresh vs delta: at what churn fraction does pushing
+#    the whole table become cheaper than pushing deltas (accounting for
+#    delta encoding overhead of, say, 3 bytes per changed entry)?
+# 3. Scale to a 10,000-satellite constellation. Does the control plane
+#    stay small? Recompute table size, total, and update rate, and find
+#    what grows fastest with N.
+</pre>
+    </div>
+    <div class="py-exercise">
+        <h3>Exercise 2 — Segment routing headers</h3>
+        <p>Price the source-routed path.</p>
+<pre>
+import math
+N = 1584
+SID_BYTES = math.ceil(math.log2(N)/8)   # bytes per segment ID
+
+def sr_header_bytes(hops):
+    return hops * SID_BYTES
+
+print(f&quot;SID size: {SID_BYTES} bytes ({N} nodes)&quot;)
+for hops in [3, 8, 15, 25]:
+    h = sr_header_bytes(hops)
+    print(f&quot;  {hops:&gt;2}-hop path: {h} byte header &quot;
+          f&quot;({h/1500*100:.1f}% of a 1500 B packet)&quot;)
+
+# 1. A latency-selling operator routes a 1200-byte VoIP-ish packet over
+#    a 12-hop transcontinental path. What is the header OVERHEAD as a
+#    percent, and does segment routing&#x27;s overhead ever threaten the
+#    efficiency the m5-4 framing worked so hard for?
+# 2. Segment routing lets the controller re-steer a flow by changing
+#    the ingress SID stack. Model a congested link: given two paths
+#    (8 hops clean, 11 hops avoiding the hot link), which does a
+#    latency metric pick, and what does the operator override to?
+# 3. Compare SR&#x27;s per-packet header cost against hop-by-hop&#x27;s per-
+#    satellite table-consistency cost. For a constellation, which is
+#    the better trade and why (hint: who computes the path)?
+</pre>
+    </div>
+    <div class="py-exercise">
+        <h3>Exercise 3 — Spine Stage 5: the control plane</h3>
+        <p>Precomputed tables, deltas, and the schedule.</p>
+<pre>
+import heapq, math
+
+# ═══════════════════════════════════════════════════════
+# M7 SPINE PROJECT — CONSTELLATION ROUTER
+# Stage 5: the control plane.
+#   Stage 4 (m7-4) computed per-snapshot path tables.
+#   Stage 5: turn them into per-satellite forwarding tables,
+#            compute deltas between snapshots, size the control
+#            budget, and emit segment-routing SID stacks.
+#   Next: m7-6 turns a path into end-to-end latency for transport.
+# ═══════════════════════════════════════════════════════
+
+def dijkstra_all_next_hops(graph, src):
+    &quot;&quot;&quot;Return {dest: next_hop_from_src} — src&#x27;s forwarding table.&quot;&quot;&quot;
+    dist = {src: 0.0}; first_hop = {src: None}
+    pq = [(0.0, src, None)]
+    while pq:
+        d, u, fh = heapq.heappop(pq)
+        if d &gt; dist.get(u, math.inf): continue
+        for v, w in graph.get(u, []):
+            nd = d + w
+            if nd &lt; dist.get(v, math.inf):
+                dist[v] = nd
+                first_hop[v] = fh if fh is not None else v
+                heapq.heappush(pq, (nd, v, first_hop[v]))
+    return {dst: fh for dst, fh in first_hop.items() if fh is not None}
+
+class ControlPlane:
+    def __init__(self, id_bits=11):
+        self.id_bits = id_bits
+
+    def forwarding_tables(self, graph):
+        &quot;&quot;&quot;Per-node table: {node: {dest: next_hop}}.&quot;&quot;&quot;
+        return {n: dijkstra_all_next_hops(graph, n) for n in graph}
+
+    def table_bytes(self, table):
+        return len(table)*self.id_bits/8
+
+    def delta(self, old_tables, new_tables):
+        &quot;&quot;&quot;Changed (node, dest) entries between two snapshots.&quot;&quot;&quot;
+        changes = 0
+        for n in new_tables:
+            o, w = old_tables.get(n, {}), new_tables[n]
+            for dst, nh in w.items():
+                if o.get(dst) != nh: changes += 1
+        return changes
+
+    def sid_stack(self, path):
+        &quot;&quot;&quot;Segment-routing header for an explicit path.&quot;&quot;&quot;
+        return path[1:]     # list of SIDs (waypoints after the source)
+
+def grid(P=4, S=4, intra=1970, inter=600, C=299792.458, proc=0.5):
+    g = {}
+    for p in range(P):
+        for s in range(S):
+            u=(p,s)
+            g[u]=[((p,(s+1)%S), intra/C*1000+proc),
+                  ((p,(s-1)%S), intra/C*1000+proc),
+                  (((p+1)%P,s), inter/C*1000+proc),
+                  (((p-1)%P,s), inter/C*1000+proc)]
+    return g
+
+cp = ControlPlane()
+# 8x8 grid: large enough that the inter-plane range change reroutes some
+# destinations (a 4x4 is too symmetric to show a delta).
+g0, g1 = grid(P=8, S=8, inter=600), grid(P=8, S=8, inter=2500)
+t0, t1 = cp.forwarding_tables(g0), cp.forwarding_tables(g1)
+
+sample = next(iter(t0))
+print(f&quot;table for {sample}: {len(t0[sample])} dests, &quot;
+      f&quot;{cp.table_bytes(t0[sample]):.0f} bytes&quot;)
+print(f&quot;total tables: {sum(cp.table_bytes(t) for t in t0.values())/1e3:.1f} KB&quot;)
+print(f&quot;delta snapshot0-&gt;1: {cp.delta(t0, t1)} changed entries&quot;)
+
+# segment-routing stack for an explicit path
+import heapq
+def sp(graph, s, d):
+    pq=[(0,s,[s])]; seen=set()
+    while pq:
+        c,u,p=heapq.heappop(pq)
+        if u==d: return p
+        if u in seen: continue
+        seen.add(u)
+        for v,w in graph[u]:
+            if v not in seen: heapq.heappush(pq,(c+w,v,p+[v]))
+path = sp(g0, (0,0), (2,3))
+print(f&quot;SID stack for {(0,0)}-&gt;{(2,3)}: {cp.sid_stack(path)}&quot;)
+
+# ── the handoff ─────────────────────────────────────────
+# m7-6 takes a path (from tables or SID stack) and adds access
+# latency (m6-5 up/down), per-hop propagation+processing, and
+# queuing to produce the END-TO-END latency the transport layer
+# (TCP/QUIC) actually experiences.
+
+# 1. Scale grid() to 40×40 and time forwarding_tables(). Confirm the
+#    all-pairs precompute is milliseconds — the control plane&#x27;s compute
+#    budget claim.
+# 2. Evolve the grid over 5 snapshots (inter breathing 600-&gt;1200) and
+#    report the delta each step. Is it always a &#x27;few percent&#x27;, as §3
+#    claims? Where would a BIG delta come from (hint: seam/pole events)?
+# 3. Add a `schedule` that pairs each snapshot&#x27;s tables with an
+#    activation time, and a synchronous &#x27;switch&#x27; that all nodes apply
+#    at the boundary. This is Stage 5&#x27;s deliverable to the data plane.
+</pre>
+    </div>
+</div>
+
+<div class="reflection-block" id="reflect">
+    <h2>REFLECTION</h2>
+    <div class="ref-intro">Four prompts. Each forces a decision — write the position down before moving on; the act of committing is the exercise.</div>
+    <div class="ref-prompt">
+        <h3>PROMPT 01</h3>
+        <p>Section 2 made onboard scheduled execution the architecture's resilience — satellites run a loaded schedule if the controller link is lost. But "a loaded schedule" has a horizon: how far ahead can a satellite's memory and the ephemeris accuracy support precomputed tables? Work the trade: a longer loaded horizon survives longer controller outages but risks the ephemeris drifting from reality (maneuvers, drag) so the old tables route on a stale topology. Determine the right loaded horizon as a function of ephemeris-prediction accuracy and controller-availability, and decide whether a satellite that has run out of valid schedule should keep routing on stale tables or fall back to a reactive protocol — and what that fallback costs.</p>
+    </div>
+    <div class="ref-prompt">
+        <h3>PROMPT 02</h3>
+        <p>Section 4 showed segment routing lets the controller re-steer a flow by changing one ingress SID stack, and section 6 admitted the controller's loop is still slower than a traffic microburst. These are in tension: SDN's traffic-engineering power (global re-steering) is real but slow, while the fast congestion response is local and myopic. Design the division of labour: which congestion events should the slow global controller handle (with SID re-steering) and which should the fast local reaction handle, and what information must pass between them so they do not fight — the local reaction undoing the controller's engineering or vice versa? Identify the failure mode where the two layers oscillate.</p>
+    </div>
+    <div class="ref-prompt">
+        <h3>PROMPT 03</h3>
+        <p>Section 6 named the centralised controller as a point of failure, mitigated by onboard execution but not eliminated. Consider the adversarial and the accidental cases together: a controller compromised (pushing malicious SID stacks) versus a controller merely offline. The onboard schedule protects against offline but <em>not</em> against a compromised controller pushing bad-but-valid tables. Propose what a satellite should verify about a control update before applying it — and whether a constellation should have a distributed consensus among satellites as a check on the central controller, trading SDN's simplicity for resilience. Where is the right point on that spectrum for a commercial constellation versus a sovereign one?</p>
+    </div>
+    <div class="ref-prompt">
+        <h3>PROMPT 04</h3>
+        <p>This lesson's control-plane-is-small result (3.4 MB, sub-100 kbps updates) rests on the forwarding table being destination-to-next-hop — a <em>hop-by-hop</em> structure — while section 4 advocated <em>segment routing</em>, where the path lives in the packet. These are two different data-plane models with different control-plane costs. Interrogate the inconsistency: does a segment-routed constellation need per-satellite forwarding tables at all, or does the ingress SID stack replace them — and if so, what is the <em>real</em> control-plane cost of segment routing (computing and distributing which SID stacks to which ingress points for which flows)? Determine whether segment routing makes the control plane smaller or merely moves its cost from the core to the edge, and which the constellation should prefer.</p>
+    </div>
+</div>
+
+<div class="cb">
+    <h2>Sources</h2>
+<ul>
+<li>McKeown et al., "OpenFlow: Enabling Innovation in Campus Networks" (2008) — the SDN control/data-plane separation.</li>
+<li>Filsfils et al., "Segment Routing Architecture" (RFC 8402) — segment routing and the SID stack.</li>
+<li>Bhattacherjee &amp; Singla, "Network topology design at 27,000 km/hour" (CoNEXT, 2019); Handley, "Delay is Not an Option" (HotNets, 2018) — centralised/precomputed routing for constellations.</li>
+<li>Giuliari et al., "Internet backbones in space" — control architectures for satellite mega-constellations.</li>
+<li>Module 7 (m7-3, m7-4) — the deterministic topology and per-snapshot tables this control plane distributes; Module 5 (m5-5) — the timing infrastructure behind the synchronous switch.</li>
+</ul>
+</div>
+
+<div class="complete-wrap">
+    <button class="complete-btn" id="completeBtn">MARK LESSON COMPLETE</button>
+    <div class="complete-msg" id="completeMsg"></div>
+</div>
+<div class="lesson-nav">
+    <a href="m7-4.html">← LESSON 04 — ROUTING UNDER CHURN</a>
+    <a href="m7-6.html">LESSON 06 — LATENCY &amp; TRANSPORT →</a>
+</div>
+</div>
+
+<button class="back-to-top" id="backToTop" title="Back to top">↑</button>
+<footer>© 2026 LEOAF · M7 · LESSON 05 OF 7</footer>
+<script>
+const canvas=document.getElementById('starsCanvas'),ctx=canvas.getContext('2d');
+let stars=[];
+function initStars(){stars=[];for(let i=0;i<180;i++)stars.push({x:Math.random()*canvas.width,y:Math.random()*canvas.height,size:Math.random()*1.5+0.4,speed:Math.random()*0.18+0.04,hue:Math.random()*360});}
+function resizeCanvas(){canvas.width=window.innerWidth;canvas.height=window.innerHeight;}
+resizeCanvas();initStars();window.addEventListener('resize',resizeCanvas);
+function animateStars(){ctx.clearRect(0,0,canvas.width,canvas.height);stars.forEach(s=>{s.y-=s.speed;if(s.y<0){s.y=canvas.height;s.x=Math.random()*canvas.width;}ctx.beginPath();ctx.fillStyle=`hsl(${s.hue},80%,80%)`;ctx.arc(s.x,s.y,s.size,0,Math.PI*2);ctx.fill();});requestAnimationFrame(animateStars);}
+animateStars();
+</script>
+<script>
+const feedbacks={
+    1:{correct:"The data plane forwards packets at line rate using a table; the control plane decides what the table says. SDN separates them, centralising the control decisions into a controller and leaving the switches as pure forwarders. This split is what lets a constellation's paths be computed centrally.",wrong:"The split is by *function* (decide vs forward), not by implementation medium, direction, or carrier. Those distinctions are unrelated to SDN."},
+    2:{correct:"On the terrestrial internet the controller fights an unpredictable, changing network. A constellation's topology is the deterministic +grid, computable arbitrarily far ahead, so the controller precomputes rather than reacts and its control-loop latency vanishes into the lead time. SDN's weakness is exactly what determinism removes.",wrong:"Satellite cost, interference, and link speed are unrelated to why SDN's control model fits. The fit is about predictability deleting the control-loop-vs-change problem."},
+    3:{correct:"Because the schedule is known hours ahead, the controller delivers each table at minute-scale lead before it activates; the millisecond access RTT is hidden entirely in that margin. There is no reaction loop for the latency to slow — the tables arrive before they are needed.",wrong:"Light is not instantaneous (that latency is real, just hidden). The controller is ground-based here (onboard execution is a separate element). Satellites absolutely need control — it is just delivered ahead of time."},
+    4:{correct:"Destination-to-next-hop over 1,584 destinations at 11 bits each is ~2.2 KB per satellite; ×1,584 ≈ 3.4 MB. The control plane is small in raw size — a rounding error against the ISL data rates. Determinism makes it precomputable; its smallness makes it trivially deliverable.",wrong:"The smallness is inherent, not from compression. Each satellite has its *own* table (different next-hops). The tables live on the satellites (delivered from the ground), where forwarding needs them."},
+    5:{correct:"Consecutive snapshots differ only where links handed off (the mesh's edges), a few percent of entries. Pushing deltas rather than full tables drops the update rate to a whisper on a multi-gigabit mesh. The predictable, incremental nature of churn makes the control traffic negligible.",wrong:"The links are fast (m7-2). Updates happen every snapshot (~15 s), far more often than per orbit. The tables change every snapshot — but incrementally, which is the point."},
+    6:{correct:"Hop-by-hop relies on every router independently agreeing on the next hop from its table; segment routing has the source specify the waypoints explicitly. For a centrally computed constellation, this expresses the controller's already-known path directly, at a tiny header cost (16 bytes for 8 hops).",wrong:"It uses a header (the SID stack). It pairs naturally *with* a controller that computes the paths. It is widely used in terrestrial networks and fits space especially well."},
+    7:{correct:"The whole path lives in the header, set at ingress, so re-steering a flow is a single change at one point rather than a coordinated update across every satellite on the route. The controller's global view becomes per-packet instructions cheaply — ideal for a centrally-controlled network.",wrong:"It does not eliminate congestion (it helps route around it) or add bandwidth or remove routing. It relocates the path decision to the source, which is what makes engineering flows easy."},
+    8:{correct:"If satellites switched tables at different times, a packet could hit a satellite still using the old topology's next-hops while its neighbour used the new — inconsistent forwarding, loops, or drops. The shared clock (m5-5's timing infrastructure) makes the whole mesh transition at once, cleanly.",wrong:"It is about forwarding consistency, not power. The controller enables it but the *reason* is consistency. Optical links do not require synchronous switching — the routing consistency does."},
+    9:{correct:"Tables for the upcoming topology are delivered and staged ahead of the boundary; at the scheduled instant the whole constellation switches to the already-loaded tables. Nothing breaks before the replacement is ready — the m6-5 handover discipline applied to routing tables.",wrong:"The planes interact constantly (control installs, data executes). Nothing breaks first — that is the point of make-before-break. The satellites share a clock with *each other* (and a timing reference), enabling the synchronous switch."},
+    10:{correct:"Determinism makes the geometric problem small; it leaves traffic and failures exactly where they were. The controller can help with congestion (global visibility, new SID stacks) but its loop is slower than a microburst, and its centralisation is a dependency mitigated but not removed by onboard execution. Proactive where possible, reactive where necessary.",wrong:"They emphatically do not solve everything — the honesty about their limits is the section's point. The link budget is m7-2's domain. The header size is a benefit, not a limitation."}
+};
+let answered={};
+document.querySelectorAll('.quiz-opt').forEach(btn=>{
+    btn.addEventListener('click',function(){
+        const q=this.dataset.q;
+        if(answered[q]!==undefined)return;
+        const correct=this.dataset.correct==='true';
+        answered[q]=correct;
+        document.querySelectorAll(`.quiz-opt[data-q="${q}"]`).forEach(b=>{b.disabled=true;if(b.dataset.correct==='true')b.classList.add('correct');});
+        if(!correct)this.classList.add('wrong');
+        const fb=document.getElementById('fb'+q);
+        fb.textContent=(correct?'✓ ':'✗ ')+feedbacks[q][correct?'correct':'wrong'];
+        fb.style.color=correct?'#39ff14':'#ff004f';
+        if(Object.keys(answered).length===10){
+            const total=Object.values(answered).filter(Boolean).length;
+            const sc=document.getElementById('quizScore');
+            sc.style.display='block';
+            const pct=Math.round(total/10*100);
+            sc.textContent=`SCORE: ${total}/10 (${pct}%) — ${pct===100?'PERFECT.':pct>=80?'STRONG.':pct>=60?'ADEQUATE. REVISIT WEAK SECTIONS.':'REVISIT THE LESSON BEFORE PROCEEDING.'}`;
+        }
+    });
+});
+</script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="supabase.js"></script>
+<script src="user_progress.js"></script>
+<script>
+const LESSON_ID='m7-5';
+(function(){
+    function bounceToLogin(r){console.error("Auth guard:",r);window.location.replace("index.html");}
+    async function init(){
+        if(typeof client==="undefined"||!client||!client.auth)return bounceToLogin("Supabase client not loaded");
+        let session=null;
+        try{({data:{session}}=await client.auth.getSession());}
+        catch(e){return bounceToLogin("getSession threw: "+e.message);}
+        if(!session){window.location.replace("index.html");return;}
+        const btn=document.getElementById('completeBtn'),msg=document.getElementById('completeMsg');
+        function setDone(done){
+            if(done){btn.textContent='✓ COMPLETE — CLICK TO UNDO';btn.classList.add('done');btn.style.cssText='border-color:#39ff14;color:#39ff14;background:rgba(57,255,20,0.1);cursor:pointer;opacity:1;';msg.style.color='#39ff14';msg.textContent='Lesson marked complete. Click again to undo.';}
+            else{btn.textContent='MARK LESSON COMPLETE';btn.classList.remove('done');btn.style.cssText='';msg.style.color='#ffffff55';msg.textContent='Not yet marked complete.';}
+        }
+        let mastered=[];
+        try{mastered=await getMasteredSections();}catch(e){console.error(e);}
+        setDone(mastered.includes(LESSON_ID));
+        btn.addEventListener('click',async()=>{
+            const isDone=btn.classList.contains('done');
+            msg.style.color='#00d9ff';msg.textContent='Saving...';
+            const ok=await upsertSection(LESSON_ID,!isDone);
+            if(ok){setDone(!isDone);}else{msg.style.color='#ff004f';msg.textContent='Error saving. Try again.';}
+        });
+        const btt=document.getElementById('backToTop');
+        window.addEventListener('scroll',()=>{btt.classList.toggle('visible',window.scrollY>400);});
+        btt.addEventListener('click',()=>window.scrollTo({top:0,behavior:'smooth'}));
+    }
+    if(document.readyState==="loading")document.addEventListener("DOMContentLoaded",init);
+    else init();
+})();
+</script>
+</body>
+</html>
