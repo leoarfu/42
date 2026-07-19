@@ -1,0 +1,621 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, shrink-to-fit=no">
+<title>M7-1 — Bent-Pipe vs Mesh: The Architecture Decision · LEOAF</title>
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;600;800&family=Share+Tech+Mono&family=Libre+Baskerville:ital,wght@0,400;0,700;1,400&display=swap" rel="stylesheet">
+<link rel="icon" href="favicon.ico" sizes="any" type="image/x-icon">
+<link rel="manifest" href="site.webmanifest">
+<meta name="theme-color" content="#0f0f0f">
+<script>
+window.leoafAbort = async function () {
+    function go() { window.location.replace("index.html?signedout=1"); }
+    try { if (typeof client !== "undefined" && client && client.auth && client.auth.signOut) { try { await client.auth.signOut({ scope: "local" }); } catch (e) {} } } catch (e) {}
+    go();
+};
+</script>
+<style>
+* { box-sizing:border-box; margin:0; padding:0; }
+html { height:100%; -webkit-text-size-adjust:100%; overflow-x:hidden; }
+body { font-family:'Share Tech Mono',monospace; background:#000; color:white; overflow-x:hidden; min-height:100vh; }
+#starsCanvas { position:fixed; inset:0; z-index:-1; }
+header { background:#000; border-bottom:1px solid #ff004f33; position:sticky; top:0; z-index:100; padding:1rem clamp(1.5rem,5vw,4rem); display:flex; justify-content:space-between; align-items:center; }
+.logo { font-family:'Orbitron',sans-serif; font-weight:800; font-size:clamp(16px,2vw,22px); letter-spacing:3px; text-decoration:none; }
+.logo span:first-child { color:white; } .logo span:last-child { color:#ff004f; }
+.nav-right { display:flex; align-items:center; gap:10px; }
+.nav-btn { background:transparent; border:1px solid #ff004f44; color:#ff004f; padding:6px 14px; cursor:pointer; transition:0.3s; font-size:11px; font-family:'Orbitron',sans-serif; letter-spacing:1px; text-decoration:none; display:inline-block; }
+.nav-btn:hover { background:#ff004f; color:black; }
+.breadcrumb { padding:14px clamp(1.5rem,5vw,4rem); font-size:11px; color:#ffffff44; letter-spacing:1px; position:relative; z-index:1; }
+.breadcrumb a { color:#00d9ff66; text-decoration:none; } .breadcrumb a:hover { color:#00d9ff; }
+.breadcrumb span { margin:0 8px; }
+.lesson-wrap { max-width:820px; margin:0 auto; padding:0 clamp(1.5rem,5vw,4rem) 80px; position:relative; z-index:1; }
+.lesson-header { padding:30px 0 28px; border-bottom:1px solid #ffffff11; margin-bottom:36px; }
+.lesson-tag { font-family:'Orbitron',sans-serif; font-size:10px; color:#ff004f; letter-spacing:3px; margin-bottom:10px; }
+.lesson-header h1 { font-family:'Orbitron',sans-serif; font-size:clamp(20px,3.5vw,32px); font-weight:800; line-height:1.2; margin-bottom:12px; }
+.lesson-meta { display:flex; gap:10px; flex-wrap:wrap; margin-bottom:16px; }
+.l-pill { font-family:'Orbitron',sans-serif; font-size:10px; padding:3px 10px; border:1px solid; letter-spacing:1px; }
+.l-pill-q { color:#ff004f; border-color:#ff004f44; } .l-pill-t { color:#39ff14; border-color:#39ff1444; }
+.l-pill-c { color:#ffaa00; border-color:#ffaa0044; }
+.lesson-intro { font-size:13px; line-height:1.85; opacity:0.75; }
+.toc { background:rgba(0,217,255,0.06); border:1px solid #00d9ff33; padding:24px 28px; margin:30px 0; }
+.toc h4 { font-family:'Orbitron',sans-serif; font-size:10px; color:#00d9ff; letter-spacing:2px; margin-bottom:16px; }
+.toc ol { padding-left:20px; } .toc li { font-size:13px; line-height:2.1; }
+.toc li a { color:#00d9ffbb; text-decoration:none; transition:0.15s; } .toc li a:hover { color:#fff; padding-left:4px; }
+.toc li::marker { color:#ff004f; font-family:'Orbitron',sans-serif; font-size:10px; }
+.cb { background:#f5f2ec; color:#1a1a1a; padding:36px clamp(24px,4vw,48px); margin-bottom:24px; border-left:4px solid #00d9ff; position:relative; z-index:1; }
+.cb h2 { font-family:'Orbitron',sans-serif; font-size:13px; color:#003d66; letter-spacing:2px; text-transform:uppercase; margin-bottom:20px; padding-bottom:10px; border-bottom:2px solid #00d9ff66; scroll-margin-top:80px; }
+.cb h3 { font-family:'Orbitron',sans-serif; font-size:11px; color:#444; letter-spacing:1.5px; text-transform:uppercase; margin:28px 0 12px; }
+.cb p { font-family:'Libre Baskerville',Georgia,serif; font-size:15px; line-height:1.9; color:#1a1a1a; margin-bottom:16px; }
+.cb ul { padding-left:0; margin-bottom:16px; }
+.cb ul li { font-family:'Libre Baskerville',Georgia,serif; font-size:14px; line-height:1.85; color:#1a1a1a; padding-left:20px; position:relative; margin-bottom:8px; }
+.cb ul li::before { content:'›'; position:absolute; left:0; color:#0077aa; }
+.cb blockquote { border-left:3px solid #1a7a1a; background:#eafaea; padding:14px 20px; margin:18px 0; font-size:13px; font-family:'Share Tech Mono',monospace; color:#0a3d0a; line-height:1.8; }
+.callout { border-left:3px solid #0088cc; background:#e8f4fb; padding:16px 20px; margin:22px 0; font-size:12px; line-height:1.8; color:#1a1a1a; }
+.callout.red { border-left-color:#cc0033; background:#fdecea; }
+.callout.green { border-left-color:#1a7a1a; background:#eafaea; }
+.callout.amber { border-left-color:#996600; background:#fef9ec; }
+.callout strong { font-family:'Orbitron',sans-serif; font-size:10px; letter-spacing:1px; display:block; margin-bottom:8px; }
+.compare-table { width:100%; border-collapse:collapse; margin:22px 0; font-size:12px; }
+.compare-table th { font-family:'Orbitron',sans-serif; font-size:10px; letter-spacing:1px; color:#003d66; padding:10px 12px; border-bottom:2px solid #00d9ff66; text-align:left; }
+.compare-table td { padding:10px 12px; border-bottom:1px solid #ddd; line-height:1.5; color:#1a1a1a; vertical-align:top; }
+.compare-table tr:hover td { background:#f0f0f0; }
+.key-numbers { display:grid; grid-template-columns:repeat(auto-fit,minmax(140px,1fr)); gap:12px; margin:22px 0; }
+.kn-item { background:#fff; border:1px solid #d0d0d0; padding:16px 12px; text-align:center; }
+.kn-val { font-family:'Orbitron',sans-serif; font-size:clamp(13px,1.8vw,18px); font-weight:800; color:#003d66; display:block; }
+.kn-label { font-size:10px; color:#555; letter-spacing:1px; margin-top:5px; display:block; line-height:1.4; }
+.quiz-block { background:rgba(17,17,17,0.9); border:1px solid #ff004f33; padding:28px; margin:48px 0 32px; }
+.quiz-block h2 { font-family:'Orbitron',sans-serif; font-size:13px; color:#ff004f; letter-spacing:2px; margin-bottom:6px; }
+.quiz-intro { font-size:12px; opacity:0.6; margin-bottom:24px; padding-bottom:16px; border-bottom:1px solid #ff004f22; line-height:1.6; }
+.quiz-q { margin-bottom:28px; }
+.quiz-q p { font-size:13px; opacity:0.9; margin-bottom:12px; line-height:1.65; }
+.quiz-q p strong { color:#00d9ff; }
+.quiz-options { display:flex; flex-direction:column; gap:8px; }
+.quiz-opt { background:rgba(255,255,255,0.03); border:1px solid #ffffff1a; padding:11px 16px; cursor:pointer; font-size:12px; font-family:'Share Tech Mono',monospace; transition:0.2s; text-align:left; color:white; line-height:1.5; }
+.quiz-opt:hover:not(:disabled) { background:rgba(0,217,255,0.08); border-color:#00d9ff44; }
+.quiz-opt.correct { background:rgba(57,255,20,0.1); border-color:#39ff14; color:#39ff14; }
+.quiz-opt.wrong { background:rgba(255,0,79,0.1); border-color:#ff004f; color:#ff004f; }
+.quiz-opt:disabled { cursor:default; }
+.quiz-feedback { font-size:12px; margin-top:10px; min-height:18px; line-height:1.7; opacity:0.9; padding:0 4px; }
+.quiz-score { font-family:'Orbitron',sans-serif; font-size:12px; color:#39ff14; margin-top:20px; letter-spacing:1px; display:none; padding-top:16px; border-top:1px solid #39ff1433; }
+.py-block { background:rgba(10,10,10,0.95); border:1px solid #39ff1422; padding:28px; margin:32px 0; }
+.py-block h2 { font-family:'Orbitron',sans-serif; font-size:13px; color:#39ff14; letter-spacing:2px; margin-bottom:8px; }
+.py-block .py-intro { font-size:12px; opacity:0.7; margin-bottom:20px; padding-bottom:16px; border-bottom:1px solid #39ff1422; line-height:1.7; }
+.py-exercise { margin-bottom:32px; } .py-exercise:last-child { margin-bottom:0; }
+.py-exercise h3 { font-family:'Orbitron',sans-serif; font-size:11px; color:#39ff1499; letter-spacing:1.5px; text-transform:uppercase; margin-bottom:10px; }
+.py-exercise p { font-size:12px; opacity:0.8; margin-bottom:14px; line-height:1.75; }
+.py-block pre { background:#050505; border:1px solid #39ff1433; padding:20px; font-family:'Share Tech Mono',monospace; font-size:11px; line-height:1.7; overflow-x:auto; color:#39ff14; white-space:pre; margin-bottom:12px; }
+.py-note { background:rgba(57,255,20,0.04); border-left:2px solid #39ff14; padding:12px 16px; margin-top:14px; font-size:12px; line-height:1.75; opacity:0.8; }
+.py-note strong { font-family:'Orbitron',sans-serif; font-size:10px; color:#39ff14; display:block; margin-bottom:6px; letter-spacing:1px; }
+.reflection-block { background:rgba(255,170,0,0.04); border:1px solid #ffaa0033; padding:24px; margin:32px 0; }
+.reflection-block h2 { font-family:'Orbitron',sans-serif; font-size:13px; color:#ffaa00; letter-spacing:2px; margin-bottom:8px; }
+.ref-intro { font-size:12px; opacity:0.7; margin-bottom:20px; padding-bottom:14px; border-bottom:1px solid #ffaa0022; line-height:1.7; }
+.ref-prompt { margin-bottom:20px; }
+.ref-prompt h3 { font-family:'Orbitron',sans-serif; font-size:11px; color:#ffaa0099; letter-spacing:1px; margin-bottom:8px; }
+.ref-prompt p { font-size:12px; opacity:0.8; line-height:1.75; }
+.complete-wrap { margin-top:56px; padding-top:30px; border-top:1px solid #ffffff11; text-align:center; }
+.complete-btn { font-family:'Orbitron',sans-serif; font-size:13px; letter-spacing:2px; padding:14px 44px; background:transparent; border:1px solid #39ff14; color:#39ff14; cursor:pointer; transition:0.3s; }
+.complete-btn:hover:not(.done) { background:#39ff14; color:black; box-shadow:0 0 20px rgba(57,255,20,0.4); }
+.complete-btn.done { background:rgba(57,255,20,0.1); cursor:pointer; opacity:1; }
+.complete-msg { font-size:12px; color:#39ff14; margin-top:14px; min-height:18px; letter-spacing:1px; }
+.lesson-nav { display:flex; justify-content:space-between; margin-top:30px; flex-wrap:wrap; gap:10px; }
+.lesson-nav a { font-family:'Orbitron',sans-serif; font-size:11px; color:#00d9ff66; text-decoration:none; letter-spacing:1px; transition:0.2s; }
+.lesson-nav a:hover { color:#00d9ff; }
+.back-to-top { position:fixed; bottom:28px; right:28px; z-index:200; width:44px; height:44px; background:#000; border:1px solid #00d9ff55; color:#00d9ff; font-size:20px; cursor:pointer; display:flex; align-items:center; justify-content:center; opacity:0; pointer-events:none; transition:opacity 0.3s; }
+.back-to-top.visible { opacity:1; pointer-events:auto; } .back-to-top:hover { border-color:#00d9ff; }
+footer { text-align:center; padding:30px; opacity:0.3; font-size:11px; position:relative; z-index:1; letter-spacing:1px; }
+.module-complete { background:rgba(57,255,20,0.06); border:1px solid #39ff1444; padding:24px 28px; margin:40px 0; text-align:center; }
+.module-complete h3 { font-family:'Orbitron',sans-serif; font-size:14px; color:#39ff14; letter-spacing:2px; margin-bottom:10px; }
+.module-complete p { font-size:12px; opacity:0.8; line-height:1.7; }
+</style>
+</head>
+<body>
+<canvas id="starsCanvas"></canvas>
+<header>
+    <a href="dashboard.html" class="logo"><span>LEO</span><span>AF</span></a>
+    <div class="nav-right">
+        <a href="m7.html" class="nav-btn">← M7 HUB</a>
+        <button class="nav-btn" onclick="leoafAbort()">ABORT</button>
+    </div>
+</header>
+<div class="breadcrumb">
+    <a href="dashboard.html">DASHBOARD</a><span>/</span>
+    <a href="m7.html">M7</a><span>/</span>
+    <span style="color:#ffffff88;">LESSON 01 — BENT-PIPE VS MESH</span>
+</div>
+
+<div class="lesson-wrap">
+<div class="lesson-header">
+    <div class="lesson-tag">M7 · LESSON 01 OF 7</div>
+    <h1>Bent-Pipe vs Mesh:<br>The Architecture Decision</h1>
+    <div class="lesson-meta">
+        <div class="l-pill l-pill-q">MODULE 7</div>
+        <div class="l-pill l-pill-t">NETWORKING, ISL &amp; ROUTING</div>
+        <div class="l-pill l-pill-c">FOUNDATION</div>
+    </div>
+    <p class="lesson-intro" style="margin-bottom:12px;">Module 6 delivered a solved terminal: a node that earns its bits from whatever satellite the scheduler points it at. This module builds the network those bits travel through — and it opens with the decision that determines whether a constellation <em>is</em> a network at all. A <strong>bent-pipe</strong> constellation is a collection of independent links: every satellite is a mirror that relays a user's signal straight back down to a ground station, and the network intelligence lives entirely on the ground. A <strong>mesh</strong> constellation carries traffic between satellites over inter-satellite links (ISLs), routing a packet across the sky before it ever touches the ground — the constellation becomes a router in orbit. The choice is not a detail; it decides the constellation's coverage, its latency, its ground-segment cost, and whether it can serve an ocean.</p>
+    <p class="lesson-intro" style="margin-bottom:12px;">This lesson establishes the two architectures, derives the geometry that separates them, and quantifies the three consequences that make the decision: <strong>coverage</strong> (a bent-pipe satellite can only serve a user who shares its footprint with a gateway — about 2,600 km of reach, which leaves most of the ocean dark), <strong>latency</strong> (a mesh routes at the speed of light in vacuum and beats terrestrial fibre beyond roughly 1,500–2,000 km, because glass is 47% slower than vacuum), and <strong>cost</strong> (ISLs are expensive optical hardware on every satellite; ground stations are expensive real estate on every continent — the two architectures move the cost to opposite ends of the system). The module's spine, a Python <code>ConstellationRouter</code>, begins here as the topology graph with a switch between the two architectures, and it will grow across the module into a full routing-and-latency engine built on the Module 2 orbital geometry.</p>
+</div>
+
+<div class="toc">
+    <h4>CONTENTS</h4>
+    <ol>
+        <li><a href="#s1">Two architectures, one picture</a></li>
+        <li><a href="#s2">The bent-pipe coverage constraint</a></li>
+        <li><a href="#s3">The mesh answer to coverage</a></li>
+        <li><a href="#s4">The latency consequence: light in glass versus vacuum</a></li>
+        <li><a href="#s5">The cost inversion</a></li>
+        <li><a href="#s6">The hybrid and the transition</a></li>
+        <li><a href="#s7">What the mesh demands: the rest of the module</a></li>
+        <li><a href="#s8">Key facts</a></li>
+        <li><a href="#s9">What this lesson delivers to the design chain</a></li>
+        <li><a href="#quiz">Knowledge check</a></li>
+        <li><a href="#py">Python exercises</a></li>
+        <li><a href="#reflect">Reflection</a></li>
+    </ol>
+</div>
+
+<div class="cb" id="s1">
+    <h2>1. Two architectures, one picture</h2>
+<p>A <strong>bent-pipe</strong> (or "transparent") satellite is an amplify-and-forward relay: it receives the user's uplink, shifts frequency, amplifies, and retransmits on the downlink toward a gateway — the m4-7 forward and return links, back to back, with the satellite adding power but no intelligence. The consequence is absolute: the user and the gateway must be <strong>simultaneously visible to the same satellite</strong>, because the satellite cannot store the packet or pass it to a neighbour. Every bent-pipe connection is a double hop — up to the satellite, down to a gateway — and the network's routing, switching, and intelligence all live in the terrestrial ground segment.</p>
+<p>A <strong>mesh</strong> (or "regenerative + ISL") satellite demodulates the packet, reads its destination, and can forward it to a neighbouring satellite over an inter-satellite link. Traffic crosses the constellation satellite-to-satellite and descends only where it needs to — near its destination, or at the one gateway that has terrestrial backhaul to the wider internet. The constellation is now a mesh network in motion, and the routing problem (the rest of this module) becomes real: a packet has choices, the topology changes every few seconds, and something must decide the path.</p>
+<p>The two architectures are not a quality ranking. A bent-pipe constellation is simpler, cheaper per satellite, and entirely adequate where gateways are plentiful and traffic is local. A mesh constellation is more capable and far more expensive, and it earns that expense exactly where the bent-pipe fails: over oceans, over poles, and on long-haul routes where its latency beats fibre.</p>
+</div>
+
+<div class="cb" id="s2">
+    <h2>2. The bent-pipe coverage constraint</h2>
+<p>The geometry that bounds a bent-pipe network: a user is served only if some satellite sees <em>both</em> the user (above the user's elevation mask, say 25°) and a gateway (above the gateway's feeder mask, which can be lower — say 10° — since gateways are engineered sites). The satellite's footprint radius at a 25° user mask is 941 km; at a 10° gateway mask, 1,664 km. The maximum user-to-gateway ground separation for a single-satellite relay is the sum — a user on one edge of the footprint, a gateway on the other:</p>
+<blockquote>Max bent-pipe reach ≈ 941 + 1,664 ≈ <strong>2,605 km</strong> from the nearest gateway.</blockquote>
+<p>Beyond that distance from any gateway, a bent-pipe constellation simply has no service to offer — there is no satellite that can see the user and a gateway at once. And here the Earth's geography becomes a systems constraint: <strong>71% of the surface is ocean</strong>, gateways need land and terrestrial backhaul, and mid-ocean points sit thousands of kilometres from the nearest coast. A bent-pipe constellation can blanket a continent from a handful of inland gateways, but it cannot serve a ship in the mid-Pacific, an aircraft on a polar route, or any user beyond ~2,600 km of a coastline. This single number is why the constellations that promised global — genuinely global — broadband committed to ISLs.</p>
+</div>
+
+<div class="cb" id="s3">
+    <h2>3. The mesh answer to coverage</h2>
+<p>A mesh dissolves the constraint. The ocean user's packet goes up to the satellite overhead, hops satellite-to-satellite across the mesh until it reaches a satellite over a continent with a gateway, and descends there to terrestrial backhaul. The user needs no local gateway at all — only a satellite overhead and a connected mesh between it and civilisation. Coverage decouples from ground-station geography entirely: the constellation serves wherever it flies, which for an inclined Walker constellation (Module 2) is essentially everywhere between its latitude extremes, ocean and pole included. The price is an ISL terminal on every satellite (m7-2's optical hardware) and a routing system that can find the path (m7-4, m7-5). The mesh buys global coverage with orbital hardware instead of terrestrial real estate — and it is the only architecture that can.</p>
+</div>
+
+<div class="cb" id="s4">
+    <h2>4. The latency consequence: light in glass versus vacuum</h2>
+<p>The mesh's second advantage is latency, and it rests on a physical fact terrestrial networks cannot escape: <strong>light travels 47% slower in optical fibre than in vacuum</strong> (the fibre's refractive index is ~1.468, so signals move at c/1.468 ≈ 204,000 km/s instead of 299,792). A LEO mesh, routing through the near-vacuum of space at almost exactly c, has a structural speed advantage over any fibre route — once the path is long enough to amortise the fixed cost of climbing to orbit and back.</p>
+<p>The crossover, verified against real city-pairs (fibre modelled with a realistic ~40% routing detour over great-circle; LEO as up-slant + ISL chord at altitude + down-slant):</p>
+<table class="compare-table">
+<thead><tr>
+<th>Route</th>
+<th>Distance</th>
+<th>Fibre (one-way)</th>
+<th>LEO mesh</th>
+<th>LEO advantage</th>
+</tr></thead>
+<tbody>
+<tr><td>~1,000 km</td><td>short</td><td>6.9 ms</td><td>9.0 ms</td><td>fibre wins</td></tr>
+<tr><td>~2,000 km</td><td>medium</td><td>13.7 ms</td><td>12.7 ms</td><td>LEO wins</td></tr>
+<tr><td>London–New York</td><td>5,570 km</td><td>38.2 ms</td><td>25.6 ms</td><td><strong>12.6 ms</strong></td></tr>
+<tr><td>Singapore–London</td><td>10,850 km</td><td>74.4 ms</td><td>44.7 ms</td><td><strong>29.6 ms</strong></td></tr>
+<tr><td>Sydney–Los Angeles</td><td>12,070 km</td><td>82.7 ms</td><td>49.2 ms</td><td><strong>33.6 ms</strong></td></tr>
+</tbody>
+</table>
+<p>Two readings. First, the crossover sits near <strong>1,500–2,000 km</strong>: below it, the ~7.5 ms round trip to climb to orbit and back (m7-6's access latency) dominates and fibre wins; above it, the vacuum-speed advantage compounds with distance and the mesh pulls away — 34 ms on a transpacific route, which is a decisive edge in latency-sensitive markets (finance, gaming, interactive applications). Second, this advantage belongs <em>only</em> to the mesh: a bent-pipe constellation cannot even attempt these routes, because no single satellite sees both endpoints. The latency argument and the coverage argument are the same argument — both are consequences of routing in space rather than relaying to the ground.</p>
+</div>
+
+<div class="cb" id="s5">
+    <h2>5. The cost inversion</h2>
+<p>The architectures move cost to opposite ends of the system. A <strong>bent-pipe</strong> constellation puts simple, cheap payloads in orbit and pays on the ground: a network of gateways, each an expensive installation with antennas, backhaul, and real estate, tiled densely enough that every served user is within ~2,600 km of one. Coverage scales with ground-station count, and the ground segment becomes the dominant recurring cost and the coverage bottleneck (Module 8's territory). A <strong>mesh</strong> constellation puts expensive optical ISL terminals on every satellite — added mass, power, cost, and pointing complexity on hundreds or thousands of spacecraft — and needs only a handful of gateways, placed for backhaul convenience rather than coverage. Coverage scales with the constellation itself.</p>
+<p>The break-even is a systems-economics question with no universal answer: it turns on the constellation size, the target coverage (regional versus global), the gateway real-estate cost in the target markets, and the ISL hardware cost per satellite. The rule of thumb the geometry supports: <strong>regional or continental service with cheap gateway sites favours bent-pipe; global service — especially oceanic, polar, or latency-competitive — requires mesh.</strong> The market has split exactly along this line, with some systems ground-relayed and others ISL-meshed, and some deploying ISLs incrementally as the coverage and latency premium justifies the hardware.</p>
+</div>
+
+<div class="cb" id="s6">
+    <h2>6. The hybrid and the transition</h2>
+<p>The architectures are endpoints of a spectrum, not a binary. A constellation can fly ISLs on some satellites and not others, use ISLs only over oceans while relaying to ground over land, or deploy a bent-pipe network first and retrofit ISLs as the fleet refreshes (the m6-1 graceful-upgrade logic at constellation scale). A regenerative payload without ISLs is already halfway to a mesh — it demodulates and could route, it simply has no neighbour link yet. The decision this lesson frames is therefore continuous: how much of the network's intelligence and connectivity lives in orbit versus on the ground, evaluated per orbit, per coverage region, and per generation of hardware. The spine's topology graph will model both endpoints and the hybrids between them with one switch.</p>
+</div>
+
+<div class="cb" id="s7">
+    <h2>7. What the mesh demands: the rest of the module</h2>
+<p>Committing to a mesh creates every problem the rest of Module 7 solves. The ISLs must be built — optical links across thousands of kilometres between platforms closing at kilometres per second, with their own link budget and a pointing problem an order of magnitude harder than m6-5's (m7-2). The topology must be understood — which satellites link to which, how the pattern breaks near the poles, how fast it churns (m7-3). The routing must work on a graph that changes every few seconds, defeating the terrestrial protocols built for stable topologies (m7-4). The control plane must scale to a network moving at 7.6 km/s, which the deterministic ephemeris makes tractable through SDN and precomputed paths (m7-5). And the end-to-end latency must be assembled and handed to a transport layer (TCP, QUIC) that was never designed for a path whose RTT changes mid-connection (m7-6). The synthesis (m7-7) assembles all of it into the routing-and-latency model. This lesson's job was to establish <em>why</em> that machinery exists: because a constellation chose to be a network.</p>
+</div>
+
+<div class="cb" id="s8">
+    <h2>8. Key facts</h2>
+<table class="compare-table">
+<thead><tr>
+<th>Fact</th>
+<th>Value</th>
+<th>Unit</th>
+<th>Source</th>
+</tr></thead>
+<tbody>
+<tr><td>Bent-pipe satellite</td><td>amplify-and-forward relay; user &amp; gateway co-visible</td><td>—</td><td>§1</td></tr>
+<tr><td>Mesh satellite</td><td>demodulate, route over ISL to neighbour</td><td>—</td><td>§1</td></tr>
+<tr><td>User footprint radius (25° mask, 550 km)</td><td>941</td><td>km</td><td>Computed</td></tr>
+<tr><td>Gateway footprint radius (10° mask)</td><td>1,664</td><td>km</td><td>Computed</td></tr>
+<tr><td>Bent-pipe max user–gateway reach</td><td>≈ 2,605</td><td>km</td><td>Computed</td></tr>
+<tr><td>Ocean fraction of Earth</td><td>~71</td><td>%</td><td>Geography</td></tr>
+<tr><td>Speed of light in fibre (n = 1.468)</td><td>≈ 204,000</td><td>km/s</td><td>Physics</td></tr>
+<tr><td>Fibre slowdown vs vacuum</td><td>47</td><td>%</td><td>Physics</td></tr>
+<tr><td>LEO-vs-fibre latency crossover</td><td>≈ 1,500–2,000</td><td>km</td><td>Computed</td></tr>
+<tr><td>London–NY: fibre vs LEO mesh</td><td>38.2 vs 25.6</td><td>ms</td><td>Computed</td></tr>
+<tr><td>Sydney–LA: fibre vs LEO mesh</td><td>82.7 vs 49.2</td><td>ms</td><td>Computed</td></tr>
+<tr><td>Access double-hop (up+down, 25°)</td><td>≈ 7.5</td><td>ms</td><td>Computed</td></tr>
+<tr><td>Cost inversion</td><td>bent-pipe → ground segment; mesh → ISL hardware</td><td>—</td><td>§5</td></tr>
+</tbody>
+</table>
+</div>
+
+<div class="cb" id="s9">
+    <h2>9. What this lesson delivers to the design chain</h2>
+<p>The spine begins as a <code>Topology</code> object built on the Module 2 orbital geometry: satellite positions over time, a visibility test for user-to-satellite and satellite-to-satellite links, and a switch between bent-pipe mode (satellites connect only to gateways) and mesh mode (satellites connect to neighbours). In bent-pipe mode it will answer coverage questions — who can be served, from which gateway; in mesh mode it becomes the graph the router traverses. The architecture decision is now a parameter, and its three consequences — coverage reach, latency crossover, cost location — are quantified and ready to trade.</p>
+<p>What the topology graph cannot yet do is carry a packet: it knows which links <em>can</em> exist, not what those links cost to build or how they behave. The ISL itself — its physics, its budget, its brutal pointing problem — is m7-2, and the pattern in which the links assemble into a mesh, and how that pattern churns, is m7-3. Only then can the router of m7-4 traverse a graph that is real.</p>
+</div>
+
+<div class="quiz-block" id="quiz">
+    <h2>KNOWLEDGE CHECK</h2>
+    <div class="quiz-intro">Ten questions. Each option explains itself after you commit. No retries per question — decide first.</div>
+    <div class="quiz-q">
+        <p><strong>Q1.</strong> The defining difference between a bent-pipe and a mesh constellation is:</p>
+        <div class="quiz-options">
+            <button class="quiz-opt" data-q="1" data-correct="false">A — Bent-pipe satellites are larger</button>
+            <button class="quiz-opt" data-q="1" data-correct="true">B — A bent-pipe satellite amplifies-and-forwards to the ground (user and gateway must be co-visible to one satellite); a mesh satellite demodulates and can route to a neighbour over an ISL</button>
+            <button class="quiz-opt" data-q="1" data-correct="false">C — Mesh constellations fly higher</button>
+            <button class="quiz-opt" data-q="1" data-correct="false">D — Bent-pipe uses optical links</button>
+        </div>
+        <div class="quiz-feedback" id="fb1"></div>
+    </div>
+    <div class="quiz-q">
+        <p><strong>Q2.</strong> A bent-pipe constellation cannot serve a mid-ocean ship because:</p>
+        <div class="quiz-options">
+            <button class="quiz-opt" data-q="2" data-correct="false">A — The water blocks the signal</button>
+            <button class="quiz-opt" data-q="2" data-correct="true">B — No satellite can simultaneously see the ship and a gateway — the ~2,605 km bent-pipe reach from land leaves most of the ocean beyond any co-visible gateway</button>
+            <button class="quiz-opt" data-q="2" data-correct="false">C — Ships move too fast</button>
+            <button class="quiz-opt" data-q="2" data-correct="false">D — Salt water detunes the antenna</button>
+        </div>
+        <div class="quiz-feedback" id="fb2"></div>
+    </div>
+    <div class="quiz-q">
+        <p><strong>Q3.</strong> The LEO mesh beats terrestrial fibre on long-haul routes because:</p>
+        <div class="quiz-options">
+            <button class="quiz-opt" data-q="3" data-correct="false">A — Satellites are closer than fibre</button>
+            <button class="quiz-opt" data-q="3" data-correct="true">B — Light travels 47% slower in glass than in vacuum, so a vacuum-path mesh has a structural speed advantage that compounds with distance, once the path is long enough to amortise the climb to orbit</button>
+            <button class="quiz-opt" data-q="3" data-correct="false">C — Fibre has more hops</button>
+            <button class="quiz-opt" data-q="3" data-correct="false">D — The mesh uses faster modulation</button>
+        </div>
+        <div class="quiz-feedback" id="fb3"></div>
+    </div>
+    <div class="quiz-q">
+        <p><strong>Q4.</strong> The LEO-vs-fibre latency crossover sits near 1,500–2,000 km because:</p>
+        <div class="quiz-options">
+            <button class="quiz-opt" data-q="4" data-correct="false">A — That is the satellite's altitude</button>
+            <button class="quiz-opt" data-q="4" data-correct="true">B — Below it, the fixed ~7.5 ms round trip to climb to orbit and back dominates and fibre wins; above it, the compounding vacuum-speed advantage overtakes that fixed cost</button>
+            <button class="quiz-opt" data-q="4" data-correct="false">C — Fibre cannot span more than 2,000 km</button>
+            <button class="quiz-opt" data-q="4" data-correct="false">D — It is a regulatory limit</button>
+        </div>
+        <div class="quiz-feedback" id="fb4"></div>
+    </div>
+    <div class="quiz-q">
+        <p><strong>Q5.</strong> The coverage argument and the latency argument for ISLs are described as "the same argument" because:</p>
+        <div class="quiz-options">
+            <button class="quiz-opt" data-q="5" data-correct="false">A — They are unrelated but both true</button>
+            <button class="quiz-opt" data-q="5" data-correct="true">B — Both are consequences of routing in space rather than relaying to the ground — the mesh serves oceans <em>and</em> beats fibre for the same reason: it carries traffic satellite-to-satellite instead of bouncing it off one mirror</button>
+            <button class="quiz-opt" data-q="5" data-correct="false">C — They contradict each other</button>
+            <button class="quiz-opt" data-q="5" data-correct="false">D — Neither actually favours the mesh</button>
+        </div>
+        <div class="quiz-feedback" id="fb5"></div>
+    </div>
+    <div class="quiz-q">
+        <p><strong>Q6.</strong> The cost inversion between the architectures means:</p>
+        <div class="quiz-options">
+            <button class="quiz-opt" data-q="6" data-correct="false">A — Both cost the same</button>
+            <button class="quiz-opt" data-q="6" data-correct="true">B — Bent-pipe pushes cost to the ground segment (many gateways, coverage-limited); mesh pushes it to orbit (optical ISL hardware on every satellite, few gateways)</button>
+            <button class="quiz-opt" data-q="6" data-correct="false">C — Mesh is always cheaper</button>
+            <button class="quiz-opt" data-q="6" data-correct="false">D — Bent-pipe has no ground cost</button>
+        </div>
+        <div class="quiz-feedback" id="fb6"></div>
+    </div>
+    <div class="quiz-q">
+        <p><strong>Q7.</strong> A regenerative payload without ISLs is described as "halfway to a mesh" because:</p>
+        <div class="quiz-options">
+            <button class="quiz-opt" data-q="7" data-correct="false">A — It flies at half the altitude</button>
+            <button class="quiz-opt" data-q="7" data-correct="true">B — It already demodulates and could route — it simply has no neighbour link yet; adding ISLs completes the mesh</button>
+            <button class="quiz-opt" data-q="7" data-correct="false">C — It serves half the users</button>
+            <button class="quiz-opt" data-q="7" data-correct="false">D — It is a bent-pipe with extra steps</button>
+        </div>
+        <div class="quiz-feedback" id="fb7"></div>
+    </div>
+    <div class="quiz-q">
+        <p><strong>Q8.</strong> The bent-pipe's ~2,605 km reach is computed as:</p>
+        <div class="quiz-options">
+            <button class="quiz-opt" data-q="8" data-correct="false">A — The satellite's altitude times two</button>
+            <button class="quiz-opt" data-q="8" data-correct="true">B — The sum of the user-side footprint radius (25° mask, 941 km) and the gateway-side footprint radius (10° mask, 1,664 km) — user and gateway on opposite edges of one footprint</button>
+            <button class="quiz-opt" data-q="8" data-correct="false">C — The orbital circumference divided by the satellite count</button>
+            <button class="quiz-opt" data-q="8" data-correct="false">D — A fixed regulatory service radius</button>
+        </div>
+        <div class="quiz-feedback" id="fb8"></div>
+    </div>
+    <div class="quiz-q">
+        <p><strong>Q9.</strong> Which deployment does the geometry say favours a bent-pipe architecture?</p>
+        <div class="quiz-options">
+            <button class="quiz-opt" data-q="9" data-correct="false">A — Global broadband including oceans and poles</button>
+            <button class="quiz-opt" data-q="9" data-correct="true">B — Regional or continental service where gateway sites are cheap and plentiful and traffic is local</button>
+            <button class="quiz-opt" data-q="9" data-correct="false">C — Latency-competitive transpacific routes</button>
+            <button class="quiz-opt" data-q="9" data-correct="false">D — Polar aviation connectivity</button>
+        </div>
+        <div class="quiz-feedback" id="fb9"></div>
+    </div>
+    <div class="quiz-q">
+        <p><strong>Q10.</strong> The spine's topology graph makes the architecture decision a parameter, which matters because:</p>
+        <div class="quiz-options">
+            <button class="quiz-opt" data-q="10" data-correct="false">A — It fixes the architecture permanently</button>
+            <button class="quiz-opt" data-q="10" data-correct="true">B — Bent-pipe and mesh (and the hybrids between) become one model with a switch — coverage reach, latency, and cost location can be traded rather than assumed</button>
+            <button class="quiz-opt" data-q="10" data-correct="false">C — It only models bent-pipe</button>
+            <button class="quiz-opt" data-q="10" data-correct="false">D — It replaces the orbital propagator</button>
+        </div>
+        <div class="quiz-feedback" id="fb10"></div>
+    </div>
+    <div class="quiz-score" id="quizScore"></div>
+</div>
+
+<div class="py-block" id="py">
+    <h2>PYTHON EXERCISES</h2>
+    <div class="py-intro">Three exercises; the last extends the module spine project. Run them, then work the numbered follow-ups in the comments — the follow-ups are the exercise.</div>
+    <div class="py-exercise">
+        <h3>Exercise 1 — The bent-pipe coverage constraint</h3>
+        <p>Compute the reach, and map what a bent-pipe cannot serve.</p>
+<pre>
+import math
+Re, h = 6371.0, 550.0
+
+def footprint_radius(emin_deg, alt=h):
+    e = math.radians(emin_deg)
+    psi = math.acos(Re/(Re+alt)*math.cos(e)) - e
+    return Re*psi   # ground arc, km
+
+r_user = footprint_radius(25)
+r_gw   = footprint_radius(10)
+reach  = r_user + r_gw
+print(f&quot;user footprint (25° mask):    {r_user:.0f} km&quot;)
+print(f&quot;gateway footprint (10° mask): {r_gw:.0f} km&quot;)
+print(f&quot;bent-pipe max user–gateway reach: {reach:.0f} km&quot;)
+
+# 1. A ship is 3,500 km from the nearest coast (mid-ocean). Can any
+#    bent-pipe satellite serve it? What if the gateway mask drops to
+#    5°? Compute the new reach and decide.
+# 2. Sweep altitude 350..1200 km: does raising the shell extend
+#    bent-pipe reach enough to matter for ocean coverage? Report the
+#    reach at each altitude and state the qualitative conclusion.
+# 3. The reach is a RADIUS around each gateway. Estimate how many
+#    gateways tile the continental US (~8e6 km²) at this reach,
+#    ignoring overlap — then explain why the real number is larger
+#    (hint: capacity per gateway, not just coverage).
+</pre>
+    </div>
+    <div class="py-exercise">
+        <h3>Exercise 2 — The latency crossover</h3>
+        <p>Find where the mesh beats fibre.</p>
+<pre>
+import math
+Re, h, c = 6371.0, 550.0, 299792.458
+c_fiber = c/1.468
+
+def fiber_oneway_ms(ground_km, detour=1.40):
+    return ground_km*detour/c_fiber*1000
+
+def leo_mesh_oneway_ms(ground_km, elev_deg=40, alt=h):
+    e = math.radians(elev_deg)
+    slant = Re*(math.sqrt(((Re+alt)/Re)**2 - math.cos(e)**2) - math.sin(e))
+    isl_chord = (Re+alt)*(ground_km/Re)      # arc at altitude
+    return (2*slant + isl_chord)/c*1000
+
+print(f&quot;{&#x27;km&#x27;:&gt;6}{&#x27;fiber ms&#x27;:&gt;10}{&#x27;LEO ms&#x27;:&gt;9}  winner&quot;)
+for d in [500, 1000, 1500, 2000, 3000, 5570, 10850]:
+    f, l = fiber_oneway_ms(d), leo_mesh_oneway_ms(d)
+    print(f&quot;{d:&gt;6}{f:&gt;10.1f}{l:&gt;9.1f}  {&#x27;LEO&#x27; if l&lt;f else &#x27;fiber&#x27;}&quot;)
+
+# 1. Find the crossover distance to the nearest 100 km by bisection.
+#    How sensitive is it to the fibre detour factor (try 1.2, 1.4, 1.6)?
+# 2. The LEO model uses ONE ISL chord at altitude — real meshes hop
+#    through discrete satellites (m7-3). Add a per-hop processing delay
+#    of 0.5 ms and a hop every ~1,500 km: how much does the crossover
+#    move, and what does that say about processing vs propagation?
+# 3. Round trip matters for interactivity. Double everything and
+#    compare against a 20 ms &#x27;good gaming&#x27; RTT budget: which routes
+#    can LEO deliver inside it that fibre cannot?
+</pre>
+    </div>
+    <div class="py-exercise">
+        <h3>Exercise 3 — Spine seed: the Topology graph</h3>
+        <p>The router begins: a switchable bent-pipe / mesh topology on the m2 geometry.</p>
+<pre>
+import math
+Re, h = 6371.0, 550.0
+
+# ═══════════════════════════════════════════════════════
+# M7 SPINE PROJECT — CONSTELLATION ROUTER
+# Stage 1 (here): Topology — a visibility graph with a
+#                 bent-pipe / mesh switch, on the m2 geometry.
+# Growth path:
+#   m7-2  ISL link budget &amp; range/rate (what a link COSTS)
+#   m7-3  the +grid mesh pattern &amp; its churn (which links EXIST)
+#   m7-4  routing under churn (the router core)
+#   m7-5  SDN / precomputed path tables
+#   m7-6  end-to-end latency + transport
+#   m7-7  full router: terminal -&gt; mesh -&gt; ground
+# ═══════════════════════════════════════════════════════
+
+def footprint_radius(emin_deg, alt=h):
+    e = math.radians(emin_deg)
+    return Re*(math.acos(Re/(Re+alt)*math.cos(e)) - e)
+
+class Topology:
+    &quot;&quot;&quot;Switchable bent-pipe / mesh graph. Positions are placeholders
+    here; m7-3 wires in the real m2 propagator output.&quot;&quot;&quot;
+    def __init__(self, mode=&quot;mesh&quot;, user_mask=25, gw_mask=10):
+        assert mode in (&quot;bent_pipe&quot;, &quot;mesh&quot;)
+        self.mode = mode
+        self.r_user = footprint_radius(user_mask)
+        self.r_gw   = footprint_radius(gw_mask)
+        self.reach  = self.r_user + self.r_gw
+
+    def can_serve(self, user_to_gateway_km, has_local_mesh=True):
+        &quot;&quot;&quot;Can a user this far from the nearest gateway be served?&quot;&quot;&quot;
+        if self.mode == &quot;bent_pipe&quot;:
+            return user_to_gateway_km &lt;= self.reach
+        # mesh: any user with a satellite overhead reaches a distant
+        # gateway via ISL hops — gateway distance is irrelevant.
+        return has_local_mesh
+
+    def describe(self):
+        print(f&quot;  topology mode: {self.mode}&quot;)
+        print(f&quot;  bent-pipe reach: {self.reach:.0f} km from a gateway&quot;)
+        for label, dist in [(&quot;suburban (200 km)&quot;, 200),
+                            (&quot;remote land (2000 km)&quot;, 2000),
+                            (&quot;mid-ocean (4000 km)&quot;, 4000)]:
+            ok = self.can_serve(dist)
+            print(f&quot;    {label:&lt;22} {&#x27;SERVED&#x27; if ok else &#x27;NO SERVICE&#x27;}&quot;)
+
+print(&quot;── BENT-PIPE ──&quot;)
+Topology(&quot;bent_pipe&quot;).describe()
+print(&quot;\n── MESH ──&quot;)
+Topology(&quot;mesh&quot;).describe()
+
+# ── the handoff ─────────────────────────────────────────
+# m7-2 gives each potential ISL a budget (can the link close?);
+# m7-3 replaces can_serve&#x27;s placeholder with the real time-varying
+# graph from the m2 propagator; m7-4 routes on it.
+
+# 1. Add a `gateways` list (lat, lon) and a `users` query: for a
+#    bent-pipe topology, compute the fraction of a lat/lon grid that
+#    is within reach of ANY gateway. That fraction IS the coverage.
+# 2. Add altitude as a parameter and show the coverage fraction vs
+#    altitude for bent-pipe — then show mesh coverage is ~1.0
+#    regardless. Plot the divergence.
+# 3. Add a `cost_profile()` method: bent-pipe cost ∝ gateway count to
+#    hit a coverage target; mesh cost ∝ ISL terminals × constellation
+#    size. Find the coverage target where they cross for a 1,000-sat
+#    constellation. (m7-7 makes this rigorous.)
+</pre>
+    </div>
+</div>
+
+<div class="reflection-block" id="reflect">
+    <h2>REFLECTION</h2>
+    <div class="ref-intro">Four prompts. Each forces a decision — write the position down before moving on; the act of committing is the exercise.</div>
+    <div class="ref-prompt">
+        <h3>PROMPT 01</h3>
+        <p>Section 5 called the bent-pipe-versus-mesh choice a cost inversion with no universal break-even. Take a specific operator's seat: a constellation targeting continental broadband over a single large landmass with cheap inland gateway sites. Argue the case <em>against</em> ISLs for this operator using the module's numbers — coverage adequacy, latency indifference, per-satellite cost saved — then identify the single change in their business (a new market, a new competitor, a latency-sensitive customer) that would flip the decision. What does this say about ISLs as an option to be held open rather than a commitment made once?</p>
+    </div>
+    <div class="ref-prompt">
+        <h3>PROMPT 02</h3>
+        <p>Section 4's latency crossover means the mesh's advantage is real only above ~1,500–2,000 km — yet most internet traffic is regional (well below the crossover), where fibre wins. Reconcile this with the enormous investment in LEO ISLs: if the mesh loses on the majority of traffic by distance, what exactly is the ISL hardware buying, and for whom? Quantify the argument by naming the specific traffic classes (by distance, by geography, by latency sensitivity) where the mesh wins, and judge whether they justify an optical terminal on every satellite or only some.</p>
+    </div>
+    <div class="ref-prompt">
+        <h3>PROMPT 03</h3>
+        <p>Section 6 framed the architecture as a continuous spectrum and noted constellations can deploy bent-pipe first and retrofit ISLs. But a satellite's design life is years, and ISLs are not a software update — they are optical hardware that must be flown. Construct the fleet-refresh argument: if ISLs are retrofitted only on new satellites, how long until a constellation's mesh is dense enough to route reliably, and what does the routing layer (m7-4) do with a <em>partial</em> mesh where only some satellites have neighbour links? Decide whether incremental ISL deployment is a smooth transition or a discontinuous one requiring a threshold fraction before the mesh is useful at all.</p>
+    </div>
+    <div class="ref-prompt">
+        <h3>PROMPT 04</h3>
+        <p>This lesson built its coverage argument on a 25°/10° elevation-mask pair and its latency argument on a 40° average-elevation model — both reasonable, both choices. Interrogate the load-bearing assumptions: which of this lesson's headline numbers (the 2,605 km reach, the 1,500–2,000 km crossover, the 34 ms transpacific advantage) is most sensitive to its mask/elevation assumptions, and which is robust? Specify the one number you would most want to re-derive from the real m2 constellation geometry before betting an architecture decision on it, and state what could move it.</p>
+    </div>
+</div>
+
+<div class="cb">
+    <h2>Sources</h2>
+<ul>
+<li>Maral &amp; Bousquet, <em>Satellite Communications Systems</em> — bent-pipe (transparent) vs regenerative payloads, footprint geometry.</li>
+<li>Pratt &amp; Allnutt, <em>Satellite Communications</em> — coverage geometry, elevation-mask footprint relations.</li>
+<li>Del Portillo, Cameron &amp; Crawley, "A technical comparison of three low Earth orbit satellite constellation systems" (Acta Astronautica, 2019) — bent-pipe vs ISL architecture trade at constellation scale.</li>
+<li>Handley, "Delay is Not an Option: Low Latency Routing in Space" (HotNets, 2018) — the LEO-vs-fibre latency argument and mesh routing motivation.</li>
+<li>Module 2 — the orbital geometry the topology graph is built on; Module 4 (m4-7) — the forward/return links the bent-pipe relays back to back; Module 6 (m6-5) — the handover choreography the mesh's routing will consume.</li>
+</ul>
+</div>
+
+<div class="complete-wrap">
+    <button class="complete-btn" id="completeBtn">MARK LESSON COMPLETE</button>
+    <div class="complete-msg" id="completeMsg"></div>
+</div>
+<div class="lesson-nav">
+    <a href="m7.html">← M7 HUB</a>
+    <a href="m7-2.html">LESSON 02 — OPTICAL ISL PHYSICS &amp; POINTING →</a>
+</div>
+</div>
+
+<button class="back-to-top" id="backToTop" title="Back to top">↑</button>
+<footer>© 2026 LEOAF · M7 · LESSON 01 OF 7</footer>
+<script>
+const canvas=document.getElementById('starsCanvas'),ctx=canvas.getContext('2d');
+let stars=[];
+function initStars(){stars=[];for(let i=0;i<180;i++)stars.push({x:Math.random()*canvas.width,y:Math.random()*canvas.height,size:Math.random()*1.5+0.4,speed:Math.random()*0.18+0.04,hue:Math.random()*360});}
+function resizeCanvas(){canvas.width=window.innerWidth;canvas.height=window.innerHeight;}
+resizeCanvas();initStars();window.addEventListener('resize',resizeCanvas);
+function animateStars(){ctx.clearRect(0,0,canvas.width,canvas.height);stars.forEach(s=>{s.y-=s.speed;if(s.y<0){s.y=canvas.height;s.x=Math.random()*canvas.width;}ctx.beginPath();ctx.fillStyle=`hsl(${s.hue},80%,80%)`;ctx.arc(s.x,s.y,s.size,0,Math.PI*2);ctx.fill();});requestAnimationFrame(animateStars);}
+animateStars();
+</script>
+<script>
+const feedbacks={
+    1:{correct:"The bent-pipe is a mirror with a power supply — no storage, no routing, so the packet must reach a gateway that shares the satellite's footprint. The mesh makes the constellation a router in orbit. Everything downstream — coverage, latency, cost — follows from this one architectural choice.",wrong:"Size and altitude are unrelated to the relay-vs-route distinction. Optical links are the *mesh's* enabling hardware (m7-2), the opposite of A's claim."},
+    2:{correct:"The user and gateway must share a footprint, capping their separation at the sum of the two footprint radii (~941 + 1,664 km). A mid-Pacific point is thousands of km from land; no gateway is co-visible, so there is nothing to relay to. This is the coverage argument for ISLs in one number.",wrong:"Water does not block Ku/Ka downlinks to a gateway elsewhere. Ship speed is trivial against the geometry. Salt is a terminal-survival issue (m6-6), not a coverage one."},
+    3:{correct:"n ≈ 1.468 makes fibre carry signals at ~204,000 km/s versus vacuum's ~299,792. Above the ~1,500–2,000 km crossover, the vacuum-speed advantage plus fibre's routing detour outweighs the ~7.5 ms up-and-down cost — 34 ms saved on a transpacific route.",wrong:"Satellites are 550+ km *away*, farther than the fibre for short routes (which is why fibre wins below the crossover). Hop count and modulation speed are not the mechanism; propagation medium is."},
+    4:{correct:"The mesh pays a fixed access cost (up-slant + down-slant) that fibre does not; the vacuum-speed saving grows linearly with distance. They cross where the growing saving equals the fixed cost — around 1,500–2,000 km for a 550 km shell. Short routes belong to fibre; long routes to the mesh.",wrong:"The crossover is a break-even distance, not an altitude. Fibre spans oceans routinely. No regulation is involved — it is pure geometry."},
+    5:{correct:"A bent-pipe cannot serve the ocean (no co-visible gateway) and cannot beat fibre on long-haul (no path between distant endpoints) for one root cause — it has no path that does not immediately return to the ground. The mesh's ISL is the single capability that answers both.",wrong:"They share a root cause, do not contradict, and both decisively favour the mesh — which is the point."},
+    6:{correct:"The architectures move the dominant cost to opposite ends. Bent-pipe coverage scales with gateway count (Module 8's ground segment); mesh coverage scales with the constellation, at the price of ISL terminals on hundreds of satellites. The break-even depends on constellation size, coverage target, and gateway real-estate cost.",wrong:"They cost very differently, and neither is universally cheaper — the trade depends on the deployment. Bent-pipe's ground cost is precisely its dominant one."},
+    7:{correct:"The bent-pipe/mesh spectrum is continuous. Regeneration (demodulate, read the destination) is the routing prerequisite; the missing piece is the ISL to a neighbour. This is why constellations can deploy bent-pipe first and retrofit ISLs — the payload is already most of the way there.",wrong:"Altitude and user count are unrelated. It is more than a bent-pipe with steps — regeneration is the qualitative capability that makes routing possible; the ISL is the connectivity."},
+    8:{correct:"The two can sit on opposite sides of the shared footprint, so their maximum ground separation is the sum of the two radii — larger for the gateway because its engineered site tolerates a lower elevation mask. Beyond this, no satellite is co-visible to both.",wrong:"It is a footprint sum, not an altitude multiple or an orbital division. No regulation sets it — the elevation masks and orbital geometry do."},
+    9:{correct:"Where every user is within ~2,600 km of an affordable gateway and no long-haul latency premium is at stake, the bent-pipe's cheaper payloads win and its ground-segment cost is manageable. The mesh's expense earns nothing there.",wrong:"Oceans, poles, and latency-competitive long-haul are exactly the cases the bent-pipe cannot serve — they require the mesh (§2–4)."},
+    10:{correct:"Modelling both endpoints and the hybrids with a switch lets the design explore where the break-even sits for a given constellation and coverage target — the continuous decision §6 framed, made computable. The rest of the module fills in what the mesh's links actually cost and how to route them.",wrong:"A parameter is the opposite of permanent. It models both modes. It is *built on* the Module 2 propagator, not a replacement."}
+};
+let answered={};
+document.querySelectorAll('.quiz-opt').forEach(btn=>{
+    btn.addEventListener('click',function(){
+        const q=this.dataset.q;
+        if(answered[q]!==undefined)return;
+        const correct=this.dataset.correct==='true';
+        answered[q]=correct;
+        document.querySelectorAll(`.quiz-opt[data-q="${q}"]`).forEach(b=>{b.disabled=true;if(b.dataset.correct==='true')b.classList.add('correct');});
+        if(!correct)this.classList.add('wrong');
+        const fb=document.getElementById('fb'+q);
+        fb.textContent=(correct?'✓ ':'✗ ')+feedbacks[q][correct?'correct':'wrong'];
+        fb.style.color=correct?'#39ff14':'#ff004f';
+        if(Object.keys(answered).length===10){
+            const total=Object.values(answered).filter(Boolean).length;
+            const sc=document.getElementById('quizScore');
+            sc.style.display='block';
+            const pct=Math.round(total/10*100);
+            sc.textContent=`SCORE: ${total}/10 (${pct}%) — ${pct===100?'PERFECT.':pct>=80?'STRONG.':pct>=60?'ADEQUATE. REVISIT WEAK SECTIONS.':'REVISIT THE LESSON BEFORE PROCEEDING.'}`;
+        }
+    });
+});
+</script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="supabase.js"></script>
+<script src="user_progress.js"></script>
+<script>
+const LESSON_ID='m7-1';
+(function(){
+    function bounceToLogin(r){console.error("Auth guard:",r);window.location.replace("index.html");}
+    async function init(){
+        if(typeof client==="undefined"||!client||!client.auth)return bounceToLogin("Supabase client not loaded");
+        let session=null;
+        try{({data:{session}}=await client.auth.getSession());}
+        catch(e){return bounceToLogin("getSession threw: "+e.message);}
+        if(!session){window.location.replace("index.html");return;}
+        const btn=document.getElementById('completeBtn'),msg=document.getElementById('completeMsg');
+        function setDone(done){
+            if(done){btn.textContent='✓ COMPLETE — CLICK TO UNDO';btn.classList.add('done');btn.style.cssText='border-color:#39ff14;color:#39ff14;background:rgba(57,255,20,0.1);cursor:pointer;opacity:1;';msg.style.color='#39ff14';msg.textContent='Lesson marked complete. Click again to undo.';}
+            else{btn.textContent='MARK LESSON COMPLETE';btn.classList.remove('done');btn.style.cssText='';msg.style.color='#ffffff55';msg.textContent='Not yet marked complete.';}
+        }
+        let mastered=[];
+        try{mastered=await getMasteredSections();}catch(e){console.error(e);}
+        setDone(mastered.includes(LESSON_ID));
+        btn.addEventListener('click',async()=>{
+            const isDone=btn.classList.contains('done');
+            msg.style.color='#00d9ff';msg.textContent='Saving...';
+            const ok=await upsertSection(LESSON_ID,!isDone);
+            if(ok){setDone(!isDone);}else{msg.style.color='#ff004f';msg.textContent='Error saving. Try again.';}
+        });
+        const btt=document.getElementById('backToTop');
+        window.addEventListener('scroll',()=>{btt.classList.toggle('visible',window.scrollY>400);});
+        btt.addEventListener('click',()=>window.scrollTo({top:0,behavior:'smooth'}));
+    }
+    if(document.readyState==="loading")document.addEventListener("DOMContentLoaded",init);
+    else init();
+})();
+</script>
+</body>
+</html>
