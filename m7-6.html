@@ -1,0 +1,648 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, shrink-to-fit=no">
+<title>M7-6 — End-to-End Latency &amp; the Transport Layer · LEOAF</title>
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;600;800&family=Share+Tech+Mono&family=Libre+Baskerville:ital,wght@0,400;0,700;1,400&display=swap" rel="stylesheet">
+<link rel="icon" href="favicon.ico" sizes="any" type="image/x-icon">
+<link rel="manifest" href="site.webmanifest">
+<meta name="theme-color" content="#0f0f0f">
+<script>
+window.leoafAbort = async function () {
+    function go() { window.location.replace("index.html?signedout=1"); }
+    try { if (typeof client !== "undefined" && client && client.auth && client.auth.signOut) { try { await client.auth.signOut({ scope: "local" }); } catch (e) {} } } catch (e) {}
+    go();
+};
+</script>
+<style>
+* { box-sizing:border-box; margin:0; padding:0; }
+html { height:100%; -webkit-text-size-adjust:100%; overflow-x:hidden; }
+body { font-family:'Share Tech Mono',monospace; background:#000; color:white; overflow-x:hidden; min-height:100vh; }
+#starsCanvas { position:fixed; inset:0; z-index:-1; }
+header { background:#000; border-bottom:1px solid #ff004f33; position:sticky; top:0; z-index:100; padding:1rem clamp(1.5rem,5vw,4rem); display:flex; justify-content:space-between; align-items:center; }
+.logo { font-family:'Orbitron',sans-serif; font-weight:800; font-size:clamp(16px,2vw,22px); letter-spacing:3px; text-decoration:none; }
+.logo span:first-child { color:white; } .logo span:last-child { color:#ff004f; }
+.nav-right { display:flex; align-items:center; gap:10px; }
+.nav-btn { background:transparent; border:1px solid #ff004f44; color:#ff004f; padding:6px 14px; cursor:pointer; transition:0.3s; font-size:11px; font-family:'Orbitron',sans-serif; letter-spacing:1px; text-decoration:none; display:inline-block; }
+.nav-btn:hover { background:#ff004f; color:black; }
+.breadcrumb { padding:14px clamp(1.5rem,5vw,4rem); font-size:11px; color:#ffffff44; letter-spacing:1px; position:relative; z-index:1; }
+.breadcrumb a { color:#00d9ff66; text-decoration:none; } .breadcrumb a:hover { color:#00d9ff; }
+.breadcrumb span { margin:0 8px; }
+.lesson-wrap { max-width:820px; margin:0 auto; padding:0 clamp(1.5rem,5vw,4rem) 80px; position:relative; z-index:1; }
+.lesson-header { padding:30px 0 28px; border-bottom:1px solid #ffffff11; margin-bottom:36px; }
+.lesson-tag { font-family:'Orbitron',sans-serif; font-size:10px; color:#ff004f; letter-spacing:3px; margin-bottom:10px; }
+.lesson-header h1 { font-family:'Orbitron',sans-serif; font-size:clamp(20px,3.5vw,32px); font-weight:800; line-height:1.2; margin-bottom:12px; }
+.lesson-meta { display:flex; gap:10px; flex-wrap:wrap; margin-bottom:16px; }
+.l-pill { font-family:'Orbitron',sans-serif; font-size:10px; padding:3px 10px; border:1px solid; letter-spacing:1px; }
+.l-pill-q { color:#ff004f; border-color:#ff004f44; } .l-pill-t { color:#39ff14; border-color:#39ff1444; }
+.l-pill-c { color:#ffaa00; border-color:#ffaa0044; }
+.lesson-intro { font-size:13px; line-height:1.85; opacity:0.75; }
+.toc { background:rgba(0,217,255,0.06); border:1px solid #00d9ff33; padding:24px 28px; margin:30px 0; }
+.toc h4 { font-family:'Orbitron',sans-serif; font-size:10px; color:#00d9ff; letter-spacing:2px; margin-bottom:16px; }
+.toc ol { padding-left:20px; } .toc li { font-size:13px; line-height:2.1; }
+.toc li a { color:#00d9ffbb; text-decoration:none; transition:0.15s; } .toc li a:hover { color:#fff; padding-left:4px; }
+.toc li::marker { color:#ff004f; font-family:'Orbitron',sans-serif; font-size:10px; }
+.cb { background:#f5f2ec; color:#1a1a1a; padding:36px clamp(24px,4vw,48px); margin-bottom:24px; border-left:4px solid #00d9ff; position:relative; z-index:1; }
+.cb h2 { font-family:'Orbitron',sans-serif; font-size:13px; color:#003d66; letter-spacing:2px; text-transform:uppercase; margin-bottom:20px; padding-bottom:10px; border-bottom:2px solid #00d9ff66; scroll-margin-top:80px; }
+.cb h3 { font-family:'Orbitron',sans-serif; font-size:11px; color:#444; letter-spacing:1.5px; text-transform:uppercase; margin:28px 0 12px; }
+.cb p { font-family:'Libre Baskerville',Georgia,serif; font-size:15px; line-height:1.9; color:#1a1a1a; margin-bottom:16px; }
+.cb ul { padding-left:0; margin-bottom:16px; }
+.cb ul li { font-family:'Libre Baskerville',Georgia,serif; font-size:14px; line-height:1.85; color:#1a1a1a; padding-left:20px; position:relative; margin-bottom:8px; }
+.cb ul li::before { content:'›'; position:absolute; left:0; color:#0077aa; }
+.cb blockquote { border-left:3px solid #1a7a1a; background:#eafaea; padding:14px 20px; margin:18px 0; font-size:13px; font-family:'Share Tech Mono',monospace; color:#0a3d0a; line-height:1.8; }
+.callout { border-left:3px solid #0088cc; background:#e8f4fb; padding:16px 20px; margin:22px 0; font-size:12px; line-height:1.8; color:#1a1a1a; }
+.callout.red { border-left-color:#cc0033; background:#fdecea; }
+.callout.green { border-left-color:#1a7a1a; background:#eafaea; }
+.callout.amber { border-left-color:#996600; background:#fef9ec; }
+.callout strong { font-family:'Orbitron',sans-serif; font-size:10px; letter-spacing:1px; display:block; margin-bottom:8px; }
+.compare-table { width:100%; border-collapse:collapse; margin:22px 0; font-size:12px; }
+.compare-table th { font-family:'Orbitron',sans-serif; font-size:10px; letter-spacing:1px; color:#003d66; padding:10px 12px; border-bottom:2px solid #00d9ff66; text-align:left; }
+.compare-table td { padding:10px 12px; border-bottom:1px solid #ddd; line-height:1.5; color:#1a1a1a; vertical-align:top; }
+.compare-table tr:hover td { background:#f0f0f0; }
+.key-numbers { display:grid; grid-template-columns:repeat(auto-fit,minmax(140px,1fr)); gap:12px; margin:22px 0; }
+.kn-item { background:#fff; border:1px solid #d0d0d0; padding:16px 12px; text-align:center; }
+.kn-val { font-family:'Orbitron',sans-serif; font-size:clamp(13px,1.8vw,18px); font-weight:800; color:#003d66; display:block; }
+.kn-label { font-size:10px; color:#555; letter-spacing:1px; margin-top:5px; display:block; line-height:1.4; }
+.quiz-block { background:rgba(17,17,17,0.9); border:1px solid #ff004f33; padding:28px; margin:48px 0 32px; }
+.quiz-block h2 { font-family:'Orbitron',sans-serif; font-size:13px; color:#ff004f; letter-spacing:2px; margin-bottom:6px; }
+.quiz-intro { font-size:12px; opacity:0.6; margin-bottom:24px; padding-bottom:16px; border-bottom:1px solid #ff004f22; line-height:1.6; }
+.quiz-q { margin-bottom:28px; }
+.quiz-q p { font-size:13px; opacity:0.9; margin-bottom:12px; line-height:1.65; }
+.quiz-q p strong { color:#00d9ff; }
+.quiz-options { display:flex; flex-direction:column; gap:8px; }
+.quiz-opt { background:rgba(255,255,255,0.03); border:1px solid #ffffff1a; padding:11px 16px; cursor:pointer; font-size:12px; font-family:'Share Tech Mono',monospace; transition:0.2s; text-align:left; color:white; line-height:1.5; }
+.quiz-opt:hover:not(:disabled) { background:rgba(0,217,255,0.08); border-color:#00d9ff44; }
+.quiz-opt.correct { background:rgba(57,255,20,0.1); border-color:#39ff14; color:#39ff14; }
+.quiz-opt.wrong { background:rgba(255,0,79,0.1); border-color:#ff004f; color:#ff004f; }
+.quiz-opt:disabled { cursor:default; }
+.quiz-feedback { font-size:12px; margin-top:10px; min-height:18px; line-height:1.7; opacity:0.9; padding:0 4px; }
+.quiz-score { font-family:'Orbitron',sans-serif; font-size:12px; color:#39ff14; margin-top:20px; letter-spacing:1px; display:none; padding-top:16px; border-top:1px solid #39ff1433; }
+.py-block { background:rgba(10,10,10,0.95); border:1px solid #39ff1422; padding:28px; margin:32px 0; }
+.py-block h2 { font-family:'Orbitron',sans-serif; font-size:13px; color:#39ff14; letter-spacing:2px; margin-bottom:8px; }
+.py-block .py-intro { font-size:12px; opacity:0.7; margin-bottom:20px; padding-bottom:16px; border-bottom:1px solid #39ff1422; line-height:1.7; }
+.py-exercise { margin-bottom:32px; } .py-exercise:last-child { margin-bottom:0; }
+.py-exercise h3 { font-family:'Orbitron',sans-serif; font-size:11px; color:#39ff1499; letter-spacing:1.5px; text-transform:uppercase; margin-bottom:10px; }
+.py-exercise p { font-size:12px; opacity:0.8; margin-bottom:14px; line-height:1.75; }
+.py-block pre { background:#050505; border:1px solid #39ff1433; padding:20px; font-family:'Share Tech Mono',monospace; font-size:11px; line-height:1.7; overflow-x:auto; color:#39ff14; white-space:pre; margin-bottom:12px; }
+.py-note { background:rgba(57,255,20,0.04); border-left:2px solid #39ff14; padding:12px 16px; margin-top:14px; font-size:12px; line-height:1.75; opacity:0.8; }
+.py-note strong { font-family:'Orbitron',sans-serif; font-size:10px; color:#39ff14; display:block; margin-bottom:6px; letter-spacing:1px; }
+.reflection-block { background:rgba(255,170,0,0.04); border:1px solid #ffaa0033; padding:24px; margin:32px 0; }
+.reflection-block h2 { font-family:'Orbitron',sans-serif; font-size:13px; color:#ffaa00; letter-spacing:2px; margin-bottom:8px; }
+.ref-intro { font-size:12px; opacity:0.7; margin-bottom:20px; padding-bottom:14px; border-bottom:1px solid #ffaa0022; line-height:1.7; }
+.ref-prompt { margin-bottom:20px; }
+.ref-prompt h3 { font-family:'Orbitron',sans-serif; font-size:11px; color:#ffaa0099; letter-spacing:1px; margin-bottom:8px; }
+.ref-prompt p { font-size:12px; opacity:0.8; line-height:1.75; }
+.complete-wrap { margin-top:56px; padding-top:30px; border-top:1px solid #ffffff11; text-align:center; }
+.complete-btn { font-family:'Orbitron',sans-serif; font-size:13px; letter-spacing:2px; padding:14px 44px; background:transparent; border:1px solid #39ff14; color:#39ff14; cursor:pointer; transition:0.3s; }
+.complete-btn:hover:not(.done) { background:#39ff14; color:black; box-shadow:0 0 20px rgba(57,255,20,0.4); }
+.complete-btn.done { background:rgba(57,255,20,0.1); cursor:pointer; opacity:1; }
+.complete-msg { font-size:12px; color:#39ff14; margin-top:14px; min-height:18px; letter-spacing:1px; }
+.lesson-nav { display:flex; justify-content:space-between; margin-top:30px; flex-wrap:wrap; gap:10px; }
+.lesson-nav a { font-family:'Orbitron',sans-serif; font-size:11px; color:#00d9ff66; text-decoration:none; letter-spacing:1px; transition:0.2s; }
+.lesson-nav a:hover { color:#00d9ff; }
+.back-to-top { position:fixed; bottom:28px; right:28px; z-index:200; width:44px; height:44px; background:#000; border:1px solid #00d9ff55; color:#00d9ff; font-size:20px; cursor:pointer; display:flex; align-items:center; justify-content:center; opacity:0; pointer-events:none; transition:opacity 0.3s; }
+.back-to-top.visible { opacity:1; pointer-events:auto; } .back-to-top:hover { border-color:#00d9ff; }
+footer { text-align:center; padding:30px; opacity:0.3; font-size:11px; position:relative; z-index:1; letter-spacing:1px; }
+.module-complete { background:rgba(57,255,20,0.06); border:1px solid #39ff1444; padding:24px 28px; margin:40px 0; text-align:center; }
+.module-complete h3 { font-family:'Orbitron',sans-serif; font-size:14px; color:#39ff14; letter-spacing:2px; margin-bottom:10px; }
+.module-complete p { font-size:12px; opacity:0.8; line-height:1.7; }
+</style>
+</head>
+<body>
+<canvas id="starsCanvas"></canvas>
+<header>
+    <a href="dashboard.html" class="logo"><span>LEO</span><span>AF</span></a>
+    <div class="nav-right">
+        <a href="m7.html" class="nav-btn">← M7 HUB</a>
+        <button class="nav-btn" onclick="leoafAbort()">ABORT</button>
+    </div>
+</header>
+<div class="breadcrumb">
+    <a href="dashboard.html">DASHBOARD</a><span>/</span>
+    <a href="m7.html">M7</a><span>/</span>
+    <span style="color:#ffffff88;">LESSON 06 — LATENCY &amp; TRANSPORT</span>
+</div>
+
+<div class="lesson-wrap">
+<div class="lesson-header">
+    <div class="lesson-tag">M7 · LESSON 06 OF 7</div>
+    <h1>End-to-End Latency<br>&amp; the Transport Layer</h1>
+    <div class="lesson-meta">
+        <div class="l-pill l-pill-q">MODULE 7</div>
+        <div class="l-pill l-pill-t">NETWORKING, ISL &amp; ROUTING</div>
+        <div class="l-pill l-pill-c">ADVANCED</div>
+    </div>
+    <p class="lesson-intro" style="margin-bottom:12px;">The routing machinery of m7-4 and m7-5 exists to move a packet from a terminal, across the mesh, to a destination. This lesson assembles what that packet actually experiences — the full end-to-end latency budget — and then hands it to the layer that has to live with it: the transport layer, TCP and QUIC, protocols built for the stable paths of the terrestrial internet and now asked to run over a network whose path length changes every fifteen seconds and whose handovers inject loss that looks exactly like congestion. The LEO mesh's headline number is excellent — a round-trip time of ~54 ms, nine times better than GEO's ~477 ms, and competitive with or better than fibre on long routes (m7-1). But the headline hides the problem. Transport protocols do not only care about how large the RTT is; they care about how <em>stable</em> it is, and a constellation delivers a low but <em>restless</em> RTT — one that steps as the path reconfigures and stutters as handovers drop packets. The mean is a selling point; the variance is the engineering problem.</p>
+    <p class="lesson-intro" style="margin-bottom:12px;">This lesson builds the latency budget term by term (access up and down, mesh propagation, per-hop processing, queuing), quantifies the LEO advantage over GEO and its competitiveness with fibre, and then confronts the transport pathology: why TCP's congestion control mistakes a handover for congestion and craters throughput, why its window is mis-sized every time the RTT steps, and what QUIC and constellation-aware transport can do about it. The spine gains the end-to-end latency distribution — not a single number but a distribution, because the path changes — and a model of how transport behaves across it. This is the last component before the synthesis assembles the whole router.</p>
+</div>
+
+<div class="toc">
+    <h4>CONTENTS</h4>
+    <ol>
+        <li><a href="#s1">The end-to-end latency budget</a></li>
+        <li><a href="#s2">The LEO advantage, quantified</a></li>
+        <li><a href="#s3">Why RTT is restless</a></li>
+        <li><a href="#s4">Why TCP misbehaves</a></li>
+        <li><a href="#s5">What QUIC and constellation-aware transport can do</a></li>
+        <li><a href="#s6">The latency distribution, not a number</a></li>
+        <li><a href="#s7">Key facts</a></li>
+        <li><a href="#s8">What this lesson delivers to the design chain</a></li>
+        <li><a href="#quiz">Knowledge check</a></li>
+        <li><a href="#py">Python exercises</a></li>
+        <li><a href="#reflect">Reflection</a></li>
+    </ol>
+</div>
+
+<div class="cb" id="s1">
+    <h2>1. The end-to-end latency budget</h2>
+<p>A packet's journey from terminal to terminal (or terminal to gateway) has four latency components, assembled here for a representative transcontinental route (London–NY, ~5,570 km):</p>
+<table class="compare-table">
+<thead><tr>
+<th>Component</th>
+<th>Value</th>
+<th>Source</th>
+</tr></thead>
+<tbody>
+<tr><td>Access up (terminal → satellite, 40° elevation)</td><td>2.7 ms</td><td>m6-5 slant range</td></tr>
+<tr><td>Mesh propagation (across the ISL path)</td><td>18.6 ms</td><td>m7-3 path length / c</td></tr>
+<tr><td>Per-hop processing (~4 hops × 0.5 ms)</td><td>2.0 ms</td><td>m7-4 regeneration</td></tr>
+<tr><td>Queuing (light load)</td><td>~1.2 ms</td><td>Traffic-dependent</td></tr>
+<tr><td>Access down (satellite → terminal)</td><td>2.7 ms</td><td>m6-5 slant range</td></tr>
+<tr><td><strong>Total one-way</strong></td><td><strong>~27 ms</strong></td><td>Sum</td></tr>
+<tr><td><strong>Round-trip time</strong></td><td><strong>~54 ms</strong></td><td>2× one-way</td></tr>
+</tbody>
+</table>
+<p>Three observations. First, <strong>mesh propagation dominates</strong> — the ~18.6 ms of light-travel across the ISL path is two-thirds of the one-way budget, and it is irreducible (it is the speed of light over the distance). Second, the <strong>access legs are small but fixed</strong> — ~2.7 ms each way, the up-and-down cost of reaching orbit that m7-1's latency crossover was built on. Third, <strong>queuing is the only load-dependent term</strong> — under light load it is a millisecond, but under congestion it grows without bound, which is exactly the regime where transport protocols make their worst decisions (§4). The budget is dominated by physics (propagation) with a small deterministic overhead (access, processing) and one dangerous variable (queuing).</p>
+</div>
+
+<div class="cb" id="s2">
+    <h2>2. The LEO advantage, quantified</h2>
+<p>Against the alternatives, the LEO mesh's ~54 ms RTT is a strong number:</p>
+<p><strong>Versus GEO.</strong> A geostationary bent-pipe link climbs to 35,786 km and back — twice, for a round trip — a propagation floor of ~477 ms RTT that no engineering can reduce, because it is light-speed over the GEO distance. The LEO mesh at ~54 ms is <strong>nine times better</strong>, and the difference is qualitative, not incremental: 477 ms breaks interactive applications (voice, video calls, gaming, responsive web) that 54 ms serves comfortably. This is the LEO value proposition in one ratio, and it is why LEO broadband exists as a category despite GEO's decades of incumbency.</p>
+<p><strong>Versus fibre.</strong> As m7-1 established, the LEO mesh beats fibre above the ~1,500–2,000 km crossover, because vacuum is 47% faster than glass and the mesh's fixed access cost amortises over distance. On the London–NY route the mesh's ~54 ms RTT undercuts fibre's ~76 ms; on transpacific routes the advantage exceeds 30 ms one-way. The mesh is not merely adequate against fibre on long-haul — it is <em>faster</em>, which opens the latency-arbitrage markets (finance, gaming) that pay premium for milliseconds.</p>
+<p>The mean RTT, then, is a genuine competitive advantage across both comparisons. The problem the rest of the lesson addresses is that a good mean is not a good <em>connection</em> if the variance around it defeats the transport layer.</p>
+</div>
+
+<div class="cb" id="s3">
+    <h2>3. Why RTT is restless</h2>
+<p>A constellation's RTT is not a constant; it moves for two distinct reasons, on two timescales:</p>
+<p><strong>The path length changes (slow, deterministic).</strong> As satellites move and the router switches snapshots (m7-4, m7-5), the packet's path through the mesh changes — a different sequence of hops, a different total length, a different propagation delay. The RTT steps up or down at each snapshot boundary, on the fifteen-second timescale, predictably. A connection that opened when the path was short sees its RTT grow as the geometry evolves and the router selects a longer path, then shrink again — a slow, sawtooth-like variation driven by orbital mechanics.</p>
+<p><strong>Handovers drop packets (fast, disruptive).</strong> When the serving satellite changes (m6-5's terminal handover) or an ISL hands off (m7-3's inter-plane reconfiguration), there is a brief instant where in-flight packets can be lost — the make-before-break machinery bounds this to tens of milliseconds, but tens of milliseconds at 100 Mbps is hundreds of kilobytes of packets in flight, and any that are dropped are <em>loss events</em> the transport layer must interpret. These are fast (a handover is a moment) and disruptive (loss triggers transport's most drastic responses).</p>
+<p>The combination is a low-mean, high-variance, occasionally-lossy path — precisely the profile that terrestrial transport protocols handle worst, because they were tuned for paths whose RTT is stable and whose loss means congestion.</p>
+</div>
+
+<div class="cb" id="s4">
+    <h2>4. Why TCP misbehaves</h2>
+<p>TCP's congestion control rests on two assumptions that a constellation violates:</p>
+<p><strong>Assumption one: loss means congestion.</strong> TCP interprets a dropped packet as a signal that a link is overloaded, and responds by halving its congestion window (cwnd) — cutting its sending rate to relieve the assumed congestion. On a constellation, a handover-induced loss is <em>not</em> congestion — the link is fine, a packet was merely dropped during a topology transition — but TCP cannot tell the difference. It halves its window, craters its throughput, and slowly rebuilds, only to be knocked down again at the next handover. A path with periodic non-congestive loss drives TCP into a permanent low-throughput state, its window never recovering before the next false signal. The mesh's excellent bandwidth goes unused because TCP mistakes its handovers for overload.</p>
+<p><strong>Assumption two: the RTT is stable.</strong> TCP sizes its window to the bandwidth-delay product (BDP = bandwidth × RTT) — the amount of in-flight data needed to keep the pipe full. When the RTT steps from 30 to 50 ms at a snapshot boundary, the BDP jumps from 375 KB to 625 KB (at 100 Mbps), and TCP's window — tuned for the old RTT — is suddenly too small to fill the pipe, so throughput drops until the window grows to the new BDP. And the retransmission timeout (RTO), computed from the RTT estimate, is mis-set when the RTT shifts: too tight and it fires spuriously (more false loss signals), too loose and it delays real recovery. Every RTT step is a re-tuning event TCP handles poorly, because its estimators assume the RTT they are tracking is stationary.</p>
+<p>The result: a network with a superb mean RTT and abundant bandwidth delivers, to unmodified TCP, a fraction of its potential — throttled by false congestion signals and mis-sized windows. The physics is excellent; the transport layer squanders it.</p>
+</div>
+
+<div class="cb" id="s5">
+    <h2>5. What QUIC and constellation-aware transport can do</h2>
+<p>The transport layer is not helpless, and the industry's responses fall into three tiers:</p>
+<p><strong>QUIC's structural advantages.</strong> QUIC (the transport under HTTP/3) improves on TCP in ways that happen to help. Its <strong>connection migration</strong> lets a connection survive a change of network path without tearing down and re-establishing — directly relevant to handovers, which look like path changes. Its more sophisticated <strong>loss detection</strong> distinguishes loss patterns better than TCP's blunt "any loss is congestion," and being <strong>user-space</strong> it can be updated far faster than kernel TCP, so constellation-specific tuning ships quickly. QUIC does not solve the problem, but it is a better substrate for solving it.</p>
+<p><strong>Performance-enhancing proxies (PEPs).</strong> The operator can split the transport connection: a PEP at the gateway terminates the user's TCP connection locally (hiding the satellite path's RTT and loss from the user's stack) and runs a constellation-tuned protocol across the mesh, re-originating a clean connection to the destination. This is the classic satellite-transport fix (long used for GEO's huge RTT), and it works — at the cost of breaking end-to-end encryption assumptions and adding a middlebox, tensions that QUIC's encryption-by-default specifically resists. The PEP-versus-QUIC friction is a live architectural argument.</p>
+<p><strong>Constellation-aware congestion control.</strong> The deepest fix is a congestion controller that <em>knows</em> it is on a constellation — that treats handover-timed loss as non-congestive (the network can even <em>signal</em> an impending handover, since it is scheduled and known, m7-5), that anticipates RTT steps from the routing schedule rather than discovering them, and that sizes its window to the known upcoming path. The same determinism that made routing tractable (m7-4) can inform the transport layer: a constellation knows its future RTT, and a transport protocol that consumed that knowledge could pre-adjust rather than react. This is the frontier, and it is the constellation's determinism reaching all the way up the stack.</p>
+</div>
+
+<div class="cb" id="s6">
+    <h2>6. The latency distribution, not a number</h2>
+<p>The lesson's synthesis-facing deliverable is a reframing: a constellation's latency is a <strong>distribution</strong>, not a value. The RTT has a low mean (~54 ms), a slow sawtooth variation as paths reconfigure (tens of ms of swing over minutes), and occasional loss spikes at handovers. Characterising a constellation link means reporting its whole distribution — median, the jitter envelope, the tail set by worst-case paths and handover gaps — because that is what the transport layer and the application experience. A median-only spec (as m6-4 warned for terminal G/T, and m5-1 for throughput) overstates the connection's quality; the jitter and the tail are where the user's experience of a video call or a game actually lives.</p>
+<p>This is the module's version of a theme the whole program has repeated: the honest figure is a distribution, and the mean is the marketing number. The constellation delivers a superb <em>median</em> latency and a <em>restless</em> one, and whether that restlessness is invisible or ruinous depends on the transport layer's ability to absorb it. The spine's Stage 6 therefore produces not a latency but a latency distribution across the snapshot sequence, and the transport model that predicts what TCP or QUIC makes of it.</p>
+</div>
+
+<div class="cb" id="s7">
+    <h2>7. Key facts</h2>
+<table class="compare-table">
+<thead><tr>
+<th>Fact</th>
+<th>Value</th>
+<th>Unit</th>
+<th>Source</th>
+</tr></thead>
+<tbody>
+<tr><td>LEO one-way latency (transcontinental)</td><td>~27</td><td>ms</td><td>Computed</td></tr>
+<tr><td>LEO round-trip time</td><td>~54</td><td>ms</td><td>Computed</td></tr>
+<tr><td>Mesh propagation share of one-way</td><td>~two-thirds (18.6 ms)</td><td>—</td><td>Computed</td></tr>
+<tr><td>Access leg (each way, 40°)</td><td>~2.7</td><td>ms</td><td>Computed</td></tr>
+<tr><td>GEO round-trip time</td><td>~477</td><td>ms</td><td>Computed</td></tr>
+<tr><td>LEO vs GEO</td><td>~9× better</td><td>—</td><td>Computed</td></tr>
+<tr><td>LEO vs fibre (London–NY RTT)</td><td>54 vs 76</td><td>ms</td><td>Computed</td></tr>
+<tr><td>BDP at 100 Mbps, 30 / 50 ms RTT</td><td>375 / 625</td><td>KB</td><td>Computed</td></tr>
+<tr><td>TCP failure 1</td><td>reads handover loss as congestion → halves cwnd</td><td>—</td><td>§4</td></tr>
+<tr><td>TCP failure 2</td><td>RTT steps mis-size window and RTO</td><td>—</td><td>§4</td></tr>
+<tr><td>Transport responses</td><td>QUIC migration, PEPs, constellation-aware CC</td><td>—</td><td>§5</td></tr>
+<tr><td>Honest metric</td><td>latency distribution, not mean</td><td>—</td><td>§6</td></tr>
+</tbody>
+</table>
+</div>
+
+<div class="cb" id="s8">
+    <h2>8. What this lesson delivers to the design chain</h2>
+<p>Stage 6 of the spine turns a routed path into what the transport layer sees: the <strong>end-to-end latency budget</strong> (access + mesh propagation + processing + queuing) computed for any source-destination pair on any snapshot, assembled across the snapshot sequence into a <strong>latency distribution</strong> (mean, jitter, tail), and a <strong>transport-behaviour model</strong> that predicts how TCP's window and QUIC's migration fare against that distribution's steps and loss spikes. The router of m7-4 said which path; the control plane of m7-5 delivered it; Stage 6 says what it <em>feels like</em> to a connection running over it.</p>
+<p>Everything is now in place for the synthesis. The terminal earns its bits (Module 6), the air interface carries them (Module 5), the link budget sets the rate (Module 4), the mesh routes them (m7-1 through m7-5), and the transport layer experiences the end-to-end latency (m7-6). The final lesson, m7-7, assembles the complete <code>ConstellationRouter</code> — a message from a terminal, up through the handover choreography, across the scheduled mesh, down to a destination, with its full latency distribution and a comparison of bent-pipe, mesh, and terrestrial for representative city-pairs. The module's capstone artefact, and the network layer's answer to the question the whole program has been building: what does the user actually experience?</p>
+</div>
+
+<div class="quiz-block" id="quiz">
+    <h2>KNOWLEDGE CHECK</h2>
+    <div class="quiz-intro">Ten questions. Each option explains itself after you commit. No retries per question — decide first.</div>
+    <div class="quiz-q">
+        <p><strong>Q1.</strong> The LEO end-to-end latency budget is dominated by:</p>
+        <div class="quiz-options">
+            <button class="quiz-opt" data-q="1" data-correct="false">A — The access legs</button>
+            <button class="quiz-opt" data-q="1" data-correct="true">B — Mesh propagation — the ~18.6 ms of light-travel across the ISL path is ~two-thirds of the one-way budget and is irreducible (speed of light over distance)</button>
+            <button class="quiz-opt" data-q="1" data-correct="false">C — Per-hop processing</button>
+            <button class="quiz-opt" data-q="1" data-correct="false">D — Queuing</button>
+        </div>
+        <div class="quiz-feedback" id="fb1"></div>
+    </div>
+    <div class="quiz-q">
+        <p><strong>Q2.</strong> The LEO mesh's ~54 ms RTT versus GEO's ~477 ms is significant because:</p>
+        <div class="quiz-options">
+            <button class="quiz-opt" data-q="2" data-correct="false">A — It is a minor improvement</button>
+            <button class="quiz-opt" data-q="2" data-correct="true">B — It is a 9× reduction that is qualitative, not incremental — 477 ms breaks interactive applications that 54 ms serves comfortably, which is why LEO broadband exists as a category</button>
+            <button class="quiz-opt" data-q="2" data-correct="false">C — GEO is actually faster</button>
+            <button class="quiz-opt" data-q="2" data-correct="false">D — Both are too slow to use</button>
+        </div>
+        <div class="quiz-feedback" id="fb2"></div>
+    </div>
+    <div class="quiz-q">
+        <p><strong>Q3.</strong> Against fibre, the LEO mesh is:</p>
+        <div class="quiz-options">
+            <button class="quiz-opt" data-q="3" data-correct="false">A — Always slower</button>
+            <button class="quiz-opt" data-q="3" data-correct="true">B — Faster above the ~1,500–2,000 km crossover — 54 vs 76 ms RTT on London–NY, and 30+ ms one-way advantage transpacific — because vacuum is 47% faster than glass</button>
+            <button class="quiz-opt" data-q="3" data-correct="false">C — Identical</button>
+            <button class="quiz-opt" data-q="3" data-correct="false">D — Only competitive under 500 km</button>
+        </div>
+        <div class="quiz-feedback" id="fb3"></div>
+    </div>
+    <div class="quiz-q">
+        <p><strong>Q4.</strong> A constellation's RTT is "restless" because:</p>
+        <div class="quiz-options">
+            <button class="quiz-opt" data-q="4" data-correct="false">A — The satellites are unstable</button>
+            <button class="quiz-opt" data-q="4" data-correct="true">B — Path length changes at each snapshot boundary (slow, deterministic sawtooth) and handovers drop in-flight packets (fast, disruptive loss) — a low-mean, high-variance, occasionally-lossy path</button>
+            <button class="quiz-opt" data-q="4" data-correct="false">C — The clocks drift</button>
+            <button class="quiz-opt" data-q="4" data-correct="false">D — The RTT is actually constant</button>
+        </div>
+        <div class="quiz-feedback" id="fb4"></div>
+    </div>
+    <div class="quiz-q">
+        <p><strong>Q5.</strong> TCP mistakes a handover for congestion because:</p>
+        <div class="quiz-options">
+            <button class="quiz-opt" data-q="5" data-correct="false">A — Handovers cause real congestion</button>
+            <button class="quiz-opt" data-q="5" data-correct="true">B — TCP interprets any packet loss as a congestion signal and halves its window — but handover loss is a topology transition, not overload, so TCP needlessly craters throughput</button>
+            <button class="quiz-opt" data-q="5" data-correct="false">C — TCP measures link load directly</button>
+            <button class="quiz-opt" data-q="5" data-correct="false">D — Handovers change the bandwidth</button>
+        </div>
+        <div class="quiz-feedback" id="fb5"></div>
+    </div>
+    <div class="quiz-q">
+        <p><strong>Q6.</strong> When the RTT steps from 30 to 50 ms, TCP's window is mis-sized because:</p>
+        <div class="quiz-options">
+            <button class="quiz-opt" data-q="6" data-correct="false">A — The window is RTT-independent</button>
+            <button class="quiz-opt" data-q="6" data-correct="true">B — The bandwidth-delay product jumps (375 → 625 KB at 100 Mbps), so the window tuned for the old RTT is suddenly too small to fill the pipe, and throughput drops until it grows</button>
+            <button class="quiz-opt" data-q="6" data-correct="false">C — The bandwidth changed</button>
+            <button class="quiz-opt" data-q="6" data-correct="false">D — TCP ignores RTT</button>
+        </div>
+        <div class="quiz-feedback" id="fb6"></div>
+    </div>
+    <div class="quiz-q">
+        <p><strong>Q7.</strong> QUIC helps with constellation transport through:</p>
+        <div class="quiz-options">
+            <button class="quiz-opt" data-q="7" data-correct="false">A — Higher bandwidth</button>
+            <button class="quiz-opt" data-q="7" data-correct="true">B — Connection migration (surviving a path change without teardown), better loss detection, and user-space deployability for fast constellation-specific tuning</button>
+            <button class="quiz-opt" data-q="7" data-correct="false">C — Eliminating handovers</button>
+            <button class="quiz-opt" data-q="7" data-correct="false">D — Running only on the ground</button>
+        </div>
+        <div class="quiz-feedback" id="fb7"></div>
+    </div>
+    <div class="quiz-q">
+        <p><strong>Q8.</strong> A performance-enhancing proxy (PEP) works by:</p>
+        <div class="quiz-options">
+            <button class="quiz-opt" data-q="8" data-correct="false">A — Speeding up the satellites</button>
+            <button class="quiz-opt" data-q="8" data-correct="true">B — Splitting the connection — terminating the user's TCP at the gateway (hiding the satellite path's RTT and loss) and running a constellation-tuned protocol across the mesh</button>
+            <button class="quiz-opt" data-q="8" data-correct="false">C — Removing the transport layer</button>
+            <button class="quiz-opt" data-q="8" data-correct="false">D — Adding more bandwidth</button>
+        </div>
+        <div class="quiz-feedback" id="fb8"></div>
+    </div>
+    <div class="quiz-q">
+        <p><strong>Q9.</strong> The deepest transport fix — constellation-aware congestion control — exploits:</p>
+        <div class="quiz-options">
+            <button class="quiz-opt" data-q="9" data-correct="false">A — Faster hardware</button>
+            <button class="quiz-opt" data-q="9" data-correct="true">B — The same determinism that made routing tractable: the network knows its future RTT and can signal impending scheduled handovers, so transport can pre-adjust its window and treat handover-timed loss as non-congestive rather than react</button>
+            <button class="quiz-opt" data-q="9" data-correct="false">C — More retransmissions</button>
+            <button class="quiz-opt" data-q="9" data-correct="false">D — Ignoring the RTT entirely</button>
+        </div>
+        <div class="quiz-feedback" id="fb9"></div>
+    </div>
+    <div class="quiz-q">
+        <p><strong>Q10.</strong> The lesson's synthesis-facing reframing is that a constellation's latency is:</p>
+        <div class="quiz-options">
+            <button class="quiz-opt" data-q="10" data-correct="false">A — A single number</button>
+            <button class="quiz-opt" data-q="10" data-correct="true">B — A distribution — low mean (~54 ms), slow sawtooth jitter as paths reconfigure, and loss spikes at handovers — because the median overstates the connection's quality and the jitter/tail is where user experience lives</button>
+            <button class="quiz-opt" data-q="10" data-correct="false">C — Always the mean</button>
+            <button class="quiz-opt" data-q="10" data-correct="false">D — Irrelevant to the user</button>
+        </div>
+        <div class="quiz-feedback" id="fb10"></div>
+    </div>
+    <div class="quiz-score" id="quizScore"></div>
+</div>
+
+<div class="py-block" id="py">
+    <h2>PYTHON EXERCISES</h2>
+    <div class="py-intro">Three exercises; the last extends the module spine project. Run them, then work the numbered follow-ups in the comments — the follow-ups are the exercise.</div>
+    <div class="py-exercise">
+        <h3>Exercise 1 — The latency budget</h3>
+        <p>Assemble the end-to-end budget and compare to GEO and fibre.</p>
+<pre>
+import math
+Re, h, c = 6371.0, 550.0, 299792.458
+c_fiber = c/1.468
+
+def slant_km(elev_deg, alt=h):
+    e = math.radians(elev_deg)
+    return Re*(math.sqrt(((Re+alt)/Re)**2 - math.cos(e)**2) - math.sin(e))
+
+def leo_budget(ground_km, n_hops=4, elev=40, proc_ms=0.5, queue_ms_per_hop=0.3):
+    access = slant_km(elev)/c*1000
+    mesh_prop = ground_km/c*1000
+    mesh_proc = n_hops*proc_ms
+    queue = n_hops*queue_ms_per_hop
+    ow = 2*access + mesh_prop + mesh_proc + queue
+    return dict(access=access, prop=mesh_prop, proc=mesh_proc,
+                queue=queue, one_way=ow, rtt=2*ow)
+
+b = leo_budget(5570)
+for k, v in b.items():
+    print(f&quot;  {k:&gt;8}: {v:6.2f} ms&quot;)
+
+geo_rtt = 4*35786/c*1000
+print(f&quot;\nGEO RTT: {geo_rtt:.0f} ms  -&gt;  LEO is {geo_rtt/b[&#x27;rtt&#x27;]:.1f}x better&quot;)
+fiber_rtt = 2*5570*1.4/c_fiber*1000
+print(f&quot;fibre RTT (London-NY): {fiber_rtt:.0f} ms vs LEO {b[&#x27;rtt&#x27;]:.0f} ms&quot;)
+
+# 1. Decompose the one-way budget into &#x27;physics&#x27; (access + propagation,
+#    irreducible) and &#x27;system&#x27; (processing + queuing, engineerable).
+#    What fraction is irreducible? What does that cap the operator&#x27;s
+#    latency-optimisation effort at?
+# 2. Queuing is the load-dependent term. Sweep queue_ms_per_hop 0.3..5
+#    (light to congested) and show where queuing overtakes processing,
+#    then where it threatens the LEO-vs-fibre advantage.
+# 3. Longer paths need more hops. Model n_hops = ground_km/1500 and
+#    recompute for Singapore-London (10,850 km). Does the mesh still
+#    beat fibre, and which term grew?
+</pre>
+    </div>
+    <div class="py-exercise">
+        <h3>Exercise 2 — TCP under a stepping RTT</h3>
+        <p>Show the window mis-sizing and the false congestion signal.</p>
+<pre>
+def bdp_kb(bw_mbps, rtt_ms):
+    return bw_mbps*1e6 * rtt_ms/1000 / 8 / 1e3
+
+bw = 100  # Mbps
+print(&quot;BDP (in-flight data to fill the pipe):&quot;)
+for rtt in [20, 30, 40, 50, 60]:
+    print(f&quot;  RTT {rtt:&gt;2} ms: {bdp_kb(bw, rtt):6.1f} KB&quot;)
+
+# a connection whose RTT steps at snapshot boundaries
+rtt_sequence = [30, 30, 45, 45, 60, 35, 35]   # ms, per 15s snapshot
+print(&quot;\nwindow mis-sizing as RTT steps (window lags the new BDP):&quot;)
+window_kb = bdp_kb(bw, rtt_sequence[0])
+for i, rtt in enumerate(rtt_sequence):
+    need = bdp_kb(bw, rtt)
+    fill = min(1.0, window_kb/need)
+    print(f&quot;  snap {i}: RTT {rtt} ms, need {need:.0f} KB, &quot;
+          f&quot;window {window_kb:.0f} KB -&gt; pipe {fill:.0%} full&quot;)
+    window_kb = need    # assume TCP grows to fill by next snapshot
+
+# 1. Model a handover loss: at snapshot 3, TCP halves its window
+#    (false congestion). Show the throughput crater and the slow
+#    rebuild over subsequent snapshots. How many snapshots to recover?
+# 2. Compare &#x27;reactive&#x27; TCP (discovers each RTT step, lags one snapshot)
+#    against &#x27;constellation-aware&#x27; TCP (pre-sizes to the known next RTT).
+#    Quantify the throughput each leaves on the table over the sequence.
+# 3. The false-congestion problem scales with handover frequency. At
+#    what handover rate does TCP&#x27;s window never recover between events
+#    (permanent collapse)? Relate it to m6-5&#x27;s handover cadence.
+</pre>
+    </div>
+    <div class="py-exercise">
+        <h3>Exercise 3 — Spine Stage 6: the latency distribution</h3>
+        <p>Turn routed paths into what transport experiences.</p>
+<pre>
+import math, statistics
+Re, h, c = 6371.0, 550.0, 299792.458
+
+# ═══════════════════════════════════════════════════════
+# M7 SPINE PROJECT — CONSTELLATION ROUTER
+# Stage 6: end-to-end latency + transport behaviour.
+#   Stages 1-5 routed a packet across the mesh.
+#   Stage 6: turn a path into an end-to-end latency, assemble a
+#            DISTRIBUTION across the snapshot sequence, and model
+#            how TCP/QUIC fare against its steps and loss spikes.
+#   Next: m7-7 assembles the full ConstellationRouter.
+# ═══════════════════════════════════════════════════════
+
+def slant_km(elev_deg, alt=h):
+    e = math.radians(elev_deg)
+    return Re*(math.sqrt(((Re+alt)/Re)**2 - math.cos(e)**2) - math.sin(e))
+
+class LatencyModel:
+    def __init__(self, proc_ms=0.5, elev=40):
+        self.proc, self.access = proc_ms, slant_km(elev)/c*1000
+
+    def path_latency_ms(self, path_range_km, n_hops, queue_ms=0.0):
+        prop = path_range_km/c*1000
+        return 2*self.access + prop + n_hops*self.proc + queue_ms
+
+    def distribution(self, snapshots):
+        &quot;&quot;&quot;snapshots: list of (path_range_km, n_hops, queue_ms).
+        Returns the RTT distribution the transport layer sees.&quot;&quot;&quot;
+        rtts = [2*self.path_latency_ms(r, n, q) for r, n, q in snapshots]
+        return dict(median=statistics.median(rtts),
+                    mean=statistics.mean(rtts),
+                    jitter=max(rtts)-min(rtts),
+                    p95=sorted(rtts)[int(0.95*len(rtts))-1],
+                    steps=[round(rtts[i+1]-rtts[i], 1)
+                           for i in range(len(rtts)-1)])
+
+class TransportModel:
+    def __init__(self, bw_mbps=100):
+        self.bw = bw_mbps
+    def bdp_kb(self, rtt_ms):
+        return self.bw*1e6*rtt_ms/1000/8/1e3
+    def tcp_efficiency(self, rtt_sequence, handover_snaps=()):
+        &quot;&quot;&quot;Fraction of pipe filled per snapshot: window lags RTT steps,
+        halves on handover loss (false congestion).&quot;&quot;&quot;
+        win = self.bdp_kb(rtt_sequence[0]); out = []
+        for i, rtt in enumerate(rtt_sequence):
+            if i in handover_snaps: win *= 0.5      # false congestion
+            need = self.bdp_kb(rtt)
+            out.append(min(1.0, win/need))
+            win = max(win, need)                     # grow toward BDP
+        return out
+
+# a transcontinental connection over 6 snapshots, path breathing
+snaps = [(5570, 4, 0.5), (5900, 4, 0.8), (6200, 5, 1.0),
+         (5800, 4, 2.0), (5570, 4, 0.5), (6400, 5, 1.2)]
+lm = LatencyModel()
+dist = lm.distribution(snaps)
+print(&quot;RTT distribution over the snapshot sequence:&quot;)
+for k, v in dist.items():
+    print(f&quot;  {k:&gt;7}: {v}&quot;)
+
+tm = TransportModel(100)
+rtts = [2*lm.path_latency_ms(r, n, q) for r, n, q in snaps]
+eff = tm.tcp_efficiency([round(x) for x in rtts], handover_snaps={2})
+print(f&quot;\nTCP pipe-fill per snapshot (handover at snap 2):&quot;)
+print(&quot;  &quot; + &quot;  &quot;.join(f&quot;{e:.0%}&quot; for e in eff))
+print(f&quot;  mean efficiency: {sum(eff)/len(eff):.0%} of available bandwidth&quot;)
+
+# ── the handoff ─────────────────────────────────────────
+# m7-7 assembles this with Stages 1-5: a full message routed terminal
+# -&gt; mesh -&gt; destination, with its latency DISTRIBUTION and the
+# bent-pipe/mesh/terrestrial comparison — the module&#x27;s capstone.
+
+# 1. Report the distribution&#x27;s median vs mean vs p95. Which does an
+#    SLA promise, which does the user feel, and which does §6 say is
+#    the honest one? Connect to m5-1 / m6-4&#x27;s &#x27;distribution not mean&#x27;.
+# 2. Run tcp_efficiency with and without the handover, and with a
+#    &#x27;constellation-aware&#x27; variant that does NOT halve on the known
+#    handover. Quantify the bandwidth the awareness recovers.
+# 3. Add QUIC connection-migration: model it as surviving the handover
+#    with no window halving but a one-snapshot RTT-discovery lag.
+#    Where does it land between naive TCP and constellation-aware CC?
+</pre>
+    </div>
+</div>
+
+<div class="reflection-block" id="reflect">
+    <h2>REFLECTION</h2>
+    <div class="ref-intro">Four prompts. Each forces a decision — write the position down before moving on; the act of committing is the exercise.</div>
+    <div class="ref-prompt">
+        <h3>PROMPT 01</h3>
+        <p>Section 5 presented three transport responses — QUIC, PEPs, constellation-aware CC — and noted the PEP-versus-QUIC friction: PEPs need to see and split the connection, QUIC encrypts to prevent exactly that. Take the operator's architectural decision: a PEP delivers immediate, large throughput gains for today's TCP traffic but breaks on QUIC's encryption and is a middlebox the industry is moving away from. Decide whether a new constellation should invest in gateway PEPs (fixing today's traffic, fighting tomorrow's encryption) or bet on constellation-aware endpoints (fixing tomorrow's traffic, helpless for unmodified clients today). What does the traffic mix — how much is already QUIC — do to the answer, and how fast is that mix changing?</p>
+    </div>
+    <div class="ref-prompt">
+        <h3>PROMPT 02</h3>
+        <p>Section 5's deepest fix has the network <em>signal</em> impending handovers to the transport layer, since they are scheduled and known. This is a layering violation — the network layer telling the transport layer about its internal topology events — that the internet's design principles (the end-to-end argument) specifically discourage. Argue both sides: the pragmatic case that a constellation's determinism is too valuable to waste on layering purity, versus the principled case that cross-layer signalling creates brittle, constellation-specific transport that fragments the internet. Where should the knowledge of the schedule live, and what is the minimal cross-layer interface that captures most of the benefit with least of the coupling?</p>
+    </div>
+    <div class="ref-prompt">
+        <h3>PROMPT 03</h3>
+        <p>Section 6 insisted latency is a distribution, and the spine reports median, jitter, and p95. But different applications care about different moments: bulk transfer cares about mean throughput (hence mean RTT via BDP), video calls care about jitter, gaming cares about the p99 tail, and a stock-trading arbitrageur cares about the <em>minimum</em> achievable latency on the best path. Design the latency spec a constellation operator should publish: which moments of the distribution, for which application classes, and how honest can a single published figure be? Connect this to the program's recurring 'distribution not mean' theme (m5-1, m6-4, m5-7) and decide whether the network layer's honesty problem is the same as or different from the physical layer's.</p>
+    </div>
+    <div class="ref-prompt">
+        <h3>PROMPT 04</h3>
+        <p>This lesson's transport pathology rests on TCP's "loss means congestion" assumption meeting handover loss. But m6-5 and m7-5 bounded handover loss to tens of milliseconds via make-before-break, and a <em>perfect</em> make-before-break would drop no packets at all. Interrogate the dependency: how much of the transport problem is intrinsic (RTT steps, which happen even with lossless handover) versus an artefact of imperfect handover (the loss, which better handover could eliminate)? Determine whether the right place to fix constellation transport is at the transport layer (smarter congestion control) or at the handover layer (lossless make-before-break), and what each fix costs — connecting the m6-5 second-beamforming-layer hardware to the m7-6 transport behaviour as two ends of one problem.</p>
+    </div>
+</div>
+
+<div class="cb">
+    <h2>Sources</h2>
+<ul>
+<li>Jacobson, "Congestion Avoidance and Control" (1988) — TCP congestion control and the loss-equals-congestion assumption.</li>
+<li>Iyengar &amp; Thomson, "QUIC: A UDP-Based Multiplexed and Secure Transport" (RFC 9000) — QUIC connection migration and loss detection.</li>
+<li>Border et al., "Performance Enhancing Proxies Intended to Mitigate Link-Related Degradations" (RFC 3135) — PEP architecture for satellite links.</li>
+<li>Kassing et al., "Exploring the 'Internet from space' with Hypatia" (IMC, 2020) — end-to-end latency and transport behaviour over LEO constellations.</li>
+<li>Module 7 (m7-1 latency crossover, m7-3 handover/churn, m7-4/m7-5 routing and its RTT effects) and Module 6 (m6-5 handover) — the path behaviour this lesson's transport model experiences.</li>
+</ul>
+</div>
+
+<div class="complete-wrap">
+    <button class="complete-btn" id="completeBtn">MARK LESSON COMPLETE</button>
+    <div class="complete-msg" id="completeMsg"></div>
+</div>
+<div class="lesson-nav">
+    <a href="m7-5.html">← LESSON 05 — SDN &amp; SEGMENT ROUTING</a>
+    <a href="m7-7.html">LESSON 07 — SYNTHESIS: ROUTING &amp; LATENCY →</a>
+</div>
+</div>
+
+<button class="back-to-top" id="backToTop" title="Back to top">↑</button>
+<footer>© 2026 LEOAF · M7 · LESSON 06 OF 7</footer>
+<script>
+const canvas=document.getElementById('starsCanvas'),ctx=canvas.getContext('2d');
+let stars=[];
+function initStars(){stars=[];for(let i=0;i<180;i++)stars.push({x:Math.random()*canvas.width,y:Math.random()*canvas.height,size:Math.random()*1.5+0.4,speed:Math.random()*0.18+0.04,hue:Math.random()*360});}
+function resizeCanvas(){canvas.width=window.innerWidth;canvas.height=window.innerHeight;}
+resizeCanvas();initStars();window.addEventListener('resize',resizeCanvas);
+function animateStars(){ctx.clearRect(0,0,canvas.width,canvas.height);stars.forEach(s=>{s.y-=s.speed;if(s.y<0){s.y=canvas.height;s.x=Math.random()*canvas.width;}ctx.beginPath();ctx.fillStyle=`hsl(${s.hue},80%,80%)`;ctx.arc(s.x,s.y,s.size,0,Math.PI*2);ctx.fill();});requestAnimationFrame(animateStars);}
+animateStars();
+</script>
+<script>
+const feedbacks={
+    1:{correct:"The four terms are access (~2.7 ms each way), mesh propagation (~18.6 ms), processing (~2 ms), and queuing (~1 ms light). Propagation dominates and cannot be engineered away — it is c over the path length. The others are small deterministic overheads plus one dangerous variable (queuing under load).",wrong:"The access legs are small and fixed. Processing and queuing are minor under light load. Propagation is the irreducible bulk of the budget."},
+    2:{correct:"GEO's 477 ms is a light-speed floor (35,786 km × 4 for a round trip) that no engineering reduces; it breaks voice, video calls, and interactive web. LEO's 54 ms serves them. The ratio is the LEO value proposition and the reason it displaced GEO's incumbency for consumer broadband.",wrong:"9× is not minor. GEO is far slower (the whole point). 54 ms is excellent for interactivity — only GEO's 477 ms is problematic."},
+    3:{correct:"The m7-1 crossover: the mesh's fixed access cost amortises over distance and the vacuum-speed advantage compounds. Above ~1,500–2,000 km the mesh wins, opening latency-arbitrage markets (finance, gaming) that pay premium for the milliseconds.",wrong:"It is faster on long-haul, not slower or identical. Under 500 km fibre wins (below the crossover) — the opposite of D."},
+    4:{correct:"Two mechanisms on two timescales: the router switching snapshots changes the path length and steps the RTT predictably over ~15 s; handovers inject loss in an instant. The profile — low mean, high variance, occasional loss — is exactly what terrestrial transport handles worst.",wrong:"Satellite and clock stability are managed and unrelated. The RTT is emphatically not constant — its variability is the whole problem."},
+    5:{correct:"TCP's core assumption is loss = congestion. A handover drops packets without any link being overloaded, but TCP cannot tell the difference, halves cwnd, and rebuilds slowly — only to be knocked down at the next handover. Periodic non-congestive loss traps TCP in a low-throughput state.",wrong:"Handovers are not congestion (that is the misinterpretation). TCP infers load from loss, it does not measure it directly. The bandwidth is fine — the loss is transitional."},
+    6:{correct:"BDP = bandwidth × RTT is the in-flight data needed to keep the pipe full. A larger RTT needs a larger window; TCP's window, sized for the old RTT, under-fills the pipe until it grows — and its RTO, computed from the old RTT, is mis-set too. Every RTT step is a re-tuning event TCP handles poorly.",wrong:"The window is fundamentally RTT-dependent (via BDP). The bandwidth is unchanged — only the RTT stepped. TCP tracks RTT closely (for RTO), it just assumes it is stationary."},
+    7:{correct:"QUIC's migration directly addresses handovers (which look like path changes); its richer loss detection distinguishes loss types better than TCP's blunt signal; and being user-space, it can be updated far faster than kernel TCP. It is a better substrate for the fix, though not a complete solution.",wrong:"QUIC does not add bandwidth or eliminate handovers. It runs end-to-end (including over the satellite path), not only on the ground."},
+    8:{correct:"The PEP hides the satellite path's pathology from the user's unmodified stack by terminating the connection locally and re-originating a clean one. Long used for GEO's huge RTT — but it breaks end-to-end encryption assumptions and adds a middlebox, tensions QUIC's encryption-by-default resists. A live architectural argument.",wrong:"It does not change the satellites or bandwidth, or remove transport — it splits and re-runs it. Its cost is the broken end-to-end assumption."},
+    9:{correct:"The constellation's determinism reaches up the stack: because handovers and RTT steps are scheduled and known (m7-5), a transport protocol that consumes that knowledge can anticipate rather than discover them — pre-sizing the window to the upcoming path and discounting scheduled loss. This is the frontier, determinism informing transport.",wrong:"Hardware speed and more retransmissions do not address the misinterpretation. Ignoring RTT is the opposite of the fix — the fix is anticipating RTT changes precisely."},
+    10:{correct:"The program's recurring theme (m5-1 throughput, m6-4 G/T): the honest figure is a distribution, the mean is marketing. The constellation delivers a superb *median* and a *restless* RTT; whether the restlessness is invisible or ruinous depends on the transport layer absorbing it. The spine reports the distribution.",wrong:"A single number or the mean is exactly what the reframing rejects. Latency is central to user experience (video calls, gaming) — the opposite of irrelevant."}
+};
+let answered={};
+document.querySelectorAll('.quiz-opt').forEach(btn=>{
+    btn.addEventListener('click',function(){
+        const q=this.dataset.q;
+        if(answered[q]!==undefined)return;
+        const correct=this.dataset.correct==='true';
+        answered[q]=correct;
+        document.querySelectorAll(`.quiz-opt[data-q="${q}"]`).forEach(b=>{b.disabled=true;if(b.dataset.correct==='true')b.classList.add('correct');});
+        if(!correct)this.classList.add('wrong');
+        const fb=document.getElementById('fb'+q);
+        fb.textContent=(correct?'✓ ':'✗ ')+feedbacks[q][correct?'correct':'wrong'];
+        fb.style.color=correct?'#39ff14':'#ff004f';
+        if(Object.keys(answered).length===10){
+            const total=Object.values(answered).filter(Boolean).length;
+            const sc=document.getElementById('quizScore');
+            sc.style.display='block';
+            const pct=Math.round(total/10*100);
+            sc.textContent=`SCORE: ${total}/10 (${pct}%) — ${pct===100?'PERFECT.':pct>=80?'STRONG.':pct>=60?'ADEQUATE. REVISIT WEAK SECTIONS.':'REVISIT THE LESSON BEFORE PROCEEDING.'}`;
+        }
+    });
+});
+</script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="supabase.js"></script>
+<script src="user_progress.js"></script>
+<script>
+const LESSON_ID='m7-6';
+(function(){
+    function bounceToLogin(r){console.error("Auth guard:",r);window.location.replace("index.html");}
+    async function init(){
+        if(typeof client==="undefined"||!client||!client.auth)return bounceToLogin("Supabase client not loaded");
+        let session=null;
+        try{({data:{session}}=await client.auth.getSession());}
+        catch(e){return bounceToLogin("getSession threw: "+e.message);}
+        if(!session){window.location.replace("index.html");return;}
+        const btn=document.getElementById('completeBtn'),msg=document.getElementById('completeMsg');
+        function setDone(done){
+            if(done){btn.textContent='✓ COMPLETE — CLICK TO UNDO';btn.classList.add('done');btn.style.cssText='border-color:#39ff14;color:#39ff14;background:rgba(57,255,20,0.1);cursor:pointer;opacity:1;';msg.style.color='#39ff14';msg.textContent='Lesson marked complete. Click again to undo.';}
+            else{btn.textContent='MARK LESSON COMPLETE';btn.classList.remove('done');btn.style.cssText='';msg.style.color='#ffffff55';msg.textContent='Not yet marked complete.';}
+        }
+        let mastered=[];
+        try{mastered=await getMasteredSections();}catch(e){console.error(e);}
+        setDone(mastered.includes(LESSON_ID));
+        btn.addEventListener('click',async()=>{
+            const isDone=btn.classList.contains('done');
+            msg.style.color='#00d9ff';msg.textContent='Saving...';
+            const ok=await upsertSection(LESSON_ID,!isDone);
+            if(ok){setDone(!isDone);}else{msg.style.color='#ff004f';msg.textContent='Error saving. Try again.';}
+        });
+        const btt=document.getElementById('backToTop');
+        window.addEventListener('scroll',()=>{btt.classList.toggle('visible',window.scrollY>400);});
+        btt.addEventListener('click',()=>window.scrollTo({top:0,behavior:'smooth'}));
+    }
+    if(document.readyState==="loading")document.addEventListener("DOMContentLoaded",init);
+    else init();
+})();
+</script>
+</body>
+</html>
