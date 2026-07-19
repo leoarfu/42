@@ -1,0 +1,641 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, shrink-to-fit=no">
+<title>M7-2 — Optical Inter-Satellite Links: Physics &amp; Pointing · LEOAF</title>
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;600;800&family=Share+Tech+Mono&family=Libre+Baskerville:ital,wght@0,400;0,700;1,400&display=swap" rel="stylesheet">
+<link rel="icon" href="favicon.ico" sizes="any" type="image/x-icon">
+<link rel="manifest" href="site.webmanifest">
+<meta name="theme-color" content="#0f0f0f">
+<script>
+window.leoafAbort = async function () {
+    function go() { window.location.replace("index.html?signedout=1"); }
+    try { if (typeof client !== "undefined" && client && client.auth && client.auth.signOut) { try { await client.auth.signOut({ scope: "local" }); } catch (e) {} } } catch (e) {}
+    go();
+};
+</script>
+<style>
+* { box-sizing:border-box; margin:0; padding:0; }
+html { height:100%; -webkit-text-size-adjust:100%; overflow-x:hidden; }
+body { font-family:'Share Tech Mono',monospace; background:#000; color:white; overflow-x:hidden; min-height:100vh; }
+#starsCanvas { position:fixed; inset:0; z-index:-1; }
+header { background:#000; border-bottom:1px solid #ff004f33; position:sticky; top:0; z-index:100; padding:1rem clamp(1.5rem,5vw,4rem); display:flex; justify-content:space-between; align-items:center; }
+.logo { font-family:'Orbitron',sans-serif; font-weight:800; font-size:clamp(16px,2vw,22px); letter-spacing:3px; text-decoration:none; }
+.logo span:first-child { color:white; } .logo span:last-child { color:#ff004f; }
+.nav-right { display:flex; align-items:center; gap:10px; }
+.nav-btn { background:transparent; border:1px solid #ff004f44; color:#ff004f; padding:6px 14px; cursor:pointer; transition:0.3s; font-size:11px; font-family:'Orbitron',sans-serif; letter-spacing:1px; text-decoration:none; display:inline-block; }
+.nav-btn:hover { background:#ff004f; color:black; }
+.breadcrumb { padding:14px clamp(1.5rem,5vw,4rem); font-size:11px; color:#ffffff44; letter-spacing:1px; position:relative; z-index:1; }
+.breadcrumb a { color:#00d9ff66; text-decoration:none; } .breadcrumb a:hover { color:#00d9ff; }
+.breadcrumb span { margin:0 8px; }
+.lesson-wrap { max-width:820px; margin:0 auto; padding:0 clamp(1.5rem,5vw,4rem) 80px; position:relative; z-index:1; }
+.lesson-header { padding:30px 0 28px; border-bottom:1px solid #ffffff11; margin-bottom:36px; }
+.lesson-tag { font-family:'Orbitron',sans-serif; font-size:10px; color:#ff004f; letter-spacing:3px; margin-bottom:10px; }
+.lesson-header h1 { font-family:'Orbitron',sans-serif; font-size:clamp(20px,3.5vw,32px); font-weight:800; line-height:1.2; margin-bottom:12px; }
+.lesson-meta { display:flex; gap:10px; flex-wrap:wrap; margin-bottom:16px; }
+.l-pill { font-family:'Orbitron',sans-serif; font-size:10px; padding:3px 10px; border:1px solid; letter-spacing:1px; }
+.l-pill-q { color:#ff004f; border-color:#ff004f44; } .l-pill-t { color:#39ff14; border-color:#39ff1444; }
+.l-pill-c { color:#ffaa00; border-color:#ffaa0044; }
+.lesson-intro { font-size:13px; line-height:1.85; opacity:0.75; }
+.toc { background:rgba(0,217,255,0.06); border:1px solid #00d9ff33; padding:24px 28px; margin:30px 0; }
+.toc h4 { font-family:'Orbitron',sans-serif; font-size:10px; color:#00d9ff; letter-spacing:2px; margin-bottom:16px; }
+.toc ol { padding-left:20px; } .toc li { font-size:13px; line-height:2.1; }
+.toc li a { color:#00d9ffbb; text-decoration:none; transition:0.15s; } .toc li a:hover { color:#fff; padding-left:4px; }
+.toc li::marker { color:#ff004f; font-family:'Orbitron',sans-serif; font-size:10px; }
+.cb { background:#f5f2ec; color:#1a1a1a; padding:36px clamp(24px,4vw,48px); margin-bottom:24px; border-left:4px solid #00d9ff; position:relative; z-index:1; }
+.cb h2 { font-family:'Orbitron',sans-serif; font-size:13px; color:#003d66; letter-spacing:2px; text-transform:uppercase; margin-bottom:20px; padding-bottom:10px; border-bottom:2px solid #00d9ff66; scroll-margin-top:80px; }
+.cb h3 { font-family:'Orbitron',sans-serif; font-size:11px; color:#444; letter-spacing:1.5px; text-transform:uppercase; margin:28px 0 12px; }
+.cb p { font-family:'Libre Baskerville',Georgia,serif; font-size:15px; line-height:1.9; color:#1a1a1a; margin-bottom:16px; }
+.cb ul { padding-left:0; margin-bottom:16px; }
+.cb ul li { font-family:'Libre Baskerville',Georgia,serif; font-size:14px; line-height:1.85; color:#1a1a1a; padding-left:20px; position:relative; margin-bottom:8px; }
+.cb ul li::before { content:'›'; position:absolute; left:0; color:#0077aa; }
+.cb blockquote { border-left:3px solid #1a7a1a; background:#eafaea; padding:14px 20px; margin:18px 0; font-size:13px; font-family:'Share Tech Mono',monospace; color:#0a3d0a; line-height:1.8; }
+.callout { border-left:3px solid #0088cc; background:#e8f4fb; padding:16px 20px; margin:22px 0; font-size:12px; line-height:1.8; color:#1a1a1a; }
+.callout.red { border-left-color:#cc0033; background:#fdecea; }
+.callout.green { border-left-color:#1a7a1a; background:#eafaea; }
+.callout.amber { border-left-color:#996600; background:#fef9ec; }
+.callout strong { font-family:'Orbitron',sans-serif; font-size:10px; letter-spacing:1px; display:block; margin-bottom:8px; }
+.compare-table { width:100%; border-collapse:collapse; margin:22px 0; font-size:12px; }
+.compare-table th { font-family:'Orbitron',sans-serif; font-size:10px; letter-spacing:1px; color:#003d66; padding:10px 12px; border-bottom:2px solid #00d9ff66; text-align:left; }
+.compare-table td { padding:10px 12px; border-bottom:1px solid #ddd; line-height:1.5; color:#1a1a1a; vertical-align:top; }
+.compare-table tr:hover td { background:#f0f0f0; }
+.key-numbers { display:grid; grid-template-columns:repeat(auto-fit,minmax(140px,1fr)); gap:12px; margin:22px 0; }
+.kn-item { background:#fff; border:1px solid #d0d0d0; padding:16px 12px; text-align:center; }
+.kn-val { font-family:'Orbitron',sans-serif; font-size:clamp(13px,1.8vw,18px); font-weight:800; color:#003d66; display:block; }
+.kn-label { font-size:10px; color:#555; letter-spacing:1px; margin-top:5px; display:block; line-height:1.4; }
+.quiz-block { background:rgba(17,17,17,0.9); border:1px solid #ff004f33; padding:28px; margin:48px 0 32px; }
+.quiz-block h2 { font-family:'Orbitron',sans-serif; font-size:13px; color:#ff004f; letter-spacing:2px; margin-bottom:6px; }
+.quiz-intro { font-size:12px; opacity:0.6; margin-bottom:24px; padding-bottom:16px; border-bottom:1px solid #ff004f22; line-height:1.6; }
+.quiz-q { margin-bottom:28px; }
+.quiz-q p { font-size:13px; opacity:0.9; margin-bottom:12px; line-height:1.65; }
+.quiz-q p strong { color:#00d9ff; }
+.quiz-options { display:flex; flex-direction:column; gap:8px; }
+.quiz-opt { background:rgba(255,255,255,0.03); border:1px solid #ffffff1a; padding:11px 16px; cursor:pointer; font-size:12px; font-family:'Share Tech Mono',monospace; transition:0.2s; text-align:left; color:white; line-height:1.5; }
+.quiz-opt:hover:not(:disabled) { background:rgba(0,217,255,0.08); border-color:#00d9ff44; }
+.quiz-opt.correct { background:rgba(57,255,20,0.1); border-color:#39ff14; color:#39ff14; }
+.quiz-opt.wrong { background:rgba(255,0,79,0.1); border-color:#ff004f; color:#ff004f; }
+.quiz-opt:disabled { cursor:default; }
+.quiz-feedback { font-size:12px; margin-top:10px; min-height:18px; line-height:1.7; opacity:0.9; padding:0 4px; }
+.quiz-score { font-family:'Orbitron',sans-serif; font-size:12px; color:#39ff14; margin-top:20px; letter-spacing:1px; display:none; padding-top:16px; border-top:1px solid #39ff1433; }
+.py-block { background:rgba(10,10,10,0.95); border:1px solid #39ff1422; padding:28px; margin:32px 0; }
+.py-block h2 { font-family:'Orbitron',sans-serif; font-size:13px; color:#39ff14; letter-spacing:2px; margin-bottom:8px; }
+.py-block .py-intro { font-size:12px; opacity:0.7; margin-bottom:20px; padding-bottom:16px; border-bottom:1px solid #39ff1422; line-height:1.7; }
+.py-exercise { margin-bottom:32px; } .py-exercise:last-child { margin-bottom:0; }
+.py-exercise h3 { font-family:'Orbitron',sans-serif; font-size:11px; color:#39ff1499; letter-spacing:1.5px; text-transform:uppercase; margin-bottom:10px; }
+.py-exercise p { font-size:12px; opacity:0.8; margin-bottom:14px; line-height:1.75; }
+.py-block pre { background:#050505; border:1px solid #39ff1433; padding:20px; font-family:'Share Tech Mono',monospace; font-size:11px; line-height:1.7; overflow-x:auto; color:#39ff14; white-space:pre; margin-bottom:12px; }
+.py-note { background:rgba(57,255,20,0.04); border-left:2px solid #39ff14; padding:12px 16px; margin-top:14px; font-size:12px; line-height:1.75; opacity:0.8; }
+.py-note strong { font-family:'Orbitron',sans-serif; font-size:10px; color:#39ff14; display:block; margin-bottom:6px; letter-spacing:1px; }
+.reflection-block { background:rgba(255,170,0,0.04); border:1px solid #ffaa0033; padding:24px; margin:32px 0; }
+.reflection-block h2 { font-family:'Orbitron',sans-serif; font-size:13px; color:#ffaa00; letter-spacing:2px; margin-bottom:8px; }
+.ref-intro { font-size:12px; opacity:0.7; margin-bottom:20px; padding-bottom:14px; border-bottom:1px solid #ffaa0022; line-height:1.7; }
+.ref-prompt { margin-bottom:20px; }
+.ref-prompt h3 { font-family:'Orbitron',sans-serif; font-size:11px; color:#ffaa0099; letter-spacing:1px; margin-bottom:8px; }
+.ref-prompt p { font-size:12px; opacity:0.8; line-height:1.75; }
+.complete-wrap { margin-top:56px; padding-top:30px; border-top:1px solid #ffffff11; text-align:center; }
+.complete-btn { font-family:'Orbitron',sans-serif; font-size:13px; letter-spacing:2px; padding:14px 44px; background:transparent; border:1px solid #39ff14; color:#39ff14; cursor:pointer; transition:0.3s; }
+.complete-btn:hover:not(.done) { background:#39ff14; color:black; box-shadow:0 0 20px rgba(57,255,20,0.4); }
+.complete-btn.done { background:rgba(57,255,20,0.1); cursor:pointer; opacity:1; }
+.complete-msg { font-size:12px; color:#39ff14; margin-top:14px; min-height:18px; letter-spacing:1px; }
+.lesson-nav { display:flex; justify-content:space-between; margin-top:30px; flex-wrap:wrap; gap:10px; }
+.lesson-nav a { font-family:'Orbitron',sans-serif; font-size:11px; color:#00d9ff66; text-decoration:none; letter-spacing:1px; transition:0.2s; }
+.lesson-nav a:hover { color:#00d9ff; }
+.back-to-top { position:fixed; bottom:28px; right:28px; z-index:200; width:44px; height:44px; background:#000; border:1px solid #00d9ff55; color:#00d9ff; font-size:20px; cursor:pointer; display:flex; align-items:center; justify-content:center; opacity:0; pointer-events:none; transition:opacity 0.3s; }
+.back-to-top.visible { opacity:1; pointer-events:auto; } .back-to-top:hover { border-color:#00d9ff; }
+footer { text-align:center; padding:30px; opacity:0.3; font-size:11px; position:relative; z-index:1; letter-spacing:1px; }
+.module-complete { background:rgba(57,255,20,0.06); border:1px solid #39ff1444; padding:24px 28px; margin:40px 0; text-align:center; }
+.module-complete h3 { font-family:'Orbitron',sans-serif; font-size:14px; color:#39ff14; letter-spacing:2px; margin-bottom:10px; }
+.module-complete p { font-size:12px; opacity:0.8; line-height:1.7; }
+</style>
+</head>
+<body>
+<canvas id="starsCanvas"></canvas>
+<header>
+    <a href="dashboard.html" class="logo"><span>LEO</span><span>AF</span></a>
+    <div class="nav-right">
+        <a href="m7.html" class="nav-btn">← M7 HUB</a>
+        <button class="nav-btn" onclick="leoafAbort()">ABORT</button>
+    </div>
+</header>
+<div class="breadcrumb">
+    <a href="dashboard.html">DASHBOARD</a><span>/</span>
+    <a href="m7.html">M7</a><span>/</span>
+    <span style="color:#ffffff88;">LESSON 02 — OPTICAL ISL PHYSICS &amp; POINTING</span>
+</div>
+
+<div class="lesson-wrap">
+<div class="lesson-header">
+    <div class="lesson-tag">M7 · LESSON 02 OF 7</div>
+    <h1>Optical Inter-Satellite Links:<br>Physics &amp; Pointing</h1>
+    <div class="lesson-meta">
+        <div class="l-pill l-pill-q">MODULE 7</div>
+        <div class="l-pill l-pill-t">NETWORKING, ISL &amp; ROUTING</div>
+        <div class="l-pill l-pill-c">CORE</div>
+    </div>
+    <p class="lesson-intro" style="margin-bottom:12px;">The mesh of m7-1 needs links between satellites, and the industry answered with lasers. This lesson explains why optical won over radio for inter-satellite links, works the laser link budget — which is the Module 4 budget transported into a regime where the free-space loss is 270 dB and the antenna gain is 106 dBi — and then confronts the problem that makes optical ISLs hard in a way nothing in this program has been: <strong>pointing</strong>. An optical ISL's beam is roughly 15 microradians wide, it must connect two platforms thousands of kilometres apart and closing at kilometres per second, and — because light takes milliseconds to cross the gap — the transmitter must aim not at where the receiver <em>is</em> but at where it <em>will be</em>, an offset of some 50 microradians, more than three beamwidths of empty space. Acquiring and holding that link is a control problem an order of magnitude beyond m6-5's satellite tracking, and it is the reason optical ISLs took decades to fly reliably.</p>
+    <p class="lesson-intro" style="margin-bottom:12px;">The lesson's verified spine: a 10 cm optical aperture at 1550 nm delivers 106 dBi of gain and, at 1 W transmit power over a 4,000 km link, closes 10 Gbps with about 1 dB of margin — a budget as tight as any in the program, which is why every term matters and pointing loss is budgeted at 3 dB rather than the 0.3 dB of a pointed dish. The spine project gains the ISL link budget and the range-and-rate geometry that the topology of m7-3 will assemble into a mesh.</p>
+</div>
+
+<div class="toc">
+    <h4>CONTENTS</h4>
+    <ol>
+        <li><a href="#s1">Why optical, not radio</a></li>
+        <li><a href="#s2">The laser link budget</a></li>
+        <li><a href="#s3">Range and rate: the geometry of a link in motion</a></li>
+        <li><a href="#s4">The point-ahead problem</a></li>
+        <li><a href="#s5">Acquisition, tracking, and pointing (ATP)</a></li>
+        <li><a href="#s6">What the ISL costs the satellite</a></li>
+        <li><a href="#s7">Key facts</a></li>
+        <li><a href="#s8">What this lesson delivers to the design chain</a></li>
+        <li><a href="#quiz">Knowledge check</a></li>
+        <li><a href="#py">Python exercises</a></li>
+        <li><a href="#reflect">Reflection</a></li>
+    </ol>
+</div>
+
+<div class="cb" id="s1">
+    <h2>1. Why optical, not radio</h2>
+<p>An inter-satellite link could in principle use RF — and some early and some GEO relay systems do. But for a dense LEO mesh moving vast traffic, optical wins on three counts, each decisive:</p>
+<p><strong>Bandwidth.</strong> The optical carrier at 1550 nm sits at 193 THz — 6,400 times higher in frequency than a 30 GHz Ka carrier. One percent of that carrier is 1,930 GHz of usable spectrum, against the few hundred megahertz an RF ISL might coordinate. Optical ISLs run 1 to 100 Gbps per link as a matter of course; an RF ISL strains to match a fraction of that. A mesh carrying transcontinental traffic (m7-1) needs the optical pipe.</p>
+<p><strong>No spectrum coordination.</strong> RF spectrum is a regulated, coordinated, scarce resource (m4-3, and the m6-4 mask). Optical ISLs radiate a pencil beam into space between two satellites, touching no terrestrial band and no other operator's allocation — no ITU filing, no interference budget, no coordination. For a constellation flying thousands of links, escaping spectrum coordination entirely is worth as much as the bandwidth.</p>
+<p><strong>Beam confinement.</strong> The same short wavelength that gives the bandwidth gives a pencil beam from a tiny aperture: a 10 cm optical aperture produces a 15 µrad beam, where a 10 cm RF aperture at 30 GHz produces a beam ten thousand times wider. The narrow beam is simultaneously the source of the link's gain (§2), its security (a beam microradians wide is nearly impossible to intercept), and its central difficulty (§4's pointing problem). Optical ISLs are the mesh's enabling technology precisely because the physics that makes them powerful also makes them hard.</p>
+</div>
+
+<div class="cb" id="s2">
+    <h2>2. The laser link budget</h2>
+<p>The Module 4 link equation is unchanged — EIRP, free-space loss, receive gain, sensitivity — but every term moves to a new scale. The optical aperture's gain follows the same (πD/λ)² law as any antenna, and at optical wavelengths it is enormous:</p>
+<blockquote>G_optical = (πD/λ)²  →  for D = 10 cm, λ = 1550 nm: <strong>106 dBi</strong></blockquote>
+<p>against which sits a free-space loss as enormous in the other direction. At 4,000 km:</p>
+<blockquote>FSPL = 20·log₁₀(4πd/λ) = <strong>270 dB</strong></blockquote>
+<p>The budget, assembled (1 W transmit = 30 dBm, two 10 cm apertures, 4,000 km, 3 dB pointing loss, 3 dB optics loss):</p>
+<table class="compare-table">
+<thead><tr>
+<th>Term</th>
+<th>Value</th>
+</tr></thead>
+<tbody>
+<tr><td>Transmit power</td><td>+30 dBm</td></tr>
+<tr><td>Transmit aperture gain</td><td>+106 dBi</td></tr>
+<tr><td>Receive aperture gain</td><td>+106 dBi</td></tr>
+<tr><td>Free-space loss</td><td>−270 dB</td></tr>
+<tr><td>Pointing loss</td><td>−3 dB</td></tr>
+<tr><td>Optics/implementation loss</td><td>−3 dB</td></tr>
+<tr><td><strong>Received power</strong></td><td><strong>−34 dBm</strong></td></tr>
+<tr><td>Receiver sensitivity (10 Gbps)</td><td>~ −35 dBm</td></tr>
+<tr><td><strong>Margin</strong></td><td><strong>~1 dB</strong></td></tr>
+</tbody>
+</table>
+<p>Two readings. First, the two 106 dBi apertures — 212 dB of combined gain — are what make a 270 dB loss survivable; optical ISLs live entirely on the extraordinary directivity a pencil beam buys. Second, the margin is <em>thin</em>: 1 dB, against a pointed dish's comfortable rain-margined budgets (m4-1). Every loss term is fought for, which is why the pointing budget is a hard 3 dB and why holding the beam (§5) is a closed-loop control problem, not a one-time alignment. Raising the data rate raises the required sensitivity and eats the margin directly — the link-rate-versus-range trade is the ISL's defining design choice.</p>
+</div>
+
+<div class="cb" id="s3">
+    <h2>3. Range and rate: the geometry of a link in motion</h2>
+<p>An ISL connects two orbiting platforms, so its range and its pointing direction change continuously. The range is bounded above by the Earth itself: two satellites at 550 km can link only until the Earth's limb blocks the line of sight, which for a grazing altitude of 80 km (above the sensible atmosphere) gives a <strong>maximum ISL range of ~5,000 km</strong>. Beyond that the beam would have to pass through the atmosphere or the planet. Within that bound, the practical ranges are set by the constellation's geometry (m7-3): intra-plane neighbours a fixed ~1,500–4,000 km apart, inter-plane neighbours whose range <em>varies</em> as the planes converge toward the poles.</p>
+<p>The rates are what make it hard. Two satellites in different planes have a relative transverse velocity of kilometres per second, and the pointing direction between them sweeps accordingly. The FSPL at these ranges (262–272 dB across 1,500–5,000 km) means range variation of a few thousand kilometres is ~10 dB of budget swing — the link's margin breathes as the geometry changes, and the ACM-like discipline of m5-2 reappears: an ISL may run a higher rate when its neighbour is close and back off as it recedes. Range, rate, and link capacity are one coupled system, and the spine models them together.</p>
+</div>
+
+<div class="cb" id="s4">
+    <h2>4. The point-ahead problem</h2>
+<p>Here is what separates optical ISL pointing from everything before it. The beam is 15 µrad wide. Light takes time to cross the link — 13 ms round trip at 4,000 km — and in that time the receiving satellite moves. So the transmitter must aim not at where it <em>sees</em> the receiver (that is where the receiver was, one light-time ago) but at where the receiver <em>will be</em> when the light arrives. This <strong>point-ahead angle</strong> is the relative transverse velocity divided by the speed of light:</p>
+<blockquote>point-ahead ≈ 2·v_transverse / c</blockquote>
+<p>For a transverse relative velocity of ~7,600 m/s, the point-ahead angle is <strong>~50 µrad</strong> — and the beam is only 15 µrad wide. The transmitter must aim <strong>more than three beamwidths off</strong> the apparent position of the receiver, into what looks like empty space, and be right. Get the point-ahead wrong by one beamwidth and the link drops. This has no analogue in m6-5's terminal tracking, where the beam was degrees wide and the target's light-time offset was negligible against the beamwidth. At optical ISL scale the light-time offset is the dominant pointing term, and computing it correctly — from the ephemeris of both satellites — is the heart of the acquisition system.</p>
+</div>
+
+<div class="cb" id="s5">
+    <h2>5. Acquisition, tracking, and pointing (ATP)</h2>
+<p>Establishing an optical ISL is a three-phase control problem, harder at every phase than m6-5's:</p>
+<p><strong>Acquisition</strong> — finding a 15 µrad target across thousands of kilometres from a cold start. Even with both satellites' ephemerides known (Module 2), residual attitude uncertainty (m6-5 §5) is far larger than the beamwidth, so the transmitter scans a small uncertainty cone with a beacon while the receiver searches for it — a spiral or raster search that must converge in seconds. The tighter the beam, the more precise the pointing but the harder the acquisition: another instance of the confinement paradox.</p>
+<p><strong>Tracking</strong> — once acquired, a closed-loop fine-pointing system (a fast steering mirror driven by a quadrant detector sensing the incoming beam's position) holds the link against platform vibration, thermal drift, and the changing geometry. The loop bandwidth must exceed the platform's disturbance spectrum — the m6-5 attitude-latency inequality, now at microradian scale.</p>
+<p><strong>Pointing</strong> — the coarse and fine stages together, with the point-ahead offset (§4) applied continuously from the computed relative velocity. The transmit beam is deliberately aimed off the received-beam direction by the point-ahead angle; the two are not co-boresighted, and the offset changes as the geometry evolves.</p>
+<p>The system that does all this — a gimbal or steering assembly, a fine-steering mirror, a quadrant detector, a beacon, and the ephemeris-driven point-ahead computation — is the optical terminal's real complexity and cost, dwarfing the laser itself. It is why optical ISLs, demonstrated in the 2000s, took until the 2020s to fly in quantity: the physics was never in doubt; the pointing was.</p>
+</div>
+
+<div class="cb" id="s6">
+    <h2>6. What the ISL costs the satellite</h2>
+<p>An optical ISL terminal is mass, power, and cost on every meshed satellite — and a mesh needs several per satellite (typically four: two intra-plane, two inter-plane, to build the +grid of m7-3). Each terminal carries the aperture and its steering, the laser and modem, the ATP electronics, and the thermal and structural provisions to hold optical alignment on a flexing spacecraft. The aggregate — several terminals per satellite across a constellation of hundreds or thousands — is the ISL hardware cost that m7-1's architecture trade weighed against the ground segment. It is also a reliability consideration: an ISL terminal that fails degrades the mesh's connectivity locally, and the routing layer (m7-4) must survive links that come and go — from failures as well as from the geometry.</p>
+<p>The design tension the whole lesson circles: the narrow beam is the source of the link's capability (gain, bandwidth, security) and the source of its difficulty (pointing, acquisition, thin margin). A wider beam would be easier to point and acquire but would lose the gain that closes the budget and the confinement that gives the security. The optical ISL sits at a sharp optimum, and the ATP system is what keeps it there. This is the m6-1 confinement principle — gain narrows the beam, narrowing tightens the pointing spec — carried to its physical extreme.</p>
+</div>
+
+<div class="cb" id="s7">
+    <h2>7. Key facts</h2>
+<table class="compare-table">
+<thead><tr>
+<th>Fact</th>
+<th>Value</th>
+<th>Unit</th>
+<th>Source</th>
+</tr></thead>
+<tbody>
+<tr><td>Optical carrier (1550 nm)</td><td>193</td><td>THz</td><td>Physics</td></tr>
+<tr><td>Frequency vs Ka (30 GHz)</td><td>6,400× higher</td><td>—</td><td>Computed</td></tr>
+<tr><td>Optical aperture gain (10 cm)</td><td>106</td><td>dBi</td><td>(πD/λ)²</td></tr>
+<tr><td>Beam divergence (10 cm aperture)</td><td>15.5</td><td>µrad</td><td>≈ λ/D</td></tr>
+<tr><td>ISL FSPL at 4,000 km</td><td>270</td><td>dB</td><td>Computed</td></tr>
+<tr><td>Max ISL range (80 km limb graze)</td><td>~5,000</td><td>km</td><td>Geometry</td></tr>
+<tr><td>Link budget margin (1 W, 10 cm, 4,000 km, 10 Gbps)</td><td>~1</td><td>dB</td><td>Computed</td></tr>
+<tr><td>Typical ISL data rate</td><td>1–100</td><td>Gbps</td><td>Optical practice</td></tr>
+<tr><td>Point-ahead angle (~7.6 km/s transverse)</td><td>~50</td><td>µrad</td><td>2v/c</td></tr>
+<tr><td>Point-ahead in beamwidths</td><td>~3.3</td><td>—</td><td>Computed</td></tr>
+<tr><td>Round-trip light time (4,000 km)</td><td>~27</td><td>ms</td><td>d/c ×2</td></tr>
+<tr><td>ISL terminals per meshed satellite</td><td>~4</td><td>—</td><td>+grid (m7-3)</td></tr>
+</tbody>
+</table>
+</div>
+
+<div class="cb" id="s8">
+    <h2>8. What this lesson delivers to the design chain</h2>
+<p>Stage 2 of the spine: an <code>ISLBudget</code> that closes (or fails to close) a link given aperture, power, range, and data rate; a range-and-rate geometry that computes an ISL's length and its point-ahead angle from two satellites' states; and the ATP feasibility check that decides whether a geometrically possible link is <em>operationally</em> possible. The topology graph of m7-1 gains link <em>weights</em> — a link that closes at 100 Gbps when its neighbour is near and 10 Gbps when far, or not at all beyond 5,000 km — turning the abstract "can-link" edge into a real capacity.</p>
+<p>What remains before routing is the pattern: which satellites link to which, how the +grid assembles from intra-plane and inter-plane links, how it breaks near the poles and reverses at the seam, and how fast the whole structure churns as the constellation moves. That is m7-3, and it is what makes the topology graph time-varying — the property that will defeat every terrestrial routing protocol in m7-4.</p>
+</div>
+
+<div class="quiz-block" id="quiz">
+    <h2>KNOWLEDGE CHECK</h2>
+    <div class="quiz-intro">Ten questions. Each option explains itself after you commit. No retries per question — decide first.</div>
+    <div class="quiz-q">
+        <p><strong>Q1.</strong> Optical won over RF for dense LEO inter-satellite links primarily because of:</p>
+        <div class="quiz-options">
+            <button class="quiz-opt" data-q="1" data-correct="false">A — Lower cost</button>
+            <button class="quiz-opt" data-q="1" data-correct="true">B — Bandwidth (193 THz carrier → 1–100 Gbps), freedom from spectrum coordination, and pencil-beam confinement from a tiny aperture</button>
+            <button class="quiz-opt" data-q="1" data-correct="false">C — Simpler pointing</button>
+            <button class="quiz-opt" data-q="1" data-correct="false">D — Longer range</button>
+        </div>
+        <div class="quiz-feedback" id="fb1"></div>
+    </div>
+    <div class="quiz-q">
+        <p><strong>Q2.</strong> The optical ISL link budget survives its 270 dB free-space loss because:</p>
+        <div class="quiz-options">
+            <button class="quiz-opt" data-q="2" data-correct="false">A — The laser is extremely powerful</button>
+            <button class="quiz-opt" data-q="2" data-correct="true">B — The two optical apertures deliver ~106 dBi of gain each — 212 dB combined — from the (πD/λ)² law at optical wavelengths</button>
+            <button class="quiz-opt" data-q="2" data-correct="false">C — Space has no path loss</button>
+            <button class="quiz-opt" data-q="2" data-correct="false">D — The link is very short</button>
+        </div>
+        <div class="quiz-feedback" id="fb2"></div>
+    </div>
+    <div class="quiz-q">
+        <p><strong>Q3.</strong> The ~1 dB link margin means:</p>
+        <div class="quiz-options">
+            <button class="quiz-opt" data-q="3" data-correct="false">A — The link is comfortably over-designed</button>
+            <button class="quiz-opt" data-q="3" data-correct="true">B — Every loss term is fought for, the pointing budget is a hard 3 dB rather than a dish's 0.3 dB, and raising the data rate eats the margin directly</button>
+            <button class="quiz-opt" data-q="3" data-correct="false">C — The link cannot work</button>
+            <button class="quiz-opt" data-q="3" data-correct="false">D — Margin is irrelevant for optical</button>
+        </div>
+        <div class="quiz-feedback" id="fb3"></div>
+    </div>
+    <div class="quiz-q">
+        <p><strong>Q4.</strong> The point-ahead angle exists because:</p>
+        <div class="quiz-options">
+            <button class="quiz-opt" data-q="4" data-correct="false">A — Satellites drift randomly</button>
+            <button class="quiz-opt" data-q="4" data-correct="true">B — Light takes milliseconds to cross the link, during which the receiver moves — so the transmitter must aim where the receiver <em>will be</em>, offset by ~2·v_transverse/c ≈ 50 µrad</button>
+            <button class="quiz-opt" data-q="4" data-correct="false">C — The beam bends in space</button>
+            <button class="quiz-opt" data-q="4" data-correct="false">D — The Earth's gravity deflects the beam</button>
+        </div>
+        <div class="quiz-feedback" id="fb4"></div>
+    </div>
+    <div class="quiz-q">
+        <p><strong>Q5.</strong> The point-ahead angle being ~3.3 beamwidths is significant because:</p>
+        <div class="quiz-options">
+            <button class="quiz-opt" data-q="5" data-correct="false">A — It makes the link easier to acquire</button>
+            <button class="quiz-opt" data-q="5" data-correct="true">B — The transmitter must aim more than three beamwidths off the receiver's apparent position — into apparent empty space — and be right, or the 15 µrad beam misses entirely</button>
+            <button class="quiz-opt" data-q="5" data-correct="false">C — It widens the beam</button>
+            <button class="quiz-opt" data-q="5" data-correct="false">D — It has no practical effect</button>
+        </div>
+        <div class="quiz-feedback" id="fb5"></div>
+    </div>
+    <div class="quiz-q">
+        <p><strong>Q6.</strong> The maximum ISL range of ~5,000 km is set by:</p>
+        <div class="quiz-options">
+            <button class="quiz-opt" data-q="6" data-correct="false">A — The laser's power</button>
+            <button class="quiz-opt" data-q="6" data-correct="true">B — The Earth's limb — beyond ~5,000 km at 550 km altitude, the line of sight grazes below ~80 km and enters the sensible atmosphere or is blocked</button>
+            <button class="quiz-opt" data-q="6" data-correct="false">C — The beam's divergence</button>
+            <button class="quiz-opt" data-q="6" data-correct="false">D — Spectrum regulation</button>
+        </div>
+        <div class="quiz-feedback" id="fb6"></div>
+    </div>
+    <div class="quiz-q">
+        <p><strong>Q7.</strong> An ISL's link margin "breathes" with geometry because:</p>
+        <div class="quiz-options">
+            <button class="quiz-opt" data-q="7" data-correct="false">A — The laser power fluctuates</button>
+            <button class="quiz-opt" data-q="7" data-correct="true">B — Range varies as planes converge and diverge, and FSPL changes ~10 dB across the practical range span — so an ISL runs higher rates when its neighbour is near and backs off as it recedes, an ACM-like discipline</button>
+            <button class="quiz-opt" data-q="7" data-correct="false">C — The atmosphere interferes</button>
+            <button class="quiz-opt" data-q="7" data-correct="false">D — Margin is constant for optical links</button>
+        </div>
+        <div class="quiz-feedback" id="fb7"></div>
+    </div>
+    <div class="quiz-q">
+        <p><strong>Q8.</strong> Acquisition of an optical ISL is hard because:</p>
+        <div class="quiz-options">
+            <button class="quiz-opt" data-q="8" data-correct="false">A — The satellites are invisible</button>
+            <button class="quiz-opt" data-q="8" data-correct="true">B — Finding a 15 µrad target across thousands of km requires scanning an uncertainty cone larger than the beamwidth (residual attitude error ≫ beam) with a beacon until the receiver locks — the tighter the beam, the harder the search</button>
+            <button class="quiz-opt" data-q="8" data-correct="false">C — Lasers are slow to turn on</button>
+            <button class="quiz-opt" data-q="8" data-correct="false">D — There is no line of sight</button>
+        </div>
+        <div class="quiz-feedback" id="fb8"></div>
+    </div>
+    <div class="quiz-q">
+        <p><strong>Q9.</strong> The optical terminal's real complexity and cost lie in:</p>
+        <div class="quiz-options">
+            <button class="quiz-opt" data-q="9" data-correct="false">A — The laser itself</button>
+            <button class="quiz-opt" data-q="9" data-correct="true">B — The ATP system — gimbal, fine-steering mirror, quadrant detector, beacon, and ephemeris-driven point-ahead computation — which dwarfs the laser</button>
+            <button class="quiz-opt" data-q="9" data-correct="false">C — The modem</button>
+            <button class="quiz-opt" data-q="9" data-correct="false">D — The thermal radiator</button>
+        </div>
+        <div class="quiz-feedback" id="fb9"></div>
+    </div>
+    <div class="quiz-q">
+        <p><strong>Q10.</strong> The lesson's central design tension is:</p>
+        <div class="quiz-options">
+            <button class="quiz-opt" data-q="10" data-correct="false">A — Optical versus radio</button>
+            <button class="quiz-opt" data-q="10" data-correct="true">B — The narrow beam is simultaneously the source of the link's capability (gain, bandwidth, security) and its difficulty (pointing, acquisition, thin margin) — the m6-1 confinement principle at its physical extreme</button>
+            <button class="quiz-opt" data-q="10" data-correct="false">C — Cost versus mass</button>
+            <button class="quiz-opt" data-q="10" data-correct="false">D — There is no tension</button>
+        </div>
+        <div class="quiz-feedback" id="fb10"></div>
+    </div>
+    <div class="quiz-score" id="quizScore"></div>
+</div>
+
+<div class="py-block" id="py">
+    <h2>PYTHON EXERCISES</h2>
+    <div class="py-intro">Three exercises; the last extends the module spine project. Run them, then work the numbered follow-ups in the comments — the follow-ups are the exercise.</div>
+    <div class="py-exercise">
+        <h3>Exercise 1 — The optical link budget</h3>
+        <p>Close the ISL, and find where it stops closing.</p>
+<pre>
+import math
+db = lambda x: 10*math.log10(x) if x &gt; 0 else -999.0
+
+LAM = 1550e-9          # 1550 nm
+C = 299792458.0
+
+def aperture_gain_db(D_m, lam=LAM):
+    return db((math.pi*D_m/lam)**2)
+
+def fspl_db(range_m, lam=LAM):
+    return 20*math.log10(4*math.pi*range_m/lam)
+
+def isl_budget(pt_w, D_tx, D_rx, range_km, point_db=3.0, optics_db=3.0):
+    pt_dbm = db(pt_w) + 30
+    pr = (pt_dbm + aperture_gain_db(D_tx) + aperture_gain_db(D_rx)
+          - fspl_db(range_km*1e3) - point_db - optics_db)
+    return pr   # dBm received
+
+def sensitivity_dbm(rate_gbps):
+    # coherent-ish scaling: ~-35 dBm at 10 Gbps, +10*log10(rate/10) worse
+    return -35.0 + 10*math.log10(rate_gbps/10.0)
+
+print(f&quot;{&#x27;range km&#x27;:&gt;9}{&#x27;Rx dBm&#x27;:&gt;9}{&#x27;sens@10G&#x27;:&gt;10}{&#x27;margin&#x27;:&gt;8}&quot;)
+for d in [1500, 2500, 4000, 5000]:
+    pr = isl_budget(1.0, 0.10, 0.10, d)
+    m = pr - sensitivity_dbm(10)
+    print(f&quot;{d:&gt;9}{pr:&gt;9.1f}{sensitivity_dbm(10):&gt;10.1f}{m:&gt;8.1f}&quot;)
+
+# 1. At 4,000 km with 1 W and 10 cm apertures, what is the MAXIMUM data
+#    rate that still closes with &gt;0 dB margin? Sweep rate and report.
+# 2. The margin is thin. Which single upgrade buys the most: doubling
+#    power (+3 dB), 14 cm apertures (2× area each), or halving optics
+#    loss? Compute each and rank — note aperture appears TWICE.
+# 3. Plot max-rate vs range for a fixed 1 dB margin. This curve is the
+#    ISL&#x27;s capacity-vs-length law that m7-3&#x27;s geometry will sample.
+</pre>
+    </div>
+    <div class="py-exercise">
+        <h3>Exercise 2 — Point-ahead and the pointing problem</h3>
+        <p>Quantify why optical ISL pointing is a different sport.</p>
+<pre>
+import math
+Re, h, C = 6371e3, 550e3, 299792458.0
+LAM = 1550e-9
+
+def orbital_v(alt=h):
+    return math.sqrt(3.986e14/(Re+alt))
+
+def beam_divergence_urad(D_m, lam=LAM):
+    return lam/D_m * 1e6
+
+def point_ahead_urad(v_transverse):
+    return 2*v_transverse/C * 1e6
+
+v = orbital_v()
+print(f&quot;orbital velocity: {v:.0f} m/s&quot;)
+print(f&quot;beam divergence (10 cm): {beam_divergence_urad(0.10):.1f} µrad&quot;)
+
+print(f&quot;\n{&#x27;v_trans m/s&#x27;:&gt;12}{&#x27;point-ahead µrad&#x27;:&gt;18}{&#x27;beamwidths&#x27;:&gt;12}&quot;)
+for vt in [1000, 3800, 7600, 15000]:
+    pa = point_ahead_urad(vt)
+    print(f&quot;{vt:&gt;12}{pa:&gt;18.1f}{pa/beam_divergence_urad(0.10):&gt;12.1f}&quot;)
+
+# 1. For the 15 µrad beam, what pointing ACCURACY (µrad) keeps pointing
+#    loss under the budgeted 3 dB? (Use m6-5&#x27;s 12*(err/bw)² law with the
+#    beamwidth = divergence.) Compare to a consumer IMU&#x27;s arc-min class.
+# 2. Point-ahead changes as geometry evolves. For two satellites in
+#    planes 30° apart, sketch v_transverse over a link&#x27;s lifetime and
+#    show the point-ahead angle is NOT constant — the ATP must track it.
+# 3. A wider beam (bigger divergence) eases pointing but cuts gain.
+#    Recompute exercise-1 margin for a 5 cm aperture (wider beam) and
+#    state the confinement paradox in one sentence of numbers.
+</pre>
+    </div>
+    <div class="py-exercise">
+        <h3>Exercise 3 — Spine Stage 2: ISLBudget and range/rate</h3>
+        <p>The topology's edges gain real weights.</p>
+<pre>
+import math
+db = lambda x: 10*math.log10(x) if x &gt; 0 else -999.0
+Re, h, C = 6371e3, 550e3, 299792458.0
+LAM = 1550e-9
+
+# ═══════════════════════════════════════════════════════
+# M7 SPINE PROJECT — CONSTELLATION ROUTER
+# Stage 2: ISLBudget + range/rate geometry.
+#   Stage 1 (m7-1) gave a can-link topology switch.
+#   Stage 2 gives each link a BUDGET (does it close, at what
+#   rate?) and a POINT-AHEAD (is it operationally pointable?).
+#   Next: m7-3 assembles links into the +grid mesh and its
+#   churn; m7-4 routes on the weighted, time-varying graph.
+# ═══════════════════════════════════════════════════════
+
+class ISLBudget:
+    MAX_RANGE_KM = 5000     # limb-grazing bound (§3)
+    def __init__(self, pt_w=1.0, D=0.10, point_db=3.0, optics_db=3.0):
+        self.pt_dbm = db(pt_w) + 30
+        self.D, self.point_db, self.optics_db = D, point_db, optics_db
+        self.g = db((math.pi*D/LAM)**2)
+
+    def rx_dbm(self, range_km):
+        fspl = 20*math.log10(4*math.pi*range_km*1e3/LAM)
+        return self.pt_dbm + 2*self.g - fspl - self.point_db - self.optics_db
+
+    def _sens(self, rate_gbps): return -35.0 + 10*math.log10(rate_gbps/10.0)
+
+    def max_rate_gbps(self, range_km, margin_db=1.0):
+        if range_km &gt; self.MAX_RANGE_KM: return 0.0
+        # rate where rx = sensitivity + margin
+        headroom = self.rx_dbm(range_km) - (-35.0) - margin_db
+        return 10.0 * 10**(headroom/10.0) if headroom &gt; -50 else 0.0
+
+    def point_ahead_urad(self, v_transverse):
+        return 2*v_transverse/C * 1e6
+
+    def link_ok(self, range_km, rate_gbps, v_transverse):
+        if range_km &gt; self.MAX_RANGE_KM: return False, &quot;out of range&quot;
+        if self.rx_dbm(range_km) - self._sens(rate_gbps) &lt; 1.0:
+            return False, &quot;budget fails&quot;
+        # point-ahead must be trackable (assume ATP handles &lt;100 µrad)
+        if self.point_ahead_urad(v_transverse) &gt; 100:
+            return False, &quot;unpointable&quot;
+        return True, &quot;OK&quot;
+
+isl = ISLBudget()
+print(f&quot;{&#x27;range km&#x27;:&gt;9}{&#x27;max rate Gbps&#x27;:&gt;14}{&#x27;point-ahead µrad&#x27;:&gt;18}&quot;)
+for d in [1500, 3000, 4500, 5500]:
+    pa = isl.point_ahead_urad(7600)
+    print(f&quot;{d:&gt;9}{isl.max_rate_gbps(d):&gt;14.1f}{pa if d&lt;=5000 else 0:&gt;18.1f}&quot;)
+
+for d, rate, vt in [(2000, 100, 3800), (4000, 10, 7600), (6000, 10, 7600)]:
+    ok, why = isl.link_ok(d, rate, vt)
+    print(f&quot;link {d} km @ {rate} Gbps, vt {vt}: {why}&quot;)
+
+# ── the handoff ─────────────────────────────────────────
+# m7-3 calls ISLBudget on every candidate satellite pair from the
+# m2 propagator, keeping the links that close AND point -&gt; the
+# time-varying weighted mesh graph. m7-4 routes on it.
+
+# 1. The mesh needs 4 terminals/sat (2 intra, 2 inter-plane). Given
+#    intra-plane range ~fixed and inter-plane range time-varying,
+#    which terminal type sees its max-rate change over an orbit?
+# 2. Add a `capacity_class` from max_rate: &gt;50 Gbps &#x27;trunk&#x27;, 10-50
+#    &#x27;link&#x27;, &lt;10 &#x27;weak&#x27;. Over the 5,000 km range span, where do the
+#    class boundaries fall? This is m7-4&#x27;s edge weighting.
+# 3. Combine with m7-1&#x27;s Topology: a mesh edge exists iff link_ok().
+#    Wire ISLBudget.link_ok into Topology so &#x27;mesh mode&#x27; produces a
+#    graph whose edges are physically real, not just geometric.
+</pre>
+    </div>
+</div>
+
+<div class="reflection-block" id="reflect">
+    <h2>REFLECTION</h2>
+    <div class="ref-intro">Four prompts. Each forces a decision — write the position down before moving on; the act of committing is the exercise.</div>
+    <div class="ref-prompt">
+        <h3>PROMPT 01</h3>
+        <p>Section 2's ~1 dB margin makes the optical ISL the tightest link in the program, and section 3 showed the margin breathing ±5 dB with range. A designer could fix this by over-sizing the aperture (more gain, more margin) at the cost of mass, power, and a harder acquisition (§5). Work the trade for a constellation flying four terminals on every one of a thousand satellites: how much aperture over-sizing is worth it, given that margin buys rate-stability but mass and acquisition-difficulty scale with the whole fleet? Identify whether the right answer is a fatter margin per link or a routing layer (m7-4) that simply tolerates links dropping to lower rates — and what that choice says about where robustness should live.</p>
+    </div>
+    <div class="ref-prompt">
+        <h3>PROMPT 02</h3>
+        <p>Section 4's point-ahead angle is computed from the ephemeris, which the constellation knows precisely (Module 2). But ephemeris has error, and a point-ahead error of one beamwidth drops the link. Quantify the chain: what ephemeris accuracy (position and velocity) does a 15 µrad beam demand, is that achievable with onboard GNSS and orbit determination, and what happens to the mesh if a maneuver or a drag event degrades one satellite's ephemeris? Decide whether optical ISLs make the constellation's orbit-determination system a link-availability dependency — and what that couples together that Module 2 treated as separate.</p>
+    </div>
+    <div class="ref-prompt">
+        <h3>PROMPT 03</h3>
+        <p>Section 1 credited optical ISLs with freedom from spectrum coordination — no ITU filing, no interference budget. Interrogate the completeness of that freedom: optical beams are unregulated in space, but the ground-to-space optical links some systems propose are not free of the atmosphere, and even space optical links raise questions of orbital debris hazard (a laser is a directed-energy beam) and of eventual coordination if the sky fills with optical constellations. Take a position on whether "no coordination" is a durable advantage or a temporary one that regulation will eventually reach, and name the specific event that would trigger the reach.</p>
+    </div>
+    <div class="ref-prompt">
+        <h3>PROMPT 04</h3>
+        <p>This lesson carried optical ISL physics at the level of the public link budget and the ATP problem structure, explicitly deferring the detailed ATP control design as specialist engineering — the same scope boundary m6-6 drew for certification. Yet optical ISL and constellation architecture sit close to the professional domain this curriculum excludes. Interrogate the boundary honestly: what can a learner genuinely design from the link budget and geometry in this lesson, versus what requires the ATP control-loop and acquisition-search expertise the lesson deliberately does not teach? Specify the point at which the lesson's <code>ISLBudget</code> spine stops being a design tool and becomes a feasibility estimator, and whether that is the right place to stop.</p>
+    </div>
+</div>
+
+<div class="cb">
+    <h2>Sources</h2>
+<ul>
+<li>Hemmati (ed.), <em>Deep Space Optical Communications</em> / <em>Near-Earth Laser Communications</em> — optical link budget, ATP, point-ahead.</li>
+<li>Kaushal &amp; Kaddoum, "Optical Communication in Space: Challenges and Mitigation Techniques" (IEEE Comm. Surveys, 2017) — free-space optical link fundamentals and pointing.</li>
+<li>Toyoshima, "Trends in satellite communications and the role of optical free-space communications" — optical-vs-RF ISL trade.</li>
+<li>Module 4 (m4-1, m4-2) — the link equation transported to optical scale; Module 2 — the orbital geometry behind range, rate, and point-ahead; Module 6 (m6-5) — the terminal pointing problem this lesson escalates by orders of magnitude.</li>
+<li>Module 7 (m7-1) — the mesh architecture these links enable; m7-3 — the topology they assemble into.</li>
+</ul>
+</div>
+
+<div class="complete-wrap">
+    <button class="complete-btn" id="completeBtn">MARK LESSON COMPLETE</button>
+    <div class="complete-msg" id="completeMsg"></div>
+</div>
+<div class="lesson-nav">
+    <a href="m7-1.html">← LESSON 01 — BENT-PIPE VS MESH</a>
+    <a href="m7-3.html">LESSON 03 — ISL TOPOLOGY &amp; DYNAMICS →</a>
+</div>
+</div>
+
+<button class="back-to-top" id="backToTop" title="Back to top">↑</button>
+<footer>© 2026 LEOAF · M7 · LESSON 02 OF 7</footer>
+<script>
+const canvas=document.getElementById('starsCanvas'),ctx=canvas.getContext('2d');
+let stars=[];
+function initStars(){stars=[];for(let i=0;i<180;i++)stars.push({x:Math.random()*canvas.width,y:Math.random()*canvas.height,size:Math.random()*1.5+0.4,speed:Math.random()*0.18+0.04,hue:Math.random()*360});}
+function resizeCanvas(){canvas.width=window.innerWidth;canvas.height=window.innerHeight;}
+resizeCanvas();initStars();window.addEventListener('resize',resizeCanvas);
+function animateStars(){ctx.clearRect(0,0,canvas.width,canvas.height);stars.forEach(s=>{s.y-=s.speed;if(s.y<0){s.y=canvas.height;s.x=Math.random()*canvas.width;}ctx.beginPath();ctx.fillStyle=`hsl(${s.hue},80%,80%)`;ctx.arc(s.x,s.y,s.size,0,Math.PI*2);ctx.fill();});requestAnimationFrame(animateStars);}
+animateStars();
+</script>
+<script>
+const feedbacks={
+    1:{correct:"The three decisive advantages all flow from the short wavelength: orders more bandwidth, no ITU coordination (the beam touches no terrestrial band), and a 15 µrad beam from a 10 cm aperture. The mesh's traffic demands the optical pipe.",wrong:"Optical ISLs are more expensive and far harder to point than RF — those are the costs paid for the bandwidth. Range is limited by the Earth's limb regardless of band."},
+    2:{correct:"A 10 cm aperture at 1550 nm gives 106 dBi; two of them give 212 dB against a 270 dB loss, leaving a workable (if thin) budget from just 1 W. The extraordinary directivity of a pencil beam is the whole game.",wrong:"1 W is modest — the gain does the work. Free space has enormous loss at these ranges (270 dB). The link is thousands of km."},
+    3:{correct:"A 1 dB margin is tight — the link-rate-versus-range trade lives here (higher rate needs more receive power). It is why holding the beam is a continuous control problem and why the 3 dB pointing allowance is generous by optical standards but tiny compared to a rain-margined dish.",wrong:"1 dB is the opposite of over-designed. The link works, barely, which is the point. Margin is critical precisely because it is thin."},
+    4:{correct:"At 4,000 km the one-way light time is ~13 ms; the receiver moves kilometres in that time. The transmitter aims ahead by the relative-transverse-velocity-over-c angle — ~50 µrad, computed from both ephemerides. This is the dominant optical-ISL pointing term and has no analogue at RF terminal scale.",wrong:"The motion is deterministic (ephemeris-known), not random. Beams travel straight in vacuum; gravitational deflection is negligible at these scales."},
+    5:{correct:"The offset exceeds the beam's own width several times over, so pointing at the apparent (light-delayed) position would miss the receiver completely. Computing the point-ahead correctly from the relative velocity is essential to the link existing at all — the defining difficulty over m6-5's degree-wide terminal beams.",wrong:"It makes pointing *harder*, not acquisition easier. It does not change the beamwidth. Getting it wrong by one beamwidth drops the link — maximally practical."},
+    6:{correct:"Two satellites can link only while their line of sight clears the atmosphere; the grazing geometry at 550 km caps the range near 5,000 km. Beyond it the beam would have to pass through air or planet. Practical ranges (intra- and inter-plane) sit inside this bound.",wrong:"Power sets the achievable rate at a range, not the maximum range. Divergence affects the budget, not the geometric limit. Optical ISLs are unregulated (§1)."},
+    7:{correct:"FSPL spans 262–272 dB across 1,500–5,000 km; that ~10 dB swing is the m5-2 adaptive-rate logic reappearing at the ISL. Range, rate, and capacity are one coupled system the spine models together.",wrong:"The laser is stable; the geometry moves. No atmosphere between satellites. Margin varies precisely because range varies."},
+    8:{correct:"Even with ephemerides known, attitude uncertainty dwarfs the 15 µrad beam, so acquisition is a search over a small cone that must converge in seconds. The confinement paradox: the beam that makes the link powerful makes it hard to find. This is the ATP system's first phase.",wrong:"The satellites' positions are known; it is the beam alignment that is hard. Lasers switch fast. Line of sight exists within the 5,000 km bound — finding it is the problem."},
+    9:{correct:"Holding a microradian beam on a moving, vibrating platform across thousands of km is the hard part; the laser is comparatively simple. This is why optical ISLs, physically demonstrated decades ago, only flew in quantity once the ATP engineering matured.",wrong:"The laser and modem are mature and modest. Thermal design matters but is secondary to the pointing chain."},
+    10:{correct:"A wider beam would be easier to point and acquire but would lose the gain that closes the budget and the confinement that gives security. The ISL sits at a sharp optimum, and the ATP system keeps it there — gain narrows the beam, narrowing tightens the spec, exactly as m6-1's dish taught.",wrong:"Optical-vs-radio was §1's settled question. Cost and mass are consequences of the tension, not the tension itself. The tension is real and defining."}
+};
+let answered={};
+document.querySelectorAll('.quiz-opt').forEach(btn=>{
+    btn.addEventListener('click',function(){
+        const q=this.dataset.q;
+        if(answered[q]!==undefined)return;
+        const correct=this.dataset.correct==='true';
+        answered[q]=correct;
+        document.querySelectorAll(`.quiz-opt[data-q="${q}"]`).forEach(b=>{b.disabled=true;if(b.dataset.correct==='true')b.classList.add('correct');});
+        if(!correct)this.classList.add('wrong');
+        const fb=document.getElementById('fb'+q);
+        fb.textContent=(correct?'✓ ':'✗ ')+feedbacks[q][correct?'correct':'wrong'];
+        fb.style.color=correct?'#39ff14':'#ff004f';
+        if(Object.keys(answered).length===10){
+            const total=Object.values(answered).filter(Boolean).length;
+            const sc=document.getElementById('quizScore');
+            sc.style.display='block';
+            const pct=Math.round(total/10*100);
+            sc.textContent=`SCORE: ${total}/10 (${pct}%) — ${pct===100?'PERFECT.':pct>=80?'STRONG.':pct>=60?'ADEQUATE. REVISIT WEAK SECTIONS.':'REVISIT THE LESSON BEFORE PROCEEDING.'}`;
+        }
+    });
+});
+</script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="supabase.js"></script>
+<script src="user_progress.js"></script>
+<script>
+const LESSON_ID='m7-2';
+(function(){
+    function bounceToLogin(r){console.error("Auth guard:",r);window.location.replace("index.html");}
+    async function init(){
+        if(typeof client==="undefined"||!client||!client.auth)return bounceToLogin("Supabase client not loaded");
+        let session=null;
+        try{({data:{session}}=await client.auth.getSession());}
+        catch(e){return bounceToLogin("getSession threw: "+e.message);}
+        if(!session){window.location.replace("index.html");return;}
+        const btn=document.getElementById('completeBtn'),msg=document.getElementById('completeMsg');
+        function setDone(done){
+            if(done){btn.textContent='✓ COMPLETE — CLICK TO UNDO';btn.classList.add('done');btn.style.cssText='border-color:#39ff14;color:#39ff14;background:rgba(57,255,20,0.1);cursor:pointer;opacity:1;';msg.style.color='#39ff14';msg.textContent='Lesson marked complete. Click again to undo.';}
+            else{btn.textContent='MARK LESSON COMPLETE';btn.classList.remove('done');btn.style.cssText='';msg.style.color='#ffffff55';msg.textContent='Not yet marked complete.';}
+        }
+        let mastered=[];
+        try{mastered=await getMasteredSections();}catch(e){console.error(e);}
+        setDone(mastered.includes(LESSON_ID));
+        btn.addEventListener('click',async()=>{
+            const isDone=btn.classList.contains('done');
+            msg.style.color='#00d9ff';msg.textContent='Saving...';
+            const ok=await upsertSection(LESSON_ID,!isDone);
+            if(ok){setDone(!isDone);}else{msg.style.color='#ff004f';msg.textContent='Error saving. Try again.';}
+        });
+        const btt=document.getElementById('backToTop');
+        window.addEventListener('scroll',()=>{btt.classList.toggle('visible',window.scrollY>400);});
+        btt.addEventListener('click',()=>window.scrollTo({top:0,behavior:'smooth'}));
+    }
+    if(document.readyState==="loading")document.addEventListener("DOMContentLoaded",init);
+    else init();
+})();
+</script>
+</body>
+</html>
