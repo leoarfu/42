@@ -1,0 +1,688 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, shrink-to-fit=no">
+<title>M7-7 — Synthesis: The Routing &amp; Latency Model · LEOAF</title>
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;600;800&family=Share+Tech+Mono&family=Libre+Baskerville:ital,wght@0,400;0,700;1,400&display=swap" rel="stylesheet">
+<link rel="icon" href="favicon.ico" sizes="any" type="image/x-icon">
+<link rel="manifest" href="site.webmanifest">
+<meta name="theme-color" content="#0f0f0f">
+<script>
+window.leoafAbort = async function () {
+    function go() { window.location.replace("index.html?signedout=1"); }
+    try { if (typeof client !== "undefined" && client && client.auth && client.auth.signOut) { try { await client.auth.signOut({ scope: "local" }); } catch (e) {} } } catch (e) {}
+    go();
+};
+</script>
+<style>
+* { box-sizing:border-box; margin:0; padding:0; }
+html { height:100%; -webkit-text-size-adjust:100%; overflow-x:hidden; }
+body { font-family:'Share Tech Mono',monospace; background:#000; color:white; overflow-x:hidden; min-height:100vh; }
+#starsCanvas { position:fixed; inset:0; z-index:-1; }
+header { background:#000; border-bottom:1px solid #ff004f33; position:sticky; top:0; z-index:100; padding:1rem clamp(1.5rem,5vw,4rem); display:flex; justify-content:space-between; align-items:center; }
+.logo { font-family:'Orbitron',sans-serif; font-weight:800; font-size:clamp(16px,2vw,22px); letter-spacing:3px; text-decoration:none; }
+.logo span:first-child { color:white; } .logo span:last-child { color:#ff004f; }
+.nav-right { display:flex; align-items:center; gap:10px; }
+.nav-btn { background:transparent; border:1px solid #ff004f44; color:#ff004f; padding:6px 14px; cursor:pointer; transition:0.3s; font-size:11px; font-family:'Orbitron',sans-serif; letter-spacing:1px; text-decoration:none; display:inline-block; }
+.nav-btn:hover { background:#ff004f; color:black; }
+.breadcrumb { padding:14px clamp(1.5rem,5vw,4rem); font-size:11px; color:#ffffff44; letter-spacing:1px; position:relative; z-index:1; }
+.breadcrumb a { color:#00d9ff66; text-decoration:none; } .breadcrumb a:hover { color:#00d9ff; }
+.breadcrumb span { margin:0 8px; }
+.lesson-wrap { max-width:820px; margin:0 auto; padding:0 clamp(1.5rem,5vw,4rem) 80px; position:relative; z-index:1; }
+.lesson-header { padding:30px 0 28px; border-bottom:1px solid #ffffff11; margin-bottom:36px; }
+.lesson-tag { font-family:'Orbitron',sans-serif; font-size:10px; color:#ff004f; letter-spacing:3px; margin-bottom:10px; }
+.lesson-header h1 { font-family:'Orbitron',sans-serif; font-size:clamp(20px,3.5vw,32px); font-weight:800; line-height:1.2; margin-bottom:12px; }
+.lesson-meta { display:flex; gap:10px; flex-wrap:wrap; margin-bottom:16px; }
+.l-pill { font-family:'Orbitron',sans-serif; font-size:10px; padding:3px 10px; border:1px solid; letter-spacing:1px; }
+.l-pill-q { color:#ff004f; border-color:#ff004f44; } .l-pill-t { color:#39ff14; border-color:#39ff1444; }
+.l-pill-c { color:#ffaa00; border-color:#ffaa0044; }
+.lesson-intro { font-size:13px; line-height:1.85; opacity:0.75; }
+.toc { background:rgba(0,217,255,0.06); border:1px solid #00d9ff33; padding:24px 28px; margin:30px 0; }
+.toc h4 { font-family:'Orbitron',sans-serif; font-size:10px; color:#00d9ff; letter-spacing:2px; margin-bottom:16px; }
+.toc ol { padding-left:20px; } .toc li { font-size:13px; line-height:2.1; }
+.toc li a { color:#00d9ffbb; text-decoration:none; transition:0.15s; } .toc li a:hover { color:#fff; padding-left:4px; }
+.toc li::marker { color:#ff004f; font-family:'Orbitron',sans-serif; font-size:10px; }
+.cb { background:#f5f2ec; color:#1a1a1a; padding:36px clamp(24px,4vw,48px); margin-bottom:24px; border-left:4px solid #00d9ff; position:relative; z-index:1; }
+.cb h2 { font-family:'Orbitron',sans-serif; font-size:13px; color:#003d66; letter-spacing:2px; text-transform:uppercase; margin-bottom:20px; padding-bottom:10px; border-bottom:2px solid #00d9ff66; scroll-margin-top:80px; }
+.cb h3 { font-family:'Orbitron',sans-serif; font-size:11px; color:#444; letter-spacing:1.5px; text-transform:uppercase; margin:28px 0 12px; }
+.cb p { font-family:'Libre Baskerville',Georgia,serif; font-size:15px; line-height:1.9; color:#1a1a1a; margin-bottom:16px; }
+.cb ul { padding-left:0; margin-bottom:16px; }
+.cb ul li { font-family:'Libre Baskerville',Georgia,serif; font-size:14px; line-height:1.85; color:#1a1a1a; padding-left:20px; position:relative; margin-bottom:8px; }
+.cb ul li::before { content:'›'; position:absolute; left:0; color:#0077aa; }
+.cb blockquote { border-left:3px solid #1a7a1a; background:#eafaea; padding:14px 20px; margin:18px 0; font-size:13px; font-family:'Share Tech Mono',monospace; color:#0a3d0a; line-height:1.8; }
+.callout { border-left:3px solid #0088cc; background:#e8f4fb; padding:16px 20px; margin:22px 0; font-size:12px; line-height:1.8; color:#1a1a1a; }
+.callout.red { border-left-color:#cc0033; background:#fdecea; }
+.callout.green { border-left-color:#1a7a1a; background:#eafaea; }
+.callout.amber { border-left-color:#996600; background:#fef9ec; }
+.callout strong { font-family:'Orbitron',sans-serif; font-size:10px; letter-spacing:1px; display:block; margin-bottom:8px; }
+.compare-table { width:100%; border-collapse:collapse; margin:22px 0; font-size:12px; }
+.compare-table th { font-family:'Orbitron',sans-serif; font-size:10px; letter-spacing:1px; color:#003d66; padding:10px 12px; border-bottom:2px solid #00d9ff66; text-align:left; }
+.compare-table td { padding:10px 12px; border-bottom:1px solid #ddd; line-height:1.5; color:#1a1a1a; vertical-align:top; }
+.compare-table tr:hover td { background:#f0f0f0; }
+.key-numbers { display:grid; grid-template-columns:repeat(auto-fit,minmax(140px,1fr)); gap:12px; margin:22px 0; }
+.kn-item { background:#fff; border:1px solid #d0d0d0; padding:16px 12px; text-align:center; }
+.kn-val { font-family:'Orbitron',sans-serif; font-size:clamp(13px,1.8vw,18px); font-weight:800; color:#003d66; display:block; }
+.kn-label { font-size:10px; color:#555; letter-spacing:1px; margin-top:5px; display:block; line-height:1.4; }
+.quiz-block { background:rgba(17,17,17,0.9); border:1px solid #ff004f33; padding:28px; margin:48px 0 32px; }
+.quiz-block h2 { font-family:'Orbitron',sans-serif; font-size:13px; color:#ff004f; letter-spacing:2px; margin-bottom:6px; }
+.quiz-intro { font-size:12px; opacity:0.6; margin-bottom:24px; padding-bottom:16px; border-bottom:1px solid #ff004f22; line-height:1.6; }
+.quiz-q { margin-bottom:28px; }
+.quiz-q p { font-size:13px; opacity:0.9; margin-bottom:12px; line-height:1.65; }
+.quiz-q p strong { color:#00d9ff; }
+.quiz-options { display:flex; flex-direction:column; gap:8px; }
+.quiz-opt { background:rgba(255,255,255,0.03); border:1px solid #ffffff1a; padding:11px 16px; cursor:pointer; font-size:12px; font-family:'Share Tech Mono',monospace; transition:0.2s; text-align:left; color:white; line-height:1.5; }
+.quiz-opt:hover:not(:disabled) { background:rgba(0,217,255,0.08); border-color:#00d9ff44; }
+.quiz-opt.correct { background:rgba(57,255,20,0.1); border-color:#39ff14; color:#39ff14; }
+.quiz-opt.wrong { background:rgba(255,0,79,0.1); border-color:#ff004f; color:#ff004f; }
+.quiz-opt:disabled { cursor:default; }
+.quiz-feedback { font-size:12px; margin-top:10px; min-height:18px; line-height:1.7; opacity:0.9; padding:0 4px; }
+.quiz-score { font-family:'Orbitron',sans-serif; font-size:12px; color:#39ff14; margin-top:20px; letter-spacing:1px; display:none; padding-top:16px; border-top:1px solid #39ff1433; }
+.py-block { background:rgba(10,10,10,0.95); border:1px solid #39ff1422; padding:28px; margin:32px 0; }
+.py-block h2 { font-family:'Orbitron',sans-serif; font-size:13px; color:#39ff14; letter-spacing:2px; margin-bottom:8px; }
+.py-block .py-intro { font-size:12px; opacity:0.7; margin-bottom:20px; padding-bottom:16px; border-bottom:1px solid #39ff1422; line-height:1.7; }
+.py-exercise { margin-bottom:32px; } .py-exercise:last-child { margin-bottom:0; }
+.py-exercise h3 { font-family:'Orbitron',sans-serif; font-size:11px; color:#39ff1499; letter-spacing:1.5px; text-transform:uppercase; margin-bottom:10px; }
+.py-exercise p { font-size:12px; opacity:0.8; margin-bottom:14px; line-height:1.75; }
+.py-block pre { background:#050505; border:1px solid #39ff1433; padding:20px; font-family:'Share Tech Mono',monospace; font-size:11px; line-height:1.7; overflow-x:auto; color:#39ff14; white-space:pre; margin-bottom:12px; }
+.py-note { background:rgba(57,255,20,0.04); border-left:2px solid #39ff14; padding:12px 16px; margin-top:14px; font-size:12px; line-height:1.75; opacity:0.8; }
+.py-note strong { font-family:'Orbitron',sans-serif; font-size:10px; color:#39ff14; display:block; margin-bottom:6px; letter-spacing:1px; }
+.reflection-block { background:rgba(255,170,0,0.04); border:1px solid #ffaa0033; padding:24px; margin:32px 0; }
+.reflection-block h2 { font-family:'Orbitron',sans-serif; font-size:13px; color:#ffaa00; letter-spacing:2px; margin-bottom:8px; }
+.ref-intro { font-size:12px; opacity:0.7; margin-bottom:20px; padding-bottom:14px; border-bottom:1px solid #ffaa0022; line-height:1.7; }
+.ref-prompt { margin-bottom:20px; }
+.ref-prompt h3 { font-family:'Orbitron',sans-serif; font-size:11px; color:#ffaa0099; letter-spacing:1px; margin-bottom:8px; }
+.ref-prompt p { font-size:12px; opacity:0.8; line-height:1.75; }
+.complete-wrap { margin-top:56px; padding-top:30px; border-top:1px solid #ffffff11; text-align:center; }
+.complete-btn { font-family:'Orbitron',sans-serif; font-size:13px; letter-spacing:2px; padding:14px 44px; background:transparent; border:1px solid #39ff14; color:#39ff14; cursor:pointer; transition:0.3s; }
+.complete-btn:hover:not(.done) { background:#39ff14; color:black; box-shadow:0 0 20px rgba(57,255,20,0.4); }
+.complete-btn.done { background:rgba(57,255,20,0.1); cursor:pointer; opacity:1; }
+.complete-msg { font-size:12px; color:#39ff14; margin-top:14px; min-height:18px; letter-spacing:1px; }
+.lesson-nav { display:flex; justify-content:space-between; margin-top:30px; flex-wrap:wrap; gap:10px; }
+.lesson-nav a { font-family:'Orbitron',sans-serif; font-size:11px; color:#00d9ff66; text-decoration:none; letter-spacing:1px; transition:0.2s; }
+.lesson-nav a:hover { color:#00d9ff; }
+.back-to-top { position:fixed; bottom:28px; right:28px; z-index:200; width:44px; height:44px; background:#000; border:1px solid #00d9ff55; color:#00d9ff; font-size:20px; cursor:pointer; display:flex; align-items:center; justify-content:center; opacity:0; pointer-events:none; transition:opacity 0.3s; }
+.back-to-top.visible { opacity:1; pointer-events:auto; } .back-to-top:hover { border-color:#00d9ff; }
+footer { text-align:center; padding:30px; opacity:0.3; font-size:11px; position:relative; z-index:1; letter-spacing:1px; }
+.module-complete { background:rgba(57,255,20,0.06); border:1px solid #39ff1444; padding:24px 28px; margin:40px 0; text-align:center; }
+.module-complete h3 { font-family:'Orbitron',sans-serif; font-size:14px; color:#39ff14; letter-spacing:2px; margin-bottom:10px; }
+.module-complete p { font-size:12px; opacity:0.8; line-height:1.7; }
+</style>
+</head>
+<body>
+<canvas id="starsCanvas"></canvas>
+<header>
+    <a href="dashboard.html" class="logo"><span>LEO</span><span>AF</span></a>
+    <div class="nav-right">
+        <a href="m7.html" class="nav-btn">← M7 HUB</a>
+        <button class="nav-btn" onclick="leoafAbort()">ABORT</button>
+    </div>
+</header>
+<div class="breadcrumb">
+    <a href="dashboard.html">DASHBOARD</a><span>/</span>
+    <a href="m7.html">M7</a><span>/</span>
+    <span style="color:#ffffff88;">LESSON 07 — SYNTHESIS: ROUTING &amp; LATENCY</span>
+</div>
+
+<div class="lesson-wrap">
+<div class="lesson-header">
+    <div class="lesson-tag">M7 · LESSON 07 OF 7 · MODULE CAPSTONE</div>
+    <h1>Synthesis:<br>The Routing &amp; Latency Model</h1>
+    <div class="lesson-meta">
+        <div class="l-pill l-pill-q">MODULE 7</div>
+        <div class="l-pill l-pill-t">NETWORKING, ISL &amp; ROUTING</div>
+        <div class="l-pill l-pill-c">CAPSTONE</div>
+    </div>
+    <p class="lesson-intro" style="margin-bottom:12px;">Six lessons built the network layer from the architecture decision outward: bent-pipe versus mesh (m7-1), the optical links that make a mesh possible (m7-2), the +grid topology and its churn (m7-3), routing on a graph that never holds still (m7-4), the SDN control plane that delivers the routes (m7-5), and the end-to-end latency the transport layer must survive (m7-6). This lesson assembles them into one artefact — the <code>ConstellationRouter</code> — and runs a message through it end to end: from a terminal, up through the handover choreography, across the scheduled mesh, down to a destination, with its full latency distribution attached. Then it does what the whole module was for: it compares bent-pipe, mesh, and terrestrial fibre for representative city-pairs, and reads off which architecture wins where, and why.</p>
+    <p class="lesson-intro" style="margin-bottom:12px;">The capstone finding is a single table that unifies the module's two central arguments — coverage and latency — into one grid. For every long-haul route, the mesh delivers a latency fibre cannot match (54 ms London–NY against fibre's 76, 104 ms Sydney–LA against 165) <em>and</em> is the only architecture that can serve the route at all, because a bent-pipe constellation has "no path" between endpoints thousands of kilometres apart. For every short route, fibre wins on latency (16 ms NYC–DC against 5) and both space architectures merely serve. And against GEO, the mesh is nine times better everywhere. The coverage argument and the latency argument, which m7-1 claimed were the same argument, turn out in the assembled model to be literally the same column: the routes where the mesh wins latency are exactly the routes where the bent-pipe has no path. This lesson proves that claim by building the thing that computes it.</p>
+</div>
+
+<div class="toc">
+    <h4>CONTENTS</h4>
+    <ol>
+        <li><a href="#s1">The assembled router</a></li>
+        <li><a href="#s2">A message, traced end to end</a></li>
+        <li><a href="#s3">The capstone comparison</a></li>
+        <li><a href="#s4">Where each architecture wins</a></li>
+        <li><a href="#s5">What the module built, and what it exports</a></li>
+        <li><a href="#s6">Key facts</a></li>
+        <li><a href="#s7">What this lesson delivers to the design chain</a></li>
+        <li><a href="#quiz">Knowledge check</a></li>
+        <li><a href="#py">Python exercises</a></li>
+        <li><a href="#reflect">Reflection</a></li>
+    </ol>
+</div>
+
+<div class="cb" id="s1">
+    <h2>1. The assembled router</h2>
+<p>The <code>ConstellationRouter</code> is the composition of all six stages:</p>
+<blockquote>terminal → <strong>[m6-5 access]</strong> → ingress satellite → <strong>[m7-4 routing on the m7-3 topology, m7-2 links, m7-1 architecture]</strong> → egress satellite → <strong>[m6-5 access]</strong> → destination, with <strong>[m7-5 control]</strong> delivering the routes and <strong>[m7-6 transport]</strong> experiencing the latency</blockquote>
+<p>Each stage is a component already built and verified: the topology graph (Stage 1/3) built on the Module 2 propagator, the ISL budgets (Stage 2) that weight its edges, the router core (Stage 4) that finds paths, the control plane (Stage 5) that distributes them, and the latency model (Stage 6) that turns a path into what the connection feels. The synthesis is the wiring — a single object that takes a source terminal, a destination, and a time, and returns the route, its latency distribution, and the architecture comparison. Nothing new is derived; everything is composed. That composition <em>is</em> the network layer's answer to the program's question: given a terminal that earns its bits (Module 6), an air interface that carries them (Module 5), and a link budget that sets the rate (Module 4), what does the user's packet actually experience crossing the world?</p>
+</div>
+
+<div class="cb" id="s2">
+    <h2>2. A message, traced end to end</h2>
+<p>Follow one packet, London terminal to New York terminal, through the assembled router:</p>
+<table class="compare-table">
+<thead><tr>
+<th>Stage</th>
+<th>Latency</th>
+<th>Mechanism</th>
+</tr></thead>
+<tbody>
+<tr><td>Terminal → satellite (up)</td><td>2.7 ms</td><td>m6-5 access, 40° elevation slant</td></tr>
+<tr><td>Mesh: 4 ISL hops, 5,570 km</td><td>18.6 ms prop + 2.0 ms proc</td><td>m7-3 path, m7-4 routing, m7-2 links</td></tr>
+<tr><td>Satellite → terminal (down)</td><td>2.7 ms</td><td>m6-5 access</td></tr>
+<tr><td>Queuing (4 hops, light load)</td><td>1.2 ms</td><td>m7-6 traffic term</td></tr>
+<tr><td><strong>One-way</strong></td><td><strong>27.2 ms</strong></td><td>Sum</td></tr>
+<tr><td><strong>Round-trip</strong></td><td><strong>54.4 ms</strong></td><td>2×</td></tr>
+</tbody>
+</table>
+<p>Every number traces to a lesson, and the whole is exactly the sum of its parts — the value of building the spine incrementally is that the final assembly holds no surprises, because each term was verified where it was introduced. The packet climbs to orbit (m6-5's access leg), crosses the mesh along a scheduled path (m7-5 delivered the tables, m7-4 computed them, m7-3 supplied the topology, m7-2 closed the links), and descends to the destination — and the 54 ms round trip is the network layer's headline, assembled from six lessons' worth of verified components.</p>
+<p>But the single number is the median (m7-6's lesson): over a session, the packet's serving satellite hands over every few minutes (m6-5), the ISLs it traverses hand off on the churn schedule (m7-3), and each handover steps the RTT and risks a loss the transport layer must absorb (m7-6). The assembled router therefore reports not 54 ms but a distribution — a low median, a sawtooth jitter as paths reconfigure, a tail set by the worst path and the handover gaps — and a model of what TCP or QUIC makes of it. The message trace is a median; the connection is a distribution.</p>
+</div>
+
+<div class="cb" id="s3">
+    <h2>3. The capstone comparison</h2>
+<p>The module's central deliverable: bent-pipe, mesh, and fibre, compared for representative city-pairs.</p>
+<table class="compare-table">
+<thead><tr>
+<th>Route</th>
+<th>Distance</th>
+<th>Bent-pipe</th>
+<th>Mesh RTT</th>
+<th>Fibre RTT</th>
+<th>GEO RTT</th>
+<th>Latency winner</th>
+</tr></thead>
+<tbody>
+<tr><td>NYC–DC</td><td>330 km</td><td>serves</td><td>16 ms</td><td>5 ms</td><td>477 ms</td><td><strong>fibre</strong></td></tr>
+<tr><td>London–NY</td><td>5,570 km</td><td><strong>no path</strong></td><td>54 ms</td><td>76 ms</td><td>477 ms</td><td><strong>mesh</strong></td></tr>
+<tr><td>Tokyo–Singapore</td><td>5,300 km</td><td><strong>no path</strong></td><td>53 ms</td><td>73 ms</td><td>477 ms</td><td><strong>mesh</strong></td></tr>
+<tr><td>Singapore–London</td><td>10,850 km</td><td><strong>no path</strong></td><td>94 ms</td><td>149 ms</td><td>477 ms</td><td><strong>mesh</strong></td></tr>
+<tr><td>Sydney–LA</td><td>12,070 km</td><td><strong>no path</strong></td><td>104 ms</td><td>165 ms</td><td>477 ms</td><td><strong>mesh</strong></td></tr>
+</tbody>
+</table>
+<p>Three readings, each a module argument confirmed:</p>
+<p><strong>The mesh wins long-haul latency.</strong> Above the ~1,500–2,000 km crossover (m7-1), the mesh beats fibre on every route, and the advantage grows with distance — 22 ms on London–NY, 61 ms on Sydney–LA. Vacuum is 47% faster than glass, and the mesh's fixed access cost amortises. This is the latency-arbitrage value proposition, quantified.</p>
+<p><strong>The bent-pipe has no path.</strong> Every long route shows "no path" for the bent-pipe architecture, because the endpoints are thousands of kilometres apart and no single satellite sees both (m7-1's ~2,605 km reach). The bent-pipe serves only the short NYC–DC hop, where a gateway is co-visible. The mesh's ISLs are not a latency luxury; they are the <em>only</em> way to serve these routes at all.</p>
+<p><strong>These are the same column.</strong> The routes where the mesh wins latency (long-haul) are exactly the routes where the bent-pipe has no path. m7-1 claimed the coverage argument and the latency argument were one argument; the assembled table makes it literal — the "no path" column and the "mesh wins" column coincide perfectly. A mesh's ISL earns its cost twice over on the same routes: it makes them possible <em>and</em> makes them fast.</p>
+<p>And underneath all of it, the GEO column is a flat 477 ms — nine times worse than the mesh everywhere, the incumbent architecture that LEO displaced for every latency-sensitive application. The table is the module in one grid: fibre for the short and local, mesh for the long and the oceanic, GEO for neither.</p>
+</div>
+
+<div class="cb" id="s4">
+    <h2>4. Where each architecture wins</h2>
+<p>The comparison resolves into a clean map of the design space:</p>
+<table class="compare-table">
+<thead><tr>
+<th>Route class</th>
+<th>Best architecture</th>
+<th>Why</th>
+</tr></thead>
+<tbody>
+<tr><td>Short (&lt; ~1,500 km), served by fibre</td><td><strong>Fibre</strong></td><td>Below the crossover; fibre's no-access-cost wins</td></tr>
+<tr><td>Long-haul land (&gt; ~2,000 km)</td><td><strong>Mesh</strong></td><td>Beats fibre on latency; bent-pipe needs gateways en route</td></tr>
+<tr><td>Oceanic / polar (any distance)</td><td><strong>Mesh only</strong></td><td>Bent-pipe has no co-visible gateway; fibre may not reach</td></tr>
+<tr><td>Latency-arbitrage long-haul</td><td><strong>Mesh</strong></td><td>The 20–60 ms advantage is the product</td></tr>
+<tr><td>Anything vs GEO</td><td><strong>Mesh</strong></td><td>9× better RTT, qualitatively</td></tr>
+</tbody>
+</table>
+<p>The map is the answer to m7-1's opening question — bent-pipe or mesh — resolved across the whole traffic space. A constellation targeting short-haul regional broadband over well-connected land could be a bent-pipe and lose nothing. A constellation targeting global coverage, oceanic and polar routes, or latency-competitive long-haul <em>must</em> be a mesh, and the mesh's optical ISLs (m7-2), churning topology (m7-3), snapshot routing (m7-4), SDN control (m7-5), and transport-aware endpoints (m7-6) are the machinery that makes the "must" possible. Every lesson in the module was a component of one capability: routing a packet across the world through space faster than the world can route it through glass.</p>
+</div>
+
+<div class="cb" id="s5">
+    <h2>5. What the module built, and what it exports</h2>
+<p>Module 7 turned a constellation from a set of links into a network. It began with a solved terminal (Module 6) that earns bits from whatever satellite serves it, and it delivered a network layer that carries those bits from any terminal to any destination — across oceans a bent-pipe cannot cross, along long-haul routes faster than fibre, with a latency distribution the transport layer can be taught to absorb. The <code>ConstellationRouter</code> is the artefact: a composition of six stages that routes a message and reports what it experiences.</p>
+<p>What the module exports to the rest of the program: to the ground segment and operations of Module 8, the gateway placement constraints (where the mesh must touch down to reach the terrestrial internet) and the traffic the mesh delivers to those gateways; to the service and economics modules, the latency distribution and coverage map that determine what the constellation can <em>sell</em> (the latency-arbitrage markets, the oceanic and polar coverage, the interactive-application capability GEO lacked). The network layer is the bridge between the physics (Modules 1–6) and the business (the modules ahead): it converts a constellation's orbital and optical capabilities into the service a customer buys — a fast, global, always-on path — and it quantifies exactly where that path beats the alternatives and where it does not.</p>
+<p>The program's arc through seven modules: an orbit (Module 2), a spacecraft (Module 3), a link (Module 4), an air interface (Module 5), a terminal (Module 6), and now a network (Module 7). What remains is to operate it, cost it, and sell it — the ground segment that keeps it running, the economics that justify it, and the regulation that governs it. Module 8 begins that turn, and it begins where this module ended: at the gateways where the mesh meets the Earth.</p>
+</div>
+
+<div class="cb" id="s6">
+    <h2>6. Key facts</h2>
+<table class="compare-table">
+<thead><tr>
+<th>Fact</th>
+<th>Value</th>
+<th>Source</th>
+</tr></thead>
+<tbody>
+<tr><td>Assembled router</td><td>composition of Stages 1–6 (m7-1..m7-6)</td><td>§1</td></tr>
+<tr><td>London–NY message RTT</td><td>54.4 ms (traced end to end)</td><td>§2</td></tr>
+<tr><td>Message = median; connection = distribution</td><td>m7-6 reframing carried forward</td><td>§2</td></tr>
+<tr><td>Mesh beats fibre, London–NY</td><td>54 vs 76 ms</td><td>§3</td></tr>
+<tr><td>Mesh beats fibre, Sydney–LA</td><td>104 vs 165 ms</td><td>§3</td></tr>
+<tr><td>Bent-pipe on long-haul</td><td>no path (endpoints not co-visible)</td><td>§3</td></tr>
+<tr><td>Coverage column = latency column</td><td>mesh-wins routes = bent-pipe-no-path routes</td><td>§3</td></tr>
+<tr><td>GEO everywhere</td><td>477 ms, 9× worse than mesh</td><td>§3</td></tr>
+<tr><td>Fibre wins</td><td>short routes below the ~1,500–2,000 km crossover</td><td>§3–4</td></tr>
+<tr><td>Mesh wins / mesh-only</td><td>long-haul / oceanic / polar / latency-arbitrage</td><td>§4</td></tr>
+<tr><td>Module exports</td><td>gateway placement + latency/coverage map</td><td>§5</td></tr>
+</tbody>
+</table>
+</div>
+
+<div class="cb" id="s7">
+    <h2>7. What this lesson delivers to the design chain</h2>
+<p>The spine is complete: <code>ConstellationRouter</code> composes all six stages into one object that routes a message from terminal to destination, returns its latency distribution, and produces the architecture comparison for any set of routes. It is the module's capstone artefact and the network layer's answer to the program's question — what the user's packet experiences crossing the world. Module 8 takes the gateway constraints and delivered traffic as inputs to the ground segment; the service and economics modules take the latency and coverage maps as the inputs to what the constellation sells.</p>
+<p>The network is built. What remains in the program is to run it, pay for it, and govern it — and each of those begins from an artefact this module produced: the gateways where the mesh touches down, the coverage map that defines the market, and the latency distribution that defines the product.</p>
+</div>
+
+<div class="quiz-block" id="quiz">
+    <h2>KNOWLEDGE CHECK</h2>
+    <div class="quiz-intro">Ten questions. Each option explains itself after you commit. No retries per question — decide first.</div>
+    <div class="quiz-q">
+        <p><strong>Q1.</strong> The <code>ConstellationRouter</code> synthesis is:</p>
+        <div class="quiz-options">
+            <button class="quiz-opt" data-q="1" data-correct="false">A — A new routing algorithm</button>
+            <button class="quiz-opt" data-q="1" data-correct="true">B — The composition of the six stages built across the module (access, links, topology, routing, control, latency) into one object that routes a message and reports what it experiences</button>
+            <button class="quiz-opt" data-q="1" data-correct="false">C — A replacement for the earlier lessons</button>
+            <button class="quiz-opt" data-q="1" data-correct="false">D — A hardware device</button>
+        </div>
+        <div class="quiz-feedback" id="fb1"></div>
+    </div>
+    <div class="quiz-q">
+        <p><strong>Q2.</strong> The traced London–NY message RTT of 54.4 ms is exactly the sum of its parts because:</p>
+        <div class="quiz-options">
+            <button class="quiz-opt" data-q="2" data-correct="false">A — The router rounds the numbers</button>
+            <button class="quiz-opt" data-q="2" data-correct="true">B — Each latency term (access, propagation, processing, queuing) was verified where it was introduced, so the assembly is the sum of independently-checked components</button>
+            <button class="quiz-opt" data-q="2" data-correct="false">C — The terms happen to cancel</button>
+            <button class="quiz-opt" data-q="2" data-correct="false">D — It is a coincidence</button>
+        </div>
+        <div class="quiz-feedback" id="fb2"></div>
+    </div>
+    <div class="quiz-q">
+        <p><strong>Q3.</strong> The message trace reports 54 ms but the connection experiences a distribution because:</p>
+        <div class="quiz-options">
+            <button class="quiz-opt" data-q="3" data-correct="false">A — The trace is wrong</button>
+            <button class="quiz-opt" data-q="3" data-correct="true">B — Over a session the serving satellite and the ISLs hand over every few minutes, each handover stepping the RTT and risking loss — so the honest figure is a distribution (median, jitter, tail), not the median alone</button>
+            <button class="quiz-opt" data-q="3" data-correct="false">C — The RTT never changes</button>
+            <button class="quiz-opt" data-q="3" data-correct="false">D — Distributions are only theoretical</button>
+        </div>
+        <div class="quiz-feedback" id="fb3"></div>
+    </div>
+    <div class="quiz-q">
+        <p><strong>Q4.</strong> The capstone table shows the mesh beats fibre on London–NY (54 vs 76 ms) because:</p>
+        <div class="quiz-options">
+            <button class="quiz-opt" data-q="4" data-correct="false">A — The mesh is closer</button>
+            <button class="quiz-opt" data-q="4" data-correct="true">B — Above the ~1,500–2,000 km crossover, vacuum's 47% speed advantage over glass plus fibre's routing detour outweighs the mesh's fixed access cost</button>
+            <button class="quiz-opt" data-q="4" data-correct="false">C — Fibre has more hops</button>
+            <button class="quiz-opt" data-q="4" data-correct="false">D — The mesh uses faster modulation</button>
+        </div>
+        <div class="quiz-feedback" id="fb4"></div>
+    </div>
+    <div class="quiz-q">
+        <p><strong>Q5.</strong> Every long-haul route shows "no path" for the bent-pipe because:</p>
+        <div class="quiz-options">
+            <button class="quiz-opt" data-q="5" data-correct="false">A — Bent-pipe satellites are turned off</button>
+            <button class="quiz-opt" data-q="5" data-correct="true">B — The endpoints are thousands of km apart and no single satellite sees both — the bent-pipe's ~2,605 km reach cannot span them, so there is no relay path</button>
+            <button class="quiz-opt" data-q="5" data-correct="false">C — Bent-pipe is illegal long-haul</button>
+            <button class="quiz-opt" data-q="5" data-correct="false">D — The fibre blocks it</button>
+        </div>
+        <div class="quiz-feedback" id="fb5"></div>
+    </div>
+    <div class="quiz-q">
+        <p><strong>Q6.</strong> The lesson's sharpest finding is that the coverage column and the latency column:</p>
+        <div class="quiz-options">
+            <button class="quiz-opt" data-q="6" data-correct="false">A — Are unrelated</button>
+            <button class="quiz-opt" data-q="6" data-correct="true">B — Coincide perfectly — the routes where the mesh wins latency are exactly the routes where the bent-pipe has no path, making m7-1's "same argument" claim literal</button>
+            <button class="quiz-opt" data-q="6" data-correct="false">C — Contradict each other</button>
+            <button class="quiz-opt" data-q="6" data-correct="false">D — Both favour the bent-pipe</button>
+        </div>
+        <div class="quiz-feedback" id="fb6"></div>
+    </div>
+    <div class="quiz-q">
+        <p><strong>Q7.</strong> Against GEO, the mesh is:</p>
+        <div class="quiz-options">
+            <button class="quiz-opt" data-q="7" data-correct="false">A — Slightly better</button>
+            <button class="quiz-opt" data-q="7" data-correct="true">B — 9× better everywhere (54 vs 477 ms) — a flat, qualitative advantage that is why LEO displaced GEO for latency-sensitive applications</button>
+            <button class="quiz-opt" data-q="7" data-correct="false">C — Worse on some routes</button>
+            <button class="quiz-opt" data-q="7" data-correct="false">D — Identical</button>
+        </div>
+        <div class="quiz-feedback" id="fb7"></div>
+    </div>
+    <div class="quiz-q">
+        <p><strong>Q8.</strong> Fibre wins the NYC–DC route (16 vs 5 ms) because:</p>
+        <div class="quiz-options">
+            <button class="quiz-opt" data-q="8" data-correct="false">A — Fibre is always faster</button>
+            <button class="quiz-opt" data-q="8" data-correct="true">B — At 330 km the route is far below the crossover, so the mesh's fixed access cost (climbing to orbit and back) dominates and fibre's shorter physical path wins</button>
+            <button class="quiz-opt" data-q="8" data-correct="false">C — The mesh has no path</button>
+            <button class="quiz-opt" data-q="8" data-correct="false">D — GEO serves it better</button>
+        </div>
+        <div class="quiz-feedback" id="fb8"></div>
+    </div>
+    <div class="quiz-q">
+        <p><strong>Q9.</strong> The clean design-space map says a constellation targeting oceanic and polar routes:</p>
+        <div class="quiz-options">
+            <button class="quiz-opt" data-q="9" data-correct="false">A — Should be a bent-pipe</button>
+            <button class="quiz-opt" data-q="9" data-correct="true">B — Must be a mesh, because the bent-pipe has no co-visible gateway over oceans/poles and fibre may not reach — the mesh is the only architecture that serves</button>
+            <button class="quiz-opt" data-q="9" data-correct="false">C — Can use either</button>
+            <button class="quiz-opt" data-q="9" data-correct="false">D — Should use GEO</button>
+        </div>
+        <div class="quiz-feedback" id="fb9"></div>
+    </div>
+    <div class="quiz-q">
+        <p><strong>Q10.</strong> The module exports, to the modules ahead:</p>
+        <div class="quiz-options">
+            <button class="quiz-opt" data-q="10" data-correct="false">A — Nothing usable</button>
+            <button class="quiz-opt" data-q="10" data-correct="true">B — Gateway placement constraints and delivered traffic (to ground segment/operations) and the latency/coverage map (to service/economics) — converting orbital capability into sellable service</button>
+            <button class="quiz-opt" data-q="10" data-correct="false">C — Only the routing algorithm</button>
+            <button class="quiz-opt" data-q="10" data-correct="false">D — The link budget</button>
+        </div>
+        <div class="quiz-feedback" id="fb10"></div>
+    </div>
+    <div class="quiz-score" id="quizScore"></div>
+</div>
+
+<div class="py-block" id="py">
+    <h2>PYTHON EXERCISES</h2>
+    <div class="py-intro">Three exercises; the last extends the module spine project. Run them, then work the numbered follow-ups in the comments — the follow-ups are the exercise.</div>
+    <div class="py-exercise">
+        <h3>Exercise 1 — The capstone comparison</h3>
+        <p>Reproduce the architecture table for any set of routes.</p>
+<pre>
+import math
+Re, h, c = 6371.0, 550.0, 299792.458
+c_fiber = c/1.468
+
+def slant_km(elev, alt=h):
+    e = math.radians(elev)
+    return Re*(math.sqrt(((Re+alt)/Re)**2 - math.cos(e)**2) - math.sin(e))
+
+def mesh_rtt(ground_km, elev=40, proc=0.5, queue=0.3):
+    n_hops = max(2, round(ground_km/1500))
+    ow = 2*slant_km(elev)/c*1000 + ground_km/c*1000 + n_hops*(proc+queue)
+    return 2*ow
+
+def fibre_rtt(ground_km, detour=1.4):
+    return 2*ground_km*detour/c_fiber*1000
+
+def geo_rtt():
+    return 4*35786/c*1000
+
+def bent_pipe_serves(ground_km, reach=2605):
+    return ground_km &lt;= reach
+
+ROUTES = [(&quot;NYC-DC&quot;, 330), (&quot;London-NY&quot;, 5570), (&quot;Tokyo-Singapore&quot;, 5300),
+          (&quot;Singapore-London&quot;, 10850), (&quot;Sydney-LA&quot;, 12070)]
+
+print(f&quot;{&#x27;route&#x27;:&lt;18}{&#x27;km&#x27;:&gt;6}{&#x27;bent-pipe&#x27;:&gt;11}{&#x27;mesh&#x27;:&gt;7}{&#x27;fibre&#x27;:&gt;7}&quot;
+      f&quot;{&#x27;GEO&#x27;:&gt;6}{&#x27;winner&#x27;:&gt;9}&quot;)
+for name, d in ROUTES:
+    m, f = mesh_rtt(d), fibre_rtt(d)
+    bp = &quot;serves&quot; if bent_pipe_serves(d) else &quot;no path&quot;
+    win = &quot;mesh&quot; if m &lt; f else &quot;fibre&quot;
+    print(f&quot;{name:&lt;18}{d:&gt;6}{bp:&gt;11}{m:&gt;6.0f}{f:&gt;7.0f}{geo_rtt():&gt;6.0f}{win:&gt;9}&quot;)
+
+# 1. Find the exact distance where mesh overtakes fibre (the crossover)
+#    and where bent-pipe loses its path (the reach). Are they the same
+#    distance? What does the answer say about m7-1&#x27;s &#x27;same argument&#x27;?
+# 2. Add a &#x27;GEO serves?&#x27; column: GEO covers up to ~81° latitude but
+#    with 477 ms. For each route, is GEO a latency-viable option? Build
+#    the full 3-architecture serve/latency matrix.
+# 3. The mesh&#x27;s advantage grows with distance. Plot (mesh - fibre) RTT
+#    vs distance from 500 to 15,000 km. Where is the mesh&#x27;s latency
+#    edge largest, and which real market lives there?
+</pre>
+    </div>
+    <div class="py-exercise">
+        <h3>Exercise 2 — Trace a message with handovers</h3>
+        <p>The connection as a distribution, not a number.</p>
+<pre>
+import math, statistics
+Re, h, c = 6371.0, 550.0, 299792.458
+
+def slant_km(elev, alt=h):
+    e = math.radians(elev)
+    return Re*(math.sqrt(((Re+alt)/Re)**2 - math.cos(e)**2) - math.sin(e))
+
+def rtt(ground_km, n_hops, elev=40, proc=0.5, queue=0.3):
+    ow = 2*slant_km(elev)/c*1000 + ground_km/c*1000 + n_hops*(proc+queue)
+    return 2*ow
+
+# a session: path breathes and rehops as satellites move (snapshots)
+session = [   # (ground_km, n_hops) per 15s snapshot over ~2 min
+    (5570, 4), (5720, 4), (5900, 5), (6050, 5),
+    (5810, 4), (5570, 4), (5680, 4), (5950, 5),
+]
+rtts = [rtt(d, n) for d, n in session]
+print(&quot;RTT over the session (per 15s snapshot):&quot;)
+print(&quot;  &quot; + &quot;  &quot;.join(f&quot;{r:.0f}&quot; for r in rtts))
+print(f&quot;\n  median: {statistics.median(rtts):.1f} ms&quot;)
+print(f&quot;  mean:   {statistics.mean(rtts):.1f} ms&quot;)
+print(f&quot;  jitter: {max(rtts)-min(rtts):.1f} ms (peak-to-peak)&quot;)
+print(f&quot;  p95:    {sorted(rtts)[int(0.95*len(rtts))-1]:.1f} ms&quot;)
+
+# 1. An SLA promises &#x27;median 55 ms&#x27;. A video call feels the jitter and
+#    the p95. Report all three and state which number the operator
+#    advertises, which the user experiences, and which is honest (m7-6 §6).
+# 2. Insert a handover loss at snapshot 3 (m6-5/m7-3). Model TCP halving
+#    its window and rebuilding; report the throughput lost over the
+#    session versus a lossless (perfect make-before-break) handover.
+# 3. Compare this session&#x27;s jitter against a GEO link (constant 477 ms,
+#    zero jitter). GEO is slower but STEADIER — for which application is
+#    steadiness worth more than speed, and why?
+</pre>
+    </div>
+    <div class="py-exercise">
+        <h3>Exercise 3 — Spine final: the ConstellationRouter</h3>
+        <p>The module's capstone: every stage composed.</p>
+<pre>
+import math, heapq, statistics
+Re, h, c = 6371.0, 550.0, 299792.458
+c_fiber = c/1.468
+
+# ═══════════════════════════════════════════════════════
+# M7 SPINE PROJECT — CONSTELLATION ROUTER (final assembly)
+#   Stage 1 topology switch (m7-1)   Stage 4 router core (m7-4)
+#   Stage 2 ISL budgets (m7-2)       Stage 5 control plane (m7-5)
+#   Stage 3 +grid &amp; churn (m7-3)     Stage 6 latency dist. (m7-6)
+#   This: compose all six -&gt; route a message, report its latency
+#   distribution, compare architectures. The network layer&#x27;s answer.
+# ═══════════════════════════════════════════════════════
+
+class ConstellationRouter:
+    def __init__(self, mode=&quot;mesh&quot;, bent_pipe_reach_km=2605):
+        self.mode = mode
+        self.reach = bent_pipe_reach_km
+
+    def _slant(self, elev=40):
+        e = math.radians(elev)
+        return Re*(math.sqrt(((Re+h)/Re)**2 - math.cos(e)**2) - math.sin(e))
+
+    def can_serve(self, ground_km):
+        if self.mode == &quot;bent_pipe&quot;:
+            return ground_km &lt;= self.reach
+        return True    # mesh: ISL reaches anywhere with satellites overhead
+
+    def route_latency(self, ground_km, n_hops=None, queue_ms=0.0):
+        if not self.can_serve(ground_km):
+            return None
+        n_hops = n_hops or max(2, round(ground_km/1500))
+        ow = (2*self._slant()/c*1000 + ground_km/c*1000
+              + n_hops*0.5 + (queue_ms or n_hops*0.3))   # default light queuing
+        return 2*ow
+
+    def session_distribution(self, snapshots):
+        &quot;&quot;&quot;snapshots: [(ground_km, n_hops, queue_ms)]. Returns the RTT
+        distribution the transport layer sees.&quot;&quot;&quot;
+        rtts = [self.route_latency(d, n, q) for d, n, q in snapshots]
+        rtts = [r for r in rtts if r]
+        return dict(median=round(statistics.median(rtts), 1),
+                    jitter=round(max(rtts)-min(rtts), 1),
+                    p95=round(sorted(rtts)[int(0.95*len(rtts))-1], 1))
+
+    def compare(self, ground_km):
+        mesh = ConstellationRouter(&quot;mesh&quot;).route_latency(ground_km)
+        bp = ConstellationRouter(&quot;bent_pipe&quot;).route_latency(ground_km)
+        fibre = 2*ground_km*1.4/c_fiber*1000
+        geo = 4*35786/c*1000
+        return dict(mesh=round(mesh, 0),
+                    bent_pipe=round(bp, 0) if bp else &quot;no path&quot;,
+                    fibre=round(fibre, 0), geo=round(geo, 0),
+                    winner=&quot;mesh&quot; if mesh &lt; fibre else &quot;fibre&quot;)
+
+router = ConstellationRouter(&quot;mesh&quot;)
+
+print(&quot;═══ end-to-end message: London -&gt; NY ═══&quot;)
+print(f&quot;  RTT: {router.route_latency(5570):.1f} ms\n&quot;)
+
+print(&quot;═══ architecture comparison ═══&quot;)
+for name, d in [(&quot;NYC-DC&quot;, 330), (&quot;London-NY&quot;, 5570), (&quot;Sydney-LA&quot;, 12070)]:
+    c_ = router.compare(d)
+    print(f&quot;  {name:&lt;12} mesh {c_[&#x27;mesh&#x27;]:&gt;4} | bent-pipe {str(c_[&#x27;bent_pipe&#x27;]):&gt;7}&quot;
+          f&quot; | fibre {c_[&#x27;fibre&#x27;]:&gt;4} | GEO {c_[&#x27;geo&#x27;]:&gt;3} -&gt; {c_[&#x27;winner&#x27;]}&quot;)
+
+print(&quot;\n═══ session distribution (London-NY, 8 snapshots) ═══&quot;)
+session = [(5570,4,0.5),(5720,4,0.8),(5900,5,1.0),(6050,5,1.5),
+           (5810,4,0.9),(5570,4,0.5),(5680,4,0.7),(5950,5,1.2)]
+print(f&quot;  {router.session_distribution(session)}&quot;)
+
+# ── the module, closed ──────────────────────────────────
+# terminal (M6) -&gt; access -&gt; mesh (M7) -&gt; destination, with a
+# latency distribution and an architecture verdict. Module 8 takes
+# the gateways where this mesh touches down; the economics modules
+# take the coverage + latency maps as what the constellation sells.
+
+# 1. Run compare() across 20 routes from 300 to 15,000 km and print
+#    the three regime boundaries: where fibre yields to mesh, where
+#    bent-pipe loses its path, and confirm the two coincide with m7-1.
+# 2. Add a &#x27;served fraction&#x27; method: for a bent-pipe vs mesh, what
+#    fraction of a random global city-pair set can each serve? This is
+#    the coverage argument as a single number.
+# 3. Wire the real m2 propagator + m7-3 topology + m7-4 router in place
+#    of the analytic n_hops estimate. Does the 54 ms headline survive
+#    a real routed path? (The honest end of the spine.)
+</pre>
+    </div>
+</div>
+
+<div class="reflection-block" id="reflect">
+    <h2>REFLECTION</h2>
+    <div class="ref-intro">Four prompts. Each forces a decision — write the position down before moving on; the act of committing is the exercise.</div>
+    <div class="ref-prompt">
+        <h3>PROMPT 01</h3>
+        <p>The capstone table's cleanest result — that the "bent-pipe no path" column and the "mesh wins latency" column coincide — is elegant but rests on the specific routes chosen. Stress-test it: are there routes where the two columns <em>disagree</em> — where the bent-pipe can serve (endpoints within reach of gateways) but the mesh still wins on latency, or where the mesh is the only server but fibre would still be faster if it existed? Construct such a route if one exists, and determine whether the coincidence is a deep truth about the geometry or an artefact of picking transcontinental examples. What would break it?</p>
+    </div>
+    <div class="ref-prompt">
+        <h3>PROMPT 02</h3>
+        <p>The module built the mesh's case on latency and coverage, and the capstone confirmed both. But the mesh's costs — optical ISLs on every satellite (m7-2), the churning topology (m7-3), the routing and control complexity (m7-4, m7-5), the transport pathology (m7-6) — are all real and all absent from the capstone table, which shows only latency. Reconstruct the honest comparison: if the table included a cost row and a complexity row, would the mesh still win the long-haul routes, or does its latency advantage have to clear a cost bar the table hides? Identify the route or market where the mesh's latency win is real but does not justify its cost, and what that implies about ISLs as a selective rather than universal choice.</p>
+    </div>
+    <div class="ref-prompt">
+        <h3>PROMPT 03</h3>
+        <p>Section 5 framed the module as the bridge from physics to business, exporting the latency and coverage maps as 'what the constellation sells.' But a latency advantage is only worth money if a customer pays for it, and most internet traffic is regional (below the crossover, where fibre wins). Quantify the addressable market for the mesh's specific advantages: what fraction of global traffic is long-haul enough to benefit from the latency edge, oceanic/polar enough to need the coverage, or latency-sensitive enough (finance, gaming) to pay premium? Decide whether the mesh's demonstrated technical superiority on long-haul routes translates into a business large enough to justify the constellation, or whether the mesh is a technical triumph serving a niche — and what that means for whether future constellations build ISLs.</p>
+    </div>
+    <div class="ref-prompt">
+        <h3>PROMPT 04</h3>
+        <p>This synthesis composed six verified stages into a router whose headline (54 ms) is 'exactly the sum of its parts.' But the final exercise's question 3 flags that the spine used an <em>analytic</em> hop-count estimate (ground_km/1500) rather than a <em>real</em> routed path through the m2 propagator and m7-3 topology. Apply the load-bearing-assumption discipline one last time for the module: does the 54 ms headline survive replacing the analytic estimate with a real routed path — and if the real path is a Manhattan grid route (m7-4) longer than the great-circle estimate, by how much does the headline degrade? Specify the computation that would replace the estimate, predict whether the mesh still beats fibre after it, and state honestly whether the module's central claim is proven or merely strongly indicated by the model built here.</p>
+    </div>
+</div>
+
+<div class="cb">
+    <h2>Sources</h2>
+<ul>
+<li>Handley, "Delay is Not an Option: Low Latency Routing in Space" (HotNets, 2018) — the LEO-vs-fibre latency case the capstone quantifies.</li>
+<li>Kassing et al., "Exploring the 'Internet from space' with Hypatia" (IMC, 2020) — end-to-end LEO constellation simulation, the assembled-router methodology.</li>
+<li>Del Portillo, Cameron &amp; Crawley, "A technical comparison of three LEO constellation systems" (Acta Astronautica, 2019) — the bent-pipe vs mesh architecture comparison.</li>
+<li>Bhattacherjee &amp; Singla, "Network topology design at 27,000 km/hour" (CoNEXT, 2019) — ISL topology and routing behind the capstone.</li>
+<li>Module 7 (m7-1 through m7-6) — the six stages this lesson composes; Modules 2, 4, 5, 6 — the orbital, link, air-interface, and terminal foundations the router sits on; Module 8 — the ground segment this module's gateways hand off to.</li>
+</ul>
+</div>
+
+<div class="module-complete">
+    <h3>MODULE 7 COMPLETE</h3>
+    <p>Seven lessons, one router: from the bent-pipe-vs-mesh decision to a message traced terminal-to-terminal across the scheduled optical mesh, with its full latency distribution. The mesh beats fibre on every long-haul route and is the only architecture that can serve an ocean — the coverage argument and the latency argument turned out to be the same column. Module 8 takes the gateways where this mesh touches down and builds the ground segment.</p>
+</div>
+
+<div class="complete-wrap">
+    <button class="complete-btn" id="completeBtn">MARK LESSON COMPLETE</button>
+    <div class="complete-msg" id="completeMsg"></div>
+</div>
+<div class="lesson-nav">
+    <a href="m7-6.html">← LESSON 06 — LATENCY &amp; TRANSPORT</a>
+    <a href="m7.html">M7 HUB →</a>
+</div>
+</div>
+
+<button class="back-to-top" id="backToTop" title="Back to top">↑</button>
+<footer>© 2026 LEOAF · M7 · LESSON 07 OF 7 · MODULE CAPSTONE</footer>
+<script>
+const canvas=document.getElementById('starsCanvas'),ctx=canvas.getContext('2d');
+let stars=[];
+function initStars(){stars=[];for(let i=0;i<180;i++)stars.push({x:Math.random()*canvas.width,y:Math.random()*canvas.height,size:Math.random()*1.5+0.4,speed:Math.random()*0.18+0.04,hue:Math.random()*360});}
+function resizeCanvas(){canvas.width=window.innerWidth;canvas.height=window.innerHeight;}
+resizeCanvas();initStars();window.addEventListener('resize',resizeCanvas);
+function animateStars(){ctx.clearRect(0,0,canvas.width,canvas.height);stars.forEach(s=>{s.y-=s.speed;if(s.y<0){s.y=canvas.height;s.x=Math.random()*canvas.width;}ctx.beginPath();ctx.fillStyle=`hsl(${s.hue},80%,80%)`;ctx.arc(s.x,s.y,s.size,0,Math.PI*2);ctx.fill();});requestAnimationFrame(animateStars);}
+animateStars();
+</script>
+<script>
+const feedbacks={
+    1:{correct:"The synthesis derives nothing new; it wires together the verified stages — m6-5 access, m7-2 links, m7-3 topology, m7-4 routing, m7-5 control, m7-6 latency — into a single artefact. The value of incremental building is that the final assembly holds no surprises.",wrong:"No new algorithm — it composes existing ones. It builds on, not replaces, the lessons. It is a model, not hardware."},
+    2:{correct:"2.7 (up) + 18.6 (prop) + 2.0 (proc) + 1.2 (queue) + 2.7 (down) = 27.2 ms one-way, ×2 = 54.4 ms RTT. Incremental verification means the final number is trustworthy because every component was checked in its own lesson — the payoff of the spine method.",wrong:"No rounding trick or cancellation or coincidence — it is a genuine, verified sum of independently-established terms."},
+    3:{correct:"m7-6's lesson carried forward: 54 ms is the median, but handovers (m6-5 terminal, m7-3 ISL) step the RTT and inject loss over a session. The connection's quality lives in the jitter and tail, not the median — the program's recurring 'distribution not mean' theme.",wrong:"The trace is correct as a median. The RTT changes constantly (that is the distribution). The distribution is what the user actually experiences — the opposite of theoretical."},
+    4:{correct:"m7-1's crossover, confirmed in the assembled model: the mesh's ~5.4 ms fixed access cost is amortised over the 5,570 km route, and the vacuum-speed advantage plus fibre's ~40% detour makes the mesh 22 ms faster. The advantage grows with distance (61 ms on Sydney–LA).",wrong:"The mesh is farther (550+ km up), which is why it loses short routes. Hop count and modulation are not the mechanism — the propagation medium is."},
+    5:{correct:"A bent-pipe needs a satellite co-visible to both endpoints (m7-1); London–NY at 5,570 km far exceeds the ~2,605 km reach. The bent-pipe serves only short routes (NYC–DC) where a co-visible gateway exists. Long-haul requires the mesh's ISLs.",wrong:"The satellites work fine; the geometry forbids the path. No such regulation. Fibre is a separate network, not a blocker."},
+    6:{correct:"The \"no path\" (bent-pipe) routes and the \"mesh wins\" (latency) routes are the same long-haul rows. m7-1 argued coverage and latency were one argument; the assembled table proves it — the mesh's ISL earns its cost twice on the same routes, making them possible and making them fast.",wrong:"They are the same column, not unrelated or contradictory. Both favour the *mesh* on long-haul, not the bent-pipe."},
+    7:{correct:"GEO's 477 ms is a light-speed floor (35,786 km × 4) independent of route; the mesh is ~54 ms on comparable long-haul. The 9× ratio is qualitative — GEO breaks interactivity that the mesh serves. The GEO column is flat because its latency is set by altitude, not distance.",wrong:"9× is not slight. The mesh beats GEO on every route (GEO's floor is route-independent). Far from identical."},
+    8:{correct:"Below the ~1,500–2,000 km crossover, the ~5.4 ms round-trip access cost the mesh pays to reach orbit exceeds any vacuum-speed saving over such a short distance. Fibre's direct terrestrial path wins short routes decisively — the mesh's advantage is long-haul only.",wrong:"Fibre wins short, loses long — not always faster. The mesh has a path (it serves at 16 ms), just slower than fibre here. GEO's 477 ms is worse than both."},
+    9:{correct:"Oceanic and polar routes are the \"mesh only\" class: the bent-pipe has no path (no gateway co-visible mid-ocean), and fibre often does not reach. The mesh's global coverage, bought with ISLs, is the sole option — the coverage argument at its starkest.",wrong:"The bent-pipe cannot serve mid-ocean (no path). Not \"either\" — only the mesh. GEO could cover geographically but at 477 ms breaks interactivity and has its own coverage gaps at high latitude."},
+    10:{correct:"The network layer bridges physics and business: it tells the ground segment where the mesh must touch down and what traffic arrives, and it tells the economics what the constellation can sell (latency-arbitrage, oceanic/polar coverage, interactivity). It converts orbital and optical capability into the service a customer buys.",wrong:"It exports concrete, load-bearing constraints — the opposite of nothing. More than the algorithm: the whole coverage/latency characterisation. The link budget is Module 4's."}
+};
+let answered={};
+document.querySelectorAll('.quiz-opt').forEach(btn=>{
+    btn.addEventListener('click',function(){
+        const q=this.dataset.q;
+        if(answered[q]!==undefined)return;
+        const correct=this.dataset.correct==='true';
+        answered[q]=correct;
+        document.querySelectorAll(`.quiz-opt[data-q="${q}"]`).forEach(b=>{b.disabled=true;if(b.dataset.correct==='true')b.classList.add('correct');});
+        if(!correct)this.classList.add('wrong');
+        const fb=document.getElementById('fb'+q);
+        fb.textContent=(correct?'✓ ':'✗ ')+feedbacks[q][correct?'correct':'wrong'];
+        fb.style.color=correct?'#39ff14':'#ff004f';
+        if(Object.keys(answered).length===10){
+            const total=Object.values(answered).filter(Boolean).length;
+            const sc=document.getElementById('quizScore');
+            sc.style.display='block';
+            const pct=Math.round(total/10*100);
+            sc.textContent=`SCORE: ${total}/10 (${pct}%) — ${pct===100?'PERFECT.':pct>=80?'STRONG.':pct>=60?'ADEQUATE. REVISIT WEAK SECTIONS.':'REVISIT THE LESSON BEFORE PROCEEDING.'}`;
+        }
+    });
+});
+</script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="supabase.js"></script>
+<script src="user_progress.js"></script>
+<script>
+const LESSON_ID='m7-7';
+(function(){
+    function bounceToLogin(r){console.error("Auth guard:",r);window.location.replace("index.html");}
+    async function init(){
+        if(typeof client==="undefined"||!client||!client.auth)return bounceToLogin("Supabase client not loaded");
+        let session=null;
+        try{({data:{session}}=await client.auth.getSession());}
+        catch(e){return bounceToLogin("getSession threw: "+e.message);}
+        if(!session){window.location.replace("index.html");return;}
+        const btn=document.getElementById('completeBtn'),msg=document.getElementById('completeMsg');
+        function setDone(done){
+            if(done){btn.textContent='✓ COMPLETE — CLICK TO UNDO';btn.classList.add('done');btn.style.cssText='border-color:#39ff14;color:#39ff14;background:rgba(57,255,20,0.1);cursor:pointer;opacity:1;';msg.style.color='#39ff14';msg.textContent='Lesson marked complete. Click again to undo.';}
+            else{btn.textContent='MARK LESSON COMPLETE';btn.classList.remove('done');btn.style.cssText='';msg.style.color='#ffffff55';msg.textContent='Not yet marked complete.';}
+        }
+        let mastered=[];
+        try{mastered=await getMasteredSections();}catch(e){console.error(e);}
+        setDone(mastered.includes(LESSON_ID));
+        btn.addEventListener('click',async()=>{
+            const isDone=btn.classList.contains('done');
+            msg.style.color='#00d9ff';msg.textContent='Saving...';
+            const ok=await upsertSection(LESSON_ID,!isDone);
+            if(ok){setDone(!isDone);}else{msg.style.color='#ff004f';msg.textContent='Error saving. Try again.';}
+        });
+        const btt=document.getElementById('backToTop');
+        window.addEventListener('scroll',()=>{btt.classList.toggle('visible',window.scrollY>400);});
+        btt.addEventListener('click',()=>window.scrollTo({top:0,behavior:'smooth'}));
+    }
+    if(document.readyState==="loading")document.addEventListener("DOMContentLoaded",init);
+    else init();
+})();
+</script>
+</body>
+</html>
