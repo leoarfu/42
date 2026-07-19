@@ -1,0 +1,652 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, shrink-to-fit=no">
+<title>M7-4 — Routing Under Churn · LEOAF</title>
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;600;800&family=Share+Tech+Mono&family=Libre+Baskerville:ital,wght@0,400;0,700;1,400&display=swap" rel="stylesheet">
+<link rel="icon" href="favicon.ico" sizes="any" type="image/x-icon">
+<link rel="manifest" href="site.webmanifest">
+<meta name="theme-color" content="#0f0f0f">
+<script>
+window.leoafAbort = async function () {
+    function go() { window.location.replace("index.html?signedout=1"); }
+    try { if (typeof client !== "undefined" && client && client.auth && client.auth.signOut) { try { await client.auth.signOut({ scope: "local" }); } catch (e) {} } } catch (e) {}
+    go();
+};
+</script>
+<style>
+* { box-sizing:border-box; margin:0; padding:0; }
+html { height:100%; -webkit-text-size-adjust:100%; overflow-x:hidden; }
+body { font-family:'Share Tech Mono',monospace; background:#000; color:white; overflow-x:hidden; min-height:100vh; }
+#starsCanvas { position:fixed; inset:0; z-index:-1; }
+header { background:#000; border-bottom:1px solid #ff004f33; position:sticky; top:0; z-index:100; padding:1rem clamp(1.5rem,5vw,4rem); display:flex; justify-content:space-between; align-items:center; }
+.logo { font-family:'Orbitron',sans-serif; font-weight:800; font-size:clamp(16px,2vw,22px); letter-spacing:3px; text-decoration:none; }
+.logo span:first-child { color:white; } .logo span:last-child { color:#ff004f; }
+.nav-right { display:flex; align-items:center; gap:10px; }
+.nav-btn { background:transparent; border:1px solid #ff004f44; color:#ff004f; padding:6px 14px; cursor:pointer; transition:0.3s; font-size:11px; font-family:'Orbitron',sans-serif; letter-spacing:1px; text-decoration:none; display:inline-block; }
+.nav-btn:hover { background:#ff004f; color:black; }
+.breadcrumb { padding:14px clamp(1.5rem,5vw,4rem); font-size:11px; color:#ffffff44; letter-spacing:1px; position:relative; z-index:1; }
+.breadcrumb a { color:#00d9ff66; text-decoration:none; } .breadcrumb a:hover { color:#00d9ff; }
+.breadcrumb span { margin:0 8px; }
+.lesson-wrap { max-width:820px; margin:0 auto; padding:0 clamp(1.5rem,5vw,4rem) 80px; position:relative; z-index:1; }
+.lesson-header { padding:30px 0 28px; border-bottom:1px solid #ffffff11; margin-bottom:36px; }
+.lesson-tag { font-family:'Orbitron',sans-serif; font-size:10px; color:#ff004f; letter-spacing:3px; margin-bottom:10px; }
+.lesson-header h1 { font-family:'Orbitron',sans-serif; font-size:clamp(20px,3.5vw,32px); font-weight:800; line-height:1.2; margin-bottom:12px; }
+.lesson-meta { display:flex; gap:10px; flex-wrap:wrap; margin-bottom:16px; }
+.l-pill { font-family:'Orbitron',sans-serif; font-size:10px; padding:3px 10px; border:1px solid; letter-spacing:1px; }
+.l-pill-q { color:#ff004f; border-color:#ff004f44; } .l-pill-t { color:#39ff14; border-color:#39ff1444; }
+.l-pill-c { color:#ffaa00; border-color:#ffaa0044; }
+.lesson-intro { font-size:13px; line-height:1.85; opacity:0.75; }
+.toc { background:rgba(0,217,255,0.06); border:1px solid #00d9ff33; padding:24px 28px; margin:30px 0; }
+.toc h4 { font-family:'Orbitron',sans-serif; font-size:10px; color:#00d9ff; letter-spacing:2px; margin-bottom:16px; }
+.toc ol { padding-left:20px; } .toc li { font-size:13px; line-height:2.1; }
+.toc li a { color:#00d9ffbb; text-decoration:none; transition:0.15s; } .toc li a:hover { color:#fff; padding-left:4px; }
+.toc li::marker { color:#ff004f; font-family:'Orbitron',sans-serif; font-size:10px; }
+.cb { background:#f5f2ec; color:#1a1a1a; padding:36px clamp(24px,4vw,48px); margin-bottom:24px; border-left:4px solid #00d9ff; position:relative; z-index:1; }
+.cb h2 { font-family:'Orbitron',sans-serif; font-size:13px; color:#003d66; letter-spacing:2px; text-transform:uppercase; margin-bottom:20px; padding-bottom:10px; border-bottom:2px solid #00d9ff66; scroll-margin-top:80px; }
+.cb h3 { font-family:'Orbitron',sans-serif; font-size:11px; color:#444; letter-spacing:1.5px; text-transform:uppercase; margin:28px 0 12px; }
+.cb p { font-family:'Libre Baskerville',Georgia,serif; font-size:15px; line-height:1.9; color:#1a1a1a; margin-bottom:16px; }
+.cb ul { padding-left:0; margin-bottom:16px; }
+.cb ul li { font-family:'Libre Baskerville',Georgia,serif; font-size:14px; line-height:1.85; color:#1a1a1a; padding-left:20px; position:relative; margin-bottom:8px; }
+.cb ul li::before { content:'›'; position:absolute; left:0; color:#0077aa; }
+.cb blockquote { border-left:3px solid #1a7a1a; background:#eafaea; padding:14px 20px; margin:18px 0; font-size:13px; font-family:'Share Tech Mono',monospace; color:#0a3d0a; line-height:1.8; }
+.callout { border-left:3px solid #0088cc; background:#e8f4fb; padding:16px 20px; margin:22px 0; font-size:12px; line-height:1.8; color:#1a1a1a; }
+.callout.red { border-left-color:#cc0033; background:#fdecea; }
+.callout.green { border-left-color:#1a7a1a; background:#eafaea; }
+.callout.amber { border-left-color:#996600; background:#fef9ec; }
+.callout strong { font-family:'Orbitron',sans-serif; font-size:10px; letter-spacing:1px; display:block; margin-bottom:8px; }
+.compare-table { width:100%; border-collapse:collapse; margin:22px 0; font-size:12px; }
+.compare-table th { font-family:'Orbitron',sans-serif; font-size:10px; letter-spacing:1px; color:#003d66; padding:10px 12px; border-bottom:2px solid #00d9ff66; text-align:left; }
+.compare-table td { padding:10px 12px; border-bottom:1px solid #ddd; line-height:1.5; color:#1a1a1a; vertical-align:top; }
+.compare-table tr:hover td { background:#f0f0f0; }
+.key-numbers { display:grid; grid-template-columns:repeat(auto-fit,minmax(140px,1fr)); gap:12px; margin:22px 0; }
+.kn-item { background:#fff; border:1px solid #d0d0d0; padding:16px 12px; text-align:center; }
+.kn-val { font-family:'Orbitron',sans-serif; font-size:clamp(13px,1.8vw,18px); font-weight:800; color:#003d66; display:block; }
+.kn-label { font-size:10px; color:#555; letter-spacing:1px; margin-top:5px; display:block; line-height:1.4; }
+.quiz-block { background:rgba(17,17,17,0.9); border:1px solid #ff004f33; padding:28px; margin:48px 0 32px; }
+.quiz-block h2 { font-family:'Orbitron',sans-serif; font-size:13px; color:#ff004f; letter-spacing:2px; margin-bottom:6px; }
+.quiz-intro { font-size:12px; opacity:0.6; margin-bottom:24px; padding-bottom:16px; border-bottom:1px solid #ff004f22; line-height:1.6; }
+.quiz-q { margin-bottom:28px; }
+.quiz-q p { font-size:13px; opacity:0.9; margin-bottom:12px; line-height:1.65; }
+.quiz-q p strong { color:#00d9ff; }
+.quiz-options { display:flex; flex-direction:column; gap:8px; }
+.quiz-opt { background:rgba(255,255,255,0.03); border:1px solid #ffffff1a; padding:11px 16px; cursor:pointer; font-size:12px; font-family:'Share Tech Mono',monospace; transition:0.2s; text-align:left; color:white; line-height:1.5; }
+.quiz-opt:hover:not(:disabled) { background:rgba(0,217,255,0.08); border-color:#00d9ff44; }
+.quiz-opt.correct { background:rgba(57,255,20,0.1); border-color:#39ff14; color:#39ff14; }
+.quiz-opt.wrong { background:rgba(255,0,79,0.1); border-color:#ff004f; color:#ff004f; }
+.quiz-opt:disabled { cursor:default; }
+.quiz-feedback { font-size:12px; margin-top:10px; min-height:18px; line-height:1.7; opacity:0.9; padding:0 4px; }
+.quiz-score { font-family:'Orbitron',sans-serif; font-size:12px; color:#39ff14; margin-top:20px; letter-spacing:1px; display:none; padding-top:16px; border-top:1px solid #39ff1433; }
+.py-block { background:rgba(10,10,10,0.95); border:1px solid #39ff1422; padding:28px; margin:32px 0; }
+.py-block h2 { font-family:'Orbitron',sans-serif; font-size:13px; color:#39ff14; letter-spacing:2px; margin-bottom:8px; }
+.py-block .py-intro { font-size:12px; opacity:0.7; margin-bottom:20px; padding-bottom:16px; border-bottom:1px solid #39ff1422; line-height:1.7; }
+.py-exercise { margin-bottom:32px; } .py-exercise:last-child { margin-bottom:0; }
+.py-exercise h3 { font-family:'Orbitron',sans-serif; font-size:11px; color:#39ff1499; letter-spacing:1.5px; text-transform:uppercase; margin-bottom:10px; }
+.py-exercise p { font-size:12px; opacity:0.8; margin-bottom:14px; line-height:1.75; }
+.py-block pre { background:#050505; border:1px solid #39ff1433; padding:20px; font-family:'Share Tech Mono',monospace; font-size:11px; line-height:1.7; overflow-x:auto; color:#39ff14; white-space:pre; margin-bottom:12px; }
+.py-note { background:rgba(57,255,20,0.04); border-left:2px solid #39ff14; padding:12px 16px; margin-top:14px; font-size:12px; line-height:1.75; opacity:0.8; }
+.py-note strong { font-family:'Orbitron',sans-serif; font-size:10px; color:#39ff14; display:block; margin-bottom:6px; letter-spacing:1px; }
+.reflection-block { background:rgba(255,170,0,0.04); border:1px solid #ffaa0033; padding:24px; margin:32px 0; }
+.reflection-block h2 { font-family:'Orbitron',sans-serif; font-size:13px; color:#ffaa00; letter-spacing:2px; margin-bottom:8px; }
+.ref-intro { font-size:12px; opacity:0.7; margin-bottom:20px; padding-bottom:14px; border-bottom:1px solid #ffaa0022; line-height:1.7; }
+.ref-prompt { margin-bottom:20px; }
+.ref-prompt h3 { font-family:'Orbitron',sans-serif; font-size:11px; color:#ffaa0099; letter-spacing:1px; margin-bottom:8px; }
+.ref-prompt p { font-size:12px; opacity:0.8; line-height:1.75; }
+.complete-wrap { margin-top:56px; padding-top:30px; border-top:1px solid #ffffff11; text-align:center; }
+.complete-btn { font-family:'Orbitron',sans-serif; font-size:13px; letter-spacing:2px; padding:14px 44px; background:transparent; border:1px solid #39ff14; color:#39ff14; cursor:pointer; transition:0.3s; }
+.complete-btn:hover:not(.done) { background:#39ff14; color:black; box-shadow:0 0 20px rgba(57,255,20,0.4); }
+.complete-btn.done { background:rgba(57,255,20,0.1); cursor:pointer; opacity:1; }
+.complete-msg { font-size:12px; color:#39ff14; margin-top:14px; min-height:18px; letter-spacing:1px; }
+.lesson-nav { display:flex; justify-content:space-between; margin-top:30px; flex-wrap:wrap; gap:10px; }
+.lesson-nav a { font-family:'Orbitron',sans-serif; font-size:11px; color:#00d9ff66; text-decoration:none; letter-spacing:1px; transition:0.2s; }
+.lesson-nav a:hover { color:#00d9ff; }
+.back-to-top { position:fixed; bottom:28px; right:28px; z-index:200; width:44px; height:44px; background:#000; border:1px solid #00d9ff55; color:#00d9ff; font-size:20px; cursor:pointer; display:flex; align-items:center; justify-content:center; opacity:0; pointer-events:none; transition:opacity 0.3s; }
+.back-to-top.visible { opacity:1; pointer-events:auto; } .back-to-top:hover { border-color:#00d9ff; }
+footer { text-align:center; padding:30px; opacity:0.3; font-size:11px; position:relative; z-index:1; letter-spacing:1px; }
+.module-complete { background:rgba(57,255,20,0.06); border:1px solid #39ff1444; padding:24px 28px; margin:40px 0; text-align:center; }
+.module-complete h3 { font-family:'Orbitron',sans-serif; font-size:14px; color:#39ff14; letter-spacing:2px; margin-bottom:10px; }
+.module-complete p { font-size:12px; opacity:0.8; line-height:1.7; }
+</style>
+</head>
+<body>
+<canvas id="starsCanvas"></canvas>
+<header>
+    <a href="dashboard.html" class="logo"><span>LEO</span><span>AF</span></a>
+    <div class="nav-right">
+        <a href="m7.html" class="nav-btn">← M7 HUB</a>
+        <button class="nav-btn" onclick="leoafAbort()">ABORT</button>
+    </div>
+</header>
+<div class="breadcrumb">
+    <a href="dashboard.html">DASHBOARD</a><span>/</span>
+    <a href="m7.html">M7</a><span>/</span>
+    <span style="color:#ffffff88;">LESSON 04 — ROUTING UNDER CHURN</span>
+</div>
+
+<div class="lesson-wrap">
+<div class="lesson-header">
+    <div class="lesson-tag">M7 · LESSON 04 OF 7</div>
+    <h1>Routing<br>Under Churn</h1>
+    <div class="lesson-meta">
+        <div class="l-pill l-pill-q">MODULE 7</div>
+        <div class="l-pill l-pill-t">NETWORKING, ISL &amp; ROUTING</div>
+        <div class="l-pill l-pill-c">CORE</div>
+    </div>
+    <p class="lesson-intro" style="margin-bottom:12px;">The mesh of m7-3 is a graph that never holds still. This lesson routes on it. The routing problem itself is elementary — a 1,584-node grid with four edges per node yields a shortest path in microseconds by Dijkstra, a textbook computation — and that is exactly what makes the lesson's real point sharp: <strong>the difficulty is not computing a path, it is that the graph the path lives on has already changed by the time a conventional protocol would have agreed on it.</strong> Terrestrial routing protocols discover topology by probing and converge on paths by flooding and negotiation, a process that takes seconds for OSPF and tens of seconds to minutes for BGP. A LEO mesh changes some link's state on the order of once a second across the whole constellation, and any individual inter-plane link hands off every few minutes. A protocol that needs thirty seconds to converge on a network that reconfigures every second is not slow — it is <em>broken</em>, permanently chasing a topology that has moved on.</p>
+    <p class="lesson-intro" style="margin-bottom:12px;">This lesson establishes the routing metrics, computes representative paths (a transcontinental route is ~3 intra-plane hops and ~20 ms), shows precisely why the terrestrial protocols fail — not from inadequate engineering but from a category mismatch between reactive convergence and continuous deterministic change — and introduces the constellation-specific answer: <strong>stop reacting, start scheduling.</strong> Because the churn is deterministic (m7-3 §6), the topology's entire future is known, and routing becomes a problem of precomputing paths for a known sequence of graphs rather than discovering paths on an unknown one. The spine gains its router core here; m7-5 builds the control architecture that distributes the precomputed result.</p>
+</div>
+
+<div class="toc">
+    <h4>CONTENTS</h4>
+    <ol>
+        <li><a href="#s1">The routing problem, stated</a></li>
+        <li><a href="#s2">What a path looks like</a></li>
+        <li><a href="#s3">Why terrestrial routing fails</a></li>
+        <li><a href="#s4">The escape: determinism</a></li>
+        <li><a href="#s5">Snapshot routing in practice</a></li>
+        <li><a href="#s6">Failure and the reactive floor</a></li>
+        <li><a href="#s7">Key facts</a></li>
+        <li><a href="#s8">What this lesson delivers to the design chain</a></li>
+        <li><a href="#quiz">Knowledge check</a></li>
+        <li><a href="#py">Python exercises</a></li>
+        <li><a href="#reflect">Reflection</a></li>
+    </ol>
+</div>
+
+<div class="cb" id="s1">
+    <h2>1. The routing problem, stated</h2>
+<p>A packet enters the mesh at one satellite (above its source terminal) and must leave at another (above its destination terminal or a gateway). Between them lies the +grid, and the router must choose a sequence of ISL hops. Formally it is single-source shortest path on a weighted graph — Dijkstra's algorithm, or any of its relatives — and the weight on each edge is where the engineering lives:</p>
+<ul>
+<li><strong>Hop count</strong> — minimise the number of satellites traversed. Simple, but ignores that a long intra-plane hop (1,970 km) and a short inter-plane hop (600 km) count equally while costing very different propagation.</li>
+<li><strong>Latency</strong> — minimise total propagation plus per-hop processing. The physically honest metric for a latency-selling constellation (m7-1), and the one the spine defaults to.</li>
+<li><strong>Congestion / load</strong> — weight edges by their current traffic, steering packets around hot links. Essential under load, but it makes the weights depend on traffic, which changes far faster than the topology.</li>
+</ul>
+<p>The metrics conflict: the minimum-hop path and the minimum-latency path and the least-congested path are generally three different routes, and a real router blends them. But all three are cheap to compute on this graph — the entire difficulty is temporal, not algorithmic, and §3 is where that bites.</p>
+</div>
+
+<div class="cb" id="s2">
+    <h2>2. What a path looks like</h2>
+<p>A representative long-haul route makes the numbers concrete. London to New York is 5,570 km on the ground; across the mesh it is roughly three intra-plane hops (1,970 km each carries the packet along-track) plus the inter-plane hops needed to shift longitude, and the propagation is dominated by the near-straight-line distance at vacuum c:</p>
+<blockquote>~18.6 ms propagation + ~3 hops × 0.5 ms processing ≈ <strong>20 ms</strong> one way</blockquote>
+<p>Two features generalise. First, <strong>processing delay is small but not negligible</strong>: each regenerative hop demodulates, reads the header, and re-transmits, costing a fraction of a millisecond, and on a many-hop path these accumulate into a real term that trades against propagation (a path with fewer, longer hops beats one with more, shorter hops even at equal distance). Second, the path is a <strong>grid route</strong>, not a great circle: the +grid only offers along-track and cross-track moves (m7-3), so a packet travels an L1 / "Manhattan" distance through the lattice, slightly longer than the great circle, and the router's choice of when to hop sideways versus stay in-plane shapes both the length and the congestion. The mesh is a Manhattan grid wrapped on a sphere, and routing it is city-block navigation with the blocks in motion.</p>
+</div>
+
+<div class="cb" id="s3">
+    <h2>3. Why terrestrial routing fails</h2>
+<p>Now the lesson's core. The internet's routing protocols were built for a network whose topology is <em>mostly stable and changes unpredictably</em> — a fibre gets cut, a router reboots, and the protocol must discover the change and re-converge. Two dominate:</p>
+<p><strong>OSPF</strong> (interior routing) floods link-state advertisements when topology changes, and every router recomputes shortest paths. Convergence takes seconds — acceptable when changes are rare. On a mesh where links change state continuously, OSPF would flood advertisements without pause and recompute perpetually, its convergence never catching up to the change rate. The flooding alone would consume the very ISL capacity it is trying to route.</p>
+<p><strong>BGP</strong> (inter-domain routing) is worse: it explores paths through iterative announcement and withdrawal, damped by timers (the MRAI, ~30 seconds) specifically designed to <em>slow</em> reaction and prevent instability. Convergence takes tens of seconds to minutes. Against orbital churn this is hopeless — BGP would still be exploring the consequences of one handoff when the next several had already occurred.</p>
+<p>The failure is quantitative and decisive. Across the constellation, link states change on the order of <strong>once a second</strong>; any individual inter-plane link hands off every few minutes; and a conventional protocol needs <strong>seconds to tens of seconds</strong> to converge on a <em>single</em> change. The convergence time exceeds the inter-change time by one to two orders of magnitude. This is not a tuning problem — no timer setting rescues a reactive protocol whose fundamental loop is slower than the change it reacts to. The category is wrong: reactive convergence assumes changes are <em>events</em> to be discovered and absorbed; constellation topology change is a <em>continuous process</em> with a known trajectory. You cannot react your way through a river; you must know its course.</p>
+</div>
+
+<div class="cb" id="s4">
+    <h2>4. The escape: determinism</h2>
+<p>The property m7-3 established is the way out. Constellation churn is <strong>deterministic</strong> — every link's state at every future instant follows from the ephemeris, computable minutes or hours ahead. This changes the problem's nature entirely. A terrestrial router faces an <em>unknown</em> topology it must discover and an <em>unpredictable</em> future it must react to. A constellation router faces a <em>known</em> topology and a <em>known</em> future — it does not need to discover anything, because it can compute the entire sequence of graphs in advance and precompute a path for each.</p>
+<p>The reframing: routing a constellation is not "find the path on this graph" (discovered, reactive) but "given the known sequence of graphs G(t₀), G(t₁), G(t₂), …, precompute the path table for each and switch tables on schedule" (computed, proactive). The churn that destroys reactive protocols is harmless to a proactive one, because the proactive router was never surprised — it knew the handoff was coming, computed the post-handoff paths before it happened, and switched to them at the scheduled instant. The seam, the polar shutdown, the inter-plane breathing — all of it is on the schedule. This is <strong>topology-scheduled</strong> or <strong>snapshot</strong> routing, and it is the constellation-specific answer the rest of the module builds on.</p>
+</div>
+
+<div class="cb" id="s5">
+    <h2>5. Snapshot routing in practice</h2>
+<p>The proactive approach discretises time into intervals within which the topology is treated as fixed. For each snapshot interval:</p>
+<p>1. <strong>Predict</strong> the topology from the ephemeris — which links exist, at what range and capacity (m7-2, m7-3). 2. <strong>Compute</strong> the routing tables for that fixed graph — ordinary shortest-path, cheap. 3. <strong>Distribute</strong> the tables to the satellites ahead of the interval (m7-5's control plane). 4. <strong>Switch</strong> all satellites to the new tables at the interval boundary, synchronously.</p>
+<p>The snapshot interval is the key parameter. Too long, and the topology drifts significantly within an interval — the "fixed" graph is a lie by the interval's end, and paths degrade. Too short, and the control plane drowns in table updates. The interval is chosen so that intra-interval topology change is tolerable — seconds to tens of seconds, matched to the churn rate — and the deterministic ephemeris makes each interval's table computable well ahead of need. The handoffs between snapshots are exactly the make-before-break events m6-5 handled for terminals, now <em>between satellites</em>: the new path is ready before the old topology expires, and the switch is seamless.</p>
+<p>The residual problem snapshot routing does <em>not</em> solve is congestion, because traffic — unlike topology — is not deterministic. The precomputed tables give good paths for the <em>geometry</em>; when a link congests from a traffic surge, the schedule did not predict it. Real systems layer a fast, local, reactive congestion response (reroute around a hot link) on top of the slow, global, proactive topology schedule — the two timescales handled by two mechanisms. Geometry is scheduled; traffic is reacted to. This division is the practical shape of constellation routing.</p>
+</div>
+
+<div class="cb" id="s6">
+    <h2>6. Failure and the reactive floor</h2>
+<p>Determinism has a limit: it assumes links behave as geometry predicts, and sometimes they do not. A satellite maneuvers for collision avoidance (Module 2's debris environment) and leaves its predicted position; an ISL terminal fails and takes a scheduled link off the map; a satellite goes briefly attitude-unstable and drops its beams. These are <em>unscheduled</em> changes — the very kind reactive protocols exist to handle — and they mean a constellation cannot be purely proactive. It needs a reactive floor: a fast local mechanism that detects a link's unexpected loss and reroutes around it until the next snapshot's tables (recomputed to account for the failure) take over.</p>
+<p>The architecture that results is layered by timescale and predictability: <strong>proactive scheduling</strong> for the deterministic geometric churn (the common case, handled ahead of time), and <strong>reactive rerouting</strong> for the unpredictable failures (the rare case, handled locally and fast). This is the opposite of the terrestrial internet, which is reactive-first because its changes are unpredictable-first. The constellation inverts the priority because its dominant change source — orbital motion — is knowable, relegating reaction to a fallback for the exceptions. Getting the balance right, and sizing the reactive floor for the real failure rate, is the routing system's central engineering judgement.</p>
+</div>
+
+<div class="cb" id="s7">
+    <h2>7. Key facts</h2>
+<table class="compare-table">
+<thead><tr>
+<th>Fact</th>
+<th>Value</th>
+<th>Unit</th>
+<th>Source</th>
+</tr></thead>
+<tbody>
+<tr><td>Routing problem</td><td>single-source shortest path on the +grid</td><td>—</td><td>§1</td></tr>
+<tr><td>Graph size (representative)</td><td>1,584 nodes, ~3,168 edges</td><td>—</td><td>m7-3</td></tr>
+<tr><td>Dijkstra per snapshot</td><td>microseconds — trivial</td><td>—</td><td>Complexity</td></tr>
+<tr><td>Common metrics</td><td>hop count, latency, congestion</td><td>—</td><td>§1</td></tr>
+<tr><td>London–NY mesh path</td><td>~3 intra-plane hops, ~20 ms one way</td><td>—</td><td>Computed</td></tr>
+<tr><td>Per-hop processing</td><td>~0.5</td><td>ms</td><td>Regeneration</td></tr>
+<tr><td>Constellation link-change rate</td><td>~once per second (order)</td><td>—</td><td>Computed</td></tr>
+<tr><td>OSPF convergence</td><td>seconds to tens of seconds</td><td>—</td><td>Published</td></tr>
+<tr><td>BGP convergence</td><td>tens of seconds to minutes</td><td>—</td><td>Published</td></tr>
+<tr><td>Convergence vs change rate</td><td>reactive is 10–100× too slow</td><td>—</td><td>§3</td></tr>
+<tr><td>Constellation answer</td><td>snapshot / topology-scheduled routing</td><td>—</td><td>§4–5</td></tr>
+<tr><td>Two-timescale split</td><td>geometry scheduled, traffic reacted-to</td><td>—</td><td>§5–6</td></tr>
+</tbody>
+</table>
+</div>
+
+<div class="cb" id="s8">
+    <h2>8. What this lesson delivers to the design chain</h2>
+<p>Stage 4 of the spine is the <strong>router core</strong>: given a topology snapshot from Stage 3, it computes shortest paths under a chosen metric (latency by default, hop count or congestion optionally), returns the path and its latency for any satellite pair, and — crucially — accepts a <em>sequence</em> of snapshots and produces a sequence of path tables with the handoff instants between them. It also carries the reactive hook: mark a link failed, and it reroutes on the current snapshot without waiting for the next. The router now works on the churning graph, by refusing to be surprised by the churn.</p>
+<p>What Stage 4 computes locally, m7-5 distributes globally. A path table is only useful on the satellite that holds it, and getting the right tables to 1,584 moving satellites ahead of each snapshot boundary — synchronised, verified, and updated as the schedule advances — is a control-plane problem at constellation scale. The deterministic topology that made routing tractable also makes the control plane tractable, through the same mechanism: precompute from the ephemeris. That is SDN in space, and it is m7-5.</p>
+</div>
+
+<div class="quiz-block" id="quiz">
+    <h2>KNOWLEDGE CHECK</h2>
+    <div class="quiz-intro">Ten questions. Each option explains itself after you commit. No retries per question — decide first.</div>
+    <div class="quiz-q">
+        <p><strong>Q1.</strong> Computing a single shortest path across the 1,584-node mesh is:</p>
+        <div class="quiz-options">
+            <button class="quiz-opt" data-q="1" data-correct="false">A — Computationally intractable</button>
+            <button class="quiz-opt" data-q="1" data-correct="true">B — Trivial — Dijkstra on a graph this small runs in microseconds; the difficulty is temporal, not algorithmic</button>
+            <button class="quiz-opt" data-q="1" data-correct="false">C — Impossible without special hardware</button>
+            <button class="quiz-opt" data-q="1" data-correct="false">D — The reason routing is hard</button>
+        </div>
+        <div class="quiz-feedback" id="fb1"></div>
+    </div>
+    <div class="quiz-q">
+        <p><strong>Q2.</strong> A representative transcontinental mesh path (London–NY) is:</p>
+        <div class="quiz-options">
+            <button class="quiz-opt" data-q="2" data-correct="false">A — A single hop</button>
+            <button class="quiz-opt" data-q="2" data-correct="true">B — ~3 intra-plane hops plus cross-track hops, ~20 ms one way, dominated by near-straight-line propagation at vacuum c</button>
+            <button class="quiz-opt" data-q="2" data-correct="false">C — Hundreds of hops</button>
+            <button class="quiz-opt" data-q="2" data-correct="false">D — Routed on a great circle</button>
+        </div>
+        <div class="quiz-feedback" id="fb2"></div>
+    </div>
+    <div class="quiz-q">
+        <p><strong>Q3.</strong> Per-hop processing delay matters because:</p>
+        <div class="quiz-options">
+            <button class="quiz-opt" data-q="3" data-correct="false">A — It dominates propagation</button>
+            <button class="quiz-opt" data-q="3" data-correct="true">B — Each regenerative hop costs ~0.5 ms, and on a many-hop path these accumulate, making a fewer-longer-hops path beat a more-shorter-hops path at equal distance</button>
+            <button class="quiz-opt" data-q="3" data-correct="false">C — It is zero for optical links</button>
+            <button class="quiz-opt" data-q="3" data-correct="false">D — It only affects congestion</button>
+        </div>
+        <div class="quiz-feedback" id="fb3"></div>
+    </div>
+    <div class="quiz-q">
+        <p><strong>Q4.</strong> OSPF fails on a LEO mesh because:</p>
+        <div class="quiz-options">
+            <button class="quiz-opt" data-q="4" data-correct="false">A — It cannot compute shortest paths</button>
+            <button class="quiz-opt" data-q="4" data-correct="true">B — It floods link-state advertisements on every change and recomputes — but the mesh changes continuously, so it would flood without pause and never converge, consuming the ISL capacity it means to route</button>
+            <button class="quiz-opt" data-q="4" data-correct="false">C — It uses too little bandwidth</button>
+            <button class="quiz-opt" data-q="4" data-correct="false">D — It is optical-incompatible</button>
+        </div>
+        <div class="quiz-feedback" id="fb4"></div>
+    </div>
+    <div class="quiz-q">
+        <p><strong>Q5.</strong> BGP is even worse than OSPF for constellation routing because:</p>
+        <div class="quiz-options">
+            <button class="quiz-opt" data-q="5" data-correct="false">A — It converges faster</button>
+            <button class="quiz-opt" data-q="5" data-correct="true">B — It explores paths through iterative announce/withdraw damped by ~30 s timers designed to slow reaction — taking tens of seconds to minutes, hopeless against second-scale churn</button>
+            <button class="quiz-opt" data-q="5" data-correct="false">C — It floods less</button>
+            <button class="quiz-opt" data-q="5" data-correct="false">D — It is designed for satellites</button>
+        </div>
+        <div class="quiz-feedback" id="fb5"></div>
+    </div>
+    <div class="quiz-q">
+        <p><strong>Q6.</strong> The failure of terrestrial protocols is a "category mismatch" because:</p>
+        <div class="quiz-options">
+            <button class="quiz-opt" data-q="6" data-correct="false">A — The protocols have bugs</button>
+            <button class="quiz-opt" data-q="6" data-correct="true">B — Reactive convergence assumes topology changes are rare unpredictable events to discover and absorb, while constellation change is a continuous process with a known trajectory — no timer tuning fixes a loop slower than the change</button>
+            <button class="quiz-opt" data-q="6" data-correct="false">C — The satellites are too fast</button>
+            <button class="quiz-opt" data-q="6" data-correct="false">D — The protocols are too old</button>
+        </div>
+        <div class="quiz-feedback" id="fb6"></div>
+    </div>
+    <div class="quiz-q">
+        <p><strong>Q7.</strong> Determinism is the escape because:</p>
+        <div class="quiz-options">
+            <button class="quiz-opt" data-q="7" data-correct="false">A — It slows the churn</button>
+            <button class="quiz-opt" data-q="7" data-correct="true">B — Every future link state follows from the ephemeris, so the router computes the entire sequence of graphs in advance and precomputes a path for each — never needing to discover or react</button>
+            <button class="quiz-opt" data-q="7" data-correct="false">C — It eliminates topology change</button>
+            <button class="quiz-opt" data-q="7" data-correct="false">D — It makes the graph static</button>
+        </div>
+        <div class="quiz-feedback" id="fb7"></div>
+    </div>
+    <div class="quiz-q">
+        <p><strong>Q8.</strong> Snapshot routing chooses its interval so that:</p>
+        <div class="quiz-options">
+            <button class="quiz-opt" data-q="8" data-correct="false">A — It is as long as possible</button>
+            <button class="quiz-opt" data-q="8" data-correct="true">B — Intra-interval topology change is tolerable — too long and the "fixed" graph drifts into a lie, too short and the control plane drowns in updates</button>
+            <button class="quiz-opt" data-q="8" data-correct="false">C — It matches the orbital period</button>
+            <button class="quiz-opt" data-q="8" data-correct="false">D — It is exactly one second</button>
+        </div>
+        <div class="quiz-feedback" id="fb8"></div>
+    </div>
+    <div class="quiz-q">
+        <p><strong>Q9.</strong> Snapshot routing does not solve congestion because:</p>
+        <div class="quiz-options">
+            <button class="quiz-opt" data-q="9" data-correct="false">A — Congestion never happens</button>
+            <button class="quiz-opt" data-q="9" data-correct="true">B — Traffic, unlike topology, is not deterministic — the precomputed tables optimise geometry, so a traffic surge on a link was not on the schedule and needs a separate fast reactive response</button>
+            <button class="quiz-opt" data-q="9" data-correct="false">C — Congestion is a hardware problem</button>
+            <button class="quiz-opt" data-q="9" data-correct="false">D — The tables include traffic prediction</button>
+        </div>
+        <div class="quiz-feedback" id="fb9"></div>
+    </div>
+    <div class="quiz-q">
+        <p><strong>Q10.</strong> A constellation needs a reactive floor beneath its proactive schedule because:</p>
+        <div class="quiz-options">
+            <button class="quiz-opt" data-q="10" data-correct="false">A — Reaction is always better</button>
+            <button class="quiz-opt" data-q="10" data-correct="true">B — Unscheduled changes — collision-avoidance maneuvers, ISL failures, attitude upsets — are unpredictable, so a fast local reroute must cover them until the next recomputed snapshot takes over</button>
+            <button class="quiz-opt" data-q="10" data-correct="false">C — The schedule is unreliable</button>
+            <button class="quiz-opt" data-q="10" data-correct="false">D — Proactive routing does not work</button>
+        </div>
+        <div class="quiz-feedback" id="fb10"></div>
+    </div>
+    <div class="quiz-score" id="quizScore"></div>
+</div>
+
+<div class="py-block" id="py">
+    <h2>PYTHON EXERCISES</h2>
+    <div class="py-intro">Three exercises; the last extends the module spine project. Run them, then work the numbered follow-ups in the comments — the follow-ups are the exercise.</div>
+    <div class="py-exercise">
+        <h3>Exercise 1 — Route the grid</h3>
+        <p>Shortest path on a snapshot, three metrics.</p>
+<pre>
+import heapq, math
+
+def dijkstra(graph, src, dst):
+    &quot;&quot;&quot;graph: {node: [(neighbor, weight), ...]}. Returns (cost, path).&quot;&quot;&quot;
+    pq = [(0, src, [src])]
+    seen = set()
+    while pq:
+        cost, u, path = heapq.heappop(pq)
+        if u == dst: return cost, path
+        if u in seen: continue
+        seen.add(u)
+        for v, w in graph.get(u, []):
+            if v not in seen:
+                heapq.heappush(pq, (cost+w, v, path+[v]))
+    return math.inf, []
+
+# Tiny +grid: 4 planes × 4 sats, node = (plane, slot)
+INTRA_KM, INTER_KM, C = 1970, 600, 299792.458
+PROC_MS = 0.5
+
+def build(metric=&quot;latency&quot;):
+    g = {}
+    P = S = 4
+    for p in range(P):
+        for s in range(S):
+            u = (p, s); g[u] = []
+            for v in [(p, (s+1)%S), (p, (s-1)%S)]:      # intra
+                w = 1 if metric==&quot;hops&quot; else INTRA_KM/C*1000 + PROC_MS
+                g[u].append((v, w))
+            for v in [((p+1)%P, s), ((p-1)%P, s)]:      # inter
+                w = 1 if metric==&quot;hops&quot; else INTER_KM/C*1000 + PROC_MS
+                g[u].append((v, w))
+    return g
+
+for metric in [&quot;hops&quot;, &quot;latency&quot;]:
+    cost, path = dijkstra(build(metric), (0,0), (2,3))
+    print(f&quot;{metric:&gt;8}: cost {cost:.2f}, {len(path)-1} hops, path {path}&quot;)
+
+# 1. Min-hop and min-latency give different paths here? Explain from
+#    the intra (1970 km) vs inter (600 km) hop-length asymmetry: which
+#    metric prefers which hop type, and why?
+# 2. Add a congestion weight: multiply one edge&#x27;s weight by 10 and
+#    re-route. Show the path bends around it. This is the fast reactive
+#    layer (§5) operating on one snapshot.
+# 3. Time the dijkstra call for a 40×40 grid (1,600 nodes ≈ the real
+#    shell). Confirm it is sub-millisecond — the lesson&#x27;s central claim.
+</pre>
+    </div>
+    <div class="py-exercise">
+        <h3>Exercise 2 — Churn versus convergence</h3>
+        <p>Quantify why reactive protocols lose.</p>
+<pre>
+import math
+Re, h = 6371.0, 550.0
+T_orbit_min = 2*math.pi*math.sqrt((Re+h)**3/398600.4)/60
+
+N = 1584
+handoffs_per_sat_orbit = 6           # order estimate (m7-3)
+changes_per_sec = N*handoffs_per_sat_orbit/(T_orbit_min*60)
+print(f&quot;orbital period: {T_orbit_min:.1f} min&quot;)
+print(f&quot;constellation-wide link changes: ~{changes_per_sec:.1f} /second&quot;)
+print(f&quot;time between changes: ~{1/changes_per_sec*1000:.0f} ms\n&quot;)
+
+for proto, conv_s in [(&quot;OSPF&quot;, 5), (&quot;OSPF worst&quot;, 30), (&quot;BGP&quot;, 60)]:
+    changes_during = conv_s*changes_per_sec
+    print(f&quot;{proto:&lt;12} converges in ~{conv_s:&gt;3}s &quot;
+          f&quot;-&gt; {changes_during:.0f} more changes occur during convergence&quot;)
+
+# 1. A reactive protocol is &#x27;keeping up&#x27; only if convergence &lt; inter-
+#    change time. Find the convergence time a protocol would NEED.
+#    Is any real reactive protocol that fast? What does that prove?
+# 2. Snapshot routing recomputes on a fixed interval instead. For a
+#    10 s snapshot interval, how many topology changes are &#x27;batched&#x27;
+#    into one table update vs handled individually? 
+# 3. The changes_per_sec estimate uses 6 handoffs/orbit. Bound it:
+#    recompute for 2 and 20 handoffs/orbit and show the conclusion
+#    (reactive fails) is robust across the whole plausible range.
+</pre>
+    </div>
+    <div class="py-exercise">
+        <h3>Exercise 3 — Spine Stage 4: the router core</h3>
+        <p>Snapshot routing with a reactive floor.</p>
+<pre>
+import heapq, math
+
+# ═══════════════════════════════════════════════════════
+# M7 SPINE PROJECT — CONSTELLATION ROUTER
+# Stage 4: the router core.
+#   Stage 3 (m7-3) produced time-varying topology snapshots.
+#   Stage 4: shortest-path routing per snapshot + a sequence
+#            of path tables with handoff instants + a reactive
+#            reroute for unscheduled link failures.
+#   Next: m7-5 distributes these tables to the satellites (SDN);
+#         m7-6 turns paths into end-to-end latency for transport.
+# ═══════════════════════════════════════════════════════
+
+class Router:
+    C = 299792.458
+    PROC_MS = 0.5
+    def __init__(self, metric=&quot;latency&quot;):
+        self.metric = metric
+
+    def _weight(self, range_km):
+        if self.metric == &quot;hops&quot;: return 1.0
+        return range_km/self.C*1000 + self.PROC_MS   # latency ms
+
+    def shortest_path(self, graph, src, dst, failed=frozenset()):
+        &quot;&quot;&quot;graph: {node:[(nbr, range_km)]}. failed: set of (u,v) edges down.&quot;&quot;&quot;
+        pq = [(0.0, src, [src])]; seen = set()
+        while pq:
+            cost, u, path = heapq.heappop(pq)
+            if u == dst: return cost, path
+            if u in seen: continue
+            seen.add(u)
+            for v, rng in graph.get(u, []):
+                if v in seen or (u, v) in failed or (v, u) in failed:
+                    continue
+                heapq.heappush(pq, (cost + self._weight(rng), v, path+[v]))
+        return math.inf, []
+
+    def route_sequence(self, snapshots, src, dst):
+        &quot;&quot;&quot;snapshots: list of (t, graph). Returns table per snapshot +
+        the handoff instants where the path changes.&quot;&quot;&quot;
+        tables, last_path = [], None
+        for t, graph in snapshots:
+            cost, path = self.shortest_path(graph, src, dst)
+            handoff = (path != last_path)
+            tables.append(dict(t=t, cost=round(cost,2), path=path,
+                               handoff=handoff))
+            last_path = path
+        return tables
+
+    def reactive_reroute(self, graph, src, dst, failed_edge):
+        &quot;&quot;&quot;A link failed mid-snapshot: reroute NOW without waiting.&quot;&quot;&quot;
+        return self.shortest_path(graph, src, dst, failed={failed_edge})
+
+# tiny grid factory (range-weighted)
+def grid(P=4, S=4, intra=1970, inter=600):
+    g = {}
+    for p in range(P):
+        for s in range(S):
+            u=(p,s)
+            g[u]=[((p,(s+1)%S),intra),((p,(s-1)%S),intra),
+                  (((p+1)%P,s),inter),(((p-1)%P,s),inter)]
+    return g
+
+r = Router(&quot;latency&quot;)
+G = grid()
+cost, path = r.shortest_path(G, (0,0), (2,3))
+print(f&quot;nominal: {cost:.2f} ms, path {path}&quot;)
+
+# simulate a 3-snapshot sequence (topology nudged each step)
+snaps = [(0, grid()), (10, grid(inter=800)), (20, grid(inter=1200))]
+for row in r.route_sequence(snaps, (0,0), (2,3)):
+    tag = &quot; &lt;- HANDOFF&quot; if row[&#x27;handoff&#x27;] else &quot;&quot;
+    print(f&quot;  t={row[&#x27;t&#x27;]:&gt;2}s: {row[&#x27;cost&#x27;]:&gt;6.2f} ms  {row[&#x27;path&#x27;]}{tag}&quot;)
+
+# reactive: fail the first hop&#x27;s edge
+cost2, path2 = r.reactive_reroute(G, (0,0), (2,3), ((0,0),(0,1)))
+print(f&quot;after edge (0,0)-(0,1) fails: {cost2:.2f} ms, path {path2}&quot;)
+
+# ── the handoff ─────────────────────────────────────────
+# m7-5 takes route_sequence&#x27;s per-snapshot tables and distributes
+# them to satellites ahead of each interval (the control plane);
+# m7-6 takes shortest_path&#x27;s latency and adds access + queuing for
+# the end-to-end budget the transport layer sees.
+
+# 1. Make the metric switchable per query and show a min-hop vs
+#    min-latency path diverging on the real-range grid. Which would a
+#    latency-selling operator (m7-1) choose, and what does it cost in hops?
+# 2. Extend route_sequence to report the FRACTION of snapshots that
+#    trigger a handoff — the path-churn rate the transport layer (m7-6)
+#    will see as RTT changes. 
+# 3. Add congestion: give each edge a load and weight = latency ×
+#    (1 + load). Show the reactive layer steering around a hot link
+#    while the scheduled tables handle the geometry (§5&#x27;s two timescales).
+</pre>
+    </div>
+</div>
+
+<div class="reflection-block" id="reflect">
+    <h2>REFLECTION</h2>
+    <div class="ref-intro">Four prompts. Each forces a decision — write the position down before moving on; the act of committing is the exercise.</div>
+    <div class="ref-prompt">
+        <h3>PROMPT 01</h3>
+        <p>Section 5 split the routing system into scheduled geometry and reacted-to traffic, on two timescales. But the boundary is not clean: a scheduled topology handoff <em>causes</em> a traffic shift (packets that took the old path now take the new one), which can <em>cause</em> congestion the schedule did not anticipate. Trace this coupling: does the deterministic topology schedule make congestion more predictable (because traffic follows known paths) or less (because handoffs cause synchronised traffic shifts across the whole constellation)? Decide whether the two timescales are truly separable or whether the schedule must anticipate the congestion its own handoffs create.</p>
+    </div>
+    <div class="ref-prompt">
+        <h3>PROMPT 02</h3>
+        <p>Section 3 argued no timer tuning rescues a reactive protocol whose loop is slower than the change rate. But a hybrid is conceivable: run a reactive protocol only on the <em>stable</em> part of the topology (intra-plane links, which never change) and schedule only the <em>volatile</em> part (inter-plane links). Evaluate this: does separating the graph into a stable sub-graph and a volatile sub-graph let a terrestrial protocol survive on the stable part, and is the resulting hybrid simpler or more complex than pure snapshot routing? Identify what fraction of the routing problem the stable sub-graph actually covers.</p>
+    </div>
+    <div class="ref-prompt">
+        <h3>PROMPT 03</h3>
+        <p>Section 6's reactive floor must cover unscheduled failures, and its size depends on the failure rate. But there is a feedback: a larger constellation has more links (more to fail) but also more alternate paths (more resilience). Work the scaling: as a constellation grows from hundreds to thousands of satellites, does the reactive floor need to grow, shrink, or hold constant as a fraction of the routing system? Connect the answer to m7-3's observation that the mesh is denser (more redundant) at some latitudes than others, and decide whether the reactive floor should be uniform or latitude-dependent.</p>
+    </div>
+    <div class="ref-prompt">
+        <h3>PROMPT 04</h3>
+        <p>This lesson's central quantitative claim — reactive convergence is 10–100× too slow — rests on a churn estimate (≈1 link-change/second) built from an order-of-magnitude handoff rate (6 per satellite per orbit), explicitly flagged as an estimate. The <em>conclusion</em> is robust (exercise 2 question 3 shows it holds from 2 to 20 handoffs/orbit), but the specific interval that sets the snapshot period is not. Apply the load-bearing-assumption discipline: which downstream design decision (snapshot interval, control-plane update bandwidth in m7-5, transport RTT-variation in m7-6) is most sensitive to the exact churn rate, and specify the Module 2 + Module 7 computation that would replace the order-estimate with a real number before that decision is locked.</p>
+    </div>
+</div>
+
+<div class="cb">
+    <h2>Sources</h2>
+<ul>
+<li>Handley, "Delay is Not an Option: Low Latency Routing in Space" (HotNets, 2018) — mesh routing, why terrestrial protocols fail, snapshot approaches.</li>
+<li>Bhattacherjee &amp; Singla, "Network topology design at 27,000 km/hour" (CoNEXT, 2019) — routing on churning constellation graphs.</li>
+<li>Ekici, Akyildiz &amp; Bender, "A distributed routing algorithm for datagram traffic in LEO satellite networks" (IEEE/ACM ToN, 2001) — early LEO routing under mobility.</li>
+<li>Moy, "OSPF Version 2" (RFC 2328); Rekhter et al., "BGP-4" (RFC 4271) — the terrestrial protocols and their convergence behaviour.</li>
+<li>Module 7 (m7-3) — the deterministic churning topology this lesson routes; Module 2 — the ephemeris that makes churn predictable; Module 6 (m6-5) — the make-before-break pattern reused between satellites.</li>
+</ul>
+</div>
+
+<div class="complete-wrap">
+    <button class="complete-btn" id="completeBtn">MARK LESSON COMPLETE</button>
+    <div class="complete-msg" id="completeMsg"></div>
+</div>
+<div class="lesson-nav">
+    <a href="m7-3.html">← LESSON 03 — ISL TOPOLOGY &amp; DYNAMICS</a>
+    <a href="m7-5.html">LESSON 05 — SDN &amp; SEGMENT ROUTING →</a>
+</div>
+</div>
+
+<button class="back-to-top" id="backToTop" title="Back to top">↑</button>
+<footer>© 2026 LEOAF · M7 · LESSON 04 OF 7</footer>
+<script>
+const canvas=document.getElementById('starsCanvas'),ctx=canvas.getContext('2d');
+let stars=[];
+function initStars(){stars=[];for(let i=0;i<180;i++)stars.push({x:Math.random()*canvas.width,y:Math.random()*canvas.height,size:Math.random()*1.5+0.4,speed:Math.random()*0.18+0.04,hue:Math.random()*360});}
+function resizeCanvas(){canvas.width=window.innerWidth;canvas.height=window.innerHeight;}
+resizeCanvas();initStars();window.addEventListener('resize',resizeCanvas);
+function animateStars(){ctx.clearRect(0,0,canvas.width,canvas.height);stars.forEach(s=>{s.y-=s.speed;if(s.y<0){s.y=canvas.height;s.x=Math.random()*canvas.width;}ctx.beginPath();ctx.fillStyle=`hsl(${s.hue},80%,80%)`;ctx.arc(s.x,s.y,s.size,0,Math.PI*2);ctx.fill();});requestAnimationFrame(animateStars);}
+animateStars();
+</script>
+<script>
+const feedbacks={
+    1:{correct:"A 1,584-node, ~3,168-edge grid is a textbook shortest-path instance. The lesson's whole point is that the hardness lives in the graph *changing*, not in computing a path on any fixed version of it — a category error to think otherwise.",wrong:"It is the opposite of intractable. No special hardware needed. Path computation is emphatically *not* the hard part — that framing is the mistake the lesson corrects."},
+    2:{correct:"Roughly three 1,970 km along-track hops plus the inter-plane hops to shift longitude, ~18.6 ms propagation + ~1.5 ms processing. The mesh routes an L1 grid distance, close to but not exactly the great circle.",wrong:"One hop cannot span 5,570 km within the 5,000 km ISL limit. Hundreds of hops would be absurd for this distance. The +grid offers only along/cross-track moves — a Manhattan route, not a great circle."},
+    3:{correct:"Regeneration (demodulate, read header, retransmit) costs a fraction of a ms per hop. Small per hop, real in aggregate — it trades against propagation and biases the router toward longer hops, a genuine metric-design consideration.",wrong:"Propagation dominates on long routes; processing is the secondary term. It is not zero (regeneration takes time). It affects latency directly, not only congestion."},
+    4:{correct:"OSPF's convergence (seconds) assumes rare changes. Continuous churn turns its flooding into perpetual overhead that never settles — the reactive loop is slower than the change rate. The protocol is fine; the environment is wrong for it.",wrong:"OSPF computes shortest paths fine — that is not the failure. It would use *too much* bandwidth (endless flooding). Optical vs RF is irrelevant to the routing protocol."},
+    5:{correct:"BGP's MRAI timers deliberately slow it to prevent instability, so it converges in tens of seconds to minutes. Against a topology reconfiguring every second it would still be processing one handoff when many more had occurred. Its damping, a virtue on the internet, is fatal here.",wrong:"BGP is *slower* than OSPF, not faster. Its timers make it react slowly by design. It was built for the stable inter-domain internet, the opposite of a moving mesh."},
+    6:{correct:"The mismatch is conceptual, not implementational: you cannot react your way through a continuous known process. The convergence time exceeds the inter-change time by 10–100×, and that gap is structural. The escape is to stop reacting and start scheduling (§4).",wrong:"The protocols are not buggy — they work perfectly on their intended networks. Satellite speed matters only through the churn rate it causes. Age is irrelevant; a newer reactive protocol would fail identically."},
+    7:{correct:"Known topology + known future = precompute everything. Routing becomes \"given graphs G(t₀), G(t₁), …, precompute each snapshot's tables and switch on schedule\" — proactive, not reactive. The churn that breaks reactive protocols is harmless to a proactive one that was never surprised.",wrong:"Determinism does not slow, eliminate, or freeze the churn — the graph still changes constantly. It makes the change *predictable*, which is entirely different and is the whole point."},
+    8:{correct:"The interval balances path quality (shorter is truer to the moving topology) against control-plane load (longer means fewer table updates). Seconds to tens of seconds, matched to the churn rate, with each table computed ahead from the ephemeris. It is the key tuning parameter.",wrong:"Longest-possible degrades paths. It is far shorter than the ~95 min orbit. No universal one-second value — it is a designed trade."},
+    9:{correct:"Geometry is knowable and scheduled; traffic is not and must be reacted to. Real systems layer fast local congestion rerouting on top of the slow global topology schedule — two timescales, two mechanisms. Geometry scheduled, traffic reacted-to.",wrong:"Congestion certainly happens under load. It is a traffic phenomenon, not hardware. The tables optimise the *geometry*; they cannot predict tomorrow's traffic surge."},
+    10:{correct:"Determinism covers geometric churn but not failures. The architecture inverts the internet's priority: proactive-first for the knowable common case, reactive-fallback for the unpredictable exceptions. Sizing that floor for the real failure rate is the central engineering judgement.",wrong:"Reaction is the *fallback*, not the primary — that inversion is the lesson. The schedule is reliable for geometry; it simply cannot cover failures. Proactive routing works and is the main mechanism."}
+};
+let answered={};
+document.querySelectorAll('.quiz-opt').forEach(btn=>{
+    btn.addEventListener('click',function(){
+        const q=this.dataset.q;
+        if(answered[q]!==undefined)return;
+        const correct=this.dataset.correct==='true';
+        answered[q]=correct;
+        document.querySelectorAll(`.quiz-opt[data-q="${q}"]`).forEach(b=>{b.disabled=true;if(b.dataset.correct==='true')b.classList.add('correct');});
+        if(!correct)this.classList.add('wrong');
+        const fb=document.getElementById('fb'+q);
+        fb.textContent=(correct?'✓ ':'✗ ')+feedbacks[q][correct?'correct':'wrong'];
+        fb.style.color=correct?'#39ff14':'#ff004f';
+        if(Object.keys(answered).length===10){
+            const total=Object.values(answered).filter(Boolean).length;
+            const sc=document.getElementById('quizScore');
+            sc.style.display='block';
+            const pct=Math.round(total/10*100);
+            sc.textContent=`SCORE: ${total}/10 (${pct}%) — ${pct===100?'PERFECT.':pct>=80?'STRONG.':pct>=60?'ADEQUATE. REVISIT WEAK SECTIONS.':'REVISIT THE LESSON BEFORE PROCEEDING.'}`;
+        }
+    });
+});
+</script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="supabase.js"></script>
+<script src="user_progress.js"></script>
+<script>
+const LESSON_ID='m7-4';
+(function(){
+    function bounceToLogin(r){console.error("Auth guard:",r);window.location.replace("index.html");}
+    async function init(){
+        if(typeof client==="undefined"||!client||!client.auth)return bounceToLogin("Supabase client not loaded");
+        let session=null;
+        try{({data:{session}}=await client.auth.getSession());}
+        catch(e){return bounceToLogin("getSession threw: "+e.message);}
+        if(!session){window.location.replace("index.html");return;}
+        const btn=document.getElementById('completeBtn'),msg=document.getElementById('completeMsg');
+        function setDone(done){
+            if(done){btn.textContent='✓ COMPLETE — CLICK TO UNDO';btn.classList.add('done');btn.style.cssText='border-color:#39ff14;color:#39ff14;background:rgba(57,255,20,0.1);cursor:pointer;opacity:1;';msg.style.color='#39ff14';msg.textContent='Lesson marked complete. Click again to undo.';}
+            else{btn.textContent='MARK LESSON COMPLETE';btn.classList.remove('done');btn.style.cssText='';msg.style.color='#ffffff55';msg.textContent='Not yet marked complete.';}
+        }
+        let mastered=[];
+        try{mastered=await getMasteredSections();}catch(e){console.error(e);}
+        setDone(mastered.includes(LESSON_ID));
+        btn.addEventListener('click',async()=>{
+            const isDone=btn.classList.contains('done');
+            msg.style.color='#00d9ff';msg.textContent='Saving...';
+            const ok=await upsertSection(LESSON_ID,!isDone);
+            if(ok){setDone(!isDone);}else{msg.style.color='#ff004f';msg.textContent='Error saving. Try again.';}
+        });
+        const btt=document.getElementById('backToTop');
+        window.addEventListener('scroll',()=>{btt.classList.toggle('visible',window.scrollY>400);});
+        btt.addEventListener('click',()=>window.scrollTo({top:0,behavior:'smooth'}));
+    }
+    if(document.readyState==="loading")document.addEventListener("DOMContentLoaded",init);
+    else init();
+})();
+</script>
+</body>
+</html>
