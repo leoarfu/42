@@ -1,0 +1,636 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, shrink-to-fit=no">
+<title>M7-3 — The ISL Topology &amp; Its Dynamics · LEOAF</title>
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;600;800&family=Share+Tech+Mono&family=Libre+Baskerville:ital,wght@0,400;0,700;1,400&display=swap" rel="stylesheet">
+<link rel="icon" href="favicon.ico" sizes="any" type="image/x-icon">
+<link rel="manifest" href="site.webmanifest">
+<meta name="theme-color" content="#0f0f0f">
+<script>
+window.leoafAbort = async function () {
+    function go() { window.location.replace("index.html?signedout=1"); }
+    try { if (typeof client !== "undefined" && client && client.auth && client.auth.signOut) { try { await client.auth.signOut({ scope: "local" }); } catch (e) {} } } catch (e) {}
+    go();
+};
+</script>
+<style>
+* { box-sizing:border-box; margin:0; padding:0; }
+html { height:100%; -webkit-text-size-adjust:100%; overflow-x:hidden; }
+body { font-family:'Share Tech Mono',monospace; background:#000; color:white; overflow-x:hidden; min-height:100vh; }
+#starsCanvas { position:fixed; inset:0; z-index:-1; }
+header { background:#000; border-bottom:1px solid #ff004f33; position:sticky; top:0; z-index:100; padding:1rem clamp(1.5rem,5vw,4rem); display:flex; justify-content:space-between; align-items:center; }
+.logo { font-family:'Orbitron',sans-serif; font-weight:800; font-size:clamp(16px,2vw,22px); letter-spacing:3px; text-decoration:none; }
+.logo span:first-child { color:white; } .logo span:last-child { color:#ff004f; }
+.nav-right { display:flex; align-items:center; gap:10px; }
+.nav-btn { background:transparent; border:1px solid #ff004f44; color:#ff004f; padding:6px 14px; cursor:pointer; transition:0.3s; font-size:11px; font-family:'Orbitron',sans-serif; letter-spacing:1px; text-decoration:none; display:inline-block; }
+.nav-btn:hover { background:#ff004f; color:black; }
+.breadcrumb { padding:14px clamp(1.5rem,5vw,4rem); font-size:11px; color:#ffffff44; letter-spacing:1px; position:relative; z-index:1; }
+.breadcrumb a { color:#00d9ff66; text-decoration:none; } .breadcrumb a:hover { color:#00d9ff; }
+.breadcrumb span { margin:0 8px; }
+.lesson-wrap { max-width:820px; margin:0 auto; padding:0 clamp(1.5rem,5vw,4rem) 80px; position:relative; z-index:1; }
+.lesson-header { padding:30px 0 28px; border-bottom:1px solid #ffffff11; margin-bottom:36px; }
+.lesson-tag { font-family:'Orbitron',sans-serif; font-size:10px; color:#ff004f; letter-spacing:3px; margin-bottom:10px; }
+.lesson-header h1 { font-family:'Orbitron',sans-serif; font-size:clamp(20px,3.5vw,32px); font-weight:800; line-height:1.2; margin-bottom:12px; }
+.lesson-meta { display:flex; gap:10px; flex-wrap:wrap; margin-bottom:16px; }
+.l-pill { font-family:'Orbitron',sans-serif; font-size:10px; padding:3px 10px; border:1px solid; letter-spacing:1px; }
+.l-pill-q { color:#ff004f; border-color:#ff004f44; } .l-pill-t { color:#39ff14; border-color:#39ff1444; }
+.l-pill-c { color:#ffaa00; border-color:#ffaa0044; }
+.lesson-intro { font-size:13px; line-height:1.85; opacity:0.75; }
+.toc { background:rgba(0,217,255,0.06); border:1px solid #00d9ff33; padding:24px 28px; margin:30px 0; }
+.toc h4 { font-family:'Orbitron',sans-serif; font-size:10px; color:#00d9ff; letter-spacing:2px; margin-bottom:16px; }
+.toc ol { padding-left:20px; } .toc li { font-size:13px; line-height:2.1; }
+.toc li a { color:#00d9ffbb; text-decoration:none; transition:0.15s; } .toc li a:hover { color:#fff; padding-left:4px; }
+.toc li::marker { color:#ff004f; font-family:'Orbitron',sans-serif; font-size:10px; }
+.cb { background:#f5f2ec; color:#1a1a1a; padding:36px clamp(24px,4vw,48px); margin-bottom:24px; border-left:4px solid #00d9ff; position:relative; z-index:1; }
+.cb h2 { font-family:'Orbitron',sans-serif; font-size:13px; color:#003d66; letter-spacing:2px; text-transform:uppercase; margin-bottom:20px; padding-bottom:10px; border-bottom:2px solid #00d9ff66; scroll-margin-top:80px; }
+.cb h3 { font-family:'Orbitron',sans-serif; font-size:11px; color:#444; letter-spacing:1.5px; text-transform:uppercase; margin:28px 0 12px; }
+.cb p { font-family:'Libre Baskerville',Georgia,serif; font-size:15px; line-height:1.9; color:#1a1a1a; margin-bottom:16px; }
+.cb ul { padding-left:0; margin-bottom:16px; }
+.cb ul li { font-family:'Libre Baskerville',Georgia,serif; font-size:14px; line-height:1.85; color:#1a1a1a; padding-left:20px; position:relative; margin-bottom:8px; }
+.cb ul li::before { content:'›'; position:absolute; left:0; color:#0077aa; }
+.cb blockquote { border-left:3px solid #1a7a1a; background:#eafaea; padding:14px 20px; margin:18px 0; font-size:13px; font-family:'Share Tech Mono',monospace; color:#0a3d0a; line-height:1.8; }
+.callout { border-left:3px solid #0088cc; background:#e8f4fb; padding:16px 20px; margin:22px 0; font-size:12px; line-height:1.8; color:#1a1a1a; }
+.callout.red { border-left-color:#cc0033; background:#fdecea; }
+.callout.green { border-left-color:#1a7a1a; background:#eafaea; }
+.callout.amber { border-left-color:#996600; background:#fef9ec; }
+.callout strong { font-family:'Orbitron',sans-serif; font-size:10px; letter-spacing:1px; display:block; margin-bottom:8px; }
+.compare-table { width:100%; border-collapse:collapse; margin:22px 0; font-size:12px; }
+.compare-table th { font-family:'Orbitron',sans-serif; font-size:10px; letter-spacing:1px; color:#003d66; padding:10px 12px; border-bottom:2px solid #00d9ff66; text-align:left; }
+.compare-table td { padding:10px 12px; border-bottom:1px solid #ddd; line-height:1.5; color:#1a1a1a; vertical-align:top; }
+.compare-table tr:hover td { background:#f0f0f0; }
+.key-numbers { display:grid; grid-template-columns:repeat(auto-fit,minmax(140px,1fr)); gap:12px; margin:22px 0; }
+.kn-item { background:#fff; border:1px solid #d0d0d0; padding:16px 12px; text-align:center; }
+.kn-val { font-family:'Orbitron',sans-serif; font-size:clamp(13px,1.8vw,18px); font-weight:800; color:#003d66; display:block; }
+.kn-label { font-size:10px; color:#555; letter-spacing:1px; margin-top:5px; display:block; line-height:1.4; }
+.quiz-block { background:rgba(17,17,17,0.9); border:1px solid #ff004f33; padding:28px; margin:48px 0 32px; }
+.quiz-block h2 { font-family:'Orbitron',sans-serif; font-size:13px; color:#ff004f; letter-spacing:2px; margin-bottom:6px; }
+.quiz-intro { font-size:12px; opacity:0.6; margin-bottom:24px; padding-bottom:16px; border-bottom:1px solid #ff004f22; line-height:1.6; }
+.quiz-q { margin-bottom:28px; }
+.quiz-q p { font-size:13px; opacity:0.9; margin-bottom:12px; line-height:1.65; }
+.quiz-q p strong { color:#00d9ff; }
+.quiz-options { display:flex; flex-direction:column; gap:8px; }
+.quiz-opt { background:rgba(255,255,255,0.03); border:1px solid #ffffff1a; padding:11px 16px; cursor:pointer; font-size:12px; font-family:'Share Tech Mono',monospace; transition:0.2s; text-align:left; color:white; line-height:1.5; }
+.quiz-opt:hover:not(:disabled) { background:rgba(0,217,255,0.08); border-color:#00d9ff44; }
+.quiz-opt.correct { background:rgba(57,255,20,0.1); border-color:#39ff14; color:#39ff14; }
+.quiz-opt.wrong { background:rgba(255,0,79,0.1); border-color:#ff004f; color:#ff004f; }
+.quiz-opt:disabled { cursor:default; }
+.quiz-feedback { font-size:12px; margin-top:10px; min-height:18px; line-height:1.7; opacity:0.9; padding:0 4px; }
+.quiz-score { font-family:'Orbitron',sans-serif; font-size:12px; color:#39ff14; margin-top:20px; letter-spacing:1px; display:none; padding-top:16px; border-top:1px solid #39ff1433; }
+.py-block { background:rgba(10,10,10,0.95); border:1px solid #39ff1422; padding:28px; margin:32px 0; }
+.py-block h2 { font-family:'Orbitron',sans-serif; font-size:13px; color:#39ff14; letter-spacing:2px; margin-bottom:8px; }
+.py-block .py-intro { font-size:12px; opacity:0.7; margin-bottom:20px; padding-bottom:16px; border-bottom:1px solid #39ff1422; line-height:1.7; }
+.py-exercise { margin-bottom:32px; } .py-exercise:last-child { margin-bottom:0; }
+.py-exercise h3 { font-family:'Orbitron',sans-serif; font-size:11px; color:#39ff1499; letter-spacing:1.5px; text-transform:uppercase; margin-bottom:10px; }
+.py-exercise p { font-size:12px; opacity:0.8; margin-bottom:14px; line-height:1.75; }
+.py-block pre { background:#050505; border:1px solid #39ff1433; padding:20px; font-family:'Share Tech Mono',monospace; font-size:11px; line-height:1.7; overflow-x:auto; color:#39ff14; white-space:pre; margin-bottom:12px; }
+.py-note { background:rgba(57,255,20,0.04); border-left:2px solid #39ff14; padding:12px 16px; margin-top:14px; font-size:12px; line-height:1.75; opacity:0.8; }
+.py-note strong { font-family:'Orbitron',sans-serif; font-size:10px; color:#39ff14; display:block; margin-bottom:6px; letter-spacing:1px; }
+.reflection-block { background:rgba(255,170,0,0.04); border:1px solid #ffaa0033; padding:24px; margin:32px 0; }
+.reflection-block h2 { font-family:'Orbitron',sans-serif; font-size:13px; color:#ffaa00; letter-spacing:2px; margin-bottom:8px; }
+.ref-intro { font-size:12px; opacity:0.7; margin-bottom:20px; padding-bottom:14px; border-bottom:1px solid #ffaa0022; line-height:1.7; }
+.ref-prompt { margin-bottom:20px; }
+.ref-prompt h3 { font-family:'Orbitron',sans-serif; font-size:11px; color:#ffaa0099; letter-spacing:1px; margin-bottom:8px; }
+.ref-prompt p { font-size:12px; opacity:0.8; line-height:1.75; }
+.complete-wrap { margin-top:56px; padding-top:30px; border-top:1px solid #ffffff11; text-align:center; }
+.complete-btn { font-family:'Orbitron',sans-serif; font-size:13px; letter-spacing:2px; padding:14px 44px; background:transparent; border:1px solid #39ff14; color:#39ff14; cursor:pointer; transition:0.3s; }
+.complete-btn:hover:not(.done) { background:#39ff14; color:black; box-shadow:0 0 20px rgba(57,255,20,0.4); }
+.complete-btn.done { background:rgba(57,255,20,0.1); cursor:pointer; opacity:1; }
+.complete-msg { font-size:12px; color:#39ff14; margin-top:14px; min-height:18px; letter-spacing:1px; }
+.lesson-nav { display:flex; justify-content:space-between; margin-top:30px; flex-wrap:wrap; gap:10px; }
+.lesson-nav a { font-family:'Orbitron',sans-serif; font-size:11px; color:#00d9ff66; text-decoration:none; letter-spacing:1px; transition:0.2s; }
+.lesson-nav a:hover { color:#00d9ff; }
+.back-to-top { position:fixed; bottom:28px; right:28px; z-index:200; width:44px; height:44px; background:#000; border:1px solid #00d9ff55; color:#00d9ff; font-size:20px; cursor:pointer; display:flex; align-items:center; justify-content:center; opacity:0; pointer-events:none; transition:opacity 0.3s; }
+.back-to-top.visible { opacity:1; pointer-events:auto; } .back-to-top:hover { border-color:#00d9ff; }
+footer { text-align:center; padding:30px; opacity:0.3; font-size:11px; position:relative; z-index:1; letter-spacing:1px; }
+.module-complete { background:rgba(57,255,20,0.06); border:1px solid #39ff1444; padding:24px 28px; margin:40px 0; text-align:center; }
+.module-complete h3 { font-family:'Orbitron',sans-serif; font-size:14px; color:#39ff14; letter-spacing:2px; margin-bottom:10px; }
+.module-complete p { font-size:12px; opacity:0.8; line-height:1.7; }
+</style>
+</head>
+<body>
+<canvas id="starsCanvas"></canvas>
+<header>
+    <a href="dashboard.html" class="logo"><span>LEO</span><span>AF</span></a>
+    <div class="nav-right">
+        <a href="m7.html" class="nav-btn">← M7 HUB</a>
+        <button class="nav-btn" onclick="leoafAbort()">ABORT</button>
+    </div>
+</header>
+<div class="breadcrumb">
+    <a href="dashboard.html">DASHBOARD</a><span>/</span>
+    <a href="m7.html">M7</a><span>/</span>
+    <span style="color:#ffffff88;">LESSON 03 — ISL TOPOLOGY &amp; DYNAMICS</span>
+</div>
+
+<div class="lesson-wrap">
+<div class="lesson-header">
+    <div class="lesson-tag">M7 · LESSON 03 OF 7</div>
+    <h1>The ISL Topology<br>&amp; Its Dynamics</h1>
+    <div class="lesson-meta">
+        <div class="l-pill l-pill-q">MODULE 7</div>
+        <div class="l-pill l-pill-t">NETWORKING, ISL &amp; ROUTING</div>
+        <div class="l-pill l-pill-c">CORE</div>
+    </div>
+    <p class="lesson-intro" style="margin-bottom:12px;">m7-2 gave every candidate link a budget and a point-ahead angle; this lesson assembles the links into a mesh and sets it in motion. The standard pattern is the <strong>+grid</strong>: each satellite carries four optical terminals — two pointing fore and aft along its own orbital plane, two pointing left and right to the neighbouring planes — weaving the constellation into a grid wrapped around the Earth. The intra-plane links are permanent and steady; the inter-plane links are the interesting ones, because they <em>change</em>: their range shrinks as the orbital planes converge toward the poles, and at one longitude — the <strong>seam</strong>, where ascending satellites pass counter-rotating descending ones — they break entirely, defeated not by distance but by a tracking rate no steering mirror can follow. The result is a topology that is regular, predictable, and constantly reconfiguring: the graph the router of m7-4 must traverse is never the same graph for long.</p>
+    <p class="lesson-intro" style="margin-bottom:12px;">The lesson's verified anchors, from a representative dense shell (1,584 satellites, 72 planes of 22, 53° inclination): intra-plane neighbours sit a fixed ~1,970 km apart; inter-plane neighbours in adjacent co-rotating planes sit a gentle ~600 km apart at the equator and converge toward the poles; and at the seam the relative velocity reaches ~12 km/s, sweeping the pointing direction through a 15 µrad beam's width every ~1.3 milliseconds — impossible to track, so the seam is a permanent tear in the mesh. The spine gains the time-varying graph built directly from the Module 2 propagator, and with it the property that will break every terrestrial routing protocol in m7-4: <strong>churn</strong>.</p>
+</div>
+
+<div class="toc">
+    <h4>CONTENTS</h4>
+    <ol>
+        <li><a href="#s1">The +grid pattern</a></li>
+        <li><a href="#s2">Intra-plane: the steady threads</a></li>
+        <li><a href="#s3">Inter-plane: the links that breathe</a></li>
+        <li><a href="#s4">The seam: where the mesh tears</a></li>
+        <li><a href="#s5">The polar region: convergence and shutdown</a></li>
+        <li><a href="#s6">Churn: the topology as a function of time</a></li>
+        <li><a href="#s7">Key facts</a></li>
+        <li><a href="#s8">What this lesson delivers to the design chain</a></li>
+        <li><a href="#quiz">Knowledge check</a></li>
+        <li><a href="#py">Python exercises</a></li>
+        <li><a href="#reflect">Reflection</a></li>
+    </ol>
+</div>
+
+<div class="cb" id="s1">
+    <h2>1. The +grid pattern</h2>
+<p>The canonical LEO mesh gives each satellite four ISL terminals in a plus-sign arrangement:</p>
+<ul>
+<li><strong>Two intra-plane links</strong> — to the satellite ahead and the satellite behind in the same orbital plane. These neighbours maintain a fixed spacing forever (they share an orbit), so these links are permanent, steady, and easy: constant range, gentle pointing.</li>
+<li><strong>Two inter-plane links</strong> — to the nearest satellite in the plane to the left and the plane to the right. These neighbours are in <em>different</em> orbits, so their relative geometry changes continuously as both satellites move.</li>
+</ul>
+<p>Woven across the whole constellation, this makes a grid: intra-plane links are the "vertical" threads running around each orbital ring, inter-plane links the "horizontal" threads tying adjacent rings together. A packet can travel along an orbit (intra-plane) or hop sideways across orbits (inter-plane), and the router's job (m7-4) is to choose the sequence. Four terminals is the standard because it builds a connected grid with a manageable terminal count; more terminals (linking to further planes, or diagonally) buy routing flexibility at linear hardware cost, and some designs use them.</p>
+</div>
+
+<div class="cb" id="s2">
+    <h2>2. Intra-plane: the steady threads</h2>
+<p>Satellites in one plane are evenly spaced around the orbit. For the representative shell, 22 satellites per plane sit 360/22 ≈ 16.4° apart, a fixed chord of:</p>
+<blockquote>range = 2·(R_e + h)·sin(θ/2) = 2·6,921·sin(8.2°) ≈ <strong>1,970 km</strong></blockquote>
+<p>This range never changes — the satellites share an orbit and maintain their phasing — so the intra-plane link is the mesh's reliable backbone: constant 1,970 km, constant ~262 dB FSPL (m7-2), a steady high-rate link that the router can always count on. Its pointing is gentle: the two satellites move together, their relative velocity nearly zero along the link, so the point-ahead angle is small and the tracking rate is low. Intra-plane links are, in the mesh, the thing that is always there. A packet can run "up" or "down" an orbital plane at full rate through as many satellites as it likes, and the only cost is propagation and per-hop processing.</p>
+</div>
+
+<div class="cb" id="s3">
+    <h2>3. Inter-plane: the links that breathe</h2>
+<p>The sideways threads are where the topology comes alive. Adjacent orbital planes are separated by their ascending-node spacing (360/72 = 5° for the representative shell), and the range between a satellite and its cross-plane neighbour depends on latitude, because <strong>the planes converge toward the poles</strong>. At the equator the planes are maximally spread; the verified inter-plane range there is ~600 km. As satellites climb toward their maximum latitude (= the inclination, 53°), the planes crowd together and the inter-plane range shrinks — to ~370 km at 52° latitude in the model:</p>
+<table class="compare-table">
+<thead><tr>
+<th>Latitude</th>
+<th>Inter-plane range</th>
+<th>vs equator</th>
+</tr></thead>
+<tbody>
+<tr><td>0° (equator)</td><td>~600 km</td><td>×1.00</td></tr>
+<tr><td>20°</td><td>~570 km</td><td>×0.94</td></tr>
+<tr><td>40°</td><td>~460 km</td><td>×0.77</td></tr>
+<tr><td>52° (near max)</td><td>~370 km</td><td>×0.62</td></tr>
+</tbody>
+</table>
+<p>The link therefore <em>breathes</em> over each orbit: the range oscillates, the FSPL with it, and — per m7-2's rate-vs-range law — the link's capacity rises as the neighbour draws near and falls as it recedes. The router sees inter-plane edges whose weights change continuously, and a path that was cheapest a minute ago may not be now. This breathing is smooth and predictable (it follows the deterministic ephemeris), which is exactly what m7-5's precomputation will exploit — but it is motion, and motion is churn.</p>
+</div>
+
+<div class="cb" id="s4">
+    <h2>4. The seam: where the mesh tears</h2>
+<p>The +grid has a defect that no amount of pointing skill can fix. In a Walker constellation the planes are all inclined the same way, so at most latitudes adjacent planes co-rotate — their satellites drift past each other slowly, and the inter-plane link tracks easily (relative velocity ~660 m/s in the model, gentle). But there is one longitude band — the <strong>seam</strong> — where an <em>ascending</em> satellite (climbing north) passes a satellite in the neighbouring plane that is <em>descending</em> (falling south). These two are counter-rotating, and their relative velocity is enormous:</p>
+<blockquote>v_seam ≈ 2·v·sin(i) = 2·7,589·sin(53°) ≈ <strong>12,100 m/s</strong></blockquote>
+<p>At that closing rate, the direction from one satellite to the other sweeps through space so fast that a 15 µrad optical beam would cross its own width every <strong>~1.3 milliseconds</strong>. No steering mirror, no ATP loop (m7-2 §5) can track a target moving that fast across the sky — the point-ahead angle also balloons (to ~80 µrad, five beamwidths), but it is the sweep <em>rate</em>, not the offset magnitude, that is fatal. So the inter-plane links across the seam are simply <strong>not made</strong>. The mesh has a permanent tear running pole to pole along the counter-rotating boundary, and traffic that needs to cross it must detour — over a pole, where the seam closes (the planes all converge and the ascending/descending distinction collapses), or the long way around. The seam is a fixed feature of the routing problem, and m7-4's paths must respect it.</p>
+</div>
+
+<div class="cb" id="s5">
+    <h2>5. The polar region: convergence and shutdown</h2>
+<p>Near the poles the geometry does two opposing things. The inter-plane ranges shrink to their minimum (§3) — the planes crowd together — which would make inter-plane links trivially easy. But the planes crowd <em>so</em> tightly that the cross-plane pointing geometry becomes degenerate: a satellite's left and right neighbours are nearly on top of each other and swapping sides, the relative bearings swing wildly, and above some latitude the inter-plane links are typically shut off rather than fought for. The intra-plane links continue unbothered (they don't care about latitude), so the mesh near the poles thins to mostly the orbital rings with sparse cross-links — a region of reduced connectivity that, combined with the seam's closure there, makes polar routing its own regime. For a constellation whose selling point includes polar coverage (m7-1), the thinning of the mesh exactly where the planes converge is a genuine constraint the routing layer inherits.</p>
+</div>
+
+<div class="cb" id="s6">
+    <h2>6. Churn: the topology as a function of time</h2>
+<p>Assemble the pieces and the mesh is in constant reconfiguration. Intra-plane links are permanent; inter-plane links breathe in range, hand off to new neighbours as satellites move, shut down near the poles, and never form across the seam. A satellite crosses the polar reconfiguration region twice per ~95-minute orbit, so from any one satellite's view the inter-plane topology is rearranging on a timescale of tens of minutes — and across the whole constellation, with thousands of satellites all moving, <em>some</em> link is changing state at essentially every instant. This is <strong>churn</strong>: the graph the router traverses is time-varying, and its rate of change is set by the orbital mechanics, not by traffic or failures.</p>
+<p>The crucial property — the one that separates this problem from the terrestrial internet — is that the churn is <strong>deterministic</strong>. Every link's state at every future instant is computable from the ephemeris (Module 2): the router knows, minutes or hours ahead, exactly when each inter-plane link will hand off, when it will cross the seam, when it will enter the polar shutdown. The topology is time-varying but not <em>uncertain</em>. Terrestrial networks discover their topology by probing and react to changes after they happen (m7-4's failing protocols); a constellation can <em>precompute</em> its entire future topology and route against it (m7-5's SDN). Churn is the problem; determinism is the escape.</p>
+</div>
+
+<div class="cb" id="s7">
+    <h2>7. Key facts</h2>
+<table class="compare-table">
+<thead><tr>
+<th>Fact</th>
+<th>Value</th>
+<th>Unit</th>
+<th>Source</th>
+</tr></thead>
+<tbody>
+<tr><td>+grid terminals per satellite</td><td>4 (2 intra + 2 inter-plane)</td><td>—</td><td>Standard mesh</td></tr>
+<tr><td>Representative shell</td><td>1,584 sats, 72×22, 53° inc</td><td>—</td><td>Model</td></tr>
+<tr><td>Intra-plane range</td><td>~1,970 (fixed)</td><td>km</td><td>Computed</td></tr>
+<tr><td>Inter-plane range at equator</td><td>~600</td><td>km</td><td>Computed</td></tr>
+<tr><td>Inter-plane range near 52° lat</td><td>~370</td><td>km</td><td>Computed</td></tr>
+<tr><td>Planes converge toward poles</td><td>range ×0.62 at 52°</td><td>—</td><td>Computed</td></tr>
+<tr><td>Seam relative velocity</td><td>~12,100 (2·v·sin i)</td><td>m/s</td><td>Computed</td></tr>
+<tr><td>Seam beam-crossing time</td><td>~1.3</td><td>ms</td><td>Computed</td></tr>
+<tr><td>Seam links</td><td>not made — untrackable sweep rate</td><td>—</td><td>§4</td></tr>
+<tr><td>Polar inter-plane links</td><td>typically shut off (degenerate geometry)</td><td>—</td><td>§5</td></tr>
+<tr><td>Orbital period</td><td>~95</td><td>min</td><td>Computed</td></tr>
+<tr><td>Churn</td><td>deterministic, ephemeris-computable</td><td>—</td><td>§6</td></tr>
+</tbody>
+</table>
+</div>
+
+<div class="cb" id="s8">
+    <h2>8. What this lesson delivers to the design chain</h2>
+<p>Stage 3 of the spine builds the <strong>time-varying graph</strong>: from the Module 2 propagator's satellite positions at any instant, it constructs the +grid — intra-plane edges (permanent, weighted by the fixed 1,970 km link), inter-plane edges (present where the range closes and the geometry is trackable, weighted by the breathing range and m7-2's rate-vs-range law), the seam left un-linked, the polar region thinned. Advance the clock and the graph reconfigures; the whole future sequence is computable. The router of m7-4 receives not a graph but a <em>movie</em> of graphs — and the fact that it is a movie with a known script is the single most important fact about routing a constellation.</p>
+<p>What this lesson leaves for m7-4 is the routing itself: given this churning-but-deterministic graph, find good paths, and do it in a way that survives the reconfiguration. Terrestrial shortest-path protocols assume a graph that holds still long enough to converge; this graph does not. The escape — precomputing paths from the known future topology — is m7-5's SDN, but m7-4 must first show <em>why</em> the terrestrial approach fails, and the answer is everything this lesson just built: a graph that changes deterministically every few seconds.</p>
+</div>
+
+<div class="quiz-block" id="quiz">
+    <h2>KNOWLEDGE CHECK</h2>
+    <div class="quiz-intro">Ten questions. Each option explains itself after you commit. No retries per question — decide first.</div>
+    <div class="quiz-q">
+        <p><strong>Q1.</strong> The +grid gives each satellite four ISL terminals arranged as:</p>
+        <div class="quiz-options">
+            <button class="quiz-opt" data-q="1" data-correct="false">A — Four links all to the same neighbouring plane</button>
+            <button class="quiz-opt" data-q="1" data-correct="true">B — Two intra-plane (fore and aft in the same orbit) and two inter-plane (to the left and right neighbouring planes)</button>
+            <button class="quiz-opt" data-q="1" data-correct="false">C — Four downlinks to the ground</button>
+            <button class="quiz-opt" data-q="1" data-correct="false">D — Two lasers and two radios</button>
+        </div>
+        <div class="quiz-feedback" id="fb1"></div>
+    </div>
+    <div class="quiz-q">
+        <p><strong>Q2.</strong> Intra-plane links are the mesh's reliable backbone because:</p>
+        <div class="quiz-options">
+            <button class="quiz-opt" data-q="2" data-correct="false">A — They use more power</button>
+            <button class="quiz-opt" data-q="2" data-correct="true">B — Satellites sharing an orbit keep a fixed ~1,970 km spacing forever — constant range, constant FSPL, gentle pointing — so the link is always there at steady rate</button>
+            <button class="quiz-opt" data-q="2" data-correct="false">C — They point at the ground</button>
+            <button class="quiz-opt" data-q="2" data-correct="false">D — They break near the poles</button>
+        </div>
+        <div class="quiz-feedback" id="fb2"></div>
+    </div>
+    <div class="quiz-q">
+        <p><strong>Q3.</strong> Inter-plane link range shrinks toward the poles because:</p>
+        <div class="quiz-options">
+            <button class="quiz-opt" data-q="3" data-correct="false">A — The satellites slow down</button>
+            <button class="quiz-opt" data-q="3" data-correct="true">B — The orbital planes converge toward the poles — maximally spread at the equator, crowding together as satellites climb to their maximum latitude</button>
+            <button class="quiz-opt" data-q="3" data-correct="false">C — The Earth is closer at the poles</button>
+            <button class="quiz-opt" data-q="3" data-correct="false">D — The atmosphere thins</button>
+        </div>
+        <div class="quiz-feedback" id="fb3"></div>
+    </div>
+    <div class="quiz-q">
+        <p><strong>Q4.</strong> The seam is the longitude band where:</p>
+        <div class="quiz-options">
+            <button class="quiz-opt" data-q="4" data-correct="false">A — Two planes have identical satellites</button>
+            <button class="quiz-opt" data-q="4" data-correct="true">B — Ascending satellites pass counter-rotating descending ones, giving a ~12,100 m/s relative velocity that sweeps the pointing direction faster than any steering mirror can track</button>
+            <button class="quiz-opt" data-q="4" data-correct="false">C — The ground stations are located</button>
+            <button class="quiz-opt" data-q="4" data-correct="false">D — Solar panels face the sun</button>
+        </div>
+        <div class="quiz-feedback" id="fb4"></div>
+    </div>
+    <div class="quiz-q">
+        <p><strong>Q5.</strong> Seam links fail because of:</p>
+        <div class="quiz-options">
+            <button class="quiz-opt" data-q="5" data-correct="false">A — The point-ahead angle being too large</button>
+            <button class="quiz-opt" data-q="5" data-correct="true">B — The angular sweep <em>rate</em> — the pointing direction moves through a beamwidth every ~1.3 ms — which no ATP loop can follow, even though the ~80 µrad point-ahead is itself trackable</button>
+            <button class="quiz-opt" data-q="5" data-correct="false">C — Insufficient laser power</button>
+            <button class="quiz-opt" data-q="5" data-correct="false">D — Spectrum interference</button>
+        </div>
+        <div class="quiz-feedback" id="fb5"></div>
+    </div>
+    <div class="quiz-q">
+        <p><strong>Q6.</strong> Near the poles, inter-plane links are typically shut off because:</p>
+        <div class="quiz-options">
+            <button class="quiz-opt" data-q="6" data-correct="false">A — The range is too long</button>
+            <button class="quiz-opt" data-q="6" data-correct="true">B — The planes crowd so tightly that the cross-plane pointing geometry becomes degenerate — left and right neighbours nearly coincide and swap sides, bearings swing wildly</button>
+            <button class="quiz-opt" data-q="6" data-correct="false">C — The lasers freeze</button>
+            <button class="quiz-opt" data-q="6" data-correct="false">D — Regulation forbids polar links</button>
+        </div>
+        <div class="quiz-feedback" id="fb6"></div>
+    </div>
+    <div class="quiz-q">
+        <p><strong>Q7.</strong> Churn is the term for:</p>
+        <div class="quiz-options">
+            <button class="quiz-opt" data-q="7" data-correct="false">A — Traffic congestion in the mesh</button>
+            <button class="quiz-opt" data-q="7" data-correct="true">B — The topology's constant reconfiguration — inter-plane links breathing, handing off, shutting down at the poles, tearing at the seam — driven by orbital mechanics, not traffic or failures</button>
+            <button class="quiz-opt" data-q="7" data-correct="false">C — Satellite tumbling</button>
+            <button class="quiz-opt" data-q="7" data-correct="false">D — Battery cycling</button>
+        </div>
+        <div class="quiz-feedback" id="fb7"></div>
+    </div>
+    <div class="quiz-q">
+        <p><strong>Q8.</strong> The property that makes constellation churn tractable is that it is:</p>
+        <div class="quiz-options">
+            <button class="quiz-opt" data-q="8" data-correct="false">A — Slow</button>
+            <button class="quiz-opt" data-q="8" data-correct="true">B — Deterministic — every link's future state is computable from the ephemeris, so the topology is time-varying but not uncertain, and can be precomputed and routed against</button>
+            <button class="quiz-opt" data-q="8" data-correct="false">C — Rare</button>
+            <button class="quiz-opt" data-q="8" data-correct="false">D — Random</button>
+        </div>
+        <div class="quiz-feedback" id="fb8"></div>
+    </div>
+    <div class="quiz-q">
+        <p><strong>Q9.</strong> The intra-plane link's constant ~1,970 km range comes from:</p>
+        <div class="quiz-options">
+            <button class="quiz-opt" data-q="9" data-correct="false">A — A regulatory spacing requirement</button>
+            <button class="quiz-opt" data-q="9" data-correct="true">B — 22 satellites evenly spaced around one orbit sit 360/22 ≈ 16.4° apart, a fixed chord of 2·(R_e+h)·sin(8.2°)</button>
+            <button class="quiz-opt" data-q="9" data-correct="false">C — The maximum ISL range limit</button>
+            <button class="quiz-opt" data-q="9" data-correct="false">D — The seam geometry</button>
+        </div>
+        <div class="quiz-feedback" id="fb9"></div>
+    </div>
+    <div class="quiz-q">
+        <p><strong>Q10.</strong> Stage 3 hands the router "a movie of graphs" rather than a graph, meaning:</p>
+        <div class="quiz-options">
+            <button class="quiz-opt" data-q="10" data-correct="false">A — The graph is animated for display</button>
+            <button class="quiz-opt" data-q="10" data-correct="true">B — The topology is a computable time-sequence of graphs (the +grid reconfiguring), and because the script is known from the ephemeris, the router can plan against the future, not just the present</button>
+            <button class="quiz-opt" data-q="10" data-correct="false">C — The graph never changes</button>
+            <button class="quiz-opt" data-q="10" data-correct="false">D — Routing is impossible</button>
+        </div>
+        <div class="quiz-feedback" id="fb10"></div>
+    </div>
+    <div class="quiz-score" id="quizScore"></div>
+</div>
+
+<div class="py-block" id="py">
+    <h2>PYTHON EXERCISES</h2>
+    <div class="py-intro">Three exercises; the last extends the module spine project. Run them, then work the numbered follow-ups in the comments — the follow-ups are the exercise.</div>
+    <div class="py-exercise">
+        <h3>Exercise 1 — The +grid ranges</h3>
+        <p>Build the intra- and inter-plane link geometry from Walker parameters.</p>
+<pre>
+import math
+Re, h = 6371.0, 550.0
+Ra = Re + h
+
+def intra_plane_range(sats_per_plane):
+    sep = math.radians(360.0/sats_per_plane)
+    return 2*Ra*math.sin(sep/2)
+
+def inter_plane_range_equator(num_planes):
+    sep = math.radians(360.0/num_planes)
+    return 2*Ra*math.sin(sep/2)
+
+def inter_plane_range_at_lat(num_planes, lat_deg):
+    # planes converge ~ cos(lat) toward the poles (first-order model)
+    return inter_plane_range_equator(num_planes)*math.cos(math.radians(lat_deg))
+
+P, S = 72, 22
+print(f&quot;intra-plane range ({S}/plane): {intra_plane_range(S):.0f} km (FIXED)&quot;)
+print(f&quot;inter-plane range at equator ({P} planes): {inter_plane_range_equator(P):.0f} km&quot;)
+print(&quot;\ninter-plane range vs latitude:&quot;)
+for lat in [0, 20, 40, 52]:
+    print(f&quot;  {lat:&gt;2}°: {inter_plane_range_at_lat(P, lat):.0f} km&quot;)
+
+# 1. A sparser shell (24 planes × 66 sats) has the SAME total. Recompute
+#    both ranges. Which link type gets longer, and does either now
+#    exceed the 5,000 km ISL limit (m7-2)? State the design lesson.
+# 2. Feed each range into m7-2&#x27;s max_rate_gbps. Plot intra-plane rate
+#    (flat) vs inter-plane rate (breathing with latitude) over an orbit.
+# 3. The convergence model cos(lat) is first-order. At what latitude does
+#    the inter-plane range fall below the intra-plane range — i.e. where
+#    sideways hops become SHORTER than along-track hops?
+</pre>
+    </div>
+    <div class="py-exercise">
+        <h3>Exercise 2 — The seam and the tracking rate</h3>
+        <p>Show why the seam tears and the poles thin.</p>
+<pre>
+import math
+Re, h, C = 6371.0, 550.0, 299792458.0
+v = math.sqrt(398600.4/(Re+h))*1000   # m/s
+BEAM_URAD = 15.5
+
+def seam_rel_velocity(inc_deg):
+    return 2*v*math.sin(math.radians(inc_deg))
+
+def sweep_time_ms(rel_v_ms, range_km, beam_urad=BEAM_URAD):
+    rate_urad_s = rel_v_ms/(range_km*1e3)*1e6      # angular rate
+    return beam_urad/rate_urad_s*1000               # ms to cross a beamwidth
+
+for inc in [53, 70, 87]:
+    vs = seam_rel_velocity(inc)
+    t = sweep_time_ms(vs, 1000)
+    print(f&quot;inc {inc}°: seam rel-v {vs:.0f} m/s, beam-cross {t:.2f} ms&quot;
+          f&quot; -&gt; {&#x27;untrackable&#x27; if t &lt; 10 else &#x27;maybe&#x27;}&quot;)
+
+# co-rotating adjacent planes for comparison
+v_corotate = v*math.sin(math.radians(5))
+print(f&quot;\nco-rotating adjacent planes: rel-v ~{v_corotate:.0f} m/s&quot;
+      f&quot; -&gt; beam-cross {sweep_time_ms(v_corotate, 600):.0f} ms (gentle)&quot;)
+
+# 1. Find the sweep time an ATP loop CAN track (say it needs &gt;20 ms per
+#    beamwidth). At what relative velocity does a link become trackable?
+#    Where in the +grid do links sit relative to that threshold?
+# 2. The seam relative velocity scales with sin(inc). Compare a 53°
+#    shell against a 90° polar shell: is the seam worse or better for
+#    polar constellations, and what does that imply for their meshes?
+# 3. Point-ahead at the seam is ~80 µrad (trackable) but sweep rate is
+#    not. Write one sentence distinguishing the two failure modes, then
+#    state which one m7-2&#x27;s ISLBudget.link_ok already catches and which
+#    it misses. Fix it.
+</pre>
+    </div>
+    <div class="py-exercise">
+        <h3>Exercise 3 — Spine Stage 3: the time-varying graph</h3>
+        <p>The router receives its movie of graphs.</p>
+<pre>
+import math
+Re, h = 6371.0, 550.0
+Ra = Re + h
+
+# ═══════════════════════════════════════════════════════
+# M7 SPINE PROJECT — CONSTELLATION ROUTER
+# Stage 3: the time-varying +grid graph.
+#   Stage 1 (m7-1): bent-pipe/mesh topology switch.
+#   Stage 2 (m7-2): per-link budget &amp; point-ahead (does it close?).
+#   Stage 3: assemble links into the +grid, evolve it in time,
+#            leave the seam un-linked and the poles thinned.
+#   Next: m7-4 routes on this churning graph; m7-5 precomputes
+#         from its deterministic future.
+# ═══════════════════════════════════════════════════════
+
+class PlusGridTopology:
+    MAX_ISL_KM = 5000
+    SEAM_VELOCITY_LIMIT = 3000    # m/s: above this, untrackable (§4)
+    POLAR_LAT_CUTOFF = 70         # ° : inter-plane links off above this
+
+    def __init__(self, num_planes=72, sats_per_plane=22, inc_deg=53.0):
+        self.P, self.S, self.inc = num_planes, sats_per_plane, inc_deg
+        self.v = math.sqrt(398600.4/Ra)*1000
+        self.intra_km = 2*Ra*math.sin(math.radians(360/self.S)/2)
+        self.inter_eq_km = 2*Ra*math.sin(math.radians(360/self.P)/2)
+
+    def intra_edge(self):
+        &quot;&quot;&quot;Always present, fixed range.&quot;&quot;&quot;
+        return dict(present=True, range_km=self.intra_km, kind=&quot;intra&quot;)
+
+    def inter_edge(self, lat_deg, counter_rotating):
+        &quot;&quot;&quot;Present unless: over range limit, across seam, or polar.&quot;&quot;&quot;
+        rng = self.inter_eq_km*math.cos(math.radians(lat_deg))
+        if abs(lat_deg) &gt; self.POLAR_LAT_CUTOFF:
+            return dict(present=False, reason=&quot;polar shutdown&quot;)
+        if counter_rotating:
+            rel_v = 2*self.v*math.sin(math.radians(self.inc))
+            if rel_v &gt; self.SEAM_VELOCITY_LIMIT:
+                return dict(present=False, reason=&quot;seam (untrackable)&quot;)
+        if rng &gt; self.MAX_ISL_KM:
+            return dict(present=False, reason=&quot;out of range&quot;)
+        return dict(present=True, range_km=rng, kind=&quot;inter&quot;)
+
+    def snapshot(self, lat_deg):
+        &quot;&quot;&quot;The mesh&#x27;s local character at a given latitude band.&quot;&quot;&quot;
+        intra = self.intra_edge()
+        inter_co = self.inter_edge(lat_deg, counter_rotating=False)
+        inter_seam = self.inter_edge(lat_deg, counter_rotating=True)
+        return intra, inter_co, inter_seam
+
+topo = PlusGridTopology()
+print(f&quot;intra-plane: {topo.intra_km:.0f} km (always present)\n&quot;)
+print(f&quot;{&#x27;lat&#x27;:&gt;5} {&#x27;inter co-rot&#x27;:&gt;28} {&#x27;inter seam&#x27;:&gt;24}&quot;)
+for lat in [0, 30, 52, 75]:
+    _, co, seam = topo.snapshot(lat)
+    co_s = f&quot;{co[&#x27;range_km&#x27;]:.0f} km&quot; if co[&#x27;present&#x27;] else co[&#x27;reason&#x27;]
+    sm_s = &quot;present&quot; if seam[&#x27;present&#x27;] else seam[&#x27;reason&#x27;]
+    print(f&quot;{lat:&gt;4}° {co_s:&gt;28} {sm_s:&gt;24}&quot;)
+
+# ── the handoff ─────────────────────────────────────────
+# m7-4 walks this graph at each timestep. Because inter-plane edges
+# appear/vanish by latitude and seam/pole rules, the graph CHURNS —
+# but every change is computable ahead of time (deterministic), which
+# m7-5 exploits by precomputing the whole path table sequence.
+
+# 1. Wire in the m2 propagator: replace the latitude argument with a
+#    real satellite&#x27;s latitude over an orbit, and print the times at
+#    which each inter-plane link appears and vanishes. That schedule
+#    IS the churn m7-4 must handle.
+# 2. Count edges: for the full 1,584-sat grid, how many ISLs exist at
+#    the equator vs over a pole? The difference is the polar
+#    connectivity deficit (m7-1&#x27;s coverage promise, stress-tested).
+# 3. Add a `handoff_schedule()`: as a satellite moves, its cross-plane
+#    neighbour changes. List the handoff instants over one orbit —
+#    these are exactly the make-before-break events m6-5 handled for
+#    terminals, now BETWEEN satellites.
+</pre>
+    </div>
+</div>
+
+<div class="reflection-block" id="reflect">
+    <h2>REFLECTION</h2>
+    <div class="ref-intro">Four prompts. Each forces a decision — write the position down before moving on; the act of committing is the exercise.</div>
+    <div class="ref-prompt">
+        <h3>PROMPT 01</h3>
+        <p>Section 6's key claim is that constellation churn is deterministic, which m7-5 will exploit by precomputing paths. But determinism assumes the ephemeris is perfect and links behave as geometry predicts. Enumerate the ways reality breaks determinism — a satellite maneuvers for collision avoidance (Module 2's debris environment), an ISL terminal fails, a satellite is temporarily attitude-unstable — and for each, decide whether it degrades the precomputed topology gracefully or catastrophically. Conclude whether "deterministic churn" is a sound engineering foundation or an idealisation that needs a reactive fallback, and how large that fallback must be.</p>
+    </div>
+    <div class="ref-prompt">
+        <h3>PROMPT 02</h3>
+        <p>Section 4's seam is a permanent tear that traffic must detour around, and section 5's poles are thinned. A packet crossing the seam at mid-latitude must go the long way — over a pole or around the world. Estimate the latency penalty this imposes on a route that "wants" to cross the seam directly, using the m7-1 latency model, and identify which real city-pairs would suffer it. Then decide: is the seam a reason to add more ISL terminals (diagonal links that might bridge it), to accept the detour, or to place gateways so that seam-crossing traffic exits to fibre instead? Defend a choice.</p>
+    </div>
+    <div class="ref-prompt">
+        <h3>PROMPT 03</h3>
+        <p>Section 1 fixed the +grid at four terminals per satellite as "the standard," noting more terminals buy flexibility at linear cost. Work the trade at constellation scale: for a 1,584-satellite shell, each additional terminal per satellite is 1,584 optical terminals of mass, power, and cost (m7-2). What does a fifth and sixth terminal actually buy — seam-bridging, polar links, shorter paths, failure resilience — and is any of it worth 1,584 terminals? Frame the answer as the marginal-connectivity-per-terminal curve and identify where it flattens.</p>
+    </div>
+    <div class="ref-prompt">
+        <h3>PROMPT 04</h3>
+        <p>This lesson built its every number on one representative shell (72×22, 53°) and a first-order cos(latitude) convergence model, explicitly flagged as first-order. The topology conclusions — seam tears, poles thin, inter-plane links breathe — are qualitative and robust, but the specific ranges and the churn timing are model-dependent. Apply the load-bearing-assumption discipline from m6-5's reflection: which of this lesson's outputs does the router (m7-4) actually consume as a number rather than a shape, and for those, specify the exact Module 2 computation that would replace the first-order model before m7-4 depends on it. State whether the qualitative topology story survives that replacement.</p>
+    </div>
+</div>
+
+<div class="cb">
+    <h2>Sources</h2>
+<ul>
+<li>Walker, "Satellite constellations" (J. British Interplanetary Soc., 1984) — the Walker constellation geometry and plane structure.</li>
+<li>Wood, "Network Performance of Non-Geostationary Constellations" — +grid ISL topology, seam, and connectivity.</li>
+<li>Handley, "Delay is Not an Option" (HotNets, 2018) — LEO mesh topology and its dynamics for routing.</li>
+<li>Bhattacherjee &amp; Singla, "Network topology design at 27,000 km/hour" (CoNEXT, 2019) — ISL topology optimisation and churn.</li>
+<li>Module 2 — the orbital propagator and Walker geometry this lesson's graph is built from; Module 7 (m7-2) — the per-link budget and point-ahead that decide which edges are real.</li>
+</ul>
+</div>
+
+<div class="complete-wrap">
+    <button class="complete-btn" id="completeBtn">MARK LESSON COMPLETE</button>
+    <div class="complete-msg" id="completeMsg"></div>
+</div>
+<div class="lesson-nav">
+    <a href="m7-2.html">← LESSON 02 — OPTICAL ISL PHYSICS &amp; POINTING</a>
+    <a href="m7-4.html">LESSON 04 — ROUTING UNDER CHURN →</a>
+</div>
+</div>
+
+<button class="back-to-top" id="backToTop" title="Back to top">↑</button>
+<footer>© 2026 LEOAF · M7 · LESSON 03 OF 7</footer>
+<script>
+const canvas=document.getElementById('starsCanvas'),ctx=canvas.getContext('2d');
+let stars=[];
+function initStars(){stars=[];for(let i=0;i<180;i++)stars.push({x:Math.random()*canvas.width,y:Math.random()*canvas.height,size:Math.random()*1.5+0.4,speed:Math.random()*0.18+0.04,hue:Math.random()*360});}
+function resizeCanvas(){canvas.width=window.innerWidth;canvas.height=window.innerHeight;}
+resizeCanvas();initStars();window.addEventListener('resize',resizeCanvas);
+function animateStars(){ctx.clearRect(0,0,canvas.width,canvas.height);stars.forEach(s=>{s.y-=s.speed;if(s.y<0){s.y=canvas.height;s.x=Math.random()*canvas.width;}ctx.beginPath();ctx.fillStyle=`hsl(${s.hue},80%,80%)`;ctx.arc(s.x,s.y,s.size,0,Math.PI*2);ctx.fill();});requestAnimationFrame(animateStars);}
+animateStars();
+</script>
+<script>
+const feedbacks={
+    1:{correct:"The plus-sign: fore/aft threads run along each orbital ring, left/right threads tie adjacent rings together, weaving a grid around the Earth. Intra-plane links are steady; inter-plane links change with the geometry — the distinction that structures the whole lesson.",wrong:"The four are split across the two intra and two inter directions, not concentrated on one plane. They are inter-satellite (ISL), not ground downlinks. All four are optical (m7-2)."},
+    2:{correct:"Same orbit, same phasing, so the neighbours never move relative to each other along the link. That permanence makes intra-plane the thing the router can always count on — a packet runs up or down an orbital ring at full rate through as many hops as it likes.",wrong:"Power is common across ISLs. Intra-plane links are satellite-to-satellite, not ground-facing. It is the *inter*-plane links that break near the poles; intra-plane links are latitude-indifferent."},
+    3:{correct:"Adjacent planes are farthest apart at the equator and converge toward the poles by the geometry of inclined orbits; the model shows ~600 km at the equator falling to ~370 km near 52° latitude. The link \"breathes\" over each orbit, its capacity rising as the neighbour nears.",wrong:"Orbital speed is constant. The Earth's radius is essentially constant (poles are marginally closer to centre, irrelevant here). The atmosphere doesn't affect satellite-to-satellite range."},
+    4:{correct:"2·v·sin(i) ≈ 12.1 km/s at 53° inclination. A 15 µrad beam would cross its own width every ~1.3 ms at that rate — untrackable. The inter-plane links across the seam are simply not made, leaving a permanent tear pole to pole.",wrong:"The planes have distinct satellites; the seam is about their opposing motion. It is an orbital-geometry feature, unrelated to ground stations or solar pointing."},
+    5:{correct:"The point-ahead offset at the seam is large (~5 beamwidths) but constant offsets are trackable; the killer is the *rate of change* of the pointing direction at 12 km/s closing. The distinction matters: it is dynamics, not magnitude, that tears the seam.",wrong:"The point-ahead magnitude, while large, is not what defeats tracking — the sweep rate is. Power sets rate-vs-range, not trackability. Optical links have no spectrum interference."},
+    6:{correct:"The range is actually shortest near the poles, but the geometry is degenerate: neighbours converge and their relative bearings swing too fast, so the links are shut off rather than fought for. Combined with the seam closing there, polar routing runs mostly on the orbital rings.",wrong:"The range is at its *minimum* near the poles, not too long. Thermal issues are managed. Optical ISLs are unregulated."},
+    7:{correct:"With thousands of satellites all moving, some link is changing state at nearly every instant. The graph the router traverses is time-varying, and its rate of change is set by the orbits. This is the property that breaks terrestrial routing protocols (m7-4).",wrong:"Churn is topological change, not congestion (a traffic property) or attitude tumbling or power cycling."},
+    8:{correct:"Unlike the terrestrial internet, which discovers topology by probing and reacts after changes happen, a constellation knows its entire future topology from orbital mechanics. Churn is the problem; determinism is the escape — the basis for m7-5's precomputed SDN routing.",wrong:"The churn is fast (tens of minutes per satellite, continuous across the fleet) and constant, not rare or slow. It is the opposite of random — fully predictable."},
+    9:{correct:"Even spacing around the shared orbit gives a fixed angular separation and hence a fixed chord length — the range never changes because the satellites hold their phasing. This permanence is what makes intra-plane the steady backbone.",wrong:"No regulation sets it — the constellation design does. It is well inside the 5,000 km max range. The seam is an inter-plane phenomenon."},
+    10:{correct:"The propagator generates the graph at any instant; advancing the clock reconfigures it deterministically. The router receives the whole future sequence — a movie with a known script — which is the single most important fact about constellation routing and the foundation for precomputation (m7-5).",wrong:"\"Movie\" is literal about time-variation, not display. The graph changes constantly (that is churn). Routing is not only possible but *easier* for being predictable — the lesson's payoff."}
+};
+let answered={};
+document.querySelectorAll('.quiz-opt').forEach(btn=>{
+    btn.addEventListener('click',function(){
+        const q=this.dataset.q;
+        if(answered[q]!==undefined)return;
+        const correct=this.dataset.correct==='true';
+        answered[q]=correct;
+        document.querySelectorAll(`.quiz-opt[data-q="${q}"]`).forEach(b=>{b.disabled=true;if(b.dataset.correct==='true')b.classList.add('correct');});
+        if(!correct)this.classList.add('wrong');
+        const fb=document.getElementById('fb'+q);
+        fb.textContent=(correct?'✓ ':'✗ ')+feedbacks[q][correct?'correct':'wrong'];
+        fb.style.color=correct?'#39ff14':'#ff004f';
+        if(Object.keys(answered).length===10){
+            const total=Object.values(answered).filter(Boolean).length;
+            const sc=document.getElementById('quizScore');
+            sc.style.display='block';
+            const pct=Math.round(total/10*100);
+            sc.textContent=`SCORE: ${total}/10 (${pct}%) — ${pct===100?'PERFECT.':pct>=80?'STRONG.':pct>=60?'ADEQUATE. REVISIT WEAK SECTIONS.':'REVISIT THE LESSON BEFORE PROCEEDING.'}`;
+        }
+    });
+});
+</script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="supabase.js"></script>
+<script src="user_progress.js"></script>
+<script>
+const LESSON_ID='m7-3';
+(function(){
+    function bounceToLogin(r){console.error("Auth guard:",r);window.location.replace("index.html");}
+    async function init(){
+        if(typeof client==="undefined"||!client||!client.auth)return bounceToLogin("Supabase client not loaded");
+        let session=null;
+        try{({data:{session}}=await client.auth.getSession());}
+        catch(e){return bounceToLogin("getSession threw: "+e.message);}
+        if(!session){window.location.replace("index.html");return;}
+        const btn=document.getElementById('completeBtn'),msg=document.getElementById('completeMsg');
+        function setDone(done){
+            if(done){btn.textContent='✓ COMPLETE — CLICK TO UNDO';btn.classList.add('done');btn.style.cssText='border-color:#39ff14;color:#39ff14;background:rgba(57,255,20,0.1);cursor:pointer;opacity:1;';msg.style.color='#39ff14';msg.textContent='Lesson marked complete. Click again to undo.';}
+            else{btn.textContent='MARK LESSON COMPLETE';btn.classList.remove('done');btn.style.cssText='';msg.style.color='#ffffff55';msg.textContent='Not yet marked complete.';}
+        }
+        let mastered=[];
+        try{mastered=await getMasteredSections();}catch(e){console.error(e);}
+        setDone(mastered.includes(LESSON_ID));
+        btn.addEventListener('click',async()=>{
+            const isDone=btn.classList.contains('done');
+            msg.style.color='#00d9ff';msg.textContent='Saving...';
+            const ok=await upsertSection(LESSON_ID,!isDone);
+            if(ok){setDone(!isDone);}else{msg.style.color='#ff004f';msg.textContent='Error saving. Try again.';}
+        });
+        const btt=document.getElementById('backToTop');
+        window.addEventListener('scroll',()=>{btt.classList.toggle('visible',window.scrollY>400);});
+        btt.addEventListener('click',()=>window.scrollTo({top:0,behavior:'smooth'}));
+    }
+    if(document.readyState==="loading")document.addEventListener("DOMContentLoaded",init);
+    else init();
+})();
+</script>
+</body>
+</html>
