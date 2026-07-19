@@ -1,0 +1,349 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, shrink-to-fit=no">
+<title>M7 — Networking, ISL &amp; Routing · LEOAF</title>
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;600;800&family=Share+Tech+Mono&display=swap" rel="stylesheet">
+
+<!-- Favicons -->
+<link rel="icon" href="favicon.ico" sizes="any" type="image/x-icon">
+<link rel="icon" href="favicon.svg" type="image/svg+xml">
+<link rel="icon" type="image/png" sizes="96x96" href="favicon-96x96.png">
+<link rel="apple-touch-icon" sizes="180x180" href="apple-touch-icon.png">
+<link rel="manifest" href="site.webmanifest">
+<meta name="theme-color" content="#0f0f0f">
+
+<script>
+// Bulletproof ABORT: inline onclick calls this. Awaits a local-scope sign-out
+// (clears the stored token immediately), then leaves with the signedout flag so
+// index.html does not bounce straight back. Always redirects, even on failure.
+window.leoafAbort = async function () {
+    function go() { window.location.replace("index.html?signedout=1"); }
+    try {
+        if (typeof client !== "undefined" && client && client.auth && client.auth.signOut) {
+            try { await client.auth.signOut({ scope: "local" }); } catch (e) {}
+        }
+    } catch (e) {}
+    go();
+};
+</script>
+
+<style>
+* { box-sizing: border-box; margin:0; padding:0; }
+html { height:100%; -webkit-text-size-adjust:100%; overflow-x:hidden; }
+body {
+    font-family: 'Share Tech Mono', monospace;
+    background:#000; color:white;
+    overflow-x:hidden; position:relative; min-height:100vh;
+}
+#starsCanvas { position:fixed; inset:0; z-index:-1; }
+
+/* HEADER */
+header {
+    background:#000; border-bottom:1px solid #ff004f33;
+    position:sticky; top:0; z-index:100;
+    padding:1rem clamp(1.5rem,5vw,4rem);
+    display:flex; justify-content:space-between; align-items:center;
+    box-shadow:0 4px 16px #0008;
+}
+.logo { font-family:'Orbitron',sans-serif; font-weight:800; font-size:clamp(16px,2vw,22px); letter-spacing:3px; text-decoration:none; }
+.logo span:first-child { color:white; }
+.logo span:last-child { color:#ff004f; }
+.nav-right { display:flex; align-items:center; gap:12px; }
+.nav-btn {
+    background:transparent; border:1px solid #ff004f44; color:#ff004f;
+    padding:6px 14px; cursor:pointer; transition:0.3s ease;
+    font-size:11px; font-family:'Orbitron',sans-serif; letter-spacing:1px;
+    text-decoration:none; display:inline-block;
+}
+.nav-btn:hover { background:#ff004f; color:black; }
+
+/* BREADCRUMB */
+.breadcrumb {
+    padding: 14px clamp(1.5rem,5vw,4rem);
+    font-size:11px; color:#ffffff44; letter-spacing:1px;
+    position:relative; z-index:1;
+}
+.breadcrumb a { color:#00d9ff66; text-decoration:none; }
+.breadcrumb a:hover { color:#00d9ff; }
+.breadcrumb span { margin:0 8px; }
+
+/* HERO */
+.q-hero {
+    padding: clamp(30px,5vw,60px) clamp(1.5rem,5vw,4rem) 30px;
+    position:relative; z-index:1;
+    max-width:960px; margin:0 auto;
+}
+.q-tag { font-family:'Orbitron',sans-serif; font-size:11px; color:#ff004f; letter-spacing:3px; margin-bottom:12px; }
+.q-hero h1 { font-family:'Orbitron',sans-serif; font-size:clamp(22px,4vw,36px); font-weight:800; margin-bottom:14px; line-height:1.2; }
+.q-hero p { font-size:13px; line-height:1.7; opacity:0.75; max-width:680px; margin-bottom:24px; }
+
+/* META ROW */
+.meta-row { display:flex; flex-wrap:wrap; gap:10px; margin-bottom:30px; }
+.meta-pill {
+    font-family:'Orbitron',sans-serif; font-size:10px; letter-spacing:1.5px;
+    padding:5px 12px; border:1px solid;
+}
+.pill-phase  { color:#00d9ff; border-color:#00d9ff44; }
+.pill-lessons { color:#ff004f; border-color:#ff004f44; }
+.pill-spine { color:#39ff14; border-color:#39ff1444; }
+
+/* PROGRESS BLOCK */
+.q-progress {
+    background:rgba(17,17,17,0.8); border:1px solid rgba(0,217,255,0.2);
+    padding:20px; margin-bottom:36px;
+    max-width:960px; margin-left:auto; margin-right:auto;
+    position:relative; z-index:1;
+    padding-left: clamp(1.5rem,5vw,4rem);
+    padding-right: clamp(1.5rem,5vw,4rem);
+}
+.progress-header { display:flex; justify-content:space-between; align-items:flex-end; margin-bottom:12px; }
+.progress-header h2 { font-family:'Orbitron',sans-serif; font-size:11px; color:#00d9ff; letter-spacing:2px; }
+.progress-pct { font-family:'Orbitron',sans-serif; font-size:13px; color:#39ff14; }
+.progress-track { width:100%; height:8px; background:rgba(255,255,255,0.08); }
+.progress-fill {
+    height:100%; width:0%;
+    background:linear-gradient(90deg,#00d9ff,#39ff14);
+    box-shadow:0 0 8px rgba(57,255,20,0.4);
+    transition:width 0.8s cubic-bezier(0.4,0,0.2,1);
+}
+
+/* LESSON LIST */
+.lesson-list {
+    max-width:960px; margin:0 auto 60px;
+    padding:0 clamp(1.5rem,5vw,4rem);
+    position:relative; z-index:1;
+    display:flex; flex-direction:column; gap:8px;
+}
+.lesson-card {
+    display:flex; align-items:center; gap:16px;
+    background:rgba(255,255,255,0.03); border-left:3px solid #ff004f;
+    padding:16px 18px; text-decoration:none; color:white;
+    transition:0.3s ease;
+}
+.lesson-card:hover { background:rgba(0,217,255,0.08); transform:translateX(4px); border-left-color:#00d9ff; }
+.lesson-card.completed { border-left-color:#39ff14; background:rgba(57,255,20,0.04); }
+
+.lesson-num {
+    font-family:'Orbitron',sans-serif; font-size:11px; color:#ff004f;
+    min-width:32px; opacity:0.7;
+}
+.lesson-card.completed .lesson-num { color:#39ff14; }
+
+.lesson-body { flex:1; }
+.lesson-body h3 {
+    font-family:'Orbitron',sans-serif; font-size:12px; letter-spacing:1px;
+    text-transform:uppercase; margin-bottom:5px; color:#fff;
+}
+.lesson-card.completed .lesson-body h3 { color:#39ff14; text-decoration:line-through; }
+.lesson-body p { font-size:11px; color:#888; line-height:1.5; }
+
+.lesson-right { display:flex; flex-direction:column; align-items:flex-end; gap:6px; }
+.check-icon { font-size:18px; opacity:0; transition:0.3s; color:#39ff14; }
+.lesson-card.completed .check-icon { opacity:1; }
+
+/* SECTION DIVIDERS */
+.section-label {
+    font-family:'Orbitron',sans-serif; font-size:10px; color:#ffffff33;
+    letter-spacing:3px; text-transform:uppercase;
+    padding:20px 0 8px; border-bottom:1px solid #ffffff11; margin-bottom:4px;
+}
+
+/* FOOTER */
+footer { text-align:center; padding:30px; opacity:0.3; font-size:11px; position:relative; z-index:1; letter-spacing:1px; }
+</style>
+
+</head>
+<body>
+
+<canvas id="starsCanvas"></canvas>
+
+<header>
+    <a href="dashboard.html" class="logo"><span>LEO</span><span>AF</span></a>
+    <div class="nav-right">
+        <a href="dashboard.html" class="nav-btn">← DASHBOARD</a>
+        <button class="nav-btn" onclick="leoafAbort()">ABORT</button>
+    </div>
+</header>
+
+<div class="breadcrumb">
+    <a href="dashboard.html">DASHBOARD</a>
+    <span>/</span>
+    <span style="color:#ffffff88;">M7 — NETWORKING, ISL &amp; ROUTING</span>
+</div>
+
+<div class="q-hero">
+    <div class="q-tag">MODULE 7 · PHASE 2 · ENGINEERING THE SYSTEM</div>
+    <h1>Networking, ISL<br>&amp; Routing</h1>
+    <p>Module 6 delivered a solved terminal that earns bits from whatever satellite serves it. This module turns the constellation from a set of links into a network. It opens with the architecture decision — bent-pipe relay versus ISL-meshed router — then builds the optical inter-satellite links that make a mesh possible (a 270 dB link budget and a beam that must aim three beamwidths into empty space), the +grid topology and its churn, routing on a graph that reconfigures every few seconds, the SDN control plane that exploits the deterministic ephemeris, and the end-to-end latency the transport layer must survive. The spine is a Python constellation router that traces a message terminal-to-terminal across the scheduled mesh. The finding: the mesh beats fibre on every long-haul route and is the only architecture that can serve an ocean — and those are the same routes.</p>
+    <div class="meta-row">
+        <div class="meta-pill pill-phase">PHASE 2 · ENGINEERING THE SYSTEM</div>
+        <div class="meta-pill pill-lessons">7 LESSONS</div>
+        <div class="meta-pill pill-spine">SPINE: CONSTELLATION ROUTER</div>
+    </div>
+</div>
+
+<div class="q-progress">
+    <div class="progress-header">
+        <h2>M7 PROGRESS</h2>
+        <span class="progress-pct" id="progressPct">0 / 7 COMPLETE</span>
+    </div>
+    <div class="progress-track">
+        <div class="progress-fill" id="progressFill"></div>
+    </div>
+</div>
+
+<div class="lesson-list">
+
+    <!-- PART -->
+    <div class="section-label">Part I — The Topology</div>
+
+    <a href="m7-1.html" class="lesson-card" data-id="m7-1">
+        <div class="lesson-num">01</div>
+        <div class="lesson-body">
+            <h3>Bent-Pipe vs Mesh: The Architecture Decision</h3>
+            <p>The decision that determines whether a constellation is a network at all. Amplify-and-forward relay versus ISL-meshed router, the ~2,605 km bent-pipe reach that leaves oceans dark, the LEO-vs-fibre latency crossover, and the cost inversion between ground segment and orbital hardware.</p>
+        </div>
+        <div class="lesson-right"><div class="check-icon">✓</div></div>
+    </a>
+
+    <a href="m7-2.html" class="lesson-card" data-id="m7-2">
+        <div class="lesson-num">02</div>
+        <div class="lesson-body">
+            <h3>Optical Inter-Satellite Links: Physics & Pointing</h3>
+            <p>The laser link budget as the Module 4 budget at 270 dB of loss and 106 dBi of gain, closing 10 Gbps at 1 dB margin. Then the pointing problem with no analogue in the program: a 15 µrad beam that must aim ~50 µrad — three beamwidths — into apparent empty space where the receiver will be.</p>
+        </div>
+        <div class="lesson-right"><div class="check-icon">✓</div></div>
+    </a>
+
+    <a href="m7-3.html" class="lesson-card" data-id="m7-3">
+        <div class="lesson-num">03</div>
+        <div class="lesson-body">
+            <h3>The ISL Topology & Its Dynamics</h3>
+            <p>The +grid assembled: two permanent intra-plane links, two inter-plane links that breathe with latitude as the planes converge. The seam where counter-rotating planes tear the mesh (12 km/s, untrackable), the polar thinning, and the churn — deterministic, ephemeris-computable, and about to break every terrestrial protocol.</p>
+        </div>
+        <div class="lesson-right"><div class="check-icon">✓</div></div>
+    </a>
+
+    <!-- PART -->
+    <div class="section-label">Part II — Routing the Network</div>
+
+    <a href="m7-4.html" class="lesson-card" data-id="m7-4">
+        <div class="lesson-num">04</div>
+        <div class="lesson-body">
+            <h3>Routing Under Churn</h3>
+            <p>Computing a path is trivial; the graph has already changed by the time BGP would converge. Why reactive protocols fail by a category mismatch against continuous deterministic change — and the escape: stop reacting, start scheduling. Snapshot routing, and the reactive floor beneath it for the unscheduled failures.</p>
+        </div>
+        <div class="lesson-right"><div class="check-icon">✓</div></div>
+    </a>
+
+    <a href="m7-5.html" class="lesson-card" data-id="m7-5">
+        <div class="lesson-num">05</div>
+        <div class="lesson-body">
+            <h3>SDN & Segment Routing in Space</h3>
+            <p>The control plane that delivers routes to 1,584 moving satellites. Why the deterministic topology deletes SDN's one weakness, why the control plane is small (3.4 MB, sub-kbps deltas), and segment routing that carries the path in the packet — the make-before-break table switch at network scale.</p>
+        </div>
+        <div class="lesson-right"><div class="check-icon">✓</div></div>
+    </a>
+
+    <!-- PART -->
+    <div class="section-label">Part III — The End-to-End Path</div>
+
+    <a href="m7-6.html" class="lesson-card" data-id="m7-6">
+        <div class="lesson-num">06</div>
+        <div class="lesson-body">
+            <h3>End-to-End Latency & the Transport Layer</h3>
+            <p>The full latency budget: 54 ms round-trip, nine times better than GEO, faster than fibre long-haul. Then the transport pathology — TCP mistakes handover loss for congestion and mis-sizes its window on every RTT step. QUIC, proxies, and constellation-aware congestion control. Latency is a distribution, not a number.</p>
+        </div>
+        <div class="lesson-right"><div class="check-icon">✓</div></div>
+    </a>
+
+    <a href="m7-7.html" class="lesson-card" data-id="m7-7">
+        <div class="lesson-num">07</div>
+        <div class="lesson-body">
+            <h3>Synthesis: The Routing & Latency Model</h3>
+            <p>The full constellation router assembled: a message traced terminal-to-terminal with its latency distribution, and the bent-pipe/mesh/fibre comparison for representative city-pairs. The capstone table where the coverage column and the latency column turn out to be literally the same column.</p>
+        </div>
+        <div class="lesson-right"><div class="check-icon">✓</div></div>
+    </a>
+
+</div>
+
+<footer>© 2026 LEOAF · MODULE 7 OF 12</footer>
+
+<!-- Stars -->
+<script>
+function setVH() { document.documentElement.style.setProperty('--vh', `${window.innerHeight * 0.01}px`); }
+setVH(); window.addEventListener('resize', setVH);
+const canvas = document.getElementById('starsCanvas');
+const ctx = canvas.getContext('2d');
+let stars = [];
+function initStars() { stars = []; for (let i=0;i<200;i++) stars.push({x:Math.random()*canvas.width,y:Math.random()*canvas.height,size:Math.random()*1.5+0.5,speed:Math.random()*0.2+0.05,hue:Math.random()*360}); }
+function resizeCanvas() { canvas.width=window.innerWidth; canvas.height=window.innerHeight; }
+resizeCanvas(); initStars(); window.addEventListener('resize', resizeCanvas);
+function animateStars() { ctx.clearRect(0,0,canvas.width,canvas.height); stars.forEach(s=>{s.y-=s.speed; if(s.y<0){s.y=canvas.height;s.x=Math.random()*canvas.width;} ctx.beginPath();ctx.fillStyle=`hsl(${s.hue},80%,80%)`;ctx.arc(s.x,s.y,s.size,0,Math.PI*2);ctx.fill();}); requestAnimationFrame(animateStars); }
+animateStars();
+</script>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="supabase.js"></script>
+<script src="user_progress.js"></script>
+
+<script>
+(function () {
+
+    function bounceToLogin(reason) {
+        console.error("Auth guard:", reason, "- redirecting to index.html");
+        window.location.replace("index.html");
+    }
+
+    async function init() {
+        // Fail CLOSED: if the session cannot be confirmed, leave the page.
+        if (typeof client === "undefined" || !client || !client.auth) {
+            return bounceToLogin("Supabase client not loaded (is supabase.js in this directory?)");
+        }
+
+        let session = null;
+        try {
+            ({ data: { session } } = await client.auth.getSession());
+        } catch (e) {
+            return bounceToLogin("getSession threw: " + e.message);
+        }
+        if (!session) { window.location.replace("index.html"); return; }
+
+        // Progress is derived from this module's own lesson keys (m7-1 … m7-7).
+        const cards = document.querySelectorAll(".lesson-card");
+        const total = cards.length;
+        let done = 0;
+
+        let mastered = [];
+        try {
+            mastered = await getMasteredSections();
+        } catch (e) {
+            console.error("getMasteredSections failed:", e);
+        }
+
+        cards.forEach(card => {
+            if (mastered.includes(card.dataset.id)) {
+                card.classList.add("completed");
+                done++;
+            }
+        });
+
+        const pct = total > 0 ? Math.round((done / total) * 100) : 0;
+        document.getElementById("progressFill").style.width = pct + "%";
+        document.getElementById("progressPct").textContent = `${done} / ${total} COMPLETE`;
+    }
+
+    if (document.readyState === "loading") {
+        document.addEventListener("DOMContentLoaded", init);
+    } else {
+        init();
+    }
+
+})();
+</script>
+
+</body>
+</html>
