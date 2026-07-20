@@ -1,0 +1,619 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, shrink-to-fit=no">
+<title>M8-3 — Gateway Placement &amp; the PoP Topology · LEOAF</title>
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;600;800&family=Share+Tech+Mono&family=Libre+Baskerville:ital,wght@0,400;0,700;1,400&display=swap" rel="stylesheet">
+<link rel="icon" href="favicon.ico" sizes="any" type="image/x-icon">
+<link rel="manifest" href="site.webmanifest">
+<meta name="theme-color" content="#0f0f0f">
+<script>
+window.leoafAbort = async function () {
+    function go() { window.location.replace("index.html?signedout=1"); }
+    try { if (typeof client !== "undefined" && client && client.auth && client.auth.signOut) { try { await client.auth.signOut({ scope: "local" }); } catch (e) {} } } catch (e) {}
+    go();
+};
+</script>
+<style>
+* { box-sizing:border-box; margin:0; padding:0; }
+html { height:100%; -webkit-text-size-adjust:100%; overflow-x:hidden; }
+body { font-family:'Share Tech Mono',monospace; background:#000; color:white; overflow-x:hidden; min-height:100vh; }
+#starsCanvas { position:fixed; inset:0; z-index:-1; }
+header { background:#000; border-bottom:1px solid #ff004f33; position:sticky; top:0; z-index:100; padding:1rem clamp(1.5rem,5vw,4rem); display:flex; justify-content:space-between; align-items:center; }
+.logo { font-family:'Orbitron',sans-serif; font-weight:800; font-size:clamp(16px,2vw,22px); letter-spacing:3px; text-decoration:none; }
+.logo span:first-child { color:white; } .logo span:last-child { color:#ff004f; }
+.nav-right { display:flex; align-items:center; gap:10px; }
+.nav-btn { background:transparent; border:1px solid #ff004f44; color:#ff004f; padding:6px 14px; cursor:pointer; transition:0.3s; font-size:11px; font-family:'Orbitron',sans-serif; letter-spacing:1px; text-decoration:none; display:inline-block; }
+.nav-btn:hover { background:#ff004f; color:black; }
+.breadcrumb { padding:14px clamp(1.5rem,5vw,4rem); font-size:11px; color:#ffffff44; letter-spacing:1px; position:relative; z-index:1; }
+.breadcrumb a { color:#00d9ff66; text-decoration:none; } .breadcrumb a:hover { color:#00d9ff; }
+.breadcrumb span { margin:0 8px; }
+.lesson-wrap { max-width:820px; margin:0 auto; padding:0 clamp(1.5rem,5vw,4rem) 80px; position:relative; z-index:1; }
+.lesson-header { padding:30px 0 28px; border-bottom:1px solid #ffffff11; margin-bottom:36px; }
+.lesson-tag { font-family:'Orbitron',sans-serif; font-size:10px; color:#ff004f; letter-spacing:3px; margin-bottom:10px; }
+.lesson-header h1 { font-family:'Orbitron',sans-serif; font-size:clamp(20px,3.5vw,32px); font-weight:800; line-height:1.2; margin-bottom:12px; }
+.lesson-meta { display:flex; gap:10px; flex-wrap:wrap; margin-bottom:16px; }
+.l-pill { font-family:'Orbitron',sans-serif; font-size:10px; padding:3px 10px; border:1px solid; letter-spacing:1px; }
+.l-pill-q { color:#ff004f; border-color:#ff004f44; } .l-pill-t { color:#39ff14; border-color:#39ff1444; }
+.l-pill-c { color:#ffaa00; border-color:#ffaa0044; }
+.lesson-intro { font-size:13px; line-height:1.85; opacity:0.75; }
+.toc { background:rgba(0,217,255,0.06); border:1px solid #00d9ff33; padding:24px 28px; margin:30px 0; }
+.toc h4 { font-family:'Orbitron',sans-serif; font-size:10px; color:#00d9ff; letter-spacing:2px; margin-bottom:16px; }
+.toc ol { padding-left:20px; } .toc li { font-size:13px; line-height:2.1; }
+.toc li a { color:#00d9ffbb; text-decoration:none; transition:0.15s; } .toc li a:hover { color:#fff; padding-left:4px; }
+.toc li::marker { color:#ff004f; font-family:'Orbitron',sans-serif; font-size:10px; }
+.cb { background:#f5f2ec; color:#1a1a1a; padding:36px clamp(24px,4vw,48px); margin-bottom:24px; border-left:4px solid #00d9ff; position:relative; z-index:1; }
+.cb h2 { font-family:'Orbitron',sans-serif; font-size:13px; color:#003d66; letter-spacing:2px; text-transform:uppercase; margin-bottom:20px; padding-bottom:10px; border-bottom:2px solid #00d9ff66; scroll-margin-top:80px; }
+.cb h3 { font-family:'Orbitron',sans-serif; font-size:11px; color:#444; letter-spacing:1.5px; text-transform:uppercase; margin:28px 0 12px; }
+.cb p { font-family:'Libre Baskerville',Georgia,serif; font-size:15px; line-height:1.9; color:#1a1a1a; margin-bottom:16px; }
+.cb ul { padding-left:0; margin-bottom:16px; }
+.cb ul li { font-family:'Libre Baskerville',Georgia,serif; font-size:14px; line-height:1.85; color:#1a1a1a; padding-left:20px; position:relative; margin-bottom:8px; }
+.cb ul li::before { content:'›'; position:absolute; left:0; color:#0077aa; }
+.cb blockquote { border-left:3px solid #1a7a1a; background:#eafaea; padding:14px 20px; margin:18px 0; font-size:13px; font-family:'Share Tech Mono',monospace; color:#0a3d0a; line-height:1.8; }
+.callout { border-left:3px solid #0088cc; background:#e8f4fb; padding:16px 20px; margin:22px 0; font-size:12px; line-height:1.8; color:#1a1a1a; }
+.callout.red { border-left-color:#cc0033; background:#fdecea; }
+.callout.green { border-left-color:#1a7a1a; background:#eafaea; }
+.callout.amber { border-left-color:#996600; background:#fef9ec; }
+.callout strong { font-family:'Orbitron',sans-serif; font-size:10px; letter-spacing:1px; display:block; margin-bottom:8px; }
+.compare-table { width:100%; border-collapse:collapse; margin:22px 0; font-size:12px; }
+.compare-table th { font-family:'Orbitron',sans-serif; font-size:10px; letter-spacing:1px; color:#003d66; padding:10px 12px; border-bottom:2px solid #00d9ff66; text-align:left; }
+.compare-table td { padding:10px 12px; border-bottom:1px solid #ddd; line-height:1.5; color:#1a1a1a; vertical-align:top; }
+.compare-table tr:hover td { background:#f0f0f0; }
+.key-numbers { display:grid; grid-template-columns:repeat(auto-fit,minmax(140px,1fr)); gap:12px; margin:22px 0; }
+.kn-item { background:#fff; border:1px solid #d0d0d0; padding:16px 12px; text-align:center; }
+.kn-val { font-family:'Orbitron',sans-serif; font-size:clamp(13px,1.8vw,18px); font-weight:800; color:#003d66; display:block; }
+.kn-label { font-size:10px; color:#555; letter-spacing:1px; margin-top:5px; display:block; line-height:1.4; }
+.quiz-block { background:rgba(17,17,17,0.9); border:1px solid #ff004f33; padding:28px; margin:48px 0 32px; }
+.quiz-block h2 { font-family:'Orbitron',sans-serif; font-size:13px; color:#ff004f; letter-spacing:2px; margin-bottom:6px; }
+.quiz-intro { font-size:12px; opacity:0.6; margin-bottom:24px; padding-bottom:16px; border-bottom:1px solid #ff004f22; line-height:1.6; }
+.quiz-q { margin-bottom:28px; }
+.quiz-q p { font-size:13px; opacity:0.9; margin-bottom:12px; line-height:1.65; }
+.quiz-q p strong { color:#00d9ff; }
+.quiz-options { display:flex; flex-direction:column; gap:8px; }
+.quiz-opt { background:rgba(255,255,255,0.03); border:1px solid #ffffff1a; padding:11px 16px; cursor:pointer; font-size:12px; font-family:'Share Tech Mono',monospace; transition:0.2s; text-align:left; color:white; line-height:1.5; }
+.quiz-opt:hover:not(:disabled) { background:rgba(0,217,255,0.08); border-color:#00d9ff44; }
+.quiz-opt.correct { background:rgba(57,255,20,0.1); border-color:#39ff14; color:#39ff14; }
+.quiz-opt.wrong { background:rgba(255,0,79,0.1); border-color:#ff004f; color:#ff004f; }
+.quiz-opt:disabled { cursor:default; }
+.quiz-feedback { font-size:12px; margin-top:10px; min-height:18px; line-height:1.7; opacity:0.9; padding:0 4px; }
+.quiz-score { font-family:'Orbitron',sans-serif; font-size:12px; color:#39ff14; margin-top:20px; letter-spacing:1px; display:none; padding-top:16px; border-top:1px solid #39ff1433; }
+.py-block { background:rgba(10,10,10,0.95); border:1px solid #39ff1422; padding:28px; margin:32px 0; }
+.py-block h2 { font-family:'Orbitron',sans-serif; font-size:13px; color:#39ff14; letter-spacing:2px; margin-bottom:8px; }
+.py-block .py-intro { font-size:12px; opacity:0.7; margin-bottom:20px; padding-bottom:16px; border-bottom:1px solid #39ff1422; line-height:1.7; }
+.py-exercise { margin-bottom:32px; } .py-exercise:last-child { margin-bottom:0; }
+.py-exercise h3 { font-family:'Orbitron',sans-serif; font-size:11px; color:#39ff1499; letter-spacing:1.5px; text-transform:uppercase; margin-bottom:10px; }
+.py-exercise p { font-size:12px; opacity:0.8; margin-bottom:14px; line-height:1.75; }
+.py-block pre { background:#050505; border:1px solid #39ff1433; padding:20px; font-family:'Share Tech Mono',monospace; font-size:11px; line-height:1.7; overflow-x:auto; color:#39ff14; white-space:pre; margin-bottom:12px; }
+.py-note { background:rgba(57,255,20,0.04); border-left:2px solid #39ff14; padding:12px 16px; margin-top:14px; font-size:12px; line-height:1.75; opacity:0.8; }
+.py-note strong { font-family:'Orbitron',sans-serif; font-size:10px; color:#39ff14; display:block; margin-bottom:6px; letter-spacing:1px; }
+.reflection-block { background:rgba(255,170,0,0.04); border:1px solid #ffaa0033; padding:24px; margin:32px 0; }
+.reflection-block h2 { font-family:'Orbitron',sans-serif; font-size:13px; color:#ffaa00; letter-spacing:2px; margin-bottom:8px; }
+.ref-intro { font-size:12px; opacity:0.7; margin-bottom:20px; padding-bottom:14px; border-bottom:1px solid #ffaa0022; line-height:1.7; }
+.ref-prompt { margin-bottom:20px; }
+.ref-prompt h3 { font-family:'Orbitron',sans-serif; font-size:11px; color:#ffaa0099; letter-spacing:1px; margin-bottom:8px; }
+.ref-prompt p { font-size:12px; opacity:0.8; line-height:1.75; }
+.complete-wrap { margin-top:56px; padding-top:30px; border-top:1px solid #ffffff11; text-align:center; }
+.complete-btn { font-family:'Orbitron',sans-serif; font-size:13px; letter-spacing:2px; padding:14px 44px; background:transparent; border:1px solid #39ff14; color:#39ff14; cursor:pointer; transition:0.3s; }
+.complete-btn:hover:not(.done) { background:#39ff14; color:black; box-shadow:0 0 20px rgba(57,255,20,0.4); }
+.complete-btn.done { background:rgba(57,255,20,0.1); cursor:pointer; opacity:1; }
+.complete-msg { font-size:12px; color:#39ff14; margin-top:14px; min-height:18px; letter-spacing:1px; }
+.lesson-nav { display:flex; justify-content:space-between; margin-top:30px; flex-wrap:wrap; gap:10px; }
+.lesson-nav a { font-family:'Orbitron',sans-serif; font-size:11px; color:#00d9ff66; text-decoration:none; letter-spacing:1px; transition:0.2s; }
+.lesson-nav a:hover { color:#00d9ff; }
+.back-to-top { position:fixed; bottom:28px; right:28px; z-index:200; width:44px; height:44px; background:#000; border:1px solid #00d9ff55; color:#00d9ff; font-size:20px; cursor:pointer; display:flex; align-items:center; justify-content:center; opacity:0; pointer-events:none; transition:opacity 0.3s; }
+.back-to-top.visible { opacity:1; pointer-events:auto; } .back-to-top:hover { border-color:#00d9ff; }
+footer { text-align:center; padding:30px; opacity:0.3; font-size:11px; position:relative; z-index:1; letter-spacing:1px; }
+.module-complete { background:rgba(57,255,20,0.06); border:1px solid #39ff1444; padding:24px 28px; margin:40px 0; text-align:center; }
+.module-complete h3 { font-family:'Orbitron',sans-serif; font-size:14px; color:#39ff14; letter-spacing:2px; margin-bottom:10px; }
+.module-complete p { font-size:12px; opacity:0.8; line-height:1.7; }
+</style>
+</head>
+<body>
+<canvas id="starsCanvas"></canvas>
+<header>
+    <a href="dashboard.html" class="logo"><span>LEO</span><span>AF</span></a>
+    <div class="nav-right">
+        <a href="m8.html" class="nav-btn">← M8 HUB</a>
+        <button class="nav-btn" onclick="leoafAbort()">ABORT</button>
+    </div>
+</header>
+<div class="breadcrumb">
+    <a href="dashboard.html">DASHBOARD</a><span>/</span>
+    <a href="m8.html">M8</a><span>/</span>
+    <span style="color:#ffffff88;">LESSON 03 — GATEWAY PLACEMENT &amp; POP</span>
+</div>
+
+<div class="lesson-wrap">
+
+<div class="lesson-header">
+    <div class="lesson-tag">M8 · LESSON 03 OF 7</div>
+    <h1>Gateway Placement &amp; the PoP Topology</h1>
+    <div class="lesson-meta">
+        <div class="l-pill l-pill-q">MODULE 8</div>
+        <div class="l-pill l-pill-t">GROUND SEGMENT &amp; OPERATIONS</div>
+        <div class="l-pill l-pill-c">CORE</div>
+    </div>
+    <p class="lesson-intro" style="margin-bottom:12px;">m8-2 said how many gateways a target availability demands — several diversity sites per location — but not <em>where</em> they go. This lesson places them. Gateway placement is a joint optimisation over four constraints that routinely conflict: the <strong>rain climate</strong> (m8-2 wants dry sites, where fewer diversity gateways are needed), the <strong>backhaul</strong> (gateways need fibre to an internet point of presence, which favours sites near existing network infrastructure), the <strong>regulatory access</strong> (a gateway needs landing rights and a spectrum licence in its host country), and the <strong>mesh egress geography</strong> (where the traffic actually wants to come down, which the routing of Module 7 shapes). These pull in different directions — the dry desert with perfect rain statistics is often far from any internet exchange, and the country with the best backhaul may have the most restrictive licensing — and gateway placement is the art of resolving them into a concrete map of sites. This lesson also introduces the alternative to building gateways at all: <strong>ground-station-as-a-service</strong>, where an operator rents antenna time from a provider rather than constructing sites, and the <strong>cloud convergence</strong> that co-locates gateways with cloud data centres so traffic enters the cloud directly.</p>
+    <p class="lesson-intro" style="margin-bottom:12px;">The lesson's verified anchors size the ground network: a constellation delivering 10 Tbps of aggregate traffic needs on the order of 50 gateway locations at ~200 Gbps each (capacity-driven), which the m8-2 diversity requirement multiplies to ~150 physical sites, each needing a fibre backhaul equal to its capacity — some 10 Tbps of terrestrial fibre in total. The ground segment is a large, expensive, geographically-distributed network in its own right, and this lesson maps it. The spine gains the gateway placement model — the tool that turns the diversity requirement and the mesh's egress needs into a set of sites, connected to the internet through a point-of-presence topology.</p>
+</div>
+
+<div class="toc">
+    <h4>CONTENTS</h4>
+    <ol>
+        <li><a href="#s1">How many gateways, and what drives the count</a></li>
+        <li><a href="#s2">The four placement constraints</a></li>
+        <li><a href="#s3">The point-of-presence topology</a></li>
+        <li><a href="#s4">Ground-station-as-a-service: rent, don't build</a></li>
+        <li><a href="#s5">Cloud convergence: the gateway at the data centre</a></li>
+        <li><a href="#s6">Placement as the ground segment's defining problem</a></li>
+        <li><a href="#s7">Key facts</a></li>
+        <li><a href="#s8">What this lesson delivers to the design chain</a></li>
+        <li><a href="#kf">Key facts</a></li>
+        <li><a href="#quiz">Knowledge check</a></li>
+        <li><a href="#py">Python exercises</a></li>
+        <li><a href="#reflect">Reflection</a></li>
+        <li><a href="#sources">Sources</a></li>
+    </ol>
+</div>
+
+<div class="cb" id="s1">
+    <h2>1. How many gateways, and what drives the count</h2>
+<p>Three independent forces set the gateway count, and the binding one is whichever is largest:</p>
+<p><strong>Capacity.</strong> The constellation delivers some aggregate traffic — call it 10 Tbps — and every bit of it must egress through a gateway. If each gateway handles ~200 Gbps (several feeder links, m8-1), the constellation needs at least ~50 gateway locations just to carry the traffic. This is usually the dominant driver for a high-capacity constellation: you need enough gateways to backhaul the total throughput, and more capacity means more gateways.</p>
+<p><strong>Coverage / co-visibility.</strong> In a <em>bent-pipe</em> constellation, gateways must tile the served area (m7-1's ~2,605 km reach), so coverage drives the count catastrophically upward. In a <em>mesh</em> constellation, this force nearly vanishes — traffic reaches a gateway continent over the ISLs, so gateways cluster on landmasses with backhaul rather than tiling for coverage. The mesh's whole ground-segment advantage (m7-1) is that it converts a coverage-driven gateway count into a capacity-driven one, which is far smaller.</p>
+<p><strong>Diversity.</strong> Each gateway <em>location</em> is really several diversity sites (m8-2), so the ~50 capacity-driven locations become ~150 physical sites at a 3× diversity factor. Diversity multiplies the site count without adding capacity — the extra sites are for availability, not throughput — and this multiplication is one of the ground segment's largest hidden costs.</p>
+<p>The result: ~50 locations, ~150 sites, for a representative high-capacity mesh constellation. The number is large enough to make the ground segment a major system in its own right, and small enough — thanks to the mesh — to be buildable, which is exactly the m7-1 trade playing out in hardware.</p>
+</div>
+
+<div class="cb" id="s2">
+    <h2>2. The four placement constraints</h2>
+<p>Where each gateway goes is decided by four constraints that must all be satisfied and often conflict:</p>
+<p><strong>Rain climate.</strong> m8-2 showed availability is bought with geography; a dry-climate site needs fewer diversity gateways (higher single-site availability) than a wet one. So placement favours arid and temperate-dry regions — deserts, high plateaus, rain-shadowed valleys — where a gateway achieves high availability with less diversity. This is a strong pull toward specific, often remote, geographies.</p>
+<p><strong>Backhaul.</strong> A gateway is useless without a fat fibre connection to an internet point of presence (§3). This pulls placement toward existing network infrastructure — near internet exchanges, near metro fibre, near the terrestrial backbone — which tends to mean populated, connected regions, often the <em>opposite</em> of the dry-remote regions rain climate prefers.</p>
+<p><strong>Regulatory access.</strong> A gateway needs landing rights (permission to operate a satellite ground station) and a spectrum licence in its host country, plus data-sovereignty compliance for the traffic it carries. Some countries grant these readily; others restrict or forbid them. Regulatory access can rule out otherwise-ideal sites entirely and force gateways into second-choice geographies — a constraint of politics rather than physics.</p>
+<p><strong>Mesh egress geography.</strong> The mesh routes traffic to a gateway near where it needs to reach the ground (m7-4). Egressing near the traffic's <em>destination</em> minimises the total path (short ISL route, then terrestrial backhaul the rest of the way); egressing near the <em>source</em> wastes the mesh and adds terrestrial backhaul. So gateways want to be near the major traffic destinations — the population and data centres — which again pulls toward connected regions.</p>
+<p>These four rarely align. The dry desert (perfect rain) is far from the internet exchange (bad backhaul) and may be in a restrictive jurisdiction (bad regulatory) and far from the traffic (bad egress). Gateway placement is the constrained optimisation that resolves the conflict — trading a little availability (a wetter site with more diversity) for much better backhaul, or accepting a longer mesh path to reach a permissive jurisdiction. There is no site that is best on all four axes; placement is the negotiated compromise.</p>
+</div>
+
+<div class="cb" id="s3">
+    <h2>3. The point-of-presence topology</h2>
+<p>A gateway connects to the internet through a <strong>point of presence (PoP)</strong> — a facility where the operator's network meets the terrestrial internet, exchanging traffic with other networks. The gateway's fibre backhaul carries its full capacity (~200 Gbps) to the nearest PoP, and at the PoP the operator <strong>peers</strong> with other networks (settlement-free traffic exchange) and buys <strong>transit</strong> (paid connectivity to the rest of the internet) — the standard terrestrial-ISP arrangements, now serving satellite-originated traffic. For a 50-gateway constellation each backhauling ~200 Gbps, the total backhaul is ~10 Tbps of fibre, a substantial terrestrial network that the "satellite" operator must build or lease alongside its space segment.</p>
+<p>The PoP topology shapes the constellation's terrestrial footprint. A few large PoPs at major internet exchanges concentrate the peering and simplify the network but lengthen the backhaul from remote gateways; many small PoPs shorten the backhaul but fragment the peering. The operator's PoP-and-peering strategy — where to interconnect, whom to peer with, how much transit to buy — is a terrestrial-networking problem indistinguishable from a large ISP's, and it is a reminder that a satellite operator is, on the ground, an ISP: it must interconnect with the internet on the same commercial and technical terms as any other network. The space segment is exotic; the ground segment is a conventional, if large, terrestrial network.</p>
+</div>
+
+<div class="cb" id="s4">
+    <h2>4. Ground-station-as-a-service: rent, don't build</h2>
+<p>Building ~150 gateway sites — acquiring land, installing antennas, running backhaul, obtaining licences in dozens of countries — is a vast capital undertaking that delays a constellation's revenue for years. <strong>Ground-station-as-a-service (GSaaS)</strong> offers an alternative: rent antenna time from a provider that operates shared ground stations, paying per-contact or per-hour operating expense instead of building capital sites. The provider has already acquired the land, installed the antennas, obtained the licences, and connected the backhaul; the operator simply schedules time on them.</p>
+<p>The trade is the classic build-versus-rent. <strong>Building</strong> gives full control, dedicated capacity, and lower long-run cost at scale, but demands enormous upfront capital and years of deployment. <strong>Renting</strong> (GSaaS) gives fast deployment, no capital sink, and geographic reach the operator could not build alone, but at a per-use cost that grows with usage and with less control over a shared resource. Many constellations use both: GSaaS to launch quickly and reach markets where building is impractical, and owned gateways where the traffic justifies the capital and control matters. GSaaS also lowers the barrier to entry — a small operator can access a global ground network without building one — which changes the competitive landscape of who can field a constellation at all.</p>
+</div>
+
+<div class="cb" id="s5">
+    <h2>5. Cloud convergence: the gateway at the data centre</h2>
+<p>The deepest trend in gateway placement is <strong>cloud convergence</strong>: co-locating the gateway with a cloud data centre, so that traffic descending from the constellation enters the cloud directly, without traversing the public internet first. A gateway at a cloud region means a user's traffic can reach a cloud-hosted application (the majority of internet traffic) with the shortest possible path — mesh to the gateway, then straight into the cloud — bypassing the terrestrial internet's routing entirely for cloud-destined traffic.</p>
+<p>This aligns gateway placement with cloud geography: put gateways where the cloud regions are, because that is where the traffic is destined (§2's egress-near-destination principle, made concrete). It also blurs the line between the satellite operator and the cloud provider — a gateway inside a cloud data centre is a joint facility, and the commercial relationship (does the cloud provider host the gateway, does the operator run edge compute at the gateway) becomes part of the ground-segment strategy. Cloud convergence is where the ground segment stops being merely a backhaul and becomes an on-ramp to the cloud, and it is reshaping where gateways go: toward the data centres, because that is where the internet's traffic actually lives.</p>
+</div>
+
+<div class="cb" id="s6">
+    <h2>6. Placement as the ground segment's defining problem</h2>
+<p>Gateway placement ties together everything Part I built. The feeder link (m8-1) sets each gateway's capacity; the diversity requirement (m8-2) multiplies the site count; and this lesson resolves the four constraints into a map, connected through a PoP topology, built or rented via GSaaS, converging on the cloud. The output is the concrete ground network: a set of sites, each with a capacity, an availability, a backhaul, and a role in egressing the mesh's traffic.</p>
+<p>And placement feeds back into the space segment. Where the gateways are determines where the mesh must route traffic to (m7-4), which shapes the ISL load; a constellation with gateways clustered on a few continents routes differently from one with gateways spread widely. The gateway map and the mesh routing co-evolve — the m7-7 export ("the gateways where the mesh touches down") was always a two-way constraint, and this lesson closes the loop: the mesh delivers traffic to gateways, and the gateways' placement shapes how the mesh delivers. With the ground network placed, Part I is complete: the constellation can reach the internet, at capacity, at availability, in the right places. Part II turns to keeping the constellation itself alive — the operations that fly the fleet.</p>
+</div>
+
+<div class="cb" id="s7">
+    <h2>7. Key facts</h2>
+<table class="compare-table">
+<thead><tr>
+<th>Fact</th>
+<th>Value</th>
+<th>Unit</th>
+<th>Source</th>
+</tr></thead>
+<tbody>
+<tr><td>Gateway count drivers</td><td>capacity, coverage, diversity (largest binds)</td><td>—</td><td>§1</td></tr>
+<tr><td>Capacity-driven count (10 Tbps, 200 Gbps/gw)</td><td>~50</td><td>locations</td><td>Computed</td></tr>
+<tr><td>Mesh vs bent-pipe</td><td>mesh makes count capacity-driven, not coverage-driven</td><td>—</td><td>§1</td></tr>
+<tr><td>Diversity multiplier</td><td>×3 sites per location</td><td>—</td><td>m8-2</td></tr>
+<tr><td>Physical sites (representative)</td><td>~150</td><td>sites</td><td>Computed</td></tr>
+<tr><td>Placement constraints</td><td>rain, backhaul, regulatory, mesh egress</td><td>—</td><td>§2</td></tr>
+<tr><td>Constraint conflict</td><td>dry sites far from PoPs; best backhaul in restrictive jurisdictions</td><td>—</td><td>§2</td></tr>
+<tr><td>Backhaul per gateway</td><td>~200 Gbps fibre to a PoP</td><td>—</td><td>§3</td></tr>
+<tr><td>Total backhaul (50 gateways)</td><td>~10 Tbps of fibre</td><td>—</td><td>Computed</td></tr>
+<tr><td>PoP role</td><td>peering + transit; operator is an ISP on the ground</td><td>—</td><td>§3</td></tr>
+<tr><td>GSaaS</td><td>rent antenna time (opex) vs build (capex)</td><td>—</td><td>§4</td></tr>
+<tr><td>Cloud convergence</td><td>gateway at the data centre; traffic enters cloud directly</td><td>—</td><td>§5</td></tr>
+</tbody>
+</table>
+</div>
+
+<div class="cb" id="s8">
+    <h2>8. What this lesson delivers to the design chain</h2>
+<p>Stage 3 of the spine is the <strong>gateway placement model</strong>: it takes the diversity requirement (m8-2's site count), the mesh's egress geography (m7-7's delivered-traffic map), and the four placement constraints, and produces a set of gateway sites — each with a location, a capacity, an availability, and a backhaul requirement — connected through a PoP topology. It scores candidate sites against the constraints, resolves the conflicts into a placement, and sizes the total backhaul. The ground network is now concrete: not "several diversity gateways" but a specific map of where they are and what they cost.</p>
+<p>Part I is complete. The constellation can reach the internet — the feeder link carries the traffic (m8-1), diversity keeps it available (m8-2), and placement puts the gateways in the right places connected to the internet (m8-3). What Part I did <em>not</em> address is keeping the constellation itself flying: the satellites need commanding, their health needs monitoring, their anomalies need handling, and a fleet of thousands needs all of this without a human per satellite. That is operations, and it is Part II — beginning with the control link to every satellite, the TT&amp;C that flies the fleet (m8-4).</p>
+</div>
+
+
+<div class="quiz-block" id="quiz">
+    <h2 style="font-family:'Orbitron',sans-serif;font-size:13px;color:#00d9ff;letter-spacing:2px;margin-bottom:8px;">KNOWLEDGE CHECK</h2>
+    <div class="quiz-intro">Ten questions. Each option explains itself after you commit. No retries per question — decide first.</div>
+    <div class="quiz-q">
+        <p><strong>1.</strong> In a mesh constellation, the gateway count is driven primarily by:</p>
+        <div class="quiz-options">
+            <button class="quiz-opt" data-q="1" data-correct="false">A — Coverage — tiling the served area</button>
+            <button class="quiz-opt" data-q="1" data-correct="true">B — Capacity — the aggregate traffic that must egress, since the ISLs let traffic reach a gateway continent without tiling for coverage</button>
+            <button class="quiz-opt" data-q="1" data-correct="false">C — The number of users</button>
+            <button class="quiz-opt" data-q="1" data-correct="false">D — The orbital period</button>
+        </div>
+        <div class="quiz-feedback" id="fb1"></div>
+    </div>
+    <div class="quiz-q">
+        <p><strong>2.</strong> Diversity affects the gateway count by:</p>
+        <div class="quiz-options">
+            <button class="quiz-opt" data-q="2" data-correct="false">A — Reducing it</button>
+            <button class="quiz-opt" data-q="2" data-correct="true">B — Multiplying the location count into more physical sites (~×3) without adding capacity — the extra sites are for availability, not throughput</button>
+            <button class="quiz-opt" data-q="2" data-correct="false">C — Leaving it unchanged</button>
+            <button class="quiz-opt" data-q="2" data-correct="false">D — Setting it to one</button>
+        </div>
+        <div class="quiz-feedback" id="fb2"></div>
+    </div>
+    <div class="quiz-q">
+        <p><strong>3.</strong> The four gateway placement constraints are:</p>
+        <div class="quiz-options">
+            <button class="quiz-opt" data-q="3" data-correct="false">A — Cost, mass, power, size</button>
+            <button class="quiz-opt" data-q="3" data-correct="true">B — Rain climate, backhaul availability, regulatory access, and mesh egress geography</button>
+            <button class="quiz-opt" data-q="3" data-correct="false">C — Frequency, bandwidth, polarisation, coding</button>
+            <button class="quiz-opt" data-q="3" data-correct="false">D — Latency, jitter, loss, throughput</button>
+        </div>
+        <div class="quiz-feedback" id="fb3"></div>
+    </div>
+    <div class="quiz-q">
+        <p><strong>4.</strong> The placement constraints conflict because:</p>
+        <div class="quiz-options">
+            <button class="quiz-opt" data-q="4" data-correct="false">A — They always align</button>
+            <button class="quiz-opt" data-q="4" data-correct="true">B — The dry desert (good rain) is often far from internet exchanges (bad backhaul) and may be in a restrictive jurisdiction (bad regulatory) and far from traffic (bad egress) — no site is best on all axes</button>
+            <button class="quiz-opt" data-q="4" data-correct="false">C — They are identical</button>
+            <button class="quiz-opt" data-q="4" data-correct="false">D — Only one matters</button>
+        </div>
+        <div class="quiz-feedback" id="fb4"></div>
+    </div>
+    <div class="quiz-q">
+        <p><strong>5.</strong> A gateway connects to the internet through a point of presence, where the operator:</p>
+        <div class="quiz-options">
+            <button class="quiz-opt" data-q="5" data-correct="false">A — Stores the satellites</button>
+            <button class="quiz-opt" data-q="5" data-correct="true">B — Peers with other networks (settlement-free exchange) and buys transit (paid connectivity) — the standard ISP arrangements, now for satellite-originated traffic</button>
+            <button class="quiz-opt" data-q="5" data-correct="false">C — Launches rockets</button>
+            <button class="quiz-opt" data-q="5" data-correct="false">D — Controls the constellation</button>
+        </div>
+        <div class="quiz-feedback" id="fb5"></div>
+    </div>
+    <div class="quiz-q">
+        <p><strong>6.</strong> The total backhaul for a 50-gateway constellation at ~200 Gbps each is:</p>
+        <div class="quiz-options">
+            <button class="quiz-opt" data-q="6" data-correct="false">A — Negligible</button>
+            <button class="quiz-opt" data-q="6" data-correct="true">B — ~10 Tbps of terrestrial fibre — a substantial network the "satellite" operator must build or lease alongside its space segment</button>
+            <button class="quiz-opt" data-q="6" data-correct="false">C — Zero (the mesh handles it)</button>
+            <button class="quiz-opt" data-q="6" data-correct="false">D — One fibre</button>
+        </div>
+        <div class="quiz-feedback" id="fb6"></div>
+    </div>
+    <div class="quiz-q">
+        <p><strong>7.</strong> Ground-station-as-a-service (GSaaS) is:</p>
+        <div class="quiz-options">
+            <button class="quiz-opt" data-q="7" data-correct="false">A — A satellite service</button>
+            <button class="quiz-opt" data-q="7" data-correct="true">B — Renting antenna time from a provider's shared ground stations (opex) instead of building capital sites — fast deployment and reach, at a per-use cost and less control</button>
+            <button class="quiz-opt" data-q="7" data-correct="false">C — A cloud database</button>
+            <button class="quiz-opt" data-q="7" data-correct="false">D — A routing protocol</button>
+        </div>
+        <div class="quiz-feedback" id="fb7"></div>
+    </div>
+    <div class="quiz-q">
+        <p><strong>8.</strong> Cloud convergence means:</p>
+        <div class="quiz-options">
+            <button class="quiz-opt" data-q="8" data-correct="false">A — Merging two constellations</button>
+            <button class="quiz-opt" data-q="8" data-correct="true">B — Co-locating gateways with cloud data centres so traffic descending from the constellation enters the cloud directly, bypassing the public internet for cloud-destined traffic</button>
+            <button class="quiz-opt" data-q="8" data-correct="false">C — Storing data on satellites</button>
+            <button class="quiz-opt" data-q="8" data-correct="false">D — Using cloud software</button>
+        </div>
+        <div class="quiz-feedback" id="fb8"></div>
+    </div>
+    <div class="quiz-q">
+        <p><strong>9.</strong> Egressing the mesh's traffic near its destination rather than its source:</p>
+        <div class="quiz-options">
+            <button class="quiz-opt" data-q="9" data-correct="false">A — Makes no difference</button>
+            <button class="quiz-opt" data-q="9" data-correct="true">B — Minimises the total path (short ISL route, then terrestrial backhaul) — egressing near the source wastes the mesh and adds terrestrial backhaul</button>
+            <button class="quiz-opt" data-q="9" data-correct="false">C — Increases latency</button>
+            <button class="quiz-opt" data-q="9" data-correct="false">D — Is impossible</button>
+        </div>
+        <div class="quiz-feedback" id="fb9"></div>
+    </div>
+    <div class="quiz-q">
+        <p><strong>10.</strong> Gateway placement "feeds back into the space segment" because:</p>
+        <div class="quiz-options">
+            <button class="quiz-opt" data-q="10" data-correct="false">A — It does not</button>
+            <button class="quiz-opt" data-q="10" data-correct="true">B — Where the gateways are determines where the mesh must route traffic to (m7-4), shaping the ISL load — the gateway map and mesh routing co-evolve</button>
+            <button class="quiz-opt" data-q="10" data-correct="false">C — It moves the satellites</button>
+            <button class="quiz-opt" data-q="10" data-correct="false">D — It changes the orbit</button>
+        </div>
+        <div class="quiz-feedback" id="fb10"></div>
+    </div>
+    <div class="quiz-score" id="quizScore"></div>
+</div>
+
+<div class="py-block" id="py">
+    <h2 style="font-family:'Orbitron',sans-serif;font-size:13px;color:#39ff14;letter-spacing:2px;margin-bottom:8px;">PYTHON EXERCISES</h2>
+    <div class="py-intro">Three exercises; the last extends the module spine project. Run them, then work the numbered follow-ups in the comments — the follow-ups are the exercise.</div>
+<div class="py-exercise">
+    <h3>Exercise 1 — Sizing the ground network</h3>
+    <p>From constellation capacity to a gateway count.</p>
+<pre>
+import math
+
+def gateway_count(total_tbps, per_gateway_gbps, diversity_sites):
+    locations = math.ceil(total_tbps*1000 / per_gateway_gbps)
+    return locations, locations*diversity_sites
+
+def total_backhaul_tbps(locations, per_gateway_gbps):
+    return locations*per_gateway_gbps/1000
+
+for total in [1, 5, 10, 20]:
+    loc, sites = gateway_count(total, 200, 3)
+    bh = total_backhaul_tbps(loc, 200)
+    print(f"{total:&gt;2} Tbps constellation: {loc:&gt;3} locations, "
+          f"{sites:&gt;3} sites, {bh:.0f} Tbps backhaul")
+
+# 1. A bent-pipe version of the same constellation is coverage-driven,
+#    needing a gateway every ~2,605 km (m7-1) to tile the served land.
+#    Estimate its gateway count for global land coverage and compare to
+#    the mesh's capacity-driven count. Quantify the mesh's ground saving.
+# 2. Per-gateway capacity depends on feeder count (m8-1). Recompute the
+#    location count for gateways of 100, 200, 400 Gbps. Bigger gateways
+#    mean fewer sites — what caps a single gateway's capacity?
+# 3. Diversity multiplies sites but not capacity. Split the cost: what
+#    fraction of the ~150 sites exist for capacity vs for availability?
+#    What would halving the diversity requirement (drier siting) save?
+</pre>
+</div>
+<div class="py-exercise">
+    <h3>Exercise 2 — Placement under conflicting constraints</h3>
+    <p>Score sites against the four axes.</p>
+<pre>
+def score_site(rain_avail, backhaul_gbps, regulatory_ok, egress_km):
+    """Higher is better. Returns None if regulatory forbids."""
+    if not regulatory_ok:
+        return None
+    rain_score = rain_avail                        # 0..1, dry = high
+    backhaul_score = min(1.0, backhaul_gbps/200)   # need ~200 Gbps
+    egress_score = max(0, 1 - egress_km/5000)      # near destination
+    return round((rain_score + backhaul_score + egress_score)/3, 3)
+
+# candidate sites: (name, rain_avail, backhaul, regulatory, egress_km)
+sites = [
+    ("dry desert, remote",    0.995, 50,  True,  4000),
+    ("coastal metro",         0.97,  400, True,  200),
+    ("high plateau",          0.99,  150, True,  1500),
+    ("restricted jurisdiction",0.99, 300, False, 500),
+    ("wet but connected",     0.95,  400, True,  100),
+]
+print(f"{'site':&lt;26}{'score':&gt;8}")
+for name, ra, bh, reg, eg in sites:
+    s = score_site(ra, bh, reg, eg)
+    print(f"{name:&lt;26}{str(s) if s else 'FORBIDDEN':&gt;8}")
+
+# 1. The scoring weights the three axes equally. Re-weight for a
+#    LATENCY-selling operator (egress matters most) and a RELIABILITY-
+#    selling one (rain matters most). Does the best site change?
+# 2. The 'dry desert' has perfect rain but poor backhaul and egress.
+#    Would building backhaul to it (fibre cost) ever beat a wetter,
+#    connected site that needs an extra diversity gateway? Set up the trade.
+# 3. Add a 'diversity cluster' constraint: a site's diversity partners
+#    must be 75-2000 km away (m8-2). Which candidate sites can form a
+#    valid cluster together?
+</pre>
+</div>
+<div class="py-exercise">
+    <h3>Exercise 3 — Spine Stage 3: the placement model</h3>
+    <p>Resolve the constraints into a ground network.</p>
+<pre>
+import math
+
+# ═══════════════════════════════════════════════════════
+# M8 SPINE PROJECT — GROUND SEGMENT
+# Stage 3: gateway placement + PoP topology.
+#   Stage 1 (m8-1): feeder link &amp; gateway capacity.
+#   Stage 2 (m8-2): diversity -&gt; site count for availability.
+#   Stage 3: place the sites against the four constraints,
+#            size the backhaul, connect to PoPs. Part I complete.
+#   Next: Part II operates the fleet (m8-4 TT&amp;C onward).
+# ═══════════════════════════════════════════════════════
+
+class GatewaySite:
+    def __init__(self, name, rain_avail, backhaul_gbps, regulatory_ok,
+                 egress_km, lat_lon):
+        self.name, self.rain_avail = name, rain_avail
+        self.backhaul, self.reg = backhaul_gbps, regulatory_ok
+        self.egress_km, self.pos = egress_km, lat_lon
+
+    def score(self, w_rain=1, w_bh=1, w_egress=1):
+        if not self.reg: return None
+        parts = [w_rain*self.rain_avail,
+                 w_bh*min(1.0, self.backhaul/200),
+                 w_egress*max(0, 1 - self.egress_km/5000)]
+        return round(sum(parts)/(w_rain+w_bh+w_egress), 3)
+
+class GroundSegment:
+    def __init__(self, total_tbps, per_gateway_gbps=200, diversity=3):
+        self.total_tbps = total_tbps
+        self.per_gw = per_gateway_gbps
+        self.diversity = diversity
+        self.locations = math.ceil(total_tbps*1000/per_gateway_gbps)
+
+    def physical_sites(self):
+        return self.locations*self.diversity
+
+    def total_backhaul_tbps(self):
+        return self.locations*self.per_gw/1000
+
+    def place(self, candidates, weights=(1,1,1)):
+        scored = [(c.score(*weights), c) for c in candidates]
+        viable = sorted([(s,c) for s,c in scored if s is not None],
+                        key=lambda x: x[0], reverse=True)
+        return viable[:self.locations]
+
+    def report(self, candidates):
+        print(f"  constellation: {self.total_tbps} Tbps")
+        print(f"  gateway locations needed: {self.locations}")
+        print(f"  physical sites (×{self.diversity} diversity): "
+              f"{self.physical_sites()}")
+        print(f"  total backhaul: {self.total_backhaul_tbps():.0f} Tbps")
+        chosen = self.place(candidates)
+        print(f"  top sites chosen:")
+        for score, site in chosen:
+            print(f"    {site.name:&lt;24} score {score}")
+
+candidates = [
+    GatewaySite("dry plateau A",   0.995, 200, True,  1500, (34, -106)),
+    GatewaySite("coastal metro B", 0.97,  400, True,  200,  (40, -74)),
+    GatewaySite("desert C",        0.995, 100, True,  3000, (24, 54)),
+    GatewaySite("restricted D",    0.99,  300, False, 500,  (55, 37)),
+    GatewaySite("connected wet E", 0.95,  400, True,  100,  (1, 103)),
+]
+gs = GroundSegment(total_tbps=0.6)   # small: needs ~3 locations
+gs.report(candidates)
+
+# ── the handoff ─────────────────────────────────────────
+# Part I complete: the constellation reaches the internet at capacity,
+# availability, and in the right places. Part II (m8-4+) keeps the
+# constellation FLYING: TT&amp;C, early-orbit ops, anomalies, automation.
+
+# 1. Wire in m8-2's DiversityModel: instead of a fixed ×3, compute the
+#    diversity per site from each site's rain_avail. Dry sites need
+#    fewer partners — does that change which sites are chosen?
+# 2. Add backhaul COST proportional to distance from the nearest PoP.
+#    Re-score sites net of backhaul cost. Does the remote dry site still
+#    win once its fibre bill is counted?
+# 3. Combine with m7-7's egress map: weight each site by how much mesh
+#    traffic is destined near it. The best ground network is the one
+#    that matches the mesh's egress geography — show it.
+</pre>
+</div>
+</div>
+
+<div class="reflection-block" id="reflect">
+    <h2>REFLECTION</h2>
+    <div class="ref-intro">Four prompts. Each forces a decision — write the position down before moving on; the act of committing is the exercise.</div>
+    <div class="ref-prompt">
+        <h3>PROMPT 1</h3>
+        <p>Section 2's four constraints conflict, and section 3 revealed the satellite operator is, on the ground, an ISP. This means gateway placement is partly a <em>networking-business</em> decision (peering, transit, PoP location) and partly a <em>physics</em> decision (rain, co-visibility). Interrogate which dominates: for a real constellation, is the gateway map shaped more by where the good rain and clear sky are, or by where the internet's peering and cloud infrastructure already sit? Take a position on whether the ground segment is fundamentally a satellite problem or fundamentally a terrestrial-networking problem wearing a satellite costume — and what that implies about who an operator should hire to design it.</p>
+    </div>
+    <div class="ref-prompt">
+        <h3>PROMPT 2</h3>
+        <p>Section 4's build-versus-rent (GSaaS) trade and section 5's cloud convergence point in the same direction: toward the operator <em>not</em> owning its ground infrastructure, but renting antennas and co-locating with clouds. Extrapolate this: if GSaaS and cloud convergence win, the satellite operator becomes a space-segment company that outsources its entire ground segment to specialised providers. Is that the efficient future, or does it cede a strategic asset (control of where and how traffic egresses) to third parties? Decide whether a serious constellation should own its ground segment or rent it, and identify the specific capability that, if outsourced, would leave the operator dangerously dependent.</p>
+    </div>
+    <div class="ref-prompt">
+        <h3>PROMPT 3</h3>
+        <p>Section 5's cloud convergence optimises for cloud-destined traffic (the majority) by putting gateways at data centres. But this couples the constellation's ground segment to the cloud providers' geography — and the major cloud regions are concentrated in a few wealthy, connected countries. Consider the consequence for the constellation's <em>coverage promise</em>: the mesh serves oceans and poles (m7-1), but if gateways cluster at cloud regions, does traffic from a remote user have to cross the whole mesh to egress at a distant data centre, eroding the latency advantage that justified the mesh? Quantify the tension between cloud-convergent gateway placement (few, concentrated) and the mesh's global-coverage value (traffic egressing far from remote users), and decide whether they are compatible or in conflict.</p>
+    </div>
+    <div class="ref-prompt">
+        <h3>PROMPT 4</h3>
+        <p>This lesson sized the ground network at ~150 sites and ~10 Tbps of backhaul from a representative 10 Tbps constellation and a ~200 Gbps per-gateway assumption — both round numbers chosen to illustrate. The <em>shape</em> of the conclusions (capacity-driven count, diversity multiplication, backhaul-equals-capacity) is robust, but the specific site count that drives the ground-segment cost is assumption-dependent. Apply the load-bearing-assumption discipline that has run through the program: which single input (per-gateway capacity, diversity factor, total constellation capacity) most strongly determines the ground-segment cost, and what real-world measurement would an operator need to pin it down before committing capital? State whether the ~150-site figure is a design target or merely an order-of-magnitude illustration.</p>
+    </div>
+</div>
+
+<div class="cb" id="sources">
+    <h2>Sources</h2>
+<ul><li>Maral &amp; Bousquet, <em>Satellite Communications Systems</em> — ground-segment architecture, gateway networks, and teleport design.</li><li>Del Portillo, Cameron &amp; Crawley, "A technical comparison of three LEO constellation systems" (Acta Astronautica, 2019) — gateway counts and ground-segment sizing for mega-constellations.</li><li>Norman &amp; Wang, ground-station-as-a-service literature; commercial GSaaS provider architectures — the rent-vs-build model.</li><li>Module 7 (m7-1, m7-7) — the mesh's ground-segment advantage and delivered-traffic export; Module 8 (m8-1, m8-2) — the feeder capacity and diversity requirement this placement resolves.</li></ul>
+</div>
+
+<div class="complete-wrap">
+    <button class="complete-btn" id="completeBtn">MARK LESSON COMPLETE</button>
+    <div class="complete-msg" id="completeMsg"></div>
+</div>
+<div class="lesson-nav">
+    <a href="m8-2.html">← LESSON 02 — SITE DIVERSITY &amp; AVAILABILITY</a>
+    <a href="m8-4.html">LESSON 04 — TT&amp;C AT SCALE →</a>
+</div>
+</div>
+
+<button class="back-to-top" id="backToTop" title="Back to top">↑</button>
+<footer>© 2026 LEOAF · M8 · LESSON 03 OF 7</footer>
+<script>
+const canvas=document.getElementById('starsCanvas'),ctx=canvas.getContext('2d');
+let stars=[];
+function initStars(){stars=[];for(let i=0;i<180;i++)stars.push({x:Math.random()*canvas.width,y:Math.random()*canvas.height,size:Math.random()*1.5+0.4,speed:Math.random()*0.18+0.04,hue:Math.random()*360});}
+function resizeCanvas(){canvas.width=window.innerWidth;canvas.height=window.innerHeight;}
+resizeCanvas();initStars();window.addEventListener('resize',resizeCanvas);
+function animateStars(){ctx.clearRect(0,0,canvas.width,canvas.height);stars.forEach(s=>{s.y-=s.speed;if(s.y<0){s.y=canvas.height;s.x=Math.random()*canvas.width;}ctx.beginPath();ctx.fillStyle=`hsl(${s.hue},80%,80%)`;ctx.arc(s.x,s.y,s.size,0,Math.PI*2);ctx.fill();});requestAnimationFrame(animateStars);}
+animateStars();
+</script>
+<script>
+const feedbacks={
+    1:{correct:"The mesh's ground-segment advantage (m7-1) is that traffic reaches a gateway over the ISLs, so gateways cluster on landmasses by capacity rather than tiling for coverage. ~10 Tbps at ~200 Gbps/gateway ≈ 50 locations. The mesh converts a coverage-driven count into a much smaller capacity-driven one.",wrong:"Coverage drives the *bent-pipe* count catastrophically; the mesh nearly eliminates it. User count matters only through aggregate capacity. Orbital period is unrelated."},
+    2:{correct:"Each gateway location is several diversity sites (m8-2), so ~50 locations become ~150 physical sites at 3×. The multiplication buys availability, not capacity — one of the ground segment's largest hidden costs.",wrong:"Diversity increases the site count, not reduces or leaves it unchanged. It cannot be one site (that defeats diversity's purpose)."},
+    3:{correct:"Placement resolves rain climate (m8-2 wants dry sites), backhaul (fibre to a PoP), regulatory (landing rights and licences), and mesh egress (where traffic wants to come down). These routinely conflict, and placement is the compromise among them.",wrong:"Cost/mass/power/size are spacecraft concerns. Frequency/bandwidth/etc. are link parameters. Latency/jitter/etc. are transport metrics. None are the placement constraints."},
+    4:{correct:"The axes pull in different directions: rain climate toward dry-remote, backhaul and egress toward connected-populated, regulatory toward permissive jurisdictions. Placement trades availability for backhaul, or path length for regulatory access — a negotiated compromise with no universally-best site.",wrong:"They rarely align (the whole difficulty). They are distinct, not identical, and all four matter simultaneously."},
+    5:{correct:"The PoP is where the operator's network meets the terrestrial internet; it peers and buys transit exactly as any large ISP does. On the ground, a satellite operator *is* an ISP — the space segment is exotic, the ground interconnection conventional.",wrong:"The PoP is a network interconnection point, not satellite storage, a launch site, or the control centre (that is TT&C, m8-4)."},
+    6:{correct:"50 × 200 Gbps = 10 Tbps of fibre to PoPs — a large terrestrial network in its own right. The reminder is that a satellite operator runs a conventional large-ISP ground network beneath its exotic space segment.",wrong:"10 Tbps is far from negligible or zero. The mesh delivers to the gateways but the backhaul from gateway to PoP is terrestrial fibre. It is a whole network, not one fibre."},
+    7:{correct:"GSaaS lets an operator schedule time on a provider's already-built, already-licensed ground stations rather than constructing its own — trading capex and years of deployment for opex and speed, at the cost of control over a shared resource. Many constellations use both GSaaS and owned gateways.",wrong:"It is a ground-segment service, not a satellite service, cloud database, or routing protocol."},
+    8:{correct:"A gateway at a cloud region lets a user's traffic reach a cloud-hosted application by the shortest path — mesh to gateway, straight into the cloud. It aligns gateway placement with cloud geography (where traffic is destined) and blurs the operator/cloud-provider line. The ground segment becomes an on-ramp to the cloud.",wrong:"It is about gateway/data-centre co-location, not merging constellations, satellite storage, or software choice."},
+    9:{correct:"The mesh routes traffic to a gateway near where it needs to reach the ground; egress-near-destination keeps the fast ISL path long and the slow terrestrial leg short. Egress-near-source would descend early and crawl the rest terrestrially — wasting the mesh's speed advantage (m7-6).",wrong:"It makes a large difference (path length). It *reduces* latency (uses the fast mesh longer). It is standard practice, not impossible."},
+    10:{correct:"The m7-7 export (\"gateways where the mesh touches down\") is a two-way constraint: the mesh delivers to gateways, and the gateways' placement shapes how the mesh routes. A constellation with gateways on a few continents routes differently from one with gateways spread widely. Placement and routing are a joint optimisation.",wrong:"It is a real feedback, not none. It does not move satellites or change orbits — it changes the *routing* over a fixed constellation."}
+};
+let answered={};
+document.querySelectorAll('.quiz-opt').forEach(btn=>{
+    btn.addEventListener('click',function(){
+        const q=this.dataset.q;
+        if(answered[q]!==undefined)return;
+        const correct=this.dataset.correct==='true';
+        answered[q]=correct;
+        document.querySelectorAll(`.quiz-opt[data-q="${q}"]`).forEach(b=>{b.disabled=true;if(b.dataset.correct==='true')b.classList.add('correct');});
+        if(!correct)this.classList.add('wrong');
+        const fb=document.getElementById('fb'+q);
+        fb.textContent=(correct?'\u2713 ':'\u2717 ')+feedbacks[q][correct?'correct':'wrong'];
+        fb.style.color=correct?'#39ff14':'#ff004f';
+        if(Object.keys(answered).length===10){
+            const total=Object.values(answered).filter(Boolean).length;
+            const sc=document.getElementById('quizScore');
+            sc.style.display='block';
+            const pct=Math.round(total/10*100);
+            sc.textContent=`SCORE: ${total}/10 (${pct}%) \u2014 ${pct===100?'PERFECT.':pct>=80?'STRONG.':pct>=60?'ADEQUATE. REVISIT WEAK SECTIONS.':'REVISIT THE LESSON BEFORE PROCEEDING.'}`;
+        }
+    });
+});
+</script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="supabase.js"></script>
+<script src="user_progress.js"></script>
+<script>
+const LESSON_ID='m8-3';
+(function(){
+    function bounceToLogin(r){console.error("Auth guard:",r);window.location.replace("index.html");}
+    async function init(){
+        if(typeof client==="undefined"||!client||!client.auth)return bounceToLogin("Supabase client not loaded");
+        let session=null;
+        try{({data:{session}}=await client.auth.getSession());}
+        catch(e){return bounceToLogin("getSession threw: "+e.message);}
+        if(!session){window.location.replace("index.html");return;}
+        const btn=document.getElementById('completeBtn'),msg=document.getElementById('completeMsg');
+        function setDone(done){
+            if(done){btn.textContent='\u2713 COMPLETE \u2014 CLICK TO UNDO';btn.classList.add('done');btn.style.cssText='border-color:#39ff14;color:#39ff14;background:rgba(57,255,20,0.1);cursor:pointer;opacity:1;';msg.style.color='#39ff14';msg.textContent='Lesson marked complete. Click again to undo.';}
+            else{btn.textContent='MARK LESSON COMPLETE';btn.classList.remove('done');btn.style.cssText='';msg.style.color='#ffffff55';msg.textContent='Not yet marked complete.';}
+        }
+        let mastered=[];
+        try{mastered=await getMasteredSections();}catch(e){console.error(e);}
+        setDone(mastered.includes(LESSON_ID));
+        btn.addEventListener('click',async()=>{
+            const isDone=btn.classList.contains('done');
+            msg.style.color='#00d9ff';msg.textContent='Saving...';
+            const ok=await upsertSection(LESSON_ID,!isDone);
+            if(ok){setDone(!isDone);}else{msg.style.color='#ff004f';msg.textContent='Error saving. Try again.';}
+        });
+        const btt=document.getElementById('backToTop');
+        window.addEventListener('scroll',()=>{btt.classList.toggle('visible',window.scrollY>400);});
+        btt.addEventListener('click',()=>window.scrollTo({top:0,behavior:'smooth'}));
+    }
+    if(document.readyState==="loading")document.addEventListener("DOMContentLoaded",init);
+    else init();
+})();
+</script>
+</body>
+</html>
