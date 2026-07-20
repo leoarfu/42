@@ -1,0 +1,612 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, shrink-to-fit=no">
+<title>M8-5 — Early-Orbit Operations &amp; Commissioning · LEOAF</title>
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;600;800&family=Share+Tech+Mono&family=Libre+Baskerville:ital,wght@0,400;0,700;1,400&display=swap" rel="stylesheet">
+<link rel="icon" href="favicon.ico" sizes="any" type="image/x-icon">
+<link rel="manifest" href="site.webmanifest">
+<meta name="theme-color" content="#0f0f0f">
+<script>
+window.leoafAbort = async function () {
+    function go() { window.location.replace("index.html?signedout=1"); }
+    try { if (typeof client !== "undefined" && client && client.auth && client.auth.signOut) { try { await client.auth.signOut({ scope: "local" }); } catch (e) {} } } catch (e) {}
+    go();
+};
+</script>
+<style>
+* { box-sizing:border-box; margin:0; padding:0; }
+html { height:100%; -webkit-text-size-adjust:100%; overflow-x:hidden; }
+body { font-family:'Share Tech Mono',monospace; background:#000; color:white; overflow-x:hidden; min-height:100vh; }
+#starsCanvas { position:fixed; inset:0; z-index:-1; }
+header { background:#000; border-bottom:1px solid #ff004f33; position:sticky; top:0; z-index:100; padding:1rem clamp(1.5rem,5vw,4rem); display:flex; justify-content:space-between; align-items:center; }
+.logo { font-family:'Orbitron',sans-serif; font-weight:800; font-size:clamp(16px,2vw,22px); letter-spacing:3px; text-decoration:none; }
+.logo span:first-child { color:white; } .logo span:last-child { color:#ff004f; }
+.nav-right { display:flex; align-items:center; gap:10px; }
+.nav-btn { background:transparent; border:1px solid #ff004f44; color:#ff004f; padding:6px 14px; cursor:pointer; transition:0.3s; font-size:11px; font-family:'Orbitron',sans-serif; letter-spacing:1px; text-decoration:none; display:inline-block; }
+.nav-btn:hover { background:#ff004f; color:black; }
+.breadcrumb { padding:14px clamp(1.5rem,5vw,4rem); font-size:11px; color:#ffffff44; letter-spacing:1px; position:relative; z-index:1; }
+.breadcrumb a { color:#00d9ff66; text-decoration:none; } .breadcrumb a:hover { color:#00d9ff; }
+.breadcrumb span { margin:0 8px; }
+.lesson-wrap { max-width:820px; margin:0 auto; padding:0 clamp(1.5rem,5vw,4rem) 80px; position:relative; z-index:1; }
+.lesson-header { padding:30px 0 28px; border-bottom:1px solid #ffffff11; margin-bottom:36px; }
+.lesson-tag { font-family:'Orbitron',sans-serif; font-size:10px; color:#ff004f; letter-spacing:3px; margin-bottom:10px; }
+.lesson-header h1 { font-family:'Orbitron',sans-serif; font-size:clamp(20px,3.5vw,32px); font-weight:800; line-height:1.2; margin-bottom:12px; }
+.lesson-meta { display:flex; gap:10px; flex-wrap:wrap; margin-bottom:16px; }
+.l-pill { font-family:'Orbitron',sans-serif; font-size:10px; padding:3px 10px; border:1px solid; letter-spacing:1px; }
+.l-pill-q { color:#ff004f; border-color:#ff004f44; } .l-pill-t { color:#39ff14; border-color:#39ff1444; }
+.l-pill-c { color:#ffaa00; border-color:#ffaa0044; }
+.lesson-intro { font-size:13px; line-height:1.85; opacity:0.75; }
+.toc { background:rgba(0,217,255,0.06); border:1px solid #00d9ff33; padding:24px 28px; margin:30px 0; }
+.toc h4 { font-family:'Orbitron',sans-serif; font-size:10px; color:#00d9ff; letter-spacing:2px; margin-bottom:16px; }
+.toc ol { padding-left:20px; } .toc li { font-size:13px; line-height:2.1; }
+.toc li a { color:#00d9ffbb; text-decoration:none; transition:0.15s; } .toc li a:hover { color:#fff; padding-left:4px; }
+.toc li::marker { color:#ff004f; font-family:'Orbitron',sans-serif; font-size:10px; }
+.cb { background:#f5f2ec; color:#1a1a1a; padding:36px clamp(24px,4vw,48px); margin-bottom:24px; border-left:4px solid #00d9ff; position:relative; z-index:1; }
+.cb h2 { font-family:'Orbitron',sans-serif; font-size:13px; color:#003d66; letter-spacing:2px; text-transform:uppercase; margin-bottom:20px; padding-bottom:10px; border-bottom:2px solid #00d9ff66; scroll-margin-top:80px; }
+.cb h3 { font-family:'Orbitron',sans-serif; font-size:11px; color:#444; letter-spacing:1.5px; text-transform:uppercase; margin:28px 0 12px; }
+.cb p { font-family:'Libre Baskerville',Georgia,serif; font-size:15px; line-height:1.9; color:#1a1a1a; margin-bottom:16px; }
+.cb ul { padding-left:0; margin-bottom:16px; }
+.cb ul li { font-family:'Libre Baskerville',Georgia,serif; font-size:14px; line-height:1.85; color:#1a1a1a; padding-left:20px; position:relative; margin-bottom:8px; }
+.cb ul li::before { content:'›'; position:absolute; left:0; color:#0077aa; }
+.cb blockquote { border-left:3px solid #1a7a1a; background:#eafaea; padding:14px 20px; margin:18px 0; font-size:13px; font-family:'Share Tech Mono',monospace; color:#0a3d0a; line-height:1.8; }
+.callout { border-left:3px solid #0088cc; background:#e8f4fb; padding:16px 20px; margin:22px 0; font-size:12px; line-height:1.8; color:#1a1a1a; }
+.callout.red { border-left-color:#cc0033; background:#fdecea; }
+.callout.green { border-left-color:#1a7a1a; background:#eafaea; }
+.callout.amber { border-left-color:#996600; background:#fef9ec; }
+.callout strong { font-family:'Orbitron',sans-serif; font-size:10px; letter-spacing:1px; display:block; margin-bottom:8px; }
+.compare-table { width:100%; border-collapse:collapse; margin:22px 0; font-size:12px; }
+.compare-table th { font-family:'Orbitron',sans-serif; font-size:10px; letter-spacing:1px; color:#003d66; padding:10px 12px; border-bottom:2px solid #00d9ff66; text-align:left; }
+.compare-table td { padding:10px 12px; border-bottom:1px solid #ddd; line-height:1.5; color:#1a1a1a; vertical-align:top; }
+.compare-table tr:hover td { background:#f0f0f0; }
+.key-numbers { display:grid; grid-template-columns:repeat(auto-fit,minmax(140px,1fr)); gap:12px; margin:22px 0; }
+.kn-item { background:#fff; border:1px solid #d0d0d0; padding:16px 12px; text-align:center; }
+.kn-val { font-family:'Orbitron',sans-serif; font-size:clamp(13px,1.8vw,18px); font-weight:800; color:#003d66; display:block; }
+.kn-label { font-size:10px; color:#555; letter-spacing:1px; margin-top:5px; display:block; line-height:1.4; }
+.quiz-block { background:rgba(17,17,17,0.9); border:1px solid #ff004f33; padding:28px; margin:48px 0 32px; }
+.quiz-block h2 { font-family:'Orbitron',sans-serif; font-size:13px; color:#ff004f; letter-spacing:2px; margin-bottom:6px; }
+.quiz-intro { font-size:12px; opacity:0.6; margin-bottom:24px; padding-bottom:16px; border-bottom:1px solid #ff004f22; line-height:1.6; }
+.quiz-q { margin-bottom:28px; }
+.quiz-q p { font-size:13px; opacity:0.9; margin-bottom:12px; line-height:1.65; }
+.quiz-q p strong { color:#00d9ff; }
+.quiz-options { display:flex; flex-direction:column; gap:8px; }
+.quiz-opt { background:rgba(255,255,255,0.03); border:1px solid #ffffff1a; padding:11px 16px; cursor:pointer; font-size:12px; font-family:'Share Tech Mono',monospace; transition:0.2s; text-align:left; color:white; line-height:1.5; }
+.quiz-opt:hover:not(:disabled) { background:rgba(0,217,255,0.08); border-color:#00d9ff44; }
+.quiz-opt.correct { background:rgba(57,255,20,0.1); border-color:#39ff14; color:#39ff14; }
+.quiz-opt.wrong { background:rgba(255,0,79,0.1); border-color:#ff004f; color:#ff004f; }
+.quiz-opt:disabled { cursor:default; }
+.quiz-feedback { font-size:12px; margin-top:10px; min-height:18px; line-height:1.7; opacity:0.9; padding:0 4px; }
+.quiz-score { font-family:'Orbitron',sans-serif; font-size:12px; color:#39ff14; margin-top:20px; letter-spacing:1px; display:none; padding-top:16px; border-top:1px solid #39ff1433; }
+.py-block { background:rgba(10,10,10,0.95); border:1px solid #39ff1422; padding:28px; margin:32px 0; }
+.py-block h2 { font-family:'Orbitron',sans-serif; font-size:13px; color:#39ff14; letter-spacing:2px; margin-bottom:8px; }
+.py-block .py-intro { font-size:12px; opacity:0.7; margin-bottom:20px; padding-bottom:16px; border-bottom:1px solid #39ff1422; line-height:1.7; }
+.py-exercise { margin-bottom:32px; } .py-exercise:last-child { margin-bottom:0; }
+.py-exercise h3 { font-family:'Orbitron',sans-serif; font-size:11px; color:#39ff1499; letter-spacing:1.5px; text-transform:uppercase; margin-bottom:10px; }
+.py-exercise p { font-size:12px; opacity:0.8; margin-bottom:14px; line-height:1.75; }
+.py-block pre { background:#050505; border:1px solid #39ff1433; padding:20px; font-family:'Share Tech Mono',monospace; font-size:11px; line-height:1.7; overflow-x:auto; color:#39ff14; white-space:pre; margin-bottom:12px; }
+.py-note { background:rgba(57,255,20,0.04); border-left:2px solid #39ff14; padding:12px 16px; margin-top:14px; font-size:12px; line-height:1.75; opacity:0.8; }
+.py-note strong { font-family:'Orbitron',sans-serif; font-size:10px; color:#39ff14; display:block; margin-bottom:6px; letter-spacing:1px; }
+.reflection-block { background:rgba(255,170,0,0.04); border:1px solid #ffaa0033; padding:24px; margin:32px 0; }
+.reflection-block h2 { font-family:'Orbitron',sans-serif; font-size:13px; color:#ffaa00; letter-spacing:2px; margin-bottom:8px; }
+.ref-intro { font-size:12px; opacity:0.7; margin-bottom:20px; padding-bottom:14px; border-bottom:1px solid #ffaa0022; line-height:1.7; }
+.ref-prompt { margin-bottom:20px; }
+.ref-prompt h3 { font-family:'Orbitron',sans-serif; font-size:11px; color:#ffaa0099; letter-spacing:1px; margin-bottom:8px; }
+.ref-prompt p { font-size:12px; opacity:0.8; line-height:1.75; }
+.complete-wrap { margin-top:56px; padding-top:30px; border-top:1px solid #ffffff11; text-align:center; }
+.complete-btn { font-family:'Orbitron',sans-serif; font-size:13px; letter-spacing:2px; padding:14px 44px; background:transparent; border:1px solid #39ff14; color:#39ff14; cursor:pointer; transition:0.3s; }
+.complete-btn:hover:not(.done) { background:#39ff14; color:black; box-shadow:0 0 20px rgba(57,255,20,0.4); }
+.complete-btn.done { background:rgba(57,255,20,0.1); cursor:pointer; opacity:1; }
+.complete-msg { font-size:12px; color:#39ff14; margin-top:14px; min-height:18px; letter-spacing:1px; }
+.lesson-nav { display:flex; justify-content:space-between; margin-top:30px; flex-wrap:wrap; gap:10px; }
+.lesson-nav a { font-family:'Orbitron',sans-serif; font-size:11px; color:#00d9ff66; text-decoration:none; letter-spacing:1px; transition:0.2s; }
+.lesson-nav a:hover { color:#00d9ff; }
+.back-to-top { position:fixed; bottom:28px; right:28px; z-index:200; width:44px; height:44px; background:#000; border:1px solid #00d9ff55; color:#00d9ff; font-size:20px; cursor:pointer; display:flex; align-items:center; justify-content:center; opacity:0; pointer-events:none; transition:opacity 0.3s; }
+.back-to-top.visible { opacity:1; pointer-events:auto; } .back-to-top:hover { border-color:#00d9ff; }
+footer { text-align:center; padding:30px; opacity:0.3; font-size:11px; position:relative; z-index:1; letter-spacing:1px; }
+.module-complete { background:rgba(57,255,20,0.06); border:1px solid #39ff1444; padding:24px 28px; margin:40px 0; text-align:center; }
+.module-complete h3 { font-family:'Orbitron',sans-serif; font-size:14px; color:#39ff14; letter-spacing:2px; margin-bottom:10px; }
+.module-complete p { font-size:12px; opacity:0.8; line-height:1.7; }
+</style>
+</head>
+<body>
+<canvas id="starsCanvas"></canvas>
+<header>
+    <a href="dashboard.html" class="logo"><span>LEO</span><span>AF</span></a>
+    <div class="nav-right">
+        <a href="m8.html" class="nav-btn">← M8 HUB</a>
+        <button class="nav-btn" onclick="leoafAbort()">ABORT</button>
+    </div>
+</header>
+<div class="breadcrumb">
+    <a href="dashboard.html">DASHBOARD</a><span>/</span>
+    <a href="m8.html">M8</a><span>/</span>
+    <span style="color:#ffffff88;">LESSON 05 — EARLY-ORBIT OPS &amp; COMMISSIONING</span>
+</div>
+
+<div class="lesson-wrap">
+
+<div class="lesson-header">
+    <div class="lesson-tag">M8 · LESSON 05 OF 7</div>
+    <h1>Early-Orbit Operations &amp; Commissioning</h1>
+    <div class="lesson-meta">
+        <div class="l-pill l-pill-q">MODULE 8</div>
+        <div class="l-pill l-pill-t">GROUND SEGMENT &amp; OPERATIONS</div>
+        <div class="l-pill l-pill-c">CORE</div>
+    </div>
+    <p class="lesson-intro" style="margin-bottom:12px;">m8-4 sized the ground network on the assumption that satellites can be operated autonomously — and that assumption has a hidden prerequisite this lesson addresses: the satellites must first be <em>brought into service</em>, and at mega-constellation scale, that too must be industrialised. This lesson covers <strong>LEOP</strong> (the launch and early-orbit phase) and <strong>commissioning</strong> — everything between a satellite separating from its launch vehicle and entering revenue service. For a traditional satellite, this is a bespoke, weeks-long campaign run by a team of engineers watching one spacecraft. For a mega-constellation launching sixty satellites at a time, twenty-seven times over a year, with over a hundred satellites in commissioning simultaneously and three hundred more to replace every year forever, it cannot be bespoke. Commissioning must become a <em>pipeline</em> — an automated, standardised process that flows satellites from separation to service with minimal human attention per satellite — or the constellation simply cannot be deployed and sustained.</p>
+    <p class="lesson-intro" style="margin-bottom:12px;">The lesson's verified anchors frame both the physics and the logistics. The physics is modest: satellites are injected at a low altitude (300 km, to save launch energy) and raise themselves to the operational shell (550 km) using electric propulsion — a 141 m/s maneuver costing ~8 days of low-thrust firing and about 1% of the satellite's mass in propellant. The logistics is the challenge: 1,584 satellites at 60 per launch is 27 launches, a year of deployment at a fortnightly cadence; ~129 satellites are in commissioning at any moment; and a 5-year satellite life means ~317 satellites — five launches' worth — must be replaced every year just to hold the constellation constant. LEOP for one satellite is a campaign; LEOP for a constellation is a factory that never stops. The spine gains the commissioning-pipeline model.</p>
+</div>
+
+<div class="toc">
+    <h4>CONTENTS</h4>
+    <ol>
+        <li><a href="#s1">LEOP: from separation to safe</a></li>
+        <li><a href="#s2">Orbit-raising: getting to the shell</a></li>
+        <li><a href="#s3">Commissioning: from safe to operational</a></li>
+        <li><a href="#s4">The deployment campaign</a></li>
+        <li><a href="#s5">Replenishment: the pipeline never stops</a></li>
+        <li><a href="#s6">Commissioning as the fleet's front door</a></li>
+        <li><a href="#s7">Key facts</a></li>
+        <li><a href="#s8">What this lesson delivers to the design chain</a></li>
+        <li><a href="#kf">Key facts</a></li>
+        <li><a href="#quiz">Knowledge check</a></li>
+        <li><a href="#py">Python exercises</a></li>
+        <li><a href="#reflect">Reflection</a></li>
+        <li><a href="#sources">Sources</a></li>
+    </ol>
+</div>
+
+<div class="cb" id="s1">
+    <h2>1. LEOP: from separation to safe</h2>
+<p>The <strong>launch and early-orbit phase</strong> begins the instant a satellite separates from its launch vehicle and ends when it is stable, healthy, and ready to begin its mission. For any satellite it is the most dangerous phase — more missions are lost in LEOP than in years of subsequent operation — because the satellite is in an unproven state, doing things for the first time. The sequence:</p>
+<p><strong>Separation and detumble.</strong> The satellite separates from the launcher, often tumbling from the separation dynamics, and must first stop rotating — the attitude control system (reaction wheels, magnetorquers) detumbles it to a stable orientation. Until it is detumbled, it cannot point its solar panels or its antennas, so this is done on the omni TT&amp;C link (m8-4) and stored battery power, against the clock of the battery draining.</p>
+<p><strong>Sun acquisition and power-positive.</strong> Once detumbled, the satellite orients its solar panels toward the Sun to become <em>power-positive</em> — generating more power than it consumes — before the battery depletes. This is the first survival milestone: a satellite that reaches power-positive can sustain itself; one that does not is lost. Everything in early LEOP races the battery.</p>
+<p><strong>Communications and control established.</strong> With power secured, the satellite establishes reliable TT&amp;C contact (m8-4), and the operators confirm its health from the first telemetry. The satellite is now safe — stable, powered, and in contact — and LEOP's critical survival phase is over. What remains is to make it <em>operational</em>, which means getting it to its working orbit and testing its payload.</p>
+<p>For a mega-constellation, every one of these steps must happen for sixty satellites at once after each launch, and be robust enough to run with minimal human intervention. The satellites are designed to execute this sequence autonomously — separate, detumble, acquire the Sun, phone home — so that the ground's role is to monitor a fleet of newborns finding their feet, not to hand-fly each one through its first hours.</p>
+</div>
+
+<div class="cb" id="s2">
+    <h2>2. Orbit-raising: getting to the shell</h2>
+<p>Satellites are usually injected at a lower altitude than their operational shell — 300 km against an operational 550 km in the representative case — because a lower injection saves the launch vehicle energy and lets it carry more satellites. The satellites then raise themselves to the operational shell under their own propulsion. The maneuver is modest in energy: raising from 300 to 550 km is a delta-v of ~141 m/s, a small fraction of orbital velocity.</p>
+<p>The propulsion is almost always <strong>electric</strong> (a Hall-effect or gridded-ion thruster), for the same reason electric propulsion dominates modern satellites: its high specific impulse (~1,500 s) means it does the maneuver on very little propellant — about 2.5 kg for a 260 kg satellite, ~1% of its mass — leaving mass for payload and station-keeping. The cost is <em>time</em>: electric thrusters produce tiny thrust (tens of millinewtons), so the raise takes ~8 days of continuous firing rather than the minutes a chemical burn would need. For a constellation this is a favourable trade — propellant mass is precious and launch cadence gives plenty of satellites in the raising pipeline, so the 8-day duration is absorbed by having many satellites raising at once. Orbit-raising also serves a second purpose: by raising satellites at different rates, the operator can <em>phase</em> them — spreading them around the orbital plane and into different planes to build the Walker constellation (Module 2) from a stack that all separated at the same point.</p>
+<p>The low injection has a safety bonus, too. A satellite that fails during orbit-raising — before reaching the operational shell — is still at low altitude, where atmospheric drag will deorbit it naturally within months to a few years (Module 2's debris discipline). Injecting low means failed satellites clean themselves up, a deliberate design choice for responsible mega-constellation deployment.</p>
+</div>
+
+<div class="cb" id="s3">
+    <h2>3. Commissioning: from safe to operational</h2>
+<p>Reaching the operational shell, safe and powered, is not the same as being ready to serve customers. <strong>Commissioning</strong> is the testing-and-activation process that turns a healthy satellite into an operational one: checking out each subsystem, calibrating the payload (the antenna patterns, the beamforming, m6-2), verifying the ISL terminals can acquire their neighbours (m7-2), confirming the satellite can take its place in the mesh topology (m7-3) and the routing schedule (m7-5), and finally accepting it into revenue service. For the representative case this takes on the order of 30 days per satellite — checkout, raise, test, accept.</p>
+<p>Thirty days per satellite, multiplied by the deployment cadence, is where the scale problem bites. If sixty satellites arrive every two weeks and each spends thirty days in commissioning, then at any moment:</p>
+<blockquote>~60 satellites/launch × (30 days ÷ 14 days/launch) ≈ <strong>129 satellites in commissioning simultaneously</strong></blockquote>
+<p>A hundred and twenty-nine satellites, each being checked out, raised, and tested at once. No team of engineers can hand-fly that many concurrent commissioning campaigns — the traditional model, one team per satellite, would need dozens of teams running in parallel forever. Commissioning must be a <em>pipeline</em>: an automated flow where satellites progress through standardised checkout stages with software running the routine tests and human engineers intervening only where a satellite deviates from the expected sequence (m8-6's exception model, again). The satellites commission themselves as much as possible, and the ground supervises the pipeline rather than flying each satellite through it.</p>
+</div>
+
+<div class="cb" id="s4">
+    <h2>4. The deployment campaign</h2>
+<p>Deploying a full constellation is an industrial campaign unlike anything in traditional space operations. The representative 1,584-satellite constellation, at 60 satellites per launch, requires 27 launches — and at a launch every two weeks, roughly a year of continuous deployment. That is 27 separation events, 27 batches of sixty newborns to shepherd through LEOP, and a commissioning pipeline running at full flow for the entire year. The deployment is not a single event but a sustained operation, a production line feeding satellites into orbit at a cadence that would have been unthinkable in the era of bespoke satellites.</p>
+<p>This industrialisation is the defining feature of the mega-constellation era. Traditional space operations launched satellites one or a few at a time, years apart, each a hand-crafted campaign. A mega-constellation launches them by the dozen, fortnightly, through a process that must be as repeatable and automated as a factory line — because the alternative, treating each of 1,584 satellites as a bespoke campaign, is impossible. The whole enterprise depends on driving the per-satellite human cost of LEOP and commissioning toward zero, which means designing satellites that bring themselves into service and a ground system that supervises the flow rather than operating each spacecraft. Deployment at this scale is a systems-engineering achievement as much as a rocketry one.</p>
+</div>
+
+<div class="cb" id="s5">
+    <h2>5. Replenishment: the pipeline never stops</h2>
+<p>The most important consequence of scale is that the commissioning pipeline is not a one-time deployment that ends — it runs <em>forever</em>. LEO satellites have a limited life (atmospheric drag, radiation, component wear-out — ~5 years is representative), and a constellation that stops replacing them decays. To hold a 1,584-satellite constellation constant against a 5-year life:</p>
+<blockquote>1,584 satellites ÷ 5 years = <strong>~317 satellites/year replaced</strong>, forever</blockquote>
+<p>Three hundred and seventeen satellites a year — more than five launches' worth — must be built, launched, commissioned, and brought into service every year just to keep the constellation at strength. The deployment campaign of §4 does not end when the constellation is complete; it transitions into a <em>replenishment</em> campaign at a lower but permanent cadence. The commissioning pipeline is a permanent fixture of the operation, not a temporary deployment phase.</p>
+<p>This has a profound implication for the whole enterprise. A mega-constellation is not a thing you build; it is a thing you <em>keep building</em> — a continuous flow of satellites through manufacture, launch, LEOP, commissioning, service, and eventual deorbit, at a steady-state rate set by the fleet size and the satellite life. The economics (the modules ahead) must account for this permanent replenishment cost; the operations must sustain the pipeline indefinitely; and the deorbit discipline (Module 2's debris environment) must handle 317 satellites a year reaching end-of-life and clearing themselves from orbit. The constellation is a river, not a lake — its strength maintained by constant flow, not by a one-time fill.</p>
+</div>
+
+<div class="cb" id="s6">
+    <h2>6. Commissioning as the fleet's front door</h2>
+<p>Commissioning is where satellites enter the fleet, and at scale it must be an automated front door. The theme unifying this lesson with m8-4 is that <em>both the routine operation and the bringing-into-service of a mega-constellation must be industrialised</em> — the contact demand (m8-4) and the commissioning demand (m8-5) both scale with fleet size beyond what human-tended operations can handle, and both are solved the same way: by autonomy and pipelines, with humans supervising aggregates and handling exceptions. A mega-constellation is an operation defined by flow: satellites flowing in through commissioning, flowing through years of autonomous service, and flowing out through deorbit, at rates that make every per-satellite manual step a scaling wall.</p>
+<p>The commissioning pipeline this lesson built is the front end of that flow, and it feeds everything downstream. A satellite that completes commissioning enters the TT&amp;C contact schedule (m8-4), takes its place in the mesh topology and routing (Module 7), and begins earning revenue — until, five years later, it deorbits and its replacement flows through the same pipeline. The next lesson (m8-6) handles what happens <em>during</em> those five years of service when a satellite deviates from healthy operation: the anomalies, the playbooks, and the fleet automation that catches the exceptions the autonomy of m8-4 and m8-5 escalates. Commissioning gets satellites into service; anomaly handling keeps them there.</p>
+</div>
+
+<div class="cb" id="s7">
+    <h2>7. Key facts</h2>
+<table class="compare-table">
+<thead><tr>
+<th>Fact</th>
+<th>Value</th>
+<th>Unit</th>
+<th>Source</th>
+</tr></thead>
+<tbody>
+<tr><td>LEOP</td><td>separation → detumble → sun-acquire → contact → safe</td><td>—</td><td>§1</td></tr>
+<tr><td>First survival milestone</td><td>power-positive before battery depletes</td><td>—</td><td>§1</td></tr>
+<tr><td>Injection altitude</td><td>~300 (low, saves launch energy)</td><td>km</td><td>§2</td></tr>
+<tr><td>Operational shell</td><td>~550</td><td>km</td><td>§2</td></tr>
+<tr><td>Orbit-raise delta-v (300→550 km)</td><td>~141</td><td>m/s</td><td>Computed</td></tr>
+<tr><td>Propulsion</td><td>electric (Isp ~1,500 s)</td><td>—</td><td>§2</td></tr>
+<tr><td>Raise duration</td><td>~8</td><td>days</td><td>Computed</td></tr>
+<tr><td>Raise propellant</td><td>~1% of satellite mass</td><td>—</td><td>Computed</td></tr>
+<tr><td>Low-injection safety</td><td>failed satellites deorbit naturally</td><td>—</td><td>§2</td></tr>
+<tr><td>Commissioning time</td><td>~30</td><td>days/sat</td><td>§3</td></tr>
+<tr><td>Satellites in commissioning at once</td><td>~129</td><td>—</td><td>Computed</td></tr>
+<tr><td>Deployment</td><td>27 launches, ~1 year at fortnightly cadence</td><td>—</td><td>Computed</td></tr>
+<tr><td>Replenishment (5-yr life)</td><td>~317 satellites/year, forever</td><td>—</td><td>Computed</td></tr>
+</tbody>
+</table>
+</div>
+
+<div class="cb" id="s8">
+    <h2>8. What this lesson delivers to the design chain</h2>
+<p>Stage 5 of the spine is the <strong>commissioning-pipeline model</strong>: it takes a fleet size, a launch cadence and batch size, a per-satellite commissioning time, and a satellite lifetime, and computes the deployment duration, the number of satellites in commissioning simultaneously, and the permanent replenishment rate. It models the orbit-raise (delta-v, duration, propellant) and the LEOP survival sequence. The ground segment now includes the pipeline that flows satellites into service — sized to reveal that ~129 concurrent commissionings and ~317 annual replacements demand an automated, pipelined process, not a bespoke campaign.</p>
+<p>What the pipeline model assumes is that the flow runs smoothly — that satellites progress through LEOP and commissioning as designed. But satellites fail, deviate, and misbehave, both during commissioning and across their years of service, and a fleet of thousands generates a steady stream of anomalies that must be caught and handled without a human per satellite. That is the last piece of Part II: m8-6, the anomalies, playbooks, and fleet automation that handle the exceptions this lesson's pipeline and m8-4's contact schedule escalate. The pipeline flows; m8-6 is what happens when a satellite in the flow deviates.</p>
+</div>
+
+
+<div class="quiz-block" id="quiz">
+    <h2 style="font-family:'Orbitron',sans-serif;font-size:13px;color:#00d9ff;letter-spacing:2px;margin-bottom:8px;">KNOWLEDGE CHECK</h2>
+    <div class="quiz-intro">Ten questions. Each option explains itself after you commit. No retries per question — decide first.</div>
+    <div class="quiz-q">
+        <p><strong>1.</strong> LEOP (the launch and early-orbit phase) is:</p>
+        <div class="quiz-options">
+            <button class="quiz-opt" data-q="1" data-correct="false">A — The satellite's final disposal</button>
+            <button class="quiz-opt" data-q="1" data-correct="true">B — Everything from separation to a stable, healthy, mission-ready satellite — the most dangerous phase, where more missions are lost than in years of later operation</button>
+            <button class="quiz-opt" data-q="1" data-correct="false">C — The routing setup</button>
+            <button class="quiz-opt" data-q="1" data-correct="false">D — The commissioning of the ground segment</button>
+        </div>
+        <div class="quiz-feedback" id="fb1"></div>
+    </div>
+    <div class="quiz-q">
+        <p><strong>2.</strong> The first survival milestone in LEOP is:</p>
+        <div class="quiz-options">
+            <button class="quiz-opt" data-q="2" data-correct="false">A — Reaching the operational shell</button>
+            <button class="quiz-opt" data-q="2" data-correct="true">B — Becoming power-positive — orienting the solar panels to the Sun to generate more power than consumed, before the battery depletes</button>
+            <button class="quiz-opt" data-q="2" data-correct="false">C — Establishing the ISL mesh</button>
+            <button class="quiz-opt" data-q="2" data-correct="false">D — Accepting revenue traffic</button>
+        </div>
+        <div class="quiz-feedback" id="fb2"></div>
+    </div>
+    <div class="quiz-q">
+        <p><strong>3.</strong> Satellites are injected at ~300 km and raise themselves to ~550 km because:</p>
+        <div class="quiz-options">
+            <button class="quiz-opt" data-q="3" data-correct="false">A — 300 km is the operational altitude</button>
+            <button class="quiz-opt" data-q="3" data-correct="true">B — A lower injection saves launch-vehicle energy (more satellites per launch), and failed satellites at low altitude deorbit naturally — the satellites raise themselves under electric propulsion</button>
+            <button class="quiz-opt" data-q="3" data-correct="false">C — The rocket cannot reach 550 km</button>
+            <button class="quiz-opt" data-q="3" data-correct="false">D — 550 km is too low</button>
+        </div>
+        <div class="quiz-feedback" id="fb3"></div>
+    </div>
+    <div class="quiz-q">
+        <p><strong>4.</strong> The orbit-raise uses electric propulsion, which trades:</p>
+        <div class="quiz-options">
+            <button class="quiz-opt" data-q="4" data-correct="false">A — Nothing — it is strictly better</button>
+            <button class="quiz-opt" data-q="4" data-correct="true">B — Time for propellant — high specific impulse means the raise costs only ~1% of satellite mass in propellant, but tiny thrust means ~8 days of continuous firing</button>
+            <button class="quiz-opt" data-q="4" data-correct="false">C — Propellant for time</button>
+            <button class="quiz-opt" data-q="4" data-correct="false">D — Mass for power</button>
+        </div>
+        <div class="quiz-feedback" id="fb4"></div>
+    </div>
+    <div class="quiz-q">
+        <p><strong>5.</strong> Commissioning differs from LEOP in that it:</p>
+        <div class="quiz-options">
+            <button class="quiz-opt" data-q="5" data-correct="false">A — Is the same thing</button>
+            <button class="quiz-opt" data-q="5" data-correct="true">B — Turns a safe satellite into an operational one — checking out subsystems, calibrating the payload, verifying ISL and mesh integration, and accepting into revenue service (~30 days)</button>
+            <button class="quiz-opt" data-q="5" data-correct="false">C — Happens before separation</button>
+            <button class="quiz-opt" data-q="5" data-correct="false">D — Is done on the ground</button>
+        </div>
+        <div class="quiz-feedback" id="fb5"></div>
+    </div>
+    <div class="quiz-q">
+        <p><strong>6.</strong> ~129 satellites are in commissioning simultaneously because:</p>
+        <div class="quiz-options">
+            <button class="quiz-opt" data-q="6" data-correct="false">A — There are only 129 satellites</button>
+            <button class="quiz-opt" data-q="6" data-correct="true">B — At 60 satellites per launch every 14 days and 30 days of commissioning each, the pipeline holds ~60 × (30/14) ≈ 129 concurrent commissionings</button>
+            <button class="quiz-opt" data-q="6" data-correct="false">C — Commissioning is instant</button>
+            <button class="quiz-opt" data-q="6" data-correct="false">D — Only one satellite commissions at a time</button>
+        </div>
+        <div class="quiz-feedback" id="fb6"></div>
+    </div>
+    <div class="quiz-q">
+        <p><strong>7.</strong> Commissioning must be a pipeline rather than bespoke because:</p>
+        <div class="quiz-options">
+            <button class="quiz-opt" data-q="7" data-correct="false">A — Bespoke is cheaper</button>
+            <button class="quiz-opt" data-q="7" data-correct="true">B — ~129 concurrent commissionings cannot be hand-flown by engineers — the process must be automated and standardised, with humans handling only deviations</button>
+            <button class="quiz-opt" data-q="7" data-correct="false">C — Satellites prefer it</button>
+            <button class="quiz-opt" data-q="7" data-correct="false">D — Regulation requires it</button>
+        </div>
+        <div class="quiz-feedback" id="fb7"></div>
+    </div>
+    <div class="quiz-q">
+        <p><strong>8.</strong> To hold a 1,584-satellite constellation constant against a 5-year satellite life requires:</p>
+        <div class="quiz-options">
+            <button class="quiz-opt" data-q="8" data-correct="false">A — No replacement</button>
+            <button class="quiz-opt" data-q="8" data-correct="true">B — ~317 satellites/year replaced forever — more than five launches' worth annually, just to hold strength</button>
+            <button class="quiz-opt" data-q="8" data-correct="false">C — One replacement per year</button>
+            <button class="quiz-opt" data-q="8" data-correct="false">D — Replacing all 1,584 at once every 5 years</button>
+        </div>
+        <div class="quiz-feedback" id="fb8"></div>
+    </div>
+    <div class="quiz-q">
+        <p><strong>9.</strong> A mega-constellation is described as "a river, not a lake" because:</p>
+        <div class="quiz-options">
+            <button class="quiz-opt" data-q="9" data-correct="false">A — It flows through water</button>
+            <button class="quiz-opt" data-q="9" data-correct="true">B — Its strength is maintained by constant flow — satellites flowing in through commissioning, through years of service, and out through deorbit — not by a one-time fill</button>
+            <button class="quiz-opt" data-q="9" data-correct="false">C — It is fluid in orbit</button>
+            <button class="quiz-opt" data-q="9" data-correct="false">D — It changes shape</button>
+        </div>
+        <div class="quiz-feedback" id="fb9"></div>
+    </div>
+    <div class="quiz-q">
+        <p><strong>10.</strong> The unifying theme of m8-4 and m8-5 is:</p>
+        <div class="quiz-options">
+            <button class="quiz-opt" data-q="10" data-correct="false">A — They are unrelated</button>
+            <button class="quiz-opt" data-q="10" data-correct="true">B — Both the routine operation (contact) and the bringing-into-service (commissioning) of a mega-constellation must be industrialised — solved by autonomy and pipelines, with humans supervising aggregates and handling exceptions</button>
+            <button class="quiz-opt" data-q="10" data-correct="false">C — Both are about the link budget</button>
+            <button class="quiz-opt" data-q="10" data-correct="false">D — Both concern the user terminal</button>
+        </div>
+        <div class="quiz-feedback" id="fb10"></div>
+    </div>
+    <div class="quiz-score" id="quizScore"></div>
+</div>
+
+<div class="py-block" id="py">
+    <h2 style="font-family:'Orbitron',sans-serif;font-size:13px;color:#39ff14;letter-spacing:2px;margin-bottom:8px;">PYTHON EXERCISES</h2>
+    <div class="py-intro">Three exercises; the last extends the module spine project. Run them, then work the numbered follow-ups in the comments — the follow-ups are the exercise.</div>
+<div class="py-exercise">
+    <h3>Exercise 1 — Orbit-raising</h3>
+    <p>The physics of getting to the shell.</p>
+<pre>
+import math
+mu, Re, g0 = 398600.4, 6371.0, 9.81
+
+def hohmann_dv(h1_km, h2_km):
+    r1, r2 = Re+h1_km, Re+h2_km
+    v1, v2 = math.sqrt(mu/r1), math.sqrt(mu/r2)
+    a = (r1+r2)/2
+    vp, va = math.sqrt(mu*(2/r1-1/a)), math.sqrt(mu*(2/r2-1/a))
+    return ((vp-v1)+(v2-va))*1000   # m/s
+
+def ep_raise(dv_ms, m_sat_kg, isp_s=1500, thrust_n=0.05):
+    prop = m_sat_kg*(1-math.exp(-dv_ms/(isp_s*g0)))
+    days = dv_ms*m_sat_kg/thrust_n/86400
+    return prop, days
+
+dv = hohmann_dv(300, 550)
+prop, days = ep_raise(dv, 260)
+print(f"raise 300-&gt;550 km: dv {dv:.0f} m/s")
+print(f"  EP: {prop:.1f} kg propellant ({prop/260*100:.1f}%), {days:.0f} days")
+
+# 1. Compare electric vs chemical (Isp 300 s) for the raise: propellant
+#    each, and time (chemical burn ~minutes). Why does the constellation
+#    choose electric despite the 8-day duration?
+# 2. A higher injection (400 km) needs less raise but costs the launcher
+#    more energy (fewer satellites/launch). Sweep injection 250-450 km:
+#    raise dv, propellant, and days. Where is the sweet spot?
+# 3. The 8-day raise means satellites arrive at the shell staggered.
+#    Use differential raising (raise some faster) to PHASE satellites
+#    around a plane. How long to spread 22 satellites evenly?
+</pre>
+</div>
+<div class="py-exercise">
+    <h3>Exercise 2 — The deployment and replenishment campaign</h3>
+    <p>Size the pipeline.</p>
+<pre>
+import math
+
+def deployment(n_total, per_launch, cadence_days):
+    launches = math.ceil(n_total/per_launch)
+    return launches, launches*cadence_days
+
+def in_commissioning(per_launch, commission_days, cadence_days):
+    return per_launch * commission_days/cadence_days
+
+def replenishment(n_total, life_years, per_launch):
+    per_year = n_total/life_years
+    return per_year, per_year/per_launch
+
+launches, days = deployment(1584, 60, 14)
+pipe = in_commissioning(60, 30, 14)
+repl, repl_launches = replenishment(1584, 5, 60)
+
+print(f"deployment: {launches} launches, {days} days ({days/365:.1f} yr)")
+print(f"in commissioning at once: {pipe:.0f} satellites")
+print(f"replenishment: {repl:.0f} sats/yr ({repl_launches:.1f} launches/yr) forever")
+
+# 1. Faster cadence (launch weekly) deploys quicker but fills the
+#    commissioning pipeline more. Recompute deployment time and
+#    concurrent commissionings for 7-day cadence. What breaks first?
+# 2. A 10,000-satellite constellation with a 5-yr life: replenishment
+#    rate? How many satellites in commissioning at steady state? Is the
+#    pipeline the binding constraint on constellation size?
+# 3. Satellite life drives replenishment. Plot replenishment rate vs
+#    life (3-10 yr). How much does extending life from 5 to 7 years
+#    save in annual launches — and what does that justify spending on?
+</pre>
+</div>
+<div class="py-exercise">
+    <h3>Exercise 3 — Spine Stage 5: the commissioning pipeline</h3>
+    <p>The fleet's front door.</p>
+<pre>
+import math
+mu, Re, g0 = 398600.4, 6371.0, 9.81
+
+# ═══════════════════════════════════════════════════════
+# M8 SPINE PROJECT — GROUND SEGMENT
+# Stage 5: the commissioning pipeline.
+#   Stage 4 (m8-4) sized the TT&amp;C network for a flying fleet.
+#   Stage 5: the pipeline that BRINGS satellites into that
+#   fleet — LEOP, orbit-raise, commissioning — and the
+#   permanent replenishment that keeps it full.
+#   Next: m8-6 handles exceptions during service.
+# ═══════════════════════════════════════════════════════
+
+class CommissioningPipeline:
+    def __init__(self, n_total, per_launch=60, cadence_days=14,
+                 commission_days=30, life_years=5):
+        self.n = n_total
+        self.per_launch = per_launch
+        self.cadence = cadence_days
+        self.commission = commission_days
+        self.life = life_years
+
+    def orbit_raise(self, h1=300, h2=550, m_sat=260, isp=1500, thrust=0.05):
+        r1, r2 = Re+h1, Re+h2
+        a = (r1+r2)/2
+        vp = math.sqrt(mu*(2/r1-1/a)); va = math.sqrt(mu*(2/r2-1/a))
+        dv = ((vp-math.sqrt(mu/r1))+(math.sqrt(mu/r2)-va))*1000
+        prop = m_sat*(1-math.exp(-dv/(isp*g0)))
+        days = dv*m_sat/thrust/86400
+        return dict(dv_ms=round(dv), prop_kg=round(prop,1), days=round(days))
+
+    def deployment(self):
+        launches = math.ceil(self.n/self.per_launch)
+        return dict(launches=launches, days=launches*self.cadence,
+                    years=round(launches*self.cadence/365, 1))
+
+    def concurrent_commissioning(self):
+        return round(self.per_launch * self.commission/self.cadence)
+
+    def replenishment(self):
+        per_year = self.n/self.life
+        return dict(sats_per_year=round(per_year),
+                    launches_per_year=round(per_year/self.per_launch, 1))
+
+    def report(self):
+        print(f"  fleet: {self.n} satellites, {self.life}-yr life")
+        print(f"  orbit-raise: {self.orbit_raise()}")
+        print(f"  deployment: {self.deployment()}")
+        print(f"  in commissioning at once: {self.concurrent_commissioning()}")
+        print(f"  replenishment: {self.replenishment()}")
+
+CommissioningPipeline(1584).report()
+
+# ── the handoff ─────────────────────────────────────────
+# The pipeline assumes satellites flow smoothly through LEOP and
+# commissioning. But they fail and deviate — during commissioning
+# and across service. m8-6 handles the exceptions: anomaly detection,
+# playbooks, and fleet automation at scale.
+
+# 1. Add a commissioning FAILURE rate (say 2% of satellites need manual
+#    intervention). How many engineers does the pipeline need if each
+#    handles one troubled satellite at a time for a week?
+# 2. Combine deployment + replenishment into a single steady-state
+#    'satellites in pipeline' number (commissioning + raising). This is
+#    the operations team's permanent workload.
+# 3. Extend to a full constellation lifecycle model: manufacture rate -&gt;
+#    launch -&gt; LEOP -&gt; commission -&gt; service -&gt; deorbit. At steady state,
+#    the manufacture rate must equal the replenishment rate. Verify.
+</pre>
+</div>
+</div>
+
+<div class="reflection-block" id="reflect">
+    <h2>REFLECTION</h2>
+    <div class="ref-intro">Four prompts. Each forces a decision — write the position down before moving on; the act of committing is the exercise.</div>
+    <div class="ref-prompt">
+        <h3>PROMPT 1</h3>
+        <p>Section 5's "river not a lake" reframing means a mega-constellation's cost is dominated not by the initial build but by the permanent replenishment — ~317 satellites a year forever. This inverts the intuition that a constellation is a capital project with a big upfront cost and then cheap operation. Work the consequence: if replenishment dominates lifetime cost, what does that imply about where an operator should invest — cheaper satellites (lower replenishment cost) or longer-lived satellites (lower replenishment rate)? Compute the trade for a satellite that costs 20% more but lasts 40% longer, and decide whether the mega-constellation economics reward durability or disposability — connecting to Module 2's debris discipline (more replenishment = more deorbits).</p>
+    </div>
+    <div class="ref-prompt">
+        <h3>PROMPT 2</h3>
+        <p>Section 2 noted low injection is a safety feature: failed satellites deorbit naturally before reaching the shell. But this protects only against failures <em>during raising</em> — a satellite that fails after reaching the 550 km operational shell does not deorbit for years to decades (Module 2), and at ~317 replacements a year, some fraction will fail on-station. Quantify the debris consequence: if even 1% of satellites fail on-station rather than deorbiting under control, how many dead satellites accumulate at the shell over a decade of operation, and what does that do to the collision environment (Module 2)? Decide whether the low-injection safety feature is sufficient, or whether on-station reliability and controlled deorbit are the real debris levers for a mega-constellation.</p>
+    </div>
+    <div class="ref-prompt">
+        <h3>PROMPT 3</h3>
+        <p>Section 3 made commissioning a pipeline where software runs routine tests and humans handle deviations. But commissioning is where a satellite is <em>tested for the first time</em> — it is precisely the phase where deviations are most likely and least predictable, because the satellite has never done these things before. This is in tension with automation: you automate the known and routine, but commissioning is where the unknown surfaces. Interrogate the boundary: which commissioning steps are genuinely routine and automatable, and which require human judgement because they are where novel failures appear? Decide whether commissioning automation is safe, or whether it risks passing subtly-flawed satellites into service because the automation only checks for the failures it was designed to catch.</p>
+    </div>
+    <div class="ref-prompt">
+        <h3>PROMPT 4</h3>
+        <p>This lesson's numbers — 129 concurrent commissionings, 317 annual replacements — rest on a batch size (60/launch), cadence (14 days), commissioning time (30 days), and satellite life (5 years), all representative. The <em>conclusions</em> (commissioning must be pipelined, replenishment is permanent) are robust, but the specific pipeline load that sizes the operations team is assumption-dependent. Apply the load-bearing-assumption discipline: which input most strongly drives the concurrent-commissioning number that sizes the operations workload, and which drives the replenishment rate that dominates lifetime cost? Specify what an operator would measure from its actual deployment to replace each assumption, and state whether the pipeline-load figures are design targets or illustrations.</p>
+    </div>
+</div>
+
+<div class="cb" id="sources">
+    <h2>Sources</h2>
+<ul><li>Wertz, Everett &amp; Puschell (eds.), <em>Space Mission Engineering: The New SMAD</em> — LEOP, commissioning, and mission operations.</li><li>Sellers, <em>Understanding Space</em> — orbit-raising, electric propulsion, and constellation deployment.</li><li>Vallado, <em>Fundamentals of Astrodynamics and Applications</em> — the transfer and phasing mechanics of orbit-raising.</li><li>Module 2 — the orbital mechanics of raising and phasing, and the debris discipline behind low injection and deorbit; Module 8 (m8-4) — the TT&amp;C the commissioning pipeline feeds into; the autonomy theme shared across Part II.</li></ul>
+</div>
+
+<div class="complete-wrap">
+    <button class="complete-btn" id="completeBtn">MARK LESSON COMPLETE</button>
+    <div class="complete-msg" id="completeMsg"></div>
+</div>
+<div class="lesson-nav">
+    <a href="m8-4.html">← LESSON 04 — TT&amp;C AT SCALE</a>
+    <a href="m8-6.html">LESSON 06 — ANOMALIES &amp; FLEET AUTOMATION →</a>
+</div>
+</div>
+
+<button class="back-to-top" id="backToTop" title="Back to top">↑</button>
+<footer>© 2026 LEOAF · M8 · LESSON 05 OF 7</footer>
+<script>
+const canvas=document.getElementById('starsCanvas'),ctx=canvas.getContext('2d');
+let stars=[];
+function initStars(){stars=[];for(let i=0;i<180;i++)stars.push({x:Math.random()*canvas.width,y:Math.random()*canvas.height,size:Math.random()*1.5+0.4,speed:Math.random()*0.18+0.04,hue:Math.random()*360});}
+function resizeCanvas(){canvas.width=window.innerWidth;canvas.height=window.innerHeight;}
+resizeCanvas();initStars();window.addEventListener('resize',resizeCanvas);
+function animateStars(){ctx.clearRect(0,0,canvas.width,canvas.height);stars.forEach(s=>{s.y-=s.speed;if(s.y<0){s.y=canvas.height;s.x=Math.random()*canvas.width;}ctx.beginPath();ctx.fillStyle=`hsl(${s.hue},80%,80%)`;ctx.arc(s.x,s.y,s.size,0,Math.PI*2);ctx.fill();});requestAnimationFrame(animateStars);}
+animateStars();
+</script>
+<script>
+const feedbacks={
+    1:{correct:"LEOP runs from the instant of separation (often tumbling) through detumble, sun acquisition, and establishing contact, to a safe state. It is the riskiest phase because the satellite is doing everything for the first time in an unproven state — more missions are lost here than in years of operation.",wrong:"Disposal is deorbit (end of life). Routing and ground-segment commissioning are unrelated to a satellite's LEOP."},
+    2:{correct:"After detumbling, the satellite must acquire the Sun and become power-positive before its battery drains — the first make-or-break moment. Everything in early LEOP races the battery; a satellite that reaches power-positive can sustain itself, one that does not is lost.",wrong:"Reaching the shell (orbit-raising) and joining the mesh come later, after survival. Revenue traffic is the end of commissioning, long after LEOP."},
+    3:{correct:"Low injection lets the launcher carry more satellites, and it is a safety bonus — a satellite that fails before raising is at low altitude where drag deorbits it within months to years. The satellites then raise themselves ~141 m/s to the operational shell. Both energy and debris discipline favour low injection.",wrong:"550 km is operational, not 300. Rockets easily reach 550 km — the low injection is a deliberate choice. 550 km is the shell, not too low."},
+    4:{correct:"Electric propulsion's high Isp (~1,500 s) does the 141 m/s raise on ~2.5 kg for a 260 kg satellite (~1%), but its tiny thrust (tens of mN) means the maneuver takes ~8 days rather than minutes. For a constellation this is favourable — propellant is precious, and many satellites raise in parallel.",wrong:"It has a real trade (time). The trade is time-for-propellant, not the reverse. Power is a consideration but the defining trade is thrust (time) vs efficiency (propellant)."},
+    5:{correct:"LEOP gets a satellite to safe (stable, powered, in contact); commissioning gets it to operational (tested, calibrated, mesh-integrated, revenue-accepted), ~30 days of checkout. Reaching the shell safely is not the same as being ready to serve customers — commissioning bridges that gap.",wrong:"It is distinct from LEOP (comes after it). It happens in orbit after separation, not before or on the ground."},
+    6:{correct:"The batch size (60), cadence (14 days), and per-satellite commissioning time (30 days) fill the pipeline: 60 × 30/14 ≈ 129 satellites being checked out at once. No team can hand-fly that many concurrent campaigns — hence the pipeline must be automated.",wrong:"The constellation has 1,584 satellites, far more than 129 (which is just those in-pipeline). Commissioning takes 30 days, not instant. Many commission at once — that is the scale problem."},
+    7:{correct:"The traditional one-team-per-satellite model would need dozens of teams running forever. At scale, commissioning must be an automated flow where software runs the routine tests and engineers intervene only on exceptions (m8-6) — the same autonomy-and-supervision pattern as m8-4's TT&C.",wrong:"Bespoke is far more expensive at scale (dozens of teams). \"Satellites prefer it\" is not a reason. No regulation requires it — the scale does."},
+    8:{correct:"1,584 ÷ 5 = ~317 satellites/year must be built, launched, commissioned, and brought into service continuously. The deployment campaign transitions into a permanent replenishment campaign — the pipeline never stops.",wrong:"A decaying constellation needs constant replacement. It is 317/year, not one. Replacement is continuous (a steady flow), not a periodic bulk swap."},
+    9:{correct:"The constellation is a continuous flow of satellites through manufacture, launch, LEOP, commissioning, service, and deorbit at a steady-state rate — you do not build it once, you keep building it forever. The ~317/year replenishment maintains strength by flow, like a river, not by a static fill.",wrong:"The metaphor is about continuous replenishment, not literal water, fluidity, or shape-changing."},
+    10:{correct:"Contact demand (m8-4) and commissioning demand (m8-5) both scale with fleet size beyond human-tended operations, and both are solved the same way — autonomy, pipelines, exception-handling. A mega-constellation is an operation defined by flow, where every per-satellite manual step is a scaling wall.",wrong:"They are deeply related (the scaling theme). Neither is fundamentally about the link budget (that was easy) or the user terminal (Module 6)."}
+};
+let answered={};
+document.querySelectorAll('.quiz-opt').forEach(btn=>{
+    btn.addEventListener('click',function(){
+        const q=this.dataset.q;
+        if(answered[q]!==undefined)return;
+        const correct=this.dataset.correct==='true';
+        answered[q]=correct;
+        document.querySelectorAll(`.quiz-opt[data-q="${q}"]`).forEach(b=>{b.disabled=true;if(b.dataset.correct==='true')b.classList.add('correct');});
+        if(!correct)this.classList.add('wrong');
+        const fb=document.getElementById('fb'+q);
+        fb.textContent=(correct?'\u2713 ':'\u2717 ')+feedbacks[q][correct?'correct':'wrong'];
+        fb.style.color=correct?'#39ff14':'#ff004f';
+        if(Object.keys(answered).length===10){
+            const total=Object.values(answered).filter(Boolean).length;
+            const sc=document.getElementById('quizScore');
+            sc.style.display='block';
+            const pct=Math.round(total/10*100);
+            sc.textContent=`SCORE: ${total}/10 (${pct}%) \u2014 ${pct===100?'PERFECT.':pct>=80?'STRONG.':pct>=60?'ADEQUATE. REVISIT WEAK SECTIONS.':'REVISIT THE LESSON BEFORE PROCEEDING.'}`;
+        }
+    });
+});
+</script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="supabase.js"></script>
+<script src="user_progress.js"></script>
+<script>
+const LESSON_ID='m8-5';
+(function(){
+    function bounceToLogin(r){console.error("Auth guard:",r);window.location.replace("index.html");}
+    async function init(){
+        if(typeof client==="undefined"||!client||!client.auth)return bounceToLogin("Supabase client not loaded");
+        let session=null;
+        try{({data:{session}}=await client.auth.getSession());}
+        catch(e){return bounceToLogin("getSession threw: "+e.message);}
+        if(!session){window.location.replace("index.html");return;}
+        const btn=document.getElementById('completeBtn'),msg=document.getElementById('completeMsg');
+        function setDone(done){
+            if(done){btn.textContent='\u2713 COMPLETE \u2014 CLICK TO UNDO';btn.classList.add('done');btn.style.cssText='border-color:#39ff14;color:#39ff14;background:rgba(57,255,20,0.1);cursor:pointer;opacity:1;';msg.style.color='#39ff14';msg.textContent='Lesson marked complete. Click again to undo.';}
+            else{btn.textContent='MARK LESSON COMPLETE';btn.classList.remove('done');btn.style.cssText='';msg.style.color='#ffffff55';msg.textContent='Not yet marked complete.';}
+        }
+        let mastered=[];
+        try{mastered=await getMasteredSections();}catch(e){console.error(e);}
+        setDone(mastered.includes(LESSON_ID));
+        btn.addEventListener('click',async()=>{
+            const isDone=btn.classList.contains('done');
+            msg.style.color='#00d9ff';msg.textContent='Saving...';
+            const ok=await upsertSection(LESSON_ID,!isDone);
+            if(ok){setDone(!isDone);}else{msg.style.color='#ff004f';msg.textContent='Error saving. Try again.';}
+        });
+        const btt=document.getElementById('backToTop');
+        window.addEventListener('scroll',()=>{btt.classList.toggle('visible',window.scrollY>400);});
+        btt.addEventListener('click',()=>window.scrollTo({top:0,behavior:'smooth'}));
+    }
+    if(document.readyState==="loading")document.addEventListener("DOMContentLoaded",init);
+    else init();
+})();
+</script>
+</body>
+</html>
