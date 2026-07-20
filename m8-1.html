@@ -1,0 +1,621 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, shrink-to-fit=no">
+<title>M8-1 — The Gateway &amp; the Feeder Link · LEOAF</title>
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;600;800&family=Share+Tech+Mono&family=Libre+Baskerville:ital,wght@0,400;0,700;1,400&display=swap" rel="stylesheet">
+<link rel="icon" href="favicon.ico" sizes="any" type="image/x-icon">
+<link rel="manifest" href="site.webmanifest">
+<meta name="theme-color" content="#0f0f0f">
+<script>
+window.leoafAbort = async function () {
+    function go() { window.location.replace("index.html?signedout=1"); }
+    try { if (typeof client !== "undefined" && client && client.auth && client.auth.signOut) { try { await client.auth.signOut({ scope: "local" }); } catch (e) {} } } catch (e) {}
+    go();
+};
+</script>
+<style>
+* { box-sizing:border-box; margin:0; padding:0; }
+html { height:100%; -webkit-text-size-adjust:100%; overflow-x:hidden; }
+body { font-family:'Share Tech Mono',monospace; background:#000; color:white; overflow-x:hidden; min-height:100vh; }
+#starsCanvas { position:fixed; inset:0; z-index:-1; }
+header { background:#000; border-bottom:1px solid #ff004f33; position:sticky; top:0; z-index:100; padding:1rem clamp(1.5rem,5vw,4rem); display:flex; justify-content:space-between; align-items:center; }
+.logo { font-family:'Orbitron',sans-serif; font-weight:800; font-size:clamp(16px,2vw,22px); letter-spacing:3px; text-decoration:none; }
+.logo span:first-child { color:white; } .logo span:last-child { color:#ff004f; }
+.nav-right { display:flex; align-items:center; gap:10px; }
+.nav-btn { background:transparent; border:1px solid #ff004f44; color:#ff004f; padding:6px 14px; cursor:pointer; transition:0.3s; font-size:11px; font-family:'Orbitron',sans-serif; letter-spacing:1px; text-decoration:none; display:inline-block; }
+.nav-btn:hover { background:#ff004f; color:black; }
+.breadcrumb { padding:14px clamp(1.5rem,5vw,4rem); font-size:11px; color:#ffffff44; letter-spacing:1px; position:relative; z-index:1; }
+.breadcrumb a { color:#00d9ff66; text-decoration:none; } .breadcrumb a:hover { color:#00d9ff; }
+.breadcrumb span { margin:0 8px; }
+.lesson-wrap { max-width:820px; margin:0 auto; padding:0 clamp(1.5rem,5vw,4rem) 80px; position:relative; z-index:1; }
+.lesson-header { padding:30px 0 28px; border-bottom:1px solid #ffffff11; margin-bottom:36px; }
+.lesson-tag { font-family:'Orbitron',sans-serif; font-size:10px; color:#ff004f; letter-spacing:3px; margin-bottom:10px; }
+.lesson-header h1 { font-family:'Orbitron',sans-serif; font-size:clamp(20px,3.5vw,32px); font-weight:800; line-height:1.2; margin-bottom:12px; }
+.lesson-meta { display:flex; gap:10px; flex-wrap:wrap; margin-bottom:16px; }
+.l-pill { font-family:'Orbitron',sans-serif; font-size:10px; padding:3px 10px; border:1px solid; letter-spacing:1px; }
+.l-pill-q { color:#ff004f; border-color:#ff004f44; } .l-pill-t { color:#39ff14; border-color:#39ff1444; }
+.l-pill-c { color:#ffaa00; border-color:#ffaa0044; }
+.lesson-intro { font-size:13px; line-height:1.85; opacity:0.75; }
+.toc { background:rgba(0,217,255,0.06); border:1px solid #00d9ff33; padding:24px 28px; margin:30px 0; }
+.toc h4 { font-family:'Orbitron',sans-serif; font-size:10px; color:#00d9ff; letter-spacing:2px; margin-bottom:16px; }
+.toc ol { padding-left:20px; } .toc li { font-size:13px; line-height:2.1; }
+.toc li a { color:#00d9ffbb; text-decoration:none; transition:0.15s; } .toc li a:hover { color:#fff; padding-left:4px; }
+.toc li::marker { color:#ff004f; font-family:'Orbitron',sans-serif; font-size:10px; }
+.cb { background:#f5f2ec; color:#1a1a1a; padding:36px clamp(24px,4vw,48px); margin-bottom:24px; border-left:4px solid #00d9ff; position:relative; z-index:1; }
+.cb h2 { font-family:'Orbitron',sans-serif; font-size:13px; color:#003d66; letter-spacing:2px; text-transform:uppercase; margin-bottom:20px; padding-bottom:10px; border-bottom:2px solid #00d9ff66; scroll-margin-top:80px; }
+.cb h3 { font-family:'Orbitron',sans-serif; font-size:11px; color:#444; letter-spacing:1.5px; text-transform:uppercase; margin:28px 0 12px; }
+.cb p { font-family:'Libre Baskerville',Georgia,serif; font-size:15px; line-height:1.9; color:#1a1a1a; margin-bottom:16px; }
+.cb ul { padding-left:0; margin-bottom:16px; }
+.cb ul li { font-family:'Libre Baskerville',Georgia,serif; font-size:14px; line-height:1.85; color:#1a1a1a; padding-left:20px; position:relative; margin-bottom:8px; }
+.cb ul li::before { content:'›'; position:absolute; left:0; color:#0077aa; }
+.cb blockquote { border-left:3px solid #1a7a1a; background:#eafaea; padding:14px 20px; margin:18px 0; font-size:13px; font-family:'Share Tech Mono',monospace; color:#0a3d0a; line-height:1.8; }
+.callout { border-left:3px solid #0088cc; background:#e8f4fb; padding:16px 20px; margin:22px 0; font-size:12px; line-height:1.8; color:#1a1a1a; }
+.callout.red { border-left-color:#cc0033; background:#fdecea; }
+.callout.green { border-left-color:#1a7a1a; background:#eafaea; }
+.callout.amber { border-left-color:#996600; background:#fef9ec; }
+.callout strong { font-family:'Orbitron',sans-serif; font-size:10px; letter-spacing:1px; display:block; margin-bottom:8px; }
+.compare-table { width:100%; border-collapse:collapse; margin:22px 0; font-size:12px; }
+.compare-table th { font-family:'Orbitron',sans-serif; font-size:10px; letter-spacing:1px; color:#003d66; padding:10px 12px; border-bottom:2px solid #00d9ff66; text-align:left; }
+.compare-table td { padding:10px 12px; border-bottom:1px solid #ddd; line-height:1.5; color:#1a1a1a; vertical-align:top; }
+.compare-table tr:hover td { background:#f0f0f0; }
+.key-numbers { display:grid; grid-template-columns:repeat(auto-fit,minmax(140px,1fr)); gap:12px; margin:22px 0; }
+.kn-item { background:#fff; border:1px solid #d0d0d0; padding:16px 12px; text-align:center; }
+.kn-val { font-family:'Orbitron',sans-serif; font-size:clamp(13px,1.8vw,18px); font-weight:800; color:#003d66; display:block; }
+.kn-label { font-size:10px; color:#555; letter-spacing:1px; margin-top:5px; display:block; line-height:1.4; }
+.quiz-block { background:rgba(17,17,17,0.9); border:1px solid #ff004f33; padding:28px; margin:48px 0 32px; }
+.quiz-block h2 { font-family:'Orbitron',sans-serif; font-size:13px; color:#ff004f; letter-spacing:2px; margin-bottom:6px; }
+.quiz-intro { font-size:12px; opacity:0.6; margin-bottom:24px; padding-bottom:16px; border-bottom:1px solid #ff004f22; line-height:1.6; }
+.quiz-q { margin-bottom:28px; }
+.quiz-q p { font-size:13px; opacity:0.9; margin-bottom:12px; line-height:1.65; }
+.quiz-q p strong { color:#00d9ff; }
+.quiz-options { display:flex; flex-direction:column; gap:8px; }
+.quiz-opt { background:rgba(255,255,255,0.03); border:1px solid #ffffff1a; padding:11px 16px; cursor:pointer; font-size:12px; font-family:'Share Tech Mono',monospace; transition:0.2s; text-align:left; color:white; line-height:1.5; }
+.quiz-opt:hover:not(:disabled) { background:rgba(0,217,255,0.08); border-color:#00d9ff44; }
+.quiz-opt.correct { background:rgba(57,255,20,0.1); border-color:#39ff14; color:#39ff14; }
+.quiz-opt.wrong { background:rgba(255,0,79,0.1); border-color:#ff004f; color:#ff004f; }
+.quiz-opt:disabled { cursor:default; }
+.quiz-feedback { font-size:12px; margin-top:10px; min-height:18px; line-height:1.7; opacity:0.9; padding:0 4px; }
+.quiz-score { font-family:'Orbitron',sans-serif; font-size:12px; color:#39ff14; margin-top:20px; letter-spacing:1px; display:none; padding-top:16px; border-top:1px solid #39ff1433; }
+.py-block { background:rgba(10,10,10,0.95); border:1px solid #39ff1422; padding:28px; margin:32px 0; }
+.py-block h2 { font-family:'Orbitron',sans-serif; font-size:13px; color:#39ff14; letter-spacing:2px; margin-bottom:8px; }
+.py-block .py-intro { font-size:12px; opacity:0.7; margin-bottom:20px; padding-bottom:16px; border-bottom:1px solid #39ff1422; line-height:1.7; }
+.py-exercise { margin-bottom:32px; } .py-exercise:last-child { margin-bottom:0; }
+.py-exercise h3 { font-family:'Orbitron',sans-serif; font-size:11px; color:#39ff1499; letter-spacing:1.5px; text-transform:uppercase; margin-bottom:10px; }
+.py-exercise p { font-size:12px; opacity:0.8; margin-bottom:14px; line-height:1.75; }
+.py-block pre { background:#050505; border:1px solid #39ff1433; padding:20px; font-family:'Share Tech Mono',monospace; font-size:11px; line-height:1.7; overflow-x:auto; color:#39ff14; white-space:pre; margin-bottom:12px; }
+.py-note { background:rgba(57,255,20,0.04); border-left:2px solid #39ff14; padding:12px 16px; margin-top:14px; font-size:12px; line-height:1.75; opacity:0.8; }
+.py-note strong { font-family:'Orbitron',sans-serif; font-size:10px; color:#39ff14; display:block; margin-bottom:6px; letter-spacing:1px; }
+.reflection-block { background:rgba(255,170,0,0.04); border:1px solid #ffaa0033; padding:24px; margin:32px 0; }
+.reflection-block h2 { font-family:'Orbitron',sans-serif; font-size:13px; color:#ffaa00; letter-spacing:2px; margin-bottom:8px; }
+.ref-intro { font-size:12px; opacity:0.7; margin-bottom:20px; padding-bottom:14px; border-bottom:1px solid #ffaa0022; line-height:1.7; }
+.ref-prompt { margin-bottom:20px; }
+.ref-prompt h3 { font-family:'Orbitron',sans-serif; font-size:11px; color:#ffaa0099; letter-spacing:1px; margin-bottom:8px; }
+.ref-prompt p { font-size:12px; opacity:0.8; line-height:1.75; }
+.complete-wrap { margin-top:56px; padding-top:30px; border-top:1px solid #ffffff11; text-align:center; }
+.complete-btn { font-family:'Orbitron',sans-serif; font-size:13px; letter-spacing:2px; padding:14px 44px; background:transparent; border:1px solid #39ff14; color:#39ff14; cursor:pointer; transition:0.3s; }
+.complete-btn:hover:not(.done) { background:#39ff14; color:black; box-shadow:0 0 20px rgba(57,255,20,0.4); }
+.complete-btn.done { background:rgba(57,255,20,0.1); cursor:pointer; opacity:1; }
+.complete-msg { font-size:12px; color:#39ff14; margin-top:14px; min-height:18px; letter-spacing:1px; }
+.lesson-nav { display:flex; justify-content:space-between; margin-top:30px; flex-wrap:wrap; gap:10px; }
+.lesson-nav a { font-family:'Orbitron',sans-serif; font-size:11px; color:#00d9ff66; text-decoration:none; letter-spacing:1px; transition:0.2s; }
+.lesson-nav a:hover { color:#00d9ff; }
+.back-to-top { position:fixed; bottom:28px; right:28px; z-index:200; width:44px; height:44px; background:#000; border:1px solid #00d9ff55; color:#00d9ff; font-size:20px; cursor:pointer; display:flex; align-items:center; justify-content:center; opacity:0; pointer-events:none; transition:opacity 0.3s; }
+.back-to-top.visible { opacity:1; pointer-events:auto; } .back-to-top:hover { border-color:#00d9ff; }
+footer { text-align:center; padding:30px; opacity:0.3; font-size:11px; position:relative; z-index:1; letter-spacing:1px; }
+.module-complete { background:rgba(57,255,20,0.06); border:1px solid #39ff1444; padding:24px 28px; margin:40px 0; text-align:center; }
+.module-complete h3 { font-family:'Orbitron',sans-serif; font-size:14px; color:#39ff14; letter-spacing:2px; margin-bottom:10px; }
+.module-complete p { font-size:12px; opacity:0.8; line-height:1.7; }
+</style>
+</head>
+<body>
+<canvas id="starsCanvas"></canvas>
+<header>
+    <a href="dashboard.html" class="logo"><span>LEO</span><span>AF</span></a>
+    <div class="nav-right">
+        <a href="m8.html" class="nav-btn">← M8 HUB</a>
+        <button class="nav-btn" onclick="leoafAbort()">ABORT</button>
+    </div>
+</header>
+<div class="breadcrumb">
+    <a href="dashboard.html">DASHBOARD</a><span>/</span>
+    <a href="m8.html">M8</a><span>/</span>
+    <span style="color:#ffffff88;">LESSON 01 — THE GATEWAY &amp; FEEDER LINK</span>
+</div>
+
+<div class="lesson-wrap">
+
+<div class="lesson-header">
+    <div class="lesson-tag">M8 · LESSON 01 OF 7</div>
+    <h1>The Gateway &amp; the Feeder Link</h1>
+    <div class="lesson-meta">
+        <div class="l-pill l-pill-q">MODULE 8</div>
+        <div class="l-pill l-pill-t">GROUND SEGMENT &amp; OPERATIONS</div>
+        <div class="l-pill l-pill-c">FOUNDATION</div>
+    </div>
+    <p class="lesson-intro" style="margin-bottom:12px;">Module 7 ended at the gateways where the mesh touches down. This module builds them — and everything else it takes to keep a constellation running. It opens a new phase of the program: the first six modules built the constellation as a machine that moves bits through space; this phase asks what it takes to <em>operate</em> that machine — the ground network that connects it to the terrestrial internet, and the operations that keep a fleet of thousands of satellites healthy. The first question is the most basic: how does a packet, having crossed the mesh, actually reach the internet? The answer is the <strong>gateway</strong> — a large ground station that connects the space network to terrestrial fibre — and the <strong>feeder link</strong>, the high-capacity radio trunk between a satellite and a gateway that is a fundamentally different animal from the user link this program has studied until now.</p>
+    <p class="lesson-intro" style="margin-bottom:12px;">The feeder link is the user link's opposite in almost every respect, and this lesson quantifies why. Where a user terminal is small and cheap with a G/T of 11 to 21 dB/K (Module 6), a gateway is a large engineered dish — a 7.3 m antenna delivers a G/T of ~41 dB/K, some 26 dB better — because a gateway is a fixed, powered, professionally-sited installation with none of the user terminal's constraints. Where a user beam carries one user's traffic over a few hundred megahertz, the feeder link carries the <em>aggregate</em> of many user beams — 32 beams of 250 MHz each is 8 GHz of trunk bandwidth — because every user a satellite serves must have its traffic funnelled down to the ground somewhere. The feeder link is the mesh's on-ramp to the internet, and it is engineered as a high-capacity backhaul trunk, not a consumer access link. The spine of this module, a <code>GroundSegment</code> model, begins here with the feeder-link budget and the gateway's capacity.</p>
+</div>
+
+<div class="toc">
+    <h4>CONTENTS</h4>
+    <ol>
+        <li><a href="#s1">What a gateway is</a></li>
+        <li><a href="#s2">The feeder link versus the user link</a></li>
+        <li><a href="#s3">The feeder-link budget</a></li>
+        <li><a href="#s4">The feeder link's capacity</a></li>
+        <li><a href="#s5">Why the feeder link is not just a big user link</a></li>
+        <li><a href="#s6">The gateway in the mesh</a></li>
+        <li><a href="#s7">Key facts</a></li>
+        <li><a href="#s8">What this lesson delivers to the design chain</a></li>
+        <li><a href="#kf">Key facts</a></li>
+        <li><a href="#quiz">Knowledge check</a></li>
+        <li><a href="#py">Python exercises</a></li>
+        <li><a href="#reflect">Reflection</a></li>
+        <li><a href="#sources">Sources</a></li>
+    </ol>
+</div>
+
+<div class="cb" id="s1">
+    <h2>1. What a gateway is</h2>
+<p>A <strong>gateway</strong> (or ground station, or teleport) is the physical point where the satellite network connects to the terrestrial internet. It is a large antenna — typically several metres of parabolic dish, often several such dishes per site — with high-power transmitters, cooled low-noise receivers, and a fibre connection to a terrestrial point of presence (m8-3). Its job is to relay traffic between the satellites overhead and the ground network: user traffic coming <em>down</em> from the constellation is handed to terrestrial fibre and routed to its internet destination; traffic coming <em>up</em> from the internet is sent to the constellation for delivery to users.</p>
+<p>A gateway is everything a user terminal is not. It is fixed, so it can use a large dish that would be absurd on a rooftop or a fuselage (Module 6's whole trade). It is powered from the grid, so it can run high-power amplifiers and cooled receivers. It is professionally sited and maintained, so it can be placed where the sky is clear and the backhaul is good. And it tracks the fast-moving LEO satellites with a steerable mount — often multiple dishes so that one can acquire the next satellite while another still serves the current one (the m6-5 make-before-break pattern, at gateway scale). The gateway is the constellation's expensive, capable, terrestrial anchor, and there are far fewer of them than there are users — which is the whole point of a mesh (m7-1): concentrate the ground infrastructure at a handful of high-capacity sites.</p>
+</div>
+
+<div class="cb" id="s2">
+    <h2>2. The feeder link versus the user link</h2>
+<p>The radio link between a satellite and a gateway is the <strong>feeder link</strong>, and it differs from the user link (Module 4, the satellite-to-terminal link) in three defining ways:</p>
+<p><strong>It aggregates.</strong> A user link carries one user's traffic. A feeder link carries the combined traffic of every user beam the satellite is serving — potentially dozens of beams, each hundreds of megahertz wide. The feeder is a trunk, not an access link: it funnels the satellite's entire served capacity down to one gateway (or splits it across a few), so it must be far higher in capacity than any single user link. This is why feeder links use the widest available spectrum allocations — Ka-band (20/30 GHz), and increasingly Q/V-band (40/50 GHz) — where gigahertz of bandwidth can be found.</p>
+<p><strong>It has a capable ground end.</strong> The user link is constrained by the user terminal's small aperture (Module 6). The feeder link's ground end is a large gateway dish with a high G/T and high EIRP, so the <em>ground side</em> of the feeder link is enormously capable — the link's limiting end is the satellite, not the ground. This inverts the user-link intuition, where the terminal was the weak end; on the feeder link, the gateway is the strong end and carries the link.</p>
+<p><strong>It is engineered, not deployed.</strong> A user terminal is installed by a consumer or an installer in whatever location the user happens to be (Module 6's segments). A gateway is <em>sited</em> — placed deliberately where the rain climate, the backhaul, and the regulatory access are favourable (m8-3). This freedom to choose the location is what makes the feeder link's central problem — rain outage — solvable through site diversity (m8-2), an option the user link never had.</p>
+<p>The feeder link, then, is a high-capacity, high-G/T, deliberately-sited backhaul trunk. It uses the same link-budget physics as Module 4, but every parameter is pushed to the opposite extreme from the user link.</p>
+</div>
+
+<div class="cb" id="s3">
+    <h2>3. The feeder-link budget</h2>
+<p>The Module 4 link equation, applied at gateway scale. Consider the feeder downlink (satellite to gateway) at Ka-band. The gateway's antenna gain, for a 7.3 m dish at 20 GHz with 65% efficiency:</p>
+<blockquote>G = η·(πD/λ)² = <strong>61.8 dBi</strong></blockquote>
+<p>and with a cooled receiver (system temperature ~120 K), the gateway's G/T is:</p>
+<blockquote>G/T = 61.8 − 10·log₁₀(120) = <strong>~41 dB/K</strong></blockquote>
+<p>against a user terminal's 11–21 dB/K (Module 6) — the gateway is 20 to 30 dB more sensitive. The slant range at a 20° elevation (gateways track to low elevation from clear sites) is ~1,294 km, giving a free-space loss of ~180.7 dB at 20 GHz (~186.7 dB at 40 GHz — the price of Q/V-band's extra bandwidth is ~6 dB more path loss). The enormous gateway G/T means the feeder downlink runs at very high signal-to-noise ratio in clear sky — the link closes with margin to spare and rides the top of the MODCOD ladder, exactly as the m5-7 saturation analysis predicts for a high-G/T terminal. The feeder link's clear-sky capacity is therefore limited not by the link budget but by the <em>bandwidth</em> — which is why the game is to find as much spectrum as possible.</p>
+</div>
+
+<div class="cb" id="s4">
+    <h2>4. The feeder link's capacity</h2>
+<p>Because the gateway's G/T saturates the MODCOD ladder in clear sky, the feeder link's capacity is set by its bandwidth and its high-SNR spectral efficiency. Aggregating 32 user beams of 250 MHz each demands 8 GHz of feeder bandwidth, and at a feeder SNR of 15–20 dB (comfortable for a big-dish gateway) the spectral efficiency is 5–6.7 bit/s/Hz, giving:</p>
+<blockquote>feeder capacity ≈ 5–6.7 bit/s/Hz × 8 GHz ≈ <strong>40–53 Gbps</strong> per feeder link</blockquote>
+<p>per satellite-to-gateway connection. This is the number that matters for the ground segment's sizing: a satellite serving tens of gigabits of user traffic needs a feeder link of comparable capacity to carry it down, and a gateway serving several satellites at once needs a total capacity — and a fibre backhaul (m8-3) — of hundreds of gigabits. The feeder link is where the constellation's aggregate traffic is concentrated, and its capacity is the ground segment's fundamental throughput unit. Where the user link's story was G/T and availability (Module 6), the feeder link's story is <em>bandwidth and aggregation</em>: how much spectrum, how many beams funnelled through it, how many gigabits per gateway.</p>
+</div>
+
+<div class="cb" id="s5">
+    <h2>5. Why the feeder link is not just a big user link</h2>
+<p>It would be tempting to treat the feeder link as merely a user link with a bigger antenna, but three differences make it a distinct engineering problem. First, <strong>the aggregation changes the failure consequence</strong>: a user link failing drops one user; a feeder link failing drops <em>every</em> user whose traffic that satellite was funnelling through it — the feeder is a concentration point, and its reliability requirement is correspondingly higher (m8-2's site diversity exists because of this). Second, <strong>the frequency band changes the physics</strong>: pushing to Q/V-band for bandwidth means far worse rain attenuation (Module 4's rain model gets dramatically worse at 40/50 GHz), so the feeder link's availability problem is more severe than any user link's — the very bandwidth that makes the feeder capable makes it fragile to weather. Third, <strong>the siting freedom changes the solution space</strong>: because a gateway can be placed anywhere, the feeder link's rain problem is solved geographically (put gateways where it rains less, and use several so rain never hits all at once) rather than through link margin alone — a solution the user link, stuck wherever the user is, could never use.</p>
+<p>These three — concentration, band-driven fragility, and siting freedom — are why the ground segment is its own module rather than a footnote to Module 4. The feeder link is the user link's physics turned to the opposite extreme and wrapped in an entirely different set of constraints, and the rest of Part I follows the consequences: the availability problem the concentration and the band create (m8-2), and the placement problem the siting freedom opens (m8-3).</p>
+</div>
+
+<div class="cb" id="s6">
+    <h2>6. The gateway in the mesh</h2>
+<p>The feeder link connects to the mesh Module 7 built. A packet from a user climbs to the serving satellite (m6-5 access), crosses the mesh to a satellite over a gateway (m7-4 routing), descends the feeder link to that gateway, and enters terrestrial fibre. The gateway is the mesh's egress point — the place m7-7 identified as "where the mesh touches down" — and how many gateways there are, and where, determines how the mesh's traffic reaches the ground. A mesh with abundant gateways can egress traffic near its destination; a mesh with few gateways must carry traffic further across the ISLs before it can descend. The gateway count and placement is therefore a joint optimisation with the mesh routing (m8-3), and the feeder link is the interface between the two: the mesh delivers traffic to a satellite over a gateway, and the feeder link carries it the last hop to the ground.</p>
+<p>This is the m7-7 export made concrete. Module 7 handed forward "the gateways where the mesh touches down" as a constraint; this lesson defines what a gateway is and what the feeder link that connects it must do; and the rest of the module sizes, places, and operates the ground network that results. The feeder link is the seam between the space segment and the ground segment, and getting it right — enough capacity, enough availability, in the right places — is what the ground segment is for.</p>
+</div>
+
+<div class="cb" id="s7">
+    <h2>7. Key facts</h2>
+<table class="compare-table">
+<thead><tr>
+<th>Fact</th>
+<th>Value</th>
+<th>Unit</th>
+<th>Source</th>
+</tr></thead>
+<tbody>
+<tr><td>Gateway</td><td>large ground station linking mesh to terrestrial fibre</td><td>—</td><td>§1</td></tr>
+<tr><td>Feeder link</td><td>satellite ↔ gateway high-capacity trunk</td><td>—</td><td>§2</td></tr>
+<tr><td>Gateway antenna gain (7.3 m, 20 GHz)</td><td>61.8</td><td>dBi</td><td>Computed</td></tr>
+<tr><td>Gateway G/T (7.3 m, cooled, 20 GHz)</td><td>~41</td><td>dB/K</td><td>Computed</td></tr>
+<tr><td>Gateway vs user terminal G/T</td><td>+20 to +30</td><td>dB</td><td>Computed</td></tr>
+<tr><td>Feeder bands</td><td>Ka (20/30), Q/V (40/50)</td><td>GHz</td><td>§2</td></tr>
+<tr><td>Feeder slant range (20° elevation)</td><td>~1,294</td><td>km</td><td>Computed</td></tr>
+<tr><td>Feeder FSPL (20 / 40 GHz)</td><td>180.7 / 186.7</td><td>dB</td><td>Computed</td></tr>
+<tr><td>Feeder aggregation (32 beams × 250 MHz)</td><td>8</td><td>GHz</td><td>Computed</td></tr>
+<tr><td>Feeder capacity (8 GHz, 15–20 dB SNR)</td><td>40–53</td><td>Gbps</td><td>Computed</td></tr>
+<tr><td>Feeder failure consequence</td><td>drops all users on that satellite's feeder</td><td>—</td><td>§5</td></tr>
+<tr><td>Q/V-band trade</td><td>more bandwidth, far worse rain</td><td>—</td><td>§5</td></tr>
+</tbody>
+</table>
+</div>
+
+<div class="cb" id="s8">
+    <h2>8. What this lesson delivers to the design chain</h2>
+<p>The spine begins as a <code>FeederLink</code> and <code>Gateway</code> model: the feeder-link budget (gateway G/T, EIRP, FSPL at the chosen band), the feeder capacity from bandwidth and high-SNR spectral efficiency, and the gateway as an aggregation point with a capacity and a fibre backhaul requirement. It takes the m7-7 delivered-traffic profile — how much traffic the mesh needs to egress, and roughly where — and turns it into a feeder-capacity requirement: how many gigabits each gateway must carry, and therefore how capable each feeder link must be. The gateway's clear-sky capacity is now a computed number.</p>
+<p>What the clear-sky budget cannot yet tell us is whether the gateway is <em>available</em>. A feeder link at Ka or Q/V-band is savaged by rain, and a single gateway cannot achieve the availability a backhaul trunk demands — the concentration point that carries a whole satellite's traffic cannot be allowed to fail every time it rains. The answer is site diversity, and it is m8-2: the feeder link's availability problem, and the geographic solution that the gateway's siting freedom makes possible. Only with availability solved can the gateways be placed (m8-3) and the ground network sized.</p>
+</div>
+
+
+<div class="quiz-block" id="quiz">
+    <h2 style="font-family:'Orbitron',sans-serif;font-size:13px;color:#00d9ff;letter-spacing:2px;margin-bottom:8px;">KNOWLEDGE CHECK</h2>
+    <div class="quiz-intro">Ten questions. Each option explains itself after you commit. No retries per question — decide first.</div>
+    <div class="quiz-q">
+        <p><strong>1.</strong> A gateway differs from a user terminal in that it is:</p>
+        <div class="quiz-options">
+            <button class="quiz-opt" data-q="1" data-correct="false">A — Smaller and cheaper</button>
+            <button class="quiz-opt" data-q="1" data-correct="true">B — Fixed, grid-powered, and professionally sited — so it can use a large dish, high-power amplifiers, and cooled receivers, and be placed where the sky and backhaul are good</button>
+            <button class="quiz-opt" data-q="1" data-correct="false">C — Lower in G/T</button>
+            <button class="quiz-opt" data-q="1" data-correct="false">D — Installed by consumers</button>
+        </div>
+        <div class="quiz-feedback" id="fb1"></div>
+    </div>
+    <div class="quiz-q">
+        <p><strong>2.</strong> The feeder link carries:</p>
+        <div class="quiz-options">
+            <button class="quiz-opt" data-q="2" data-correct="false">A — One user's traffic</button>
+            <button class="quiz-opt" data-q="2" data-correct="true">B — The aggregate of every user beam the satellite is serving — a trunk funnelling the satellite's whole served capacity to the ground, needing far more bandwidth than any single user link</button>
+            <button class="quiz-opt" data-q="2" data-correct="false">C — Only telemetry</button>
+            <button class="quiz-opt" data-q="2" data-correct="false">D — Only the control plane</button>
+        </div>
+        <div class="quiz-feedback" id="fb2"></div>
+    </div>
+    <div class="quiz-q">
+        <p><strong>3.</strong> The gateway's G/T of ~41 dB/K versus a user terminal's 11–21 dB/K means:</p>
+        <div class="quiz-options">
+            <button class="quiz-opt" data-q="3" data-correct="false">A — The gateway is the weak end of the feeder link</button>
+            <button class="quiz-opt" data-q="3" data-correct="true">B — The ground end of the feeder link is enormously capable — inverting the user-link intuition where the terminal was the weak end; on the feeder link the satellite is the limiting end</button>
+            <button class="quiz-opt" data-q="3" data-correct="false">C — The feeder link cannot close</button>
+            <button class="quiz-opt" data-q="3" data-correct="false">D — The two links are identical</button>
+        </div>
+        <div class="quiz-feedback" id="fb3"></div>
+    </div>
+    <div class="quiz-q">
+        <p><strong>4.</strong> The feeder link's clear-sky capacity is limited by:</p>
+        <div class="quiz-options">
+            <button class="quiz-opt" data-q="4" data-correct="false">A — The link budget</button>
+            <button class="quiz-opt" data-q="4" data-correct="true">B — Its bandwidth — the huge gateway G/T saturates the MODCOD ladder, so capacity is set by how much spectrum and high-SNR spectral efficiency, giving ~40–53 Gbps over 8 GHz</button>
+            <button class="quiz-opt" data-q="4" data-correct="false">C — The user terminal</button>
+            <button class="quiz-opt" data-q="4" data-correct="false">D — Regulation of user beams</button>
+        </div>
+        <div class="quiz-feedback" id="fb4"></div>
+    </div>
+    <div class="quiz-q">
+        <p><strong>5.</strong> Pushing the feeder link to Q/V-band (40/50 GHz) buys bandwidth at the cost of:</p>
+        <div class="quiz-options">
+            <button class="quiz-opt" data-q="5" data-correct="false">A — Nothing</button>
+            <button class="quiz-opt" data-q="5" data-correct="true">B — Far worse rain attenuation — the very bandwidth that makes the feeder capable makes it more fragile to weather, worsening its availability problem</button>
+            <button class="quiz-opt" data-q="5" data-correct="false">C — Lower gateway gain</button>
+            <button class="quiz-opt" data-q="5" data-correct="false">D — Less aggregation</button>
+        </div>
+        <div class="quiz-feedback" id="fb5"></div>
+    </div>
+    <div class="quiz-q">
+        <p><strong>6.</strong> A feeder link failing is more serious than a user link failing because:</p>
+        <div class="quiz-options">
+            <button class="quiz-opt" data-q="6" data-correct="false">A — It is not more serious</button>
+            <button class="quiz-opt" data-q="6" data-correct="true">B — The feeder is a concentration point — it drops every user whose traffic that satellite was funnelling through it, so its reliability requirement is far higher</button>
+            <button class="quiz-opt" data-q="6" data-correct="false">C — Feeder links are cheaper</button>
+            <button class="quiz-opt" data-q="6" data-correct="false">D — User links carry more traffic</button>
+        </div>
+        <div class="quiz-feedback" id="fb6"></div>
+    </div>
+    <div class="quiz-q">
+        <p><strong>7.</strong> The feeder link's rain problem is solvable through site diversity because:</p>
+        <div class="quiz-options">
+            <button class="quiz-opt" data-q="7" data-correct="false">A — Rain does not affect feeder links</button>
+            <button class="quiz-opt" data-q="7" data-correct="true">B — A gateway can be placed anywhere — so gateways can be sited where it rains less and spread geographically so rain never hits all of them at once, a solution the user link (stuck at the user's location) never had</button>
+            <button class="quiz-opt" data-q="7" data-correct="false">C — Feeder links have infinite margin</button>
+            <button class="quiz-opt" data-q="7" data-correct="false">D — The satellite avoids rain</button>
+        </div>
+        <div class="quiz-feedback" id="fb7"></div>
+    </div>
+    <div class="quiz-q">
+        <p><strong>8.</strong> On the feeder link, the limiting end is:</p>
+        <div class="quiz-options">
+            <button class="quiz-opt" data-q="8" data-correct="false">A — The gateway</button>
+            <button class="quiz-opt" data-q="8" data-correct="true">B — The satellite — because the gateway's large dish and cooled receiver make the ground end so capable that the satellite's antenna and power are the constraint</button>
+            <button class="quiz-opt" data-q="8" data-correct="false">C — The user terminal</button>
+            <button class="quiz-opt" data-q="8" data-correct="false">D — The fibre backhaul</button>
+        </div>
+        <div class="quiz-feedback" id="fb8"></div>
+    </div>
+    <div class="quiz-q">
+        <p><strong>9.</strong> The gateway is the mesh's:</p>
+        <div class="quiz-options">
+            <button class="quiz-opt" data-q="9" data-correct="false">A — Control centre</button>
+            <button class="quiz-opt" data-q="9" data-correct="true">B — Egress point — where the mesh touches down, a packet crossing the ISLs to a satellite over a gateway, descending the feeder link, and entering terrestrial fibre</button>
+            <button class="quiz-opt" data-q="9" data-correct="false">C — Power source</button>
+            <button class="quiz-opt" data-q="9" data-correct="false">D — Only user</button>
+        </div>
+        <div class="quiz-feedback" id="fb9"></div>
+    </div>
+    <div class="quiz-q">
+        <p><strong>10.</strong> The feeder link is described as "the seam between the space segment and the ground segment" because:</p>
+        <div class="quiz-options">
+            <button class="quiz-opt" data-q="10" data-correct="false">A — It is physically a seam</button>
+            <button class="quiz-opt" data-q="10" data-correct="true">B — It is the interface where the mesh delivers traffic to a satellite over a gateway and the feeder carries it the last hop to the ground — the boundary between the space network and the terrestrial one</button>
+            <button class="quiz-opt" data-q="10" data-correct="false">C — It tears like the m7-3 seam</button>
+            <button class="quiz-opt" data-q="10" data-correct="false">D — It is optional</button>
+        </div>
+        <div class="quiz-feedback" id="fb10"></div>
+    </div>
+    <div class="quiz-score" id="quizScore"></div>
+</div>
+
+<div class="py-block" id="py">
+    <h2 style="font-family:'Orbitron',sans-serif;font-size:13px;color:#39ff14;letter-spacing:2px;margin-bottom:8px;">PYTHON EXERCISES</h2>
+    <div class="py-intro">Three exercises; the last extends the module spine project. Run them, then work the numbered follow-ups in the comments — the follow-ups are the exercise.</div>
+<div class="py-exercise">
+    <h3>Exercise 1 — The feeder-link budget</h3>
+    <p>Build the gateway's link and contrast it with the user link.</p>
+<pre>
+import math
+db = lambda x: 10*math.log10(x) if x &gt; 0 else -999.0
+Re, h = 6371.0, 550.0
+
+def dish_gain_db(D_m, f_ghz, eta=0.65):
+    lam = 0.3/f_ghz
+    return db(eta*(math.pi*D_m/lam)**2)
+
+def slant_km(elev_deg, alt=h):
+    e = math.radians(elev_deg)
+    return Re*(math.sqrt(((Re+alt)/Re)**2 - math.cos(e)**2) - math.sin(e))
+
+def fspl_db(range_km, f_ghz):
+    return 92.45 + 20*math.log10(range_km) + 20*math.log10(f_ghz)
+
+# gateway G/T at several dish sizes and bands
+print(f"{'dish':&gt;5}{'band':&gt;7}{'gain dBi':&gt;10}{'G/T dB/K':&gt;10}")
+for D in [3.0, 5.0, 7.3, 9.0]:
+    for f, Tsys in [(20, 120), (40, 150)]:
+        g = dish_gain_db(D, f)
+        gt = g - db(Tsys)
+        print(f"{D:&gt;5.1f}{f:&gt;6}G{g:&gt;10.1f}{gt:&gt;10.1f}")
+
+print(f"\nuser terminal G/T (Module 6): 11-21 dB/K")
+print(f"feeder slant @20°: {slant_km(20):.0f} km, "
+      f"FSPL 20/40 GHz: {fspl_db(slant_km(20),20):.1f}/{fspl_db(slant_km(20),40):.1f} dB")
+
+# 1. Compute how many dB more capable the gateway is than a 21 dB/K
+#    user terminal, per band. Does the gateway's advantage grow or
+#    shrink at Q/V-band, and why (hint: gain up, but Tsys and rain up too)?
+# 2. The feeder downlink saturates the MODCOD ladder in clear sky.
+#    Verify: at what user-link-style C/N0 does the gateway sit, and how
+#    far above the top MODCOD rung (m5-2) is it? State what that wastes.
+# 3. Q/V-band adds ~6 dB FSPL but doubles available bandwidth. Is the
+#    net capacity higher? Model capacity = bandwidth × min(spectral_eff,
+#    saturation) and compare 8 GHz Ka vs 16 GHz Q/V.
+</pre>
+</div>
+<div class="py-exercise">
+    <h3>Exercise 2 — Feeder capacity and aggregation</h3>
+    <p>Size the trunk against the user beams it carries.</p>
+<pre>
+import math
+
+def feeder_capacity_gbps(bandwidth_ghz, snr_db):
+    eff = math.log2(1 + 10**(snr_db/10))
+    return eff * bandwidth_ghz  # Gbps (GHz × bit/s/Hz)
+
+def aggregate_bandwidth_ghz(n_beams, beam_mhz):
+    return n_beams * beam_mhz / 1000
+
+for n_beams in [8, 16, 32, 48]:
+    bw = aggregate_bandwidth_ghz(n_beams, 250)
+    cap = feeder_capacity_gbps(bw, 18)
+    print(f"{n_beams:&gt;2} beams -&gt; {bw:.1f} GHz feeder, "
+          f"{cap:.0f} Gbps @ 18 dB SNR")
+
+# 1. A satellite serves 32 beams but each beam only averages 40% loaded.
+#    Does the feeder still need the full 8 GHz, or can it be
+#    statistically multiplexed smaller? Compute the feeder bandwidth for
+#    a 2:1 and 4:1 statistical-multiplexing ratio and state the risk.
+# 2. A gateway serves several satellites at once. For a gateway handling
+#    4 satellites at 40 Gbps each, what is its total capacity and fibre
+#    backhaul requirement (m8-3)? Is that a lot of fibre?
+# 3. The user-return direction is capacity-starved (m5-7). Does the
+#    feeder link have the same asymmetry, or is it symmetric? Explain
+#    from the gateway's equal strength in both directions.
+</pre>
+</div>
+<div class="py-exercise">
+    <h3>Exercise 3 — Spine seed: the FeederLink and Gateway</h3>
+    <p>The ground segment begins.</p>
+<pre>
+import math
+db = lambda x: 10*math.log10(x) if x &gt; 0 else -999.0
+Re, h = 6371.0, 550.0
+
+# ═══════════════════════════════════════════════════════
+# M8 SPINE PROJECT — GROUND SEGMENT
+# Stage 1 (here): FeederLink + Gateway — the feeder-link
+#   budget, gateway capacity, and aggregation of the mesh's
+#   delivered traffic (m7-7 export) into a feeder requirement.
+# Growth path:
+#   m8-2  site diversity &amp; feeder availability (rain)
+#   m8-3  gateway placement &amp; PoP topology
+#   m8-4  TT&amp;C at scale (the control link)
+#   m8-5  early-orbit operations &amp; commissioning
+#   m8-6  anomalies, playbooks &amp; fleet automation
+#   m8-7  full GroundSegment: placed, sized, operated
+# ═══════════════════════════════════════════════════════
+
+def slant_km(elev_deg, alt=h):
+    e = math.radians(elev_deg)
+    return Re*(math.sqrt(((Re+alt)/Re)**2 - math.cos(e)**2) - math.sin(e))
+
+class Gateway:
+    def __init__(self, dish_m=7.3, band_ghz=20, tsys_k=120, eta=0.65):
+        self.dish_m, self.band, self.tsys = dish_m, band_ghz, tsys_k
+        lam = 0.3/band_ghz
+        self.gain_db = db(eta*(math.pi*dish_m/lam)**2)
+        self.gt_db = self.gain_db - db(tsys_k)
+
+class FeederLink:
+    def __init__(self, gateway, bandwidth_ghz=8.0, elev_deg=20):
+        self.gw = gateway
+        self.bw = bandwidth_ghz
+        self.range_km = slant_km(elev_deg)
+        self.fspl_db = 92.45 + 20*math.log10(self.range_km) \
+                       + 20*math.log10(gateway.band)
+
+    def capacity_gbps(self, snr_db=18):
+        eff = math.log2(1 + 10**(snr_db/10))
+        return eff * self.bw
+
+    def aggregates_beams(self, beam_mhz=250):
+        return int(self.bw*1000 / beam_mhz)
+
+    def report(self):
+        print(f"  gateway: {self.gw.dish_m} m, {self.gw.band} GHz, "
+              f"G/T {self.gw.gt_db:.1f} dB/K")
+        print(f"  feeder:  {self.bw} GHz, range {self.range_km:.0f} km, "
+              f"FSPL {self.fspl_db:.1f} dB")
+        print(f"  capacity: {self.capacity_gbps():.0f} Gbps "
+              f"(~{self.aggregates_beams()} user beams)")
+
+gw = Gateway()
+fl = FeederLink(gw)
+print("── FEEDER LINK (Ka-band, 7.3 m gateway) ──")
+fl.report()
+
+# size against the mesh's delivered traffic (m7-7 export)
+mesh_egress_gbps = 120   # a satellite's served traffic needing to reach ground
+n_feeders = math.ceil(mesh_egress_gbps / fl.capacity_gbps())
+print(f"\n  mesh egress {mesh_egress_gbps} Gbps -&gt; "
+      f"{n_feeders} feeder link(s) needed")
+
+# ── the handoff ─────────────────────────────────────────
+# m8-2 asks whether this feeder is AVAILABLE: at Ka/Q/V-band rain
+# savages it, and a single gateway cannot hit the availability a
+# concentration point demands. Site diversity is the answer.
+
+# 1. Build a Q/V-band gateway (40 GHz, larger Tsys) and compare its
+#    clear-sky capacity to the Ka one. More bandwidth, worse rain —
+#    which wins on clear-sky capacity, and what does m8-2 do to the answer?
+# 2. Add a `backhaul_gbps` requirement: a gateway serving N satellites
+#    needs N × feeder capacity of terrestrial fibre. Size it for a
+#    4-satellite gateway and flag it for m8-3.
+# 3. The feeder saturates the MODCOD ladder (huge G/T). Add a
+#    `clear_sky_margin_db` and show it is large — then note (for m8-2)
+#    that rain will eat all of it and more.
+</pre>
+</div>
+</div>
+
+<div class="reflection-block" id="reflect">
+    <h2>REFLECTION</h2>
+    <div class="ref-intro">Four prompts. Each forces a decision — write the position down before moving on; the act of committing is the exercise.</div>
+    <div class="ref-prompt">
+        <h3>PROMPT 1</h3>
+        <p>Section 4 showed the feeder link's clear-sky capacity is bandwidth-limited because the gateway's huge G/T saturates the MODCOD ladder — the same saturation m5-7 found for high-G/T terminals. This means the gateway's enormous sensitivity is "wasted" in clear sky (it buys no extra clear-sky capacity). Yet nobody builds a smaller, cheaper gateway. Reconcile this: if the G/T is wasted in clear sky, what is the large dish actually buying, and where does its value appear? Connect the answer to m8-2's rain problem and decide whether the gateway is sized for clear-sky capacity or for rain-fade survival — and what that says about how to think about margin on a concentration point.</p>
+    </div>
+    <div class="ref-prompt">
+        <h3>PROMPT 2</h3>
+        <p>Section 5 argued the feeder link is not just a big user link because of concentration, band-driven fragility, and siting freedom. But there is a design choice hidden in "concentration": a satellite could funnel all its traffic through one feeder link (maximum concentration, maximum failure consequence) or split it across several feeder links to different gateways (less concentration, more resilience, more feeder hardware). Work the trade: what does splitting a satellite's feeder across two gateways buy in availability, and cost in feeder hardware and complexity? Decide whether the concentration is a bug to be mitigated or a feature to be embraced, and how m8-2's site diversity changes the calculation.</p>
+    </div>
+    <div class="ref-prompt">
+        <h3>PROMPT 3</h3>
+        <p>Section 2 noted feeder links push to Q/V-band for bandwidth despite the rain penalty. This is a bet: that the extra bandwidth is worth the extra fragility, mitigated by site diversity. But the bet's payoff depends on the constellation's traffic and climate. Construct the argument for and against Q/V-band feeders for two different operators: one serving dense traffic in wet tropical markets, one serving moderate traffic in dry temperate markets. For which does the Q/V-band bandwidth justify its rain fragility, and what does the answer say about whether feeder-band choice is a constellation-wide decision or a per-gateway one?</p>
+    </div>
+    <div class="ref-prompt">
+        <h3>PROMPT 4</h3>
+        <p>This lesson built the feeder link entirely from the clear-sky budget, explicitly deferring availability to m8-2. But the clear-sky capacity (40–53 Gbps) is the number that will size the whole ground segment — how many gateways, how much backhaul, what it costs. If m8-2 shows that rain forces the feeder to run at a lower average rate (backing off MODCOD during fades), the clear-sky number overstates the deliverable capacity. Apply the load-bearing-assumption discipline: is the clear-sky feeder capacity the right number to size the ground segment on, or should it be an availability-weighted average? Specify what m8-2 must compute before the ground-segment sizing (m8-7) can trust the feeder capacity, and predict roughly how much the availability weighting will reduce it.</p>
+    </div>
+</div>
+
+<div class="cb" id="sources">
+    <h2>Sources</h2>
+<ul><li>Maral &amp; Bousquet, <em>Satellite Communications Systems</em> — feeder links, gateway architecture, and the ground segment.</li><li>Roddy, <em>Satellite Communications</em> — earth station (gateway) design, large-aperture antennas, and G/T.</li><li>ITU-R S.1328 / feeder-link sharing studies — feeder-link band usage (Ka, Q/V) for non-GSO systems.</li><li>Module 4 (m4-1) — the link-budget physics applied here at gateway scale; Module 5 (m5-7) — the MODCOD saturation the gateway's high G/T triggers; Module 7 (m7-7) — the mesh's delivered-traffic profile this feeder link sizes against.</li></ul>
+</div>
+
+<div class="complete-wrap">
+    <button class="complete-btn" id="completeBtn">MARK LESSON COMPLETE</button>
+    <div class="complete-msg" id="completeMsg"></div>
+</div>
+<div class="lesson-nav">
+    <a href="m8.html">← M8 HUB</a>
+    <a href="m8-2.html">LESSON 02 — SITE DIVERSITY &amp; AVAILABILITY →</a>
+</div>
+</div>
+
+<button class="back-to-top" id="backToTop" title="Back to top">↑</button>
+<footer>© 2026 LEOAF · M8 · LESSON 01 OF 7</footer>
+<script>
+const canvas=document.getElementById('starsCanvas'),ctx=canvas.getContext('2d');
+let stars=[];
+function initStars(){stars=[];for(let i=0;i<180;i++)stars.push({x:Math.random()*canvas.width,y:Math.random()*canvas.height,size:Math.random()*1.5+0.4,speed:Math.random()*0.18+0.04,hue:Math.random()*360});}
+function resizeCanvas(){canvas.width=window.innerWidth;canvas.height=window.innerHeight;}
+resizeCanvas();initStars();window.addEventListener('resize',resizeCanvas);
+function animateStars(){ctx.clearRect(0,0,canvas.width,canvas.height);stars.forEach(s=>{s.y-=s.speed;if(s.y<0){s.y=canvas.height;s.x=Math.random()*canvas.width;}ctx.beginPath();ctx.fillStyle=`hsl(${s.hue},80%,80%)`;ctx.arc(s.x,s.y,s.size,0,Math.PI*2);ctx.fill();});requestAnimationFrame(animateStars);}
+animateStars();
+</script>
+<script>
+const feedbacks={
+    1:{correct:"The gateway is everything the user terminal (Module 6) is not: a fixed, powered, engineered installation with a several-metre dish and a G/T of ~41 dB/K. Its freedom from the terminal's constraints is what makes it capable — and its siting freedom is what makes the feeder link's rain problem solvable (m8-2).",wrong:"A gateway is larger, more expensive, and far higher in G/T than a user terminal. It is professionally sited and maintained, not consumer-installed."},
+    2:{correct:"The feeder is a backhaul trunk: 32 beams of 250 MHz aggregate to 8 GHz. Every user a satellite serves must have their traffic funnelled down somewhere, so the feeder must be much higher in capacity than a user link — which is why it uses the widest Ka/Q/V allocations.",wrong:"It carries far more than one user's traffic (the aggregate). Telemetry and control are the separate TT&C link (m8-4), not the feeder."},
+    3:{correct:"A 7.3 m cooled gateway dish is 20–30 dB more sensitive than a user terminal. On the user link the small terminal limited things; on the feeder link the gateway is the strong end and the satellite is the constraint — the intuition inverts.",wrong:"The gateway is the *strong* end, not weak. The feeder closes with margin to spare (high SNR). The links are opposites, not identical."},
+    4:{correct:"The gateway's G/T runs the link at very high SNR in clear sky (m5-7 saturation), so the budget is not the limit — the bandwidth is. 8 GHz at 5–6.7 bit/s/Hz gives 40–53 Gbps. The game is finding spectrum, which is why feeder links push to Q/V-band.",wrong:"The budget is not the clear-sky limit (it saturates). The user terminal is on a different link. User-beam regulation is unrelated to feeder capacity."},
+    5:{correct:"Rain attenuation (Module 4's model) is dramatically worse at 40/50 GHz than at 20 GHz — ~6 dB more path loss plus far heavier rain fades. Q/V-band's wide allocations are the draw; its weather fragility is the price, and it makes site diversity (m8-2) essential.",wrong:"There is a real cost (rain). Higher frequency gives *more* gain for a fixed dish, not less. Aggregation is unchanged."},
+    6:{correct:"A user link failing drops one user; a feeder link failing drops all the users on that satellite's feeder. The aggregation that makes the feeder efficient also makes its failure catastrophic — which is precisely why site diversity (m8-2) exists.",wrong:"It is much more serious (the whole point). Feeder links are far more expensive. The feeder carries the *aggregate*, far more than any user link."},
+    7:{correct:"The gateway's siting freedom is the key: unlike a user terminal fixed wherever the user is, gateways are placed deliberately, so the rain problem becomes geographic (spread the gateways) rather than a pure link-margin problem. This is m8-2's diversity solution.",wrong:"Rain savages feeder links (especially at Q/V). No link has infinite margin. The satellite cannot avoid rain on the ground path — the gateways' placement is the lever."},
+    8:{correct:"The gateway's ~41 dB/K G/T and high EIRP make the ground end enormously capable, so the feeder link's performance is bounded by the satellite's antenna and power, not the gateway. This inverts the user link, where the small terminal was the weak end.",wrong:"The gateway is the strong end. The user terminal is not on the feeder link. The fibre backhaul is a separate capacity concern (m8-3), not the RF link's limiting end."},
+    9:{correct:"The gateway is where m7-7's \"mesh touches down\": traffic crosses the mesh to a satellite over a gateway, descends the feeder link, and joins terrestrial fibre. How many gateways and where determines how the mesh's traffic reaches the ground — a joint optimisation with routing (m8-3).",wrong:"Control is TT&C's domain (m8-4). The gateway does not power the constellation. It is an egress for all users' traffic, not a user itself."},
+    10:{correct:"The feeder link is where the space segment (Modules 1–7) meets the ground segment (Module 8): the mesh's routing delivers traffic to the satellite, and the feeder carries it down to the gateway and into fibre. Getting it right — capacity, availability, placement — is what the ground segment is for.",wrong:"\"Seam\" is a metaphor for the space/ground boundary, unrelated to m7-3's orbital seam. It is essential, not optional — without it the mesh cannot reach the internet."}
+};
+let answered={};
+document.querySelectorAll('.quiz-opt').forEach(btn=>{
+    btn.addEventListener('click',function(){
+        const q=this.dataset.q;
+        if(answered[q]!==undefined)return;
+        const correct=this.dataset.correct==='true';
+        answered[q]=correct;
+        document.querySelectorAll(`.quiz-opt[data-q="${q}"]`).forEach(b=>{b.disabled=true;if(b.dataset.correct==='true')b.classList.add('correct');});
+        if(!correct)this.classList.add('wrong');
+        const fb=document.getElementById('fb'+q);
+        fb.textContent=(correct?'\u2713 ':'\u2717 ')+feedbacks[q][correct?'correct':'wrong'];
+        fb.style.color=correct?'#39ff14':'#ff004f';
+        if(Object.keys(answered).length===10){
+            const total=Object.values(answered).filter(Boolean).length;
+            const sc=document.getElementById('quizScore');
+            sc.style.display='block';
+            const pct=Math.round(total/10*100);
+            sc.textContent=`SCORE: ${total}/10 (${pct}%) \u2014 ${pct===100?'PERFECT.':pct>=80?'STRONG.':pct>=60?'ADEQUATE. REVISIT WEAK SECTIONS.':'REVISIT THE LESSON BEFORE PROCEEDING.'}`;
+        }
+    });
+});
+</script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="supabase.js"></script>
+<script src="user_progress.js"></script>
+<script>
+const LESSON_ID='m8-1';
+(function(){
+    function bounceToLogin(r){console.error("Auth guard:",r);window.location.replace("index.html");}
+    async function init(){
+        if(typeof client==="undefined"||!client||!client.auth)return bounceToLogin("Supabase client not loaded");
+        let session=null;
+        try{({data:{session}}=await client.auth.getSession());}
+        catch(e){return bounceToLogin("getSession threw: "+e.message);}
+        if(!session){window.location.replace("index.html");return;}
+        const btn=document.getElementById('completeBtn'),msg=document.getElementById('completeMsg');
+        function setDone(done){
+            if(done){btn.textContent='\u2713 COMPLETE \u2014 CLICK TO UNDO';btn.classList.add('done');btn.style.cssText='border-color:#39ff14;color:#39ff14;background:rgba(57,255,20,0.1);cursor:pointer;opacity:1;';msg.style.color='#39ff14';msg.textContent='Lesson marked complete. Click again to undo.';}
+            else{btn.textContent='MARK LESSON COMPLETE';btn.classList.remove('done');btn.style.cssText='';msg.style.color='#ffffff55';msg.textContent='Not yet marked complete.';}
+        }
+        let mastered=[];
+        try{mastered=await getMasteredSections();}catch(e){console.error(e);}
+        setDone(mastered.includes(LESSON_ID));
+        btn.addEventListener('click',async()=>{
+            const isDone=btn.classList.contains('done');
+            msg.style.color='#00d9ff';msg.textContent='Saving...';
+            const ok=await upsertSection(LESSON_ID,!isDone);
+            if(ok){setDone(!isDone);}else{msg.style.color='#ff004f';msg.textContent='Error saving. Try again.';}
+        });
+        const btt=document.getElementById('backToTop');
+        window.addEventListener('scroll',()=>{btt.classList.toggle('visible',window.scrollY>400);});
+        btt.addEventListener('click',()=>window.scrollTo({top:0,behavior:'smooth'}));
+    }
+    if(document.readyState==="loading")document.addEventListener("DOMContentLoaded",init);
+    else init();
+})();
+</script>
+</body>
+</html>
