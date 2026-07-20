@@ -1,0 +1,600 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, shrink-to-fit=no">
+<title>M8-6 — Anomalies, Playbooks &amp; Automated Fleet Operations · LEOAF</title>
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;600;800&family=Share+Tech+Mono&family=Libre+Baskerville:ital,wght@0,400;0,700;1,400&display=swap" rel="stylesheet">
+<link rel="icon" href="favicon.ico" sizes="any" type="image/x-icon">
+<link rel="manifest" href="site.webmanifest">
+<meta name="theme-color" content="#0f0f0f">
+<script>
+window.leoafAbort = async function () {
+    function go() { window.location.replace("index.html?signedout=1"); }
+    try { if (typeof client !== "undefined" && client && client.auth && client.auth.signOut) { try { await client.auth.signOut({ scope: "local" }); } catch (e) {} } } catch (e) {}
+    go();
+};
+</script>
+<style>
+* { box-sizing:border-box; margin:0; padding:0; }
+html { height:100%; -webkit-text-size-adjust:100%; overflow-x:hidden; }
+body { font-family:'Share Tech Mono',monospace; background:#000; color:white; overflow-x:hidden; min-height:100vh; }
+#starsCanvas { position:fixed; inset:0; z-index:-1; }
+header { background:#000; border-bottom:1px solid #ff004f33; position:sticky; top:0; z-index:100; padding:1rem clamp(1.5rem,5vw,4rem); display:flex; justify-content:space-between; align-items:center; }
+.logo { font-family:'Orbitron',sans-serif; font-weight:800; font-size:clamp(16px,2vw,22px); letter-spacing:3px; text-decoration:none; }
+.logo span:first-child { color:white; } .logo span:last-child { color:#ff004f; }
+.nav-right { display:flex; align-items:center; gap:10px; }
+.nav-btn { background:transparent; border:1px solid #ff004f44; color:#ff004f; padding:6px 14px; cursor:pointer; transition:0.3s; font-size:11px; font-family:'Orbitron',sans-serif; letter-spacing:1px; text-decoration:none; display:inline-block; }
+.nav-btn:hover { background:#ff004f; color:black; }
+.breadcrumb { padding:14px clamp(1.5rem,5vw,4rem); font-size:11px; color:#ffffff44; letter-spacing:1px; position:relative; z-index:1; }
+.breadcrumb a { color:#00d9ff66; text-decoration:none; } .breadcrumb a:hover { color:#00d9ff; }
+.breadcrumb span { margin:0 8px; }
+.lesson-wrap { max-width:820px; margin:0 auto; padding:0 clamp(1.5rem,5vw,4rem) 80px; position:relative; z-index:1; }
+.lesson-header { padding:30px 0 28px; border-bottom:1px solid #ffffff11; margin-bottom:36px; }
+.lesson-tag { font-family:'Orbitron',sans-serif; font-size:10px; color:#ff004f; letter-spacing:3px; margin-bottom:10px; }
+.lesson-header h1 { font-family:'Orbitron',sans-serif; font-size:clamp(20px,3.5vw,32px); font-weight:800; line-height:1.2; margin-bottom:12px; }
+.lesson-meta { display:flex; gap:10px; flex-wrap:wrap; margin-bottom:16px; }
+.l-pill { font-family:'Orbitron',sans-serif; font-size:10px; padding:3px 10px; border:1px solid; letter-spacing:1px; }
+.l-pill-q { color:#ff004f; border-color:#ff004f44; } .l-pill-t { color:#39ff14; border-color:#39ff1444; }
+.l-pill-c { color:#ffaa00; border-color:#ffaa0044; }
+.lesson-intro { font-size:13px; line-height:1.85; opacity:0.75; }
+.toc { background:rgba(0,217,255,0.06); border:1px solid #00d9ff33; padding:24px 28px; margin:30px 0; }
+.toc h4 { font-family:'Orbitron',sans-serif; font-size:10px; color:#00d9ff; letter-spacing:2px; margin-bottom:16px; }
+.toc ol { padding-left:20px; } .toc li { font-size:13px; line-height:2.1; }
+.toc li a { color:#00d9ffbb; text-decoration:none; transition:0.15s; } .toc li a:hover { color:#fff; padding-left:4px; }
+.toc li::marker { color:#ff004f; font-family:'Orbitron',sans-serif; font-size:10px; }
+.cb { background:#f5f2ec; color:#1a1a1a; padding:36px clamp(24px,4vw,48px); margin-bottom:24px; border-left:4px solid #00d9ff; position:relative; z-index:1; }
+.cb h2 { font-family:'Orbitron',sans-serif; font-size:13px; color:#003d66; letter-spacing:2px; text-transform:uppercase; margin-bottom:20px; padding-bottom:10px; border-bottom:2px solid #00d9ff66; scroll-margin-top:80px; }
+.cb h3 { font-family:'Orbitron',sans-serif; font-size:11px; color:#444; letter-spacing:1.5px; text-transform:uppercase; margin:28px 0 12px; }
+.cb p { font-family:'Libre Baskerville',Georgia,serif; font-size:15px; line-height:1.9; color:#1a1a1a; margin-bottom:16px; }
+.cb ul { padding-left:0; margin-bottom:16px; }
+.cb ul li { font-family:'Libre Baskerville',Georgia,serif; font-size:14px; line-height:1.85; color:#1a1a1a; padding-left:20px; position:relative; margin-bottom:8px; }
+.cb ul li::before { content:'›'; position:absolute; left:0; color:#0077aa; }
+.cb blockquote { border-left:3px solid #1a7a1a; background:#eafaea; padding:14px 20px; margin:18px 0; font-size:13px; font-family:'Share Tech Mono',monospace; color:#0a3d0a; line-height:1.8; }
+.callout { border-left:3px solid #0088cc; background:#e8f4fb; padding:16px 20px; margin:22px 0; font-size:12px; line-height:1.8; color:#1a1a1a; }
+.callout.red { border-left-color:#cc0033; background:#fdecea; }
+.callout.green { border-left-color:#1a7a1a; background:#eafaea; }
+.callout.amber { border-left-color:#996600; background:#fef9ec; }
+.callout strong { font-family:'Orbitron',sans-serif; font-size:10px; letter-spacing:1px; display:block; margin-bottom:8px; }
+.compare-table { width:100%; border-collapse:collapse; margin:22px 0; font-size:12px; }
+.compare-table th { font-family:'Orbitron',sans-serif; font-size:10px; letter-spacing:1px; color:#003d66; padding:10px 12px; border-bottom:2px solid #00d9ff66; text-align:left; }
+.compare-table td { padding:10px 12px; border-bottom:1px solid #ddd; line-height:1.5; color:#1a1a1a; vertical-align:top; }
+.compare-table tr:hover td { background:#f0f0f0; }
+.key-numbers { display:grid; grid-template-columns:repeat(auto-fit,minmax(140px,1fr)); gap:12px; margin:22px 0; }
+.kn-item { background:#fff; border:1px solid #d0d0d0; padding:16px 12px; text-align:center; }
+.kn-val { font-family:'Orbitron',sans-serif; font-size:clamp(13px,1.8vw,18px); font-weight:800; color:#003d66; display:block; }
+.kn-label { font-size:10px; color:#555; letter-spacing:1px; margin-top:5px; display:block; line-height:1.4; }
+.quiz-block { background:rgba(17,17,17,0.9); border:1px solid #ff004f33; padding:28px; margin:48px 0 32px; }
+.quiz-block h2 { font-family:'Orbitron',sans-serif; font-size:13px; color:#ff004f; letter-spacing:2px; margin-bottom:6px; }
+.quiz-intro { font-size:12px; opacity:0.6; margin-bottom:24px; padding-bottom:16px; border-bottom:1px solid #ff004f22; line-height:1.6; }
+.quiz-q { margin-bottom:28px; }
+.quiz-q p { font-size:13px; opacity:0.9; margin-bottom:12px; line-height:1.65; }
+.quiz-q p strong { color:#00d9ff; }
+.quiz-options { display:flex; flex-direction:column; gap:8px; }
+.quiz-opt { background:rgba(255,255,255,0.03); border:1px solid #ffffff1a; padding:11px 16px; cursor:pointer; font-size:12px; font-family:'Share Tech Mono',monospace; transition:0.2s; text-align:left; color:white; line-height:1.5; }
+.quiz-opt:hover:not(:disabled) { background:rgba(0,217,255,0.08); border-color:#00d9ff44; }
+.quiz-opt.correct { background:rgba(57,255,20,0.1); border-color:#39ff14; color:#39ff14; }
+.quiz-opt.wrong { background:rgba(255,0,79,0.1); border-color:#ff004f; color:#ff004f; }
+.quiz-opt:disabled { cursor:default; }
+.quiz-feedback { font-size:12px; margin-top:10px; min-height:18px; line-height:1.7; opacity:0.9; padding:0 4px; }
+.quiz-score { font-family:'Orbitron',sans-serif; font-size:12px; color:#39ff14; margin-top:20px; letter-spacing:1px; display:none; padding-top:16px; border-top:1px solid #39ff1433; }
+.py-block { background:rgba(10,10,10,0.95); border:1px solid #39ff1422; padding:28px; margin:32px 0; }
+.py-block h2 { font-family:'Orbitron',sans-serif; font-size:13px; color:#39ff14; letter-spacing:2px; margin-bottom:8px; }
+.py-block .py-intro { font-size:12px; opacity:0.7; margin-bottom:20px; padding-bottom:16px; border-bottom:1px solid #39ff1422; line-height:1.7; }
+.py-exercise { margin-bottom:32px; } .py-exercise:last-child { margin-bottom:0; }
+.py-exercise h3 { font-family:'Orbitron',sans-serif; font-size:11px; color:#39ff1499; letter-spacing:1.5px; text-transform:uppercase; margin-bottom:10px; }
+.py-exercise p { font-size:12px; opacity:0.8; margin-bottom:14px; line-height:1.75; }
+.py-block pre { background:#050505; border:1px solid #39ff1433; padding:20px; font-family:'Share Tech Mono',monospace; font-size:11px; line-height:1.7; overflow-x:auto; color:#39ff14; white-space:pre; margin-bottom:12px; }
+.py-note { background:rgba(57,255,20,0.04); border-left:2px solid #39ff14; padding:12px 16px; margin-top:14px; font-size:12px; line-height:1.75; opacity:0.8; }
+.py-note strong { font-family:'Orbitron',sans-serif; font-size:10px; color:#39ff14; display:block; margin-bottom:6px; letter-spacing:1px; }
+.reflection-block { background:rgba(255,170,0,0.04); border:1px solid #ffaa0033; padding:24px; margin:32px 0; }
+.reflection-block h2 { font-family:'Orbitron',sans-serif; font-size:13px; color:#ffaa00; letter-spacing:2px; margin-bottom:8px; }
+.ref-intro { font-size:12px; opacity:0.7; margin-bottom:20px; padding-bottom:14px; border-bottom:1px solid #ffaa0022; line-height:1.7; }
+.ref-prompt { margin-bottom:20px; }
+.ref-prompt h3 { font-family:'Orbitron',sans-serif; font-size:11px; color:#ffaa0099; letter-spacing:1px; margin-bottom:8px; }
+.ref-prompt p { font-size:12px; opacity:0.8; line-height:1.75; }
+.complete-wrap { margin-top:56px; padding-top:30px; border-top:1px solid #ffffff11; text-align:center; }
+.complete-btn { font-family:'Orbitron',sans-serif; font-size:13px; letter-spacing:2px; padding:14px 44px; background:transparent; border:1px solid #39ff14; color:#39ff14; cursor:pointer; transition:0.3s; }
+.complete-btn:hover:not(.done) { background:#39ff14; color:black; box-shadow:0 0 20px rgba(57,255,20,0.4); }
+.complete-btn.done { background:rgba(57,255,20,0.1); cursor:pointer; opacity:1; }
+.complete-msg { font-size:12px; color:#39ff14; margin-top:14px; min-height:18px; letter-spacing:1px; }
+.lesson-nav { display:flex; justify-content:space-between; margin-top:30px; flex-wrap:wrap; gap:10px; }
+.lesson-nav a { font-family:'Orbitron',sans-serif; font-size:11px; color:#00d9ff66; text-decoration:none; letter-spacing:1px; transition:0.2s; }
+.lesson-nav a:hover { color:#00d9ff; }
+.back-to-top { position:fixed; bottom:28px; right:28px; z-index:200; width:44px; height:44px; background:#000; border:1px solid #00d9ff55; color:#00d9ff; font-size:20px; cursor:pointer; display:flex; align-items:center; justify-content:center; opacity:0; pointer-events:none; transition:opacity 0.3s; }
+.back-to-top.visible { opacity:1; pointer-events:auto; } .back-to-top:hover { border-color:#00d9ff; }
+footer { text-align:center; padding:30px; opacity:0.3; font-size:11px; position:relative; z-index:1; letter-spacing:1px; }
+.module-complete { background:rgba(57,255,20,0.06); border:1px solid #39ff1444; padding:24px 28px; margin:40px 0; text-align:center; }
+.module-complete h3 { font-family:'Orbitron',sans-serif; font-size:14px; color:#39ff14; letter-spacing:2px; margin-bottom:10px; }
+.module-complete p { font-size:12px; opacity:0.8; line-height:1.7; }
+</style>
+</head>
+<body>
+<canvas id="starsCanvas"></canvas>
+<header>
+    <a href="dashboard.html" class="logo"><span>LEO</span><span>AF</span></a>
+    <div class="nav-right">
+        <a href="m8.html" class="nav-btn">← M8 HUB</a>
+        <button class="nav-btn" onclick="leoafAbort()">ABORT</button>
+    </div>
+</header>
+<div class="breadcrumb">
+    <a href="dashboard.html">DASHBOARD</a><span>/</span>
+    <a href="m8.html">M8</a><span>/</span>
+    <span style="color:#ffffff88;">LESSON 06 — ANOMALIES &amp; FLEET AUTOMATION</span>
+</div>
+
+<div class="lesson-wrap">
+
+<div class="lesson-header">
+    <div class="lesson-tag">M8 · LESSON 06 OF 7</div>
+    <h1>Anomalies, Playbooks &amp; Automated Fleet Operations</h1>
+    <div class="lesson-meta">
+        <div class="l-pill l-pill-q">MODULE 8</div>
+        <div class="l-pill l-pill-t">GROUND SEGMENT &amp; OPERATIONS</div>
+        <div class="l-pill l-pill-c">ADVANCED</div>
+    </div>
+    <p class="lesson-intro" style="margin-bottom:12px;">m8-4 assumed satellites could be operated autonomously and m8-5 assumed they could be commissioned in a pipeline — both deferring the same question to this lesson: what happens when a satellite <em>deviates</em>? A fleet of thousands of satellites, each with thousands of telemetry channels, generates a continuous stream of anomalies — components drift out of range, subsystems fault, software misbehaves, the space environment strikes — and every one must be detected, diagnosed, and resolved. For a traditional satellite, an anomaly is an event: an alarm sounds, engineers gather, and a team works the problem over hours or days. For a mega-constellation generating some fifty anomalies a day across a fleet monitored by nearly eight million telemetry points per second, the event model is as impossible as everything else at this scale. Anomaly handling must be automated: <strong>detection</strong> by software watching the telemetry firehose, <strong>response</strong> by standardised <strong>playbooks</strong> that resolve known failures without human intervention, and <strong>escalation</strong> to human engineers only for the small fraction that are genuinely novel. This lesson completes Part II by showing how a fleet that flies itself (m8-4) and commissions itself (m8-5) also <em>heals</em> itself — and where the humans must remain.</p>
+    <p class="lesson-intro" style="margin-bottom:12px;">The lesson's verified anchors quantify why. A fleet of 1,584 satellites at a modest one anomaly per satellite per month generates ~52 anomalies per day — ten engineers working every day under the traditional model — but if 95% match known playbooks and resolve automatically, the human workload drops below one engineer's daily capacity. Monitoring the fleet means watching ~7.9 million telemetry points per second, far beyond any human's capacity, so detection itself must be automated. And the fleet's identical satellites carry a systematic risk that shadows the whole approach: a design flaw, or a wrong automated response, propagates across all 1,584 at once. The spine gains the fleet-anomaly model — the tool that turns a fleet size and an anomaly rate into an operations workload, and shows how automation and playbooks collapse it.</p>
+</div>
+
+<div class="toc">
+    <h4>CONTENTS</h4>
+    <ol>
+        <li><a href="#s1">Anomalies at fleet scale</a></li>
+        <li><a href="#s2">Detection: watching the firehose</a></li>
+        <li><a href="#s3">Playbooks: automating the known response</a></li>
+        <li><a href="#s4">Escalation: where the humans stay</a></li>
+        <li><a href="#s5">Graceful degradation and fleet health</a></li>
+        <li><a href="#s6">The systematic risk of identical satellites</a></li>
+        <li><a href="#s7">Key facts</a></li>
+        <li><a href="#s8">What this lesson delivers to the design chain</a></li>
+        <li><a href="#kf">Key facts</a></li>
+        <li><a href="#quiz">Knowledge check</a></li>
+        <li><a href="#py">Python exercises</a></li>
+        <li><a href="#reflect">Reflection</a></li>
+        <li><a href="#sources">Sources</a></li>
+    </ol>
+</div>
+
+<div class="cb" id="s1">
+    <h2>1. Anomalies at fleet scale</h2>
+<p>An <strong>anomaly</strong> is any deviation from expected behaviour: a temperature out of range, a voltage sagging, a subsystem reporting a fault, a maneuver executing imperfectly, an ISL terminal failing to acquire (m7-2), a solar panel underperforming. Some are benign (a sensor glitch), some are serious (a reaction wheel failing), and some are catastrophic (a power system fault that threatens the satellite). For a single satellite, anomalies are rare enough to handle individually — a few a month, each worked by engineers.</p>
+<p>At fleet scale the arithmetic changes everything. If each satellite generates even a modest one anomaly per month, a 1,584-satellite fleet generates:</p>
+<blockquote>1,584 satellites × 12 anomalies/year = 19,008 anomalies/year = <strong>52 per day</strong> = 2.2 per hour</blockquote>
+<p>Fifty-two anomalies a day, around the clock, forever. Under the traditional model — an engineer working each anomaly — this would need about ten engineers handling anomalies every single day, doing nothing else, forever. And that is at a <em>modest</em> anomaly rate; a newly deployed constellation, or one hit by a space-weather event, spikes far higher. The event model, where an anomaly summons a team, simply cannot absorb fifty-two events a day. Anomaly handling must become a <em>process</em> — automated detection, automated response, human escalation — the same transformation from event to process that m8-4 and m8-5 forced on contact and commissioning.</p>
+</div>
+
+<div class="cb" id="s2">
+    <h2>2. Detection: watching the firehose</h2>
+<p>Before an anomaly can be handled it must be <em>detected</em>, and detection at fleet scale is itself beyond human capacity. Each satellite streams thousands of telemetry channels — voltages, temperatures, currents, states, rates — and a fleet of 1,584 satellites at 5,000 channels each, sampled once a second, is:</p>
+<blockquote>1,584 × 5,000 × 1 Hz ≈ <strong>7.9 million telemetry points per second</strong></blockquote>
+<p>Nearly eight million numbers a second, streaming down from the fleet. No human, and no room full of humans, can watch this. Detection must be automated: software that ingests the telemetry firehose and flags deviations — by simple threshold checks (a temperature exceeds a limit), by statistical methods (a value drifts outside its normal envelope), or by machine-learning models trained on healthy behaviour (a pattern looks anomalous even without crossing a hard threshold). The detection layer is a filter that turns eight million points a second into a manageable stream of flagged anomalies — the ~52 a day that matter — and its quality determines everything downstream: miss a real anomaly and a satellite is lost; flag too many false ones and the human escalation queue drowns. Fleet monitoring is a big-data problem before it is a spacecraft problem.</p>
+</div>
+
+<div class="cb" id="s3">
+    <h2>3. Playbooks: automating the known response</h2>
+<p>Detection produces a stream of anomalies; most of them are <em>known types</em> with <em>known responses</em>. A reaction wheel saturates — the response is a known desaturation maneuver. A subsystem faults — the response is a known reset sequence. A satellite drifts from its slot — the response is a known station-keeping burn. These are not novel problems requiring engineering judgement; they are recognised failures with established fixes, and the fix can be encoded as a <strong>playbook</strong>: a standardised, automated response that the system executes when it detects the matching anomaly, without waiting for a human.</p>
+<p>Playbooks are the heart of fleet automation. If a large fraction of anomalies — say 95% — match a known playbook, then 95% of the fifty-two daily anomalies resolve automatically, and the human workload drops to the remaining 5%:</p>
+<blockquote>52 anomalies/day × 5% = ~2.6 manual anomalies/day → less than one engineer's daily load</blockquote>
+<p>The fleet, in effect, heals most of its own wounds: an anomaly is detected, matched to a playbook, and resolved by automated action, with the whole cycle logged for human review but requiring no human decision. The playbook library grows over time — each novel anomaly, once diagnosed by engineers, becomes a new playbook so that the next occurrence resolves automatically — so the automated fraction rises as the constellation matures and the fleet's failure modes become known. This is the mechanism that makes a thousand-satellite fleet operable by a small team: the routine is automated, and the team handles only the genuinely novel.</p>
+</div>
+
+<div class="cb" id="s4">
+    <h2>4. Escalation: where the humans stay</h2>
+<p>The 5% that no playbook matches — the genuinely novel anomalies — escalate to human engineers, and this is where human judgement remains essential. A novel anomaly is one the fleet has not seen before: an unexpected failure mode, an interaction between subsystems not anticipated, a symptom that matches no known pattern. These require the diagnostic reasoning that automation cannot supply — understanding <em>why</em> a satellite is misbehaving, not just matching a symptom to a fix — and they are exactly the anomalies where a wrong response could make things worse. Human engineers work these, diagnose them, resolve them, and then <em>encode the resolution as a new playbook</em> so the next occurrence is automated.</p>
+<p>This escalation model — automate the known, escalate the novel — is the fleet-operations equivalent of m7-4's proactive-with-reactive-floor routing and m8-4's autonomy-with-exceptions contact. The pattern recurs because it is the only way scale works: handle the common case automatically and reserve scarce human attention for the exceptions. The humans are not removed from the loop; they are <em>repositioned</em> — from working every anomaly to working only the novel ones and teaching the system to handle them next time. A fleet operations team is small not because there is little to do, but because most of what there is to do has been automated, leaving the humans to do the part only humans can: reason about the unknown.</p>
+</div>
+
+<div class="cb" id="s5">
+    <h2>5. Graceful degradation and fleet health</h2>
+<p>A mega-constellation is designed so that individual satellite failures do not break the service — a principle inherited from m6-6's dispatch reliability and m7-4's rerouting, now at fleet scale. At any moment some fraction of the fleet — say 2%, about 32 satellites — is degraded or offline: in an anomaly, in a playbook response, in safe mode awaiting a fix, or simply failed and awaiting deorbit (m8-5). The constellation is engineered to tolerate this: spare capacity absorbs the lost throughput, the mesh reroutes around the degraded satellites (m7-4), and the service degrades <em>gracefully</em> — smoothly and slightly — rather than catastrophically. A user rarely notices that 32 satellites are unhealthy, because the constellation was designed with the redundancy to carry on without them.</p>
+<p><strong>Fleet health monitoring</strong> is the aggregate view that makes this manageable: rather than tracking 1,584 individual satellites, operators track the <em>fleet's</em> health — how many are nominal, how many degraded, how many failed, and whether the degraded fraction is stable or growing. A stable 2% degraded is normal operation; a rising fraction is a warning that something systematic is wrong (§6). This aggregate view is the human-scale interface to a fleet too large to watch satellite-by-satellite: the operators supervise the <em>statistics</em> of the fleet's health, and the automation handles the individuals. Graceful degradation is what lets them do this — because no single satellite's failure is a crisis, the operators can afford to watch the aggregate and let the automation and the redundancy handle the individuals.</p>
+</div>
+
+<div class="cb" id="s6">
+    <h2>6. The systematic risk of identical satellites</h2>
+<p>There is a shadow over the whole automated-fleet approach, and it is the flip side of the mass production that makes mega-constellations possible: the satellites are <strong>identical</strong>. Identical satellites are cheap (Module 3's mass production) and operable (one playbook library serves the whole fleet), but they share every flaw. A design defect — a component that fails after a certain radiation dose, a software bug triggered by a rare condition, a thermal weakness under a particular Sun angle — is present in <em>all</em> 1,584 satellites, and when the triggering condition arrives, it can affect the whole fleet at once. The systematic failure, not the individual anomaly, is the mega-constellation's gravest operational risk: one anomaly is trivial, but the same anomaly on a thousand satellites simultaneously is an existential threat to the service.</p>
+<p>And the automation amplifies this risk. A playbook is applied identically across the fleet, so a <em>wrong</em> playbook — an automated response that is subtly incorrect — replicates its error across every satellite that triggers it, potentially damaging the whole fleet through the very mechanism meant to heal it. This is why the escalation to humans (§4) and the fleet-health aggregate view (§5) matter so much: they are the checks against systematic error. A rising degraded-fraction that many satellites share is the signal of a systematic problem, and it must halt the automated response and escalate to humans <em>before</em> the playbook propagates the error further. The operations discipline for a mega-constellation is therefore not just automating the routine but <em>detecting when the routine is wrong at scale</em> — watching for the correlated failure and the mis-applied playbook that identical satellites make catastrophic. Automation handles the fleet; vigilance against systematic error protects it.</p>
+</div>
+
+<div class="cb" id="s7">
+    <h2>7. Key facts</h2>
+<table class="compare-table">
+<thead><tr>
+<th>Fact</th>
+<th>Value</th>
+<th>Unit</th>
+<th>Source</th>
+</tr></thead>
+<tbody>
+<tr><td>Anomaly</td><td>any deviation from expected behaviour</td><td>—</td><td>§1</td></tr>
+<tr><td>Fleet anomaly rate (1,584 × 1/month)</td><td>~52</td><td>/day</td><td>Computed</td></tr>
+<tr><td>Traditional engineers needed</td><td>~10 (every day)</td><td>—</td><td>Computed</td></tr>
+<tr><td>Telemetry to monitor</td><td>~7.9 million</td><td>points/s</td><td>Computed</td></tr>
+<tr><td>Detection</td><td>automated (thresholds, statistics, ML)</td><td>—</td><td>§2</td></tr>
+<tr><td>Playbook</td><td>standardised automated response to a known anomaly</td><td>—</td><td>§3</td></tr>
+<tr><td>Automated fraction</td><td>~95%</td><td>—</td><td>§3</td></tr>
+<tr><td>Manual anomalies after playbooks</td><td>~2.6/day (&lt;1 engineer)</td><td>—</td><td>Computed</td></tr>
+<tr><td>Escalation</td><td>novel anomalies → human diagnosis → new playbook</td><td>—</td><td>§4</td></tr>
+<tr><td>Graceful degradation</td><td>~2% degraded tolerated via spare capacity + rerouting</td><td>—</td><td>§5</td></tr>
+<tr><td>Fleet health</td><td>supervise the aggregate statistics, not individuals</td><td>—</td><td>§5</td></tr>
+<tr><td>Systematic risk</td><td>identical satellites share flaws; wrong playbook replicates</td><td>—</td><td>§6</td></tr>
+</tbody>
+</table>
+</div>
+
+<div class="cb" id="s8">
+    <h2>8. What this lesson delivers to the design chain</h2>
+<p>Stage 6 of the spine is the <strong>fleet-anomaly model</strong>: it takes a fleet size, a per-satellite anomaly rate, a playbook-automation fraction, and a telemetry channel count, and computes the anomaly workload, the detection data rate, the manual-escalation load, and the operations-team size — showing how automation collapses ten engineers to less than one, and flagging the systematic risk that identical satellites and applied-at-scale playbooks create. It models graceful degradation (the tolerable degraded fraction) and the fleet-health aggregate view. The ground segment's operations layer is now complete: a fleet that flies (m8-4), commissions (m8-5), and heals (m8-6) itself, supervised by a small team watching aggregates and handling exceptions.</p>
+<p>Part II is complete. The constellation is operated — the control link flies it (m8-4), the pipeline brings satellites into service (m8-5), and automated anomaly handling keeps them healthy (m8-6), all through the same pattern of autonomy, pipelines, and human-escalation-of-exceptions that fleet scale demands. What remains is to assemble the whole ground segment — the data network of Part I and the operations of Part II — into one model, and to compute the total ground-segment cost and complexity that m7-1's bent-pipe-versus-mesh trade weighed against the space segment. That is the synthesis, m8-7: the complete <code>GroundSegment</code>, and the ground half of the constellation's total cost.</p>
+</div>
+
+
+<div class="quiz-block" id="quiz">
+    <h2 style="font-family:'Orbitron',sans-serif;font-size:13px;color:#00d9ff;letter-spacing:2px;margin-bottom:8px;">KNOWLEDGE CHECK</h2>
+    <div class="quiz-intro">Ten questions. Each option explains itself after you commit. No retries per question — decide first.</div>
+    <div class="quiz-q">
+        <p><strong>1.</strong> A fleet of 1,584 satellites at one anomaly per satellite per month generates:</p>
+        <div class="quiz-options">
+            <button class="quiz-opt" data-q="1" data-correct="false">A — One anomaly per day</button>
+            <button class="quiz-opt" data-q="1" data-correct="true">B — ~52 anomalies per day — around the clock, needing ~10 engineers every day under the traditional one-engineer-per-anomaly model</button>
+            <button class="quiz-opt" data-q="1" data-correct="false">C — One anomaly per year</button>
+            <button class="quiz-opt" data-q="1" data-correct="false">D — No anomalies if well-designed</button>
+        </div>
+        <div class="quiz-feedback" id="fb1"></div>
+    </div>
+    <div class="quiz-q">
+        <p><strong>2.</strong> Anomaly <em>detection</em> at fleet scale must be automated because:</p>
+        <div class="quiz-options">
+            <button class="quiz-opt" data-q="2" data-correct="false">A — Humans are too slow</button>
+            <button class="quiz-opt" data-q="2" data-correct="true">B — The fleet streams ~7.9 million telemetry points per second (1,584 sats × ~5,000 channels × 1 Hz) — far beyond any human's or room-of-humans' capacity to watch</button>
+            <button class="quiz-opt" data-q="2" data-correct="false">C — Telemetry is encrypted</button>
+            <button class="quiz-opt" data-q="2" data-correct="false">D — Detection is unnecessary</button>
+        </div>
+        <div class="quiz-feedback" id="fb2"></div>
+    </div>
+    <div class="quiz-q">
+        <p><strong>3.</strong> A playbook is:</p>
+        <div class="quiz-options">
+            <button class="quiz-opt" data-q="3" data-correct="false">A — A user manual</button>
+            <button class="quiz-opt" data-q="3" data-correct="true">B — A standardised, automated response to a known anomaly type — executed when the matching anomaly is detected, without waiting for a human</button>
+            <button class="quiz-opt" data-q="3" data-correct="false">C — A launch schedule</button>
+            <button class="quiz-opt" data-q="3" data-correct="false">D — A routing table</button>
+        </div>
+        <div class="quiz-feedback" id="fb3"></div>
+    </div>
+    <div class="quiz-q">
+        <p><strong>4.</strong> If 95% of anomalies match a playbook, the human workload:</p>
+        <div class="quiz-options">
+            <button class="quiz-opt" data-q="4" data-correct="false">A — Is unchanged</button>
+            <button class="quiz-opt" data-q="4" data-correct="true">B — Drops to the remaining ~5% — about 2.6 manual anomalies/day, less than one engineer's daily load, instead of ten engineers</button>
+            <button class="quiz-opt" data-q="4" data-correct="false">C — Doubles</button>
+            <button class="quiz-opt" data-q="4" data-correct="false">D — Goes to zero</button>
+        </div>
+        <div class="quiz-feedback" id="fb4"></div>
+    </div>
+    <div class="quiz-q">
+        <p><strong>5.</strong> The novel anomalies that escalate to humans are handled by:</p>
+        <div class="quiz-options">
+            <button class="quiz-opt" data-q="5" data-correct="false">A — Ignoring them</button>
+            <button class="quiz-opt" data-q="5" data-correct="true">B — Human engineers diagnosing the unknown failure, resolving it, and encoding the resolution as a new playbook so the next occurrence is automated</button>
+            <button class="quiz-opt" data-q="5" data-correct="false">C — A default playbook</button>
+            <button class="quiz-opt" data-q="5" data-correct="false">D — Rebooting the satellite</button>
+        </div>
+        <div class="quiz-feedback" id="fb5"></div>
+    </div>
+    <div class="quiz-q">
+        <p><strong>6.</strong> The escalation model (automate the known, escalate the novel) recurs across Module 8 because:</p>
+        <div class="quiz-options">
+            <button class="quiz-opt" data-q="6" data-correct="false">A — It is a coincidence</button>
+            <button class="quiz-opt" data-q="6" data-correct="true">B — It is the only way scale works — handle the common case automatically and reserve scarce human attention for exceptions, the same pattern as m8-4's autonomy and m7-4's proactive routing</button>
+            <button class="quiz-opt" data-q="6" data-correct="false">C — It is required by regulation</button>
+            <button class="quiz-opt" data-q="6" data-correct="false">D — It only applies to anomalies</button>
+        </div>
+        <div class="quiz-feedback" id="fb6"></div>
+    </div>
+    <div class="quiz-q">
+        <p><strong>7.</strong> Graceful degradation means:</p>
+        <div class="quiz-options">
+            <button class="quiz-opt" data-q="7" data-correct="false">A — The constellation never fails</button>
+            <button class="quiz-opt" data-q="7" data-correct="true">B — Individual satellite failures (say 2%, ~32 satellites) do not break the service — spare capacity and mesh rerouting absorb them, so the service degrades smoothly rather than catastrophically</button>
+            <button class="quiz-opt" data-q="7" data-correct="false">C — Satellites degrade slowly</button>
+            <button class="quiz-opt" data-q="7" data-correct="false">D — The fleet shuts down gradually</button>
+        </div>
+        <div class="quiz-feedback" id="fb7"></div>
+    </div>
+    <div class="quiz-q">
+        <p><strong>8.</strong> Fleet health monitoring works by:</p>
+        <div class="quiz-options">
+            <button class="quiz-opt" data-q="8" data-correct="false">A — Watching each satellite individually</button>
+            <button class="quiz-opt" data-q="8" data-correct="true">B — Supervising the aggregate statistics — how many nominal, degraded, failed — rather than tracking 1,584 satellites individually, with a rising degraded fraction signalling a systematic problem</button>
+            <button class="quiz-opt" data-q="8" data-correct="false">C — Ignoring health</button>
+            <button class="quiz-opt" data-q="8" data-correct="false">D — Checking one satellite per day</button>
+        </div>
+        <div class="quiz-feedback" id="fb8"></div>
+    </div>
+    <div class="quiz-q">
+        <p><strong>9.</strong> The systematic risk of identical satellites is that:</p>
+        <div class="quiz-options">
+            <button class="quiz-opt" data-q="9" data-correct="false">A — They are too expensive</button>
+            <button class="quiz-opt" data-q="9" data-correct="true">B — They share every flaw — a design defect or a wrong playbook is present in or applied to all 1,584 at once, making a correlated failure the gravest operational risk</button>
+            <button class="quiz-opt" data-q="9" data-correct="false">C — They cannot be told apart</button>
+            <button class="quiz-opt" data-q="9" data-correct="false">D — There is no such risk</button>
+        </div>
+        <div class="quiz-feedback" id="fb9"></div>
+    </div>
+    <div class="quiz-q">
+        <p><strong>10.</strong> Automation amplifies the systematic risk because:</p>
+        <div class="quiz-options">
+            <button class="quiz-opt" data-q="10" data-correct="false">A — It does not</button>
+            <button class="quiz-opt" data-q="10" data-correct="true">B — A wrong playbook is applied identically across the fleet, replicating its error on every satellite that triggers it — so operations must watch for correlated failures and halt a mis-applied playbook before it propagates</button>
+            <button class="quiz-opt" data-q="10" data-correct="false">C — Automation is always safe</button>
+            <button class="quiz-opt" data-q="10" data-correct="false">D — Playbooks are never wrong</button>
+        </div>
+        <div class="quiz-feedback" id="fb10"></div>
+    </div>
+    <div class="quiz-score" id="quizScore"></div>
+</div>
+
+<div class="py-block" id="py">
+    <h2 style="font-family:'Orbitron',sans-serif;font-size:13px;color:#39ff14;letter-spacing:2px;margin-bottom:8px;">PYTHON EXERCISES</h2>
+    <div class="py-intro">Three exercises; the last extends the module spine project. Run them, then work the numbered follow-ups in the comments — the follow-ups are the exercise.</div>
+<div class="py-exercise">
+    <h3>Exercise 1 — The anomaly workload</h3>
+    <p>From fleet size to operations team.</p>
+<pre>
+import math
+
+def anomaly_rate_per_day(n_sats, per_sat_per_month):
+    return n_sats*per_sat_per_month*12/365
+
+def engineers_needed(anomalies_per_day, per_engineer_per_day=5):
+    return anomalies_per_day/per_engineer_per_day
+
+def with_playbooks(anomalies_per_day, automated_fraction):
+    manual = anomalies_per_day*(1-automated_fraction)
+    return manual, engineers_needed(manual)
+
+N = 1584
+rate = anomaly_rate_per_day(N, 1)
+print(f"fleet anomaly rate: {rate:.0f}/day")
+print(f"traditional engineers: {engineers_needed(rate):.0f}")
+print(f"\nwith playbook automation:")
+for frac in [0.80, 0.90, 0.95, 0.99]:
+    manual, eng = with_playbooks(rate, frac)
+    print(f"  {frac:.0%} automated: {manual:.1f} manual/day, {eng:.2f} engineers")
+
+# 1. The automated fraction rises as the playbook library grows. Model
+#    it climbing from 80% (new constellation) to 99% (mature) over 3
+#    years and show the operations team shrinking. What's the steady state?
+# 2. A space-weather event spikes the anomaly rate 10× for a day. How
+#    many manual anomalies at 95% automation, and does the team cope?
+#    What does this say about sizing for the average vs the spike?
+# 3. A 10,000-satellite fleet at 95% automation: manual anomalies/day
+#    and engineers? Does automation keep the team small as fleets grow,
+#    or does the residual 5% eventually dominate?
+</pre>
+</div>
+<div class="py-exercise">
+    <h3>Exercise 2 — The telemetry firehose</h3>
+    <p>Why detection must be automated.</p>
+<pre>
+def telemetry_rate(n_sats, channels_per_sat, sample_hz):
+    return n_sats*channels_per_sat*sample_hz
+
+N = 1584
+for channels in [1000, 5000, 20000]:
+    for hz in [0.1, 1, 10]:
+        rate = telemetry_rate(N, channels, hz)
+        print(f"  {channels:&gt;5} ch × {hz:&gt;4} Hz: {rate/1e6:7.1f} M points/s")
+
+# 1. A human analyst can meaningfully watch ~10 values at once. How many
+#    analysts would it take to watch the whole firehose manually? State
+#    why the number proves detection MUST be automated.
+# 2. Detection has false positives (flag healthy telemetry) and false
+#    negatives (miss real anomalies). Model a detector with a 0.01% false-
+#    positive rate on 7.9M points/s: how many false alarms/day? Does that
+#    flood the escalation queue? What's the tension with sensitivity?
+# 3. Downlinking all telemetry is expensive (m8-1 feeder capacity).
+#    Onboard detection (flag anomalies on the satellite, downlink only
+#    those) saves bandwidth. Estimate the downlink saving if only 0.01%
+#    of telemetry is anomalous and needs sending.
+</pre>
+</div>
+<div class="py-exercise">
+    <h3>Exercise 3 — Spine Stage 6: the fleet-anomaly model</h3>
+    <p>The fleet heals itself.</p>
+<pre>
+import math
+
+# ═══════════════════════════════════════════════════════
+# M8 SPINE PROJECT — GROUND SEGMENT
+# Stage 6: the fleet-anomaly model.
+#   Stages 4-5 gave a fleet that flies and commissions itself.
+#   Stage 6: a fleet that HEALS itself — automated detection,
+#   playbook response, human escalation of the novel — plus the
+#   graceful degradation and systematic-risk watch that scale needs.
+#   Next: m8-7 assembles the whole GroundSegment.
+# ═══════════════════════════════════════════════════════
+
+class FleetAnomalyModel:
+    def __init__(self, n_sats, anomalies_per_sat_month=1,
+                 channels_per_sat=5000, sample_hz=1,
+                 automated_fraction=0.95, degraded_fraction=0.02):
+        self.n = n_sats
+        self.rate_month = anomalies_per_sat_month
+        self.channels = channels_per_sat
+        self.hz = sample_hz
+        self.auto = automated_fraction
+        self.degraded = degraded_fraction
+
+    def anomalies_per_day(self):
+        return self.n*self.rate_month*12/365
+
+    def telemetry_points_per_sec(self):
+        return self.n*self.channels*self.hz
+
+    def manual_load(self, per_engineer_day=5):
+        manual = self.anomalies_per_day()*(1-self.auto)
+        return dict(manual_per_day=round(manual, 1),
+                    engineers=round(manual/per_engineer_day, 2))
+
+    def degraded_satellites(self):
+        return round(self.n*self.degraded)
+
+    def systematic_risk(self):
+        # a wrong playbook or shared defect hits all identical satellites
+        return dict(identical=self.n,
+                    worst_case="a single flaw/playbook affects the whole fleet")
+
+    def report(self):
+        print(f"  fleet: {self.n} satellites")
+        print(f"  anomalies: {self.anomalies_per_day():.0f}/day")
+        print(f"  telemetry: {self.telemetry_points_per_sec()/1e6:.1f} M points/s "
+              f"-&gt; automated detection required")
+        print(f"  automation {self.auto:.0%}: {self.manual_load()}")
+        print(f"  degraded (tolerated): {self.degraded_satellites()} satellites")
+        print(f"  systematic risk: {self.systematic_risk()['worst_case']}")
+
+FleetAnomalyModel(1584).report()
+
+# ── the handoff ─────────────────────────────────────────
+# Part II complete: the fleet flies (m8-4), commissions (m8-5), and
+# heals (m8-6) itself. m8-7 assembles the whole GroundSegment — data
+# network (Part I) + operations (Part II) — and the total ground cost
+# that m7-1's bent-pipe-vs-mesh trade weighed.
+
+# 1. Add a 'playbook library growth' that raises automated_fraction
+#    over time and re-runs manual_load. Plot the operations team
+#    shrinking as the constellation matures.
+# 2. Model the systematic risk concretely: a defect triggers on 5% of
+#    satellites per day once activated. Without a human halt, how fast
+#    does it spread? Add an escalation trigger (halt if &gt;X correlated
+#    anomalies) and show it containing the spread.
+# 3. Combine Stages 4-6 into an 'operations team size' estimate:
+#    TT&amp;C supervision + commissioning oversight + anomaly escalation.
+#    How many people operate a 1,584-satellite constellation? (Small.)
+</pre>
+</div>
+</div>
+
+<div class="reflection-block" id="reflect">
+    <h2>REFLECTION</h2>
+    <div class="ref-intro">Four prompts. Each forces a decision — write the position down before moving on; the act of committing is the exercise.</div>
+    <div class="ref-prompt">
+        <h3>PROMPT 1</h3>
+        <p>Section 6 identified the systematic risk of identical satellites and warned that a wrong playbook replicates its error fleet-wide. This creates a fundamental tension with section 3's automation imperative: automation is required for scale, but automation applied to identical satellites is exactly what makes a systematic error catastrophic. Design the safeguard: how should a fleet-operations system apply playbooks so that a subtly-wrong one does not damage the whole fleet before anyone notices? Consider staged rollout (apply a playbook to a few satellites first, watch, then expand), correlation detection (halt if many satellites respond badly to the same playbook), and human checkpoints. Decide where on the automation-versus-caution spectrum a mega-constellation should sit, and what it costs in responsiveness to add the safeguards.</p>
+    </div>
+    <div class="ref-prompt">
+        <h3>PROMPT 2</h3>
+        <p>Section 4 has humans encode each resolved novel anomaly as a new playbook, so the automated fraction rises over time. But this means the fleet's operational knowledge accumulates in the playbook library, and the human engineers gradually work only the rarest, hardest anomalies — which means they see each type less often and may lose the fluency that comes from routine practice. Interrogate this deskilling risk: as automation handles more, do the humans who must handle the novel anomalies become <em>less</em> capable of doing so, because they no longer practise on the routine ones? Decide whether a fleet-operations organisation should deliberately keep humans in the loop on some routine anomalies to maintain skill, trading efficiency for competence, and how it would strike that balance.</p>
+    </div>
+    <div class="ref-prompt">
+        <h3>PROMPT 3</h3>
+        <p>Section 5's graceful degradation tolerates ~2% of the fleet being unhealthy, absorbed by spare capacity and rerouting. But "2% tolerated" is a design choice with a cost: the spare capacity that absorbs the degraded satellites is capacity that could have been sold. Work the trade: a constellation designed to tolerate 5% degradation needs more spare capacity (more expensive) but can run its operations more relaxed (fewer urgent anomalies); one designed to tolerate only 1% is cheaper in spare capacity but must fix anomalies faster (more operations pressure). Determine where the optimum sits, connecting the degradation tolerance (a design parameter) to both the spare-capacity cost (Module 3, the space segment) and the operations-team size (this lesson) — and decide whether graceful degradation is bought with hardware or with operations.</p>
+    </div>
+    <div class="ref-prompt">
+        <h3>PROMPT 4</h3>
+        <p>This lesson's numbers — 52 anomalies/day, 7.9M telemetry points/s, 95% automation — rest on a per-satellite anomaly rate (1/month), a channel count (5,000), and an automation fraction (95%), all representative. The <em>conclusions</em> (detection and response must be automated, systematic risk is the gravest threat) are robust, but the operations-team size that these figures imply is assumption-dependent. Apply the load-bearing-assumption discipline that has run through the program: which input most strongly drives the residual human workload — the anomaly rate, or the automation fraction? Specify what an operator would measure from its actual fleet to pin each down, and state whether the "less than one engineer for anomalies" figure is a design target or an illustration — and what happens to it if the automation fraction is really 80%, not 95%.</p>
+    </div>
+</div>
+
+<div class="cb" id="sources">
+    <h2>Sources</h2>
+<ul><li>Wertz, Everett &amp; Puschell (eds.), <em>Space Mission Engineering: The New SMAD</em> — mission operations, anomaly resolution, and fleet management.</li><li>CCSDS Mission Operations standards — telemetry monitoring and automated operations concepts.</li><li>Autonomous and automated satellite operations literature — playbook/procedure automation and fleet health monitoring for large constellations.</li><li>Module 3 — the mass-produced identical satellites whose systematic risk this lesson addresses; Module 7 (m7-4) — the mesh rerouting behind graceful degradation; Module 8 (m8-4, m8-5) — the autonomy and pipeline this anomaly-handling completes.</li></ul>
+</div>
+
+<div class="complete-wrap">
+    <button class="complete-btn" id="completeBtn">MARK LESSON COMPLETE</button>
+    <div class="complete-msg" id="completeMsg"></div>
+</div>
+<div class="lesson-nav">
+    <a href="m8-5.html">← LESSON 05 — EARLY-ORBIT OPS &amp; COMMISSIONING</a>
+    <a href="m8-7.html">LESSON 07 — SYNTHESIS: GROUND &amp; OPERATIONS →</a>
+</div>
+</div>
+
+<button class="back-to-top" id="backToTop" title="Back to top">↑</button>
+<footer>© 2026 LEOAF · M8 · LESSON 06 OF 7</footer>
+<script>
+const canvas=document.getElementById('starsCanvas'),ctx=canvas.getContext('2d');
+let stars=[];
+function initStars(){stars=[];for(let i=0;i<180;i++)stars.push({x:Math.random()*canvas.width,y:Math.random()*canvas.height,size:Math.random()*1.5+0.4,speed:Math.random()*0.18+0.04,hue:Math.random()*360});}
+function resizeCanvas(){canvas.width=window.innerWidth;canvas.height=window.innerHeight;}
+resizeCanvas();initStars();window.addEventListener('resize',resizeCanvas);
+function animateStars(){ctx.clearRect(0,0,canvas.width,canvas.height);stars.forEach(s=>{s.y-=s.speed;if(s.y<0){s.y=canvas.height;s.x=Math.random()*canvas.width;}ctx.beginPath();ctx.fillStyle=`hsl(${s.hue},80%,80%)`;ctx.arc(s.x,s.y,s.size,0,Math.PI*2);ctx.fill();});requestAnimationFrame(animateStars);}
+animateStars();
+</script>
+<script>
+const feedbacks={
+    1:{correct:"1,584 × 12/year = 19,008/year = ~52/day = 2.2/hour. The traditional event model (an anomaly summons a team) cannot absorb 52 events a day — it would need ~10 engineers doing nothing else, forever. Anomaly handling must become a process.",wrong:"It is ~52/day, not one per day or year. Even well-designed satellites have anomalies (sensor glitches, environment strikes); the fleet rate is inherent to scale."},
+    2:{correct:"Nearly eight million numbers a second stream from the fleet. Software must ingest this firehose and flag deviations (thresholds, statistics, ML), turning eight million points/second into the ~52 flagged anomalies/day that matter. Fleet monitoring is a big-data problem before it is a spacecraft problem.",wrong:"It is a volume problem, not merely speed. Telemetry monitoring is not blocked by encryption. Detection is essential — miss an anomaly and a satellite is lost."},
+    3:{correct:"Most anomalies are known types with known fixes (a reaction wheel saturates → a known desaturation maneuver). A playbook encodes the fix as automated action triggered by the matching detection. Playbooks are the heart of fleet automation — the fleet heals its own known wounds.",wrong:"Not a manual, schedule, or routing table — a playbook is an automated anomaly-response procedure."},
+    4:{correct:"52/day × 5% ≈ 2.6 manual anomalies/day, resolvable by a fraction of one engineer's time — versus the ten engineers the un-automated fleet would need. Automating the known collapses the human workload, which is what makes a thousand-satellite fleet operable by a small team.",wrong:"It changes dramatically (10 engineers → <1). It drops, not doubles. It does not go to zero — the novel 5% still needs humans."},
+    5:{correct:"Novel anomalies (no matching playbook) need diagnostic reasoning — understanding *why*, not just matching a symptom. Engineers work them, and each resolution becomes a new playbook, so the automated fraction rises as the fleet matures. Humans are repositioned to reason about the unknown, not removed.",wrong:"They cannot be ignored (a satellite may be at risk). A default playbook for an unknown anomaly could make things worse. Rebooting is one possible response, not the general answer — diagnosis comes first."},
+    6:{correct:"Contact (m8-4), commissioning (m8-5), anomaly handling (m8-6), and even routing (m7-4) all use the same pattern: automate the routine common case, escalate/react to the exceptions. The pattern recurs because scale leaves no alternative — human attention is the scarce resource to be spent only where automation cannot reach.",wrong:"It is a structural necessity, not coincidence or regulation. It applies across contact, commissioning, routing, and anomalies — not only anomalies."},
+    7:{correct:"The constellation is engineered to tolerate a degraded fraction: spare capacity carries the lost throughput and the mesh reroutes around unhealthy satellites (m7-4). A user rarely notices 32 unhealthy satellites because the redundancy was designed in — service degrades gracefully, not catastrophically.",wrong:"Satellites do fail (that is the point — the *service* doesn't). It is about the service tolerating failures, not satellites degrading slowly or the fleet shutting down."},
+    8:{correct:"The human-scale interface to a too-large fleet is the aggregate: operators watch the *statistics* of fleet health while automation handles individuals. A stable 2% degraded is normal; a rising fraction warns of a systematic issue. Graceful degradation is what lets operators watch aggregates instead of individuals.",wrong:"Watching 1,584 satellites individually is exactly what is impossible. Health cannot be ignored. One-per-day sampling would miss fast-developing problems — the aggregate view is continuous."},
+    9:{correct:"Mass production makes satellites cheap and operable (one playbook library) but identical — so a defect (a component failing at a radiation dose, a software bug) is in all of them, and a wrong playbook replicates its error fleet-wide. One anomaly is trivial; the same anomaly on a thousand satellites is existential. The systematic failure is the real risk.",wrong:"Identical satellites are cheap, not expensive (that is the point of mass production). Telling them apart is trivial (IDs). The systematic risk is very real — the section's whole subject."},
+    10:{correct:"The mechanism meant to heal (identical playbooks applied fleet-wide) can harm at the same scale if a playbook is subtly wrong — replicating the error across every triggering satellite. This is why the fleet-health aggregate and human escalation are checks against systematic error: a shared rising degraded-fraction must halt the automation before the error spreads.",wrong:"It does amplify the risk (the section's point). Automation is not always safe — a wrong playbook at scale is dangerous. Playbooks can be wrong, which is exactly the hazard."}
+};
+let answered={};
+document.querySelectorAll('.quiz-opt').forEach(btn=>{
+    btn.addEventListener('click',function(){
+        const q=this.dataset.q;
+        if(answered[q]!==undefined)return;
+        const correct=this.dataset.correct==='true';
+        answered[q]=correct;
+        document.querySelectorAll(`.quiz-opt[data-q="${q}"]`).forEach(b=>{b.disabled=true;if(b.dataset.correct==='true')b.classList.add('correct');});
+        if(!correct)this.classList.add('wrong');
+        const fb=document.getElementById('fb'+q);
+        fb.textContent=(correct?'\u2713 ':'\u2717 ')+feedbacks[q][correct?'correct':'wrong'];
+        fb.style.color=correct?'#39ff14':'#ff004f';
+        if(Object.keys(answered).length===10){
+            const total=Object.values(answered).filter(Boolean).length;
+            const sc=document.getElementById('quizScore');
+            sc.style.display='block';
+            const pct=Math.round(total/10*100);
+            sc.textContent=`SCORE: ${total}/10 (${pct}%) \u2014 ${pct===100?'PERFECT.':pct>=80?'STRONG.':pct>=60?'ADEQUATE. REVISIT WEAK SECTIONS.':'REVISIT THE LESSON BEFORE PROCEEDING.'}`;
+        }
+    });
+});
+</script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="supabase.js"></script>
+<script src="user_progress.js"></script>
+<script>
+const LESSON_ID='m8-6';
+(function(){
+    function bounceToLogin(r){console.error("Auth guard:",r);window.location.replace("index.html");}
+    async function init(){
+        if(typeof client==="undefined"||!client||!client.auth)return bounceToLogin("Supabase client not loaded");
+        let session=null;
+        try{({data:{session}}=await client.auth.getSession());}
+        catch(e){return bounceToLogin("getSession threw: "+e.message);}
+        if(!session){window.location.replace("index.html");return;}
+        const btn=document.getElementById('completeBtn'),msg=document.getElementById('completeMsg');
+        function setDone(done){
+            if(done){btn.textContent='\u2713 COMPLETE \u2014 CLICK TO UNDO';btn.classList.add('done');btn.style.cssText='border-color:#39ff14;color:#39ff14;background:rgba(57,255,20,0.1);cursor:pointer;opacity:1;';msg.style.color='#39ff14';msg.textContent='Lesson marked complete. Click again to undo.';}
+            else{btn.textContent='MARK LESSON COMPLETE';btn.classList.remove('done');btn.style.cssText='';msg.style.color='#ffffff55';msg.textContent='Not yet marked complete.';}
+        }
+        let mastered=[];
+        try{mastered=await getMasteredSections();}catch(e){console.error(e);}
+        setDone(mastered.includes(LESSON_ID));
+        btn.addEventListener('click',async()=>{
+            const isDone=btn.classList.contains('done');
+            msg.style.color='#00d9ff';msg.textContent='Saving...';
+            const ok=await upsertSection(LESSON_ID,!isDone);
+            if(ok){setDone(!isDone);}else{msg.style.color='#ff004f';msg.textContent='Error saving. Try again.';}
+        });
+        const btt=document.getElementById('backToTop');
+        window.addEventListener('scroll',()=>{btt.classList.toggle('visible',window.scrollY>400);});
+        btt.addEventListener('click',()=>window.scrollTo({top:0,behavior:'smooth'}));
+    }
+    if(document.readyState==="loading")document.addEventListener("DOMContentLoaded",init);
+    else init();
+})();
+</script>
+</body>
+</html>
