@@ -1,0 +1,634 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, shrink-to-fit=no">
+<title>M8-2 — Site Diversity &amp; Feeder-Link Availability · LEOAF</title>
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;600;800&family=Share+Tech+Mono&family=Libre+Baskerville:ital,wght@0,400;0,700;1,400&display=swap" rel="stylesheet">
+<link rel="icon" href="favicon.ico" sizes="any" type="image/x-icon">
+<link rel="manifest" href="site.webmanifest">
+<meta name="theme-color" content="#0f0f0f">
+<script>
+window.leoafAbort = async function () {
+    function go() { window.location.replace("index.html?signedout=1"); }
+    try { if (typeof client !== "undefined" && client && client.auth && client.auth.signOut) { try { await client.auth.signOut({ scope: "local" }); } catch (e) {} } } catch (e) {}
+    go();
+};
+</script>
+<style>
+* { box-sizing:border-box; margin:0; padding:0; }
+html { height:100%; -webkit-text-size-adjust:100%; overflow-x:hidden; }
+body { font-family:'Share Tech Mono',monospace; background:#000; color:white; overflow-x:hidden; min-height:100vh; }
+#starsCanvas { position:fixed; inset:0; z-index:-1; }
+header { background:#000; border-bottom:1px solid #ff004f33; position:sticky; top:0; z-index:100; padding:1rem clamp(1.5rem,5vw,4rem); display:flex; justify-content:space-between; align-items:center; }
+.logo { font-family:'Orbitron',sans-serif; font-weight:800; font-size:clamp(16px,2vw,22px); letter-spacing:3px; text-decoration:none; }
+.logo span:first-child { color:white; } .logo span:last-child { color:#ff004f; }
+.nav-right { display:flex; align-items:center; gap:10px; }
+.nav-btn { background:transparent; border:1px solid #ff004f44; color:#ff004f; padding:6px 14px; cursor:pointer; transition:0.3s; font-size:11px; font-family:'Orbitron',sans-serif; letter-spacing:1px; text-decoration:none; display:inline-block; }
+.nav-btn:hover { background:#ff004f; color:black; }
+.breadcrumb { padding:14px clamp(1.5rem,5vw,4rem); font-size:11px; color:#ffffff44; letter-spacing:1px; position:relative; z-index:1; }
+.breadcrumb a { color:#00d9ff66; text-decoration:none; } .breadcrumb a:hover { color:#00d9ff; }
+.breadcrumb span { margin:0 8px; }
+.lesson-wrap { max-width:820px; margin:0 auto; padding:0 clamp(1.5rem,5vw,4rem) 80px; position:relative; z-index:1; }
+.lesson-header { padding:30px 0 28px; border-bottom:1px solid #ffffff11; margin-bottom:36px; }
+.lesson-tag { font-family:'Orbitron',sans-serif; font-size:10px; color:#ff004f; letter-spacing:3px; margin-bottom:10px; }
+.lesson-header h1 { font-family:'Orbitron',sans-serif; font-size:clamp(20px,3.5vw,32px); font-weight:800; line-height:1.2; margin-bottom:12px; }
+.lesson-meta { display:flex; gap:10px; flex-wrap:wrap; margin-bottom:16px; }
+.l-pill { font-family:'Orbitron',sans-serif; font-size:10px; padding:3px 10px; border:1px solid; letter-spacing:1px; }
+.l-pill-q { color:#ff004f; border-color:#ff004f44; } .l-pill-t { color:#39ff14; border-color:#39ff1444; }
+.l-pill-c { color:#ffaa00; border-color:#ffaa0044; }
+.lesson-intro { font-size:13px; line-height:1.85; opacity:0.75; }
+.toc { background:rgba(0,217,255,0.06); border:1px solid #00d9ff33; padding:24px 28px; margin:30px 0; }
+.toc h4 { font-family:'Orbitron',sans-serif; font-size:10px; color:#00d9ff; letter-spacing:2px; margin-bottom:16px; }
+.toc ol { padding-left:20px; } .toc li { font-size:13px; line-height:2.1; }
+.toc li a { color:#00d9ffbb; text-decoration:none; transition:0.15s; } .toc li a:hover { color:#fff; padding-left:4px; }
+.toc li::marker { color:#ff004f; font-family:'Orbitron',sans-serif; font-size:10px; }
+.cb { background:#f5f2ec; color:#1a1a1a; padding:36px clamp(24px,4vw,48px); margin-bottom:24px; border-left:4px solid #00d9ff; position:relative; z-index:1; }
+.cb h2 { font-family:'Orbitron',sans-serif; font-size:13px; color:#003d66; letter-spacing:2px; text-transform:uppercase; margin-bottom:20px; padding-bottom:10px; border-bottom:2px solid #00d9ff66; scroll-margin-top:80px; }
+.cb h3 { font-family:'Orbitron',sans-serif; font-size:11px; color:#444; letter-spacing:1.5px; text-transform:uppercase; margin:28px 0 12px; }
+.cb p { font-family:'Libre Baskerville',Georgia,serif; font-size:15px; line-height:1.9; color:#1a1a1a; margin-bottom:16px; }
+.cb ul { padding-left:0; margin-bottom:16px; }
+.cb ul li { font-family:'Libre Baskerville',Georgia,serif; font-size:14px; line-height:1.85; color:#1a1a1a; padding-left:20px; position:relative; margin-bottom:8px; }
+.cb ul li::before { content:'›'; position:absolute; left:0; color:#0077aa; }
+.cb blockquote { border-left:3px solid #1a7a1a; background:#eafaea; padding:14px 20px; margin:18px 0; font-size:13px; font-family:'Share Tech Mono',monospace; color:#0a3d0a; line-height:1.8; }
+.callout { border-left:3px solid #0088cc; background:#e8f4fb; padding:16px 20px; margin:22px 0; font-size:12px; line-height:1.8; color:#1a1a1a; }
+.callout.red { border-left-color:#cc0033; background:#fdecea; }
+.callout.green { border-left-color:#1a7a1a; background:#eafaea; }
+.callout.amber { border-left-color:#996600; background:#fef9ec; }
+.callout strong { font-family:'Orbitron',sans-serif; font-size:10px; letter-spacing:1px; display:block; margin-bottom:8px; }
+.compare-table { width:100%; border-collapse:collapse; margin:22px 0; font-size:12px; }
+.compare-table th { font-family:'Orbitron',sans-serif; font-size:10px; letter-spacing:1px; color:#003d66; padding:10px 12px; border-bottom:2px solid #00d9ff66; text-align:left; }
+.compare-table td { padding:10px 12px; border-bottom:1px solid #ddd; line-height:1.5; color:#1a1a1a; vertical-align:top; }
+.compare-table tr:hover td { background:#f0f0f0; }
+.key-numbers { display:grid; grid-template-columns:repeat(auto-fit,minmax(140px,1fr)); gap:12px; margin:22px 0; }
+.kn-item { background:#fff; border:1px solid #d0d0d0; padding:16px 12px; text-align:center; }
+.kn-val { font-family:'Orbitron',sans-serif; font-size:clamp(13px,1.8vw,18px); font-weight:800; color:#003d66; display:block; }
+.kn-label { font-size:10px; color:#555; letter-spacing:1px; margin-top:5px; display:block; line-height:1.4; }
+.quiz-block { background:rgba(17,17,17,0.9); border:1px solid #ff004f33; padding:28px; margin:48px 0 32px; }
+.quiz-block h2 { font-family:'Orbitron',sans-serif; font-size:13px; color:#ff004f; letter-spacing:2px; margin-bottom:6px; }
+.quiz-intro { font-size:12px; opacity:0.6; margin-bottom:24px; padding-bottom:16px; border-bottom:1px solid #ff004f22; line-height:1.6; }
+.quiz-q { margin-bottom:28px; }
+.quiz-q p { font-size:13px; opacity:0.9; margin-bottom:12px; line-height:1.65; }
+.quiz-q p strong { color:#00d9ff; }
+.quiz-options { display:flex; flex-direction:column; gap:8px; }
+.quiz-opt { background:rgba(255,255,255,0.03); border:1px solid #ffffff1a; padding:11px 16px; cursor:pointer; font-size:12px; font-family:'Share Tech Mono',monospace; transition:0.2s; text-align:left; color:white; line-height:1.5; }
+.quiz-opt:hover:not(:disabled) { background:rgba(0,217,255,0.08); border-color:#00d9ff44; }
+.quiz-opt.correct { background:rgba(57,255,20,0.1); border-color:#39ff14; color:#39ff14; }
+.quiz-opt.wrong { background:rgba(255,0,79,0.1); border-color:#ff004f; color:#ff004f; }
+.quiz-opt:disabled { cursor:default; }
+.quiz-feedback { font-size:12px; margin-top:10px; min-height:18px; line-height:1.7; opacity:0.9; padding:0 4px; }
+.quiz-score { font-family:'Orbitron',sans-serif; font-size:12px; color:#39ff14; margin-top:20px; letter-spacing:1px; display:none; padding-top:16px; border-top:1px solid #39ff1433; }
+.py-block { background:rgba(10,10,10,0.95); border:1px solid #39ff1422; padding:28px; margin:32px 0; }
+.py-block h2 { font-family:'Orbitron',sans-serif; font-size:13px; color:#39ff14; letter-spacing:2px; margin-bottom:8px; }
+.py-block .py-intro { font-size:12px; opacity:0.7; margin-bottom:20px; padding-bottom:16px; border-bottom:1px solid #39ff1422; line-height:1.7; }
+.py-exercise { margin-bottom:32px; } .py-exercise:last-child { margin-bottom:0; }
+.py-exercise h3 { font-family:'Orbitron',sans-serif; font-size:11px; color:#39ff1499; letter-spacing:1.5px; text-transform:uppercase; margin-bottom:10px; }
+.py-exercise p { font-size:12px; opacity:0.8; margin-bottom:14px; line-height:1.75; }
+.py-block pre { background:#050505; border:1px solid #39ff1433; padding:20px; font-family:'Share Tech Mono',monospace; font-size:11px; line-height:1.7; overflow-x:auto; color:#39ff14; white-space:pre; margin-bottom:12px; }
+.py-note { background:rgba(57,255,20,0.04); border-left:2px solid #39ff14; padding:12px 16px; margin-top:14px; font-size:12px; line-height:1.75; opacity:0.8; }
+.py-note strong { font-family:'Orbitron',sans-serif; font-size:10px; color:#39ff14; display:block; margin-bottom:6px; letter-spacing:1px; }
+.reflection-block { background:rgba(255,170,0,0.04); border:1px solid #ffaa0033; padding:24px; margin:32px 0; }
+.reflection-block h2 { font-family:'Orbitron',sans-serif; font-size:13px; color:#ffaa00; letter-spacing:2px; margin-bottom:8px; }
+.ref-intro { font-size:12px; opacity:0.7; margin-bottom:20px; padding-bottom:14px; border-bottom:1px solid #ffaa0022; line-height:1.7; }
+.ref-prompt { margin-bottom:20px; }
+.ref-prompt h3 { font-family:'Orbitron',sans-serif; font-size:11px; color:#ffaa0099; letter-spacing:1px; margin-bottom:8px; }
+.ref-prompt p { font-size:12px; opacity:0.8; line-height:1.75; }
+.complete-wrap { margin-top:56px; padding-top:30px; border-top:1px solid #ffffff11; text-align:center; }
+.complete-btn { font-family:'Orbitron',sans-serif; font-size:13px; letter-spacing:2px; padding:14px 44px; background:transparent; border:1px solid #39ff14; color:#39ff14; cursor:pointer; transition:0.3s; }
+.complete-btn:hover:not(.done) { background:#39ff14; color:black; box-shadow:0 0 20px rgba(57,255,20,0.4); }
+.complete-btn.done { background:rgba(57,255,20,0.1); cursor:pointer; opacity:1; }
+.complete-msg { font-size:12px; color:#39ff14; margin-top:14px; min-height:18px; letter-spacing:1px; }
+.lesson-nav { display:flex; justify-content:space-between; margin-top:30px; flex-wrap:wrap; gap:10px; }
+.lesson-nav a { font-family:'Orbitron',sans-serif; font-size:11px; color:#00d9ff66; text-decoration:none; letter-spacing:1px; transition:0.2s; }
+.lesson-nav a:hover { color:#00d9ff; }
+.back-to-top { position:fixed; bottom:28px; right:28px; z-index:200; width:44px; height:44px; background:#000; border:1px solid #00d9ff55; color:#00d9ff; font-size:20px; cursor:pointer; display:flex; align-items:center; justify-content:center; opacity:0; pointer-events:none; transition:opacity 0.3s; }
+.back-to-top.visible { opacity:1; pointer-events:auto; } .back-to-top:hover { border-color:#00d9ff; }
+footer { text-align:center; padding:30px; opacity:0.3; font-size:11px; position:relative; z-index:1; letter-spacing:1px; }
+.module-complete { background:rgba(57,255,20,0.06); border:1px solid #39ff1444; padding:24px 28px; margin:40px 0; text-align:center; }
+.module-complete h3 { font-family:'Orbitron',sans-serif; font-size:14px; color:#39ff14; letter-spacing:2px; margin-bottom:10px; }
+.module-complete p { font-size:12px; opacity:0.8; line-height:1.7; }
+</style>
+</head>
+<body>
+<canvas id="starsCanvas"></canvas>
+<header>
+    <a href="dashboard.html" class="logo"><span>LEO</span><span>AF</span></a>
+    <div class="nav-right">
+        <a href="m8.html" class="nav-btn">← M8 HUB</a>
+        <button class="nav-btn" onclick="leoafAbort()">ABORT</button>
+    </div>
+</header>
+<div class="breadcrumb">
+    <a href="dashboard.html">DASHBOARD</a><span>/</span>
+    <a href="m8.html">M8</a><span>/</span>
+    <span style="color:#ffffff88;">LESSON 02 — SITE DIVERSITY &amp; AVAILABILITY</span>
+</div>
+
+<div class="lesson-wrap">
+
+<div class="lesson-header">
+    <div class="lesson-tag">M8 · LESSON 02 OF 7</div>
+    <h1>Site Diversity &amp; Feeder-Link Availability</h1>
+    <div class="lesson-meta">
+        <div class="l-pill l-pill-q">MODULE 8</div>
+        <div class="l-pill l-pill-t">GROUND SEGMENT &amp; OPERATIONS</div>
+        <div class="l-pill l-pill-c">CORE</div>
+    </div>
+    <p class="lesson-intro" style="margin-bottom:12px;">m8-1 built a feeder link with tens of gigabits of clear-sky capacity and flagged the problem this lesson solves: that capacity is worthless if the link is down every time it rains. A feeder link concentrates a whole satellite's traffic (m8-1 §5), so it must be highly available — but it runs at Ka or Q/V-band, where rain attenuation is brutal, and the availability a concentration point demands cannot be bought with link margin at those frequencies. This lesson quantifies the rain problem — a single Ka gateway needs some 23 dB of margin for 99.99% availability and effectively unaffordable margin for 99.999% — and then presents the solution that the gateway's siting freedom (m8-1 §2) makes possible: <strong>site diversity</strong>. Build several gateways far enough apart that rain never soaks all of them at once, and route the feeder link to whichever gateway is currently clear. The rain problem, unsolvable per-site with margin, becomes solvable geographically.</p>
+    <p class="lesson-intro" style="margin-bottom:12px;">The lesson's verified core is the multiplication that makes diversity work. Rain outage at separated sites is largely independent — a rain cell over one gateway rarely extends to another 50–100 km away — so if each gateway alone achieves a modest 99% availability, three independent gateways achieve 99.9999% jointly, because all three must be rained-on simultaneously for the feeder to fail, and that near-never happens. Site diversity converts a link-margin problem the physics forbids solving into a geographic problem the operator can solve by building more gateways. The spine gains the diversity availability model — the tool that turns a target feeder availability into a required number and separation of gateway sites.</p>
+</div>
+
+<div class="toc">
+    <h4>CONTENTS</h4>
+    <ol>
+        <li><a href="#s1">The rain problem at feeder bands</a></li>
+        <li><a href="#s2">Why margin fails and geography works</a></li>
+        <li><a href="#s3">The diversity multiplication</a></li>
+        <li><a href="#s4">How far apart: decorrelating the sites</a></li>
+        <li><a href="#s5">Gateway switching: using the diversity</a></li>
+        <li><a href="#s6">The availability-weighted feeder capacity</a></li>
+        <li><a href="#s7">Key facts</a></li>
+        <li><a href="#s8">What this lesson delivers to the design chain</a></li>
+        <li><a href="#kf">Key facts</a></li>
+        <li><a href="#quiz">Knowledge check</a></li>
+        <li><a href="#py">Python exercises</a></li>
+        <li><a href="#reflect">Reflection</a></li>
+        <li><a href="#sources">Sources</a></li>
+    </ol>
+</div>
+
+<div class="cb" id="s1">
+    <h2>1. The rain problem at feeder bands</h2>
+<p>Module 4 established rain attenuation; at feeder bands it is severe. Applying the rain model at 30° elevation for the rain rates that correspond to different availability targets:</p>
+<table class="compare-table">
+<thead><tr>
+<th>Availability</th>
+<th>Rain rate</th>
+<th>Ka (20 GHz) fade</th>
+<th>Q/V (40 GHz) fade</th>
+</tr></thead>
+<tbody>
+<tr><td>99.9% (three-nines)</td><td>~12 mm/h</td><td>5.8 dB</td><td>18.3 dB</td></tr>
+<tr><td>99.99% (four-nines)</td><td>~42 mm/h</td><td>23.2 dB</td><td>59.4 dB</td></tr>
+<tr><td>99.999% (five-nines)</td><td>~100 mm/h</td><td>~60 dB</td><td>~134 dB</td></tr>
+</tbody>
+</table>
+<p>The numbers climb catastrophically with both availability and frequency. At Ka-band, reaching four-nines requires surviving a 23 dB fade — more margin than the entire feeder link budget can spare — and five-nines is physically hopeless with margin alone. At Q/V-band it is worse by another factor: an 18 dB fade just for three-nines, and utterly impossible fades beyond. This is the trap m8-1 flagged: the wide bandwidth that makes the feeder capable (Q/V-band's gigahertz) comes with rain attenuation that makes single-site high availability unreachable. <strong>You cannot buy feeder availability with link margin at these frequencies.</strong> The feeder link needs a different kind of answer.</p>
+</div>
+
+<div class="cb" id="s2">
+    <h2>2. Why margin fails and geography works</h2>
+<p>The reason margin fails is that rain fade is a <em>heavy-tailed</em> problem: the fade you must survive grows steeply as you chase the last fractions of a percent of availability, because the rare, intense downpours that cause the worst fades are precisely the ones that define five-nines. To survive them with margin, the feeder link would need to run, in clear sky, tens of decibels below its capability — throwing away most of the capacity m8-1 built — just to have headroom for a storm that occurs 0.001% of the time over that one gateway. It is a colossal waste to size a link for the worst weather at a single point.</p>
+<p>Geography sidesteps the tail entirely. The insight: the worst rain over <em>one</em> gateway is a local event — a storm cell tens of kilometres across — and it is very unlikely that an equally bad storm sits over a <em>second</em> gateway 100 km away at the same moment. So instead of one gateway hardened against its own worst weather, build two or three gateways in different weather, and use whichever is clear. The feeder link fails only if <em>all</em> the diversity sites are rained-on at once, which — for well-separated sites — is far rarer than any one being rained-on. The problem the tail made unsolvable per-site becomes easy across sites, because the tails do not coincide.</p>
+</div>
+
+<div class="cb" id="s3">
+    <h2>3. The diversity multiplication</h2>
+<p>The arithmetic is the lesson's centre. If a single gateway achieves availability <em>a</em> (outage probability <em>p</em> = 1 − <em>a</em>), and <em>N</em> gateways have <em>independent</em> rain outages, then the feeder fails only when all <em>N</em> are simultaneously out, with joint outage <em>p^N</em> and joint availability 1 − <em>p^N</em>:</p>
+<table class="compare-table">
+<thead><tr>
+<th>Sites</th>
+<th>Single-site availability</th>
+<th>Joint availability</th>
+</tr></thead>
+<tbody>
+<tr><td>1</td><td>99%</td><td>99%</td></tr>
+<tr><td>2</td><td>99%</td><td>99.99%</td></tr>
+<tr><td>3</td><td>99%</td><td>99.9999%</td></tr>
+</tbody>
+</table>
+<p>Each independent site <em>multiplies</em> the outage probability. Three gateways, each achieving only a modest 99% availability on its own (a 1% outage, easily met with normal margin), together achieve 99.9999% — six-nines — because all three must be rained-on at once for the feeder to fail, a coincidence of probability 0.01³ = one in a million. This is why site diversity is transformative: it reaches availability targets that are physically impossible per-site, using gateways that are individually unremarkable. The operator trades hardware (more gateways) for availability (the multiplication), and the trade is enormously favourable because the exponent works in their favour.</p>
+<p>The catch is the word <em>independent</em>, and it is m8-2's central caveat (§4). The multiplication assumes the sites' rain outages do not coincide, which is true only if they are far enough apart to be in genuinely different weather. Correlated sites do not multiply — two gateways in the same storm's path fail together, and their joint availability is barely better than one. The whole diversity gain rides on decorrelating the sites, which means separating them.</p>
+</div>
+
+<div class="cb" id="s4">
+    <h2>4. How far apart: decorrelating the sites</h2>
+<p>Rain is spatially correlated over the scale of weather systems. Convective storm cells — the intense downpours that cause the worst fades — are typically a few kilometres to tens of kilometres across, while the broader frontal systems that bring them are larger. For two gateways' rain outages to be usefully independent, they must be separated by more than the correlation scale of the heavy rain — as a rule of thumb, <strong>50 to 100 kilometres or more</strong>, and ideally in different meteorological settings (different sides of a mountain range, different distances from a coast, different microclimates). Sites much closer than this share weather and do not diversify; sites far apart in different climates diversify strongly.</p>
+<p>This is a real constraint on gateway placement (m8-3). Diversity sites cannot be co-located for operational convenience — they must be deliberately spread, which means more land, more backhaul (each diversity site needs its own fibre to the point of presence), and more antennas. The separation also cannot be so large that no single satellite can see both sites (the m7-1 co-visibility geometry) if the diversity is to be seamless — the satellite must be able to switch its feeder link from one diversity gateway to another without the traffic touching the ground in between, which requires both to be in its footprint. So the diversity separation is bounded below by rain decorrelation (~50–100 km) and above by satellite co-visibility (the footprint, ~2,000+ km) — a comfortable window, but a real one.</p>
+</div>
+
+<div class="cb" id="s5">
+    <h2>5. Gateway switching: using the diversity</h2>
+<p>Diversity is only useful if the system can <em>switch</em> to the clear gateway when one is raining. The feeder link is redirected — the satellite retargets its feeder beam from the rained-on gateway to a clear diversity site, and the traffic that was descending at gateway A now descends at gateway B — and this switch must happen fast enough that the rain fade does not cause an outage before the switch completes. Because rain fades build over seconds to minutes (not milliseconds), the switch has time to be orderly: the system monitors each diversity site's fade (from the feeder link's own signal quality or a co-located rain sensor), predicts an impending outage, and hands the feeder over to a clear site before the fade deepens — the m6-5 make-before-break pattern once more, now switching gateways instead of satellites.</p>
+<p>The switch has a cost: the clear diversity gateway must have spare capacity to absorb the traffic redirected to it, which means the diversity sites cannot all run at full capacity simultaneously — there must be headroom to carry a neighbour's redirected load. This is the hidden cost of diversity: not just extra gateways, but extra <em>capacity</em> at each, so that a clear site can take over a rained-on site's traffic. A diversity scheme sized so that any one site can fail over to the others needs each site provisioned above its own average load — the availability is bought with both redundant sites and redundant capacity.</p>
+</div>
+
+<div class="cb" id="s6">
+    <h2>6. The availability-weighted feeder capacity</h2>
+<p>Site diversity resolves m8-1's deferred question (reflection 4): what capacity does the feeder link actually deliver, accounting for rain? With diversity, the feeder is almost always running on a clear gateway at full clear-sky capacity, so the availability-weighted average capacity is close to the clear-sky number — the diversity scheme's whole purpose is to keep the link out of the rain. Without diversity, the feeder would spend meaningful time in fade, backing off its MODCOD (m5-2) to survive, and its average deliverable capacity would be materially below clear-sky. Diversity therefore does double duty: it delivers the <em>availability</em> a concentration point demands, and by keeping the link on clear gateways it preserves the <em>capacity</em> m8-1 computed. The clear-sky feeder capacity is a trustworthy sizing number <em>because</em> diversity keeps the link in clear sky — the two lessons resolve together.</p>
+<p>This is the ground segment's first principle: <strong>availability is bought with geography, not margin.</strong> A user terminal, stuck at the user's location, had only margin and ACM to fight rain (Module 4, m5-2). A gateway, free to be sited and duplicated, fights rain with diversity — a fundamentally more powerful tool that only the ground segment's siting freedom unlocks. It is the single most important difference between operating a feeder link and operating a user link, and it shapes everything about how gateways are placed (m8-3) and how many there must be.</p>
+</div>
+
+<div class="cb" id="s7">
+    <h2>7. Key facts</h2>
+<table class="compare-table">
+<thead><tr>
+<th>Fact</th>
+<th>Value</th>
+<th>Unit</th>
+<th>Source</th>
+</tr></thead>
+<tbody>
+<tr><td>Ka feeder fade, 99.99% (30° elev)</td><td>23.2</td><td>dB</td><td>Computed</td></tr>
+<tr><td>Q/V feeder fade, 99.9%</td><td>18.3</td><td>dB</td><td>Computed</td></tr>
+<tr><td>Single-site five-nines at Ka</td><td>~60 dB — unaffordable</td><td>—</td><td>Computed</td></tr>
+<tr><td>Margin failure</td><td>rain fade heavy-tailed; sizing for the tail wastes capacity</td><td>—</td><td>§2</td></tr>
+<tr><td>Diversity principle</td><td>fail only if ALL sites rained-on at once</td><td>—</td><td>§3</td></tr>
+<tr><td>3 independent sites at 99% each</td><td>99.9999% joint</td><td>—</td><td>Computed</td></tr>
+<tr><td>Diversity multiplication</td><td>joint outage = p^N (if independent)</td><td>—</td><td>§3</td></tr>
+<tr><td>Site separation for decorrelation</td><td>50–100+</td><td>km</td><td>§4</td></tr>
+<tr><td>Separation upper bound</td><td>satellite co-visibility (footprint)</td><td>—</td><td>§4</td></tr>
+<tr><td>Switching</td><td>make-before-break to a clear site, seconds-scale</td><td>—</td><td>§5</td></tr>
+<tr><td>Hidden cost</td><td>spare capacity at each site to absorb redirected load</td><td>—</td><td>§5</td></tr>
+<tr><td>Ground-segment first principle</td><td>availability from geography, not margin</td><td>—</td><td>§6</td></tr>
+</tbody>
+</table>
+</div>
+
+<div class="cb" id="s8">
+    <h2>8. What this lesson delivers to the design chain</h2>
+<p>Stage 2 of the spine is the <strong>diversity availability model</strong>: given a target feeder availability, a single-site availability (from the rain climate and the link margin), and a site-independence assumption, it computes the number of diversity gateways required and checks the separation for decorrelation. It also computes the availability-weighted feeder capacity — confirming that with diversity, the clear-sky capacity of m8-1 is close to the deliverable capacity. The feeder link is now not just a budget but an <em>available</em> budget: a capacity the operator can actually promise, backed by enough gateways to keep it out of the rain.</p>
+<p>What remains is to place those gateways in the real world. Diversity says how many gateways and how far apart; it does not say <em>where</em> — and placement is a joint problem of rain climate, backhaul availability, regulatory access, and the mesh's egress needs (where the traffic wants to come down). That is m8-3, and it turns the diversity requirement into a concrete map of gateway sites, connected to the terrestrial internet through a point-of-presence topology. The number of gateways diversity demands is one of the biggest cost drivers in the ground segment, and m8-3 is where that cost gets located.</p>
+</div>
+
+
+<div class="quiz-block" id="quiz">
+    <h2 style="font-family:'Orbitron',sans-serif;font-size:13px;color:#00d9ff;letter-spacing:2px;margin-bottom:8px;">KNOWLEDGE CHECK</h2>
+    <div class="quiz-intro">Ten questions. Each option explains itself after you commit. No retries per question — decide first.</div>
+    <div class="quiz-q">
+        <p><strong>1.</strong> A single feeder gateway cannot achieve five-nines availability with link margin because:</p>
+        <div class="quiz-options">
+            <button class="quiz-opt" data-q="1" data-correct="false">A — Gateways are unreliable</button>
+            <button class="quiz-opt" data-q="1" data-correct="true">B — Rain fade at Ka/Q/V-band is heavy-tailed — 99.99% needs ~23 dB of margin at Ka and five-nines needs effectively unaffordable margin, more than the feeder budget can spare</button>
+            <button class="quiz-opt" data-q="1" data-correct="false">C — The satellite is too far</button>
+            <button class="quiz-opt" data-q="1" data-correct="false">D — Regulation forbids it</button>
+        </div>
+        <div class="quiz-feedback" id="fb1"></div>
+    </div>
+    <div class="quiz-q">
+        <p><strong>2.</strong> Site diversity solves the rain problem by:</p>
+        <div class="quiz-options">
+            <button class="quiz-opt" data-q="2" data-correct="false">A — Adding link margin</button>
+            <button class="quiz-opt" data-q="2" data-correct="true">B — Building several gateways far enough apart that rain never soaks all of them at once, and routing the feeder to whichever is clear</button>
+            <button class="quiz-opt" data-q="2" data-correct="false">C — Using a lower frequency</button>
+            <button class="quiz-opt" data-q="2" data-correct="false">D — Pointing away from the rain</button>
+        </div>
+        <div class="quiz-feedback" id="fb2"></div>
+    </div>
+    <div class="quiz-q">
+        <p><strong>3.</strong> Three independent gateways at 99% availability each achieve, jointly:</p>
+        <div class="quiz-options">
+            <button class="quiz-opt" data-q="3" data-correct="false">A — 99% (no improvement)</button>
+            <button class="quiz-opt" data-q="3" data-correct="true">B — 99.9999% — because all three must be rained-on at once (probability 0.01³ = one in a million) for the feeder to fail</button>
+            <button class="quiz-opt" data-q="3" data-correct="false">C — 97% (worse)</button>
+            <button class="quiz-opt" data-q="3" data-correct="false">D — Exactly 99.99%</button>
+        </div>
+        <div class="quiz-feedback" id="fb3"></div>
+    </div>
+    <div class="quiz-q">
+        <p><strong>4.</strong> The diversity multiplication requires the sites to be:</p>
+        <div class="quiz-options">
+            <button class="quiz-opt" data-q="4" data-correct="false">A — Co-located</button>
+            <button class="quiz-opt" data-q="4" data-correct="true">B — Independent — their rain outages must not coincide, which holds only if they are separated by more than the heavy-rain correlation scale (~50–100 km) in different weather</button>
+            <button class="quiz-opt" data-q="4" data-correct="false">C — Identical</button>
+            <button class="quiz-opt" data-q="4" data-correct="false">D — As close as possible</button>
+        </div>
+        <div class="quiz-feedback" id="fb4"></div>
+    </div>
+    <div class="quiz-q">
+        <p><strong>5.</strong> The site separation is bounded above by:</p>
+        <div class="quiz-options">
+            <button class="quiz-opt" data-q="5" data-correct="false">A — Nothing</button>
+            <button class="quiz-opt" data-q="5" data-correct="true">B — Satellite co-visibility — both diversity gateways must be in one satellite's footprint so it can switch the feeder between them without the traffic touching the ground</button>
+            <button class="quiz-opt" data-q="5" data-correct="false">C — The correlation scale</button>
+            <button class="quiz-opt" data-q="5" data-correct="false">D — Fibre length limits</button>
+        </div>
+        <div class="quiz-feedback" id="fb5"></div>
+    </div>
+    <div class="quiz-q">
+        <p><strong>6.</strong> Gateway switching during a rain fade is orderly because:</p>
+        <div class="quiz-options">
+            <button class="quiz-opt" data-q="6" data-correct="false">A — Rain is instant</button>
+            <button class="quiz-opt" data-q="6" data-correct="true">B — Rain fades build over seconds to minutes, so the system can predict an impending outage and hand the feeder to a clear site before the fade deepens — make-before-break, at gateway scale</button>
+            <button class="quiz-opt" data-q="6" data-correct="false">C — The satellite stops transmitting</button>
+            <button class="quiz-opt" data-q="6" data-correct="false">D — There is no switching</button>
+        </div>
+        <div class="quiz-feedback" id="fb6"></div>
+    </div>
+    <div class="quiz-q">
+        <p><strong>7.</strong> The hidden cost of diversity is:</p>
+        <div class="quiz-options">
+            <button class="quiz-opt" data-q="7" data-correct="false">A — Nothing beyond the extra gateways</button>
+            <button class="quiz-opt" data-q="7" data-correct="true">B — Spare capacity at each site — a clear gateway must have headroom to absorb a rained-on site's redirected traffic, so sites cannot all run at full load</button>
+            <button class="quiz-opt" data-q="7" data-correct="false">C — Higher frequency</button>
+            <button class="quiz-opt" data-q="7" data-correct="false">D — Lower availability</button>
+        </div>
+        <div class="quiz-feedback" id="fb7"></div>
+    </div>
+    <div class="quiz-q">
+        <p><strong>8.</strong> With site diversity, the availability-weighted feeder capacity is:</p>
+        <div class="quiz-options">
+            <button class="quiz-opt" data-q="8" data-correct="false">A — Far below clear-sky</button>
+            <button class="quiz-opt" data-q="8" data-correct="true">B — Close to the clear-sky capacity — because diversity keeps the link on a clear gateway almost always, so it rarely has to back off MODCOD for rain</button>
+            <button class="quiz-opt" data-q="8" data-correct="false">C — Zero during any rain</button>
+            <button class="quiz-opt" data-q="8" data-correct="false">D — Unrelated to diversity</button>
+        </div>
+        <div class="quiz-feedback" id="fb8"></div>
+    </div>
+    <div class="quiz-q">
+        <p><strong>9.</strong> The ground segment's first principle, from this lesson, is:</p>
+        <div class="quiz-options">
+            <button class="quiz-opt" data-q="9" data-correct="false">A — Bigger antennas</button>
+            <button class="quiz-opt" data-q="9" data-correct="true">B — Availability is bought with geography, not margin — the gateway's siting freedom lets it fight rain with diversity, a tool the user terminal never had</button>
+            <button class="quiz-opt" data-q="9" data-correct="false">C — Higher power</button>
+            <button class="quiz-opt" data-q="9" data-correct="false">D — Lower frequency</button>
+        </div>
+        <div class="quiz-feedback" id="fb9"></div>
+    </div>
+    <div class="quiz-q">
+        <p><strong>10.</strong> Site diversity relates to Module 4's rain handling as:</p>
+        <div class="quiz-options">
+            <button class="quiz-opt" data-q="10" data-correct="false">A — An identical technique</button>
+            <button class="quiz-opt" data-q="10" data-correct="true">B — A fundamentally more powerful tool — Module 4's user terminal had only margin and ACM against rain; the gateway's siting freedom adds diversity, which reaches availabilities margin cannot</button>
+            <button class="quiz-opt" data-q="10" data-correct="false">C — A weaker technique</button>
+            <button class="quiz-opt" data-q="10" data-correct="false">D — Unrelated</button>
+        </div>
+        <div class="quiz-feedback" id="fb10"></div>
+    </div>
+    <div class="quiz-score" id="quizScore"></div>
+</div>
+
+<div class="py-block" id="py">
+    <h2 style="font-family:'Orbitron',sans-serif;font-size:13px;color:#39ff14;letter-spacing:2px;margin-bottom:8px;">PYTHON EXERCISES</h2>
+    <div class="py-intro">Three exercises; the last extends the module spine project. Run them, then work the numbered follow-ups in the comments — the follow-ups are the exercise.</div>
+<div class="py-exercise">
+    <h3>Exercise 1 — The rain problem at feeder bands</h3>
+    <p>Quantify why margin fails.</p>
+<pre>
+import math
+
+def specific_atten(f_ghz, R):
+    tbl = {12:(0.0188,1.217), 20:(0.0751,1.099), 30:(0.187,1.021),
+           40:(0.350,0.939), 50:(0.536,0.873)}
+    k, a = tbl[min(tbl, key=lambda x: abs(x-f_ghz))]
+    return k*R**a
+
+def rain_fade_db(f_ghz, R, elev_deg, hR=3.0, hs=0.1):
+    gamma = specific_atten(f_ghz, R)
+    Ls = (hR-hs)/math.sin(math.radians(elev_deg))
+    r = 1/(1 + Ls*math.cos(math.radians(elev_deg))/35)
+    return gamma*Ls*r
+
+# rain rate for each availability target (temperate zone, approx)
+targets = {"99.9%": 12, "99.99%": 42, "99.999%": 100}
+print(f"{'availability':&gt;12}{'Ka fade':&gt;10}{'Q/V fade':&gt;10}")
+for label, R in targets.items():
+    print(f"{label:&gt;12}{rain_fade_db(20,R,30):&gt;9.1f}{rain_fade_db(40,R,30):&gt;10.1f}")
+
+# 1. The feeder budget (m8-1) had large clear-sky margin from the huge
+#    gateway G/T. Estimate that margin and check: which availability
+#    target can a single Ka gateway hit on margin ALONE before running
+#    out? Confirm five-nines is hopeless.
+# 2. Elevation matters: recompute the 99.99% Ka fade at 10°, 30°, 60°.
+#    A gateway can be sited for high elevation to a favoured orbit shell
+#    — how much fade does raising elevation save?
+# 3. Q/V-band roughly triples the fade. For the SAME availability, how
+#    much MORE diversity (sites) does Q/V need than Ka? Preview m8-2 §3.
+</pre>
+</div>
+<div class="py-exercise">
+    <h3>Exercise 2 — The diversity multiplication</h3>
+    <p>Turn a target into a site count.</p>
+<pre>
+import math
+
+def joint_availability(single_avail, n_sites):
+    p = 1 - single_avail
+    return 1 - p**n_sites
+
+def sites_needed(target_avail, single_avail):
+    p, pt = 1-single_avail, 1-target_avail
+    n = 1
+    while (p**n) &gt; pt:
+        n += 1
+    return n
+
+print("joint availability by site count (99% single):")
+for n in [1, 2, 3, 4]:
+    print(f"  {n} sites: {joint_availability(0.99, n)*100:.4f}%")
+
+print("\nsites needed for targets (99% single-site):")
+for target in [0.9999, 0.99999, 0.999999]:
+    print(f"  {target*100:.4f}% -&gt; {sites_needed(target, 0.99)} sites")
+
+# 1. A wetter climate gives only 97% single-site availability. Recompute
+#    the sites needed for five-nines. How sensitive is the site count to
+#    the single-site availability — and what does that say about siting
+#    in wet vs dry regions?
+# 2. Independence is the key assumption. Model PARTIAL correlation: joint
+#    outage = p^n only for the independent fraction, plus a correlated
+#    floor. Add a 0.001 correlated floor and show it CAPS the achievable
+#    availability regardless of site count.
+# 3. Each site costs money. Plot availability vs number of sites and find
+#    the knee — where does adding another gateway stop being worth it?
+</pre>
+</div>
+<div class="py-exercise">
+    <h3>Exercise 3 — Spine Stage 2: the diversity model</h3>
+    <p>Feeder availability, solved geographically.</p>
+<pre>
+import math
+
+# ═══════════════════════════════════════════════════════
+# M8 SPINE PROJECT — GROUND SEGMENT
+# Stage 2: site-diversity availability model.
+#   Stage 1 (m8-1) gave a feeder link with clear-sky capacity
+#   but no availability. Stage 2: turn a target availability
+#   into a required number &amp; separation of diversity gateways,
+#   and confirm the availability-weighted capacity ≈ clear-sky.
+#   Next: m8-3 places these gateways in the real world.
+# ═══════════════════════════════════════════════════════
+
+class DiversityModel:
+    MIN_SEPARATION_KM = 75      # rain decorrelation (§4)
+    MAX_SEPARATION_KM = 2000    # satellite co-visibility (§4)
+
+    def __init__(self, single_site_avail=0.99, correlated_floor=0.0):
+        self.p = 1 - single_site_avail
+        self.floor = correlated_floor    # residual correlated outage
+
+    def joint_availability(self, n_sites):
+        indep = self.p**n_sites
+        return 1 - max(indep, self.floor)
+
+    def sites_needed(self, target_avail):
+        n = 1
+        while self.joint_availability(n) &lt; target_avail:
+            n += 1
+            if n &gt; 20: return None    # floor prevents reaching target
+        return n
+
+    def separation_ok(self, sep_km):
+        return self.MIN_SEPARATION_KM &lt;= sep_km &lt;= self.MAX_SEPARATION_KM
+
+    def weighted_capacity_gbps(self, clear_sky_gbps, n_sites):
+        # with diversity, link is clear almost always -&gt; ~clear-sky
+        avail = self.joint_availability(n_sites)
+        return clear_sky_gbps * avail    # tiny derate
+
+    def report(self, target_avail, clear_sky_gbps):
+        n = self.sites_needed(target_avail)
+        print(f"  target availability: {target_avail*100:.4f}%")
+        print(f"  single-site: {(1-self.p)*100:.1f}%")
+        print(f"  diversity gateways needed: {n}")
+        if n:
+            print(f"  joint availability: {self.joint_availability(n)*100:.4f}%")
+            print(f"  weighted capacity: "
+                  f"{self.weighted_capacity_gbps(clear_sky_gbps, n):.1f} Gbps "
+                  f"(clear-sky {clear_sky_gbps})")
+
+print("── DIVERSITY (99% single-site, dry climate) ──")
+DiversityModel(0.99).report(0.99999, clear_sky_gbps=48)
+
+print("\n── DIVERSITY (97% single-site, wet climate) ──")
+DiversityModel(0.97).report(0.99999, clear_sky_gbps=48)
+
+print("\n── with a correlated floor (imperfect independence) ──")
+DiversityModel(0.99, correlated_floor=1e-4).report(0.99999, 48)
+
+# ── the handoff ─────────────────────────────────────────
+# m8-3 takes 'N gateways, &gt;75 km apart' and places them for real:
+# rain climate (favouring dry sites -&gt; fewer needed), backhaul
+# availability, regulatory access, and the mesh's egress geography.
+
+# 1. Combine with m8-1: a Q/V-band feeder has higher capacity but
+#    worse single-site availability. Does Q/V + more diversity beat
+#    Ka + less diversity on delivered (weighted) capacity per gateway-euro?
+# 2. The correlated floor caps availability. Given a floor of 1e-4,
+#    what is the BEST availability any amount of diversity can reach,
+#    and what would it take to lower the floor (hint: continents apart)?
+# 3. Report gateways-needed vs single-site-availability from 90% to
+#    99.9%. This curve tells m8-3 how much dry-climate siting is worth.
+</pre>
+</div>
+</div>
+
+<div class="reflection-block" id="reflect">
+    <h2>REFLECTION</h2>
+    <div class="ref-intro">Four prompts. Each forces a decision — write the position down before moving on; the act of committing is the exercise.</div>
+    <div class="ref-prompt">
+        <h3>PROMPT 1</h3>
+        <p>Section 3's multiplication (p^N) is the lesson's engine, and section 4's independence caveat is its limit. Real rain is neither fully independent nor fully correlated — nearby sites share frontal systems but not convective cells, and the correlation decays with distance in a way that depends on the climate. Construct the honest model: how should an operator estimate the <em>effective</em> independence of two candidate sites, and what data would they need (rain radar climatology, historical concurrent-outage records)? Decide whether the clean p^N model is a useful design tool or a dangerous oversimplification, and what safety factor an operator should apply to the site count to account for residual correlation.</p>
+    </div>
+    <div class="ref-prompt">
+        <h3>PROMPT 2</h3>
+        <p>Section 5 revealed diversity's hidden cost: spare capacity at each site to absorb redirected load. This means a 3-site diversity scheme is not 3× a single gateway's cost but more, because each site must be over-provisioned. Work the true cost multiplier: if any one site must be able to absorb the full load of a rained-on neighbour, how much spare capacity does each site need, and does the answer change with the number of sites (more sites = smaller share each must absorb)? Determine whether diversity gets cheaper per-nine as you add sites, or whether the over-provisioning cost grows, and where the economic optimum sits.</p>
+    </div>
+    <div class="ref-prompt">
+        <h3>PROMPT 3</h3>
+        <p>Section 6 claimed diversity resolves m8-1's deferred question by keeping the feeder near clear-sky capacity. But this assumes the switch always finds a clear site — which fails if a large frontal system covers all the diversity sites at once (the correlated case §4 warned about). Consider the worst case: a weather system large enough to rain on every gateway in a diversity cluster. What does the feeder do — ride the fade with MODCOD backoff (m5-2), reroute the traffic through the mesh to a distant clear gateway (m7-4), or accept the outage? Evaluate each option's cost and decide which a well-designed constellation should use, connecting the mesh's routing freedom (Module 7) to the ground segment's availability.</p>
+    </div>
+    <div class="ref-prompt">
+        <h3>PROMPT 4</h3>
+        <p>This lesson established that availability is bought with geography, not margin — a principle that inverts the user link's approach. But it rests on the gateway's siting freedom being real, which assumes the operator can actually acquire land, backhaul, and regulatory access wherever rain decorrelation demands. Interrogate that assumption for the hard cases: a constellation needing diversity gateways in a region with few dry sites, restrictive land access, or a hostile regulator. Where the siting freedom is constrained, does the ground-segment first principle break down — and what does the operator fall back on (Q/V→Ka retreat, accepting lower availability, mesh rerouting)? Specify the conditions under which geography is <em>not</em> available as a tool, and what replaces it.</p>
+    </div>
+</div>
+
+<div class="cb" id="sources">
+    <h2>Sources</h2>
+<ul><li>ITU-R P.618 — rain attenuation prediction and site-diversity gain for earth-space links.</li><li>ITU-R P.837, P.838 — rain rate statistics and specific attenuation coefficients.</li><li>Panagopoulos et al., "Satellite communications at Ku, Ka, and V bands: propagation impairments and mitigation techniques" (IEEE Comm. Surveys, 2004) — feeder-band rain and diversity.</li><li>Module 4 (m4-4) — the rain-attenuation model applied here at feeder bands; Module 5 (m5-2) — the MODCOD backoff diversity avoids; Module 8 (m8-1) — the feeder link whose availability this lesson secures.</li></ul>
+</div>
+
+<div class="complete-wrap">
+    <button class="complete-btn" id="completeBtn">MARK LESSON COMPLETE</button>
+    <div class="complete-msg" id="completeMsg"></div>
+</div>
+<div class="lesson-nav">
+    <a href="m8-1.html">← LESSON 01 — THE GATEWAY &amp; FEEDER LINK</a>
+    <a href="m8-3.html">LESSON 03 — GATEWAY PLACEMENT &amp; POP →</a>
+</div>
+</div>
+
+<button class="back-to-top" id="backToTop" title="Back to top">↑</button>
+<footer>© 2026 LEOAF · M8 · LESSON 02 OF 7</footer>
+<script>
+const canvas=document.getElementById('starsCanvas'),ctx=canvas.getContext('2d');
+let stars=[];
+function initStars(){stars=[];for(let i=0;i<180;i++)stars.push({x:Math.random()*canvas.width,y:Math.random()*canvas.height,size:Math.random()*1.5+0.4,speed:Math.random()*0.18+0.04,hue:Math.random()*360});}
+function resizeCanvas(){canvas.width=window.innerWidth;canvas.height=window.innerHeight;}
+resizeCanvas();initStars();window.addEventListener('resize',resizeCanvas);
+function animateStars(){ctx.clearRect(0,0,canvas.width,canvas.height);stars.forEach(s=>{s.y-=s.speed;if(s.y<0){s.y=canvas.height;s.x=Math.random()*canvas.width;}ctx.beginPath();ctx.fillStyle=`hsl(${s.hue},80%,80%)`;ctx.arc(s.x,s.y,s.size,0,Math.PI*2);ctx.fill();});requestAnimationFrame(animateStars);}
+animateStars();
+</script>
+<script>
+const feedbacks={
+    1:{correct:"The fade to survive climbs catastrophically as you chase the last fractions of a percent (5.8 dB for three-nines, 23 dB for four, ~60 for five at Ka). Sizing a link for that tail would throw away most of its capacity. Margin alone cannot deliver feeder availability at these bands.",wrong:"Gateway hardware is reliable; rain is the problem. Distance sets FSPL (fixed), not the availability problem. No regulation is involved — physics is."},
+    2:{correct:"The gateway's siting freedom (m8-1) lets the operator spread gateways across different weather; the feeder fails only if all diversity sites are rained-on simultaneously, which is far rarer than any one being rained-on. Geography sidesteps the fade tail that margin cannot afford.",wrong:"Diversity is the opposite of adding margin (which fails). A lower frequency loses the bandwidth the feeder needs. You cannot point around ground rain — the gateway is under it."},
+    3:{correct:"Independent outages multiply: joint outage = p^N = 0.01³ = 10⁻⁶, so joint availability is 99.9999% (six-nines). Three individually-unremarkable gateways reach an availability physically impossible per-site — the transformative power of diversity.",wrong:"Independent sites improve dramatically, not zero or worse. Two sites give 99.99%; three give another factor of 100, reaching six-nines, not four."},
+    4:{correct:"The p^N multiplication assumes independence. Sites in the same storm fail together and barely diversify; only well-separated sites in different weather decorrelate. This is the central caveat — the whole diversity gain rides on separating the sites.",wrong:"Co-located or as-close-as-possible sites share weather and do not diversify — the opposite of what is needed. Identical hardware is fine; identical *weather* is fatal."},
+    5:{correct:"Seamless diversity needs the satellite to retarget its feeder from one clear site to another within its footprint (~2,000+ km). Below, separation is bounded by rain decorrelation (~50–100 km); above, by co-visibility. A comfortable window, but a real one.",wrong:"There is an upper bound (co-visibility). The correlation scale is the *lower* bound. Fibre length is a backhaul cost (m8-3), not the diversity-separation limit."},
+    6:{correct:"Unlike a handover's millisecond window, rain builds slowly, giving time to monitor each site's fade, predict the outage, and switch to a clear gateway in advance — the m6-5 make-before-break pattern switching gateways instead of satellites. The slow onset is what makes the switch reliable.",wrong:"Rain is not instant (that is why switching works). The satellite keeps transmitting, to the new gateway. Switching is exactly how the diversity is used."},
+    7:{correct:"Failing a rained-on site's traffic over to a clear one requires the clear site to carry the extra load, so each site must be provisioned above its own average — availability is bought with redundant sites *and* redundant capacity, not just more antennas.",wrong:"The spare capacity is a cost beyond the extra gateways. Frequency is unrelated. Diversity raises availability — the cost is the price of that gain."},
+    8:{correct:"Diversity's whole purpose is keeping the feeder out of the rain, so the link runs at clear-sky capacity almost always and the availability-weighted average is close to clear-sky. This resolves m8-1's deferred question: the clear-sky capacity is a trustworthy sizing number *because* diversity preserves it.",wrong:"It is close to clear-sky, not far below (that would be the no-diversity case). It is not zero (a clear site always carries it). It is closely tied to diversity — diversity is what preserves it."},
+    9:{correct:"A user terminal fought rain with margin and ACM (stuck at the user's location); a gateway fights it with diversity (free to be sited and duplicated). Geography is a fundamentally more powerful tool, unlocked only by the ground segment's siting freedom — the defining difference from operating a user link.",wrong:"Antennas, power, and frequency are all margin-side levers that the lesson showed *cannot* solve the feeder's availability problem. Geography is the answer."},
+    10:{correct:"Module 4 and m5-2 gave the user terminal margin and adaptive coding to fight rain, limited because the terminal is stuck where the user is. The gateway's siting freedom adds a categorically stronger tool — diversity — that reaches five-nines and beyond, impossible with margin alone.",wrong:"It is not identical or weaker — it is stronger, and it is directly related (both fight rain, but with different tools unlocked by different freedoms)."}
+};
+let answered={};
+document.querySelectorAll('.quiz-opt').forEach(btn=>{
+    btn.addEventListener('click',function(){
+        const q=this.dataset.q;
+        if(answered[q]!==undefined)return;
+        const correct=this.dataset.correct==='true';
+        answered[q]=correct;
+        document.querySelectorAll(`.quiz-opt[data-q="${q}"]`).forEach(b=>{b.disabled=true;if(b.dataset.correct==='true')b.classList.add('correct');});
+        if(!correct)this.classList.add('wrong');
+        const fb=document.getElementById('fb'+q);
+        fb.textContent=(correct?'\u2713 ':'\u2717 ')+feedbacks[q][correct?'correct':'wrong'];
+        fb.style.color=correct?'#39ff14':'#ff004f';
+        if(Object.keys(answered).length===10){
+            const total=Object.values(answered).filter(Boolean).length;
+            const sc=document.getElementById('quizScore');
+            sc.style.display='block';
+            const pct=Math.round(total/10*100);
+            sc.textContent=`SCORE: ${total}/10 (${pct}%) \u2014 ${pct===100?'PERFECT.':pct>=80?'STRONG.':pct>=60?'ADEQUATE. REVISIT WEAK SECTIONS.':'REVISIT THE LESSON BEFORE PROCEEDING.'}`;
+        }
+    });
+});
+</script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="supabase.js"></script>
+<script src="user_progress.js"></script>
+<script>
+const LESSON_ID='m8-2';
+(function(){
+    function bounceToLogin(r){console.error("Auth guard:",r);window.location.replace("index.html");}
+    async function init(){
+        if(typeof client==="undefined"||!client||!client.auth)return bounceToLogin("Supabase client not loaded");
+        let session=null;
+        try{({data:{session}}=await client.auth.getSession());}
+        catch(e){return bounceToLogin("getSession threw: "+e.message);}
+        if(!session){window.location.replace("index.html");return;}
+        const btn=document.getElementById('completeBtn'),msg=document.getElementById('completeMsg');
+        function setDone(done){
+            if(done){btn.textContent='\u2713 COMPLETE \u2014 CLICK TO UNDO';btn.classList.add('done');btn.style.cssText='border-color:#39ff14;color:#39ff14;background:rgba(57,255,20,0.1);cursor:pointer;opacity:1;';msg.style.color='#39ff14';msg.textContent='Lesson marked complete. Click again to undo.';}
+            else{btn.textContent='MARK LESSON COMPLETE';btn.classList.remove('done');btn.style.cssText='';msg.style.color='#ffffff55';msg.textContent='Not yet marked complete.';}
+        }
+        let mastered=[];
+        try{mastered=await getMasteredSections();}catch(e){console.error(e);}
+        setDone(mastered.includes(LESSON_ID));
+        btn.addEventListener('click',async()=>{
+            const isDone=btn.classList.contains('done');
+            msg.style.color='#00d9ff';msg.textContent='Saving...';
+            const ok=await upsertSection(LESSON_ID,!isDone);
+            if(ok){setDone(!isDone);}else{msg.style.color='#ff004f';msg.textContent='Error saving. Try again.';}
+        });
+        const btt=document.getElementById('backToTop');
+        window.addEventListener('scroll',()=>{btt.classList.toggle('visible',window.scrollY>400);});
+        btt.addEventListener('click',()=>window.scrollTo({top:0,behavior:'smooth'}));
+    }
+    if(document.readyState==="loading")document.addEventListener("DOMContentLoaded",init);
+    else init();
+})();
+</script>
+</body>
+</html>
