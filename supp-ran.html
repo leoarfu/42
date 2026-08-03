@@ -1,0 +1,269 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, shrink-to-fit=no">
+<title>Supplementary — RAN L2/L3 &amp; Scheduler Algorithms · LEOAF</title>
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;600;800&family=Share+Tech+Mono&family=Libre+Baskerville:ital,wght@0,400;0,700;1,400&display=swap" rel="stylesheet">
+<link rel="icon" href="favicon.ico" sizes="any" type="image/x-icon">
+<link rel="manifest" href="site.webmanifest">
+<meta name="theme-color" content="#0f0f0f">
+<script>
+window.leoafAbort = async function () {
+    function go() { window.location.replace("index.html?signedout=1"); }
+    try { if (typeof client !== "undefined" && client && client.auth && client.auth.signOut) { try { await client.auth.signOut({ scope: "local" }); } catch (e) {} } } catch (e) {}
+    go();
+};
+</script>
+<style>
+* { box-sizing:border-box; margin:0; padding:0; }
+html { height:100%; -webkit-text-size-adjust:100%; overflow-x:hidden; }
+body { font-family:'Share Tech Mono',monospace; background:#000; color:white; overflow-x:hidden; min-height:100vh; }
+header { background:#000; border-bottom:1px solid #00d9ff33; position:sticky; top:0; z-index:100; padding:1rem clamp(1.5rem,5vw,4rem); display:flex; justify-content:space-between; align-items:center; }
+.logo { font-family:'Orbitron',sans-serif; font-weight:800; font-size:clamp(16px,2vw,22px); letter-spacing:3px; text-decoration:none; }
+.logo span:first-child { color:white; } .logo span:last-child { color:#00d9ff; }
+.nav-right { display:flex; align-items:center; gap:10px; }
+.nav-btn { background:transparent; border:1px solid #00d9ff44; color:#00d9ff; padding:6px 14px; cursor:pointer; transition:0.3s; font-size:11px; font-family:'Orbitron',sans-serif; letter-spacing:1px; text-decoration:none; display:inline-block; }
+.nav-btn:hover { background:#00d9ff; color:black; }
+.breadcrumb { padding:14px clamp(1.5rem,5vw,4rem); font-size:11px; color:#ffffff44; letter-spacing:1px; position:relative; z-index:1; }
+.breadcrumb a { color:#00d9ff66; text-decoration:none; } .breadcrumb a:hover { color:#00d9ff; }
+.breadcrumb span { margin:0 8px; }
+.lesson-wrap { max-width:820px; margin:0 auto; padding:0 clamp(1.5rem,5vw,4rem) 80px; position:relative; z-index:1; }
+.lesson-header { padding:30px 0 28px; border-bottom:1px solid #ffffff11; margin-bottom:36px; }
+.lesson-tag { font-family:'Orbitron',sans-serif; font-size:10px; color:#00d9ff; letter-spacing:3px; margin-bottom:10px; }
+.lesson-header h1 { font-family:'Orbitron',sans-serif; font-size:clamp(20px,3.5vw,32px); font-weight:800; line-height:1.2; margin-bottom:12px; }
+.lesson-meta { display:flex; gap:10px; flex-wrap:wrap; margin-bottom:16px; }
+.l-pill { font-family:'Orbitron',sans-serif; font-size:10px; padding:3px 10px; border:1px solid; letter-spacing:1px; }
+.l-pill-r { color:#ff004f; border-color:#ff004f44; } .l-pill-c { color:#00d9ff; border-color:#00d9ff44; }
+.lesson-intro { font-size:13px; line-height:1.85; opacity:0.75; }
+.scope-note { background:rgba(255,0,79,0.05); border:1px solid #ff004f33; padding:16px 20px; margin-top:18px; font-size:12px; line-height:1.8; opacity:0.9; }
+.scope-note strong { font-family:'Orbitron',sans-serif; font-size:10px; color:#ff004f; letter-spacing:1.5px; display:block; margin-bottom:8px; }
+.toc { background:rgba(0,217,255,0.06); border:1px solid #00d9ff33; padding:24px 28px; margin:30px 0; }
+.toc h4 { font-family:'Orbitron',sans-serif; font-size:10px; color:#00d9ff; letter-spacing:2px; margin-bottom:16px; }
+.toc ol { padding-left:20px; } .toc li { font-size:13px; line-height:2.1; }
+.toc li a { color:#00d9ffbb; text-decoration:none; transition:0.15s; } .toc li a:hover { color:#fff; padding-left:4px; }
+.toc li::marker { color:#ff004f; font-family:'Orbitron',sans-serif; font-size:10px; }
+.cb { background:#f5f2ec; color:#1a1a1a; padding:36px clamp(24px,4vw,48px); margin-bottom:24px; border-left:4px solid #00d9ff; position:relative; z-index:1; }
+.cb h2 { font-family:'Orbitron',sans-serif; font-size:13px; color:#003d66; letter-spacing:2px; text-transform:uppercase; margin-bottom:20px; padding-bottom:10px; border-bottom:2px solid #00d9ff66; scroll-margin-top:80px; }
+.cb h3 { font-family:'Orbitron',sans-serif; font-size:11px; color:#444; letter-spacing:1.5px; text-transform:uppercase; margin:28px 0 12px; }
+.cb p { font-family:'Libre Baskerville',Georgia,serif; font-size:15px; line-height:1.9; color:#1a1a1a; margin-bottom:16px; }
+.cb ul { padding-left:0; margin-bottom:16px; }
+.cb ul li { font-family:'Libre Baskerville',Georgia,serif; font-size:14px; line-height:1.85; color:#1a1a1a; padding-left:20px; position:relative; margin-bottom:8px; }
+.cb ul li::before { content:'›'; position:absolute; left:0; color:#0077aa; }
+.cb blockquote { border-left:3px solid #1a7a1a; background:#eafaea; padding:14px 20px; margin:18px 0; font-size:13px; font-family:'Share Tech Mono',monospace; color:#0a3d0a; line-height:1.8; }
+.callout { border-left:3px solid #0088cc; background:#e8f4fb; padding:16px 20px; margin:22px 0; font-size:12px; line-height:1.8; color:#1a1a1a; }
+.callout.red { border-left-color:#cc0033; background:#fdecea; }
+.callout.green { border-left-color:#1a7a1a; background:#eafaea; }
+.callout.amber { border-left-color:#996600; background:#fef9ec; }
+.callout strong { font-family:'Orbitron',sans-serif; font-size:10px; letter-spacing:1px; display:block; margin-bottom:8px; }
+.compare-table { width:100%; border-collapse:collapse; margin:22px 0; font-size:12px; }
+.compare-table th { font-family:'Orbitron',sans-serif; font-size:10px; letter-spacing:1px; color:#003d66; padding:10px 12px; border-bottom:2px solid #00d9ff66; text-align:left; }
+.compare-table td { padding:10px 12px; border-bottom:1px solid #ddd; line-height:1.5; color:#1a1a1a; vertical-align:top; }
+.compare-table tr:hover td { background:#f0f0f0; }
+.stack-diagram { display:flex; flex-direction:column; gap:4px; margin:24px 0; font-family:'Share Tech Mono',monospace; }
+.stack-row { display:flex; align-items:center; border:1px solid #00d9ff44; background:#0d1114; padding:10px 16px; }
+.stack-row .layer { font-family:'Orbitron',sans-serif; font-size:11px; color:#00d9ff; letter-spacing:1px; width:100px; flex-shrink:0; }
+.stack-row .own { font-size:11px; color:#ffffffaa; }
+.stack-row .own b { color:#39ff14; }
+.stack-row.gap { border-color:#ff004f66; background:#160a0d; }
+.stack-row.gap .layer { color:#ff004f; }
+.py-block { background:rgba(10,10,10,0.95); border:1px solid #39ff1422; padding:28px; margin:32px 0; }
+.py-block h2 { font-family:'Orbitron',sans-serif; font-size:13px; color:#39ff14; letter-spacing:2px; margin-bottom:8px; }
+.py-block .py-intro { font-size:12px; opacity:0.7; margin-bottom:20px; padding-bottom:16px; border-bottom:1px solid #39ff1422; line-height:1.7; }
+.py-block pre { background:#050505; border:1px solid #39ff1433; padding:20px; font-family:'Share Tech Mono',monospace; font-size:11px; line-height:1.7; overflow-x:auto; color:#39ff14; white-space:pre; margin-bottom:12px; }
+.py-note { background:rgba(57,255,20,0.04); border-left:2px solid #39ff14; padding:12px 16px; margin-top:14px; font-size:12px; line-height:1.75; opacity:0.8; }
+.py-note strong { font-family:'Orbitron',sans-serif; font-size:10px; color:#39ff14; display:block; margin-bottom:6px; letter-spacing:1px; }
+.further { background:rgba(255,255,255,0.03); border:1px solid #ffffff1a; padding:22px 26px; margin:32px 0; font-size:12px; line-height:1.8; }
+.further h2 { font-family:'Orbitron',sans-serif; font-size:12px; color:#ffffffcc; letter-spacing:2px; margin-bottom:12px; }
+.further code { color:#00d9ff; }
+.back-to-top { position:fixed; bottom:28px; right:28px; z-index:200; width:44px; height:44px; background:#000; border:1px solid #00d9ff55; color:#00d9ff; font-size:20px; cursor:pointer; display:flex; align-items:center; justify-content:center; opacity:0; pointer-events:none; transition:opacity 0.3s; }
+.back-to-top.visible { opacity:1; pointer-events:auto; } .back-to-top:hover { border-color:#00d9ff; }
+footer { text-align:center; padding:30px; opacity:0.3; font-size:11px; position:relative; z-index:1; letter-spacing:1px; }
+.lesson-nav { display:flex; justify-content:space-between; margin-top:30px; flex-wrap:wrap; gap:10px; }
+.lesson-nav a { font-family:'Orbitron',sans-serif; font-size:11px; color:#00d9ff66; text-decoration:none; letter-spacing:1px; transition:0.2s; }
+.lesson-nav a:hover { color:#00d9ff; }
+</style>
+</head>
+<body>
+<header>
+    <a href="dashboard.html" class="logo"><span>LEO</span><span>AF</span></a>
+    <div class="nav-right">
+        <a href="m5.html" class="nav-btn">← M5 HUB</a>
+        <button class="nav-btn" onclick="leoafAbort()">ABORT</button>
+    </div>
+</header>
+<div class="breadcrumb">
+    <a href="dashboard.html">DASHBOARD</a><span>/</span>
+    <a href="m5.html">M5</a><span>/</span>
+    <span style="color:#ffffff88;">SUPPLEMENTARY — RAN L2/L3 &amp; SCHEDULER ALGORITHMS</span>
+</div>
+
+<div class="lesson-wrap">
+<div class="lesson-header">
+    <div class="lesson-tag">SUPPLEMENTARY · NOT PART OF THE NUMBERED CURRICULUM · NO SPINE INTEGRATION</div>
+    <h1>Above the PHY:<br>RRC, PDCP, RLC &amp; the RRM Scheduler</h1>
+    <div class="lesson-meta">
+        <div class="l-pill l-pill-c">REFERENCE MODE</div>
+        <div class="l-pill l-pill-r">SUPPLEMENTARY</div>
+    </div>
+    <p class="lesson-intro">M5-5 covers 3GPP NTN down to the MAC layer: the OFDM resource grid, HARQ, and the ephemeris-driven timing/Doppler compensation that makes NR work through a satellite. This page closes the layer above it — RRC, PDCP, and RLC, the control- and user-plane protocols that own connection state, header compression/ciphering, and segmentation/retransmission — plus the RRM scheduling algorithms that M5-3 named but never opened up. Both are reference-depth: what each layer does, why it exists, and what changes when the cell is a satellite instead of a tower. Neither is spine-integrated code; this is not a substitute for TS 38.331/38.323/38.322 if the target role needs implementation-level fluency.</p>
+    <div class="scope-note">
+        <strong>WHY THIS ISN'T A NUMBERED LESSON</strong>
+        LEOAF's spine is systems-architecture register: trade-offs, worked physics, one owning module per topic. Protocol-layer mechanics and scheduler-algorithm math are a different register — telecom/RAN engineering depth, useful for one class of role (specialised access-network architect) and a dilution for every other reader. This page exists so the gap is closed without changing M5's register or renumbering its seven shipped lessons.
+    </div>
+</div>
+
+<div class="toc">
+    <h4>CONTENTS</h4>
+    <ol>
+        <li><a href="#s1">Where this sits in the stack</a></li>
+        <li><a href="#s2">RRC — connection and mobility management</a></li>
+        <li><a href="#s3">PDCP — header compression, ciphering, handover continuity</a></li>
+        <li><a href="#s4">RLC — the reliability layer HARQ hands off to</a></li>
+        <li><a href="#s5">RRM scheduling algorithms</a></li>
+        <li><a href="#s6">Key facts</a></li>
+        <li><a href="#s7">Why it matters for LEO specifically</a></li>
+        <li><a href="#s8">Further reading</a></li>
+    </ol>
+</div>
+
+<div class="cb" id="s1">
+    <h2>1. Where This Sits in the Stack</h2>
+    <p>M5-5 built the physical and MAC layers of the NTN air interface — the resource grid, MODCOD-equivalent link adaptation, HARQ. M7-6 picks up at the transport layer — TCP/QUIC riding across the ISL mesh. Between them sits the part of the RAN protocol stack that owns per-connection state, ciphering, and reliable delivery to a specific UE. That's the gap this page fills.</p>
+    <div class="stack-diagram">
+        <div class="stack-row"><span class="layer">APPLICATION</span><span class="own">User data</span></div>
+        <div class="stack-row"><span class="layer">TRANSPORT</span><span class="own">TCP / QUIC — <b>owned by M7-6</b></span></div>
+        <div class="stack-row gap"><span class="layer">RRC</span><span class="own">Connection &amp; mobility management — <b>this page, §2</b></span></div>
+        <div class="stack-row gap"><span class="layer">PDCP</span><span class="own">Header compression, ciphering, reordering — <b>this page, §3</b></span></div>
+        <div class="stack-row gap"><span class="layer">RLC</span><span class="own">Segmentation, ARQ — <b>this page, §4</b></span></div>
+        <div class="stack-row"><span class="layer">MAC</span><span class="own">HARQ, scheduling grants — owned by M5-3 / M5-5</span></div>
+        <div class="stack-row"><span class="layer">PHY</span><span class="own">OFDM resource grid, timing/Doppler compensation — owned by M5-5</span></div>
+    </div>
+    <p>Two of the three layers here are control/user-plane protocols that terminate at a specific network function — in Release-17 transparent NTN, that function is the ground-based gNB, not the satellite (M5-5 §2). Everything in §2–4 below therefore runs on the ground today, and only migrates to the satellite if the architecture goes regenerative — the same fork M5-5 §6 and M7-1 already flagged for the payload and the mesh respectively.</p>
+</div>
+
+<div class="cb" id="s2">
+    <h2>2. RRC — Connection &amp; Mobility Management</h2>
+    <p>Radio Resource Control (TS 38.331) owns the UE's relationship with the network above the bit level: which cell it's attached to, what its security context is, and what triggers a handover. Three states:</p>
+    <ul>
+        <li><strong>RRC_IDLE</strong> — no dedicated resources; the UE monitors paging and re-selects cells on its own.</li>
+        <li><strong>RRC_INACTIVE</strong> — a Release-15 addition: context is kept at both ends so reconnection is fast, without holding a dedicated radio bearer meanwhile. The efficient middle state for bursty traffic.</li>
+        <li><strong>RRC_CONNECTED</strong> — dedicated resources, network-controlled mobility. This is the state everything in M5-5 and M6-5's handover choreography assumes.</li>
+    </ul>
+    <p>RRC carries the signalling that makes a handover a handover rather than a dropped call: measurement reports, handover commands, and — the NTN-specific addition — the broadcast satellite ephemeris and common timing-advance/Doppler parameters that M5-5 §3 described. Those aren't a separate NTN sub-protocol; they're carried as RRC system information, the same channel that carries cell configuration on any terrestrial gNB.</p>
+    <div class="callout">
+        <strong>THE HANDOVER CHOREOGRAPHY, ONE LAYER DOWN</strong>
+        M6-5 §7 described handover as make-before-break: authorise on the new path while the old still carries. RRC is the protocol executing that — the measurement report, the handover command naming the target cell, and the security-context transfer all ride RRC signalling, timed against the K_offset-adjusted grant arithmetic of M5-5 §3. The "network-side switching" latency M6-5 quotes in the low tens of milliseconds is substantially RRC signalling delay.
+    </div>
+</div>
+
+<div class="cb" id="s3">
+    <h2>3. PDCP — Header Compression, Ciphering, Handover Continuity</h2>
+    <p>Packet Data Convergence Protocol (TS 38.323) sits directly above RLC and does three jobs: robust header compression (ROHC) to shrink IP/UDP/RTP overhead on the air interface, ciphering and integrity protection, and — the piece that matters most for a system with frequent handovers — in-order delivery and duplicate detection across a handover using a PDCP sequence number that survives the RLC/MAC reset underneath it.</p>
+    <p>The handover-continuity function is why PDCP exists as a separate layer rather than folding into RLC. When a UE moves to a new cell, RLC and MAC state resets — new HARQ processes, new ARQ state — but PDCP's SN and reordering window carry across the transition, so packets in flight during the handover arrive in order at the receiver instead of being lost or duplicated. For a terrestrial macrocell handing over every few minutes this is a minor robustness feature. For a LEO earth-moving-cell architecture handing every terminal over every few tens of seconds (M5-5 §6), it's a continuously-exercised mechanism, not an edge case.</p>
+</div>
+
+<div class="cb" id="s4">
+    <h2>4. RLC — The Reliability Layer HARQ Hands Off To</h2>
+    <p>Radio Link Control (TS 38.322) has three modes:</p>
+    <ul>
+        <li><strong>Transparent Mode (TM)</strong> — no header, no segmentation; used only for specific broadcast/control channels.</li>
+        <li><strong>Unacknowledged Mode (UM)</strong> — segmentation and reassembly, no retransmission. Used where a higher layer or the application tolerates loss (VoIP-class traffic).</li>
+        <li><strong>Acknowledged Mode (AM)</strong> — segmentation, reassembly, and ARQ: the receiver reports missing segments, the transmitter retransmits. This is the mode M5-5 §4 pointed to without naming it, when it said GEO NTN disables HARQ feedback and "reliability moves to the RLC layer."</li>
+    </ul>
+    <p>That's the mechanical answer to the thread M5-5 left open: with HARQ feedback off, the MAC layer stops retransmitting at the slot level, and RLC AM's ARQ — running end-to-end over the full satellite RTT rather than per-slot — becomes the sole automatic-retransmission mechanism. It's slower per retransmission (bound by the full RTT, not a HARQ round) but it's the layer designed to tolerate exactly that, since RLC ARQ was never assumed to be fast — HARQ was always the fast layer and RLC the backstop. GEO NTN simply promotes the backstop to primary.</p>
+</div>
+
+<div class="cb" id="s5">
+    <h2>5. RRM Scheduling Algorithms</h2>
+    <p>M5-3 established what the scheduler divides (multiple access schemes) and what it's discharging (the harmonic-sum efficiency loss of contention and framing). It never specified how the scheduler decides who gets which resource block when — that's the algorithm layer, and it's genuinely a different discipline from the physical-layer material the rest of M5 covers.</p>
+    <p>Three canonical scheduling metrics, all computing a priority score per user per scheduling interval and awarding the resource to the highest score:</p>
+    <ul>
+        <li><strong>Round robin</strong> — cycles through users regardless of channel quality. Fair in allocation count, wasteful of capacity: a user in a deep fade gets the same slot as one in clear sky.</li>
+        <li><strong>Max C/I (max carrier-to-interference)</strong> — always serves whoever has the best instantaneous channel. Maximises total cell throughput, starves users with structurally worse geometry (edge-of-beam, low elevation) — the opposite failure mode from round robin.</li>
+        <li><strong>Proportional fair (PF)</strong> — the industry-standard compromise. Priority score = instantaneous achievable rate ÷ that user's own recent average throughput. A user scores high either because their channel is good <em>right now</em> or because they've been under-served recently — both trigger an allocation, which is what keeps a temporarily-shadowed or low-elevation user from starving while still exploiting good channel moments opportunistically.</li>
+    </ul>
+    <p>Beam-level RRM extends the same logic across the two-dimensional problem M3-5 already introduced conceptually (beam-hopping, demand-matching): a full RRM engine allocates power, frequency sub-channels, and dwell time jointly across beams, using the same per-user metrics as an inner loop and an interference-aware outer loop that accounts for co-channel beams (M4-6's C/I territory) before finalising an allocation.</p>
+</div>
+
+<div class="py-block" id="pf-demo">
+    <h2>ILLUSTRATION — PROPORTIONAL-FAIR SCORING</h2>
+    <p class="py-intro">Not spine-integrated, not exercised, no knowledge check attached — a minimal illustration of the PF metric only, to make §5 concrete rather than descriptive.</p>
+<pre>
+def proportional_fair_pick(users, alpha=0.1):
+    """
+    users: dict {user_id: {"inst_rate": Mbps this slot, "avg_rate": Mbps, EWMA}}
+    alpha: EWMA smoothing for the running average (0 < alpha <= 1)
+    Returns the user_id scheduled this slot, and updates avg_rate for all.
+    """
+    scores = {u: d["inst_rate"] / max(d["avg_rate"], 1e-6)
+              for u, d in users.items()}
+    winner = max(scores, key=scores.get)
+
+    for u, d in users.items():
+        served_rate = d["inst_rate"] if u == winner else 0.0
+        d["avg_rate"] = (1 - alpha) * d["avg_rate"] + alpha * served_rate
+    return winner, scores
+
+# Three terminals: one at high elevation (good, steady channel),
+# one at low elevation (weaker, steadier), one mid-beam fading in and out.
+users = {
+    "A_high_elev":  {"inst_rate": 120.0, "avg_rate": 100.0},
+    "B_low_elev":   {"inst_rate": 40.0,  "avg_rate": 35.0},
+    "C_fading":     {"inst_rate": 180.0, "avg_rate": 30.0},  # good instant, starved recently
+}
+winner, scores = proportional_fair_pick(users)
+print(winner, scores)
+# C wins this slot despite B's lower instantaneous rate, because C's score
+# (180/30=6.0) beats both A (120/100=1.2) and B (40/35=1.14) — PF rewards
+# either a strong channel right now or a low recent average. Run this in
+# a loop over synthetic elevation/fade traces and B's low but steady rate
+# will still accumulate fair long-run share, unlike under max-C/I.
+</pre>
+    <div class="py-note">
+        <strong>WHAT THIS DOESN'T SHOW</strong>
+        Real RRM schedulers add QoS-class weighting (a voice/control packet outranks best-effort regardless of PF score), buffer-status awareness (don't schedule an empty queue), and — for LEO specifically — elevation/Doppler-aware channel prediction rather than a single scalar "inst_rate." This is the metric core, not a product scheduler.
+    </div>
+</div>
+
+<div class="cb" id="s6">
+    <h2>6. Key Facts</h2>
+    <table class="compare-table">
+        <thead><tr><th>Fact</th><th>Value</th><th>Source</th></tr></thead>
+        <tbody>
+            <tr><td>RRC states</td><td>IDLE, INACTIVE, CONNECTED</td><td>TS 38.331</td></tr>
+            <tr><td>PDCP functions</td><td>ROHC header compression; ciphering/integrity; in-order delivery &amp; duplicate detection across handover</td><td>TS 38.323</td></tr>
+            <tr><td>RLC modes</td><td>TM (no header/segmentation); UM (segmentation, no ARQ); AM (segmentation + ARQ)</td><td>TS 38.322</td></tr>
+            <tr><td>RLC AM's NTN role</td><td>Sole automatic-retransmission mechanism when HARQ feedback is disabled (GEO NTN)</td><td>Derived, per M5-5 §4</td></tr>
+            <tr><td>PF scheduling metric</td><td>score = instantaneous rate ÷ recent average throughput</td><td>Standard RRM literature</td></tr>
+            <tr><td>Scheduling failure modes bracketed by PF</td><td>Round robin (ignores channel quality); max C/I (starves poor-geometry users)</td><td>Standard RRM literature</td></tr>
+        </tbody>
+    </table>
+</div>
+
+<div class="cb" id="s7">
+    <h2>7. Why It Matters for LEO Specifically</h2>
+    <p>None of this is generically "useful to know." Three places it changes LEO system design in ways that don't show up at terrestrial cell sizes:</p>
+    <p><strong>PDCP's handover-continuity job runs continuously, not occasionally.</strong> A terrestrial macrocell exercises PDCP's cross-handover reordering window a few times an hour per user. An earth-moving-cell LEO architecture (M5-5 §6) exercises it every few tens of seconds, for every terminal, all the time. A PDCP implementation whose reordering window and buffer sizing were tuned for terrestrial handover rates will either buffer too little (packet loss at every handover) or too much (added latency) at LEO's handover cadence — this is a real sizing parameter an access-network architect has to revisit, not an inherited default.</p>
+    <p><strong>RLC AM's promotion to primary reliability layer at GEO is a design choice with a LEO converse.</strong> Because LEO's shorter RTT keeps HARQ duty factor high (M5-5 §4 — 31–62% at LEO versus 1–3% at GEO), LEO NTN can leave HARQ as the fast primary layer and keep RLC AM as backstop, the terrestrial-normal division of labour. GEO can't. An architect evaluating a multi-orbit hybrid system (M1-4) needs to know this split changes between the LEO and GEO legs of the same network, not that one config serves both.</p>
+    <p><strong>The scheduler's per-user metric needs a satellite-aware channel predictor, and this is exactly where the ephemeris-driven pre-compensation of M5-5 §3 pays a second dividend.</strong> A terrestrial PF scheduler estimates "instantaneous achievable rate" from a recent CQI report — fine, because the channel a terrestrial UE saw a few milliseconds ago is a good predictor of the channel now. A LEO terminal's channel is moving through a continuously-changing elevation angle and range (M6-4, M6-5); a scheduler that treats the last CQI report as current is scheduling against stale geometry. Because the terminal already computes its own position and has ephemeris (the same data that drives TA/Doppler pre-compensation), the scheduler can — and production LEO systems do — feed elevation/range-predicted SNR into the PF metric instead of relying purely on reported CQI, buying a few slots of lookahead that a terrestrial scheduler doesn't need and doesn't have.</p>
+    <p><strong>Regenerative payloads move all three layers into orbit.</strong> M5-5 §6 flagged Release-19 store-and-forward as "reintroducing the regenerative payload through the back door" for IoT-NTN. The general version: any regenerative architecture terminating the gNB on the satellite (M7-1's mesh territory) also moves RRC, PDCP, and RLC termination on board — which is a payload processing and radiation-tolerant compute requirement, not just a routing one. This is the direct line from "L2/L3 protocol termination point" to Module 3's payload architecture and the digital transparent processor question that sits at the centre of the payload-experience gap this page's parent conversation was actually about.</p>
+</div>
+
+<div class="further">
+    <h2>FURTHER READING — IF THE ROLE NEEDS IMPLEMENTATION DEPTH</h2>
+    <p>This page is reference-depth. If a specific requisition (e.g. an access-network architect role naming 3GPP NR, NTN, MAC/RLC/RRC, OFDM, and radio resource allocation explicitly) needs implementation fluency rather than architectural literacy, the next step is the primary specs, not a deeper LEOAF page: <code>TS 38.331</code> (RRC), <code>TS 38.323</code> (PDCP), <code>TS 38.322</code> (RLC), <code>TS 38.321</code> (MAC), and <code>TR 38.821</code> for the NTN-specific adaptations layered on top of all four. That's a targeted, role-specific prep task — deliberately kept outside LEOAF's numbered spine so it doesn't reshape the curriculum's register for every other reader.</p>
+</div>
+
+</div>
+
+<button class="back-to-top" id="backToTop" title="Back to top">↑</button>
+<footer>© 2026 LEOAF · SUPPLEMENTARY · NOT COUNTED TOWARD MODULE OR CURRICULUM PROGRESS</footer>
+
+<script>
+const btt=document.getElementById('backToTop');
+window.addEventListener('scroll',()=>{btt.classList.toggle('visible',window.scrollY>400);});
+btt.addEventListener('click',()=>window.scrollTo({top:0,behavior:'smooth'}));
+</script>
+</body>
+</html>
