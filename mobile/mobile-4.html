@@ -1,0 +1,300 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>MOBILE-04 — The 3GPP NTN Standard, Plainly · LEOAF Mobile</title>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Source+Serif+4:ital,wght@0,400;0,600;1,400&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<link rel="icon" href="../favicon.ico" sizes="any" type="image/x-icon">
+<meta name="theme-color" content="#F2F0E8">
+<style>
+* { box-sizing:border-box; margin:0; padding:0; }
+html { height:100%; -webkit-text-size-adjust:100%; }
+body {
+  font-family:'Source Serif 4',Georgia,serif;
+  background:#F2F0E8;
+  color:#17232E;
+  min-height:100vh;
+  line-height:1.6;
+}
+::selection { background:#D4590A; color:#F2F0E8; }
+
+/* ---- top bar ---- */
+header.topbar {
+  background:#F2F0E8f2;
+  backdrop-filter:blur(6px);
+  border-bottom:1px solid #D3CFC0;
+  position:sticky; top:0; z-index:100;
+  padding:14px clamp(1.25rem,5vw,3.5rem);
+  display:flex; justify-content:space-between; align-items:center;
+  gap:16px;
+}
+.brand { display:flex; align-items:center; gap:10px; text-decoration:none; }
+.brand-mark { font-family:'Space Grotesk',sans-serif; font-weight:700; font-size:13px; letter-spacing:2px; color:#17232E; }
+.brand-mark span { color:#D4590A; }
+.brand-sub { font-family:'IBM Plex Mono',monospace; font-size:9.5px; color:#566072; letter-spacing:1.5px; border-left:1px solid #D3CFC0; padding-left:10px; }
+.topbar-right { display:flex; align-items:center; gap:14px; }
+.hub-link { font-family:'Space Grotesk',sans-serif; font-size:11px; letter-spacing:1px; color:#566072; text-decoration:none; padding:6px 12px; border:1px solid #D3CFC0; transition:.15s; }
+.hub-link:hover { border-color:#D4590A; color:#D4590A; }
+
+/* signature element: signal bars */
+.signal-bars { display:flex; align-items:flex-end; gap:2px; height:16px; }
+.signal-bars i { display:block; width:3px; background:#D3CFC0; border-radius:1px; }
+.signal-bars i:nth-child(1){height:25%;} .signal-bars i:nth-child(2){height:45%;}
+.signal-bars i:nth-child(3){height:65%;} .signal-bars i:nth-child(4){height:82%;}
+.signal-bars i:nth-child(5){height:100%;}
+.signal-bars i.lit { background:#D4590A; }
+
+/* ---- breadcrumb / position ---- */
+.posbar {
+  padding:10px clamp(1.25rem,5vw,3.5rem);
+  font-family:'IBM Plex Mono',monospace; font-size:10.5px; color:#566072;
+  display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:8px;
+  border-bottom:1px solid #E4E1D6;
+}
+.posbar a { color:#8a6a4a; text-decoration:none; }
+.posbar a:hover { color:#D4590A; }
+
+/* ---- layout ---- */
+.wrap { max-width:760px; margin:0 auto; padding:0 clamp(1.25rem,5vw,3.5rem) 90px; }
+.lesson-head { padding:36px 0 26px; border-bottom:2px solid #17232E; margin-bottom:34px; }
+.lesson-tag { font-family:'IBM Plex Mono',monospace; font-size:10.5px; color:#D4590A; letter-spacing:2.5px; margin-bottom:12px; text-transform:uppercase; }
+.lesson-head h1 { font-family:'Space Grotesk',sans-serif; font-weight:700; font-size:clamp(24px,4vw,36px); line-height:1.15; margin-bottom:14px; letter-spacing:-.3px; }
+.lesson-intro { font-size:15.5px; line-height:1.85; color:#3b4552; }
+.lesson-intro em, .lesson-intro i { color:#8a6a4a; font-style:italic; }
+
+.section { margin-bottom:42px; }
+.section h2 {
+  font-family:'Space Grotesk',sans-serif; font-weight:700; font-size:14px;
+  letter-spacing:1.5px; text-transform:uppercase; color:#17232E;
+  padding-bottom:9px; margin-bottom:16px; border-bottom:2px solid #D4590A;
+  scroll-margin-top:70px;
+}
+.section h3 {
+  font-family:'Space Grotesk',sans-serif; font-weight:600; font-size:12.5px;
+  letter-spacing:.5px; color:#8a6a4a; margin:22px 0 10px; text-transform:uppercase;
+}
+.section p { font-size:15px; line-height:1.85; margin-bottom:14px; color:#242f3a; }
+.section ul, .section ol { margin:0 0 16px 0; padding-left:0; }
+.section li { list-style:none; font-size:15px; line-height:1.8; margin-bottom:8px; padding-left:22px; position:relative; color:#242f3a; }
+.section ul li::before { content:'—'; position:absolute; left:0; color:#D4590A; }
+.section ol { counter-reset:ol; }
+.section ol li { counter-increment:ol; }
+.section ol li::before { content:counter(ol)'.'; position:absolute; left:0; color:#D4590A; font-family:'IBM Plex Mono',monospace; font-size:13px; }
+.section strong { color:#17232E; font-weight:700; }
+
+/* ---- data table ---- */
+.dtable { width:100%; border-collapse:collapse; margin:18px 0 22px; font-size:13.5px; }
+.dtable th { font-family:'Space Grotesk',sans-serif; font-size:10.5px; letter-spacing:1px; text-transform:uppercase; text-align:left; color:#566072; padding:8px 12px; border-bottom:2px solid #17232E; }
+.dtable td { padding:9px 12px; border-bottom:1px solid #E4E1D6; font-family:'IBM Plex Mono',monospace; font-size:13px; color:#242f3a; }
+.dtable tr:last-child td { border-bottom:1px solid #17232E; }
+.dtable-note { font-size:11.5px; color:#8a6a4a; font-style:italic; margin-top:-14px; margin-bottom:22px; }
+
+/* ---- know cold panel ---- */
+.knowcold { background:#FBFAF6; border:1.5px solid #17232E; padding:22px 26px; margin:38px 0; position:relative; }
+.knowcold::before { content:'KNOW COLD'; position:absolute; top:-11px; left:20px; background:#F2F0E8; padding:0 10px; font-family:'IBM Plex Mono',monospace; font-size:10px; letter-spacing:2px; color:#D4590A; font-weight:700; }
+.knowcold ul { margin:6px 0 0; }
+.knowcold li { font-size:13.5px; line-height:1.75; padding-left:16px; margin-bottom:9px; color:#242f3a; }
+.knowcold li::before { content:'▸'; color:#D4590A; }
+.knowcold li b, .knowcold li strong { font-family:'IBM Plex Mono',monospace; color:#17232E; }
+.knowcold-empty { font-size:13px; font-style:italic; color:#8a6a4a; }
+
+/* ---- python block (deliberate dark inversion) ---- */
+.pyblock { background:#17232E; color:#EDEAE0; padding:24px 26px; margin:30px 0; }
+.pyblock .py-label { font-family:'IBM Plex Mono',monospace; font-size:10px; letter-spacing:2px; color:#D4590A; margin-bottom:14px; }
+.pyblock pre { font-family:'IBM Plex Mono',monospace; font-size:12px; line-height:1.7; overflow-x:auto; white-space:pre; color:#EDEAE0; }
+.pyblock pre .c { color:#7d8a97; } /* comment */
+
+/* ---- reflection ---- */
+.reflection { margin:38px 0; }
+.reflection h2 { font-family:'Space Grotesk',sans-serif; font-weight:700; font-size:14px; letter-spacing:1.5px; text-transform:uppercase; color:#17232E; padding-bottom:9px; margin-bottom:16px; border-bottom:2px solid #17232E; }
+.reflection ol { counter-reset:rf; }
+.reflection li { list-style:none; counter-increment:rf; font-size:14.5px; line-height:1.85; margin-bottom:16px; padding-left:30px; position:relative; color:#3b4552; }
+.reflection li::before { content:counter(rf); position:absolute; left:0; top:0; width:20px; height:20px; border:1.5px solid #D4590A; color:#D4590A; font-family:'IBM Plex Mono',monospace; font-size:11px; display:flex; align-items:center; justify-content:center; }
+
+/* ---- sources ---- */
+.sources { margin:32px 0 8px; padding-top:18px; border-top:1px solid #D3CFC0; }
+.sources h2 { font-family:'IBM Plex Mono',monospace; font-size:10px; letter-spacing:2px; text-transform:uppercase; color:#8a6a4a; margin-bottom:10px; }
+.sources li { font-size:12px; line-height:1.7; color:#566072; padding-left:14px; position:relative; margin-bottom:5px; list-style:none; }
+.sources li::before { content:'·'; position:absolute; left:0; color:#8a6a4a; }
+
+/* ---- verify flag ---- */
+.verify { display:inline-block; font-family:'IBM Plex Mono',monospace; font-size:10px; letter-spacing:.5px; color:#a34a00; background:#F3DFC6; border:1px solid #D4590A55; padding:2px 8px; margin-left:6px; }
+
+/* ---- complete button ---- */
+.complete-wrap { margin:44px 0 20px; padding:22px 0; border-top:1px solid #D3CFC0; border-bottom:1px solid #D3CFC0; display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:14px; }
+.complete-btn {
+  font-family:'Space Grotesk',sans-serif; font-weight:600; font-size:12px; letter-spacing:1px;
+  background:#17232E; color:#F2F0E8; border:none; padding:13px 22px; cursor:pointer; transition:.2s;
+}
+.complete-btn:hover { background:#D4590A; }
+.complete-btn.done { background:#1D7A4C; }
+.complete-btn.done:hover { background:#155c39; }
+.complete-msg { font-family:'IBM Plex Mono',monospace; font-size:11px; color:#8a6a4a; }
+
+/* ---- prev/next nav ---- */
+.pagenav { display:flex; justify-content:space-between; gap:16px; margin:24px 0 50px; }
+.pagenav a { flex:1; text-decoration:none; border:1px solid #D3CFC0; padding:16px 18px; transition:.15s; }
+.pagenav a:hover { border-color:#D4590A; }
+.pagenav .dir { font-family:'IBM Plex Mono',monospace; font-size:9.5px; letter-spacing:1.5px; color:#8a6a4a; display:block; margin-bottom:5px; }
+.pagenav .ttl { font-family:'Space Grotesk',sans-serif; font-weight:600; font-size:13.5px; color:#17232E; }
+.pagenav .next { text-align:right; }
+
+footer.sitefoot { text-align:center; padding:26px; font-family:'IBM Plex Mono',monospace; font-size:10px; color:#8a6a4a; letter-spacing:1px; }
+
+@media (max-width:600px){
+  .pagenav { flex-direction:column; }
+  .brand-sub { display:none; }
+}
+</style>
+</head>
+<body>
+
+<header class="topbar">
+  <a href="mobile.html" class="brand">
+    <span class="brand-mark">LEOAF <span>// MOBILE</span></span>
+    <span class="brand-sub">DIRECT-TO-DEVICE &amp; 5G NTN</span>
+  </a>
+  <div class="topbar-right">
+    <div class="signal-bars" aria-hidden="true"><i class="lit"></i><i class="lit"></i><i class=""></i><i class=""></i><i class=""></i></div>
+    <a href="mobile.html" class="hub-link">TRACK HUB</a>
+  </div>
+</header>
+
+
+<div class="posbar">
+  <span><a href="mobile.html">MOBILE</a> &nbsp;/&nbsp; LESSON 04 OF 10</span>
+  <span>STANDALONE TRACK — NOT PART OF M1–M12 MASTERY COUNT</span>
+</div>
+
+<div class="wrap">
+  <div class="lesson-head">
+    <div class="lesson-tag">MOBILE-04</div>
+    <h1>The 3GPP NTN Standard, Plainly</h1>
+    <p class="lesson-intro">The full derivation — HARQ duty-factor arithmetic, the OFDM resource grid, K_offset scheduling, and a working throughput engine — lives in M5-5. This page explains what changes and why, in plain terms, before that page's notation.</p>
+  </div>
+
+  
+<div class="section">
+<h2>1. Why 5G needed a satellite patch at all</h2>
+<p>Terrestrial NR was designed assuming cell radii of kilometres, round-trip times under a millisecond, and a UE that barely moves relative to its cell. A LEO satellite link breaks all three assumptions at once: the "cell" is a beam a thousand kilometres away, the round trip is measured in milliseconds to tens of milliseconds, and the satellite itself is moving at 7.6 km/s. None of the terrestrial standard's timing or mobility logic survives that unmodified — which is why NTN exists as a distinct 3GPP work item rather than something handled at the RF layer alone.</p>
+</div>
+
+<div class="section">
+<h2>2. The four fixes, explained not derived</h2>
+<h3>2.1 Timing — the network and the phone split the correction</h3>
+<p>A terrestrial base station tells a nearby phone exactly how much to adjust its transmit timing. At satellite range, that correction is far too large and changes too fast for the network alone to track cheaply — so NTN splits it: the network broadcasts a common correction for the whole beam, and the phone computes its own share using its own GPS position and the satellite's broadcast trajectory.</p>
+<div class="section" style="margin:16px 0 0;">
+<p><strong>This split-compensation approach only applies to a Rel-17 NTN-capable handset</strong> — one built with the new protocol machinery. Most phones in service today, including everything Starlink Mobile currently serves, are <strong>legacy handsets</strong>: they have GPS, but none of this NTN logic. For them, the network has to do all the compensating instead, and it can only do that if each spot beam is kept small enough that the leftover timing/Doppler error across the beam stays inside what an ordinary phone's existing tracking loop can already handle without any satellite-aware software at all. This is why beam size in MOBILE-3 isn't just an antenna decision — it's also a protocol decision, forced by the fact that most phones can't help with the correction themselves.</p>
+</div>
+<h3>2.2 Doppler — same split-compensation idea, plain version</h3>
+<p>The same logic applies to frequency. Part of the ~48 kHz shift from MOBILE-3 is corrected by the satellite or gateway before the signal ever reaches the phone; the rest, a Rel-17 phone corrects itself using its own position and the broadcast trajectory data — a legacy phone gets none of this and relies entirely on small beams keeping the residual error tolerable.</p>
+<h3>2.3 HARQ — why waiting for an acknowledgment doesn't work at LEO RTT</h3>
+<p>Terrestrial NR assumes a lost packet gets retransmitted and acknowledged within about a millisecond. At LEO range, that round trip is long enough that waiting for an acknowledgment before sending the next packet would waste a meaningful fraction of the link's capacity doing nothing. NTN's answer is to allow many more packets to be "in flight" unacknowledged at once — M5-5 works this out precisely with its duty-factor table — and, in some configurations, to simply turn acknowledgment off for certain traffic rather than pay that cost at all.</p>
+<h3>2.4 Scheduling — K_offset, explained as "telling the truth about how long the message takes to arrive"</h3>
+<p>A terrestrial scheduler assumes a command it sends reaches the phone almost instantly. Over a satellite link that isn't true, so NTN adds an explicit offset — how long this particular instruction will actually take to arrive — into the scheduling messages themselves, rather than pretending the terrestrial-scale assumption still holds.</p>
+</div>
+
+<div class="section">
+<h2>3. Two sentences on the protocol stack</h2>
+<p>Everything above lives at the physical and MAC layers, plus the radio resource control layer that broadcasts the satellite's position and timing data. The layers above that — the ones responsible for reliable delivery and ciphering — mostly don't need to change at all; they just inherit a longer round trip as a number, not a redesign.</p>
+</div>
+
+<div class="section">
+<h2>4. Transparent vs. regenerative, as the standard defines it</h2>
+<p>The standard's own vocabulary for where satellite processing happens — transparent versus regenerative — is the same distinction M3-3 covers in full, with the same tradeoffs (M3-3's noise-coupling, switching, and gateway-dependency arguments apply unchanged to the NTN case). This page only needs you to recognize the terms line up; MOBILE-5 covers what's specifically new for the D2D case.</p>
+</div>
+
+<div class="section">
+<h2>5. Where Starlink Mobile sits relative to all of this</h2>
+<p>Explicitly: Starlink Mobile's current service runs unmodified LTE, not NR-NTN. None of the four fixes above are in play, because the phone was never told it's talking to a satellite — it's simply relayed. That's precisely why it could ship years before any standards-based NTN deployment: zero handset change, zero new standard required.</p>
+</div>
+
+<div class="section">
+<h2>6. The 2027 convergence point</h2>
+<p>Reported plans put Starlink's Gen2 D2D satellites on the actual NR-NTN standard around 2027. If that holds, the radio-standard gap between Starlink Mobile and IRIS² narrows — though, as MOBILE-8 covers, payload architecture and core-integration philosophy could easily stay different even after both speak the same radio standard.</p>
+</div>
+
+
+  
+
+  <div class="knowcold-wrap">
+    <div class="knowcold"><ul><li><b>Four NTN fixes</b> — split timing correction, split Doppler correction, relaxed/disabled HARQ, K_offset scheduling</li><li><b>Rel-17 NTN handset</b> — computes its own timing/Doppler correction</li><li><b>Legacy handset</b> — network does all compensating; requires small beams</li><li><b>RLC/PDCP</b> — mostly unchanged, inherit longer RTT as a parameter</li><li><b>Transparent vs. regenerative, standard vocabulary</b> — same as M3-3's distinction</li><li><b>Starlink Mobile today</b> — unmodified LTE, not NR-NTN</li></ul></div>
+  </div>
+
+  <div class="reflection">
+    <h2>Reflection</h2>
+    <ol><li>HARQ disable trades reliability for throughput on a delay it can't beat. Which traffic type from MOBILE-2's player list (broadband D2D, emergency messaging, IoT) is that the right tradeoff for, and which is the wrong one?</li></ol>
+  </div>
+
+  <div class="sources">
+    <h2>Sources</h2>
+    <ul><li>M5-5 (3GPP NTN air interface, canonical — HARQ arithmetic, resource grid, throughput engine).</li><li>M3-3 (transparent vs. regenerative, canonical).</li><li>3GPP TR 38.821, TS 38.331/321/322/323.</li></ul>
+  </div>
+
+  <div class="complete-wrap">
+    <button class="complete-btn" id="completeBtn">MARK LESSON COMPLETE</button>
+    <span class="complete-msg" id="completeMsg">Checking status...</span>
+  </div>
+
+  <div class="pagenav"><a href="mobile-3.html"><span class="dir">← PREVIOUS</span><span class="ttl">Closing the Link to a Handset</span></a><a href="mobile-5.html" class="next"><span class="dir">NEXT →</span><span class="ttl">Payload for D2D: What's Actually New</span></a></div>
+</div>
+<footer class="sitefoot">LEOAF MOBILE TRACK · STANDALONE · SELF-DIRECTED STUDY, NOT A CREDENTIAL</footer>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="../supabase.js"></script>
+<script src="../user_progress.js"></script>
+<script>
+const LESSON_ID = 'mobile-4';
+(function () {
+    function bounceToLogin(reason) {
+        console.error("Auth guard:", reason, "- redirecting to ../index.html");
+        window.location.replace("../index.html");
+    }
+    async function init() {
+        if (typeof client === "undefined" || !client || !client.auth) {
+            return bounceToLogin("Supabase client not loaded (is supabase.js at site root?)");
+        }
+        let session = null;
+        try { ({ data: { session } } = await client.auth.getSession()); }
+        catch (e) { return bounceToLogin("getSession threw: " + e.message); }
+        if (!session) { window.location.replace("../index.html"); return; }
+
+        const btn = document.getElementById('completeBtn');
+        const msg = document.getElementById('completeMsg');
+        function setDone(done) {
+            if (done) {
+                btn.textContent = 'MARKED COMPLETE — CLICK TO UNDO';
+                btn.classList.add('done');
+                msg.textContent = 'Saved. Click again to undo.';
+            } else {
+                btn.textContent = 'MARK LESSON COMPLETE';
+                btn.classList.remove('done');
+                msg.textContent = 'Not yet marked complete.';
+            }
+        }
+        let mastered = [];
+        try { mastered = await getMasteredSections(); } catch (e) { console.error(e); }
+        setDone(mastered.includes(LESSON_ID));
+        btn.addEventListener('click', async () => {
+            const isCurrentlyDone = btn.classList.contains('done');
+            msg.textContent = 'Saving...';
+            const ok = await upsertSection(LESSON_ID, !isCurrentlyDone);
+            if (ok) {
+                setDone(!isCurrentlyDone);
+                if (!isCurrentlyDone) {
+                    msg.textContent = 'Saved. Moving to next lesson...';
+                    setTimeout(() => { window.location.href = 'mobile-5.html'; }, 700);
+                }
+            } else {
+                msg.textContent = 'Error saving. Try again.';
+            }
+        });
+    }
+    if (document.readyState === "loading") { document.addEventListener("DOMContentLoaded", init); }
+    else { init(); }
+})();
+</script>
+
+</body>
+</html>
