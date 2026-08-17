@@ -1,0 +1,347 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>MOBILE-01 — Orientation: LEO, MEO, IRIS² & Starlink · LEOAF Mobile</title>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Source+Serif+4:ital,wght@0,400;0,600;1,400&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<link rel="icon" href="../favicon.ico" sizes="any" type="image/x-icon">
+<meta name="theme-color" content="#F2F0E8">
+<style>
+* { box-sizing:border-box; margin:0; padding:0; }
+html { height:100%; -webkit-text-size-adjust:100%; }
+body {
+  font-family:'Source Serif 4',Georgia,serif;
+  background:#F2F0E8;
+  color:#17232E;
+  min-height:100vh;
+  line-height:1.6;
+}
+::selection { background:#D4590A; color:#F2F0E8; }
+
+/* ---- top bar ---- */
+header.topbar {
+  background:#F2F0E8f2;
+  backdrop-filter:blur(6px);
+  border-bottom:1px solid #D3CFC0;
+  position:sticky; top:0; z-index:100;
+  padding:14px clamp(1.25rem,5vw,3.5rem);
+  display:flex; justify-content:space-between; align-items:center;
+  gap:16px;
+}
+.brand { display:flex; align-items:center; gap:10px; text-decoration:none; }
+.brand-mark { font-family:'Space Grotesk',sans-serif; font-weight:700; font-size:13px; letter-spacing:2px; color:#17232E; }
+.brand-mark span { color:#D4590A; }
+.brand-sub { font-family:'IBM Plex Mono',monospace; font-size:9.5px; color:#566072; letter-spacing:1.5px; border-left:1px solid #D3CFC0; padding-left:10px; }
+.topbar-right { display:flex; align-items:center; gap:14px; }
+.hub-link { font-family:'Space Grotesk',sans-serif; font-size:11px; letter-spacing:1px; color:#566072; text-decoration:none; padding:6px 12px; border:1px solid #D3CFC0; transition:.15s; }
+.hub-link:hover { border-color:#D4590A; color:#D4590A; }
+
+/* signature element: signal bars */
+.signal-bars { display:flex; align-items:flex-end; gap:2px; height:16px; }
+.signal-bars i { display:block; width:3px; background:#D3CFC0; border-radius:1px; }
+.signal-bars i:nth-child(1){height:25%;} .signal-bars i:nth-child(2){height:45%;}
+.signal-bars i:nth-child(3){height:65%;} .signal-bars i:nth-child(4){height:82%;}
+.signal-bars i:nth-child(5){height:100%;}
+.signal-bars i.lit { background:#D4590A; }
+
+/* ---- breadcrumb / position ---- */
+.posbar {
+  padding:10px clamp(1.25rem,5vw,3.5rem);
+  font-family:'IBM Plex Mono',monospace; font-size:10.5px; color:#566072;
+  display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:8px;
+  border-bottom:1px solid #E4E1D6;
+}
+.posbar a { color:#8a6a4a; text-decoration:none; }
+.posbar a:hover { color:#D4590A; }
+
+/* ---- layout ---- */
+.wrap { max-width:760px; margin:0 auto; padding:0 clamp(1.25rem,5vw,3.5rem) 90px; }
+.lesson-head { padding:36px 0 26px; border-bottom:2px solid #17232E; margin-bottom:34px; }
+.lesson-tag { font-family:'IBM Plex Mono',monospace; font-size:10.5px; color:#D4590A; letter-spacing:2.5px; margin-bottom:12px; text-transform:uppercase; }
+.lesson-head h1 { font-family:'Space Grotesk',sans-serif; font-weight:700; font-size:clamp(24px,4vw,36px); line-height:1.15; margin-bottom:14px; letter-spacing:-.3px; }
+.lesson-intro { font-size:15.5px; line-height:1.85; color:#3b4552; }
+.lesson-intro em, .lesson-intro i { color:#8a6a4a; font-style:italic; }
+
+.section { margin-bottom:42px; }
+.section h2 {
+  font-family:'Space Grotesk',sans-serif; font-weight:700; font-size:14px;
+  letter-spacing:1.5px; text-transform:uppercase; color:#17232E;
+  padding-bottom:9px; margin-bottom:16px; border-bottom:2px solid #D4590A;
+  scroll-margin-top:70px;
+}
+.section h3 {
+  font-family:'Space Grotesk',sans-serif; font-weight:600; font-size:12.5px;
+  letter-spacing:.5px; color:#8a6a4a; margin:22px 0 10px; text-transform:uppercase;
+}
+.section p { font-size:15px; line-height:1.85; margin-bottom:14px; color:#242f3a; }
+.section ul, .section ol { margin:0 0 16px 0; padding-left:0; }
+.section li { list-style:none; font-size:15px; line-height:1.8; margin-bottom:8px; padding-left:22px; position:relative; color:#242f3a; }
+.section ul li::before { content:'—'; position:absolute; left:0; color:#D4590A; }
+.section ol { counter-reset:ol; }
+.section ol li { counter-increment:ol; }
+.section ol li::before { content:counter(ol)'.'; position:absolute; left:0; color:#D4590A; font-family:'IBM Plex Mono',monospace; font-size:13px; }
+.section strong { color:#17232E; font-weight:700; }
+
+/* ---- data table ---- */
+.dtable { width:100%; border-collapse:collapse; margin:18px 0 22px; font-size:13.5px; }
+.dtable th { font-family:'Space Grotesk',sans-serif; font-size:10.5px; letter-spacing:1px; text-transform:uppercase; text-align:left; color:#566072; padding:8px 12px; border-bottom:2px solid #17232E; }
+.dtable td { padding:9px 12px; border-bottom:1px solid #E4E1D6; font-family:'IBM Plex Mono',monospace; font-size:13px; color:#242f3a; }
+.dtable tr:last-child td { border-bottom:1px solid #17232E; }
+.dtable-note { font-size:11.5px; color:#8a6a4a; font-style:italic; margin-top:-14px; margin-bottom:22px; }
+
+/* ---- know cold panel ---- */
+.knowcold { background:#FBFAF6; border:1.5px solid #17232E; padding:22px 26px; margin:38px 0; position:relative; }
+.knowcold::before { content:'KNOW COLD'; position:absolute; top:-11px; left:20px; background:#F2F0E8; padding:0 10px; font-family:'IBM Plex Mono',monospace; font-size:10px; letter-spacing:2px; color:#D4590A; font-weight:700; }
+.knowcold ul { margin:6px 0 0; }
+.knowcold li { font-size:13.5px; line-height:1.75; padding-left:16px; margin-bottom:9px; color:#242f3a; }
+.knowcold li::before { content:'▸'; color:#D4590A; }
+.knowcold li b, .knowcold li strong { font-family:'IBM Plex Mono',monospace; color:#17232E; }
+.knowcold-empty { font-size:13px; font-style:italic; color:#8a6a4a; }
+
+/* ---- python block (deliberate dark inversion) ---- */
+.pyblock { background:#17232E; color:#EDEAE0; padding:24px 26px; margin:30px 0; }
+.pyblock .py-label { font-family:'IBM Plex Mono',monospace; font-size:10px; letter-spacing:2px; color:#D4590A; margin-bottom:14px; }
+.pyblock pre { font-family:'IBM Plex Mono',monospace; font-size:12px; line-height:1.7; overflow-x:auto; white-space:pre; color:#EDEAE0; }
+.pyblock pre .c { color:#7d8a97; } /* comment */
+
+/* ---- reflection ---- */
+.reflection { margin:38px 0; }
+.reflection h2 { font-family:'Space Grotesk',sans-serif; font-weight:700; font-size:14px; letter-spacing:1.5px; text-transform:uppercase; color:#17232E; padding-bottom:9px; margin-bottom:16px; border-bottom:2px solid #17232E; }
+.reflection ol { counter-reset:rf; }
+.reflection li { list-style:none; counter-increment:rf; font-size:14.5px; line-height:1.85; margin-bottom:16px; padding-left:30px; position:relative; color:#3b4552; }
+.reflection li::before { content:counter(rf); position:absolute; left:0; top:0; width:20px; height:20px; border:1.5px solid #D4590A; color:#D4590A; font-family:'IBM Plex Mono',monospace; font-size:11px; display:flex; align-items:center; justify-content:center; }
+
+/* ---- sources ---- */
+.sources { margin:32px 0 8px; padding-top:18px; border-top:1px solid #D3CFC0; }
+.sources h2 { font-family:'IBM Plex Mono',monospace; font-size:10px; letter-spacing:2px; text-transform:uppercase; color:#8a6a4a; margin-bottom:10px; }
+.sources li { font-size:12px; line-height:1.7; color:#566072; padding-left:14px; position:relative; margin-bottom:5px; list-style:none; }
+.sources li::before { content:'·'; position:absolute; left:0; color:#8a6a4a; }
+
+/* ---- verify flag ---- */
+.verify { display:inline-block; font-family:'IBM Plex Mono',monospace; font-size:10px; letter-spacing:.5px; color:#a34a00; background:#F3DFC6; border:1px solid #D4590A55; padding:2px 8px; margin-left:6px; }
+
+/* ---- complete button ---- */
+.complete-wrap { margin:44px 0 20px; padding:22px 0; border-top:1px solid #D3CFC0; border-bottom:1px solid #D3CFC0; display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:14px; }
+.complete-btn {
+  font-family:'Space Grotesk',sans-serif; font-weight:600; font-size:12px; letter-spacing:1px;
+  background:#17232E; color:#F2F0E8; border:none; padding:13px 22px; cursor:pointer; transition:.2s;
+}
+.complete-btn:hover { background:#D4590A; }
+.complete-btn.done { background:#1D7A4C; }
+.complete-btn.done:hover { background:#155c39; }
+.complete-msg { font-family:'IBM Plex Mono',monospace; font-size:11px; color:#8a6a4a; }
+
+/* ---- prev/next nav ---- */
+.pagenav { display:flex; justify-content:space-between; gap:16px; margin:24px 0 50px; }
+.pagenav a { flex:1; text-decoration:none; border:1px solid #D3CFC0; padding:16px 18px; transition:.15s; }
+.pagenav a:hover { border-color:#D4590A; }
+.pagenav .dir { font-family:'IBM Plex Mono',monospace; font-size:9.5px; letter-spacing:1.5px; color:#8a6a4a; display:block; margin-bottom:5px; }
+.pagenav .ttl { font-family:'Space Grotesk',sans-serif; font-weight:600; font-size:13.5px; color:#17232E; }
+.pagenav .next { text-align:right; }
+
+footer.sitefoot { text-align:center; padding:26px; font-family:'IBM Plex Mono',monospace; font-size:10px; color:#8a6a4a; letter-spacing:1px; }
+
+@media (max-width:600px){
+  .pagenav { flex-direction:column; }
+  .brand-sub { display:none; }
+}
+</style>
+</head>
+<body>
+
+<header class="topbar">
+  <a href="mobile.html" class="brand">
+    <span class="brand-mark">LEOAF <span>// MOBILE</span></span>
+    <span class="brand-sub">DIRECT-TO-DEVICE &amp; 5G NTN</span>
+  </a>
+  <div class="topbar-right">
+    <div class="signal-bars" aria-hidden="true"><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i></div>
+    <a href="mobile.html" class="hub-link">TRACK HUB</a>
+  </div>
+</header>
+
+
+<div class="posbar">
+  <span><a href="mobile.html">MOBILE</a> &nbsp;/&nbsp; LESSON 01 OF 10</span>
+  <span>STANDALONE TRACK — NOT PART OF M1–M12 MASTERY COUNT</span>
+</div>
+
+<div class="wrap">
+  <div class="lesson-head">
+    <div class="lesson-tag">MOBILE-01</div>
+    <h1>Orientation: LEO, MEO, IRIS² & Starlink</h1>
+    <p class="lesson-intro">This page sets vocabulary only — no direct-to-device content yet. Before comparing how IRIS² and Starlink each approach mobile connectivity, you need the two systems compared at the level they actually differ most: constellation shape, orbit choice, and who builds and operates what.</p>
+  </div>
+
+  
+<div class="section">
+<h2>1. Orbital regimes, refresher</h2>
+<p>Three altitude bands matter for this track. Low Earth orbit runs roughly 160–2,000 km. Medium Earth orbit runs from there out to just below geostationary, roughly 2,000–35,786 km. Geostationary orbit sits at a single altitude, 35,786 km, where orbital period exactly matches Earth's rotation and the satellite appears fixed in the sky. Orbital mechanics and Walker-pattern coverage geometry are owned by M2 — this section only re-establishes the numbers needed to place IRIS² and Starlink correctly.</p>
+<p>Period and velocity fall as altitude rises — a satellite closer to Earth must move faster to avoid falling, and completes an orbit sooner.</p>
+<h3>Key facts</h3>
+<table class="dtable">
+<tr><th>Altitude</th><th>Period</th><th>Velocity</th></tr>
+<tr><td>400 km</td><td>92.4 min</td><td>7.67 km/s</td></tr>
+<tr><td>550 km</td><td>95.5 min</td><td>7.59 km/s</td></tr>
+<tr><td>750 km</td><td>99.7 min</td><td>7.48 km/s</td></tr>
+<tr><td>1,200 km</td><td>109.3 min</td><td>7.26 km/s</td></tr>
+<tr><td>8,000 km</td><td>285.8 min</td><td>5.27 km/s</td></tr>
+<tr><td>35,786 km (GEO)</td><td>1,435.7 min</td><td>3.08 km/s</td></tr>
+</table>
+<p class="dtable-note">Verified via vis-viva, μ = 398,600.4418 km³/s², R_E = 6,371 km.</p>
+</div>
+
+<div class="section">
+<h2>2. IRIS² at the constellation level</h2>
+<p>IRIS² is a multi-orbit constellation, not a single shell. The baseline design under the SpaceRISE concession contract is 264 satellites in a "LEO-High" shell at 1,200 km, plus 18 satellites in MEO at 8,000 km — 282 satellites total, funded under a roughly €10.5 billion program with launches originally projected for 2029–2030. A third "LEO-Low" shell of 10 or more satellites at 400–750 km was added for technology incubation, and — most recently — an August 7, 2026 "Rendezvous 1" agreement expanded the program further, to 348 satellites, adding 66 quantum-secured military satellites to the constellation. That expansion is very recent relative to this page's writing and should be treated as a live figure, not a fixed one <span class="verify">VERIFY BEFORE CITING</span>.</p>
+<p>IRIS² is not attempting to match Starlink's scale. Its purpose is government and institutional resilience — secure, sovereign connectivity that does not depend on a non-European commercial operator — with commercial broadband as a secondary layer, not the primary goal.</p>
+<h3>Key facts</h3>
+<table class="dtable">
+<tr><th>Fact</th><th>Value</th></tr>
+<tr><td>LEO-High shell</td><td>264 sats @ 1,200 km</td></tr>
+<tr><td>MEO shell</td><td>18 sats @ 8,000 km</td></tr>
+<tr><td>LEO-Low shell</td><td>10+ sats @ 400–750 km</td></tr>
+<tr><td>Expanded total (Aug 2026)</td><td>348 sats, incl. 66 quantum-secured military</td></tr>
+<tr><td>Program cost</td><td>~€10.5 billion</td></tr>
+<tr><td>Full operational capability</td><td>2030 (target)</td></tr>
+</table>
+</div>
+
+<div class="section">
+<h2>3. Starlink at the constellation level</h2>
+<p>Starlink operates the largest satellite constellation ever built: roughly 10,900+ working satellites in orbit as of mid-August 2026, the great majority in shells near 550 km altitude, flying at approximately 53° inclination. SpaceX holds FCC authorization for 12,000 first-generation satellites and has filed for up to 42,000. Unlike IRIS², Starlink is a single-operator commercial system — no consortium, no separate prime/operator split — and its constellation is continuously replenished: satellites are launched every 2–4 days in batches of 20–29, and older units are actively deorbited at end of life.</p>
+<h3>Key facts</h3>
+<table class="dtable">
+<tr><th>Fact</th><th>Value</th></tr>
+<tr><td>Working satellites (mid-Aug 2026)</td><td>~10,900+</td></tr>
+<tr><td>Typical operating altitude</td><td>~550 km</td></tr>
+<tr><td>Typical inclination</td><td>~53°</td></tr>
+<tr><td>FCC-authorized (Gen1)</td><td>12,000</td></tr>
+<tr><td>Filed for (total ceiling)</td><td>42,000</td></tr>
+<tr><td>Launch cadence</td><td>every 2–4 days, 20–29 sats/batch</td></tr>
+</table>
+</div>
+
+<div class="section">
+<h2>4. Operator and prime structure — who builds, who flies, who sells</h2>
+<p>This is the structural contrast that recurs across the whole track, so fix it now. IRIS² separates three roles: the European Commission and ESA fund and set requirements; a prime industrial consortium — Airbus Defence &amp; Space, Thales Alenia Space, and others — builds the satellites; and a separate consortium of operators, SpaceRISE (SES, Eutelsat, Hispasat), operates the constellation and sells the service. Three different organizations, three different incentive structures, and every interface between them is a contract.</p>
+<p>Starlink collapses all three roles into one company. SpaceX designs, builds, launches, operates, and sells Starlink service, end to end. There is no separate prime, no separate operator, no external launch dependency — SpaceX flies Starlink satellites on Starlink's own rockets. That vertical integration is not incidental; it is a structural cost and speed advantage that a consortium model cannot replicate, and it is worth holding in mind every time IRIS²'s slower pace and higher per-satellite cost comes up — the difference is not primarily technical.</p>
+</div>
+
+<div class="section">
+<h2>5. Why this contrast matters before going further</h2>
+<p>Everything downstream in this track — payload choices, core-network integration, orchestration — traces back to this structural split. Consortium-built systems optimize for sovereignty, security, and government service guarantees at the cost of speed and unit economics. Vertically integrated commercial systems optimize for speed, scale, and unit economics at the cost of a single point of dependency. Neither is "better" in the abstract — they are answers to different questions, and recognizing which question a given job posting or program is actually answering is a large part of reading the sector correctly.</p>
+</div>
+
+
+  
+<div class="pyblock">
+<div class="py-label">PYTHON — VERIFY THE PERIOD/VELOCITY TABLE</div>
+<pre>import math
+
+MU = 398600.4418   <span class="c"># km^3/s^2, Earth standard gravitational parameter</span>
+R_E = 6371.0        <span class="c"># km, mean Earth radius</span>
+
+def period_minutes(altitude_km):
+    a = R_E + altitude_km
+    T = 2 * math.pi * math.sqrt(a**3 / MU)
+    return T / 60.0
+
+def velocity_kms(altitude_km):
+    a = R_E + altitude_km
+    return math.sqrt(MU / a)
+
+for alt in [400, 550, 750, 1200, 8000, 35786]:
+    print(f"{alt:>6} km   T={period_minutes(alt):7.2f} min   v={velocity_kms(alt):6.3f} km/s")
+
+<span class="c"># 1. IRIS2's MEO shell (8,000 km) has a period of roughly 4.75 hours.
+#    A ground station tracking one MEO satellite has far more time per
+#    pass than tracking a LEO satellite. What does that imply about how
+#    many MEO vs LEO satellites are needed for continuous coverage?
+# 2. Starlink and IRIS2's LEO-High shell differ by 650 km of altitude.
+#    Compute the percentage difference in period. Is it proportional to
+#    the altitude difference? Why or why not (hint: it's not linear).</span></pre>
+</div>
+
+
+  <div class="knowcold-wrap">
+    <div class="knowcold"><ul><li><b>LEO</b> — 160–2,000 km</li><li><b>MEO</b> — 2,000–35,786 km</li><li><b>GEO</b> — 35,786 km, matches Earth's rotation</li><li><b>IRIS² baseline</b> — 264 LEO-High (1,200 km) + 18 MEO (8,000 km) = 282 sats</li><li><b>IRIS² Aug 2026 expansion</b> — 348 sats total, incl. 66 quantum-secured military (verify before citing)</li><li><b>SpaceRISE</b> — the operator consortium: SES, Eutelsat, Hispasat</li><li><b>IRIS² primes</b> — Airbus Defence &amp; Space, Thales Alenia Space (satellite build)</li><li><b>Starlink</b> — ~10,900+ working sats, ~550 km, single vertically integrated operator (SpaceX)</li><li><b>Consortium model vs. vertical integration</b> — the recurring structural axis across this whole track</li></ul></div>
+  </div>
+
+  <div class="reflection">
+    <h2>Reflection</h2>
+    <ol><li>IRIS²'s three-way split (fund/build/operate) versus Starlink's single vertically integrated company is presented here as a tradeoff, not a verdict. Argue the strongest case that the consortium model is the <i>correct</i> structure for a government-anchored system, even accounting for its cost and speed disadvantage.</li><li>The Aug 2026 IRIS² expansion added 66 quantum-secured military satellites to the constellation. What does that addition suggest about how the program's priorities have shifted since the original 2022–2023 concept, and what would you want to verify before treating "348 satellites" as a stable number in an interview?</li><li>Starlink's cadence — a new batch every 2–4 days — is only possible because of reusable launch and a single company controlling both the satellites and the rocket. If IRIS²'s consortium wanted to match that cadence, what would have to change structurally, not just technically?</li></ol>
+  </div>
+
+  <div class="sources">
+    <h2>Sources</h2>
+    <ul><li>SpaceRISE / IRIS² program reporting, SpaceNews, Armada International, Copernicus Observer, SatNews — constellation composition and cost, current as of August 2026.</li><li>TechTimes reporting on the August 7, 2026 Rendezvous 1 expansion agreement.</li><li>Starlink satellite-count tracking aggregators (CelesTrak-derived: azmth, KeepTrack, findcheapbroadband), current as of mid-August 2026.</li><li>FCC filings on Starlink Gen1/Gen2 authorization ceilings.</li><li>Vis-viva / Kepler's third law, standard orbital mechanics.</li></ul>
+  </div>
+
+  <div class="complete-wrap">
+    <button class="complete-btn" id="completeBtn">MARK LESSON COMPLETE</button>
+    <span class="complete-msg" id="completeMsg">Checking status...</span>
+  </div>
+
+  <div class="pagenav"><a href="mobile.html"><span class="dir">← BACK</span><span class="ttl">Track Hub</span></a><a href="mobile-2.html" class="next"><span class="dir">NEXT →</span><span class="ttl">The Direct-to-Device Landscape</span></a></div>
+</div>
+<footer class="sitefoot">LEOAF MOBILE TRACK · STANDALONE · SELF-DIRECTED STUDY, NOT A CREDENTIAL</footer>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="../supabase.js"></script>
+<script src="../user_progress.js"></script>
+<script>
+const LESSON_ID = 'mobile-1';
+(function () {
+    function bounceToLogin(reason) {
+        console.error("Auth guard:", reason, "- redirecting to ../index.html");
+        window.location.replace("../index.html");
+    }
+    async function init() {
+        if (typeof client === "undefined" || !client || !client.auth) {
+            return bounceToLogin("Supabase client not loaded (is supabase.js at site root?)");
+        }
+        let session = null;
+        try { ({ data: { session } } = await client.auth.getSession()); }
+        catch (e) { return bounceToLogin("getSession threw: " + e.message); }
+        if (!session) { window.location.replace("../index.html"); return; }
+
+        const btn = document.getElementById('completeBtn');
+        const msg = document.getElementById('completeMsg');
+        function setDone(done) {
+            if (done) {
+                btn.textContent = 'MARKED COMPLETE — CLICK TO UNDO';
+                btn.classList.add('done');
+                msg.textContent = 'Saved. Click again to undo.';
+            } else {
+                btn.textContent = 'MARK LESSON COMPLETE';
+                btn.classList.remove('done');
+                msg.textContent = 'Not yet marked complete.';
+            }
+        }
+        let mastered = [];
+        try { mastered = await getMasteredSections(); } catch (e) { console.error(e); }
+        setDone(mastered.includes(LESSON_ID));
+        btn.addEventListener('click', async () => {
+            const isCurrentlyDone = btn.classList.contains('done');
+            msg.textContent = 'Saving...';
+            const ok = await upsertSection(LESSON_ID, !isCurrentlyDone);
+            if (ok) {
+                setDone(!isCurrentlyDone);
+                if (!isCurrentlyDone) {
+                    msg.textContent = 'Saved. Moving to next lesson...';
+                    setTimeout(() => { window.location.href = 'mobile-2.html'; }, 700);
+                }
+            } else {
+                msg.textContent = 'Error saving. Try again.';
+            }
+        });
+    }
+    if (document.readyState === "loading") { document.addEventListener("DOMContentLoaded", init); }
+    else { init(); }
+})();
+</script>
+
+</body>
+</html>
