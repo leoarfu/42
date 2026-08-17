@@ -1,0 +1,325 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Mobile &amp; 5G NTN Track · LEOAF</title>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Source+Serif+4:ital,wght@0,400;0,600;1,400&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<link rel="icon" href="../favicon.ico" sizes="any" type="image/x-icon">
+<meta name="theme-color" content="#F2F0E8">
+<style>
+* { box-sizing:border-box; margin:0; padding:0; }
+html { height:100%; -webkit-text-size-adjust:100%; }
+body {
+  font-family:'Source Serif 4',Georgia,serif;
+  background:#F2F0E8;
+  color:#17232E;
+  min-height:100vh;
+  line-height:1.6;
+}
+::selection { background:#D4590A; color:#F2F0E8; }
+
+/* ---- top bar ---- */
+header.topbar {
+  background:#F2F0E8f2;
+  backdrop-filter:blur(6px);
+  border-bottom:1px solid #D3CFC0;
+  position:sticky; top:0; z-index:100;
+  padding:14px clamp(1.25rem,5vw,3.5rem);
+  display:flex; justify-content:space-between; align-items:center;
+  gap:16px;
+}
+.brand { display:flex; align-items:center; gap:10px; text-decoration:none; }
+.brand-mark { font-family:'Space Grotesk',sans-serif; font-weight:700; font-size:13px; letter-spacing:2px; color:#17232E; }
+.brand-mark span { color:#D4590A; }
+.brand-sub { font-family:'IBM Plex Mono',monospace; font-size:9.5px; color:#566072; letter-spacing:1.5px; border-left:1px solid #D3CFC0; padding-left:10px; }
+.topbar-right { display:flex; align-items:center; gap:14px; }
+.hub-link { font-family:'Space Grotesk',sans-serif; font-size:11px; letter-spacing:1px; color:#566072; text-decoration:none; padding:6px 12px; border:1px solid #D3CFC0; transition:.15s; }
+.hub-link:hover { border-color:#D4590A; color:#D4590A; }
+
+/* signature element: signal bars */
+.signal-bars { display:flex; align-items:flex-end; gap:2px; height:16px; }
+.signal-bars i { display:block; width:3px; background:#D3CFC0; border-radius:1px; }
+.signal-bars i:nth-child(1){height:25%;} .signal-bars i:nth-child(2){height:45%;}
+.signal-bars i:nth-child(3){height:65%;} .signal-bars i:nth-child(4){height:82%;}
+.signal-bars i:nth-child(5){height:100%;}
+.signal-bars i.lit { background:#D4590A; }
+
+/* ---- breadcrumb / position ---- */
+.posbar {
+  padding:10px clamp(1.25rem,5vw,3.5rem);
+  font-family:'IBM Plex Mono',monospace; font-size:10.5px; color:#566072;
+  display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:8px;
+  border-bottom:1px solid #E4E1D6;
+}
+.posbar a { color:#8a6a4a; text-decoration:none; }
+.posbar a:hover { color:#D4590A; }
+
+/* ---- layout ---- */
+.wrap { max-width:760px; margin:0 auto; padding:0 clamp(1.25rem,5vw,3.5rem) 90px; }
+.lesson-head { padding:36px 0 26px; border-bottom:2px solid #17232E; margin-bottom:34px; }
+.lesson-tag { font-family:'IBM Plex Mono',monospace; font-size:10.5px; color:#D4590A; letter-spacing:2.5px; margin-bottom:12px; text-transform:uppercase; }
+.lesson-head h1 { font-family:'Space Grotesk',sans-serif; font-weight:700; font-size:clamp(24px,4vw,36px); line-height:1.15; margin-bottom:14px; letter-spacing:-.3px; }
+.lesson-intro { font-size:15.5px; line-height:1.85; color:#3b4552; }
+.lesson-intro em, .lesson-intro i { color:#8a6a4a; font-style:italic; }
+
+.section { margin-bottom:42px; }
+.section h2 {
+  font-family:'Space Grotesk',sans-serif; font-weight:700; font-size:14px;
+  letter-spacing:1.5px; text-transform:uppercase; color:#17232E;
+  padding-bottom:9px; margin-bottom:16px; border-bottom:2px solid #D4590A;
+  scroll-margin-top:70px;
+}
+.section h3 {
+  font-family:'Space Grotesk',sans-serif; font-weight:600; font-size:12.5px;
+  letter-spacing:.5px; color:#8a6a4a; margin:22px 0 10px; text-transform:uppercase;
+}
+.section p { font-size:15px; line-height:1.85; margin-bottom:14px; color:#242f3a; }
+.section ul, .section ol { margin:0 0 16px 0; padding-left:0; }
+.section li { list-style:none; font-size:15px; line-height:1.8; margin-bottom:8px; padding-left:22px; position:relative; color:#242f3a; }
+.section ul li::before { content:'—'; position:absolute; left:0; color:#D4590A; }
+.section ol { counter-reset:ol; }
+.section ol li { counter-increment:ol; }
+.section ol li::before { content:counter(ol)'.'; position:absolute; left:0; color:#D4590A; font-family:'IBM Plex Mono',monospace; font-size:13px; }
+.section strong { color:#17232E; font-weight:700; }
+
+/* ---- data table ---- */
+.dtable { width:100%; border-collapse:collapse; margin:18px 0 22px; font-size:13.5px; }
+.dtable th { font-family:'Space Grotesk',sans-serif; font-size:10.5px; letter-spacing:1px; text-transform:uppercase; text-align:left; color:#566072; padding:8px 12px; border-bottom:2px solid #17232E; }
+.dtable td { padding:9px 12px; border-bottom:1px solid #E4E1D6; font-family:'IBM Plex Mono',monospace; font-size:13px; color:#242f3a; }
+.dtable tr:last-child td { border-bottom:1px solid #17232E; }
+.dtable-note { font-size:11.5px; color:#8a6a4a; font-style:italic; margin-top:-14px; margin-bottom:22px; }
+
+/* ---- know cold panel ---- */
+.knowcold { background:#FBFAF6; border:1.5px solid #17232E; padding:22px 26px; margin:38px 0; position:relative; }
+.knowcold::before { content:'KNOW COLD'; position:absolute; top:-11px; left:20px; background:#F2F0E8; padding:0 10px; font-family:'IBM Plex Mono',monospace; font-size:10px; letter-spacing:2px; color:#D4590A; font-weight:700; }
+.knowcold ul { margin:6px 0 0; }
+.knowcold li { font-size:13.5px; line-height:1.75; padding-left:16px; margin-bottom:9px; color:#242f3a; }
+.knowcold li::before { content:'▸'; color:#D4590A; }
+.knowcold li b, .knowcold li strong { font-family:'IBM Plex Mono',monospace; color:#17232E; }
+.knowcold-empty { font-size:13px; font-style:italic; color:#8a6a4a; }
+
+/* ---- python block (deliberate dark inversion) ---- */
+.pyblock { background:#17232E; color:#EDEAE0; padding:24px 26px; margin:30px 0; }
+.pyblock .py-label { font-family:'IBM Plex Mono',monospace; font-size:10px; letter-spacing:2px; color:#D4590A; margin-bottom:14px; }
+.pyblock pre { font-family:'IBM Plex Mono',monospace; font-size:12px; line-height:1.7; overflow-x:auto; white-space:pre; color:#EDEAE0; }
+.pyblock pre .c { color:#7d8a97; } /* comment */
+
+/* ---- reflection ---- */
+.reflection { margin:38px 0; }
+.reflection h2 { font-family:'Space Grotesk',sans-serif; font-weight:700; font-size:14px; letter-spacing:1.5px; text-transform:uppercase; color:#17232E; padding-bottom:9px; margin-bottom:16px; border-bottom:2px solid #17232E; }
+.reflection ol { counter-reset:rf; }
+.reflection li { list-style:none; counter-increment:rf; font-size:14.5px; line-height:1.85; margin-bottom:16px; padding-left:30px; position:relative; color:#3b4552; }
+.reflection li::before { content:counter(rf); position:absolute; left:0; top:0; width:20px; height:20px; border:1.5px solid #D4590A; color:#D4590A; font-family:'IBM Plex Mono',monospace; font-size:11px; display:flex; align-items:center; justify-content:center; }
+
+/* ---- sources ---- */
+.sources { margin:32px 0 8px; padding-top:18px; border-top:1px solid #D3CFC0; }
+.sources h2 { font-family:'IBM Plex Mono',monospace; font-size:10px; letter-spacing:2px; text-transform:uppercase; color:#8a6a4a; margin-bottom:10px; }
+.sources li { font-size:12px; line-height:1.7; color:#566072; padding-left:14px; position:relative; margin-bottom:5px; list-style:none; }
+.sources li::before { content:'·'; position:absolute; left:0; color:#8a6a4a; }
+
+/* ---- verify flag ---- */
+.verify { display:inline-block; font-family:'IBM Plex Mono',monospace; font-size:10px; letter-spacing:.5px; color:#a34a00; background:#F3DFC6; border:1px solid #D4590A55; padding:2px 8px; margin-left:6px; }
+
+/* ---- complete button ---- */
+.complete-wrap { margin:44px 0 20px; padding:22px 0; border-top:1px solid #D3CFC0; border-bottom:1px solid #D3CFC0; display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:14px; }
+.complete-btn {
+  font-family:'Space Grotesk',sans-serif; font-weight:600; font-size:12px; letter-spacing:1px;
+  background:#17232E; color:#F2F0E8; border:none; padding:13px 22px; cursor:pointer; transition:.2s;
+}
+.complete-btn:hover { background:#D4590A; }
+.complete-btn.done { background:#1D7A4C; }
+.complete-btn.done:hover { background:#155c39; }
+.complete-msg { font-family:'IBM Plex Mono',monospace; font-size:11px; color:#8a6a4a; }
+
+/* ---- prev/next nav ---- */
+.pagenav { display:flex; justify-content:space-between; gap:16px; margin:24px 0 50px; }
+.pagenav a { flex:1; text-decoration:none; border:1px solid #D3CFC0; padding:16px 18px; transition:.15s; }
+.pagenav a:hover { border-color:#D4590A; }
+.pagenav .dir { font-family:'IBM Plex Mono',monospace; font-size:9.5px; letter-spacing:1.5px; color:#8a6a4a; display:block; margin-bottom:5px; }
+.pagenav .ttl { font-family:'Space Grotesk',sans-serif; font-weight:600; font-size:13.5px; color:#17232E; }
+.pagenav .next { text-align:right; }
+
+footer.sitefoot { text-align:center; padding:26px; font-family:'IBM Plex Mono',monospace; font-size:10px; color:#8a6a4a; letter-spacing:1px; }
+
+@media (max-width:600px){
+  .pagenav { flex-direction:column; }
+  .brand-sub { display:none; }
+}
+
+.hero { max-width:760px; margin:0 auto; padding:56px clamp(1.25rem,5vw,3.5rem) 10px; }
+.hero-eyebrow { font-family:'IBM Plex Mono',monospace; font-size:11px; letter-spacing:2.5px; color:#D4590A; margin-bottom:14px; text-transform:uppercase; }
+.hero h1 { font-family:'Space Grotesk',sans-serif; font-weight:700; font-size:clamp(28px,5vw,44px); line-height:1.12; letter-spacing:-.5px; margin-bottom:18px; }
+.hero p { font-size:16px; line-height:1.85; color:#3b4552; max-width:620px; }
+.standalone-note { font-family:'IBM Plex Mono',monospace; font-size:11px; color:#8a6a4a; margin-top:18px; padding:12px 16px; border:1px dashed #D3CFC0; display:inline-block; }
+
+.q-progress { max-width:760px; margin:0 auto; padding:0 clamp(1.25rem,5vw,3.5rem); }
+.progress-header { display:flex; justify-content:space-between; align-items:baseline; margin-bottom:10px; }
+.progress-header h2 { font-family:'Space Grotesk',sans-serif; font-size:12px; letter-spacing:2px; color:#17232E; }
+.progress-pct { font-family:'IBM Plex Mono',monospace; font-size:11px; color:#8a6a4a; }
+.progress-track { height:8px; background:#E4E1D6; border:1px solid #D3CFC0; }
+.progress-fill { height:100%; background:#D4590A; width:0%; transition:width .4s ease; }
+
+.lesson-list { max-width:760px; margin:34px auto 0; padding:0 clamp(1.25rem,5vw,3.5rem) 100px; display:flex; flex-direction:column; gap:10px; }
+.lesson-card { display:flex; align-items:center; gap:18px; background:#FBFAF6; border:1px solid #D3CFC0; padding:18px 20px; text-decoration:none; color:inherit; transition:.15s; }
+.lesson-card:hover { border-color:#D4590A; transform:translateX(2px); }
+.lesson-card.completed { border-left:4px solid #1D7A4C; }
+.lesson-num { font-family:'IBM Plex Mono',monospace; font-size:20px; font-weight:600; color:#D3CFC0; min-width:36px; }
+.lesson-card.completed .lesson-num { color:#1D7A4C; }
+.lesson-body h3 { font-family:'Space Grotesk',sans-serif; font-weight:600; font-size:15.5px; color:#17232E; margin-bottom:4px; }
+.lesson-body p { font-size:13px; line-height:1.6; color:#566072; }
+.lesson-right { margin-left:auto; }
+.check-icon { width:22px; height:22px; border:1.5px solid #D3CFC0; border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:12px; color:transparent; flex-shrink:0; }
+.lesson-card.completed .check-icon { border-color:#1D7A4C; color:#1D7A4C; }
+</style>
+</head>
+<body>
+<header class="topbar">
+  <a href="mobile.html" class="brand">
+    <span class="brand-mark">LEOAF <span>// MOBILE</span></span>
+    <span class="brand-sub">DIRECT-TO-DEVICE &amp; 5G NTN</span>
+  </a>
+  <div class="topbar-right">
+    <a href="../m1.html" class="hub-link">← MAIN LEOAF</a>
+  </div>
+</header>
+
+<div class="hero">
+  <div class="hero-eyebrow">Standalone track — 10 lessons</div>
+  <h1>Direct-to-Device &amp; 5G NTN</h1>
+  <p>LEO, MEO, IRIS², and Starlink at the constellation level, then straight into the direct-to-device landscape: seven players, three architectures, one running example traced from a handset with no signal all the way through a core network and an orchestration layer. Built for one purpose — landing at IRIS², eventually at Starlink, and being able to hold your own in the room either way.</p>
+  <div class="standalone-note">This track does not count toward M1–M12 mastery. It's tracked separately.</div>
+</div>
+
+<div class="q-progress">
+    <div class="progress-header">
+        <h2>TRACK PROGRESS</h2>
+        <span class="progress-pct" id="progressPct">0 / 10 COMPLETE</span>
+    </div>
+    <div class="progress-track">
+        <div class="progress-fill" id="progressFill"></div>
+    </div>
+</div>
+
+<div class="lesson-list">
+
+    <a href="mobile-1.html" class="lesson-card" data-id="mobile-1">
+        <div class="lesson-num">01</div>
+        <div class="lesson-body">
+            <h3>Orientation: LEO, MEO, IRIS² & Starlink</h3>
+            <p>LEO vs. MEO vs. GEO, IRIS² and Starlink at the constellation level — vocabulary before any of this gets technical.</p>
+        </div>
+        <div class="lesson-right"><div class="check-icon">✓</div></div>
+    </a>
+    <a href="mobile-2.html" class="lesson-card" data-id="mobile-2">
+        <div class="lesson-num">02</div>
+        <div class="lesson-body">
+            <h3>The Direct-to-Device Landscape</h3>
+            <p>Seven players, three architectures. The direct-to-device landscape, mapped before the physics.</p>
+        </div>
+        <div class="lesson-right"><div class="check-icon">✓</div></div>
+    </a>
+    <a href="mobile-3.html" class="lesson-card" data-id="mobile-3">
+        <div class="lesson-num">03</div>
+        <div class="lesson-body">
+            <h3>Closing the Link to a Handset</h3>
+            <p>Why a handset is a hard receiver — the ~45–47 dB gap and where every decibel goes to close it.</p>
+        </div>
+        <div class="lesson-right"><div class="check-icon">✓</div></div>
+    </a>
+    <a href="mobile-4.html" class="lesson-card" data-id="mobile-4">
+        <div class="lesson-num">04</div>
+        <div class="lesson-body">
+            <h3>The 3GPP NTN Standard, Plainly</h3>
+            <p>What 3GPP's NTN standard actually changes, and why, in plain language before the arithmetic.</p>
+        </div>
+        <div class="lesson-right"><div class="check-icon">✓</div></div>
+    </a>
+    <a href="mobile-5.html" class="lesson-card" data-id="mobile-5">
+        <div class="lesson-num">05</div>
+        <div class="lesson-body">
+            <h3>Payload for D2D: What's Actually New</h3>
+            <p>Transparent, regenerative, and the digital transparent processor — the payload architecture behind D2D.</p>
+        </div>
+        <div class="lesson-right"><div class="check-icon">✓</div></div>
+    </a>
+    <a href="mobile-6.html" class="lesson-card" data-id="mobile-6">
+        <div class="lesson-num">06</div>
+        <div class="lesson-body">
+            <h3>Core Network Integration</h3>
+            <p>Registering a satellite cell into a 5G core, bent-pipe and purpose-built, side by side.</p>
+        </div>
+        <div class="lesson-right"><div class="check-icon">✓</div></div>
+    </a>
+    <a href="mobile-7.html" class="lesson-card" data-id="mobile-7">
+        <div class="lesson-num">07</div>
+        <div class="lesson-body">
+            <h3>O-RAN, SMO & Orchestration</h3>
+            <p>O-RAN and SMO — orchestrating a radio network whose topology never stops moving.</p>
+        </div>
+        <div class="lesson-right"><div class="check-icon">✓</div></div>
+    </a>
+    <a href="mobile-8.html" class="lesson-card" data-id="mobile-8">
+        <div class="lesson-num">08</div>
+        <div class="lesson-body">
+            <h3>Architecture Comparison, Revisited</h3>
+            <p>One message, three architectures, traced end to end with everything you now know.</p>
+        </div>
+        <div class="lesson-right"><div class="check-icon">✓</div></div>
+    </a>
+    <a href="mobile-9.html" class="lesson-card" data-id="mobile-9">
+        <div class="lesson-num">09</div>
+        <div class="lesson-body">
+            <h3>In-Service Operations & Troubleshooting</h3>
+            <p>Handover failures, link degradation, and the order to check them in.</p>
+        </div>
+        <div class="lesson-right"><div class="check-icon">✓</div></div>
+    </a>
+    <a href="mobile-10.html" class="lesson-card" data-id="mobile-10">
+        <div class="lesson-num">10</div>
+        <div class="lesson-body">
+            <h3>Field Vocabulary</h3>
+            <p>The full glossary — every Know Cold entry from this track, aggregated and alphabetized.</p>
+        </div>
+        <div class="lesson-right"><div class="check-icon">✓</div></div>
+    </a>
+</div>
+
+<footer class="sitefoot">LEOAF MOBILE TRACK · STANDALONE · SELF-DIRECTED STUDY, NOT A CREDENTIAL</footer>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="../supabase.js"></script>
+<script src="../user_progress.js"></script>
+<script>
+(function () {
+    function bounceToLogin(reason) {
+        console.error("Auth guard:", reason, "- redirecting to ../index.html");
+        window.location.replace("../index.html");
+    }
+    async function init() {
+        if (typeof client === "undefined" || !client || !client.auth) {
+            return bounceToLogin("Supabase client not loaded (is supabase.js at site root?)");
+        }
+        let session = null;
+        try { ({ data: { session } } = await client.auth.getSession()); }
+        catch (e) { return bounceToLogin("getSession threw: " + e.message); }
+        if (!session) { window.location.replace("../index.html"); return; }
+
+        const cards = document.querySelectorAll(".lesson-card");
+        const total = cards.length;
+        let done = 0;
+        let mastered = [];
+        try { mastered = await getMasteredSections(); } catch (e) { console.error("getMasteredSections failed:", e); }
+        cards.forEach(card => {
+            if (mastered.includes(card.dataset.id)) { card.classList.add("completed"); done++; }
+        });
+        const pct = total > 0 ? Math.round((done / total) * 100) : 0;
+        document.getElementById("progressFill").style.width = pct + "%";
+        document.getElementById("progressPct").textContent = `${done} / ${total} COMPLETE`;
+    }
+    if (document.readyState === "loading") { document.addEventListener("DOMContentLoaded", init); }
+    else { init(); }
+})();
+</script>
+</body>
+</html>
