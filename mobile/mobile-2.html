@@ -1,0 +1,313 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>MOBILE-02 — The Direct-to-Device Landscape · LEOAF Mobile</title>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Source+Serif+4:ital,wght@0,400;0,600;1,400&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<link rel="icon" href="../favicon.ico" sizes="any" type="image/x-icon">
+<meta name="theme-color" content="#F2F0E8">
+<style>
+* { box-sizing:border-box; margin:0; padding:0; }
+html { height:100%; -webkit-text-size-adjust:100%; }
+body {
+  font-family:'Source Serif 4',Georgia,serif;
+  background:#F2F0E8;
+  color:#17232E;
+  min-height:100vh;
+  line-height:1.6;
+}
+::selection { background:#D4590A; color:#F2F0E8; }
+
+/* ---- top bar ---- */
+header.topbar {
+  background:#F2F0E8f2;
+  backdrop-filter:blur(6px);
+  border-bottom:1px solid #D3CFC0;
+  position:sticky; top:0; z-index:100;
+  padding:14px clamp(1.25rem,5vw,3.5rem);
+  display:flex; justify-content:space-between; align-items:center;
+  gap:16px;
+}
+.brand { display:flex; align-items:center; gap:10px; text-decoration:none; }
+.brand-mark { font-family:'Space Grotesk',sans-serif; font-weight:700; font-size:13px; letter-spacing:2px; color:#17232E; }
+.brand-mark span { color:#D4590A; }
+.brand-sub { font-family:'IBM Plex Mono',monospace; font-size:9.5px; color:#566072; letter-spacing:1.5px; border-left:1px solid #D3CFC0; padding-left:10px; }
+.topbar-right { display:flex; align-items:center; gap:14px; }
+.hub-link { font-family:'Space Grotesk',sans-serif; font-size:11px; letter-spacing:1px; color:#566072; text-decoration:none; padding:6px 12px; border:1px solid #D3CFC0; transition:.15s; }
+.hub-link:hover { border-color:#D4590A; color:#D4590A; }
+
+/* signature element: signal bars */
+.signal-bars { display:flex; align-items:flex-end; gap:2px; height:16px; }
+.signal-bars i { display:block; width:3px; background:#D3CFC0; border-radius:1px; }
+.signal-bars i:nth-child(1){height:25%;} .signal-bars i:nth-child(2){height:45%;}
+.signal-bars i:nth-child(3){height:65%;} .signal-bars i:nth-child(4){height:82%;}
+.signal-bars i:nth-child(5){height:100%;}
+.signal-bars i.lit { background:#D4590A; }
+
+/* ---- breadcrumb / position ---- */
+.posbar {
+  padding:10px clamp(1.25rem,5vw,3.5rem);
+  font-family:'IBM Plex Mono',monospace; font-size:10.5px; color:#566072;
+  display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:8px;
+  border-bottom:1px solid #E4E1D6;
+}
+.posbar a { color:#8a6a4a; text-decoration:none; }
+.posbar a:hover { color:#D4590A; }
+
+/* ---- layout ---- */
+.wrap { max-width:760px; margin:0 auto; padding:0 clamp(1.25rem,5vw,3.5rem) 90px; }
+.lesson-head { padding:36px 0 26px; border-bottom:2px solid #17232E; margin-bottom:34px; }
+.lesson-tag { font-family:'IBM Plex Mono',monospace; font-size:10.5px; color:#D4590A; letter-spacing:2.5px; margin-bottom:12px; text-transform:uppercase; }
+.lesson-head h1 { font-family:'Space Grotesk',sans-serif; font-weight:700; font-size:clamp(24px,4vw,36px); line-height:1.15; margin-bottom:14px; letter-spacing:-.3px; }
+.lesson-intro { font-size:15.5px; line-height:1.85; color:#3b4552; }
+.lesson-intro em, .lesson-intro i { color:#8a6a4a; font-style:italic; }
+
+.section { margin-bottom:42px; }
+.section h2 {
+  font-family:'Space Grotesk',sans-serif; font-weight:700; font-size:14px;
+  letter-spacing:1.5px; text-transform:uppercase; color:#17232E;
+  padding-bottom:9px; margin-bottom:16px; border-bottom:2px solid #D4590A;
+  scroll-margin-top:70px;
+}
+.section h3 {
+  font-family:'Space Grotesk',sans-serif; font-weight:600; font-size:12.5px;
+  letter-spacing:.5px; color:#8a6a4a; margin:22px 0 10px; text-transform:uppercase;
+}
+.section p { font-size:15px; line-height:1.85; margin-bottom:14px; color:#242f3a; }
+.section ul, .section ol { margin:0 0 16px 0; padding-left:0; }
+.section li { list-style:none; font-size:15px; line-height:1.8; margin-bottom:8px; padding-left:22px; position:relative; color:#242f3a; }
+.section ul li::before { content:'—'; position:absolute; left:0; color:#D4590A; }
+.section ol { counter-reset:ol; }
+.section ol li { counter-increment:ol; }
+.section ol li::before { content:counter(ol)'.'; position:absolute; left:0; color:#D4590A; font-family:'IBM Plex Mono',monospace; font-size:13px; }
+.section strong { color:#17232E; font-weight:700; }
+
+/* ---- data table ---- */
+.dtable { width:100%; border-collapse:collapse; margin:18px 0 22px; font-size:13.5px; }
+.dtable th { font-family:'Space Grotesk',sans-serif; font-size:10.5px; letter-spacing:1px; text-transform:uppercase; text-align:left; color:#566072; padding:8px 12px; border-bottom:2px solid #17232E; }
+.dtable td { padding:9px 12px; border-bottom:1px solid #E4E1D6; font-family:'IBM Plex Mono',monospace; font-size:13px; color:#242f3a; }
+.dtable tr:last-child td { border-bottom:1px solid #17232E; }
+.dtable-note { font-size:11.5px; color:#8a6a4a; font-style:italic; margin-top:-14px; margin-bottom:22px; }
+
+/* ---- know cold panel ---- */
+.knowcold { background:#FBFAF6; border:1.5px solid #17232E; padding:22px 26px; margin:38px 0; position:relative; }
+.knowcold::before { content:'KNOW COLD'; position:absolute; top:-11px; left:20px; background:#F2F0E8; padding:0 10px; font-family:'IBM Plex Mono',monospace; font-size:10px; letter-spacing:2px; color:#D4590A; font-weight:700; }
+.knowcold ul { margin:6px 0 0; }
+.knowcold li { font-size:13.5px; line-height:1.75; padding-left:16px; margin-bottom:9px; color:#242f3a; }
+.knowcold li::before { content:'▸'; color:#D4590A; }
+.knowcold li b, .knowcold li strong { font-family:'IBM Plex Mono',monospace; color:#17232E; }
+.knowcold-empty { font-size:13px; font-style:italic; color:#8a6a4a; }
+
+/* ---- python block (deliberate dark inversion) ---- */
+.pyblock { background:#17232E; color:#EDEAE0; padding:24px 26px; margin:30px 0; }
+.pyblock .py-label { font-family:'IBM Plex Mono',monospace; font-size:10px; letter-spacing:2px; color:#D4590A; margin-bottom:14px; }
+.pyblock pre { font-family:'IBM Plex Mono',monospace; font-size:12px; line-height:1.7; overflow-x:auto; white-space:pre; color:#EDEAE0; }
+.pyblock pre .c { color:#7d8a97; } /* comment */
+
+/* ---- reflection ---- */
+.reflection { margin:38px 0; }
+.reflection h2 { font-family:'Space Grotesk',sans-serif; font-weight:700; font-size:14px; letter-spacing:1.5px; text-transform:uppercase; color:#17232E; padding-bottom:9px; margin-bottom:16px; border-bottom:2px solid #17232E; }
+.reflection ol { counter-reset:rf; }
+.reflection li { list-style:none; counter-increment:rf; font-size:14.5px; line-height:1.85; margin-bottom:16px; padding-left:30px; position:relative; color:#3b4552; }
+.reflection li::before { content:counter(rf); position:absolute; left:0; top:0; width:20px; height:20px; border:1.5px solid #D4590A; color:#D4590A; font-family:'IBM Plex Mono',monospace; font-size:11px; display:flex; align-items:center; justify-content:center; }
+
+/* ---- sources ---- */
+.sources { margin:32px 0 8px; padding-top:18px; border-top:1px solid #D3CFC0; }
+.sources h2 { font-family:'IBM Plex Mono',monospace; font-size:10px; letter-spacing:2px; text-transform:uppercase; color:#8a6a4a; margin-bottom:10px; }
+.sources li { font-size:12px; line-height:1.7; color:#566072; padding-left:14px; position:relative; margin-bottom:5px; list-style:none; }
+.sources li::before { content:'·'; position:absolute; left:0; color:#8a6a4a; }
+
+/* ---- verify flag ---- */
+.verify { display:inline-block; font-family:'IBM Plex Mono',monospace; font-size:10px; letter-spacing:.5px; color:#a34a00; background:#F3DFC6; border:1px solid #D4590A55; padding:2px 8px; margin-left:6px; }
+
+/* ---- complete button ---- */
+.complete-wrap { margin:44px 0 20px; padding:22px 0; border-top:1px solid #D3CFC0; border-bottom:1px solid #D3CFC0; display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:14px; }
+.complete-btn {
+  font-family:'Space Grotesk',sans-serif; font-weight:600; font-size:12px; letter-spacing:1px;
+  background:#17232E; color:#F2F0E8; border:none; padding:13px 22px; cursor:pointer; transition:.2s;
+}
+.complete-btn:hover { background:#D4590A; }
+.complete-btn.done { background:#1D7A4C; }
+.complete-btn.done:hover { background:#155c39; }
+.complete-msg { font-family:'IBM Plex Mono',monospace; font-size:11px; color:#8a6a4a; }
+
+/* ---- prev/next nav ---- */
+.pagenav { display:flex; justify-content:space-between; gap:16px; margin:24px 0 50px; }
+.pagenav a { flex:1; text-decoration:none; border:1px solid #D3CFC0; padding:16px 18px; transition:.15s; }
+.pagenav a:hover { border-color:#D4590A; }
+.pagenav .dir { font-family:'IBM Plex Mono',monospace; font-size:9.5px; letter-spacing:1.5px; color:#8a6a4a; display:block; margin-bottom:5px; }
+.pagenav .ttl { font-family:'Space Grotesk',sans-serif; font-weight:600; font-size:13.5px; color:#17232E; }
+.pagenav .next { text-align:right; }
+
+footer.sitefoot { text-align:center; padding:26px; font-family:'IBM Plex Mono',monospace; font-size:10px; color:#8a6a4a; letter-spacing:1px; }
+
+@media (max-width:600px){
+  .pagenav { flex-direction:column; }
+  .brand-sub { display:none; }
+}
+</style>
+</head>
+<body>
+
+<header class="topbar">
+  <a href="mobile.html" class="brand">
+    <span class="brand-mark">LEOAF <span>// MOBILE</span></span>
+    <span class="brand-sub">DIRECT-TO-DEVICE &amp; 5G NTN</span>
+  </a>
+  <div class="topbar-right">
+    <div class="signal-bars" aria-hidden="true"><i class="lit"></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i></div>
+    <a href="mobile.html" class="hub-link">TRACK HUB</a>
+  </div>
+</header>
+
+
+<div class="posbar">
+  <span><a href="mobile.html">MOBILE</a> &nbsp;/&nbsp; LESSON 02 OF 10</span>
+  <span>STANDALONE TRACK — NOT PART OF M1–M12 MASTERY COUNT</span>
+</div>
+
+<div class="wrap">
+  <div class="lesson-head">
+    <div class="lesson-tag">MOBILE-02</div>
+    <h1>The Direct-to-Device Landscape</h1>
+    <p class="lesson-intro">Names and categories before physics. Every player below is solving the same problem — get a signal from orbit into an ordinary handset with no new hardware — and each has made a different, defensible tradeoff. This page is the map; MOBILE-8 revisits it once you can explain <i>why</i> each tradeoff was made.</p>
+  </div>
+
+  
+<div class="section">
+<h2>1. What "direct-to-device" means, precisely</h2>
+<p>D2D/D2C means an unmodified consumer handset — no external antenna, no specialized terminal — connects straight to a satellite using (or adapting) standard cellular protocols. This is a different category from VSAT-class terminals (flat-panel phased arrays, dishes) covered in M6: those terminals have real antenna gain and real power budgets. A smartphone has neither. That single constraint — closing a link with a sub-1-dBi antenna and a battery-limited transmitter — is the organizing problem of this entire track.</p>
+</div>
+
+<div class="section">
+<h2>2. The architecture taxonomy</h2>
+<p>Three buckets, and every player below sorts into one:</p>
+<ul>
+<li><strong>Bent-pipe / transparent, LTE-based.</strong> Satellite acts as a repeater — amplify and relay, no onboard demodulation. Standard LTE waveform, because it was designed for terrestrial towers and unmodified phones already speak it. Fastest to market; least standardized for the satellite hop itself.</li>
+<li><strong>Regenerative, 3GPP NR-NTN.</strong> Satellite carries onboard baseband processing (in the fullest case, an onboard gNB). Built to the standard's NTN extensions (MOBILE-4). Higher capability, higher cost, slower to deploy.</li>
+<li><strong>MSS narrowband.</strong> Legacy mobile-satellite-service spectrum (L-band, S-band), built for low-rate messaging and emergency use, not broadband. Bolted onto phones via OS-level integration rather than carrier roaming.</li>
+</ul>
+</div>
+
+<div class="section">
+<h2>3. Player-by-player</h2>
+<h3>3.1 Starlink Mobile (formerly Direct to Cell)</h3>
+<p>Bent-pipe / LTE bucket. ~650+ D2C-equipped satellites as of early-to-mid 2026, live in 22+ countries, ~10 million monthly active users, rebranded "Starlink Mobile" mid-2026. Partners with terrestrial MNOs (T-Mobile in the US, Veon/Kyivstar, OneNZ) rather than operating its own core — the satellite is a relay back to the partner's existing terrestrial 4G/5G core. Gen2 satellites are reported to target the actual 3GPP NR-NTN standard, aiming for 2027 <span class="verify">VERIFY</span> — a planned move out of the bent-pipe bucket.</p>
+<h3>3.2 IRIS²</h3>
+<p>Regenerative / NR-NTN bucket, per SpaceRISE program materials. Thales Alenia Space's program description explicitly names a 5G system, regenerative payload, active antennas, and an onboard processor as core scope items. Government-anchored, not consumer-D2D-first — the mobile/D2D capability sits inside a broader sovereign-communications mandate rather than being IRIS²'s primary commercial pitch the way it is for Starlink Mobile or AST SpaceMobile.</p>
+<h3>3.3 AST SpaceMobile</h3>
+<p>Broadband-class D2D bucket, standard cellular frequencies, large phased-array satellites (BlueBird series). FCC-authorized for 248 satellites; ~45 targeted in orbit by end of 2026. Carrier partnerships include AT&amp;T, Verizon, and Vodafone. Has moved into defense-adjacent work via a Missile Defense Agency SHIELD program contract, alongside its commercial MNO roadmap — a dual-track positioning worth noting since it mirrors, at smaller scale, the government/commercial split you'll see again with IRIS².</p>
+<h3>3.4 Amazon Leo + Globalstar</h3>
+<p>Hybrid: broadband constellation (formerly Project Kuiper, renamed Amazon Leo) combined with an $11.6 billion acquisition of Globalstar's spectrum and infrastructure (L-band + S-band, ~25 MHz) to add D2D capability. ~390+ Amazon Leo satellites in orbit as of mid-2026; the Globalstar deal is expected to close in 2027, with D2D deployment beginning around 2028. This is the furthest from live of the major players — an announced capability layered onto an existing broadband constellation, not yet an operating D2D service.</p>
+<h3>3.5 Lynk Global + Omnispace + SES</h3>
+<p>Smallest of the broadband-class players — "cell-tower-in-space" positioning. SES became a strategic backer following a Lynk/Omnispace merger; targeting service start around mid-2027. Worth tracking mainly because of the SES connection — it links back to IRIS²'s operator consortium.</p>
+<h3>3.6 Skylo</h3>
+<p>Narrowband/IoT bucket, MSS-spectrum-based. Reports millions of active consumer devices already, mostly for messaging/IoT rather than broadband — a materially different market than Starlink Mobile or AST SpaceMobile.</p>
+<h3>3.7 Apple Emergency SOS (Globalstar-based, transitioning to Amazon Leo)</h3>
+<p>Narrowband bucket, deliberately limited by design — emergency-only, 911/SOS-class messaging, iPhone 14+, restricted to a defined set of countries. Not a broadband competitor and not trying to be; useful here mainly as the low end of the capability spectrum for comparison.</p>
+</div>
+
+<div class="section">
+<h2>4. Comparison table</h2>
+<table class="dtable">
+<tr><th>Player</th><th>Bucket</th><th>Status (mid-2026)</th><th>Backer / operator</th></tr>
+<tr><td>Starlink Mobile</td><td>Bent-pipe LTE → NR-NTN (2027 target)</td><td>Live, ~10M MAU</td><td>SpaceX, vertically integrated</td></tr>
+<tr><td>IRIS²</td><td>Regenerative NR-NTN</td><td>Pre-launch, expanding scope</td><td>SpaceRISE + Airbus DS/Thales Alenia Space</td></tr>
+<tr><td>AST SpaceMobile</td><td>Broadband D2D</td><td>Early commercial, scaling</td><td>AT&amp;T, Verizon, Vodafone; DoD SHIELD</td></tr>
+<tr><td>Amazon Leo + Globalstar</td><td>Hybrid broadband + D2D</td><td>Broadband live; D2D not yet</td><td>Amazon</td></tr>
+<tr><td>Lynk + Omnispace</td><td>Broadband-class, small scale</td><td>Pre-service, targeting 2027</td><td>SES-backed</td></tr>
+<tr><td>Skylo</td><td>Narrowband/IoT</td><td>Live, millions of devices</td><td>MSS spectrum</td></tr>
+<tr><td>Apple SOS</td><td>Narrowband emergency</td><td>Live, limited scope</td><td>Globalstar → Amazon Leo</td></tr>
+</table>
+<p class="dtable-note">Status figures move quickly in this sector — re-verify before quoting any of them in a live conversation.</p>
+</div>
+
+<div class="section">
+<h2>5. Why so many approaches — the underlying disagreement</h2>
+<p>The field hasn't converged because the players are answering different questions. Starlink Mobile optimized for speed to market: use the waveform phones already speak, partner with existing MNO cores, accept a smaller total-capability ceiling in exchange for being live in 2024 rather than 2029. IRIS² optimized for government-grade capability and sovereignty, accepting a much longer timeline and higher per-satellite cost. AST SpaceMobile bet on satellite size — bigger phased arrays, fewer satellites, better link margin per beam, at a harder manufacturing problem. Amazon bought its way past years of spectrum-licensing delay via Globalstar rather than developing D2D capability organically. None of these is obviously wrong; each is a coherent answer to "what do we optimize first," and that question is the one worth asking about any new entrant you read about later.</p>
+</div>
+
+
+  
+
+  <div class="knowcold-wrap">
+    <div class="knowcold"><ul><li><b>Bent-pipe (transparent) vs. regenerative</b> — repeater vs. onboard processing</li><li><b>Starlink Mobile</b> — bent-pipe LTE today, targeting NR-NTN via Gen2, ~2027</li><li><b>IRIS²</b> — regenerative NR-NTN, government-anchored, SpaceRISE + Airbus DS/Thales Alenia Space</li><li><b>AST SpaceMobile</b> — broadband D2D, large phased arrays, AT&amp;T/Verizon/Vodafone + DoD SHIELD</li><li><b>Amazon Leo + Globalstar</b> — broadband constellation + acquired MSS spectrum, D2D not yet live</li><li><b>Lynk + Omnispace</b> — SES-backed, small scale, targeting 2027</li><li><b>Skylo</b> — narrowband/IoT, MSS spectrum, live at scale</li><li><b>Apple SOS</b> — narrowband emergency-only, Globalstar → Amazon Leo</li></ul></div>
+  </div>
+
+  <div class="reflection">
+    <h2>Reflection</h2>
+    <ol><li>Rank the seven players by how close their current architecture sits to the 3GPP NR-NTN standard (covered next, MOBILE-4). What does that ranking predict about who has the easiest path to interoperate with a standards-based system like IRIS² later?</li><li>AST SpaceMobile's dual commercial/defense positioning mirrors IRIS²'s government/commercial split at smaller scale. Is that convergence evidence that defense-grade D2D is where the sector is heading, or is it two unrelated companies solving unrelated problems that happen to look similar from outside?</li></ol>
+  </div>
+
+  <div class="sources">
+    <h2>Sources</h2>
+    <ul><li>Thales Alenia Space program materials on IRIS² technical scope.</li><li>SEC 8-K filing, AST SpaceMobile, FY2026 business update.</li><li>ABI Research, SatNews, CNBC, 5GWorldPro reporting on the D2D competitive landscape, April–August 2026.</li><li>KeepTrack, RVMobileInternet, US Mobile reporting on Starlink Mobile status, mid-2026.</li><li>All status/count figures dated to search date (August 2026) — flagged as time-sensitive throughout.</li></ul>
+  </div>
+
+  <div class="complete-wrap">
+    <button class="complete-btn" id="completeBtn">MARK LESSON COMPLETE</button>
+    <span class="complete-msg" id="completeMsg">Checking status...</span>
+  </div>
+
+  <div class="pagenav"><a href="mobile-1.html"><span class="dir">← PREVIOUS</span><span class="ttl">Orientation: LEO, MEO, IRIS² & Starlink</span></a><a href="mobile-3.html" class="next"><span class="dir">NEXT →</span><span class="ttl">Closing the Link to a Handset</span></a></div>
+</div>
+<footer class="sitefoot">LEOAF MOBILE TRACK · STANDALONE · SELF-DIRECTED STUDY, NOT A CREDENTIAL</footer>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="../supabase.js"></script>
+<script src="../user_progress.js"></script>
+<script>
+const LESSON_ID = 'mobile-2';
+(function () {
+    function bounceToLogin(reason) {
+        console.error("Auth guard:", reason, "- redirecting to ../index.html");
+        window.location.replace("../index.html");
+    }
+    async function init() {
+        if (typeof client === "undefined" || !client || !client.auth) {
+            return bounceToLogin("Supabase client not loaded (is supabase.js at site root?)");
+        }
+        let session = null;
+        try { ({ data: { session } } = await client.auth.getSession()); }
+        catch (e) { return bounceToLogin("getSession threw: " + e.message); }
+        if (!session) { window.location.replace("../index.html"); return; }
+
+        const btn = document.getElementById('completeBtn');
+        const msg = document.getElementById('completeMsg');
+        function setDone(done) {
+            if (done) {
+                btn.textContent = 'MARKED COMPLETE — CLICK TO UNDO';
+                btn.classList.add('done');
+                msg.textContent = 'Saved. Click again to undo.';
+            } else {
+                btn.textContent = 'MARK LESSON COMPLETE';
+                btn.classList.remove('done');
+                msg.textContent = 'Not yet marked complete.';
+            }
+        }
+        let mastered = [];
+        try { mastered = await getMasteredSections(); } catch (e) { console.error(e); }
+        setDone(mastered.includes(LESSON_ID));
+        btn.addEventListener('click', async () => {
+            const isCurrentlyDone = btn.classList.contains('done');
+            msg.textContent = 'Saving...';
+            const ok = await upsertSection(LESSON_ID, !isCurrentlyDone);
+            if (ok) {
+                setDone(!isCurrentlyDone);
+                if (!isCurrentlyDone) {
+                    msg.textContent = 'Saved. Moving to next lesson...';
+                    setTimeout(() => { window.location.href = 'mobile-3.html'; }, 700);
+                }
+            } else {
+                msg.textContent = 'Error saving. Try again.';
+            }
+        });
+    }
+    if (document.readyState === "loading") { document.addEventListener("DOMContentLoaded", init); }
+    else { init(); }
+})();
+</script>
+
+</body>
+</html>
