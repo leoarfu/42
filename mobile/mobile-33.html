@@ -1,0 +1,548 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>MOBILE-03 — Closing the Link to a Handset · LEOAF Mobile</title>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Source+Serif+4:ital,wght@0,400;0,600;1,400&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<link rel="icon" href="../favicon.ico" sizes="any" type="image/x-icon">
+<meta name="theme-color" content="#F2F0E8">
+<style>
+* { box-sizing:border-box; margin:0; padding:0; }
+html { height:100%; -webkit-text-size-adjust:100%; }
+body {
+  font-family:'Source Serif 4',Georgia,serif;
+  background:#F2F0E8;
+  color:#17232E;
+  min-height:100vh;
+  line-height:1.6;
+}
+::selection { background:#D4590A; color:#F2F0E8; }
+
+/* ---- top bar ---- */
+header.topbar {
+  background:#F2F0E8f2;
+  backdrop-filter:blur(6px);
+  border-bottom:1px solid #D3CFC0;
+  position:sticky; top:0; z-index:100;
+  padding:14px clamp(1.25rem,5vw,3.5rem);
+  display:flex; justify-content:space-between; align-items:center;
+  gap:16px;
+}
+.brand { display:flex; align-items:center; gap:10px; text-decoration:none; }
+.brand-mark { font-family:'Space Grotesk',sans-serif; font-weight:700; font-size:13px; letter-spacing:2px; color:#17232E; }
+.brand-mark span { color:#D4590A; }
+.brand-sub { font-family:'IBM Plex Mono',monospace; font-size:9.5px; color:#566072; letter-spacing:1.5px; border-left:1px solid #D3CFC0; padding-left:10px; }
+.topbar-right { display:flex; align-items:center; gap:14px; }
+.hub-link { font-family:'Space Grotesk',sans-serif; font-size:11px; letter-spacing:1px; color:#566072; text-decoration:none; padding:6px 12px; border:1px solid #D3CFC0; transition:.15s; }
+.hub-link:hover { border-color:#D4590A; color:#D4590A; }
+
+/* signature element: signal bars */
+.signal-bars { display:flex; align-items:flex-end; gap:2px; height:16px; }
+.signal-bars i { display:block; width:3px; background:#D3CFC0; border-radius:1px; }
+.signal-bars i:nth-child(1){height:25%;} .signal-bars i:nth-child(2){height:45%;}
+.signal-bars i:nth-child(3){height:65%;} .signal-bars i:nth-child(4){height:82%;}
+.signal-bars i:nth-child(5){height:100%;}
+.signal-bars i.lit { background:#D4590A; }
+
+/* ---- breadcrumb / position ---- */
+.posbar {
+  padding:10px clamp(1.25rem,5vw,3.5rem);
+  font-family:'IBM Plex Mono',monospace; font-size:10.5px; color:#566072;
+  display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:8px;
+  border-bottom:1px solid #E4E1D6;
+}
+.posbar a { color:#8a6a4a; text-decoration:none; }
+.posbar a:hover { color:#D4590A; }
+
+/* ---- layout ---- */
+.wrap { max-width:760px; margin:0 auto; padding:0 clamp(1.25rem,5vw,3.5rem) 90px; }
+.lesson-head { padding:36px 0 26px; border-bottom:2px solid #17232E; margin-bottom:34px; }
+.lesson-tag { font-family:'IBM Plex Mono',monospace; font-size:10.5px; color:#D4590A; letter-spacing:2.5px; margin-bottom:12px; text-transform:uppercase; }
+.lesson-head h1 { font-family:'Space Grotesk',sans-serif; font-weight:700; font-size:clamp(24px,4vw,36px); line-height:1.15; margin-bottom:14px; letter-spacing:-.3px; }
+.lesson-intro { font-size:15.5px; line-height:1.85; color:#3b4552; }
+.lesson-intro em, .lesson-intro i { color:#8a6a4a; font-style:italic; }
+
+.section { margin-bottom:42px; }
+.section h2 {
+  font-family:'Space Grotesk',sans-serif; font-weight:700; font-size:14px;
+  letter-spacing:1.5px; text-transform:uppercase; color:#17232E;
+  padding-bottom:9px; margin-bottom:16px; border-bottom:2px solid #D4590A;
+  scroll-margin-top:70px;
+}
+.section h3 {
+  font-family:'Space Grotesk',sans-serif; font-weight:600; font-size:12.5px;
+  letter-spacing:.5px; color:#8a6a4a; margin:22px 0 10px; text-transform:uppercase;
+}
+.section p { font-size:15px; line-height:1.85; margin-bottom:14px; color:#242f3a; }
+.section ul, .section ol { margin:0 0 16px 0; padding-left:0; }
+.section li { list-style:none; font-size:15px; line-height:1.8; margin-bottom:8px; padding-left:22px; position:relative; color:#242f3a; }
+.section ul li::before { content:'—'; position:absolute; left:0; color:#D4590A; }
+.section ol { counter-reset:ol; }
+.section ol li { counter-increment:ol; }
+.section ol li::before { content:counter(ol)'.'; position:absolute; left:0; color:#D4590A; font-family:'IBM Plex Mono',monospace; font-size:13px; }
+.section strong { color:#17232E; font-weight:700; }
+
+/* ---- data table ---- */
+.dtable { width:100%; border-collapse:collapse; margin:18px 0 22px; font-size:13.5px; }
+.dtable th { font-family:'Space Grotesk',sans-serif; font-size:10.5px; letter-spacing:1px; text-transform:uppercase; text-align:left; color:#566072; padding:8px 12px; border-bottom:2px solid #17232E; }
+.dtable td { padding:9px 12px; border-bottom:1px solid #E4E1D6; font-family:'IBM Plex Mono',monospace; font-size:13px; color:#242f3a; }
+.dtable tr:last-child td { border-bottom:1px solid #17232E; }
+.dtable-note { font-size:11.5px; color:#8a6a4a; font-style:italic; margin-top:-14px; margin-bottom:22px; }
+
+/* ---- know cold panel ---- */
+.knowcold { background:#FBFAF6; border:1.5px solid #17232E; padding:22px 26px; margin:38px 0; position:relative; }
+.knowcold::before { content:'KNOW COLD'; position:absolute; top:-11px; left:20px; background:#F2F0E8; padding:0 10px; font-family:'IBM Plex Mono',monospace; font-size:10px; letter-spacing:2px; color:#D4590A; font-weight:700; }
+.knowcold ul { margin:6px 0 0; }
+.knowcold li { font-size:13.5px; line-height:1.75; padding-left:16px; margin-bottom:9px; color:#242f3a; }
+.knowcold li::before { content:'▸'; color:#D4590A; }
+.knowcold li b, .knowcold li strong { font-family:'IBM Plex Mono',monospace; color:#17232E; }
+
+/* ---- python block ---- */
+.pyblock { background:#17232E; color:#EDEAE0; padding:24px 26px; margin:30px 0; }
+.pyblock .py-label { font-family:'IBM Plex Mono',monospace; font-size:10px; letter-spacing:2px; color:#D4590A; margin-bottom:14px; }
+.pyblock pre { font-family:'IBM Plex Mono',monospace; font-size:12px; line-height:1.7; overflow-x:auto; white-space:pre; color:#EDEAE0; }
+.pyblock pre .c { color:#7d8a97; }
+
+/* ---- reflection ---- */
+.reflection { margin:38px 0; }
+.reflection h2 { font-family:'Space Grotesk',sans-serif; font-weight:700; font-size:14px; letter-spacing:1.5px; text-transform:uppercase; color:#17232E; padding-bottom:9px; margin-bottom:16px; border-bottom:2px solid #17232E; }
+.reflection ol { counter-reset:rf; }
+.reflection li { list-style:none; counter-increment:rf; font-size:14.5px; line-height:1.85; margin-bottom:16px; padding-left:30px; position:relative; color:#3b4552; }
+.reflection li::before { content:counter(rf); position:absolute; left:0; top:0; width:20px; height:20px; border:1.5px solid #D4590A; color:#D4590A; font-family:'IBM Plex Mono',monospace; font-size:11px; display:flex; align-items:center; justify-content:center; }
+
+/* ---- sources ---- */
+.sources { margin:32px 0 8px; padding-top:18px; border-top:1px solid #D3CFC0; }
+.sources h2 { font-family:'IBM Plex Mono',monospace; font-size:10px; letter-spacing:2px; text-transform:uppercase; color:#8a6a4a; margin-bottom:10px; }
+.sources li { font-size:12px; line-height:1.7; color:#566072; padding-left:14px; position:relative; margin-bottom:5px; list-style:none; }
+.sources li::before { content:'·'; position:absolute; left:0; color:#8a6a4a; }
+
+/* ---- complete button ---- */
+.complete-wrap { margin:44px 0 20px; padding:22px 0; border-top:1px solid #D3CFC0; border-bottom:1px solid #D3CFC0; display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:14px; }
+.complete-btn {
+  font-family:'Space Grotesk',sans-serif; font-weight:600; font-size:12px; letter-spacing:1px;
+  background:#17232E; color:#F2F0E8; border:none; padding:13px 22px; cursor:pointer; transition:.2s;
+}
+.complete-btn:hover { background:#D4590A; }
+.complete-btn.done { background:#1D7A4C; }
+.complete-btn.done:hover { background:#155c39; }
+.complete-msg { font-family:'IBM Plex Mono',monospace; font-size:11px; color:#8a6a4a; }
+
+/* ---- prev/next nav ---- */
+.pagenav { display:flex; justify-content:space-between; gap:16px; margin:24px 0 50px; }
+.pagenav a { flex:1; text-decoration:none; border:1px solid #D3CFC0; padding:16px 18px; transition:.15s; }
+.pagenav a:hover { border-color:#D4590A; }
+.pagenav .dir { font-family:'IBM Plex Mono',monospace; font-size:9.5px; letter-spacing:1.5px; color:#8a6a4a; display:block; margin-bottom:5px; }
+.pagenav .ttl { font-family:'Space Grotesk',sans-serif; font-weight:600; font-size:13.5px; color:#17232E; }
+.pagenav .next { text-align:right; }
+
+footer.sitefoot { text-align:center; padding:26px; font-family:'IBM Plex Mono',monospace; font-size:10px; color:#8a6a4a; letter-spacing:1px; }
+
+svg { width:100%; height:auto; margin:16px 0; display:block; }
+
+@media (max-width:600px){
+  .pagenav { flex-direction:column; }
+  .brand-sub { display:none; }
+}
+</style>
+</head>
+<body>
+
+<header class="topbar">
+  <a href="mobile.html" class="brand">
+    <span class="brand-mark">LEOAF <span>// MOBILE</span></span>
+    <span class="brand-sub">DIRECT-TO-DEVICE &amp; 5G NTN</span>
+  </a>
+  <div class="topbar-right">
+    <div class="signal-bars" aria-hidden="true"><i class="lit"></i><i class="lit"></i><i class=""></i><i class=""></i><i class=""></i></div>
+    <a href="mobile.html" class="hub-link">TRACK HUB</a>
+  </div>
+</header>
+
+<div class="posbar">
+  <span><a href="mobile.html">MOBILE</a> &nbsp;/&nbsp; LESSON 03 OF 10</span>
+  <span>STANDALONE TRACK — NOT PART OF M1–M12 MASTERY COUNT</span>
+</div>
+
+<div class="wrap">
+  <div class="lesson-head">
+    <div class="lesson-tag">MOBILE-03</div>
+    <h1>Closing the Link to a Handset</h1>
+    <p class="lesson-intro">The full derivation and a working Python engine for everything on this page live in M5-6. This page is the plain-language version — read it first if D2D link budgets are new to you, or on its own if you just need the concept without the arithmetic.</p>
+  </div>
+
+  <div class="section">
+    <h2>1. Why a handset is a hard receiver, in plain terms</h2>
+    <p>M4-1 established the link equation everything in this track rests on: received signal quality (C/N₀) is transmit strength (EIRP) minus path loss minus other losses, plus receiver quality (G/T). A VSAT-class terminal — the kind M4 assumes throughout — has a real dish or flat-panel array: tens of dBi of gain. A smartphone has an antenna built to talk to a cell tower a few kilometres away, not a satellite a thousand kilometres up: close to 0 dBi, sometimes negative.</p>
+    <p>M5-6 quantifies exactly what that costs you: an unmodified smartphone's EIRP and receive quality (G/T) together fall <strong>~45–47 dB</strong> short of a VSAT-class terminal — a factor of tens of thousands in raw signal power. Nothing about the physics changes between a VSAT link and a D2D link; only this one number does, and it changes by a lot.</p>
+  </div>
+
+  <div class="section">
+    <h2>2. Where the missing decibels come from — four places, plainly</h2>
+    <p>M5-6 breaks the gap into four accounts. In plain terms:</p>
+    <ul>
+      <li><strong>Orbit altitude.</strong> Flying at 550 km instead of GEO's ~36,000 km recovers roughly <strong>32 dB</strong> on its own — the single largest of the four accounts, and the reason D2D at scale is a LEO product, not a GEO one. GEO mobile-satellite service existed for decades before D2D, but only with real terminals — external antennas, real transmit power, users who pointed them at the sky. It never worked with an unmodified phone, because it never had this 32 dB for free.</li>
+      <li><strong>Aperture.</strong> The satellite's own antenna has to be much larger, or split into many more, narrower beams, to make up on the transmit side what the handset can't make up on the receive side.</li>
+      <li><strong>Bandwidth.</strong> A narrower carrier concentrates the same power into less spectrum, which directly raises the effective signal-to-noise ratio in that narrower channel — the tradeoff being less total data rate.</li>
+      <li><strong>Waveform floor.</strong> The modulation and coding chosen for D2D is deliberately robust — able to work at a much lower signal-to-noise ratio than a broadband waveform — at the cost of carrying fewer bits per symbol. This is the D2D equivalent of a GEO system dropping to its most robust MODCOD in bad weather, except D2D runs there by default, not just as a fallback.</li>
+    </ul>
+    <p>Every one of these is a real engineering lever pulled specifically to close a link that the handset's antenna alone cannot close.</p>
+  </div>
+
+  <div class="section">
+    <h2>3. The downlink is the tight link, not the uplink</h2>
+    <p>In ordinary broadband satcom, the return link (terminal to satellite) is usually the constrained one — the terminal has less power than the satellite. D2D reverses this. The satellite's huge receive aperture more than makes up for the handset's feeble transmitter, so the uplink actually closes comfortably. What doesn't have anything compensating for it is the <strong>downlink</strong>: the handset's terrible receive quality has no aperture on its side to help. So counterintuitively, sending a message <i>from</i> your phone to the satellite is the easy direction — getting a reply <i>back</i> is the hard one.</p>
+  </div>
+
+  <div class="section">
+    <h2>4. Doppler and pass geometry, why LEO forces the issue</h2>
+    <p>A LEO satellite is moving at roughly 7.6 km/s. At a typical D2D handset frequency near 1.9 GHz, that motion alone produces a frequency shift of around 48 kHz at the start and end of a pass — large relative to how narrow a resource block is, not a rounding error. And the pass itself is short: roughly eight minutes overhead, at a 550 km altitude, before the satellite drops back below a useful elevation angle. Every D2D architecture has to solve both problems — correct for a shift that size, and hand a session off to the next satellite every few minutes — and how each one solves them is exactly what separates the architectures compared in MOBILE-2.</p>
+  </div>
+
+  <div class="section">
+    <h2>5. What "narrowband by design" means for you as a user</h2>
+    <p>Put the accounts together and the conclusion is structural, not incidental: D2D services are narrowband by design, not by immaturity. That's why the current generation of services carries text messages and short data before it carries video calls — the link budget genuinely doesn't support broadband rates yet, for the same reason a GEO satphone call sounds different from a fibre call. It isn't that the D2D engineers haven't gotten there yet; it's that the accounts above cost real decibels, and broadband-grade data rates cost decibels the link doesn't currently have to spend.</p>
+  </div>
+
+  <div class="section">
+    <h2>6. Where to go deeper</h2>
+    <p>M4-1 for the link-budget fundamentals this page assumes (EIRP, FSPL, G/T, C/N₀) — read that first if any of those terms were unfamiliar. M5-6 for the full D2D-specific accounting with real numbers at every step and a working <code>D2DLink</code> Python class that sweeps array size against carrier width — read that once this page's shape makes sense and you want the arithmetic underneath it.</p>
+  </div>
+
+  <section class="section">
+    <h2>From Zero to 5G NTN: OFDM, Doppler &amp; Synchronization</h2>
+    <p>This lesson starts from absolute zero. Every acronym, every unit, and every physical idea is introduced before it is used.</p>
+
+    <h3>The Big Picture</h3>
+    <p>A Direct-to-Device (D2D) connection is astonishing because an ordinary smartphone communicates with a satellite travelling about <strong>7.6 km/s</strong>. The phone is not redesigned into a satellite terminal; instead, 5G NTN extends the existing 5G radio standard with new synchronization techniques.</p>
+
+    <svg viewBox="0 0 680 170" xmlns="http://www.w3.org/2000/svg">
+      <rect width="680" height="170" rx="14" fill="#FBFAF6" stroke="#D3CFC0"/>
+      <rect x="28" y="52" width="120" height="72" rx="10" fill="#17232E"/>
+      <text x="88" y="75" fill="#F2F0E8" font-size="12" text-anchor="middle" font-family="Arial" font-weight="700">UE</text>
+      <text x="88" y="92" fill="#D3CFC0" font-size="9" text-anchor="middle" font-family="Arial">Smartphone</text>
+      <text x="88" y="104" fill="#D3CFC0" font-size="9" text-anchor="middle" font-family="Arial">1.9 GHz</text>
+      <circle cx="340" cy="52" r="20" fill="#D4590A"/>
+      <path d="M325 52 h30 M340 37 v30" stroke="#fff" stroke-width="1.6"/>
+      <text x="340" y="84" fill="#17232E" font-size="10" text-anchor="middle" font-family="Arial" font-weight="700">LEO satellite</text>
+      <text x="340" y="96" fill="#566072" font-size="8" text-anchor="middle" font-family="Arial">7.6 km/s</text>
+      <rect x="532" y="52" width="120" height="72" rx="10" fill="#E9E5D8" stroke="#17232E"/>
+      <text x="592" y="74" fill="#17232E" font-size="12" text-anchor="middle" font-family="Arial" font-weight="700">Gateway</text>
+      <text x="592" y="90" fill="#566072" font-size="9" text-anchor="middle" font-family="Arial">5G Core</text>
+      <line x1="148" y1="88" x2="320" y2="52" stroke="#D4590A" stroke-width="1.8" stroke-dasharray="5 4"/>
+      <line x1="360" y1="52" x2="532" y2="88" stroke="#D4590A" stroke-width="1.8" stroke-dasharray="5 4"/>
+      <text x="235" y="64" fill="#8A6A4A" font-size="8" text-anchor="middle" font-family="Arial">Service link</text>
+      <text x="445" y="64" fill="#8A6A4A" font-size="8" text-anchor="middle" font-family="Arial">Feeder link</text>
+    </svg>
+
+    <h3>Definition 1 — UE (User Equipment)</h3>
+    <p><strong>UE</strong> stands for <strong>User Equipment</strong>. It is the official 3GPP name for the user's device: a smartphone, tablet, wearable or IoT sensor. Throughout the rest of the Mobile curriculum, whenever you see <strong>UE</strong>, think <strong>your phone</strong>.</p>
+
+    <h3>Definition 2 — What Is a Radio Wave?</h3>
+    <p>A radio wave is an electromagnetic wave that oscillates. Imagine the electric field rising and falling smoothly like a sine wave. The number of oscillations completed every second is called the <strong>frequency</strong>.</p>
+
+    <svg viewBox="0 0 680 170" xmlns="http://www.w3.org/2000/svg">
+      <rect width="680" height="170" rx="14" fill="#FBFAF6" stroke="#D3CFC0"/>
+      <line x1="40" y1="85" x2="640" y2="85" stroke="#94A3B8"/>
+      <path d="M40 85 C70 35 100 35 130 85 S190 135 220 85 280 35 310 85 370 135 400 85 460 35 490 85 550 135 580 85 610 35 640 85" fill="none" stroke="#D4590A" stroke-width="3"/>
+      <text x="340" y="24" fill="#17232E" font-size="12" text-anchor="middle" font-family="Arial" font-weight="700">A radio wave is simply an oscillation</text>
+      <text x="340" y="150" fill="#566072" font-size="9" text-anchor="middle" font-family="Arial">One complete cycle = one wavelength</text>
+    </svg>
+
+    <table class="dtable">
+      <tr><th>Unit</th><th>Meaning</th></tr>
+      <tr><td>Hz</td><td>1 oscillation per second</td></tr>
+      <tr><td>kHz</td><td>1,000 Hz</td></tr>
+      <tr><td>MHz</td><td>1 million Hz</td></tr>
+      <tr><td>GHz</td><td>1 billion Hz</td></tr>
+    </table>
+
+    <p>A D2D handset typically operates around <strong>1.9 GHz</strong>, meaning the carrier oscillates about <strong>1.9 billion times every second</strong>.</p>
+
+    <h3>Definition 3 — What Is a Carrier?</h3>
+    <p>The carrier is the high-frequency wave that transports information. Voice, video and internet data do not travel directly; they are encoded onto this carrier.</p>
+
+    <h3>Definition 4 — OFDM</h3>
+    <p><strong>OFDM</strong> stands for <strong>Orthogonal Frequency Division Multiplexing</strong>. Instead of using one large carrier, OFDM divides it into hundreds or thousands of extremely narrow subcarriers that all transmit simultaneously.</p>
+
+    <svg viewBox="0 0 680 180" xmlns="http://www.w3.org/2000/svg">
+      <rect width="680" height="180" rx="14" fill="#17232E"/>
+      <text x="340" y="22" fill="#F2F0E8" font-size="12" text-anchor="middle" font-family="Arial" font-weight="700">One OFDM Carrier</text>
+      <line x1="40" y1="120" x2="640" y2="120" stroke="#64748B"/>
+      <g stroke="#67E8F9" stroke-width="2">
+        <line x1="70" y1="40" x2="70" y2="120"/>
+        <line x1="110" y1="40" x2="110" y2="120"/>
+        <line x1="150" y1="40" x2="150" y2="120"/>
+        <line x1="190" y1="40" x2="190" y2="120"/>
+        <line x1="230" y1="40" x2="230" y2="120"/>
+        <line x1="270" y1="40" x2="270" y2="120"/>
+        <line x1="310" y1="40" x2="310" y2="120"/>
+        <line x1="350" y1="40" x2="350" y2="120"/>
+        <line x1="390" y1="40" x2="390" y2="120"/>
+        <line x1="430" y1="40" x2="430" y2="120"/>
+        <line x1="470" y1="40" x2="470" y2="120"/>
+        <line x1="510" y1="40" x2="510" y2="120"/>
+        <line x1="550" y1="40" x2="550" y2="120"/>
+        <line x1="590" y1="40" x2="590" y2="120"/>
+      </g>
+      <text x="340" y="145" fill="#D3CFC0" font-size="9" text-anchor="middle" font-family="Arial">Hundreds of parallel subcarriers</text>
+    </svg>
+
+    <h3>Orthogonality</h3>
+    <p>The word <strong>orthogonal</strong> means the subcarriers are mathematically arranged so they overlap without interfering. They occupy nearly the same spectrum while remaining separable by the receiver.</p>
+
+    <h3>Definition 5 — Subcarrier</h3>
+    <p>A <strong>subcarrier</strong> is one of those narrow frequency tones. In a common 5G numerology, adjacent subcarriers are spaced <strong>15 kHz</strong> apart.</p>
+
+    <h3>Definition 6 — Resource Block (RB)</h3>
+    <p>A scheduler never allocates individual subcarriers. It allocates <strong>Resource Blocks</strong>.</p>
+
+    <svg viewBox="0 0 680 130" xmlns="http://www.w3.org/2000/svg">
+      <rect width="680" height="130" rx="14" fill="#FBFAF6" stroke="#D3CFC0"/>
+      <g stroke="#0EA5E9" stroke-width="2">
+        <line x1="80" y1="25" x2="80" y2="75"/>
+        <line x1="120" y1="25" x2="120" y2="75"/>
+        <line x1="160" y1="25" x2="160" y2="75"/>
+        <line x1="200" y1="25" x2="200" y2="75"/>
+        <line x1="240" y1="25" x2="240" y2="75"/>
+        <line x1="280" y1="25" x2="280" y2="75"/>
+        <line x1="320" y1="25" x2="320" y2="75"/>
+        <line x1="360" y1="25" x2="360" y2="75"/>
+        <line x1="400" y1="25" x2="400" y2="75"/>
+        <line x1="440" y1="25" x2="440" y2="75"/>
+        <line x1="480" y1="25" x2="480" y2="75"/>
+        <line x1="520" y1="25" x2="520" y2="75"/>
+      </g>
+      <line x1="80" y1="95" x2="520" y2="95" stroke="#D4590A" stroke-width="2"/>
+      <text x="300" y="108" fill="#D4590A" font-size="10" text-anchor="middle" font-family="Arial" font-weight="700">12 subcarriers = 1 Resource Block = 180 kHz</text>
+    </svg>
+
+    <table class="dtable">
+      <tr><th>Object</th><th>Definition</th></tr>
+      <tr><td>Subcarrier</td><td>One narrow tone</td></tr>
+      <tr><td>Resource Block</td><td>12 adjacent subcarriers (180 kHz)</td></tr>
+      <tr><td>Scheduler</td><td>Software that assigns RBs to users</td></tr>
+    </table>
+
+    <h3>The Doppler Effect</h3>
+    <p>When transmitter and receiver move relative to one another, the received frequency changes. This is called the <strong>Doppler effect</strong>.</p>
+
+    <svg viewBox="0 0 680 190" xmlns="http://www.w3.org/2000/svg">
+      <rect width="680" height="190" rx="14" fill="#FBFAF6" stroke="#D3CFC0"/>
+      <text x="340" y="18" fill="#17232E" font-size="12" text-anchor="middle" font-family="Arial" font-weight="700">Doppler During One Satellite Pass</text>
+      <line x1="60" y1="35" x2="60" y2="145" stroke="#64748B"/>
+      <line x1="60" y1="90" x2="620" y2="90" stroke="#CBD5E1" stroke-dasharray="5 5"/>
+      <path d="M60 45 C170 45 210 90 340 90 S510 135 620 135" fill="none" stroke="#2563EB" stroke-width="3"/>
+      <text x="28" y="48" fill="#17232E" font-size="9" font-family="Arial">+48</text>
+      <text x="35" y="92" fill="#566072" font-size="9" font-family="Arial">0</text>
+      <text x="22" y="138" fill="#17232E" font-size="9" font-family="Arial">−48</text>
+      <text x="15" y="20" fill="#566072" font-size="8" font-family="Arial">kHz</text>
+      <text x="60" y="162" fill="#566072" font-size="8" text-anchor="middle" font-family="Arial">Start</text>
+      <text x="340" y="162" fill="#566072" font-size="8" text-anchor="middle" font-family="Arial">Overhead</text>
+      <text x="620" y="162" fill="#566072" font-size="8" text-anchor="middle" font-family="Arial">End</text>
+    </svg>
+
+    <p>The satellite approaches, reaches overhead, then recedes. The frequency continuously shifts from about <strong>+48 kHz</strong> to <strong>−48 kHz</strong>.</p>
+
+    <h3>Where Does 48 kHz Come From?</h3>
+    <p>The Doppler equation is:</p>
+    <p><strong>Δf = (v / c) × f</strong></p>
+    <table class="dtable">
+      <tr><th>Variable</th><th>Meaning</th></tr>
+      <tr><td>v</td><td>Relative velocity (7,600 m/s)</td></tr>
+      <tr><td>c</td><td>Speed of light (300,000,000 m/s)</td></tr>
+      <tr><td>f</td><td>Carrier frequency (1.9 GHz)</td></tr>
+    </table>
+    <p>Using these parameters yields approximately <strong>48,000 Hz</strong> (48 kHz) of frequency shift.</p>
+
+    <h3>Why Cars Barely Matter</h3>
+    <table class="dtable">
+      <tr><th>Scenario</th><th>Doppler</th></tr>
+      <tr><td>130 km/h car</td><td>≈ 228 Hz</td></tr>
+      <tr><td>LEO satellite</td><td>≈ 48,000 Hz</td></tr>
+    </table>
+
+    <h3>The Critical Insight</h3>
+    <p>The phone does <strong>not</strong> jump from one subcarrier to another. Instead, it continuously adjusts its own internal frequency reference, called the <strong>local oscillator</strong>.</p>
+
+    <svg viewBox="0 0 680 180" xmlns="http://www.w3.org/2000/svg">
+      <rect width="680" height="180" rx="14" fill="#FBFAF6" stroke="#D3CFC0"/>
+      <text x="340" y="18" fill="#17232E" font-size="12" text-anchor="middle" font-family="Arial" font-weight="700">The Entire Grid Is Rotated Back Into Alignment</text>
+      <g stroke="#64748B">
+        <line x1="80" y1="40" x2="80" y2="120"/>
+        <line x1="160" y1="40" x2="160" y2="120"/>
+        <line x1="240" y1="40" x2="240" y2="120"/>
+        <line x1="320" y1="40" x2="320" y2="120"/>
+        <line x1="400" y1="40" x2="400" y2="120"/>
+        <line x1="480" y1="40" x2="480" y2="120"/>
+        <line x1="560" y1="40" x2="560" y2="120"/>
+      </g>
+      <g stroke="#2563EB" stroke-width="3">
+        <line x1="95" y1="40" x2="95" y2="120"/>
+        <line x1="175" y1="40" x2="175" y2="120"/>
+        <line x1="255" y1="40" x2="255" y2="120"/>
+        <line x1="335" y1="40" x2="335" y2="120"/>
+        <line x1="415" y1="40" x2="415" y2="120"/>
+        <line x1="495" y1="40" x2="495" y2="120"/>
+      </g>
+      <text x="340" y="145" fill="#566072" font-size="9" text-anchor="middle" font-family="Arial">Blue = received grid shifted by Doppler</text>
+      <text x="340" y="158" fill="#17232E" font-size="9" text-anchor="middle" font-family="Arial" font-weight="700">Receiver shifts it back before demodulation</text>
+    </svg>
+
+    <h3>NTN Synchronization</h3>
+    <p><strong>NTN</strong> stands for <strong>Non-Terrestrial Network</strong>. Release 17 introduced two major additions that terrestrial 5G did not need.</p>
+
+    <h3>1. Frequency Pre-compensation</h3>
+    <p>The UE knows its GNSS position. The satellite broadcasts its ephemeris, which describes its orbit, position, and velocity. The phone predicts the Doppler before transmitting and intentionally shifts its uplink frequency.</p>
+
+    <h3>2. Timing Advance</h3>
+    <p>Radio waves travel at the speed of light, but 600 km still takes about 2 milliseconds. Users on opposite sides of the beam have different propagation delays, so each phone transmits slightly early.</p>
+
+    <svg viewBox="0 0 680 170" xmlns="http://www.w3.org/2000/svg">
+      <rect width="680" height="170" rx="14" fill="#FBFAF6" stroke="#D3CFC0"/>
+      <text x="40" y="30" fill="#17232E" font-size="11" font-family="Arial" font-weight="700">UE</text>
+      <text x="300" y="30" fill="#17232E" font-size="11" font-family="Arial" font-weight="700">Satellite</text>
+      <text x="560" y="30" fill="#17232E" font-size="11" font-family="Arial" font-weight="700">gNB</text>
+      <rect x="25" y="60" width="110" height="20" rx="4" fill="#D4590A"/>
+      <rect x="275" y="60" width="110" height="20" rx="4" fill="#2563EB"/>
+      <rect x="525" y="60" width="110" height="20" rx="4" fill="#16A34A"/>
+      <line x1="135" y1="70" x2="275" y2="70" stroke="#64748B" stroke-dasharray="5 5"/>
+      <line x1="385" y1="70" x2="525" y2="70" stroke="#64748B" stroke-dasharray="5 5"/>
+      <text x="205" y="58" fill="#8A6A4A" font-size="8" text-anchor="middle" font-family="Arial">Propagation delay</text>
+      <text x="340" y="110" fill="#17232E" font-size="10" text-anchor="middle" font-family="Arial" font-weight="700">Timing Advance</text>
+      <text x="340" y="125" fill="#566072" font-size="8" text-anchor="middle" font-family="Arial">Transmit early so arrivals line up perfectly</text>
+    </svg>
+
+    <h3>Who Does What?</h3>
+    <table class="dtable">
+      <tr><th>Component</th><th>Responsibility</th></tr>
+      <tr><td>UE</td><td>GNSS, Doppler prediction, timing advance</td></tr>
+      <tr><td>Satellite</td><td>5G radio access, scheduling, beamforming</td></tr>
+      <tr><td>Gateway</td><td>Feeder-link correction and connection to the 5G core</td></tr>
+    </table>
+
+    <h3>The Mental Model You Should Keep</h3>
+    <p>The most important distinction in this module is philosophical.</p>
+    <table class="dtable">
+      <tr><th>GEO DVB-S2X</th><th>5G NTN</th></tr>
+      <tr><td>Think in carriers</td><td>Think in resource grids</td></tr>
+      <tr><td>One continuous symbol stream</td><td>Hundreds of parallel OFDM subcarriers</td></tr>
+      <tr><td>ACM changes MODCOD</td><td>Scheduler allocates RBs dynamically</td></tr>
+      <tr><td>Carrier is fundamental</td><td>Time × frequency grid is fundamental</td></tr>
+    </table>
+  </section>
+
+  <div class="knowcold-wrap">
+    <div class="knowcold">
+      <ul>
+        <li><b>~45–47 dB</b> — total handset-vs-VSAT gap (EIRP + G/T combined)</li>
+        <li><b>~32 dB</b> — recovered from orbit altitude alone (LEO vs. GEO), the single largest account</li>
+        <li><b>Four accounts</b> — orbit altitude, aperture, bandwidth, waveform floor</li>
+        <li><b>Downlink, not uplink, is binding</b> — reverse of ordinary broadband satcom asymmetry</li>
+        <li><b>~48 kHz</b> — max Doppler shift, 550 km altitude, ~1.9 GHz</li>
+        <li><b>~8 minutes</b> — typical overhead pass duration, 550 km, 10° min elevation</li>
+        <li><b>Narrowband by design</b> — a link-budget consequence, not a maturity gap</li>
+        <li><b>UE</b> — User Equipment (your phone)</li>
+        <li><b>Carrier</b> — The high-frequency radio wave transporting data</li>
+        <li><b>Frequency</b> — Oscillations per second, measured in Hertz</li>
+        <li><b>OFDM</b> — Orthogonal Frequency Division Multiplexing</li>
+        <li><b>Orthogonal</b> — Signals overlap without interfering</li>
+        <li><b>Subcarrier</b> — One narrow frequency tone (15 kHz spacing)</li>
+        <li><b>Resource Block</b> — 12 adjacent subcarriers (180 kHz total)</li>
+        <li><b>Scheduler</b> — Network software assigning RBs every slot</li>
+        <li><b>Doppler</b> — Frequency shift caused by relative motion</li>
+        <li><b>Local Oscillator</b> — Internal frequency reference used to correct Doppler</li>
+        <li><b>NTN</b> — Non-Terrestrial Network</li>
+        <li><b>GNSS</b> — Global Navigation Satellite System (GPS, Galileo...)</li>
+        <li><b>Ephemeris</b> — Satellite orbital position and velocity data</li>
+        <li><b>Timing Advance</b> — Intentional early transmission to compensate propagation delay</li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="reflection">
+    <h2>Reflection</h2>
+    <ol>
+      <li>Of the four accounts (altitude, aperture, bandwidth, waveform floor), which one is the <i>cheapest</i> lever for an operator to pull, and which is the most expensive? What does that predict about which lever a fast-moving, cost-constrained entrant (Starlink Mobile) pulled hardest, versus a capability-first entrant (AST SpaceMobile)?</li>
+    </ol>
+  </div>
+
+  <div class="sources">
+    <h2>Sources</h2>
+    <ul>
+      <li>M4-1 (link-budget fundamentals, canonical).</li>
+      <li>M5-6 (D2D-specific link budget and Python engine, canonical).</li>
+      <li>Verified Doppler/pass-duration figures, vis-viva orbital mechanics.</li>
+    </ul>
+  </div>
+
+  <div class="complete-wrap">
+    <button class="complete-btn" id="completeBtn">MARK LESSON COMPLETE</button>
+    <span class="complete-msg" id="completeMsg">Checking status...</span>
+  </div>
+
+  <div class="pagenav">
+    <a href="mobile-2.html"><span class="dir">← PREVIOUS</span><span class="ttl">The Direct-to-Device Landscape</span></a>
+    <a href="mobile-4.html" class="next"><span class="dir">NEXT →</span><span class="ttl">The 3GPP NTN Standard, Plainly</span></a>
+  </div>
+</div>
+
+<footer class="sitefoot">LEOAF MOBILE TRACK · STANDALONE · SELF-DIRECTED STUDY, NOT A CREDENTIAL</footer>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="../supabase.js"></script>
+<script src="../user_progress.js"></script>
+<script>
+const LESSON_ID = 'mobile-3';
+(function () {
+    function bounceToLogin(reason) {
+        console.error("Auth guard:", reason, "- redirecting to ../index.html");
+        window.location.replace("../index.html");
+    }
+    async function init() {
+        if (typeof client === "undefined" || !client || !client.auth) {
+            return bounceToLogin("Supabase client not loaded (is supabase.js at site root?)");
+        }
+        let session = null;
+        try { ({ data: { session } } = await client.auth.getSession()); }
+        catch (e) { return bounceToLogin("getSession threw: " + e.message); }
+        if (!session) { window.location.replace("../index.html"); return; }
+
+        const btn = document.getElementById('completeBtn');
+        const msg = document.getElementById('completeMsg');
+        function setDone(done) {
+            if (done) {
+                btn.textContent = 'MARKED COMPLETE — CLICK TO UNDO';
+                btn.classList.add('done');
+                msg.textContent = 'Saved. Click again to undo.';
+            } else {
+                btn.textContent = 'MARK LESSON COMPLETE';
+                btn.classList.remove('done');
+                msg.textContent = 'Not yet marked complete.';
+            }
+        }
+        let mastered = [];
+        try { mastered = await getMasteredSections(); } catch (e) { console.error(e); }
+        setDone(mastered.includes(LESSON_ID));
+        btn.addEventListener('click', async () => {
+            const isCurrentlyDone = btn.classList.contains('done');
+            msg.textContent = 'Saving...';
+            const ok = await upsertSection(LESSON_ID, !isCurrentlyDone);
+            if (ok) {
+                setDone(!isCurrentlyDone);
+                if (!isCurrentlyDone) {
+                    msg.textContent = 'Saved. Moving to next lesson...';
+                    setTimeout(() => { window.location.href = 'mobile-4.html'; }, 700);
+                }
+            } else {
+                msg.textContent = 'Error saving. Try again.';
+            }
+        });
+    }
+    if (document.readyState === "loading") { document.addEventListener("DOMContentLoaded", init); }
+    else { init(); }
+})();
+</script>
+
+</body>
+</html>
