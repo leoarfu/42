@@ -2655,3 +2655,466 @@ A stationary UE should still experience beam mobility because the satellite is m
 </div>
 
 </section>
+
+ <!-- ========================================================= -->
+<!-- PART 7 — INTEGRATION, TESTING & TROUBLESHOOTING           -->
+<!-- ========================================================= -->
+
+<section id="testing">
+
+<h2>Integration Engineering</h2>
+
+<p>
+The Capgemini role is not primarily about designing algorithms. It is about making equipment from multiple vendors operate together inside a complete 5G NTN system. Integration engineers live at the boundary between RF, software, networking, cloud infrastructure and system validation.
+</p>
+
+<div class="callout">
+<div class="callout-title">INTERVIEW ANSWER</div>
+<p>
+Integration is the discipline of verifying that independently developed subsystems operate correctly together under realistic operational conditions.
+</p>
+</div>
+
+---
+
+<h2>The End-to-End System</h2>
+
+<svg viewBox="0 0 760 180">
+<defs>
+<marker id="arrow3" markerWidth="10" markerHeight="10" refX="9" refY="3" orient="auto">
+<path d="M0,0 L10,3 L0,6 Z" fill="#D4590A"/>
+</marker>
+</defs>
+
+<rect x="20" y="55" width="90" height="50" rx="8" fill="#17232E"/>
+<text x="65" y="84" font-family="IBM Plex Mono" font-size="10" text-anchor="middle" fill="#FFFFFF">UE</text>
+
+<rect x="140" y="55" width="90" height="50" rx="8" fill="#D4590A"/>
+<text x="185" y="84" font-family="IBM Plex Mono" font-size="10" text-anchor="middle" fill="#FFFFFF">RU</text>
+
+<rect x="260" y="55" width="90" height="50" rx="8" fill="#B45309"/>
+<text x="305" y="84" font-family="IBM Plex Mono" font-size="10" text-anchor="middle" fill="#FFFFFF">DU</text>
+
+<rect x="380" y="55" width="90" height="50" rx="8" fill="#8A5C32"/>
+<text x="425" y="84" font-family="IBM Plex Mono" font-size="10" text-anchor="middle" fill="#FFFFFF">CU</text>
+
+<rect x="500" y="55" width="90" height="50" rx="8" fill="#264653"/>
+<text x="545" y="84" font-family="IBM Plex Mono" font-size="10" text-anchor="middle" fill="#FFFFFF">Gateway</text>
+
+<rect x="620" y="55" width="120" height="50" rx="8" fill="#17232E"/>
+<text x="680" y="84" font-family="IBM Plex Mono" font-size="10" text-anchor="middle" fill="#D4590A">5G Core</text>
+
+<line x1="110" y1="80" x2="140" y2="80" stroke="#17232E" stroke-width="2" marker-end="url(#arrow3)"/>
+<line x1="230" y1="80" x2="260" y2="80" stroke="#17232E" stroke-width="2" marker-end="url(#arrow3)"/>
+<line x1="350" y1="80" x2="380" y2="80" stroke="#17232E" stroke-width="2" marker-end="url(#arrow3)"/>
+<line x1="470" y1="80" x2="500" y2="80" stroke="#17232E" stroke-width="2" marker-end="url(#arrow3)"/>
+<line x1="590" y1="80" x2="620" y2="80" stroke="#17232E" stroke-width="2" marker-end="url(#arrow3)"/>
+</svg>
+
+<p>
+Every interface is a potential failure point. Good integration engineers isolate which subsystem fails before proposing a fix.
+</p>
+
+---
+
+<h2>Integration Lifecycle</h2>
+
+<svg viewBox="0 0 720 360">
+<defs>
+<marker id="arrow4" markerWidth="10" markerHeight="10" refX="9" refY="3" orient="auto">
+<path d="M0,0 L10,3 L0,6 Z" fill="#D4590A"/>
+</marker>
+</defs>
+
+{#each ["Requirements","Architecture","Integration","Validation","Deployment","Operations"] as step, i}
+  <rect x="180" y={20 + i*52} width="360" height="34" rx="8" fill={i===0 ? "#17232E" : i===1 ? "#264653" : i===2 ? "#2A9D8F" : i===3 ? "#D4590A" : i===4 ? "#B45309" : "#8A5C32"}/>
+  <text x="360" y={41 + i*52} font-family="IBM Plex Mono" font-size="10" text-anchor="middle" fill="#FFFFFF">{step}</text>
+{/each}
+
+{#each Array.from({length:5}) as _, i}
+  <line x1="360" y1={54 + i*52} x2="360" y2={72 + i*52} stroke="#17232E" stroke-width="2" marker-end="url(#arrow4)"/>
+{/each}
+</svg>
+
+<p>
+Notice that testing is not the final step. Validation happens before deployment, but monitoring continues throughout operations.
+</p>
+
+---
+
+<h2>Types of Testing</h2>
+
+<table>
+<tr>
+<th>Test</th>
+<th>Purpose</th>
+</tr>
+<tr>
+<td>Unit</td>
+<td>Single software component</td>
+</tr>
+<tr>
+<td>Integration</td>
+<td>Interfaces between subsystems</td>
+</tr>
+<tr>
+<td>System</td>
+<td>Complete end-to-end behavior</td>
+</tr>
+<tr>
+<td>Conformance</td>
+<td>3GPP compliance</td>
+</tr>
+<tr>
+<td>Interoperability</td>
+<td>Multi-vendor compatibility</td>
+</tr>
+<tr>
+<td>Regression</td>
+<td>Ensure fixes do not break existing features</td>
+</tr>
+<tr>
+<td>Performance</td>
+<td>Capacity, latency, throughput</td>
+</tr>
+</table>
+
+<div class="callout">
+<div class="callout-title">MEMORIZE</div>
+<p>
+Conformance asks <strong>"Does it follow the standard?"</strong> Interoperability asks <strong>"Does it work with another vendor?"</strong>
+</p>
+</div>
+
+---
+
+<h2>Conformance vs Interoperability</h2>
+
+<svg viewBox="0 0 720 190">
+<rect x="40" y="20" width="280" height="150" rx="12" fill="#FBFAF6" stroke="#17232E"/>
+<text x="180" y="42" font-family="Space Grotesk" font-size="13" text-anchor="middle">Conformance</text>
+
+<rect x="90" y="70" width="180" height="55" rx="8" fill="#D4590A"/>
+<text x="180" y="92" font-family="IBM Plex Mono" font-size="9" text-anchor="middle" fill="#FFFFFF">Vendor DU</text>
+<text x="180" y="108" font-family="Space Grotesk" font-size="8" text-anchor="middle" fill="#FFFFFF">Compared to 3GPP</text>
+
+<rect x="400" y="20" width="280" height="150" rx="12" fill="#FBFAF6" stroke="#17232E"/>
+<text x="540" y="42" font-family="Space Grotesk" font-size="13" text-anchor="middle">Interoperability</text>
+
+<rect x="425" y="70" width="90" height="55" rx="8" fill="#D4590A"/>
+<text x="470" y="92" font-family="IBM Plex Mono" font-size="8" text-anchor="middle" fill="#FFFFFF">RU</text>
+<text x="470" y="106" font-family="Space Grotesk" font-size="7" text-anchor="middle" fill="#FFFFFF">Vendor A</text>
+
+<rect x="565" y="70" width="90" height="55" rx="8" fill="#B45309"/>
+<text x="610" y="92" font-family="IBM Plex Mono" font-size="8" text-anchor="middle" fill="#FFFFFF">DU</text>
+<text x="610" y="106" font-family="Space Grotesk" font-size="7" text-anchor="middle" fill="#FFFFFF">Vendor B</text>
+
+<line x1="515" y1="97" x2="565" y2="97" stroke="#17232E" stroke-width="2"/>
+</svg>
+
+<p>
+In O-RAN, interoperability becomes particularly important because the RU, DU and CU may come from different manufacturers.
+</p>
+
+---
+
+<h2>KPIs Every RAN Engineer Knows</h2>
+
+<div class="card">
+<h3>Radio Quality</h3>
+
+<div class="definition">
+<div class="term">RSRP</div>
+<div>Reference Signal Received Power. Measures received signal strength.</div>
+</div>
+
+<div class="definition">
+<div class="term">RSRQ</div>
+<div>Reference Signal Received Quality. Combines power and interference.</div>
+</div>
+
+<div class="definition">
+<div class="term">SINR</div>
+<div>Signal-to-Interference-plus-Noise Ratio. Indicates usable signal quality.</div>
+</div>
+
+</div>
+
+<div class="card">
+<h3>Performance</h3>
+
+<div class="definition">
+<div class="term">Throughput</div>
+<div>User data rate.</div>
+</div>
+
+<div class="definition">
+<div class="term">Latency</div>
+<div>End-to-end transmission delay.</div>
+</div>
+
+<div class="definition">
+<div class="term">Jitter</div>
+<div>Variation of latency.</div>
+</div>
+
+<div class="definition">
+<div class="term">Packet Loss</div>
+<div>Percentage of packets never delivered.</div>
+</div>
+
+</div>
+
+---
+
+<h2>The Troubleshooting Pyramid</h2>
+
+<p>
+Never begin with assumptions. Start from the highest observable symptom and progressively isolate the failing layer.
+</p>
+
+<svg viewBox="0 0 720 260">
+<polygon points="360,20 620,220 100,220" fill="#F7E7D6" stroke="#D4590A" stroke-width="2"/>
+
+<line x1="170" y1="180" x2="550" y2="180" stroke="#D4590A"/>
+<line x1="230" y1="135" x2="490" y2="135" stroke="#D4590A"/>
+<line x1="290" y1="90" x2="430" y2="90" stroke="#D4590A"/>
+
+<text x="360" y="45" font-family="IBM Plex Mono" font-size="10" text-anchor="middle">Application</text>
+<text x="360" y="75" font-family="IBM Plex Mono" font-size="10" text-anchor="middle">Core</text>
+<text x="360" y="120" font-family="IBM Plex Mono" font-size="10" text-anchor="middle">CU</text>
+<text x="360" y="165" font-family="IBM Plex Mono" font-size="10" text-anchor="middle">DU</text>
+<text x="360" y="205" font-family="IBM Plex Mono" font-size="10" text-anchor="middle">RU / RF</text>
+</svg>
+
+<p>
+A disciplined engineer identifies the <strong>first layer where expected behavior diverges</strong>. Everything above that layer is usually a consequence rather than the root cause.
+</p>
+
+---
+
+<h2>Root Cause Methodology</h2>
+
+<svg viewBox="0 0 720 300">
+<defs>
+<marker id="arrow5" markerWidth="10" markerHeight="10" refX="9" refY="3" orient="auto">
+<path d="M0,0 L10,3 L0,6 Z" fill="#D4590A"/>
+</marker>
+</defs>
+
+{#each ["Reproduce","Measure","Localize","Hypothesis","Fix","Regression Test"] as step, i}
+  <rect x="180" y={15 + i*46} width="360" height="30" rx="7" fill={i===0 ? "#17232E" : i===1 ? "#264653" : i===2 ? "#2A9D8F" : i===3 ? "#D4590A" : i===4 ? "#B45309" : "#8A5C32"}/>
+  <text x="360" y={34 + i*46} font-family="IBM Plex Mono" font-size="9" text-anchor="middle" fill="#FFFFFF">{step}</text>
+{/each}
+
+{#each Array.from({length:5}) as _, i}
+  <line x1="360" y1={45 + i*46} x2="360" y2={57 + i*46} stroke="#17232E" stroke-width="2" marker-end="url(#arrow5)"/>
+{/each}
+</svg>
+
+<div class="callout">
+<div class="callout-title">INTERVIEW ANSWER</div>
+<p>
+I always reproduce the issue first, capture the exact software versions and topology, localize the failing subsystem using logs and KPIs, validate the hypothesis experimentally, and finally execute a regression campaign to ensure the correction does not introduce new failures.
+</p>
+</div>
+
+---
+
+<h2>Example Scenario 1</h2>
+
+<div class="card">
+<h3>Symptom</h3>
+
+<p>
+A UE suddenly loses synchronization during a LEO satellite pass.
+</p>
+
+<h3>Investigation Order</h3>
+
+<ol>
+<li>Check SSB detection history.</li>
+<li>Review CSI-RS measurements.</li>
+<li>Look for beam failure events.</li>
+<li>Verify Doppler compensation logs.</li>
+<li>Confirm timing advance evolution.</li>
+<li>Determine whether beam handover succeeded.</li>
+</ol>
+
+<h3>Possible Root Causes</h3>
+
+<ul>
+<li>Incorrect Doppler estimation</li>
+<li>Beam tracking failure</li>
+<li>Late timing correction</li>
+<li>SSB measurement degradation</li>
+<li>Satellite ephemeris inconsistency</li>
+</ul>
+
+</div>
+
+---
+
+<h2>Example Scenario 2</h2>
+
+<div class="card">
+<h3>Symptom</h3>
+
+<p>
+Throughput suddenly drops while RSRP remains excellent.
+</p>
+
+<h3>Interpretation</h3>
+
+<p>
+Strong signal does not necessarily mean good channel quality.
+</p>
+
+<table>
+<tr>
+<th>Metric</th>
+<th>Possible Observation</th>
+</tr>
+<tr>
+<td>RSRP</td>
+<td>Excellent</td>
+</tr>
+<tr>
+<td>RSRQ</td>
+<td>Poor</td>
+</tr>
+<tr>
+<td>SINR</td>
+<td>Low</td>
+</tr>
+<tr>
+<td>BLER</td>
+<td>High</td>
+</tr>
+</table>
+
+<p>
+Likely causes include interference, scheduler congestion, beam overlap or poor SINR rather than insufficient received power.
+</p>
+
+</div>
+
+---
+
+<h2>Example Scenario 3</h2>
+
+<div class="card">
+<h3>Symptom</h3>
+
+<p>
+A Vendor A RU refuses to operate with a Vendor B DU.
+</p>
+
+<h3>Engineering Thought Process</h3>
+
+<ol>
+<li>Verify Open Fronthaul version compatibility.</li>
+<li>Check timing synchronization.</li>
+<li>Validate O-RAN profiles.</li>
+<li>Compare software releases.</li>
+<li>Capture interface traces.</li>
+<li>Reproduce using reference configuration.</li>
+</ol>
+
+<p>
+This is an interoperability problem, not necessarily an RF problem.
+</p>
+
+</div>
+
+---
+
+<h2>What Logs Matter?</h2>
+
+<table>
+<tr>
+<th>Component</th>
+<th>Useful Logs</th>
+</tr>
+<tr>
+<td>UE</td>
+<td>RRC events, measurements</td>
+</tr>
+<tr>
+<td>RU</td>
+<td>RF alarms, synchronization</td>
+</tr>
+<tr>
+<td>DU</td>
+<td>MAC scheduler, HARQ</td>
+</tr>
+<tr>
+<td>CU</td>
+<td>RRC, mobility, bearer setup</td>
+</tr>
+<tr>
+<td>Gateway</td>
+<td>Transport latency</td>
+</tr>
+<tr>
+<td>5GC</td>
+<td>Registration, sessions</td>
+</tr>
+</table>
+
+---
+
+<h2>Interview Case Study</h2>
+
+<div class="qa">
+<button onclick="toggleAnswer(this)">
+A UE cannot attach to the network. Where do you start?
+</button>
+<div class="answer">
+<p>
+I begin by determining the highest successful procedure. Did the UE detect an SSB? Did random access complete? Did RRC setup succeed? Did registration reach the AMF? This immediately localizes whether the failure is PHY, MAC, RRC or Core.
+</p>
+</div>
+</div>
+
+<div class="qa">
+<button onclick="toggleAnswer(this)">
+A software update fixed one bug but introduced beam failures. What do you do?
+</button>
+<div class="answer">
+<p>
+Run a regression campaign using the original passing scenarios plus beam mobility, Doppler, timing compensation and handover tests. Compare KPIs before and after the update to isolate behavioral regressions.
+</p>
+</div>
+</div>
+
+<div class="qa">
+<button onclick="toggleAnswer(this)">
+Why is regression testing mandatory in telecom?
+</button>
+<div class="answer">
+<p>
+Telecom systems are highly interconnected. A change in scheduling, mobility or timing may unintentionally affect unrelated procedures. Regression testing verifies that previously validated behavior still conforms after modifications.
+</p>
+</div>
+</div>
+
+---
+
+<h2>Know Cold</h2>
+
+<div class="know">
+<ul>
+<li><strong>Integration</strong> = Making subsystems operate together</li>
+<li><strong>Conformance</strong> = Compliance with 3GPP</li>
+<li><strong>Interoperability</strong> = Multi-vendor compatibility</li>
+<li><strong>Regression</strong> = Verify existing behavior after changes</li>
+<li><strong>RSRP</strong> = Signal strength</li>
+<li><strong>RSRQ</strong> = Signal quality</li>
+<li><strong>SINR</strong> = Usable channel quality</li>
+<li><strong>BLER</strong> = Block Error Rate</li>
+<li><strong>Root Cause</strong> = First failing subsystem</li>
+</ul>
+</div>
+
+</section>
