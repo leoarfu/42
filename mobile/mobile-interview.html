@@ -1291,4 +1291,506 @@ Because different functions have different latency requirements. RF and real-tim
 
 </section>
 
- 
+ <!-- ========================================================= -->
+<!-- PART 4 — 5G NTN ARCHITECTURE                             -->
+<!-- ========================================================= -->
+
+<section id="ntn">
+
+<h2>5G NTN — Non-Terrestrial Networks</h2>
+
+<p>
+The most important interview realization is this: <strong>NTN is not "5G over satellite."</strong> It is 3GPP's redesign of the Radio Access Network so that a base station can exist hundreds of kilometers above Earth while remaining compatible with the 5G ecosystem.
+</p>
+
+<div class="callout">
+<div class="callout-title">ONE SENTENCE</div>
+<p>
+NTN extends the 5G RAN to operate through satellites by compensating for long propagation delay, high Doppler shift, moving cells, and rapidly changing geometry.
+</p>
+</div>
+
+<h3>What does NTN actually mean?</h3>
+
+<table>
+<tr><th>Term</th><th>Meaning</th></tr>
+<tr><td>TN</td><td>Terrestrial Network</td></tr>
+<tr><td>NTN</td><td>Non-Terrestrial Network</td></tr>
+<tr><td>NR-NTN</td><td>5G New Radio adapted for satellites</td></tr>
+<tr><td>Rel-17</td><td>First major 3GPP NTN release</td></tr>
+</table>
+
+<p>
+The word <strong>non-terrestrial</strong> includes LEO, MEO, GEO satellites and even High Altitude Platform Stations (HAPS). The interview role is primarily concerned with <strong>LEO NTN</strong>.
+</p>
+
+---
+
+<h2>Why terrestrial 5G breaks in space</h2>
+
+<p>
+A terrestrial base station assumes four things that immediately become false in LEO.
+</p>
+
+<svg viewBox="0 0 720 250">
+<rect x="20" y="20" width="300" height="200" rx="12" fill="#FBFAF6" stroke="#17232E"/>
+
+<text x="170" y="42" font-family="Space Grotesk" font-size="14" text-anchor="middle">Terrestrial Cell</text>
+
+<circle cx="170" cy="95" r="18" fill="#D4590A"/>
+<path d="M160 88 L170 98 L180 88" stroke="#FFF" stroke-width="2" fill="none"/>
+
+<circle cx="95" cy="170" r="8" fill="#17232E"/>
+<circle cx="170" cy="170" r="8" fill="#17232E"/>
+<circle cx="245" cy="170" r="8" fill="#17232E"/>
+
+<path d="M170 113 L95 162" stroke="#566072" stroke-dasharray="3 4"/>
+<path d="M170 113 L170 162" stroke="#566072" stroke-dasharray="3 4"/>
+<path d="M170 113 L245 162" stroke="#566072" stroke-dasharray="3 4"/>
+
+<rect x="400" y="20" width="300" height="200" rx="12" fill="#FBFAF6" stroke="#17232E"/>
+
+<text x="550" y="42" font-family="Space Grotesk" font-size="14" text-anchor="middle">LEO NTN</text>
+
+<circle cx="550" cy="58" r="12" fill="#D4590A"/>
+<path d="M540 58 L560 58 M550 48 L550 68" stroke="#FFF" stroke-width="2"/>
+
+<path d="M520 58 L505 58" stroke="#D4590A" stroke-width="2" marker-end="url(#arrow)"/>
+<text x="490" y="48" font-family="IBM Plex Mono" font-size="8" fill="#D4590A">7.6 km/s</text>
+
+<rect x="445" y="175" width="210" height="10" rx="5" fill="#17232E"/>
+
+<circle cx="485" cy="170" r="7" fill="#17232E"/>
+<circle cx="550" cy="170" r="7" fill="#17232E"/>
+<circle cx="615" cy="170" r="7" fill="#17232E"/>
+
+<path d="M550 70 L485 163" stroke="#566072" stroke-dasharray="3 4"/>
+<path d="M550 70 L550 163" stroke="#566072" stroke-dasharray="3 4"/>
+<path d="M550 70 L615 163" stroke="#566072" stroke-dasharray="3 4"/>
+
+<text x="550" y="195" font-family="IBM Plex Mono" font-size="8" text-anchor="middle" fill="#566072">Moving beam</text>
+</svg>
+
+<table>
+<tr>
+<th>Terrestrial assumption</th>
+<th>LEO reality</th>
+</tr>
+<tr>
+<td>Static base station</td>
+<td>Satellite moves at ~7.6 km/s</td>
+</tr>
+<tr>
+<td>Short propagation delay</td>
+<td>Hundreds of kilometers</td>
+</tr>
+<tr>
+<td>Small Doppler</td>
+<td>Tens of kHz</td>
+</tr>
+<tr>
+<td>Cell stays in place</td>
+<td>Beam continuously moves</td>
+</tr>
+</table>
+
+---
+
+<h2>The complete NTN architecture</h2>
+
+<svg viewBox="0 0 760 260">
+<defs>
+<marker id="arrow2" markerWidth="10" markerHeight="10" refX="9" refY="3" orient="auto">
+<path d="M0,0 L10,3 L0,6 Z" fill="#D4590A"/>
+</marker>
+</defs>
+
+<circle cx="70" cy="190" r="16" fill="#17232E"/>
+<path d="M60 182 L70 192 L80 182" stroke="#FFF" stroke-width="2" fill="none"/>
+<text x="70" y="220" font-family="IBM Plex Mono" font-size="10" text-anchor="middle" fill="#D4590A">UE</text>
+
+<ellipse cx="250" cy="85" rx="65" ry="24" fill="#D4590A"/>
+<text x="250" y="90" font-family="IBM Plex Mono" font-size="10" text-anchor="middle" fill="#FFFFFF">LEO SATELLITE</text>
+
+<rect x="430" y="150" width="120" height="55" rx="8" fill="#8A5C32"/>
+<text x="490" y="170" font-family="IBM Plex Mono" font-size="10" text-anchor="middle" fill="#FFFFFF">Gateway</text>
+<text x="490" y="184" font-family="Space Grotesk" font-size="9" text-anchor="middle" fill="#FFFFFF">Ground</text>
+
+<rect x="610" y="150" width="120" height="55" rx="8" fill="#17232E"/>
+<text x="670" y="170" font-family="IBM Plex Mono" font-size="10" text-anchor="middle" fill="#D4590A">5GC</text>
+<text x="670" y="184" font-family="Space Grotesk" font-size="9" text-anchor="middle" fill="#FFFFFF">Core</text>
+
+<path d="M86 178 L215 98" stroke="#17232E" stroke-width="2" marker-end="url(#arrow2)"/>
+<path d="M305 98 L448 155" stroke="#17232E" stroke-width="2" marker-end="url(#arrow2)"/>
+<path d="M550 177 L610 177" stroke="#17232E" stroke-width="2" marker-end="url(#arrow2)"/>
+
+<text x="145" y="120" font-family="IBM Plex Mono" font-size="8" fill="#566072">NR Air Interface</text>
+<text x="365" y="120" font-family="IBM Plex Mono" font-size="8" fill="#566072">Feeder Link</text>
+</svg>
+
+<p>
+Notice there are <strong>two completely different radio links</strong>.
+</p>
+
+<div class="card">
+<div class="definition">
+<div class="term">Service Link</div>
+<div>The radio connection between the UE and the satellite.</div>
+</div>
+<div class="definition">
+<div class="term">Feeder Link</div>
+<div>The high-capacity connection between the satellite and the gateway.</div>
+</div>
+</div>
+
+<p>
+Interviewers often ask which link is LTE/NR. The answer is: the <strong>service link</strong>. The feeder link may use entirely different frequencies and technologies.
+</p>
+
+---
+
+<h2>Transparent vs Regenerative Payload</h2>
+
+<h3>Transparent (Bent-Pipe)</h3>
+
+<svg viewBox="0 0 720 150">
+<rect x="20" y="45" width="100" height="50" rx="8" fill="#17232E"/>
+<text x="70" y="74" font-family="IBM Plex Mono" font-size="10" text-anchor="middle" fill="#FFFFFF">UE</text>
+
+<ellipse cx="240" cy="70" rx="55" ry="22" fill="#D4590A"/>
+<text x="240" y="74" font-family="IBM Plex Mono" font-size="9" text-anchor="middle" fill="#FFFFFF">Relay</text>
+
+<rect x="410" y="45" width="110" height="50" rx="8" fill="#8A5C32"/>
+<text x="465" y="74" font-family="IBM Plex Mono" font-size="10" text-anchor="middle" fill="#FFFFFF">Gateway</text>
+
+<rect x="590" y="45" width="110" height="50" rx="8" fill="#17232E"/>
+<text x="645" y="74" font-family="IBM Plex Mono" font-size="10" text-anchor="middle" fill="#D4590A">gNB</text>
+
+<line x1="120" y1="70" x2="185" y2="70" stroke="#17232E" stroke-width="2" marker-end="url(#arrow2)"/>
+<line x1="295" y1="70" x2="410" y2="70" stroke="#17232E" stroke-width="2" marker-end="url(#arrow2)"/>
+<line x1="520" y1="70" x2="590" y2="70" stroke="#17232E" stroke-width="2" marker-end="url(#arrow2)"/>
+</svg>
+
+<p>
+The satellite performs almost no baseband processing. It simply receives RF energy, shifts frequency, amplifies it, and forwards it to the gateway. The actual gNB remains on Earth.
+</p>
+
+<h3>Regenerative Payload</h3>
+
+<svg viewBox="0 0 720 170">
+<rect x="20" y="60" width="100" height="50" rx="8" fill="#17232E"/>
+<text x="70" y="88" font-family="IBM Plex Mono" font-size="10" text-anchor="middle" fill="#FFFFFF">UE</text>
+
+<rect x="180" y="30" width="220" height="110" rx="12" fill="#D4590A"/>
+<text x="290" y="48" font-family="IBM Plex Mono" font-size="10" text-anchor="middle" fill="#FFFFFF">REGENERATIVE SATELLITE</text>
+<text x="290" y="70" font-family="Space Grotesk" font-size="9" text-anchor="middle" fill="#FFFFFF">Demodulation</text>
+<text x="290" y="84" font-family="Space Grotesk" font-size="9" text-anchor="middle" fill="#FFFFFF">MAC / RLC</text>
+<text x="290" y="98" font-family="Space Grotesk" font-size="9" text-anchor="middle" fill="#FFFFFF">Scheduling</text>
+<text x="290" y="112" font-family="Space Grotesk" font-size="9" text-anchor="middle" fill="#FFFFFF">Potential gNB</text>
+
+<rect x="500" y="60" width="180" height="50" rx="8" fill="#17232E"/>
+<text x="590" y="78" font-family="IBM Plex Mono" font-size="10" text-anchor="middle" fill="#D4590A">5G Core</text>
+<text x="590" y="92" font-family="Space Grotesk" font-size="9" text-anchor="middle" fill="#FFFFFF">Gateway + Core</text>
+
+<line x1="120" y1="85" x2="180" y2="85" stroke="#17232E" stroke-width="2" marker-end="url(#arrow2)"/>
+<line x1="400" y1="85" x2="500" y2="85" stroke="#17232E" stroke-width="2" marker-end="url(#arrow2)"/>
+</svg>
+
+<table>
+<tr>
+<th>Transparent</th>
+<th>Regenerative</th>
+</tr>
+<tr>
+<td>Satellite is RF relay</td>
+<td>Satellite processes baseband</td>
+</tr>
+<tr>
+<td>Ground gNB</td>
+<td>Onboard gNB possible</td>
+</tr>
+<tr>
+<td>Simpler payload</td>
+<td>More powerful payload</td>
+</tr>
+<tr>
+<td>Gateway dependent</td>
+<td>Greater autonomy</td>
+</tr>
+</table>
+
+<div class="callout">
+<div class="callout-title">INTERVIEW PHRASE</div>
+<p>
+Transparent payloads move intelligence to the ground. Regenerative payloads move part of the RAN into space.
+</p>
+</div>
+
+---
+
+<h2>Where is the gNB located?</h2>
+
+<p>
+This is one of the most common architectural questions.
+</p>
+
+<svg viewBox="0 0 720 180">
+<rect x="20" y="20" width="320" height="140" rx="12" fill="#FBFAF6" stroke="#17232E"/>
+<text x="180" y="42" font-family="Space Grotesk" font-size="13" text-anchor="middle">Transparent</text>
+<text x="180" y="68" font-family="IBM Plex Mono" font-size="10" text-anchor="middle" fill="#D4590A">gNB on Ground</text>
+<text x="180" y="88" font-family="Space Grotesk" font-size="10" text-anchor="middle">Satellite = Relay</text>
+
+<rect x="380" y="20" width="320" height="140" rx="12" fill="#FBFAF6" stroke="#17232E"/>
+<text x="540" y="42" font-family="Space Grotesk" font-size="13" text-anchor="middle">Regenerative</text>
+<text x="540" y="68" font-family="IBM Plex Mono" font-size="10" text-anchor="middle" fill="#D4590A">gNB in Orbit</text>
+<text x="540" y="88" font-family="Space Grotesk" font-size="10" text-anchor="middle">Satellite runs RAN</text>
+</svg>
+
+<p>
+Notice the distinction between the <strong>logical gNB</strong> and the <strong>physical satellite</strong>. The interview is really testing where the RAN functions execute.
+</p>
+
+---
+
+<h2>Timing Advance</h2>
+
+<p>
+Radio transmissions from many UEs must arrive at the base station at precisely aligned instants. Otherwise signals overlap and interfere with one another.
+</p>
+
+<svg viewBox="0 0 720 170">
+<circle cx="90" cy="130" r="8" fill="#17232E"/>
+<circle cx="200" cy="130" r="8" fill="#17232E"/>
+<circle cx="310" cy="130" r="8" fill="#17232E"/>
+
+<ellipse cx="360" cy="45" rx="70" ry="24" fill="#D4590A"/>
+
+<path d="M90 122 L320 55" stroke="#566072" stroke-dasharray="3 4"/>
+<path d="M200 122 L350 55" stroke="#566072" stroke-dasharray="3 4"/>
+<path d="M310 122 L390 55" stroke="#566072" stroke-dasharray="3 4"/>
+
+<text x="90" y="148" font-family="IBM Plex Mono" font-size="8" text-anchor="middle">UE A</text>
+<text x="200" y="148" font-family="IBM Plex Mono" font-size="8" text-anchor="middle">UE B</text>
+<text x="310" y="148" font-family="IBM Plex Mono" font-size="8" text-anchor="middle">UE C</text>
+
+<text x="360" y="50" font-family="IBM Plex Mono" font-size="10" text-anchor="middle" fill="#FFFFFF">Satellite</text>
+</svg>
+
+<p>
+In terrestrial networks, the base station measures arrival time and tells the UE how much earlier or later to transmit.
+</p>
+
+<p>
+In NTN, propagation delay is much larger, and the geometry changes continuously. Rel-17 therefore allows the UE to calculate part of the timing correction using GNSS and satellite trajectory information.
+</p>
+
+---
+
+<h2>Doppler Compensation</h2>
+
+<p>
+As the satellite approaches, the received frequency appears higher. As it moves away, the frequency appears lower.
+</p>
+
+<svg viewBox="0 0 720 170">
+<line x1="60" y1="110" x2="660" y2="110" stroke="#17232E" stroke-width="2"/>
+
+<ellipse cx="180" cy="70" rx="55" ry="20" fill="#D4590A"/>
+<path d="M130 70 L105 70" stroke="#D4590A" stroke-width="2" marker-end="url(#arrow2)"/>
+<text x="95" y="60" font-family="IBM Plex Mono" font-size="8" fill="#D4590A">Approaching</text>
+
+<ellipse cx="540" cy="70" rx="55" ry="20" fill="#8A5C32"/>
+<path d="M590 70 L615 70" stroke="#8A5C32" stroke-width="2" marker-end="url(#arrow2)"/>
+<text x="625" y="60" font-family="IBM Plex Mono" font-size="8" fill="#8A5C32">Receding</text>
+
+<circle cx="360" cy="110" r="8" fill="#17232E"/>
+<text x="360" y="132" font-family="IBM Plex Mono" font-size="8" text-anchor="middle">UE</text>
+</svg>
+
+<p>
+The Doppler shift is approximately
+</p>
+
+<p style="text-align:center;font-size:22px;">
+<math value="f_D=\\frac{v_r}{c}f_c"/>
+</p>
+
+<div class="card">
+<div class="definition">
+<div class="term">vᵣ</div>
+<div>Radial velocity between satellite and UE.</div>
+</div>
+<div class="definition">
+<div class="term">fᶜ</div>
+<div>Carrier frequency.</div>
+</div>
+<div class="definition">
+<div class="term">c</div>
+<div>Speed of light.</div>
+</div>
+</div>
+
+<p>
+At approximately 1.9 GHz, a LEO satellite can produce roughly <strong>±48 kHz</strong> of Doppler shift. The exact value depends on radial velocity, not orbital speed alone.
+</p>
+
+<div class="callout">
+<div class="callout-title">WHY IT MATTERS</div>
+<p>
+OFDM depends on subcarrier orthogonality. Doppler shifts the received spectrum and creates inter-carrier interference if not compensated.
+</p>
+</div>
+
+---
+
+<h2>K_offset — Honest Scheduling</h2>
+
+<p>
+A terrestrial scheduler assumes control messages arrive almost immediately. That assumption is false over satellite.
+</p>
+
+<svg viewBox="0 0 720 130">
+<line x1="40" y1="70" x2="680" y2="70" stroke="#17232E" stroke-width="2"/>
+
+<circle cx="90" cy="70" r="8" fill="#D4590A"/>
+<circle cx="220" cy="70" r="8" fill="#D4590A"/>
+<circle cx="420" cy="70" r="8" fill="#D4590A"/>
+<circle cx="600" cy="70" r="8" fill="#D4590A"/>
+
+<text x="90" y="95" font-family="IBM Plex Mono" font-size="8" text-anchor="middle">Schedule</text>
+<text x="220" y="95" font-family="IBM Plex Mono" font-size="8" text-anchor="middle">Propagate</text>
+<text x="420" y="95" font-family="IBM Plex Mono" font-size="8" text-anchor="middle">Arrive</text>
+<text x="600" y="95" font-family="IBM Plex Mono" font-size="8" text-anchor="middle">Transmit</text>
+</svg>
+
+<p>
+Rather than pretending the delay does not exist, NTN explicitly tells the UE how far into the future a scheduled transmission should occur. That scheduling offset is represented by <strong>K_offset</strong>.
+</p>
+
+---
+
+<h2>HARQ in NTN</h2>
+
+<p>
+HARQ (Hybrid Automatic Repeat Request) is a retransmission mechanism. In terrestrial networks it works extremely well because acknowledgements return quickly.
+</p>
+
+<svg viewBox="0 0 720 140">
+<rect x="40" y="40" width="120" height="40" rx="8" fill="#17232E"/>
+<text x="100" y="65" font-family="IBM Plex Mono" font-size="10" text-anchor="middle" fill="#FFFFFF">UE</text>
+
+<ellipse cx="360" cy="60" rx="70" ry="22" fill="#D4590A"/>
+<text x="360" y="65" font-family="IBM Plex Mono" font-size="10" text-anchor="middle" fill="#FFFFFF">Satellite</text>
+
+<rect x="560" y="40" width="120" height="40" rx="8" fill="#17232E"/>
+<text x="620" y="65" font-family="IBM Plex Mono" font-size="10" text-anchor="middle" fill="#FFFFFF">gNB</text>
+
+<path d="M160 55 L290 55" stroke="#17232E" stroke-width="2" marker-end="url(#arrow2)"/>
+<path d="M430 55 L560 55" stroke="#17232E" stroke-width="2" marker-end="url(#arrow2)"/>
+<path d="M560 85 L160 85" stroke="#8A5C32" stroke-width="2" stroke-dasharray="6 4" marker-end="url(#arrow2)"/>
+
+<text x="360" y="98" font-family="IBM Plex Mono" font-size="8" text-anchor="middle" fill="#8A5C32">ACK returns much later</text>
+</svg>
+
+<table>
+<tr>
+<th>Terrestrial</th>
+<th>NTN</th>
+</tr>
+<tr>
+<td>Fast ACK</td>
+<td>Long RTT</td>
+</tr>
+<tr>
+<td>Few packets in flight</td>
+<td>Many simultaneous packets</td>
+</tr>
+<tr>
+<td>Immediate retransmission</td>
+<td>Relaxed or disabled HARQ</td>
+</tr>
+</table>
+
+<p>
+The important engineering idea is not that HARQ disappears. It is that the protocol must tolerate much longer acknowledgement cycles.
+</p>
+
+---
+
+<h2>GNSS & Ephemeris</h2>
+
+<div class="card">
+<div class="definition">
+<div class="term">GNSS</div>
+<div>Global Navigation Satellite System. GPS, Galileo, BeiDou and GLONASS are all GNSS constellations.</div>
+</div>
+<div class="definition">
+<div class="term">Ephemeris</div>
+<div>Orbital position and trajectory information broadcast by the satellite so the UE knows where the satellite is.</div>
+</div>
+</div>
+
+<p>
+A Rel-17 NTN handset combines its own GNSS position with satellite ephemeris to estimate propagation delay and Doppler before transmission.
+</p>
+
+---
+
+<h2>What changes in Rel-17?</h2>
+
+<table>
+<tr>
+<th>Feature</th>
+<th>Purpose</th>
+</tr>
+<tr>
+<td>GNSS support</td>
+<td>UE knows its position</td>
+</tr>
+<tr>
+<td>Ephemeris</td>
+<td>Satellite trajectory broadcast</td>
+</tr>
+<tr>
+<td>Timing compensation</td>
+<td>Large propagation delay</td>
+</tr>
+<tr>
+<td>Doppler compensation</td>
+<td>Moving satellite</td>
+</tr>
+<tr>
+<td>K_offset</td>
+<td>Future scheduling</td>
+</tr>
+<tr>
+<td>Relaxed HARQ</td>
+<td>Long RTT operation</td>
+</tr>
+</table>
+
+<div class="know">
+<ul>
+<li><strong>Service link</strong> = UE ↔ Satellite</li>
+<li><strong>Feeder link</strong> = Satellite ↔ Gateway</li>
+<li><strong>Transparent</strong> = RF relay only</li>
+<li><strong>Regenerative</strong> = Baseband processing onboard</li>
+<li><strong>Timing Advance</strong> = Align uplink arrivals</li>
+<li><strong>Doppler Compensation</strong> = Preserve OFDM orthogonality</li>
+<li><strong>K_offset</strong> = Future-aware scheduling</li>
+<li><strong>Ephemeris</strong> = Satellite orbital data</li>
+</ul>
+</div>
+
+<div class="qa">
+<button onclick="toggleAnswer(this)">
+Interview: Explain transparent vs regenerative payload in under one minute.
+</button>
+<div class="answer">
+<p>
+A transparent payload behaves like an RF repeater: it forwards the waveform to a gateway where the gNB remains on Earth. A regenerative payload performs part of the RAN processing onboard the satellite, potentially including MAC, RLC or even the gNB itself. The tradeoff is simpler payload and gateway dependence versus greater onboard capability and autonomy.
+</p>
+</div>
+</div>
+
+</section>
