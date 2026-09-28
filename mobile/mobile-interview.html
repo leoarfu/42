@@ -1794,3 +1794,397 @@ A transparent payload behaves like an RF repeater: it forwards the waveform to a
 </div>
 
 </section>
+
+ <!-- ========================================================= -->
+<!-- PART 5 — VIRTUALIZATION & CLOUD RAN                       -->
+<!-- ========================================================= -->
+
+<section id="virtualization">
+
+<h2>Cloud RAN, NFV & Virtualization</h2>
+
+<p>
+Modern 5G networks are no longer built from proprietary hardware appliances. The CU, DU, RIC and many core functions increasingly run as software on standardized servers inside data centres or edge computing sites. This transformation is called <strong>virtualization</strong>.
+</p>
+
+<div class="callout">
+<div class="callout-title">INTERVIEW ANSWER</div>
+<p>
+Virtualization separates <strong>network functions</strong> from the underlying hardware. Instead of buying a dedicated baseband appliance, operators deploy software functions on commercial compute infrastructure.
+</p>
+</div>
+
+---
+
+<h2>From Hardware to Software</h2>
+
+<svg viewBox="0 0 760 220">
+<rect x="30" y="30" width="300" height="160" rx="14" fill="#FBFAF6" stroke="#17232E" stroke-width="2"/>
+<text x="180" y="52" font-family="Space Grotesk" font-size="14" font-weight="600" text-anchor="middle">Legacy RAN</text>
+
+<rect x="80" y="75" width="200" height="90" rx="10" fill="#17232E"/>
+<text x="180" y="98" font-family="IBM Plex Mono" font-size="10" text-anchor="middle" fill="#D4590A">Dedicated Hardware</text>
+<text x="180" y="118" font-family="Space Grotesk" font-size="11" text-anchor="middle" fill="#FFFFFF">DSP</text>
+<text x="180" y="133" font-family="Space Grotesk" font-size="11" text-anchor="middle" fill="#FFFFFF">FPGA</text>
+<text x="180" y="148" font-family="Space Grotesk" font-size="11" text-anchor="middle" fill="#FFFFFF">Vendor Software</text>
+
+<path d="M345 110 L415 110" stroke="#D4590A" stroke-width="2" stroke-dasharray="6 4"/>
+<polygon points="405,102 420,110 405,118" fill="#D4590A"/>
+
+<rect x="430" y="30" width="300" height="160" rx="14" fill="#FBFAF6" stroke="#17232E" stroke-width="2"/>
+<text x="580" y="52" font-family="Space Grotesk" font-size="14" font-weight="600" text-anchor="middle">Cloud RAN</text>
+
+<rect x="460" y="75" width="240" height="26" rx="6" fill="#D4590A"/>
+<text x="580" y="92" font-family="IBM Plex Mono" font-size="9" text-anchor="middle" fill="#FFFFFF">CU Container</text>
+
+<rect x="460" y="108" width="240" height="26" rx="6" fill="#B45309"/>
+<text x="580" y="125" font-family="IBM Plex Mono" font-size="9" text-anchor="middle" fill="#FFFFFF">DU Container</text>
+
+<rect x="460" y="141" width="240" height="26" rx="6" fill="#8A5C32"/>
+<text x="580" y="158" font-family="IBM Plex Mono" font-size="9" text-anchor="middle" fill="#FFFFFF">RIC / Apps</text>
+</svg>
+
+<p>
+The radio hardware still exists. What changes is that much of the baseband intelligence becomes software.
+</p>
+
+---
+
+<h2>What is NFV?</h2>
+
+<div class="card">
+
+<div class="definition">
+<div class="term">NFV</div>
+<div><strong>Network Function Virtualization.</strong> The concept of implementing network functions as software rather than dedicated hardware.</div>
+</div>
+
+<div class="definition">
+<div class="term">Goal</div>
+<div>Reduce hardware dependence, improve scalability, accelerate deployment and simplify lifecycle management.</div>
+</div>
+
+</div>
+
+<p>
+NFV is a design philosophy. It is not a specific product.
+</p>
+
+<h3>Example</h3>
+
+<table>
+<tr>
+<th>Before NFV</th>
+<th>After NFV</th>
+</tr>
+<tr>
+<td>Physical EPC appliance</td>
+<td>Virtual AMF</td>
+</tr>
+<tr>
+<td>Dedicated baseband cabinet</td>
+<td>Virtual DU</td>
+</tr>
+<tr>
+<td>Hardware mobility server</td>
+<td>Containerized CU</td>
+</tr>
+</table>
+
+---
+
+<h2>VNF vs CNF</h2>
+
+<p>
+These two acronyms appear constantly in telecom interviews.
+</p>
+
+<svg viewBox="0 0 720 220">
+<rect x="40" y="20" width="280" height="180" rx="12" fill="#FBFAF6" stroke="#17232E"/>
+
+<text x="180" y="42" font-family="Space Grotesk" font-size="13" text-anchor="middle">VNF</text>
+
+<rect x="85" y="60" width="190" height="28" rx="6" fill="#D4590A"/>
+<text x="180" y="78" font-family="IBM Plex Mono" font-size="9" text-anchor="middle" fill="#FFFFFF">Virtual Machine</text>
+
+<rect x="85" y="96" width="190" height="28" rx="6" fill="#8A5C32"/>
+<text x="180" y="114" font-family="IBM Plex Mono" font-size="9" text-anchor="middle" fill="#FFFFFF">Guest Operating System</text>
+
+<rect x="85" y="132" width="190" height="28" rx="6" fill="#17232E"/>
+<text x="180" y="150" font-family="IBM Plex Mono" font-size="9" text-anchor="middle" fill="#FFFFFF">Hypervisor</text>
+
+<rect x="400" y="20" width="280" height="180" rx="12" fill="#FBFAF6" stroke="#17232E"/>
+
+<text x="540" y="42" font-family="Space Grotesk" font-size="13" text-anchor="middle">CNF</text>
+
+<rect x="445" y="60" width="190" height="24" rx="6" fill="#D4590A"/>
+<text x="540" y="76" font-family="IBM Plex Mono" font-size="8" text-anchor="middle" fill="#FFFFFF">Container</text>
+
+<rect x="445" y="90" width="190" height="24" rx="6" fill="#B45309"/>
+<text x="540" y="106" font-family="IBM Plex Mono" font-size="8" text-anchor="middle" fill="#FFFFFF">Container</text>
+
+<rect x="445" y="120" width="190" height="24" rx="6" fill="#8A5C32"/>
+<text x="540" y="136" font-family="IBM Plex Mono" font-size="8" text-anchor="middle" fill="#FFFFFF">Container</text>
+
+<rect x="445" y="150" width="190" height="24" rx="6" fill="#17232E"/>
+<text x="540" y="166" font-family="IBM Plex Mono" font-size="8" text-anchor="middle" fill="#FFFFFF">Container Runtime</text>
+</svg>
+
+<table>
+<tr>
+<th>VNF</th>
+<th>CNF</th>
+</tr>
+<tr>
+<td>Virtual Network Function</td>
+<td>Cloud Native Network Function</td>
+</tr>
+<tr>
+<td>Runs inside VMs</td>
+<td>Runs in containers</td>
+</tr>
+<tr>
+<td>Heavier</td>
+<td>Lighter</td>
+</tr>
+<tr>
+<td>Hypervisor</td>
+<td>Kubernetes</td>
+</tr>
+</table>
+
+<div class="callout">
+<div class="callout-title">MEMORIZE</div>
+<p>
+A VNF is virtualized. A CNF is containerized. Cloud-native 5G increasingly favors CNFs.
+</p>
+</div>
+
+---
+
+<h2>What is a Container?</h2>
+
+<p>
+A container packages an application together with its libraries while sharing the host operating system. Unlike a virtual machine, it does not require its own complete operating system.
+</p>
+
+<svg viewBox="0 0 720 180">
+<rect x="110" y="15" width="500" height="150" rx="12" fill="#FBFAF6" stroke="#17232E"/>
+
+<rect x="145" y="35" width="430" height="28" rx="6" fill="#17232E"/>
+<text x="360" y="53" font-family="IBM Plex Mono" font-size="9" text-anchor="middle" fill="#FFFFFF">Host Operating System</text>
+
+<rect x="145" y="75" width="120" height="60" rx="8" fill="#D4590A"/>
+<text x="205" y="95" font-family="IBM Plex Mono" font-size="8" text-anchor="middle" fill="#FFFFFF">Container</text>
+<text x="205" y="110" font-family="Space Grotesk" font-size="8" text-anchor="middle" fill="#FFFFFF">CU</text>
+
+<rect x="300" y="75" width="120" height="60" rx="8" fill="#B45309"/>
+<text x="360" y="95" font-family="IBM Plex Mono" font-size="8" text-anchor="middle" fill="#FFFFFF">Container</text>
+<text x="360" y="110" font-family="Space Grotesk" font-size="8" text-anchor="middle" fill="#FFFFFF">DU</text>
+
+<rect x="455" y="75" width="120" height="60" rx="8" fill="#8A5C32"/>
+<text x="515" y="95" font-family="IBM Plex Mono" font-size="8" text-anchor="middle" fill="#FFFFFF">Container</text>
+<text x="515" y="110" font-family="Space Grotesk" font-size="8" text-anchor="middle" fill="#FFFFFF">RIC</text>
+</svg>
+
+<p>
+Think of containers as lightweight isolated applications sharing the same Linux kernel.
+</p>
+
+---
+
+<h2>Kubernetes — The Telecom Orchestrator</h2>
+
+<p>
+Running one container is easy. Running ten thousand across hundreds of edge sites is not. Kubernetes solves that orchestration problem.
+</p>
+
+<svg viewBox="0 0 760 240">
+<rect x="250" y="20" width="260" height="46" rx="10" fill="#17232E"/>
+<text x="380" y="40" font-family="IBM Plex Mono" font-size="10" text-anchor="middle" fill="#D4590A">KUBERNETES</text>
+<text x="380" y="55" font-family="Space Grotesk" font-size="9" text-anchor="middle" fill="#FFFFFF">Scheduler & Orchestrator</text>
+
+<rect x="40" y="110" width="180" height="90" rx="10" fill="#FBFAF6" stroke="#17232E"/>
+<text x="130" y="128" font-family="IBM Plex Mono" font-size="9" text-anchor="middle" fill="#D4590A">EDGE SITE A</text>
+<rect x="65" y="145" width="55" height="26" rx="5" fill="#D4590A"/>
+<rect x="140" y="145" width="55" height="26" rx="5" fill="#B45309"/>
+
+<rect x="290" y="110" width="180" height="90" rx="10" fill="#FBFAF6" stroke="#17232E"/>
+<text x="380" y="128" font-family="IBM Plex Mono" font-size="9" text-anchor="middle" fill="#D4590A">EDGE SITE B</text>
+<rect x="315" y="145" width="55" height="26" rx="5" fill="#D4590A"/>
+<rect x="390" y="145" width="55" height="26" rx="5" fill="#8A5C32"/>
+
+<rect x="540" y="110" width="180" height="90" rx="10" fill="#FBFAF6" stroke="#17232E"/>
+<text x="630" y="128" font-family="IBM Plex Mono" font-size="9" text-anchor="middle" fill="#D4590A">EDGE SITE C</text>
+<rect x="565" y="145" width="55" height="26" rx="5" fill="#B45309"/>
+<rect x="640" y="145" width="55" height="26" rx="5" fill="#8A5C32"/>
+
+<line x1="380" y1="66" x2="130" y2="110" stroke="#566072" stroke-dasharray="4 4"/>
+<line x1="380" y1="66" x2="380" y2="110" stroke="#566072" stroke-dasharray="4 4"/>
+<line x1="380" y1="66" x2="630" y2="110" stroke="#566072" stroke-dasharray="4 4"/>
+</svg>
+
+<div class="card">
+
+<h3>Kubernetes Responsibilities</h3>
+
+<ul>
+<li>Deploy containers automatically</li>
+<li>Restart failed applications</li>
+<li>Scale CU and DU instances</li>
+<li>Perform rolling software updates</li>
+<li>Distribute workloads across servers</li>
+<li>Monitor health of network functions</li>
+</ul>
+
+</div>
+
+---
+
+<h2>Helm — The Package Manager</h2>
+
+<p>
+If Kubernetes is the operating system of cloud infrastructure, Helm is its application installer.
+</p>
+
+<svg viewBox="0 0 700 120">
+<rect x="30" y="35" width="140" height="50" rx="8" fill="#D4590A"/>
+<text x="100" y="64" font-family="IBM Plex Mono" font-size="9" text-anchor="middle" fill="#FFFFFF">Helm Chart</text>
+
+<rect x="280" y="35" width="140" height="50" rx="8" fill="#B45309"/>
+<text x="350" y="64" font-family="IBM Plex Mono" font-size="9" text-anchor="middle" fill="#FFFFFF">Kubernetes</text>
+
+<rect x="530" y="35" width="140" height="50" rx="8" fill="#17232E"/>
+<text x="600" y="64" font-family="IBM Plex Mono" font-size="9" text-anchor="middle" fill="#D4590A">Running DU</text>
+
+<line x1="170" y1="60" x2="280" y2="60" stroke="#17232E" stroke-width="2" marker-end="url(#arrow2)"/>
+<line x1="420" y1="60" x2="530" y2="60" stroke="#17232E" stroke-width="2" marker-end="url(#arrow2)"/>
+</svg>
+
+<div class="definition">
+<div class="term">Helm</div>
+<div>A package manager for Kubernetes that deploys complete applications using reusable templates called charts.</div>
+</div>
+
+---
+
+<h2>What is O-Cloud?</h2>
+
+<p>
+O-Cloud is the cloud infrastructure standardized by O-RAN on which CU, DU, RIC and management software execute.
+</p>
+
+<svg viewBox="0 0 720 250">
+<rect x="120" y="15" width="480" height="220" rx="14" fill="#FBFAF6" stroke="#17232E"/>
+
+<text x="360" y="35" font-family="Space Grotesk" font-size="14" text-anchor="middle">O-Cloud</text>
+
+<rect x="155" y="55" width="410" height="30" rx="6" fill="#17232E"/>
+<text x="360" y="74" font-family="IBM Plex Mono" font-size="9" text-anchor="middle" fill="#FFFFFF">Kubernetes</text>
+
+<rect x="155" y="95" width="125" height="40" rx="6" fill="#D4590A"/>
+<text x="217" y="118" font-family="IBM Plex Mono" font-size="8" text-anchor="middle" fill="#FFFFFF">CU CNF</text>
+
+<rect x="298" y="95" width="125" height="40" rx="6" fill="#B45309"/>
+<text x="360" y="118" font-family="IBM Plex Mono" font-size="8" text-anchor="middle" fill="#FFFFFF">DU CNF</text>
+
+<rect x="441" y="95" width="125" height="40" rx="6" fill="#8A5C32"/>
+<text x="503" y="118" font-family="IBM Plex Mono" font-size="8" text-anchor="middle" fill="#FFFFFF">RIC CNF</text>
+
+<rect x="155" y="150" width="410" height="60" rx="8" fill="#E8E4D8"/>
+<text x="360" y="170" font-family="IBM Plex Mono" font-size="8" text-anchor="middle">Commercial Servers</text>
+<text x="360" y="188" font-family="Space Grotesk" font-size="9" text-anchor="middle">CPU · RAM · SSD · NIC</text>
+</svg>
+
+<p>
+Interview phrasing:
+</p>
+
+<div class="callout">
+<div class="callout-title">GOOD ANSWER</div>
+<p>
+O-Cloud is the standardized cloud infrastructure layer defined by O-RAN that provides compute, storage, networking and virtualization resources for cloud-native RAN functions.
+</p>
+</div>
+
+---
+
+<h2>Edge Computing vs Central Cloud</h2>
+
+<p>
+Why not place every DU in one massive data centre? Because latency matters.
+</p>
+
+<svg viewBox="0 0 760 180">
+<rect x="30" y="40" width="160" height="90" rx="10" fill="#D4590A"/>
+<text x="110" y="60" font-family="IBM Plex Mono" font-size="9" text-anchor="middle" fill="#FFFFFF">Cell Site</text>
+<text x="110" y="78" font-family="Space Grotesk" font-size="9" text-anchor="middle" fill="#FFFFFF">RU</text>
+
+<rect x="280" y="40" width="200" height="90" rx="10" fill="#B45309"/>
+<text x="380" y="60" font-family="IBM Plex Mono" font-size="9" text-anchor="middle" fill="#FFFFFF">Edge Cloud</text>
+<text x="380" y="78" font-family="Space Grotesk" font-size="9" text-anchor="middle" fill="#FFFFFF">DU</text>
+
+<rect x="570" y="40" width="160" height="90" rx="10" fill="#17232E"/>
+<text x="650" y="60" font-family="IBM Plex Mono" font-size="9" text-anchor="middle" fill="#D4590A">Regional DC</text>
+<text x="650" y="78" font-family="Space Grotesk" font-size="9" text-anchor="middle" fill="#FFFFFF">CU</text>
+
+<line x1="190" y1="85" x2="280" y2="85" stroke="#17232E" stroke-width="2"/>
+<line x1="480" y1="85" x2="570" y2="85" stroke="#17232E" stroke-width="2"/>
+
+<text x="235" y="105" font-family="IBM Plex Mono" font-size="8" text-anchor="middle" fill="#566072">Low latency</text>
+<text x="525" y="105" font-family="IBM Plex Mono" font-size="8" text-anchor="middle" fill="#566072">Higher latency</text>
+</svg>
+
+<table>
+<tr>
+<th>Edge</th>
+<th>Regional Cloud</th>
+</tr>
+<tr>
+<td>DU</td>
+<td>CU</td>
+</tr>
+<tr>
+<td>Low latency</td>
+<td>Large compute capacity</td>
+</tr>
+<tr>
+<td>Near antenna</td>
+<td>Centralized operations</td>
+</tr>
+</table>
+
+---
+
+<h2>Why Capgemini Cares</h2>
+
+<p>
+The integration role explicitly mentions virtualization, NFV, containers and orchestration because the engineer is expected to integrate software RAN functions across distributed cloud infrastructure—not simply install radios.
+</p>
+
+<div class="know">
+
+<ul>
+<li><strong>NFV</strong> = Network Function Virtualization</li>
+<li><strong>VNF</strong> = Virtual Machine-based function</li>
+<li><strong>CNF</strong> = Containerized function</li>
+<li><strong>Kubernetes</strong> = Container orchestrator</li>
+<li><strong>Helm</strong> = Kubernetes package manager</li>
+<li><strong>O-Cloud</strong> = Cloud infrastructure for O-RAN</li>
+<li><strong>Cloud RAN</strong> = Software-based RAN deployment</li>
+</ul>
+
+</div>
+
+<div class="qa">
+<button onclick="toggleAnswer(this)">
+Interview: Why is the DU usually deployed at the edge while the CU is centralized?
+</button>
+<div class="answer">
+<p>
+The DU contains the MAC scheduler and real-time PHY processing, which have strict latency deadlines. Placing it near the RU minimizes transport latency. The CU handles higher-layer protocols such as PDCP and RRC, which tolerate more latency and benefit from centralized cloud deployment.
+</p>
+</div>
+</div>
+
+</section>
