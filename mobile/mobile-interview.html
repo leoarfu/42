@@ -2188,3 +2188,470 @@ The DU contains the MAC scheduler and real-time PHY processing, which have stric
 </div>
 
 </section>
+
+ <!-- ========================================================= -->
+<!-- PART 6 — BEAM MANAGEMENT & MOBILITY                       -->
+<!-- ========================================================= -->
+
+<section id="mobility">
+
+<h2>Beam Management & Mobility</h2>
+
+<p>
+A terrestrial cell is usually identified by a fixed tower. A LEO NTN cell is fundamentally different: the <strong>satellite moves continuously</strong>, its beams move across Earth, and the UE must remain synchronized while the serving beam changes.
+</p>
+
+<div class="callout">
+<div class="callout-title">KEY IDEA</div>
+<p>
+In 5G, mobility is no longer only about moving users. In NTN, the <strong>network itself is moving</strong>.
+</p>
+</div>
+
+<!-- --------------------------------------------------------- -->
+
+<h2>What is a Beam?</h2>
+
+<p>
+A beam is a focused region of radio energy created by an antenna array. Instead of illuminating the entire Earth equally, modern satellites generate dozens or even hundreds of narrow steerable beams.
+</p>
+
+<svg viewBox="0 0 720 240">
+<rect x="290" y="18" width="140" height="34" rx="8" fill="#D4590A"/>
+<text x="360" y="39" font-family="IBM Plex Mono" font-size="10" text-anchor="middle" fill="#FFFFFF">Satellite</text>
+
+<path d="M360 52 L120 200" stroke="#F4A261" stroke-width="2"/>
+<path d="M360 52 L250 200" stroke="#E9C46A" stroke-width="2"/>
+<path d="M360 52 L360 200" stroke="#2A9D8F" stroke-width="2"/>
+<path d="M360 52 L470 200" stroke="#B45309" stroke-width="2"/>
+<path d="M360 52 L600 200" stroke="#D4590A" stroke-width="2"/>
+
+<ellipse cx="120" cy="210" rx="55" ry="12" fill="#F4A261" opacity="0.45"/>
+<ellipse cx="250" cy="210" rx="55" ry="12" fill="#E9C46A" opacity="0.45"/>
+<ellipse cx="360" cy="210" rx="55" ry="12" fill="#2A9D8F" opacity="0.45"/>
+<ellipse cx="470" cy="210" rx="55" ry="12" fill="#B45309" opacity="0.45"/>
+<ellipse cx="600" cy="210" rx="55" ry="12" fill="#D4590A" opacity="0.45"/>
+
+<text x="120" y="228" font-family="IBM Plex Mono" font-size="8" text-anchor="middle">Beam 1</text>
+<text x="250" y="228" font-family="IBM Plex Mono" font-size="8" text-anchor="middle">Beam 2</text>
+<text x="360" y="228" font-family="IBM Plex Mono" font-size="8" text-anchor="middle">Beam 3</text>
+<text x="470" y="228" font-family="IBM Plex Mono" font-size="8" text-anchor="middle">Beam 4</text>
+<text x="600" y="228" font-family="IBM Plex Mono" font-size="8" text-anchor="middle">Beam 5</text>
+</svg>
+
+<p>
+Each beam behaves similarly to a cellular sector: it has its own synchronization, scheduling resources, and capacity.
+</p>
+
+---
+
+<h2>Why Multiple Beams?</h2>
+
+<table>
+<tr>
+<th>Single Wide Beam</th>
+<th>Many Narrow Beams</th>
+</tr>
+<tr>
+<td>Low capacity</td>
+<td>High frequency reuse</td>
+</tr>
+<tr>
+<td>Weak signal</td>
+<td>Higher antenna gain</td>
+</tr>
+<tr>
+<td>Poor spatial reuse</td>
+<td>Independent scheduling</td>
+</tr>
+<tr>
+<td>Large interference area</td>
+<td>Smaller interference footprint</td>
+</tr>
+</table>
+
+<div class="callout">
+<div class="callout-title">INTERVIEW INSIGHT</div>
+<p>
+Narrow beams increase capacity because the same spectrum can be reused in geographically separated beams.
+</p>
+</div>
+
+<!-- --------------------------------------------------------- -->
+
+<h2>Beamforming</h2>
+
+<p>
+Beamforming is the process of electronically steering radio energy without mechanically rotating the antenna.
+</p>
+
+<svg viewBox="0 0 720 180">
+<rect x="305" y="20" width="110" height="28" rx="6" fill="#17232E"/>
+<text x="360" y="39" font-family="IBM Plex Mono" font-size="9" text-anchor="middle" fill="#FFFFFF">Phased Array</text>
+
+{#each Array.from({length:8}) as _, i}
+<circle cx={220 + i*20} cy=60 r=4 fill="#D4590A"/>
+{/each}
+
+<path d="M360 64 L220 150" stroke="#E9C46A" stroke-width="2"/>
+<path d="M360 64 L360 150" stroke="#2A9D8F" stroke-width="3"/>
+<path d="M360 64 L500 150" stroke="#F4A261" stroke-width="2"/>
+
+<ellipse cx="220" cy="158" rx="40" ry="8" fill="#E9C46A" opacity="0.35"/>
+<ellipse cx="360" cy="158" rx="40" ry="8" fill="#2A9D8F" opacity="0.35"/>
+<ellipse cx="500" cy="158" rx="40" ry="8" fill="#F4A261" opacity="0.35"/>
+
+<text x="360" y="175" font-family="IBM Plex Mono" font-size="8" text-anchor="middle">Steered main lobe</text>
+</svg>
+
+<p>
+Instead of transmitting equally in every direction, the antenna adjusts the phase of each antenna element so the waves add constructively in one direction.
+</p>
+
+<div class="card">
+<div class="definition">
+<div class="term">Beamforming</div>
+<div>Electronic steering of radio energy by controlling the phase and amplitude of multiple antenna elements.</div>
+</div>
+<div class="definition">
+<div class="term">Phased Array</div>
+<div>An antenna composed of many small radiating elements whose phases can be independently controlled.</div>
+</div>
+</div>
+
+---
+
+<h2>Beam Sweeping</h2>
+
+<p>
+Before a UE can connect, it must discover which beam is strongest. The satellite therefore transmits synchronization signals across many beams sequentially.
+</p>
+
+<svg viewBox="0 0 720 170">
+<line x1="60" y1="120" x2="660" y2="120" stroke="#17232E" stroke-width="2"/>
+
+{#each ["B1","B2","B3","B4","B5"] as beam, i}
+<rect x={90 + i*110} y=55 width=44 height=36 rx=6 fill={i===2 ? "#D4590A" : "#D3CFC0"}/>
+<text x={112 + i*110} y=77 font-family="IBM Plex Mono" font-size="8" text-anchor="middle" fill={i===2 ? "#FFFFFF" : "#17232E"}>{beam}</text>
+{/each}
+
+<text x="360" y="145" font-family="IBM Plex Mono" font-size="8" text-anchor="middle" fill="#566072">Time → Synchronization Beam Sweeping</text>
+</svg>
+
+<p>
+The UE measures each synchronization transmission and reports the best candidate to the network.
+</p>
+
+---
+
+<h2>SSB — Synchronization Signal Block</h2>
+
+<p>
+The <strong>Synchronization Signal Block (SSB)</strong> is the first thing a UE looks for when searching for a cell.
+</p>
+
+<div class="card">
+<div class="definition">
+<div class="term">SSB</div>
+<div>A predefined OFDM structure carrying synchronization and basic broadcast information so a UE can detect and synchronize with a cell.</div>
+</div>
+<div class="definition">
+<div class="term">Contains</div>
+<div>PSS, SSS and PBCH.</div>
+</div>
+</div>
+
+<h3>The three parts of an SSB</h3>
+
+<table>
+<tr>
+<th>Signal</th>
+<th>Purpose</th>
+</tr>
+<tr>
+<td>PSS</td>
+<td>Primary synchronization</td>
+</tr>
+<tr>
+<td>SSS</td>
+<td>Secondary synchronization</td>
+</tr>
+<tr>
+<td>PBCH</td>
+<td>Broadcast system information</td>
+</tr>
+</table>
+
+<div class="callout">
+<div class="callout-title">MEMORIZE</div>
+<p>
+PSS finds timing, SSS identifies the cell, and PBCH tells the UE how to access the network.
+</p>
+</div>
+
+---
+
+<h2>CSI-RS — Measuring the Radio Channel</h2>
+
+<p>
+Once connected, synchronization is no longer enough. The network needs continuous measurements of channel quality.
+</p>
+
+<div class="card">
+<div class="definition">
+<div class="term">CSI</div>
+<div>Channel State Information.</div>
+</div>
+<div class="definition">
+<div class="term">CSI-RS</div>
+<div>Reference signals transmitted so the UE can estimate channel quality, beam quality and MIMO performance.</div>
+</div>
+</div>
+
+<table>
+<tr>
+<th>SSB</th>
+<th>CSI-RS</th>
+</tr>
+<tr>
+<td>Initial access</td>
+<td>Connected mode</td>
+</tr>
+<tr>
+<td>Find the cell</td>
+<td>Measure channel quality</td>
+</tr>
+<tr>
+<td>Synchronization</td>
+<td>Beam optimization</td>
+</tr>
+</table>
+
+---
+
+<h2>Beam Tracking</h2>
+
+<p>
+A LEO satellite moves continuously. The UE therefore tracks the best beam throughout the pass.
+</p>
+
+<svg viewBox="0 0 720 180">
+<path d="M70 40 L650 40" stroke="#D4590A" stroke-width="2" stroke-dasharray="6 4"/>
+
+{#each Array.from({length:5}) as _, i}
+<ellipse cx={120 + i*120} cy=40 rx=26 ry=12 fill={i===2 ? "#D4590A" : "#F4A261"} opacity={i===2 ? 1 : 0.55}/>
+{/each}
+
+<line x1="360" y1="52" x2="360" y2="120" stroke="#17232E" stroke-width="2"/>
+<circle cx="360" cy="135" r="8" fill="#17232E"/>
+<text x="360" y="156" font-family="IBM Plex Mono" font-size="8" text-anchor="middle">UE</text>
+
+<text x="360" y="22" font-family="IBM Plex Mono" font-size="8" text-anchor="middle" fill="#566072">Satellite trajectory</text>
+</svg>
+
+<p>
+The serving beam changes even if the UE is standing perfectly still.
+</p>
+
+---
+
+<h2>Beam Handover vs Satellite Handover</h2>
+
+<p>
+These are frequently confused in interviews.
+</p>
+
+<h3>Beam Handover</h3>
+
+<svg viewBox="0 0 720 150">
+<ellipse cx="220" cy="55" rx="46" ry="18" fill="#D4590A"/>
+<ellipse cx="500" cy="55" rx="46" ry="18" fill="#F4A261"/>
+
+<circle cx="360" cy="120" r="8" fill="#17232E"/>
+
+<path d="M220 70 L360 112" stroke="#D4590A" stroke-width="2"/>
+<path d="M500 70 L360 112" stroke="#F4A261" stroke-width="2" stroke-dasharray="4 4"/>
+
+<text x="220" y="28" font-family="IBM Plex Mono" font-size="8" text-anchor="middle">Beam A</text>
+<text x="500" y="28" font-family="IBM Plex Mono" font-size="8" text-anchor="middle">Beam B</text>
+</svg>
+
+<p>
+The satellite remains the same. Only the serving beam changes.
+</p>
+
+<h3>Satellite Handover</h3>
+
+<svg viewBox="0 0 720 150">
+<ellipse cx="220" cy="45" rx="42" ry="18" fill="#D4590A"/>
+<ellipse cx="500" cy="45" rx="42" ry="18" fill="#8A5C32"/>
+
+<circle cx="360" cy="120" r="8" fill="#17232E"/>
+
+<path d="M220 60 L360 112" stroke="#D4590A" stroke-width="2"/>
+<path d="M500 60 L360 112" stroke="#8A5C32" stroke-width="2" stroke-dasharray="4 4"/>
+
+<text x="220" y="22" font-family="IBM Plex Mono" font-size="8" text-anchor="middle">Satellite 17</text>
+<text x="500" y="22" font-family="IBM Plex Mono" font-size="8" text-anchor="middle">Satellite 18</text>
+</svg>
+
+<p>
+Here, the serving spacecraft itself changes. This is generally a more complex mobility procedure.
+</p>
+
+<table>
+<tr>
+<th>Beam Handover</th>
+<th>Satellite Handover</th>
+</tr>
+<tr>
+<td>Same satellite</td>
+<td>Different satellite</td>
+</tr>
+<tr>
+<td>Different beam</td>
+<td>Different spacecraft</td>
+</tr>
+<tr>
+<td>Frequent</td>
+<td>Less frequent</td>
+</tr>
+<tr>
+<td>Lower signaling overhead</td>
+<td>Higher coordination complexity</td>
+</tr>
+</table>
+
+---
+
+<h2>Beam Hopping</h2>
+
+<p>
+Some satellite systems do not illuminate every beam continuously. Instead, power is dynamically allocated where traffic exists.
+</p>
+
+<svg viewBox="0 0 720 190">
+{#each Array.from({length:3}) as _, r}
+  {#each Array.from({length:5}) as _, c}
+    <ellipse cx={120 + c*120} cy={45 + r*55} rx=40 ry=16 fill={r===1 && c===2 ? "#D4590A" : "#E6E1D8"}/>
+  {/each}
+{/each}
+
+<text x="360" y="175" font-family="IBM Plex Mono" font-size="8" text-anchor="middle" fill="#566072">Only one beam is energized during this instant</text>
+</svg>
+
+<div class="card">
+<div class="definition">
+<div class="term">Beam Hopping</div>
+<div>A resource allocation technique where satellite power is rapidly switched between beams instead of transmitting continuously everywhere.</div>
+</div>
+</div>
+
+---
+
+<h2>The Complete Mobility Timeline</h2>
+
+<svg viewBox="0 0 720 120">
+<line x1="40" y1="60" x2="680" y2="60" stroke="#17232E" stroke-width="2"/>
+
+{#each ["Search","SSB","Access","CSI","Track","Handover"] as step, i}
+  <circle cx={70 + i*110} cy=60 r=8 fill="#D4590A"/>
+  <text x={70 + i*110} y="80" font-family="IBM Plex Mono" font-size="7" text-anchor="middle">{step}</text>
+{/each}
+</svg>
+
+<ol>
+<li>UE searches for synchronization signals.</li>
+<li>SSB identifies the best beam.</li>
+<li>Random access establishes the connection.</li>
+<li>CSI-RS measures channel quality.</li>
+<li>Beam tracking maintains the strongest beam.</li>
+<li>Beam or satellite handover preserves service continuity.</li>
+</ol>
+
+---
+
+<h2>Mobility KPIs</h2>
+
+<table>
+<tr>
+<th>KPI</th>
+<th>Meaning</th>
+</tr>
+<tr>
+<td>RSRP</td>
+<td>Reference Signal Received Power</td>
+</tr>
+<tr>
+<td>RSRQ</td>
+<td>Reference Signal Received Quality</td>
+</tr>
+<tr>
+<td>SINR</td>
+<td>Signal-to-Interference-plus-Noise Ratio</td>
+</tr>
+<tr>
+<td>Handover Success Rate</td>
+<td>Successful mobility procedures</td>
+</tr>
+<tr>
+<td>Beam Failure Rate</td>
+<td>Loss of serving beam</td>
+</tr>
+<tr>
+<td>Access Delay</td>
+<td>Time to establish connection</td>
+</tr>
+</table>
+
+<div class="callout">
+<div class="callout-title">GOOD INTERVIEW ANSWER</div>
+<p>
+"I would monitor RSRP, RSRQ and SINR for radio quality, beam failure events for mobility robustness, and handover success rate to evaluate continuity across moving NTN beams."
+</p>
+</div>
+
+---
+
+<h2>Know Cold</h2>
+
+<div class="know">
+<ul>
+<li><strong>Beam</strong> = Focused region of RF coverage</li>
+<li><strong>Beamforming</strong> = Electronic steering of radio energy</li>
+<li><strong>Phased Array</strong> = Multi-element steerable antenna</li>
+<li><strong>SSB</strong> = Synchronization Signal Block</li>
+<li><strong>PSS</strong> = Primary Synchronization Signal</li>
+<li><strong>SSS</strong> = Secondary Synchronization Signal</li>
+<li><strong>PBCH</strong> = Physical Broadcast Channel</li>
+<li><strong>CSI-RS</strong> = Channel State Information Reference Signal</li>
+<li><strong>Beam Tracking</strong> = Continuous optimization of serving beam</li>
+<li><strong>Beam Hopping</strong> = Dynamic allocation of satellite power</li>
+<li><strong>Beam Handover</strong> = Same satellite, different beam</li>
+<li><strong>Satellite Handover</strong> = Different spacecraft</li>
+</ul>
+</div>
+
+<div class="qa">
+<button onclick="toggleAnswer(this)">
+Interview: Explain the difference between SSB and CSI-RS.
+</button>
+<div class="answer">
+<p>
+SSB is used during initial access. It allows the UE to detect a cell, synchronize in time and frequency, and receive broadcast information through PSS, SSS and PBCH. CSI-RS is used after connection establishment so the UE can measure channel quality, evaluate beam quality and support beam management and MIMO optimization.
+</p>
+</div>
+</div>
+
+<div class="qa">
+<button onclick="toggleAnswer(this)">
+Interview: A stationary UE loses service every few minutes during a satellite pass. What is the most likely mobility explanation?
+</button>
+<div class="answer">
+<p>
+A stationary UE should still experience beam mobility because the satellite is moving. I would first investigate beam tracking and beam handover performance by examining SSB measurements, CSI-RS reports, beam failure events and handover success logs before suspecting RF hardware.
+</p>
+</div>
+</div>
+
+</section>
